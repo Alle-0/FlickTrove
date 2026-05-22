@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@mipmap/ic_launcher_foreground"
+        android:width="124dp"
+        android:height="124dp"
+        android:gravity="center" />
+</layer-list>

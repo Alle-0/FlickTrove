@@ -1,0 +1,186 @@
+package com.cinetrack.ui.components
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.theme.NeonTeal
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
+import io.github.fletchmckee.liquid.liquid
+import io.github.fletchmckee.liquid.LiquidState
+
+@Composable
+fun GlassyBottomBar(
+    hazeState: HazeState,
+    liquidState: LiquidState,
+    selectedRoute: String?,
+    onNavigate: (String) -> Unit,
+    isDimmed: Boolean = false
+) {
+    val accentColor = MaterialTheme.colorScheme.primary
+    val animatedDimAlpha by animateFloatAsState(
+        targetValue = if (isDimmed) 0.6f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "BottomBarDimAlpha"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 20.dp, top = 4.dp)
+            .height(60.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // BACKGROUND BLUR LAYER
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(CircleShape)
+                .liquid(liquidState)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NavItem(
+                icon = Icons.Rounded.Bookmark,
+                label = "DA VEDERE",
+                isSelected = selectedRoute == "index",
+                enabled = !isDimmed,
+                onClick = { onNavigate("index") },
+                accentColor = accentColor
+            )
+            NavItem(
+                icon = Icons.Rounded.CheckCircle,
+                label = "VISTI",
+                isSelected = selectedRoute == "visti",
+                enabled = !isDimmed,
+                onClick = { onNavigate("visti") },
+                accentColor = accentColor
+            )
+            NavItem(
+                icon = Icons.Rounded.BarChart,
+                label = "STATISTICHE",
+                isSelected = selectedRoute == "stats",
+                enabled = !isDimmed,
+                onClick = { onNavigate("stats") },
+                accentColor = accentColor
+            )
+        }
+
+        // DIM OVERLAY
+        if (animatedDimAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = animatedDimAlpha), CircleShape)
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.NavItem(
+    icon: ImageVector,
+    label: String,
+    isSelected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    accentColor: Color
+) {
+    val haptic = LocalHapticFeedback.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    
+    // Scale animation ONLY if not selected and enabled
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && !isSelected && enabled) 0.92f else 1f, 
+        label = "navScale"
+    )
+
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled && !isSelected // Disable click if dimmed OR already on this screen
+            ) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        val baseColor = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f)
+        val tintColor by animateColorAsState(
+            targetValue = if (isPressed) baseColor.copy(alpha = 0.9f) else baseColor,
+            label = "iconTint"
+        )
+
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = tintColor,
+            modifier = Modifier.size(22.dp)
+        )
+        
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 9.sp,
+            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+            color = tintColor,
+            modifier = Modifier.padding(top = 4.dp),
+            letterSpacing = 0.5.sp
+        )
+
+    }
+}

@@ -1,0 +1,189 @@
+package com.cinetrack.data.api
+
+import com.cinetrack.data.models.Season
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface TMDBService {
+    @GET("movie/{id}")
+    suspend fun getMovieDetails(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates"
+    ): MovieDetailResponse
+
+    @GET("tv/{id}")
+    suspend fun getTVDetails(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings"
+    ): MovieDetailResponse
+
+    @GET("search/movie")
+    suspend fun searchMovie(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("search/tv")
+    suspend fun searchTV(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("search/multi")
+    suspend fun searchMulti(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): MultiSearchResponse
+
+    @GET("person/{id}?append_to_response=combined_credits")
+    suspend fun getPersonDetails(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT"
+    ): Person
+
+    @GET("search/person")
+    suspend fun searchPeople(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): PersonSearchResponse
+
+    @GET("discover/movie")
+    suspend fun getMoviesByGenre(
+        @Query("with_genres") genreId: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("discover/tv")
+    suspend fun getTVShowsByGenre(
+        @Query("with_genres") genreId: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("discover/movie")
+    suspend fun discoverMovies(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1,
+        @retrofit2.http.QueryMap options: Map<String, String> = emptyMap()
+    ): SearchResponse
+
+    @GET("discover/tv")
+    suspend fun discoverTV(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1,
+        @retrofit2.http.QueryMap options: Map<String, String> = emptyMap()
+    ): SearchResponse
+
+    @GET("movie/popular")
+    suspend fun getPopularMovies(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("movie/now_playing")
+    suspend fun getNowPlayingMovies(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1,
+        @Query("region") region: String = "IT"
+    ): SearchResponse
+
+    @GET("movie/upcoming")
+    suspend fun getUpcomingMovies(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1,
+        @Query("region") region: String = "IT"
+    ): SearchResponse
+
+    @GET("tv/popular")
+    suspend fun getPopularTV(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("tv/airing_today")
+    suspend fun getAiringTodayTV(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("tv/on_the_air")
+    suspend fun getOnTheAirTV(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("trending/all/week")
+    suspend fun getTrendingAll(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("trending/movie/week")
+    suspend fun getTrendingMovies(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("trending/tv/week")
+    suspend fun getTrendingTV(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): SearchResponse
+
+    @GET("trending/person/week")
+    suspend fun getTrendingPeople(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): PersonSearchResponse
+
+    @GET("person/popular")
+    suspend fun getPopularPeople(
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("page") page: Int = 1
+    ): PersonSearchResponse
+
+    @GET("tv/{id}/season/{season_number}")
+    suspend fun getSeasonDetails(
+        @Path("id") id: Long,
+        @Path("season_number") seasonNumber: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT"
+    ): Season
+
+    @GET("collection/{id}")
+    suspend fun getCollectionDetails(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT"
+    ): CollectionResponse
+}

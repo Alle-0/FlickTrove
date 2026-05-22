@@ -1,0 +1,7 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  }
+}

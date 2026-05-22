@@ -1,0 +1,196 @@
+package com.cinetrack.ui.components.detail
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.utils.bounceClick
+import coil.compose.AsyncImage
+import com.cinetrack.data.api.CastMember
+import com.cinetrack.data.api.CrewMember
+
+/**
+ * DetailCast
+ * Renders Directors and Main Cast in horizontal LazyRows.
+ * Features profile avatars and premium typography.
+ */
+@Composable
+fun DetailCast(
+    directors: List<CrewMember>,
+    cast: List<CastMember>,
+    accentColor: Color,
+    onPersonClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (directors.isEmpty() && cast.isEmpty()) return
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        // REGIA SECTION
+        if (directors.isNotEmpty()) {
+            val groupedDirectors = remember(directors) {
+                directors.groupBy { it.id }.map { (_, members) ->
+                    val first = members.first()
+                    val combinedJobs = members.map { it.job }.distinct().joinToString(" / ")
+                    first.copy(job = combinedJobs)
+                }
+            }
+
+            Text(
+                text = "REGIA",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 3.sp
+                ),
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
+            )
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            ) {
+                items(groupedDirectors, key = { "dir-${it.id}" }) { person ->
+                    PersonCard(
+                        id = person.id,
+                        name = person.name,
+                        subLabel = "", // Nascondiamo il label "Director" poiché la sezione è già titolata REGIA
+                        imagePath = person.profilePath,
+                        accentColor = accentColor,
+                        showSubLabelContainer = false,
+                        onClick = { onPersonClick(person.id) }
+                    )
+                }
+            }
+        }
+
+        // CAST SECTION
+        if (cast.isNotEmpty()) {
+            val groupedCast = remember(cast) {
+                cast.groupBy { it.id }.map { (_, members) ->
+                    val first = members.first()
+                    val combinedCharacters = members.mapNotNull { it.character }.distinct().filter { it.isNotBlank() }.joinToString(" / ")
+                    first.copy(character = combinedCharacters.ifBlank { null })
+                }
+            }
+
+            Text(
+                text = "CAST",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 3.sp
+                ),
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
+            )
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            ) {
+                items(groupedCast, key = { "cast-${it.id}" }) { person ->
+                    PersonCard(
+                        id = person.id,
+                        name = person.name,
+                        subLabel = person.character ?: "-",
+                        imagePath = person.profilePath,
+                        accentColor = accentColor,
+                        onClick = { onPersonClick(person.id) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonCard(
+    id: Long,
+    name: String,
+    subLabel: String,
+    imagePath: String?,
+    accentColor: Color,
+    showSubLabelContainer: Boolean = true,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(64.dp)
+            .bounceClick { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.05f))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+        ) {
+            if (imagePath != null) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w185$imagePath",
+                    contentDescription = name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        
+        // ... (Spacer and name Text remain the same) ...
+        
+        Spacer(modifier = Modifier.height(6.dp))
+        
+        Text(
+            text = name,
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            lineHeight = 13.sp,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp)
+        )
+        
+        if (showSubLabelContainer || subLabel.isNotBlank()) {
+            // Use a fixed height container for subLabel to maintain row consistency
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 24.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                if (subLabel.isNotBlank()) {
+                    Text(
+                        text = subLabel,
+                        color = Color.White.copy(alpha = 0.4f), // Grigio chiaro invece di ciano
+                        fontSize = 9.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 11.sp,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
+    }
+}

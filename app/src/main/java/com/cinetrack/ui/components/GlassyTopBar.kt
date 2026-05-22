@@ -1,0 +1,308 @@
+package com.cinetrack.ui.components
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.rounded.*
+import com.cinetrack.ui.assets.CustomIcons
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.bounceClick
+import dev.chrisbanes.haze.HazeState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import com.cinetrack.utils.NetworkMonitor
+
+@Composable
+fun GlassyTopBar(
+    hazeState: HazeState,
+    title: String,
+    onMenuClick: (() -> Unit)? = null,
+    onBackPress: (() -> Unit)? = null,
+    onFilterClick: ((Offset) -> Unit)? = null,
+    onUpdatesClick: ((Offset) -> Unit)? = null,
+    hasActiveFilters: Boolean = false,
+    isSyncing: Boolean = false,
+    isDimmed: Boolean = false,
+    notificationCount: Int = 0,
+    onDeleteClick: (() -> Unit)? = null,
+    indicatorColor: Color? = null
+) {
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val networkMonitor = remember { NetworkMonitor(context) }
+    val isOnline by networkMonitor.isOnline.collectAsState(initial = true)
+
+    val animatedDimAlpha by animateFloatAsState(
+        targetValue = if (isDimmed) 0.6f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "TopBarDimAlpha"
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "SyncPulse")
+    val syncAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "SyncAlpha"
+    )
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .displayCutoutPadding()
+            .padding(start = 24.dp, top = 0.dp, end = 24.dp, bottom = 0.dp)
+    ) {
+        // BACKGROUND BLUR LAYER
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .hazeGlass(state = hazeState, shape = RoundedCornerShape(50))
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .padding(horizontal = 12.dp)
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // Menu/Back Button
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .bounceClick(
+                        enabled = !isDimmed,
+                        onClick = {
+                            onBackPress?.invoke() ?: onMenuClick?.invoke()
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (onBackPress != null) Icons.Rounded.ArrowBackIosNew else Icons.AutoMirrored.Rounded.Notes,
+                    contentDescription = "Navigation",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (indicatorColor != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(indicatorColor)
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.wrapContentWidth()
+            ) {
+                if (!isOnline) {
+                    Icon(
+                        imageVector = Icons.Rounded.CloudOff,
+                        contentDescription = "Offline",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                if (isSyncing) {
+                    Icon(
+                        imageVector = Icons.Rounded.Sync,
+                        contentDescription = "Syncing",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .alpha(syncAlpha)
+                            .padding(end = 8.dp)
+                    )
+                }
+
+                if (onFilterClick != null) {
+                    var buttonCenter by remember { mutableStateOf(Offset.Zero) }
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .then(
+                                if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(50))
+                                else Modifier
+                            )
+                            .onGloballyPositioned { coords ->
+                                val position = coords.positionInWindow()
+                                buttonCenter = Offset(
+                                    x = position.x + coords.size.width / 2f,
+                                    y = position.y + coords.size.height / 2f
+                                )
+                            }
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = { onFilterClick.invoke(buttonCenter) }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = "Filtri",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                if (onUpdatesClick != null) {
+                    var buttonCenter by remember { mutableStateOf(Offset.Zero) }
+
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .onGloballyPositioned { coords ->
+                                val position = coords.positionInWindow()
+                                buttonCenter = Offset(
+                                    x = position.x + coords.size.width / 2f,
+                                    y = position.y + coords.size.height / 2f
+                                )
+                            }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = { onUpdatesClick.invoke(buttonCenter) }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = CustomIcons.PremiumBellFilled,
+                                contentDescription = "Aggiornamenti",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        if (notificationCount > 0) {
+                            val isPill = notificationCount > 9
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    // Keep offset inside the enlarged 36dp box — no overflow, no clipping
+                                    .offset(x = (-1).dp, y = 1.dp)
+                                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
+                                    .then(if (isPill) Modifier.sizeIn(minWidth = 14.dp).height(14.dp) else Modifier.size(14.dp))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(50))
+                                    .padding(horizontal = if (isPill) 4.dp else 0.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isPill) "9+" else notificationCount.toString(),
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Black,
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 8.sp
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                if (onDeleteClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = onDeleteClick
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.DeleteOutline,
+                            contentDescription = "Elimina",
+                            tint = Color(0xFFFF3B30),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing) {
+                    Spacer(modifier = Modifier.size(48.dp))
+                }
+            }
+
+        }
+
+        // DIM OVERLAY
+        if (animatedDimAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = animatedDimAlpha), RoundedCornerShape(50))
+            )
+        }
+    }
+}
