@@ -189,23 +189,6 @@ fun DetailActions(
         label = "PillContentScale"
     )
 
-    // Glow explosion animation
-    val glowScale = remember { Animatable(1f) }
-    val glowAlpha = remember { Animatable(0f) }
-    
-    LaunchedEffect(watchState) {
-        if (watchState != WatchState.NONE) {
-            launch {
-                glowScale.snapTo(1f)
-                glowScale.animateTo(1.4f, tween(500, easing = FastOutSlowInEasing))
-            }
-            launch {
-                glowAlpha.snapTo(0.6f)
-                glowAlpha.animateTo(0f, tween(500, easing = FastOutSlowInEasing))
-            }
-        }
-    }
-
     // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
     val displayWatchState = if (watchState == WatchState.WATCHED && movie.mediaType != "tv") WatchState.BOOKMARKED else watchState
 
@@ -308,17 +291,6 @@ fun DetailActions(
                     val w = size.width
                     val h = size.height
                     if (w < 1f || h < 1f) return@drawBehind
-                    
-                    if (glowAlpha.value > 0f) {
-                        scale(scale = glowScale.value) {
-                            drawRoundRect(
-                                color = displayColor.copy(alpha = glowAlpha.value),
-                                size = size,
-                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(28.dp.toPx()),
-                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
-                            )
-                        }
-                    }
                     
                     // TV Progress Border
                     if (movie.mediaType == "tv" && watchState != WatchState.NONE && animatedProgress > 0f) {
