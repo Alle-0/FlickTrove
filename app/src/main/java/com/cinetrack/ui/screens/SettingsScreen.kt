@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material.icons.rounded.*
@@ -863,7 +865,12 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         // Badge Legend
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .heightIn(max = 420.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
                             BadgeLegendItem(text = "MASTERPIECE", color = Color(0xFFFFD700), desc = "Capolavoro assoluto (media ≥8.8, >2000 voti)")
                             BadgeLegendItem(text = "BEST", color = Color(0xFF00E5FF), desc = "Media voto eccezionale (≥8.5, >300 voti)")
@@ -2087,10 +2094,10 @@ fun BadgeLegendItem(text: String, color: Color, desc: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .width(55.dp)
+                .widthIn(min = 55.dp)
                 .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(50))
-                .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(50))
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+                .border(1.dp, color.copy(alpha = 0.6f), RoundedCornerShape(50))
+                .padding(horizontal = 8.dp, vertical = 3.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -2098,7 +2105,9 @@ fun BadgeLegendItem(text: String, color: Color, desc: String) {
                 color = color,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.3.sp
+                letterSpacing = 0.3.sp,
+                maxLines = 1,
+                softWrap = false
             )
         }
         Spacer(modifier = Modifier.width(12.dp))

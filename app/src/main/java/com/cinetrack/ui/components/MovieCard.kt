@@ -760,12 +760,8 @@ fun MovieCard(
 private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null) {
     Box(
         modifier = modifier
-            .then(
-                if (hazeState != null) Modifier.hazeGlass(state = hazeState, shape = CircleShape)
-                else Modifier
-            )
-            .background(Color.Black.copy(alpha = 0.45f), CircleShape)
-            .border(0.5.dp, color, CircleShape)
+            .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
+            .border(0.5.dp, color.copy(alpha = 0.8f), RoundedCornerShape(50))
             .padding(horizontal = 6.dp, vertical = 2.5.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -775,6 +771,7 @@ private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modi
             fontSize = 7.5.sp,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 0.5.sp,
+            maxLines = 1,
             style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
         )
     }
