@@ -730,9 +730,9 @@ fun MovieCard(
 private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
-            .border(0.5.dp, color.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
-            .padding(horizontal = 5.dp, vertical = 2.dp),
+            .background(Color.Black.copy(alpha = 0.75f), CircleShape)
+            .border(0.5.dp, color, CircleShape)
+            .padding(horizontal = 6.dp, vertical = 2.5.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
