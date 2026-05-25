@@ -1305,9 +1305,12 @@ fun FeedbackDialog(
                 }
         ) {
 
-            Column(
+        Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(28.dp)
+                modifier = Modifier
+                    .padding(28.dp)
+                    .heightIn(max = 600.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     "Invia Feedback",
