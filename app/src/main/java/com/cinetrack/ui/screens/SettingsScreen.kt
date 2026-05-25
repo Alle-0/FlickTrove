@@ -882,11 +882,18 @@ fun SettingsScreen(
                         
                         // Badge Legend
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati oggi")
-                            BadgeLegendItem(text = "BEST", color = Color(0xFF00E5FF), desc = "Media voto eccezionale (≥8.5) con tanti voti (>300)")
+                            BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
+                            BadgeLegendItem(text = "MASTERPIECE", color = Color(0xFFFFD700), desc = "Capolavoro assoluto (media ≥8.8, >2000 voti)")
+                            BadgeLegendItem(text = "BEST", color = Color(0xFF00E5FF), desc = "Media voto eccezionale (≥8.5, >300 voti)")
                             BadgeLegendItem(text = "HOT", color = HazeStyles.AccentYellow, desc = "Molto popolare (voto > 3000 su TMDB)")
                             BadgeLegendItem(text = "WOW", color = NeonTeal, desc = "Ottimo gradimento (media ≥8.0, >1000 voti)")
-                            BadgeLegendItem(text = "CULT", color = Color(0xFF9C27B0), desc = "Titolo del '900 o anni 2000 rimasto amato (media ≥8.0)")
+                            BadgeLegendItem(text = "HIDDEN GEM", color = Color(0xFF00E676), desc = "Perla Nascosta (media ≥7.5, <500 voti)")
+                            BadgeLegendItem(text = "CULT", color = Color(0xFF9C27B0), desc = "Titolo iconico ('90 - '10, media ≥8.0)")
+                            BadgeLegendItem(text = "CLASSIC", color = Color(0xFF8D6E63), desc = "Classico del passato (< 1990, media ≥7.0)")
+                            BadgeLegendItem(text = "EPIC", color = Color(0xFFFF5722), desc = "Lunga durata, colossale (> 160 min)")
+                            BadgeLegendItem(text = "BINGE", color = Color(0xFF00BCD4), desc = "Ideale per abbuffate (Serie lunga, >50 ep.)")
+                            BadgeLegendItem(text = "SCI-FI", color = Color(0xFF2962FF), desc = "Genere Fantascienza")
+                            BadgeLegendItem(text = "COMEDY", color = Color(0xFFFFEA00), desc = "Commedia apprezzata (media ≥7.0)")
                             BadgeLegendItem(text = "HORROR", color = Color(0xFFE53935), desc = "Genere Horror")
                             BadgeLegendItem(text = "ANIME", color = Color(0xFFFF9800), desc = "Genere Animazione / Anime")
                         }

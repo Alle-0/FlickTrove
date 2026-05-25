@@ -535,24 +535,50 @@ fun MovieCard(
                         MovieCardBadge(text = "NEW", color = com.cinetrack.ui.theme.NeonPink, hazeState = hazeState)
                     }
     
-                    if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
+                    if ((movie.voteAverage ?: 0.0) >= 8.8 && (movie.voteCount ?: 0) > 2000) {
+                        MovieCardBadge(text = "MASTERPIECE", color = Color(0xFFFFD700), hazeState = hazeState)
+                    } else if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
                         MovieCardBadge(text = "BEST", color = Color(0xFF00E5FF), hazeState = hazeState)
                     } else if ((movie.voteCount ?: 0) > 3000) {
                         MovieCardBadge(text = "HOT", color = com.cinetrack.ui.theme.HazeStyles.AccentYellow, hazeState = hazeState)
                     } else if ((movie.voteAverage ?: 0.0) >= 8.0 && (movie.voteCount ?: 0) > 1000) {
                         MovieCardBadge(text = "WOW", color = com.cinetrack.ui.theme.NeonTeal, hazeState = hazeState)
+                    } else if ((movie.voteAverage ?: 0.0) >= 7.5 && (movie.voteCount ?: 0) in 50..500) {
+                        MovieCardBadge(text = "HIDDEN GEM", color = Color(0xFF00E676), hazeState = hazeState)
                     }
                     
-                    val isOldAndGood = (movie.releaseDate?.startsWith("19") == true || movie.releaseDate?.startsWith("200") == true) && (movie.voteAverage ?: 0.0) >= 8.0
-                    if (isOldAndGood) {
+                    val releaseYear = movie.releaseYear?.toIntOrNull() ?: 
+                                      movie.releaseDate?.take(4)?.toIntOrNull() ?: 
+                                      movie.firstAirDate?.take(4)?.toIntOrNull() ?: 9999
+                    
+                    if (releaseYear < 1990 && (movie.voteAverage ?: 0.0) >= 7.0) {
+                        MovieCardBadge(text = "CLASSIC", color = Color(0xFF8D6E63), hazeState = hazeState)
+                    } else if (releaseYear in 1990..2010 && (movie.voteAverage ?: 0.0) >= 8.0) {
                         MovieCardBadge(text = "CULT", color = Color(0xFF9C27B0), hazeState = hazeState)
+                    }
+                    
+                    if ((movie.runtime ?: 0) > 160) {
+                        MovieCardBadge(text = "EPIC", color = Color(0xFFFF5722), hazeState = hazeState)
+                    }
+                    
+                    if ((movie.numberOfSeasons ?: 0) >= 5 || (movie.numberOfEpisodes ?: 0) > 50) {
+                        MovieCardBadge(text = "BINGE", color = Color(0xFF00BCD4), hazeState = hazeState)
                     }
     
                     val genresStr = movie.genreNamesString ?: ""
-                    if (genresStr.contains("Horror", ignoreCase = true) || movie.genres?.any { it.name?.equals("Horror", ignoreCase = true) == true } == true) {
+                    val hasGenre = { name: String -> 
+                        genresStr.contains(name, ignoreCase = true) || 
+                        movie.genres?.any { it.name?.equals(name, ignoreCase = true) == true } == true
+                    }
+                    
+                    if (hasGenre("Horror")) {
                         MovieCardBadge(text = "HORROR", color = Color(0xFFE53935), hazeState = hazeState)
-                    } else if (genresStr.contains("Animation", ignoreCase = true) || genresStr.contains("Anime", ignoreCase = true)) {
+                    } else if (hasGenre("Animation") || hasGenre("Anime")) {
                         MovieCardBadge(text = "ANIME", color = Color(0xFFFF9800), hazeState = hazeState)
+                    } else if (hasGenre("Science Fiction") || hasGenre("Sci-Fi")) {
+                        MovieCardBadge(text = "SCI-FI", color = Color(0xFF2962FF), hazeState = hazeState)
+                    } else if (hasGenre("Comedy") && (movie.voteAverage ?: 0.0) >= 7.0) {
+                        MovieCardBadge(text = "COMEDY", color = Color(0xFFFFEA00), hazeState = hazeState)
                     }
                 }
             }
