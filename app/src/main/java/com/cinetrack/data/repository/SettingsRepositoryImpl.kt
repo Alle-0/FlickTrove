@@ -20,6 +20,7 @@ class SettingsRepositoryImpl @Inject constructor(
     private object PreferencesKeys {
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
+        val SHOW_BADGES = booleanPreferencesKey("show_badges")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
@@ -32,6 +33,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val showFolderBookmarks: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] ?: true // Default value
+    }
+
+    override val showBadges: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_BADGES] ?: true // Default value
     }
 
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -59,6 +64,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleFolderBookmarks(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] = enabled
+        }
+    }
+
+    override suspend fun toggleBadges(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_BADGES] = enabled
         }
     }
 

@@ -72,6 +72,7 @@ data class UserPreferences(
     val showLayoutToggle: Boolean = false,
     val notificationsEnabled: Boolean = true,
     val showFolderBookmarks: Boolean = true,
+    val showBadges: Boolean = true,
     val vibrationEnabled: Boolean = true,
     val lastSyncTimestamp: Long = 0L
 )

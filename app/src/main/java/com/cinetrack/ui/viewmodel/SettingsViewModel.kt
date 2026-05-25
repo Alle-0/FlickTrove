@@ -62,6 +62,9 @@ class SettingsViewModel @Inject constructor(
     val showFolderBookmarks: StateFlow<Boolean> = settingsRepository.showFolderBookmarks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showBadges: StateFlow<Boolean> = settingsRepository.showBadges
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -98,6 +101,14 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleFolderBookmarks(enabled)
             val status = if (enabled) "visibili" else "nascosti"
             actionFeedbackManager.emit("Segnalibri cartelle $status")
+        }
+    }
+
+    fun toggleBadges(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleBadges(enabled)
+            val status = if (enabled) "visibili" else "nascosti"
+            actionFeedbackManager.emit("Badge $status")
         }
     }
 

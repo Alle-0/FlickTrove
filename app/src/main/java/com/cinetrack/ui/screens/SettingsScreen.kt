@@ -106,12 +106,14 @@ fun SettingsScreen(
         }
     }
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
+    val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
+    var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
     var showLogoutConfirm by remember { mutableStateOf(false) }
@@ -131,7 +133,7 @@ fun SettingsScreen(
 
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
-                           showExternalMigrationDialog || isBackupLoading
+                           showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -314,6 +316,45 @@ fun SettingsScreen(
                                 onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.toggleFolderBookmarks(!showFolderBookmarks)
+                                }
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.Style,
+                                title = "Badge informativi",
+                                description = "Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.",
+                                trailing = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        IconButton(onClick = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            showBadgesInfoDialog = true 
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Info,
+                                                contentDescription = "Info Badge",
+                                                tint = Color.White.copy(alpha = 0.5f),
+                                                modifier = Modifier.size(22.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Switch(
+                                            checked = showBadges,
+                                            onCheckedChange = { 
+                                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                settingsViewModel.toggleBadges(it) 
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = Color.White,
+                                                checkedTrackColor = currentAccentColor,
+                                                uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
+                                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f),
+                                                uncheckedBorderColor = Color.Transparent
+                                            )
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleBadges(!showBadges)
                                 }
                             )
 
@@ -633,6 +674,7 @@ fun SettingsScreen(
                                 showDeleteDialog = false
                                 showColorDialog = false
                                 showFeedbackDialog = false
+                                showBadgesInfoDialog = false
                                 showCacheConfirm = false
                                 showLogoutConfirm = false
                                 showBackupDialog = false
@@ -787,6 +829,78 @@ fun SettingsScreen(
                             ) {
                                 Text("Conferma", fontWeight = FontWeight.Bold)
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Custom Glassy Info Badges Dialog
+        AnimatedVisibility(
+            visible = showBadgesInfoDialog,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.zIndex(100f)
+        ) {
+            val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .widthIn(max = 400.dp)
+                        .fillMaxWidth(0.85f)
+                        .hazeGlass(
+                            state = localHazeState, alpha = alpha,
+                            shape = RoundedCornerShape(32.dp)
+                        )
+                        .clickable(enabled = false) {}
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Rounded.Info,
+                                null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                "Significato Badge",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        // Badge Legend
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati oggi")
+                            BadgeLegendItem(text = "BEST", color = Color(0xFF00E5FF), desc = "Media voto eccezionale (≥8.5) con tanti voti (>300)")
+                            BadgeLegendItem(text = "HOT", color = HazeStyles.AccentYellow, desc = "Molto popolare (voto > 3000 su TMDB)")
+                            BadgeLegendItem(text = "WOW", color = NeonTeal, desc = "Ottimo gradimento (media ≥8.0, >1000 voti)")
+                            BadgeLegendItem(text = "CULT", color = Color(0xFF9C27B0), desc = "Titolo del '900 o anni 2000 rimasto amato (media ≥8.0)")
+                            BadgeLegendItem(text = "HORROR", color = Color(0xFFE53935), desc = "Genere Horror")
+                            BadgeLegendItem(text = "ANIME", color = Color(0xFFFF9800), desc = "Genere Animazione / Anime")
+                        }
+                        
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Button(
+                            onClick = { showBadgesInfoDialog = false },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text("Ho capito", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1963,3 +2077,31 @@ fun AttributionRow(
     }
 }
 
+@Composable
+fun BadgeLegendItem(text: String, color: Color, desc: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .width(55.dp)
+                .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(50))
+                .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(50))
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                color = color,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 0.3.sp
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = desc,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}

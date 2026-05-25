@@ -28,6 +28,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_LAYOUT_TOGGLE = booleanPreferencesKey("show_layout_toggle")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
+        val SHOW_BADGES = booleanPreferencesKey("show_badges")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
@@ -53,6 +54,7 @@ class PreferenceRepository @Inject constructor(
                 showLayoutToggle = preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] ?: false,
                 notificationsEnabled = preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true,
                 showFolderBookmarks = preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] ?: true,
+                showBadges = preferences[PreferencesKeys.SHOW_BADGES] ?: true,
                 vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
             )
@@ -115,6 +117,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = prefs.showLayoutToggle
             preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = prefs.notificationsEnabled
             preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] = prefs.showFolderBookmarks
+            preferences[PreferencesKeys.SHOW_BADGES] = prefs.showBadges
             preferences[PreferencesKeys.VIBRATION_ENABLED] = prefs.vibrationEnabled
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
         }

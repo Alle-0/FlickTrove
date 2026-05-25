@@ -170,6 +170,7 @@ fun HomeScreen(
                             progress = (movie.progress ?: 0.0).toFloat(),
                             folderColors = folderColors,
                             showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                            showBadges = uiState.preferences.showBadges,
                             animatedVisibilityScope = animatedVisibilityScope,
                             staggerIndex = index,
                             onPress = { onMovieClick(movie) },
