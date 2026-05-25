@@ -22,6 +22,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
+        val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
         val LAST_FEEDBACK_TIMESTAMP = longPreferencesKey("last_feedback_timestamp")
     }
 
@@ -39,6 +40,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val vibrationEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true // Default value
+    }
+
+    override val advancedVisualEffectsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true // Default value
     }
 
     override val lastFeedbackTimestamp: Flow<Long> = dataStore.data.map { preferences ->
@@ -66,6 +71,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleVibration(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.VIBRATION_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun toggleAdvancedVisualEffects(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = enabled
         }
     }
 

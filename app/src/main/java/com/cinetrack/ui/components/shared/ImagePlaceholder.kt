@@ -3,7 +3,7 @@ package com.cinetrack.ui.components.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
@@ -28,7 +28,7 @@ fun ImagePlaceholder(
     isBackdrop: Boolean = false
 ) {
     val icon = when (mediaType) {
-        "tv" -> Icons.Rounded.List
+        "tv" -> Icons.AutoMirrored.Rounded.List
         "person" -> Icons.Rounded.Person
         else -> Icons.Rounded.PlayArrow
     }

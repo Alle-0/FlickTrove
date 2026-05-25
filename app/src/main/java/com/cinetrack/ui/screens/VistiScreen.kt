@@ -78,6 +78,12 @@ fun VistiScreen(
     val topPadding = paddingValues.calculateTopPadding()
     val localHazeState = remember { HazeState() }
 
+    LaunchedEffect(uiState.sortConfig) {
+        if (uiState.movies.isNotEmpty()) {
+            listState.scrollToItem(0)
+        }
+    }
+
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
     MovieActionsWrapper(

@@ -11,7 +11,7 @@ interface TMDBService {
         @Path("id") id: Long,
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT",
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates"
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords"
     ): MovieDetailResponse
 
     @GET("tv/{id}")
@@ -19,7 +19,7 @@ interface TMDBService {
         @Path("id") id: Long,
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT",
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings"
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords"
     ): MovieDetailResponse
 
     @GET("search/movie")
@@ -27,7 +27,8 @@ interface TMDBService {
         @Query("query") query: String,
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT",
-        @Query("page") page: Int = 1
+        @Query("page") page: Int = 1,
+        @Query("year") year: String? = null
     ): SearchResponse
 
     @GET("search/tv")
@@ -60,6 +61,13 @@ interface TMDBService {
         @Query("language") language: String = "it-IT",
         @Query("page") page: Int = 1
     ): PersonSearchResponse
+
+    @GET("search/keyword")
+    suspend fun searchKeyword(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String,
+        @Query("page") page: Int = 1
+    ): KeywordsResponse
 
     @GET("discover/movie")
     suspend fun getMoviesByGenre(
@@ -186,4 +194,12 @@ interface TMDBService {
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT"
     ): CollectionResponse
+
+    @GET("find/{external_id}")
+    suspend fun findByExternalId(
+        @Path("external_id") externalId: String,
+        @Query("external_source") externalSource: String,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT"
+    ): FindResponse
 }

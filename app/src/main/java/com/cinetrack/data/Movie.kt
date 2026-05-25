@@ -316,9 +316,42 @@ data class Movie(
     @get:Exclude
     val isReleased: Boolean
         get() {
-            // 1. Explicitly check isUpcoming flag if available
-            if (isUpcoming == true) return false
-            
+            // 1. Robust date comparison (Priority)
+            val todayIso = try {
+                LocalDate.now().toString()
+            } catch (e: Exception) {
+                "2024-01-01" // Fallback if system date fails
+            }
+            val currentYear = todayIso.take(4).toIntOrNull() ?: 2024
+
+            // Check date if available
+            val dateStr = releaseDate ?: firstAirDate
+            if (!dateStr.isNullOrBlank()) {
+                try {
+                    if (dateStr.length >= 10) {
+                        // Compare full ISO strings: "2026-11-25" <= "2026-05-12" is false
+                        // If date is today or before, it's released!
+                        if (dateStr.take(10) <= todayIso) return true
+                        // Otherwise it's in the future, so definitely not released
+                        return false
+                    } else if (dateStr.length >= 4) {
+                        val year = dateStr.take(4).toIntOrNull()
+                        if (year != null) {
+                            if (year < currentYear) return true
+                            if (year > currentYear) return false
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore date format errors and fall through
+                }
+            }
+
+            // Check year-only fields as fallback
+            releaseYear?.toIntOrNull()?.let { year ->
+                if (year > currentYear) return false
+                if (year < currentYear) return true
+            }
+
             // 2. Check status if available (TMDB status)
             val lowerStatus = status?.lowercase()
             if (lowerStatus != null) {
@@ -329,44 +362,17 @@ data class Movie(
                 }
             }
 
-            // 3. Robust date comparison
-            val todayIso = try {
-                LocalDate.now().toString()
-            } catch (e: Exception) {
-                "2024-01-01" // Fallback if system date fails
-            }
-            val currentYear = todayIso.take(4).toIntOrNull() ?: 2024
+            // 3. Fallback to isUpcoming flag
+            if (isUpcoming == true) return false
 
-            // Check year-only fields first
-            releaseYear?.toIntOrNull()?.let { year ->
-                if (year > currentYear) return false
-                if (year < currentYear) return true
-                // If same year, fall through to full date check
-            }
-
-            val dateStr = releaseDate ?: firstAirDate ?: return false
-            if (dateStr.isBlank()) return false
-
-            return try {
-                if (dateStr.length >= 10) {
-                    // Compare full ISO strings: "2026-11-25" <= "2026-05-12" is false
-                    dateStr.take(10) <= todayIso
-                } else if (dateStr.length >= 4) {
-                    val year = dateStr.take(4).toIntOrNull() ?: return true
-                    year < currentYear
-                } else {
-                    false
-                }
-            } catch (e: Exception) {
-                false
-            }
+            // Default to true if no other indicators say otherwise
+            return true
         }
 
     // --- Firestore Resilient Deserialization Proxies ---
 
     @get:PropertyName("vote_average")
     @set:PropertyName("vote_average")
-    @Transient
     var voteAverageProxy: Any?
         get() = voteAverage
         set(value) {
@@ -379,7 +385,6 @@ data class Movie(
 
     @get:PropertyName("personal_rating")
     @set:PropertyName("personal_rating")
-    @Transient
     var personalRatingProxy: Any?
         get() = personalRating
         set(value) {
@@ -392,7 +397,6 @@ data class Movie(
 
     @get:PropertyName("progress")
     @set:PropertyName("progress")
-    @Transient
     var progressProxy: Any?
         get() = progress
         set(value) {
@@ -405,42 +409,36 @@ data class Movie(
 
     @get:PropertyName("watched_at")
     @set:PropertyName("watched_at")
-    @Transient
     var watchedAtProxy: Any?
         get() = watchedAt
         set(value) { watchedAt = parseDate(value) }
 
     @get:PropertyName("updated_at")
     @set:PropertyName("updated_at")
-    @Transient
     var updatedAtProxy: Any?
         get() = updatedAt
         set(value) { updatedAt = parseDate(value) }
 
     @get:PropertyName("created_at")
     @set:PropertyName("created_at")
-    @Transient
     var createdAtProxy: Any?
         get() = createdAt
         set(value) { createdAt = parseDate(value) }
 
     @get:PropertyName("last_sync_date")
     @set:PropertyName("last_sync_date")
-    @Transient
     var lastSyncDateProxy: Any?
         get() = lastSyncDate
         set(value) { lastSyncDate = parseDate(value) }
 
     @get:PropertyName("migrated_at")
     @set:PropertyName("migrated_at")
-    @Transient
     var migratedAtProxy: Any?
         get() = migratedAt
         set(value) { migratedAt = parseDate(value) }
 
     @get:PropertyName("genres")
     @set:PropertyName("genres")
-    @Transient
     var genresProxy: List<Any?>?
         get() = genres
         set(value) {
@@ -449,7 +447,6 @@ data class Movie(
 
     @get:PropertyName("director_data")
     @set:PropertyName("director_data")
-    @Transient
     var directorDataProxy: List<Any?>?
         get() = directorData
         set(value) {
@@ -458,7 +455,6 @@ data class Movie(
 
     @get:PropertyName("top_cast_data")
     @set:PropertyName("top_cast_data")
-    @Transient
     var topCastDataProxy: List<Any?>?
         get() = topCastData
         set(value) {

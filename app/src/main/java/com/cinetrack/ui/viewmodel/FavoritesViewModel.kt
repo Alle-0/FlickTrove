@@ -12,6 +12,7 @@ import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
@@ -58,7 +59,7 @@ class FavoritesViewModel @Inject constructor(
             syncingIds = syncingIds,
             updatesCount = watchlist.count { (it.newEpisodesFound ?: 0) > 0 }
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000), // Protect battery - Stop activity when inactive
         initialValue = FavoritesUiState()

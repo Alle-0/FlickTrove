@@ -48,13 +48,15 @@ fun MovieList(
         ) {
             items(
                 items = movies,
-                key = { it.id }, // CRITICAL: Unique key for performance
+                key = { it.compositeId }, // CRITICAL: Unique key for performance
                 contentType = { "movie" }
             ) { movie ->
-                MovieCard(
-                    movie = movie,
-                    onClick = { onMovieClick(movie) }
-                )
+                androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                    MovieCard(
+                        movie = movie,
+                        onClick = { onMovieClick(movie) }
+                    )
+                }
             }
         }
     }

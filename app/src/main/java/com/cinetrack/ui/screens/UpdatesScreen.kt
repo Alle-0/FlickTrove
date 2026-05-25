@@ -66,6 +66,7 @@ import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.utils.bounceClick
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -192,6 +193,7 @@ fun UpdatesScreen(
                             state = internalHazeState,
                             style = HazeStyles.PremiumDark
                         )
+                        
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -221,14 +223,16 @@ fun UpdatesScreen(
                                     }
                                 } else {
                                     items(futureReminders, key = { it.id.toString() + it.mediaType + "_rem" }, contentType = { "movie" }) { movie ->
-                                        UpdateCard(
-                                            movie = movie,
-                                            label = "In Arrivo: ${movie.releaseDate ?: movie.firstAirDate}",
-                                            icon = CustomIcons.PremiumBellFilled,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            onAction = { /* Optional: toggle reminder */ },
-                                            onPress = { onMovieClick(movie) }
-                                        )
+                                        androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                            UpdateCard(
+                                                movie = movie,
+                                                label = "In Arrivo: ${movie.releaseDate ?: movie.firstAirDate}",
+                                                icon = CustomIcons.PremiumBellFilled,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                onAction = { /* Optional: toggle reminder */ },
+                                                onPress = { onMovieClick(movie) }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -302,14 +306,16 @@ fun UpdatesScreen(
                                             ) 
                                         }
                                         items(newEpisodes, key = { it.id.toString() + it.mediaType + "_new" }, contentType = { "movie" }) { movie ->
-                                            UpdateCard(
-                                                movie = movie,
-                                                label = "${movie.newEpisodesFound} nuovi episodi",
-                                                icon = CustomIcons.PremiumCheck,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                onAction = { viewModel.clearUpdate(movie.id, movie.mediaType) },
-                                                onPress = { onMovieClick(movie) }
-                                            )
+                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                UpdateCard(
+                                                    movie = movie,
+                                                    label = "${movie.newEpisodesFound} nuovi episodi",
+                                                    icon = CustomIcons.PremiumCheck,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    onAction = { viewModel.clearUpdate(movie.id, movie.mediaType) },
+                                                    onPress = { onMovieClick(movie) }
+                                                )
+                                            }
                                         }
                                     }
 
@@ -348,14 +354,16 @@ fun UpdatesScreen(
                                             )
                                         }
                                         items(releasedRecently, key = { it.id.toString() + it.mediaType + "_recent" }, contentType = { "movie" }) { movie ->
-                                            UpdateCard(
-                                                movie = movie,
-                                                label = "Disponibile ora",
-                                                icon = CustomIcons.PremiumCheck,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                onAction = { viewModel.clearMigrated(movie.id, movie.mediaType) },
-                                                onPress = { onMovieClick(movie) }
-                                            )
+                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                UpdateCard(
+                                                    movie = movie,
+                                                    label = "Disponibile ora",
+                                                    icon = CustomIcons.PremiumCheck,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    onAction = { viewModel.clearMigrated(movie.id, movie.mediaType) },
+                                                    onPress = { onMovieClick(movie) }
+                                                )
+                                            }
                                         }
                                     }
 
@@ -376,7 +384,11 @@ fun UpdatesScreen(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .offset(y = (-10).dp)
-                        .hazeGlass(state = internalHazeState, shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                        .hazeGlass(
+                            state = internalHazeState,
+                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                            borderWidth = 0.dp
+                        )
                         .padding(top = 10.dp)
                         .zIndex(10f),
                     contentAlignment = Alignment.TopCenter
@@ -390,50 +402,37 @@ fun UpdatesScreen(
                         contentAlignment = Alignment.Center
                     ) {
                     // Back Button
-                    val backInteractionSource = remember { MutableInteractionSource() }
-                    val isBackPressed by backInteractionSource.collectIsPressedAsState()
-                    val backScale by animateFloatAsState(
-                        targetValue = if (isBackPressed) 0.85f else 1f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = if (isBackPressed) Spring.StiffnessHigh else Spring.StiffnessLow
-                        ),
-                        label = "backScale"
-                    )
-
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .padding(start = 16.dp)
                             .size(44.dp)
-                            .graphicsLayer {
-                                scaleX = backScale
-                                scaleY = backScale
-                            }
-                            .hazeGlass(
-                                state = internalHazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius
-                            )
-                            .clickable(
-                                interactionSource = backInteractionSource,
-                                indication = null
-                            ) { 
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (pagerState.currentPage > 0) {
-                                    scope.launch { pagerState.animateScrollToPage(0) }
-                                } else {
-                                    triggerExit() 
-                                }
-                            },
-                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick { 
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (pagerState.currentPage > 0) {
+                                        scope.launch { pagerState.animateScrollToPage(0) }
+                                    } else {
+                                        triggerExit() 
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                                contentDescription = "Back",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
 
                     // Title with Animation

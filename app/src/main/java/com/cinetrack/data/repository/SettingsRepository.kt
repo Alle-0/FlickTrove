@@ -7,11 +7,13 @@ interface SettingsRepository {
     val showFolderBookmarks: Flow<Boolean>
     val notificationsEnabled: Flow<Boolean>
     val vibrationEnabled: Flow<Boolean>
+    val advancedVisualEffectsEnabled: Flow<Boolean>
     val lastFeedbackTimestamp: Flow<Long>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
     suspend fun toggleNotifications(enabled: Boolean)
     suspend fun toggleVibration(enabled: Boolean)
+    suspend fun toggleAdvancedVisualEffects(enabled: Boolean)
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)
 }

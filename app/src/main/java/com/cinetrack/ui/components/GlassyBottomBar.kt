@@ -43,13 +43,10 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
-import io.github.fletchmckee.liquid.liquid
-import io.github.fletchmckee.liquid.LiquidState
 
 @Composable
 fun GlassyBottomBar(
     hazeState: HazeState,
-    liquidState: LiquidState,
     selectedRoute: String?,
     onNavigate: (String) -> Unit,
     isDimmed: Boolean = false
@@ -74,7 +71,10 @@ fun GlassyBottomBar(
             modifier = Modifier
                 .matchParentSize()
                 .clip(CircleShape)
-                .liquid(liquidState)
+                .hazeGlass(
+                    state = hazeState, 
+                    shape = CircleShape
+                )
         )
 
         Row(
@@ -134,8 +134,18 @@ private fun RowScope.NavItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
+    // Bounce animation when becoming selected
+    val iconScale = remember { androidx.compose.animation.core.Animatable(1f) }
+    androidx.compose.runtime.LaunchedEffect(isSelected) {
+        if (isSelected) {
+            iconScale.animateTo(0.85f, tween(100, easing = androidx.compose.animation.core.LinearOutSlowInEasing))
+            iconScale.animateTo(1.1f, androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessMedium))
+            iconScale.animateTo(1f, androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow))
+        }
+    }
+    
     // Scale animation ONLY if not selected and enabled
-    val scale by animateFloatAsState(
+    val pressScale by animateFloatAsState(
         targetValue = if (isPressed && !isSelected && enabled) 0.92f else 1f, 
         label = "navScale"
     )
@@ -145,8 +155,8 @@ private fun RowScope.NavItem(
             .weight(1f)
             .fillMaxHeight()
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
+                scaleX = pressScale
+                scaleY = pressScale
             }
             .clickable(
                 interactionSource = interactionSource,
@@ -169,7 +179,12 @@ private fun RowScope.NavItem(
             imageVector = icon,
             contentDescription = label,
             tint = tintColor,
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier
+                .size(22.dp)
+                .graphicsLayer {
+                    scaleX = iconScale.value
+                    scaleY = iconScale.value
+                }
         )
         
         Text(

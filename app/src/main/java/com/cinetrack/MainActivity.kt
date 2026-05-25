@@ -45,8 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
-import io.github.fletchmckee.liquid.rememberLiquidState
-import io.github.fletchmckee.liquid.liquefiable
+
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.compose.ui.zIndex
@@ -59,6 +58,12 @@ import androidx.compose.foundation.border
 import com.cinetrack.ui.assets.CustomIcons
 import dev.chrisbanes.haze.hazeChild
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -155,6 +160,7 @@ class MainActivity : ComponentActivity() {
             val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
             val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
             val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
+
             val context = LocalContext.current
 
             // Ask for POST_NOTIFICATIONS at startup if user has it enabled but hasn't granted yet
@@ -187,9 +193,11 @@ class MainActivity : ComponentActivity() {
 
             FlickTrove_KotlinTheme(accentColor = accentColor) {
                 val movieActionsManager = remember { MovieActionsManager() }
+
                 CompositionLocalProvider(
                     LocalMovieActions provides movieActionsManager,
-                    com.cinetrack.ui.utils.LocalVibrationEnabled provides vibrationEnabled
+                    com.cinetrack.ui.utils.LocalVibrationEnabled provides vibrationEnabled,
+
                 ) {
                 val navController = rememberNavController()
                 val detailNavController = rememberNavController()
@@ -199,7 +207,6 @@ class MainActivity : ComponentActivity() {
                 val authViewModel: AuthViewModel = hiltViewModel()
                 val authState by authViewModel.authState.collectAsStateWithLifecycle()
                 val contentHazeState = remember { HazeState() }
-                val contentLiquidState = rememberLiquidState()
                 val drawerHazeState = remember { HazeState() }
                 val homeViewModel: HomeViewModel = hiltViewModel()
                 val vistiViewModel: VistiViewModel = hiltViewModel()
@@ -215,8 +222,14 @@ class MainActivity : ComponentActivity() {
                 var searchInitialQuery by remember { mutableStateOf<String?>(null) }
                 var searchInitialGenreId by remember { mutableStateOf<Long?>(null) }
                 var searchInitialGenreName by remember { mutableStateOf<String?>(null) }
+                var searchInitialKeywordId by remember { mutableStateOf<Long?>(null) }
+                var searchInitialKeywordName by remember { mutableStateOf<String?>(null) }
                 var isOverlayClosing by remember { mutableStateOf(false) }
                 var showFolderDeleteConfirm by remember { mutableStateOf(false) }
+                var showFolderEditDialog by remember { mutableStateOf(false) }
+                var folderEditMode by remember { mutableStateOf(com.cinetrack.ui.components.shared.FolderEditMode.NAME) }
+                var showFolderOptions by remember { mutableStateOf(false) }
+                var folderOptionsOffset by remember { mutableStateOf(Offset.Zero) }
                 var showExitConfirmation by remember { mutableStateOf(false) }
                 
                 var globalTopZIndex by remember { mutableStateOf(1000f) }
@@ -226,8 +239,10 @@ class MainActivity : ComponentActivity() {
                 val detailZIndexMap = remember { mutableStateMapOf<String, Float>() }
 
                 LaunchedEffect(deepLinkIntent.value, authState) {
-                    val uri = deepLinkIntent.value?.data
-                    if (uri != null) {
+                    val intent = deepLinkIntent.value ?: return@LaunchedEffect
+                    val uri = intent.data
+                    val action = intent.action
+                    if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
                         // If auth state is not yet resolved, wait for it
                         if (authState !is AuthState.Authenticated && authState !is AuthState.Unauthenticated && authState !is AuthState.Error) {
                             return@LaunchedEffect
@@ -235,7 +250,7 @@ class MainActivity : ComponentActivity() {
                         
                         // Only process deep links if authenticated
                         if (authState is AuthState.Authenticated) {
-                            if (uri.scheme == "flicktrove" && uri.host == "media") {
+                            if (uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")) {
                                 val segments = uri.pathSegments
                                 if (segments.size >= 2) {
                                     val type = segments[0]
@@ -248,9 +263,18 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 }
-                            } else if (uri.scheme == "flicktrove" && uri.host == "search") {
+                            } else if (uri?.scheme == "flicktrove" && uri.host == "search") {
                                 searchZIndex = ++globalTopZIndex
                                 searchOverlayOffset = androidx.compose.ui.geometry.Offset(540f, 1140f)
+                            } else if (action == "com.cinetrack.SHORTCUT_SEARCH") {
+                                searchZIndex = ++globalTopZIndex
+                                searchOverlayOffset = androidx.compose.ui.geometry.Offset(540f, 1140f)
+                            } else if (action == "com.cinetrack.SHORTCUT_VISTI") {
+                                navController.navigate(VistiRoute) { launchSingleTop = true }
+                            } else if (action == "com.cinetrack.SHORTCUT_UPCOMING_MOVIES") {
+                                navController.navigate(DiscoverRoute(type = "upcoming_movies")) { launchSingleTop = true }
+                            } else if (action == "com.cinetrack.SHORTCUT_UPCOMING_TV") {
+                                navController.navigate(DiscoverRoute(type = "airing_today_tv")) { launchSingleTop = true }
                             }
                         }
                         
@@ -419,7 +443,7 @@ class MainActivity : ComponentActivity() {
                                                     state = contentHazeState,
                                                     style = HazeStyles.PremiumDark
                                                 )
-                                                .liquefiable(contentLiquidState)
+
                                         ) {
                                             CinematicBackground(accentColor = accentColor)
                                             content()
@@ -483,8 +507,11 @@ class MainActivity : ComponentActivity() {
                                                     onBackPress = if (activeTab is DetailRoute || activeTab is PersonRoute || activeTab is FolderDetailRoute || activeTab is SettingsRoute) {
                                                         { navController.popBackStack() }
                                                     } else null,
-                                                    onDeleteClick = if (activeTab is FolderDetailRoute) {
-                                                        { showFolderDeleteConfirm = true }
+                                                    onFolderOptionsClick = if (activeTab is FolderDetailRoute) {
+                                                        { offset: Offset ->
+                                                            folderOptionsOffset = offset
+                                                            showFolderOptions = true
+                                                        }
                                                     } else null,
                                                     onUpdatesClick = { offset: Offset -> 
                                                         updatesZIndex = ++globalTopZIndex
@@ -514,7 +541,6 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 GlassyBottomBar(
                                                     hazeState = contentHazeState,
-                                                    liquidState = contentLiquidState,
                                                     isDimmed = dimBars,
                                                     selectedRoute = when(activeTab) {
                                                         is HomeRoute -> "index"
@@ -841,7 +867,15 @@ class MainActivity : ComponentActivity() {
                                                     },
                                                     onBack = { navController.popBackStack() },
                                                     showDeleteConfirm = showFolderDeleteConfirm,
-                                                    onShowDeleteConfirmChange = { showFolderDeleteConfirm = it }
+                                                    onShowDeleteConfirmChange = { showFolderDeleteConfirm = it },
+                                                    showEditDialog = showFolderEditDialog,
+                                                    onShowEditDialogChange = { showFolderEditDialog = it },
+                                                    folderEditMode = folderEditMode,
+                                                    onFolderUpdated = { newName, newColor ->
+                                                        navController.navigate(FolderDetailRoute(route.folderId, newName, newColor)) {
+                                                            popUpTo<FolderDetailRoute> { inclusive = true }
+                                                        }
+                                                    }
                                                 )
                                             }
                                         }
@@ -851,10 +885,172 @@ class MainActivity : ComponentActivity() {
                         }
 
                         // --- OVERLAY LAYER (Dynamic Bars) ---
+                        
+                        if (showFolderOptions && activeTab is FolderDetailRoute) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .zIndex(2000f)
+                                    .pointerInput(Unit) { detectTapGestures { showFolderOptions = false } }
+                            ) {
+                                val density = androidx.compose.ui.platform.LocalDensity.current
+                                val offsetX = with(density) { folderOptionsOffset.x.toDp() }
+                                val offsetY = with(density) { folderOptionsOffset.y.toDp() }
+                                
+                                var isMenuVisible by remember { mutableStateOf(false) }
+                                LaunchedEffect(Unit) { isMenuVisible = true }
+                                
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = isMenuVisible,
+                                    enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically(
+                                        initialOffsetY = { -it / 4 },
+                                        animationSpec = androidx.compose.animation.core.tween(250, easing = androidx.compose.animation.core.EaseOutCirc)
+                                    ),
+                                    exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically(
+                                        targetOffsetY = { -it / 4 },
+                                        animationSpec = androidx.compose.animation.core.tween(200, easing = androidx.compose.animation.core.EaseInCirc)
+                                    ),
+                                    modifier = Modifier.absoluteOffset(x = offsetX - 200.dp + 32.dp, y = offsetY + 8.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .width(200.dp)
+                                            .clip(RoundedCornerShape(24.dp))
+                                            .hazeGlass(state = contentHazeState, shape = RoundedCornerShape(24.dp))
+                                            .background(Color(0xFF1E1E1E).copy(alpha = 0.5f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
+                                            .padding(vertical = 8.dp)
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("Rinomina Cartella", color = Color.White) },
+                                            leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
+                                            onClick = { 
+                                                showFolderOptions = false
+                                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME
+                                                showFolderEditDialog = true 
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Cambia Colore", color = Color.White) },
+                                            leadingIcon = { Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
+                                            onClick = { 
+                                                showFolderOptions = false
+                                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.COLOR
+                                                showFolderEditDialog = true 
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Elimina Cartella", color = Color(0xFFFF3B30)) },
+                                            leadingIcon = { Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp)) },
+                                            onClick = { showFolderOptions = false; showFolderDeleteConfirm = true }
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
 
                         } // End of BACKGROUND SOURCE LAYER
 
+                        val detailPadding = PaddingValues(top = topBarHeight, bottom = 0.dp)
+                        NavHost(
+                            navController = detailNavController,
+                            startDestination = DetailOverlayPlaceholder,
+                            modifier = Modifier.fillMaxSize().zIndex(if (isDetailOverlayVisible) detailZIndex else -1f)
+                        ) {
+                            composable<DetailOverlayPlaceholder> {
+                                Box(modifier = Modifier.fillMaxSize().background(Color.Transparent))
+                            }
+                            composable<DetailRoute>(
+                                enterTransition = { 
+                                    slideInVertically(
+                                        initialOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(tween(450))
+                                },
+                                exitTransition = { 
+                                    slideOutVertically(
+                                        targetOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeOut(tween(450))
+                                },
+                                popEnterTransition = { 
+                                    slideInVertically(
+                                        initialOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(tween(450))
+                                },
+                                popExitTransition = { 
+                                    slideOutVertically(
+                                        targetOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeOut(tween(450))
+                                }
+                            ) {
+                                MovieDetailScreen(
+                                    viewModel = hiltViewModel(),
+                                    paddingValues = detailPadding,
+                                    hazeState = contentHazeState,
+                                    animatedVisibilityScope = this@composable,
+                                    onBackClick = { detailNavController.popBackStack() },
+                                    onPersonClick = { personId ->
+                                        detailNavController.navigate(PersonRoute(id = personId))
+                                    },
+                                    onMovieClick = { movie ->
+                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                    },
+                                    onGenreClick = { id, name, offset ->
+                                        searchZIndex = ++globalTopZIndex
+                                        searchInitialGenreId = id
+                                        searchInitialGenreName = name
+                                        searchOverlayOffset = offset
+                                    },
+                                    onKeywordClick = { keywordId, keywordName, offset ->
+                                        searchZIndex = ++globalTopZIndex
+                                        searchInitialKeywordId = keywordId
+                                        searchInitialKeywordName = keywordName
+                                        searchOverlayOffset = offset
+                                    }
+                                )
+                            }
+                            composable<PersonRoute>(
+                                enterTransition = { 
+                                    slideInVertically(
+                                        initialOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(tween(450))
+                                },
+                                exitTransition = { 
+                                    slideOutVertically(
+                                        targetOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeOut(tween(450))
+                                },
+                                popEnterTransition = { 
+                                    slideInVertically(
+                                        initialOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(tween(450))
+                                },
+                                popExitTransition = { 
+                                    slideOutVertically(
+                                        targetOffsetY = { it },
+                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
+                                    ) + fadeOut(tween(450))
+                                }
+                            ) {
+                                PersonDetailScreen(
+                                    viewModel = hiltViewModel(),
+                                    paddingValues = detailPadding,
+                                    hazeState = contentHazeState,
+                                    animatedVisibilityScope = this@composable,
+                                    onBackClick = { detailNavController.popBackStack() },
+                                    onMovieClick = { movie ->
+                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                    }
+                                )
+                            }
+                        }
                         // --- MODALS AND OVERLAYS (Topmost) ---
                         AnimatedVisibility(
                             visible = updatesOverlayOffset != null,
@@ -888,7 +1084,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val searchViewModel: SearchViewModel = hiltViewModel()
                             
-                            LaunchedEffect(searchInitialQuery, searchInitialGenreId) {
+                            LaunchedEffect(searchInitialQuery, searchInitialGenreId, searchInitialKeywordId) {
                                 searchInitialQuery?.let {
                                     searchViewModel.onQueryChanged(it)
                                     searchInitialQuery = null
@@ -901,6 +1097,14 @@ class MainActivity : ComponentActivity() {
                                     )
                                     searchInitialGenreId = null
                                 }
+                                searchInitialKeywordId?.let { kid ->
+                                    searchViewModel.updateSortConfig(
+                                        searchViewModel.uiState.value.sortConfig.copy(
+                                            selectedKeywords = listOf(kid)
+                                        )
+                                    )
+                                    searchInitialKeywordId = null
+                                }
                             }
                              SearchScreen(
                                 viewModel = searchViewModel,
@@ -910,6 +1114,7 @@ class MainActivity : ComponentActivity() {
                                 startY = searchOverlayOffset?.y,
                                 animatedVisibilityScope = this@AnimatedVisibility,
                                 initialGenreName = searchInitialGenreName,
+                                initialKeywordName = searchInitialKeywordName,
                                 isFilterVisible = isFilterModalVisible,
                                 isDetailVisible = isDetailOnTop,
                                 onBack = { 
@@ -918,6 +1123,7 @@ class MainActivity : ComponentActivity() {
                                     isFilterModalVisible = false
                                     searchOverlayOffset = null 
                                     searchInitialGenreName = null
+                                    searchInitialKeywordName = null
                                     isOverlayClosing = false
                                 },
                                 onClosing = { isOverlayClosing = true },
@@ -1085,13 +1291,21 @@ class MainActivity : ComponentActivity() {
                                 movieActionsManager.showFolderDialog || 
                                 movieActionsManager.showActionsPopup
 
-                        val isModalActive = isAnyMovieActionModalOpen || showFolderDeleteConfirm || isYearPickerVisible || isFilterModalVisible
+                        val isModalActive = isAnyMovieActionModalOpen || showFolderDeleteConfirm || showFolderEditDialog || showFolderOptions || isYearPickerVisible || isFilterModalVisible
 
                         androidx.activity.compose.BackHandler(enabled = isAnyMovieActionModalOpen) {
                             movieActionsManager.closeAll()
                         }
 
-                        androidx.activity.compose.BackHandler(enabled = showFolderDeleteConfirm && !isAnyMovieActionModalOpen) {
+                        androidx.activity.compose.BackHandler(enabled = showFolderOptions && !isAnyMovieActionModalOpen) {
+                            showFolderOptions = false
+                        }
+                        
+                        androidx.activity.compose.BackHandler(enabled = showFolderEditDialog && !isAnyMovieActionModalOpen && !showFolderOptions) {
+                            showFolderEditDialog = false
+                        }
+
+                        androidx.activity.compose.BackHandler(enabled = showFolderDeleteConfirm && !isAnyMovieActionModalOpen && !showFolderOptions && !showFolderEditDialog) {
                             showFolderDeleteConfirm = false
                         }
 
@@ -1129,99 +1343,6 @@ class MainActivity : ComponentActivity() {
                             showExitConfirmation = false
                         }
 
-                        val detailPadding = PaddingValues(top = topBarHeight, bottom = 0.dp)
-                        NavHost(
-                            navController = detailNavController,
-                            startDestination = DetailOverlayPlaceholder,
-                            modifier = Modifier.fillMaxSize().zIndex(if (isDetailOverlayVisible) detailZIndex else -1f)
-                        ) {
-                            composable<DetailOverlayPlaceholder> {
-                                Box(modifier = Modifier.fillMaxSize().background(Color.Transparent))
-                            }
-                            composable<DetailRoute>(
-                                enterTransition = { 
-                                    slideInVertically(
-                                        initialOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(tween(450))
-                                },
-                                exitTransition = { 
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(tween(450))
-                                },
-                                popEnterTransition = { 
-                                    slideInVertically(
-                                        initialOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(tween(450))
-                                },
-                                popExitTransition = { 
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(tween(450))
-                                }
-                            ) {
-                                MovieDetailScreen(
-                                    viewModel = hiltViewModel(),
-                                    paddingValues = detailPadding,
-                                    hazeState = contentHazeState,
-                                    animatedVisibilityScope = this@composable,
-                                    onBackClick = { detailNavController.popBackStack() },
-                                    onPersonClick = { personId ->
-                                        detailNavController.navigate(PersonRoute(id = personId))
-                                    },
-                                    onMovieClick = { movie ->
-                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
-                                    },
-                                    onGenreClick = { id, name, offset ->
-                                        searchZIndex = ++globalTopZIndex
-                                        searchInitialGenreId = id
-                                        searchInitialGenreName = name
-                                        searchOverlayOffset = offset
-                                    }
-                                )
-                            }
-                            composable<PersonRoute>(
-                                enterTransition = { 
-                                    slideInVertically(
-                                        initialOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(tween(450))
-                                },
-                                exitTransition = { 
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(tween(450))
-                                },
-                                popEnterTransition = { 
-                                    slideInVertically(
-                                        initialOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(tween(450))
-                                },
-                                popExitTransition = { 
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(450, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(tween(450))
-                                }
-                            ) {
-                                PersonDetailScreen(
-                                    viewModel = hiltViewModel(),
-                                    paddingValues = detailPadding,
-                                    hazeState = contentHazeState,
-                                    animatedVisibilityScope = this@composable,
-                                    onBackClick = { detailNavController.popBackStack() },
-                                    onMovieClick = { movie ->
-                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
-                                    }
-                                )
-                            }
-                        }
                         } // End Haze Capture Box (drawerHazeState)
 
                         // --- GLOBAL FEEDBACK (Topmost) ---

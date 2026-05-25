@@ -583,8 +583,8 @@ private fun PremiumTextField(
         // ── Error text below the field
         AnimatedVisibility(
             visible = isError && !errorText.isNullOrEmpty(),
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut(),
+            enter = scaleIn(initialScale = 0.95f) + fadeIn(),
+            exit = scaleOut(targetScale = 0.95f) + fadeOut(),
             modifier = Modifier.padding(top = 82.dp, start = 16.dp)
         ) {
             Text(

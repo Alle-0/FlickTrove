@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">FlickTrove_Kotlin</string>
+    
+    <!-- Shortcut Strings -->
+    <string name="shortcut_search_short">Cerca</string>
+    <string name="shortcut_search_long">Cerca Titolo</string>
+    <string name="shortcut_visti_short">Visti</string>
+    <string name="shortcut_visti_long">Apri Visti</string>
+    <string name="shortcut_movie_short">Film in uscita</string>
+    <string name="shortcut_movie_long">Film in uscita</string>
+    <string name="shortcut_tv_short">Serie in arrivo</string>
+    <string name="shortcut_tv_long">Serie in arrivo</string>
+    <string name="widget_name">In uscita &amp; Cerca</string>
 </resources>

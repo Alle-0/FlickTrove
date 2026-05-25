@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.*
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @Composable
 fun FluidRatingBar(
@@ -83,7 +84,11 @@ fun FluidRatingBar(
                     fillRatio = fillRatio,
                     accentColor = accentColor,
                     starSize = starSize,
-                    showGlow = showGlow
+                    showGlow = showGlow,
+                    index = index,
+                    currentRating = rating,
+                    starCenter = starStart + starValue / 2.0,
+                    starValue = starValue
                 )
             }
         }
@@ -95,10 +100,40 @@ fun PremiumStar(
     fillRatio: Float,
     accentColor: Color,
     starSize: Dp,
-    showGlow: Boolean
+    showGlow: Boolean,
+    index: Int = 0,
+    currentRating: Double = 0.0,
+    starCenter: Double = 0.0,
+    starValue: Double = 2.0
 ) {
+    // Entrance animation
+    val entranceAlpha = remember { Animatable(0f) }
+    val entranceScale = remember { Animatable(0.5f) }
+    
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(index * 60L) // Stagger
+        launch { entranceAlpha.animateTo(1f, tween(200)) }
+        launch { entranceScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy)) }
+    }
+    
+    // Wave animation based on distance from current drag
+    val distanceFromCurrent = kotlin.math.abs(currentRating - starCenter)
+    val waveScale by animateFloatAsState(
+        targetValue = if (distanceFromCurrent < starValue) {
+            1f + (0.25f * (1f - (distanceFromCurrent / starValue).toFloat()))
+        } else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "WaveScale"
+    )
+
     Box(
-        modifier = Modifier.size(starSize),
+        modifier = Modifier
+            .size(starSize)
+            .graphicsLayer {
+                alpha = entranceAlpha.value
+                scaleX = entranceScale.value * waveScale
+                scaleY = entranceScale.value * waveScale
+            },
         contentAlignment = Alignment.Center
     ) {
         // Base Star (Empty/Background)

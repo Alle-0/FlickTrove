@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.layout.layout
+import io.github.fletchmckee.liquid.liquid
 
 import androidx.compose.ui.unit.coerceAtLeast
 
@@ -62,8 +64,7 @@ fun Modifier.hazeGlass(
             )
         }
     }
-    
-    this
+    val modifierChain = this
         .clip(shape)
         .then(
             if (state != null) {
@@ -84,6 +85,8 @@ fun Modifier.hazeGlass(
             }
         )
         .glassOverlay(shape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
+        
+    modifierChain
 }
 
 fun Modifier.glassmorphic(

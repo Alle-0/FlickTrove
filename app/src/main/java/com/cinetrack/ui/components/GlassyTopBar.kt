@@ -58,13 +58,14 @@ fun GlassyTopBar(
     isSyncing: Boolean = false,
     isDimmed: Boolean = false,
     notificationCount: Int = 0,
-    onDeleteClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null, // Deprecated, use onFolderOptionsClick
+    onFolderOptionsClick: ((Offset) -> Unit)? = null,
     indicatorColor: Color? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val networkMonitor = remember { NetworkMonitor(context) }
-    val isOnline by networkMonitor.isOnline.collectAsState(initial = true)
+    val connectionState by networkMonitor.connectionState.collectAsState(initial = com.cinetrack.utils.ConnectionState.ONLINE)
 
     val animatedDimAlpha by animateFloatAsState(
         targetValue = if (isDimmed) 0.6f else 0f,
@@ -158,13 +159,20 @@ fun GlassyTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.wrapContentWidth()
             ) {
-                if (!isOnline) {
+                if (connectionState == com.cinetrack.utils.ConnectionState.OFFLINE) {
                     Icon(
                         imageVector = Icons.Rounded.CloudOff,
                         contentDescription = "Offline",
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .size(20.dp)
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                } else if (connectionState == com.cinetrack.utils.ConnectionState.POOR) {
+                    Icon(
+                        imageVector = Icons.Rounded.Wifi,
+                        contentDescription = "Poor Connection",
+                        tint = Color(0xFFFFA500),
+                        modifier = Modifier.size(20.dp).alpha(0.8f)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
@@ -270,21 +278,26 @@ fun GlassyTopBar(
                     }
                 }
                 
-                if (onDeleteClick != null) {
+                if (onFolderOptionsClick != null) {
+                    var optionsOffset by remember { mutableStateOf(Offset.Zero) }
                     Box(
                         modifier = Modifier
                             .size(32.dp)
+                            .onGloballyPositioned { coords ->
+                                val position = coords.positionInWindow()
+                                optionsOffset = Offset(position.x, position.y + coords.size.height)
+                            }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = onDeleteClick
+                                onClick = { onFolderOptionsClick(optionsOffset) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.DeleteOutline,
-                            contentDescription = "Elimina",
-                            tint = Color(0xFFFF3B30),
-                            modifier = Modifier.size(20.dp)
+                            imageVector = Icons.Rounded.MoreVert,
+                            contentDescription = "Opzioni",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }

@@ -232,7 +232,48 @@ fun YouTubePlayer(videoId: String) {
                     }
                 }
                 
-                webChromeClient = WebChromeClient()
+                webChromeClient = object : WebChromeClient() {
+                    private var customView: android.view.View? = null
+                    private var customViewCallback: CustomViewCallback? = null
+
+                    override fun onShowCustomView(view: android.view.View?, callback: CustomViewCallback?) {
+                        if (customView != null) {
+                            callback?.onCustomViewHidden()
+                            return
+                        }
+                        var context = ctx
+                        while (context is android.content.ContextWrapper) {
+                            if (context is android.app.Activity) break
+                            context = context.baseContext
+                        }
+                        val activity = context as? android.app.Activity ?: return
+                        val decorView = activity.window.decorView as android.widget.FrameLayout
+                        
+                        view?.setBackgroundColor(android.graphics.Color.BLACK)
+                        decorView.addView(view, android.widget.FrameLayout.LayoutParams(
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                        ))
+                        
+                        customView = view
+                        customViewCallback = callback
+                    }
+
+                    override fun onHideCustomView() {
+                        if (customView == null) return
+                        var context = ctx
+                        while (context is android.content.ContextWrapper) {
+                            if (context is android.app.Activity) break
+                            context = context.baseContext
+                        }
+                        val activity = context as? android.app.Activity ?: return
+                        val decorView = activity.window.decorView as android.widget.FrameLayout
+                        decorView.removeView(customView)
+                        customView = null
+                        customViewCallback?.onCustomViewHidden()
+                        customViewCallback = null
+                    }
+                }
                 setBackgroundColor(android.graphics.Color.BLACK)
 
                 // Use youtube-nocookie.com to avoid some tracking issues and embedding restrictions

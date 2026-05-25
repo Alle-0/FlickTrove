@@ -36,6 +36,10 @@ fun FolderDetailScreen(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     showDeleteConfirm: Boolean = false,
     onShowDeleteConfirmChange: (Boolean) -> Unit = {},
+    showEditDialog: Boolean = false,
+    onShowEditDialogChange: (Boolean) -> Unit = {},
+    folderEditMode: com.cinetrack.ui.components.shared.FolderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME,
+    onFolderUpdated: (String, String) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
@@ -123,6 +127,9 @@ fun FolderDetailScreen(
                                         MovieCard(
                                             movie = movie,
                                             cardWidth = cardWidth,
+                                            isFavorite = movie.favorite,
+                                            isWatched = movie.watched,
+                                            isReminder = movie.reminder,
                                             onPress = { onMovieClick(movie) },
                                             animatedVisibilityScope = animatedVisibilityScope,
                                             staggerIndex = index,
@@ -149,6 +156,21 @@ fun FolderDetailScreen(
                                     },
                                     onDismiss = { onShowDeleteConfirmChange(false) },
                                     folderName = state.folder.name,
+                                    hazeState = localHazeState
+                                )
+                            }
+                            
+                            if (showEditDialog) {
+                                com.cinetrack.ui.components.shared.FolderEditDialog(
+                                    initialName = state.folder.name,
+                                    initialColor = state.folder.color ?: "#FFFFFF",
+                                    editMode = folderEditMode,
+                                    onDismiss = { onShowEditDialogChange(false) },
+                                    onSave = { newName, newColor ->
+                                        onShowEditDialogChange(false)
+                                        viewModel.updateFolderDetails(newName, newColor)
+                                        onFolderUpdated(newName, newColor)
+                                    },
                                     hazeState = localHazeState
                                 )
                             }

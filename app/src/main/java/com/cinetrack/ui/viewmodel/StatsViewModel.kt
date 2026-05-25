@@ -7,6 +7,7 @@ import com.cinetrack.data.GenreConstants
 import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -95,13 +96,13 @@ class StatsViewModel @Inject constructor(
         }
 
         StatsUiState(
-            stats = calculateStats(filteredMovies),
-            currentYearStats = calculateStats(currentYearMovies),
+            stats = calculateStats(filteredMovies, movies),
+            currentYearStats = calculateStats(currentYearMovies, movies),
             timeRange = range,
             availableYears = years,
             isLoading = false
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = StatsUiState()
@@ -123,7 +124,7 @@ class StatsViewModel @Inject constructor(
         }
     }
 
-    private fun calculateStats(movies: List<Movie>): CalculatedStats {
+    private fun calculateStats(movies: List<Movie>, allMovies: List<Movie>): CalculatedStats {
         val watched = movies.filter { it.watched }
         val watchedMovies = watched.filter { it.mediaType != "tv" }
         val watchedTV = watched.filter { it.mediaType == "tv" }
@@ -234,10 +235,10 @@ class StatsViewModel @Inject constructor(
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
 
         return CalculatedStats(
-            totalTimeFormatted = formatDuration(movieMin + tvMin).uppercase(),
+            totalTimeFormatted = formatDuration(movieMin + tvMin),
             isEstimate = moviesEstimate || tvEstimate,
             moviesWatched = watchedMovies.size,
-            moviesToWatch = movies.count { it.mediaType != "tv" && !it.watched && (it.favorite || it.reminder) },
+            moviesToWatch = allMovies.count { it.mediaType != "tv" && !it.watched && (it.favorite || it.reminder) },
             totalMinutes = movieMin + tvMin,
             movieMinutes = movieMin,
             movieTimeFormatted = formatDuration(movieMin),
@@ -245,7 +246,7 @@ class StatsViewModel @Inject constructor(
             longestMovie = longestMovie,
             longestMovieMinutes = longestMovie?.runtime ?: 0,
             tvWatched = watchedTV.size,
-            tvToWatch = movies.count { it.mediaType == "tv" && !it.watched && (it.favorite || it.reminder) },
+            tvToWatch = allMovies.count { it.mediaType == "tv" && !it.watched && (it.favorite || it.reminder) },
             totalEpisodes = totalEpisodes,
             tvMinutes = tvMin,
             tvTimeFormatted = formatDuration(tvMin),

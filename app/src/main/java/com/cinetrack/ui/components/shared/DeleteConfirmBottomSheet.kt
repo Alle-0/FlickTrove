@@ -23,6 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.theme.ErrorRed
 import com.cinetrack.ui.utils.bounceClick
+import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Animatable
+import kotlinx.coroutines.delay
 
 /**
  * Specifically styled destructive confirmation sheet for folder deletion.
@@ -36,6 +42,9 @@ fun DeleteConfirmBottomSheet(
     folderName: String
 ) {
     val haptic = LocalHapticFeedback.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val trashRotation = androidx.compose.runtime.remember { Animatable(0f) }
+    val trashScale = androidx.compose.runtime.remember { Animatable(1f) }
 
     FlickTroveBottomSheet(onDismissRequest = onDismiss) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -137,8 +146,20 @@ fun DeleteConfirmBottomSheet(
                             .weight(1.2f)
                             .bounceClick(scaleDown = 0.94f) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onConfirm()
-                                onDismiss()
+                                scope.launch {
+                                    // "Lid lift" + Shake effect
+                                    trashScale.animateTo(1.15f, tween(50))
+                                    trashRotation.animateTo(-15f, tween(40))
+                                    trashRotation.animateTo(15f, tween(40))
+                                    trashRotation.animateTo(-15f, tween(40))
+                                    trashRotation.animateTo(15f, tween(40))
+                                    trashRotation.animateTo(0f, tween(40))
+                                    trashScale.animateTo(1f, tween(50))
+                                    
+                                    delay(100)
+                                    onConfirm()
+                                    onDismiss()
+                                }
                             },
                         color = ErrorRed,
                         shape = RoundedCornerShape(18.dp)
@@ -152,7 +173,14 @@ fun DeleteConfirmBottomSheet(
                                 imageVector = Icons.Rounded.DeleteOutline,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .graphicsLayer {
+                                        rotationZ = trashRotation.value
+                                        scaleX = trashScale.value
+                                        scaleY = trashScale.value
+                                        transformOrigin = TransformOrigin(0.5f, 0.8f) // Shake from bottom
+                                    }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(

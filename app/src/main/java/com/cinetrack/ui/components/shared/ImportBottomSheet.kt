@@ -3,7 +3,7 @@ package com.cinetrack.ui.components.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,7 +37,7 @@ fun ImportBottomSheet(
                 Spacer(Modifier.height(24.dp))
                 if (state is ImportState.Select) {
                     Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Rounded.List, null)
+                        Icon(Icons.AutoMirrored.Rounded.List, null)
                         Spacer(Modifier.width(8.dp))
                         Text("Carica CSV")
                     }

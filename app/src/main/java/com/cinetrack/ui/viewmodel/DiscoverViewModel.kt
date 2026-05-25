@@ -7,6 +7,7 @@ import com.cinetrack.data.Movie
 import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
@@ -154,7 +155,7 @@ class DiscoverViewModel @Inject constructor(
             folders = folders,
             preferences = prefs
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = DiscoverUiState(type = type, genreName = route.genreName)

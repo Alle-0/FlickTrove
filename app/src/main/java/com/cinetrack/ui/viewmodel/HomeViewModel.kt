@@ -9,6 +9,7 @@ import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -108,7 +109,7 @@ class HomeViewModel @Inject constructor(
             sortConfig = prefs.homeSort,
             preferences = prefs
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = HomeUiState()

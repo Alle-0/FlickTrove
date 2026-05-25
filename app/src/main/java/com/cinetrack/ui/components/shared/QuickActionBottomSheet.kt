@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -85,7 +85,7 @@ fun QuickActionBottomSheet(
 
             QuickActionItem(
                 label = "Cartelle",
-                icon = Icons.Rounded.List,
+                icon = Icons.AutoMirrored.Rounded.List,
                 iconColor = Color(0xFF6366F1),
                 onClick = {
                     onDismiss()

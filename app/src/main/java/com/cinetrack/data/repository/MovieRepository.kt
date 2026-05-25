@@ -413,6 +413,44 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun searchMovies(query: String, page: Int = 1): List<Movie> = tmdbService.searchMovie(query, apiKey, page = page).results
+    suspend fun searchMovieWithYear(query: String, year: String?): Movie? {
+        val results = tmdbService.searchMovie(query, apiKey, year = year).results
+        return results.firstOrNull()
+    }
+    
+    suspend fun findByImdbId(imdbId: String): Movie? {
+        val response = tmdbService.findByExternalId(imdbId, "imdb_id", apiKey)
+        val movieRes = response.movieResults?.firstOrNull()
+        if (movieRes != null) {
+            return Movie(
+                id = movieRes.id,
+                mediaType = "movie",
+                title = movieRes.title,
+                posterPath = movieRes.posterPath,
+                backdropPath = movieRes.backdropPath,
+                voteAverage = movieRes.voteAverage,
+                releaseDate = movieRes.releaseDate,
+                genreIds = movieRes.genreIds,
+                overview = movieRes.overview
+            )
+        }
+        val tvRes = response.tvResults?.firstOrNull()
+        if (tvRes != null) {
+            return Movie(
+                id = tvRes.id,
+                mediaType = "tv",
+                name = tvRes.name,
+                posterPath = tvRes.posterPath,
+                backdropPath = tvRes.backdropPath,
+                voteAverage = tvRes.voteAverage,
+                firstAirDate = tvRes.firstAirDate,
+                genreIds = tvRes.genreIds,
+                overview = tvRes.overview
+            )
+        }
+        return null
+    }
+    
     suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, apiKey, page = page).results
     suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, apiKey, page = page).results
     suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id, apiKey)

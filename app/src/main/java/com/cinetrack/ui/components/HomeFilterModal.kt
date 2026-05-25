@@ -188,26 +188,47 @@ fun HomeFilterModal(
                 progress
             )
 
-            Box(
+            // Background blur layer (always in composition to avoid HazeState leaks!)
+            // We set its size to 0x0 when progress == 0f so it clears the ghost blur area.
+            Spacer(
                 modifier = Modifier
                     .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
                     .size(
-                        width = with(density) { currentRect.width.toDp() },
-                        height = with(density) { currentRect.height.toDp() }
+                        width = if (progress == 0f) 0.dp else with(density) { currentRect.width.toDp() },
+                        height = if (progress == 0f) 0.dp else with(density) { currentRect.height.toDp() }
                     )
-                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
-            ) {
-                // Background Layer (Blurred glass)
-                Spacer(
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() }),
+                        alpha = alpha
+                    )
+            )
+
+            if (progress > 0f) {
+                Box(
                     modifier = Modifier
-                        .matchParentSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(currentCornerRadius.pxToDp(density)),
-                            useOffscreenStrategy = true,
-                            alpha = alpha
+                        .offset { IntOffset(targetRect.left.roundToInt(), targetRect.top.roundToInt()) }
+                        .size(
+                            width = with(density) { targetRect.width.toDp() },
+                            height = with(density) { targetRect.height.toDp() }
                         )
-                )
+                        .graphicsLayer {
+                            val scaleX = currentRect.width / targetRect.width
+                            val scaleY = currentRect.height / targetRect.height
+                            this.scaleX = scaleX
+                            this.scaleY = scaleY
+                            
+                            val targetCenterX = targetRect.left + targetRect.width / 2f
+                            val targetCenterY = targetRect.top + targetRect.height / 2f
+                            val currentCenterX = currentRect.left + currentRect.width / 2f
+                            val currentCenterY = currentRect.top + currentRect.height / 2f
+                            
+                            this.translationX = currentCenterX - targetCenterX
+                            this.translationY = currentCenterY - targetCenterY
+                        }
+                        .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
+                ) {
+                    // No background here, handled by the independent Spacer above!
 
                 // Foreground Content
                 if (progress > 0.4f) {
@@ -240,6 +261,7 @@ fun HomeFilterModal(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // Reset All Button
                                 val hasActiveFilters = localSortConfig.selectedGenres.isNotEmpty() ||
+                                    localSortConfig.selectedKeywords.isNotEmpty() ||
                                     localSortConfig.selectedProviders.isNotEmpty() ||
                                     localSortConfig.selectedDecades.isNotEmpty()
                                 if (hasActiveFilters) {
@@ -248,6 +270,7 @@ fun HomeFilterModal(
                                             .bounceClick {
                                                 localSortConfig = localSortConfig.copy(
                                                     selectedGenres = emptyList(),
+                                                    selectedKeywords = emptyList(),
                                                     selectedProviders = emptyList(),
                                                     selectedDecades = emptyList()
                                                 )
@@ -356,6 +379,35 @@ fun HomeFilterModal(
                                 }
                             }
 
+                            // --- ACTIVE KEYWORDS SECTION ---
+                            if (localSortConfig.selectedKeywords.isNotEmpty()) {
+                                ExpandableSection(
+                                    title = "SOTTOGENERI ATTIVI",
+                                    isExpanded = expandedSection == "keywords" || expandedSection == null,
+                                    badgeCount = localSortConfig.selectedKeywords.size,
+                                    onToggle = { expandedSection = if (expandedSection == "keywords") null else "keywords" }
+                                ) {
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        localSortConfig.selectedKeywords.forEach { keywordId ->
+                                            val keywordName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries
+                                                .firstOrNull { it.value == keywordId }?.key?.uppercase() ?: "SOTTOGENERE SELEZIONATO"
+                                                
+                                            FilterChip(
+                                                label = keywordName,
+                                                isSelected = true,
+                                                onClick = {
+                                                    localSortConfig = localSortConfig.copy(selectedKeywords = localSortConfig.selectedKeywords - keywordId)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
                             // --- GENRES SECTION ---
                             ExpandableSection(
                                 title = "GENERI",
@@ -430,7 +482,7 @@ fun HomeFilterModal(
                                     contentPadding = PaddingValues(horizontal = 12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    items(ProviderConstants.ALL_PROVIDERS) { provider ->
+                                    items(ProviderConstants.ALL_PROVIDERS, key = { it.providerId }) { provider ->
                                         val isSelected = provider.providerId in localSortConfig.selectedProviders
                                         ProviderItem(
                                             name = provider.providerName,
@@ -502,6 +554,7 @@ fun HomeFilterModal(
                     }
                 }
             }
+            } // <-- Closes if (progress > 0f)
         }
     }
 }
@@ -590,8 +643,8 @@ private fun ExpandableSection(
 
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
+                enter = scaleIn(initialScale = 0.95f) + fadeIn(),
+                exit = scaleOut(targetScale = 0.95f) + fadeOut()
             ) {
                 Box(modifier = Modifier.padding(bottom = 14.dp)) {
                     content()

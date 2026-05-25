@@ -16,6 +16,8 @@ import javax.inject.Inject
 import javax.inject.Named
 import com.cinetrack.data.local.entities.FolderEntity
 
+data class FilterPill(val id: Long, val name: String, val isKeyword: Boolean = false)
+
 data class SearchUiState(
     val query: String = "",
     val category: String = "movie",
@@ -33,7 +35,8 @@ data class SearchUiState(
     val movieFolderColors: Map<String, List<String>> = emptyMap(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences(),
     val togglingIds: Set<Long> = emptySet(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val suggestedFilters: List<FilterPill> = emptyList()
 )
 
 @HiltViewModel
@@ -64,6 +67,8 @@ class SearchViewModel @Inject constructor(
     }
     
     private var searchJob: Job? = null
+    private var keywordSearchJob: Job? = null
+    private val _dynamicKeywords = MutableStateFlow<List<FilterPill>>(emptyList())
     
     init {
         // Initial fetch for trending or discovery
@@ -92,13 +97,13 @@ class SearchViewModel @Inject constructor(
 
     val uiState: StateFlow<SearchUiState> = combine(
         combine(
-            _query,
+            combine(_query, _dynamicKeywords) { q, dyn -> q to dyn },
             _category,
             _results,
             _trendingMovies,
             _trendingTv
-        ) { query, category, results, trendingMovies, trendingTv ->
-            Triple(query, category, Triple(results, trendingMovies, trendingTv))
+        ) { queryAndDyn, category, results, trendingMovies, trendingTv ->
+            Triple(queryAndDyn, category, Triple(results, trendingMovies, trendingTv))
         },
         combine(
             _trendingPeople,
@@ -121,7 +126,7 @@ class SearchViewModel @Inject constructor(
         }
     ) { groupA, groupB, groupC ->
         android.util.Log.d("SearchViewModel", "uiState combine triggered: localMovies size = ${groupC.second.first.size}")
-        val query = groupA.first
+        val (query, dynamicKeywords) = groupA.first
         val category = groupA.second
         val (resultsList, trendingMoviesList, trendingTvList) = groupA.third
         
@@ -186,6 +191,30 @@ class SearchViewModel @Inject constructor(
             }
         }
 
+        val lowerQuery = query.lowercase()
+        val availableGenres = if (category == "movie") com.cinetrack.data.GenreConstants.MOVIE_GENRES else com.cinetrack.data.GenreConstants.TV_GENRES
+        
+        val keywordToGenre = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds
+
+        val suggestedFilters = mutableListOf<FilterPill>()
+        if (query.length >= 2) {
+            availableGenres.filter { it.name.lowercase().contains(lowerQuery) }.forEach {
+                suggestedFilters.add(FilterPill(it.id, it.name, isKeyword = false))
+            }
+            keywordToGenre.forEach { (keyword, keywordId) ->
+                if (keyword.contains(lowerQuery)) {
+                    if (!suggestedFilters.any { it.id == keywordId && it.isKeyword }) {
+                        suggestedFilters.add(FilterPill(keywordId, keyword.replaceFirstChar { it.uppercase() }, isKeyword = true))
+                    }
+                }
+            }
+            dynamicKeywords.forEach { dynKw ->
+                if (!suggestedFilters.any { it.id == dynKw.id }) {
+                    suggestedFilters.add(dynKw)
+                }
+            }
+        }
+
         SearchUiState(
             query = query,
             category = category,
@@ -203,9 +232,10 @@ class SearchViewModel @Inject constructor(
             movieFolderColors = movieFolderColors,
             preferences = prefs,
             togglingIds = togglingIds,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            suggestedFilters = suggestedFilters
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = SearchUiState()
@@ -214,6 +244,27 @@ class SearchViewModel @Inject constructor(
     fun onQueryChanged(newQuery: String) {
         if (_query.value == newQuery) return
         _query.value = newQuery
+        
+        if (newQuery.isNotEmpty() && _sortConfig.value.selectedKeywords.isNotEmpty()) {
+            _sortConfig.value = _sortConfig.value.copy(selectedKeywords = emptyList())
+        }
+        
+        keywordSearchJob?.cancel()
+        if (newQuery.length >= 3) {
+            keywordSearchJob = viewModelScope.launch {
+                kotlinx.coroutines.delay(400)
+                try {
+                    val response = tmdbService.searchKeyword(query = newQuery, apiKey = apiKey)
+                    _dynamicKeywords.value = response.getList().take(6).map { 
+                        FilterPill(it.id, it.name.replaceFirstChar { c -> c.uppercase() }, isKeyword = true) 
+                    }
+                } catch (e: Exception) {
+                    if (e !is kotlinx.coroutines.CancellationException) _dynamicKeywords.value = emptyList()
+                }
+            }
+        } else {
+            _dynamicKeywords.value = emptyList()
+        }
     }
 
     fun onCategoryChanged(newCategory: String) {
@@ -238,7 +289,7 @@ class SearchViewModel @Inject constructor(
         _errorMessage.value = null
 
         if (query.isEmpty()) {
-            if (_sortConfig.value.selectedGenres.isNotEmpty() && category != "person") {
+            if ((_sortConfig.value.selectedGenres.isNotEmpty() || _sortConfig.value.selectedKeywords.isNotEmpty()) && category != "person") {
                 fetchDiscovery()
             } else {
                 _results.value = emptyList()
@@ -370,6 +421,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val category = _category.value
                 val genreId = _sortConfig.value.selectedGenres.firstOrNull()
+                val keywordId = _sortConfig.value.selectedKeywords.firstOrNull()
                 
                 if (category == "person") {
                     _results.value = emptyList()
@@ -379,14 +431,18 @@ class SearchViewModel @Inject constructor(
 
                 // If we have a genre, we fetch by genre. If not, we fetch trending and then apply local decade filter.
                 // Note: Full decade-based TMDB discovery would require a repository update.
-                val results = if (genreId != null) {
+                val results = if (genreId != null || keywordId != null) {
                     coroutineScope {
                         (1..5).map { pageNum ->
                             async {
                                 try {
+                                    val options = mutableMapOf<String, String>()
+                                    if (genreId != null) options["with_genres"] = genreId.toString()
+                                    if (keywordId != null) options["with_keywords"] = keywordId.toString()
+                                    
                                     when (category) {
-                                        "movie" -> repository.getMoviesByGenre(genreId, pageNum).map { it.toMovieResultInternal() }
-                                        "tv" -> repository.getTVShowsByGenre(genreId, pageNum).map { it.toTvResultInternal() }
+                                        "movie" -> tmdbService.discoverMovies(apiKey = apiKey, page = pageNum, options = options).results.map { it.toMovieResultInternal() }
+                                        "tv" -> tmdbService.discoverTV(apiKey = apiKey, page = pageNum, options = options).results.map { it.toTvResultInternal() }
                                         else -> emptyList()
                                     }
                                 } catch (e: Exception) {
@@ -461,16 +517,21 @@ class SearchViewModel @Inject constructor(
                     val newBatch: List<TMDBSearchResult>
                     var totalPages = 1
 
-                    if (query.isEmpty() && _sortConfig.value.selectedGenres.isNotEmpty()) {
-                        val genreId = _sortConfig.value.selectedGenres.first()
+                    if (query.isEmpty() && (_sortConfig.value.selectedGenres.isNotEmpty() || _sortConfig.value.selectedKeywords.isNotEmpty())) {
+                        val genreId = _sortConfig.value.selectedGenres.firstOrNull()
+                        val keywordId = _sortConfig.value.selectedKeywords.firstOrNull()
+                        val options = mutableMapOf<String, String>()
+                        if (genreId != null) options["with_genres"] = genreId.toString()
+                        if (keywordId != null) options["with_keywords"] = keywordId.toString()
+
                         when (category) {
                             "movie" -> {
-                                val response = tmdbService.getMoviesByGenre(genreId, apiKey, page = page)
+                                val response = tmdbService.discoverMovies(apiKey = apiKey, page = page, options = options)
                                 newBatch = response.results.map { it.toMovieResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
                             "tv" -> {
-                                val response = tmdbService.getTVShowsByGenre(genreId, apiKey, page = page)
+                                val response = tmdbService.discoverTV(apiKey = apiKey, page = page, options = options)
                                 newBatch = response.results.map { it.toTvResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
@@ -712,9 +773,4 @@ private val TMDBSearchResult.title: String
         is TMDBSearchResult.PersonResult -> name
     }
 
-private val TMDBSearchResult.mediaType: String
-    get() = when (this) {
-        is TMDBSearchResult.MovieResult -> "movie"
-        is TMDBSearchResult.TvResult -> "tv"
-        is TMDBSearchResult.PersonResult -> "person"
-    }
+

@@ -4,10 +4,10 @@ import android.graphics.Color.HSVToColor
 import android.graphics.Color.colorToHSV
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -122,8 +122,8 @@ fun FolderColorPicker(
         
         AnimatedVisibility(
             visible = isCustomMode,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            enter = fadeIn() + scaleIn(initialScale = 0.95f),
+            exit = fadeOut() + scaleOut(targetScale = 0.95f)
         ) {
             Column(
                 modifier = Modifier
@@ -148,6 +148,12 @@ fun FolderColorPicker(
                 var hexInput by remember(selectedColor) { mutableStateOf(selectedColor.uppercase()) }
                 
                 var isHexFocused by remember { mutableStateOf(false) }
+                
+                androidx.compose.runtime.LaunchedEffect(localColor) {
+                    if (!isHexFocused) {
+                        hexInput = localColor.uppercase()
+                    }
+                }
                 
                 Box(
                     modifier = Modifier

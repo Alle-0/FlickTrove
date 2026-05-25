@@ -59,6 +59,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.HazeStyle
+
 import android.graphics.drawable.BitmapDrawable
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -81,7 +82,8 @@ fun MovieDetailScreen(
     onBackClick: () -> Unit = {},
     onMovieClick: (Movie) -> Unit = {},
     onPersonClick: (Long) -> Unit = {},
-    onGenreClick: (Long, String, Offset) -> Unit = { _, _, _ -> }
+    onGenreClick: (Long, String, Offset) -> Unit = { _, _, _ -> },
+    onKeywordClick: (Long, String, Offset) -> Unit = { _, _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
@@ -89,6 +91,14 @@ fun MovieDetailScreen(
     var extractedColor by remember { mutableStateOf<Color?>(null) }
     var showEpisodesSheet by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
+
+    androidx.activity.compose.BackHandler(enabled = true) {
+        if (showFolderPicker) {
+            showFolderPicker = false
+        } else {
+            onBackClick()
+        }
+    }
     
     // Estrazione colore dinamica se accentColor è nullo nel database
     LaunchedEffect(uiState) {
@@ -150,6 +160,7 @@ fun MovieDetailScreen(
 
     val localHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
+
 
     // Removed showRatingDialog and showNoteDialog as they are now handled inline
 
@@ -313,10 +324,12 @@ fun MovieDetailScreen(
 
                                     DetailMetaRows(
                                         genres = state.movieEntry.genres ?: emptyList(),
+                                        keywords = state.details.keywords?.getList()?.take(10) ?: emptyList(),
                                         streaming = state.streamingProviders,
                                         buyAndRent = state.buyRentProviders,
                                         accentColor = accentColor,
                                         onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
+                                        onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
                                         onProviderClick = {
                                             state.watchProviderLink?.let { link ->
                                                 try {
@@ -637,7 +650,8 @@ fun MovieDetailScreen(
                             val movieTitleAlpha = if (showFolderPicker) {
                                 (1f - modalExpansionProgress).coerceIn(0f, 1f)
                             } else {
-                                symbioteProgress.coerceIn(0f, 1f)
+                                // Only start showing the title when the scroll is 70% complete
+                                ((symbioteProgress - 0.7f) / 0.3f).coerceIn(0f, 1f)
                             }
 
                             if (movieTitleAlpha > 0.01f || (showFolderPicker && modalExpansionProgress < 1f)) {
@@ -752,8 +766,8 @@ fun MovieDetailScreen(
                         }
                     }
                 }
-            }
         }
         }
+    }
     }
 }

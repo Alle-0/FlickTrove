@@ -25,6 +25,44 @@ class AuthViewModel @Inject constructor(
 
     private val _processState = MutableStateFlow<AuthState?>(null)
 
+    private val offensiveWords = listOf(
+        // Generiche / Insulti
+        "stronz", "cazzo", "cazzi", "cazzon", "cazzat", "merda", "merde", "merdos",
+        "puttan", "zoccol", "mignott", "bagascia", "baldracca", "bastard", 
+        "coglion", "minchia", "minchion", "cornut", "sfigat", "stracciacazz",
+        // Discriminazione / Omofobia
+        "frocio", "froci", "ricchion", "culatton", "mongoloid", "spastic", 
+        // Atti / Espliciti / Composte
+        "sborra", "sborro", "sborrat", "pompin", "bocchin", "succhiacazz", "succhiaminchi",
+        "vaffancul", "fancul", "rottincul", "leccacul", "rompicazz", "cacacazz", "scassacazz",
+        "testadicazz", "faccidimerda", "pezzodimerda", "figliodiputtan", "figlidiputtan",
+        // Bestemmie e imprecazioni
+        "porcodio", "diocane", "diocan", "porcamadonna", "dioporco", "diomerda",
+        "canedio", "diocristo", "cristodio", "madonnaputtana", "madonnacagna",
+        "mortacci"
+    )
+
+    private fun normalizeText(text: String): String {
+        return text.lowercase()
+            .replace("4", "a")
+            .replace("@", "a")
+            .replace("3", "e")
+            .replace("1", "i")
+            .replace("!", "i")
+            .replace("0", "o")
+            .replace("5", "s")
+            .replace("$", "s")
+            .replace("7", "t")
+            .replace("+", "t")
+            .replace("8", "b")
+            .replace("2", "z")
+    }
+
+    private fun containsOffensiveWords(text: String): Boolean {
+        val normalizedText = normalizeText(text)
+        return offensiveWords.any { normalizedText.contains(it) }
+    }
+
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {
             val listener = FirebaseAuth.AuthStateListener { auth ->
@@ -43,6 +81,11 @@ class AuthViewModel @Inject constructor(
     )
 
     fun login(email: String, password: String) {
+        if (containsOffensiveWords(email)) {
+            _processState.update { AuthState.Error("L'email contiene parole non consentite") }
+            return
+        }
+
         if (email.isBlank() || password.isBlank()) {
             _processState.update { AuthState.Error("Email e password sono obbligatorie") }
             return
@@ -67,6 +110,11 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signUp(email: String, password: String) {
+        if (containsOffensiveWords(email)) {
+            _processState.update { AuthState.Error("L'email contiene parole non consentite") }
+            return
+        }
+
         if (email.isBlank() || password.isBlank()) {
             _processState.update { AuthState.Error("Email e password sono obbligatorie") }
             return

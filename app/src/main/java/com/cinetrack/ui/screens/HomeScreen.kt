@@ -16,6 +16,8 @@ import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,8 +75,14 @@ fun HomeScreen(
     val movieGridState = rememberLazyGridState()
     val tvGridState = rememberLazyGridState()
     
-    // Separate scroll states for Movie and TV tabs
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
+    
+    LaunchedEffect(uiState.sortConfig) {
+        if (uiState.movies.isNotEmpty()) {
+            movieGridState.scrollToItem(0)
+            tvGridState.scrollToItem(0)
+        }
+    }
     
     val context = LocalContext.current
 

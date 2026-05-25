@@ -38,7 +38,24 @@ import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.components.shared.FolderColorPicker
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeStyle
+import com.cinetrack.ui.components.shared.DeleteFolderDialog
+import com.cinetrack.ui.components.shared.FolderEditDialog
+import com.cinetrack.ui.components.shared.FolderEditMode
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.EaseOutCirc
+import androidx.compose.animation.core.EaseInCirc
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 fun FoldersScreen(
@@ -49,61 +66,79 @@ fun FoldersScreen(
 ) {
     val folders by viewModel.folders.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
+    var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
+    var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
+    var folderEditMode by remember { mutableStateOf(FolderEditMode.NAME) }
+    
+    var activeMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
+    var activeMenuBounds by remember { mutableStateOf(Rect.Zero) }
+    
+    val localHazeState = remember { HazeState() }
     
     Box(modifier = Modifier.fillMaxSize()) {
-        // --- FOREGROUND LAYER (SHARP CONTENT) ---
-        if (folders.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Rounded.FolderOpen,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.size(80.dp)
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = "Non hai ancora creato cartelle",
-                        color = Color.White.copy(alpha = 0.4f),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Button(
-                        onClick = { isCreateDialogOpen = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("CREA LA PRIMA")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(state = localHazeState)
+        ) {
+            // --- FOREGROUND LAYER (SHARP CONTENT) ---
+            if (folders.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Rounded.FolderOpen,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.2f),
+                            modifier = Modifier.size(80.dp)
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = "Non hai ancora creato cartelle",
+                            color = Color.White.copy(alpha = 0.4f),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        Button(
+                            onClick = { isCreateDialogOpen = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("CREA LA PRIMA")
+                        }
                     }
                 }
-            }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = paddingValues.calculateTopPadding() + 16.dp,
-                    bottom = paddingValues.calculateBottomPadding() + 32.dp
-                ),
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    NewFolderCard(onClick = { isCreateDialogOpen = true })
-                }
-
-                val sortedFolders = folders.sortedBy { it.name.lowercase() }
-                items(sortedFolders, key = { it.id }) { folder ->
-                    Box(modifier = Modifier.animateItem()) {
-                        FolderCard(
-                            folder = folder,
-                            onClick = { onFolderClick(folder) }
-                        )
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 32.dp
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item {
+                        NewFolderCard(onClick = { isCreateDialogOpen = true })
+                    }
+    
+                    val sortedFolders = folders.sortedBy { it.name.lowercase() }
+                    items(sortedFolders, key = { it.id }) { folder ->
+                        Box(modifier = Modifier.animateItem()) {
+                            FolderCard(
+                                folder = folder,
+                                onClick = { onFolderClick(folder) },
+                                onLongClick = { bounds ->
+                                    activeMenuBounds = bounds
+                                    activeMenuFolder = folder
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -120,25 +155,126 @@ fun FoldersScreen(
             hazeState = hazeState
         )
     }
+
+    if (folderToDelete != null) {
+        DeleteFolderDialog(
+            onConfirm = {
+                viewModel.deleteFolder(folderToDelete!!.id)
+                folderToDelete = null
+            },
+            onDismiss = { folderToDelete = null },
+            folderName = folderToDelete!!.name,
+            hazeState = hazeState
+        )
+    }
+
+    if (folderToEdit != null) {
+        FolderEditDialog(
+            initialName = folderToEdit!!.name,
+            initialColor = folderToEdit!!.color ?: "#FFFFFF",
+            editMode = folderEditMode,
+            onDismiss = { folderToEdit = null },
+            onSave = { newName, newColor ->
+                viewModel.updateFolder(folderToEdit!!.copy(name = newName, color = newColor))
+                folderToEdit = null
+            },
+            hazeState = hazeState
+        )
+    }
+
+    if (activeMenuFolder != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(2000f)
+                .pointerInput(Unit) { detectTapGestures { activeMenuFolder = null } }
+        ) {
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
+            val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
+            
+            var isMenuVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) { isMenuVisible = true }
+            
+            AnimatedVisibility(
+                visible = isMenuVisible,
+                enter = fadeIn() + slideInVertically(
+                    initialOffsetY = { -it / 4 },
+                    animationSpec = tween(250, easing = EaseOutCirc)
+                ),
+                exit = fadeOut() + slideOutVertically(
+                    targetOffsetY = { -it / 4 },
+                    animationSpec = tween(200, easing = EaseInCirc)
+                ),
+                modifier = Modifier.absoluteOffset(x = offsetX, y = offsetY)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(200.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .then(Modifier.hazeGlass(state = localHazeState, shape = RoundedCornerShape(24.dp)))
+                        .padding(vertical = 8.dp)
+                ) {
+                    val folder = activeMenuFolder!!
+                    DropdownMenuItem(
+                        text = { Text("Rinomina Cartella", color = Color.White) },
+                        leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
+                        onClick = { 
+                            activeMenuFolder = null
+                            folderEditMode = FolderEditMode.NAME
+                            folderToEdit = folder
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Cambia Colore", color = Color.White) },
+                        leadingIcon = { Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
+                        onClick = { 
+                            activeMenuFolder = null
+                            folderEditMode = FolderEditMode.COLOR
+                            folderToEdit = folder
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Elimina Cartella", color = Color(0xFFFF3B30)) },
+                        leadingIcon = { Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp)) },
+                        onClick = { 
+                            activeMenuFolder = null
+                            folderToDelete = folder 
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun FolderCard(
     folder: FolderEntity,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: (Rect) -> Unit
 ) {
     val folderColor = folder.color.toComposeColor()
+    var bounds by remember { mutableStateOf(Rect.Zero) }
     
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-            .bounceClick { onClick() }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .onGloballyPositioned { bounds = it.boundsInWindow() }
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White.copy(alpha = 0.05f))
+                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                .bounceClick(
+                    onLongClick = { onLongClick(bounds) },
+                    onClick = onClick
+                )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         // Colored dot (circle) with icon
         // Icon container with subtle background
         Box(
@@ -184,6 +320,7 @@ fun FolderCard(
             tint = Color.White.copy(alpha = 0.2f),
             modifier = Modifier.size(20.dp)
         )
+    }
     }
 }
 
@@ -252,26 +389,50 @@ fun FolderCreateDialog(
                 },
             contentAlignment = Alignment.Center
         ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .width(320.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
-                    .pointerInput(Unit) {
-                        detectTapGestures { focusManager.clearFocus() }
-                    }
-                    .clickable(enabled = false) { }
-                    .premiumScrollbar(scrollState)
-                    .verticalScroll(scrollState)
-                    .padding(24.dp)
+            var isVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) { isVisible = true }
+            
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isVisible,
+                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(initialScale = 0.9f),
+                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(targetScale = 0.9f)
             ) {
-                Text(
-                    text = "Nuova Cartella",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-                    color = Color.White
-                )
-                Spacer(Modifier.height(24.dp))
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .width(320.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .pointerInput(Unit) {
+                            detectTapGestures { focusManager.clearFocus() }
+                        }
+                        .clickable(enabled = false) { }
+                        .premiumScrollbar(scrollState)
+                        .verticalScroll(scrollState)
+                        .padding(24.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Nuova Cartella",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                            color = Color.White
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(Color.White.copy(alpha = 0.1f))
+                                .bounceClick { onDismiss() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Rounded.Close, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
                 
                 OutlinedTextField(
                     value = name,
@@ -313,6 +474,7 @@ fun FolderCreateDialog(
                     )
                 ) {
                     Text("CREA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                }
                 }
             }
         }

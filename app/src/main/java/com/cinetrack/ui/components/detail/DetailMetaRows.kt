@@ -39,10 +39,12 @@ import com.cinetrack.ui.utils.bounceClick
 @Composable
 fun DetailMetaRows(
     genres: List<Genre>,
+    keywords: List<com.cinetrack.data.api.Keyword> = emptyList(),
     streaming: List<Provider>,
     buyAndRent: List<Provider>,
     accentColor: Color,
     onGenreClick: (Genre, Offset) -> Unit,
+    onKeywordClick: (Long, String, Offset) -> Unit,
     onProviderClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,11 +53,14 @@ fun DetailMetaRows(
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
     ) {
+        var showKeywords by remember { mutableStateOf(false) }
+
         // Genres Flow
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 28.dp),
+                .padding(bottom = 28.dp)
+                .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -65,6 +70,64 @@ fun DetailMetaRows(
                     accentColor = accentColor,
                     onGenreClick = { offset -> onGenreClick(genre, offset) }
                 )
+            }
+            if (keywords.isNotEmpty()) {
+                AnimatedVisibility(
+                    visible = !showKeywords,
+                    enter = scaleIn(initialScale = 0.8f) + fadeIn(),
+                    exit = scaleOut(targetScale = 0.8f) + fadeOut()
+                ) {
+                    KeywordExpandPill(
+                        accentColor = accentColor,
+                        onClick = { showKeywords = true }
+                    )
+                }
+                
+                keywords.forEachIndexed { index, keyword ->
+                    val reverseIndex = keywords.size - 1 - index
+                    AnimatedVisibility(
+                        visible = showKeywords,
+                        enter = scaleIn(
+                            initialScale = 0.8f, 
+                            animationSpec = tween(durationMillis = 350, delayMillis = index * 25, easing = FastOutSlowInEasing)
+                        ) + fadeIn(
+                            animationSpec = tween(durationMillis = 300, delayMillis = index * 25, easing = LinearOutSlowInEasing)
+                        ),
+                        exit = scaleOut(
+                            targetScale = 0.8f, 
+                            animationSpec = tween(durationMillis = 200, delayMillis = reverseIndex * 20, easing = FastOutSlowInEasing)
+                        ) + fadeOut(
+                            animationSpec = tween(durationMillis = 200, delayMillis = reverseIndex * 20, easing = LinearOutSlowInEasing)
+                        )
+                    ) {
+                        KeywordPill(
+                            keyword = keyword.name, 
+                            accentColor = accentColor,
+                            onKeywordClick = { offset -> onKeywordClick(keyword.id, keyword.name, offset) }
+                        )
+                    }
+                }
+                
+                AnimatedVisibility(
+                    visible = showKeywords,
+                    enter = scaleIn(
+                        initialScale = 0.8f, 
+                        animationSpec = tween(durationMillis = 350, delayMillis = keywords.size * 25, easing = FastOutSlowInEasing)
+                    ) + fadeIn(
+                        animationSpec = tween(durationMillis = 300, delayMillis = keywords.size * 25, easing = LinearOutSlowInEasing)
+                    ),
+                    exit = scaleOut(
+                        targetScale = 0.8f, 
+                        animationSpec = tween(durationMillis = 200, delayMillis = 0, easing = FastOutSlowInEasing)
+                    ) + fadeOut(
+                        animationSpec = tween(durationMillis = 200, delayMillis = 0, easing = LinearOutSlowInEasing)
+                    )
+                ) {
+                    KeywordCollapsePill(
+                        accentColor = accentColor,
+                        onClick = { showKeywords = false }
+                    )
+                }
             }
         }
 
@@ -181,5 +244,105 @@ fun ProviderLogo(provider: Provider, accentColor: Color, onClick: () -> Unit) {
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
+    }
+}
+
+@Composable
+fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(20.dp)
+
+    Box(
+        modifier = Modifier
+            .bounceClick { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(shape)
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .background(accentColor.copy(alpha = 0.15f))
+                .border(0.5.dp, accentColor.copy(alpha = 0.5f), shape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "+ Sottogeneri",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = accentColor,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun KeywordCollapsePill(accentColor: Color, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(20.dp)
+
+    Box(
+        modifier = Modifier
+            .bounceClick { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(shape)
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .background(accentColor.copy(alpha = 0.15f))
+                .border(0.5.dp, accentColor.copy(alpha = 0.5f), shape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "- Nascondi",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = accentColor,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun KeywordPill(keyword: String, accentColor: Color, onKeywordClick: (Offset) -> Unit) {
+    var pillCenter by remember { mutableStateOf(Offset.Zero) }
+    val shape = RoundedCornerShape(20.dp)
+
+    Box(
+        modifier = Modifier
+            .onGloballyPositioned { layoutCoordinates ->
+                val position = layoutCoordinates.positionInWindow()
+                pillCenter = Offset(
+                    position.x + layoutCoordinates.size.width / 2f,
+                    position.y + layoutCoordinates.size.height / 2f
+                )
+            }
+            .bounceClick { onKeywordClick(pillCenter) },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(shape)
+                .background(Color.White.copy(alpha = 0.02f))
+                .border(0.5.dp, Color.White.copy(alpha = 0.05f), shape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = keyword.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() },
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Normal,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+            )
+        }
     }
 }

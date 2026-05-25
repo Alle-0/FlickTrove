@@ -83,6 +83,7 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.theme.HazeStyles
+
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import kotlinx.coroutines.delay
@@ -102,6 +103,7 @@ fun SearchScreen(
     startX: Float? = null,
     startY: Float? = null,
     initialGenreName: String? = null,
+    initialKeywordName: String? = null,
     isFilterVisible: Boolean = false,
     isDetailVisible: Boolean = false,
     onBack: () -> Unit,
@@ -115,11 +117,23 @@ fun SearchScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(uiState.query)) }
+    
+    LaunchedEffect(uiState.query) {
+        if (uiState.query != textFieldValue.text) {
+            textFieldValue = textFieldValue.copy(
+                text = uiState.query,
+                selection = androidx.compose.ui.text.TextRange(uiState.query.length)
+            )
+        }
+    }
+
     var isMeasured by remember { mutableStateOf(false) }
     val revealAmount = remember { Animatable(0f) }
     var isClosing by remember { mutableStateOf(false) }
 
     val internalHazeState = hazeState ?: remember { HazeState() }
+
 
 
     LaunchedEffect(isMeasured) {
@@ -175,6 +189,7 @@ fun SearchScreen(
     val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
     val personCardWidth = (screenWidth - (padding * 2) - (gap * 3)) / 4
 
+
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val width = constraints.maxWidth.toFloat()
         val height = constraints.maxHeight.toFloat()
@@ -214,7 +229,7 @@ fun SearchScreen(
             LaunchedEffect(isTransitioning) {
                 if (!isTransitioning && !hasRequestedFocus) {
                     hasRequestedFocus = true
-                    if (initialGenreName == null) {
+                    if (initialGenreName == null && initialKeywordName == null) {
                         try {
                             focusRequester.requestFocus()
                         } catch (e: Exception) { }
@@ -245,6 +260,7 @@ fun SearchScreen(
                             state = internalHazeState,
                             style = HazeStyles.PremiumDark
                         )
+                        
                 ) {
                     Box(
                         modifier = Modifier
@@ -256,6 +272,13 @@ fun SearchScreen(
                     ) {
 
                     val gridState = rememberLazyGridState()
+                    
+                    LaunchedEffect(uiState.sortConfig) {
+                        if (uiState.results.isNotEmpty()) {
+                            gridState.scrollToItem(0)
+                        }
+                    }
+                    
                     val shouldLoadMore = remember {
                         derivedStateOf {
                             val lastVisibleItem = gridState.layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf false
@@ -323,9 +346,10 @@ fun SearchScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            val showEmptySearch = uiState.query.isEmpty() && (uiState.sortConfig.selectedGenres.isEmpty() || uiState.category == "person")
+                            val showEmptySearch = uiState.query.isEmpty() && (uiState.sortConfig.selectedGenres.isEmpty() && uiState.sortConfig.selectedKeywords.isEmpty() || uiState.category == "person")
                             
                             if (showEmptySearch) {
+
                                 if (uiState.category == "movie" && uiState.trendingMovies.isNotEmpty()) {
                                     item(span = { GridItemSpan(12) }) {
                                         Column {
@@ -336,7 +360,6 @@ fun SearchScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                                             )
-                                            TrendingHeader("FILM")
                                         }
                                     }
                                     itemsIndexed(items = uiState.trendingMovies.take(6), key = { _, item -> "trending_movie_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
@@ -383,7 +406,6 @@ fun SearchScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                                             )
-                                            TrendingHeader("SERIE TV")
                                         }
                                     }
                                     itemsIndexed(items = uiState.trendingTv.take(6), key = { _, item -> "trending_tv_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
@@ -430,7 +452,6 @@ fun SearchScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                                             )
-                                            TrendingHeader("PERSONE")
                                         }
                                     }
                                     items(items = uiState.trendingPeople.take(8), key = { "trending_person_${it.id}" }, contentType = { "person_result" }, span = { GridItemSpan(3) }) { item ->
@@ -443,9 +464,7 @@ fun SearchScreen(
                                     }
                                 }
                             } else {
-                                if (uiState.query.isEmpty() && uiState.sortConfig.selectedGenres.isNotEmpty()) {
-                                    item(span = { GridItemSpan(12) }) { Spacer(modifier = Modifier.height(72.dp)) }
-                                }
+
                                 
                                 if (uiState.results.isEmpty() && uiState.isLoading) {
                                     items(if (uiState.category == "person") 16 else 12, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(3) else GridItemSpan(4) }) { 
@@ -553,6 +572,7 @@ fun SearchScreen(
                                         MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth) 
                                     }
                                 }
+                                }
                             }
                         }
                     }
@@ -574,6 +594,11 @@ fun SearchScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .hazeGlass(
+                                state = internalHazeState,
+                                shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                                borderWidth = 0.dp
+                            )
                             .windowInsetsPadding(WindowInsets.statusBars)
                             .windowInsetsPadding(WindowInsets.displayCutout)
                             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
@@ -585,22 +610,27 @@ fun SearchScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(modifier = Modifier.size(44.dp)) {
-                                Box(modifier = Modifier.fillMaxSize().hazeGlass(state = internalHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = true))
+                                Box(modifier = Modifier.fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { triggerExit() }, contentAlignment = Alignment.Center) {
                                     Icon(imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Torna indietro", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                              Box(modifier = Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.CenterStart) {
-                                 Box(modifier = Modifier.fillMaxSize().hazeGlass(state = internalHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = true))
+                                 Box(modifier = Modifier.fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
                                  Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 14.dp)) {
                                     Icon(imageVector = CustomIcons.PremiumSearch, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
                                     Spacer(modifier = Modifier.width(10.dp))
                                     val primaryColor = MaterialTheme.colorScheme.primary
                                     CompositionLocalProvider(LocalTextSelectionColors provides TextSelectionColors(handleColor = primaryColor, backgroundColor = primaryColor.copy(alpha = 0.4f))) {
                                         BasicTextField(
-                                            value = uiState.query,
-                                            onValueChange = { viewModel.onQueryChanged(it) },
+                                            value = textFieldValue,
+                                            onValueChange = { 
+                                                textFieldValue = it
+                                                viewModel.onQueryChanged(it.text) 
+                                            },
                                             modifier = Modifier.weight(1f).focusRequester(focusRequester),
                                             textStyle = androidx.compose.ui.text.TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp),
                                             cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
@@ -610,7 +640,22 @@ fun SearchScreen(
                                             decorationBox = { innerTextField ->
                                                 Box(contentAlignment = Alignment.CenterStart) {
                                                     if (uiState.query.isEmpty()) {
-                                                        Text(text = if (initialGenreName != null) "Genere: $initialGenreName" else "Cerca film, serie, persone...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (initialGenreName != null) 0.6f else 0.3f), fontSize = 14.sp)
+                                                        val placeholderText = when {
+                                                            uiState.sortConfig.selectedGenres.isNotEmpty() -> {
+                                                                val gid = uiState.sortConfig.selectedGenres.first()
+                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: "Genere"
+                                                                "Genere: $name"
+                                                            }
+                                                            uiState.sortConfig.selectedKeywords.isNotEmpty() -> {
+                                                                val kid = uiState.sortConfig.selectedKeywords.first()
+                                                                val dictName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries.firstOrNull { it.value == kid }?.key?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+                                                                val name = uiState.suggestedFilters.find { it.id == kid }?.name ?: dictName ?: initialKeywordName ?: "Selezionato"
+                                                                "Tema: $name"
+                                                            }
+                                                            else -> "Cerca film, serie, persone..."
+                                                        }
+                                                        val hasActiveFilter = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty()
+                                                        Text(text = placeholderText, color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f), fontSize = 14.sp)
                                                     }
                                                     innerTextField()
                                                 }
@@ -623,13 +668,13 @@ fun SearchScreen(
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedProviders.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty()
+                            val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty() || uiState.sortConfig.selectedProviders.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty()
                             Box(modifier = Modifier.size(44.dp).onGloballyPositioned { layoutCoordinates ->
                                 val position = layoutCoordinates.positionInWindow()
                                 filterBounds = Rect(position.x, position.y, position.x + layoutCoordinates.size.width, position.y + layoutCoordinates.size.height)
                             }) {
                                 Box(modifier = Modifier.fillMaxSize()
-                                     .hazeGlass(state = internalHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = true)
+                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                                     .then(if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape) else Modifier))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { keyboardController?.hide(); focusManager.clearFocus(); onToggleFilter(true, filterBounds) }, contentAlignment = Alignment.Center) {
                                     Icon(imageVector = Icons.Rounded.Tune, contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
@@ -661,28 +706,74 @@ fun SearchScreen(
                                     Box(
                                         modifier = Modifier
                                             .height(32.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                                             .bounceClick { viewModel.onQueryChanged(search) },
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Box(modifier = Modifier.fillMaxSize().hazeGlass(state = internalHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = true))
                                         Row(
                                             modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(search, color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            Icon(
-                                                imageVector = Icons.Rounded.Close,
-                                                contentDescription = "Rimuovi ricerca",
-                                                modifier = Modifier
-                                                    .size(14.dp)
-                                                    .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) },
-                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                            )
+                                            CompositionLocalProvider(androidx.compose.material3.LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.Close,
+                                                    contentDescription = "Rimuovi ricerca",
+                                                    modifier = Modifier
+                                                        .size(14.dp)
+                                                        .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) },
+                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                                )
+                                            }
                                         }
                                     }
                                 }
 
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        if (uiState.suggestedFilters.isNotEmpty() && uiState.query.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("GENERI E TEMI SUGGERITI", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth()) {
+                                items(uiState.suggestedFilters, key = { "${it.id}_${it.isKeyword}_${it.name}" }, contentType = { "suggested_filter" }) { filter ->
+                                    Box(
+                                        modifier = Modifier
+                                            .height(32.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
+                                            .bounceClick { 
+                                                if (filter.isKeyword) {
+                                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = listOf(filter.id), selectedGenres = emptyList()))
+                                                } else {
+                                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = listOf(filter.id), selectedKeywords = emptyList()))
+                                                }
+                                                viewModel.onQueryChanged("")
+                                                keyboardController?.hide()
+                                                focusManager.clearFocus()
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = filter.name, 
+                                            modifier = Modifier.padding(horizontal = 14.dp), 
+                                            color = MaterialTheme.colorScheme.primary, 
+                                            fontSize = 12.sp, 
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                         }
@@ -699,11 +790,9 @@ fun SearchScreen(
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 8.dp)
                             .height(40.dp)) {
-                             Box(modifier = Modifier.fillMaxSize().hazeGlass(
-                                 state = internalHazeState, 
-                                 shape = CircleShape, 
-                                 blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                 useOffscreenStrategy = true
+                             Box(modifier = Modifier.fillMaxSize().background(
+                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                 shape = CircleShape
                              ))
                              
                              BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(4.dp)) {
@@ -717,12 +806,11 @@ fun SearchScreen(
                                     if (!offsetAnimatable.isRunning) {
                                         offsetAnimatable.animateTo(
                                             targetValue = selectedIndex * tabWidthPx,
-                                            animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMediumLow)
+                                            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
                                         )
                                     }
                                 }
-                                
-                                // Liquid stretch effect
+                                // Tab stretch effect
                                 val velocity = offsetAnimatable.velocity
                                 val stretchFactor = 1f + (kotlin.math.abs(velocity) / 4000f).coerceAtMost(0.35f)
                                 val currentOffset = offsetAnimatable.value
@@ -745,7 +833,7 @@ fun SearchScreen(
                                                     
                                                     offsetAnimatable.animateTo(
                                                         targetValue = targetIndex * tabWidthPx,
-                                                        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMediumLow),
+                                                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
                                                         initialVelocity = offsetAnimatable.velocity
                                                     )
                                                 }
@@ -754,7 +842,7 @@ fun SearchScreen(
                                                 coroutineScope.launch {
                                                     offsetAnimatable.animateTo(
                                                         targetValue = selectedIndex * tabWidthPx,
-                                                        animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMediumLow)
+                                                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
                                                     )
                                                 }
                                             },
@@ -823,7 +911,6 @@ fun SearchScreen(
             )
         }
     }
-}
 
 
 

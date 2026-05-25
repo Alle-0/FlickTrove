@@ -147,7 +147,8 @@ data class MovieDetailResponse(
     val seasons: List<com.cinetrack.data.models.Season>? = null,
     @SerialName("release_dates") val releaseDates: ReleaseDatesResponse? = null,
     @SerialName("content_ratings") val contentRatings: ContentRatingsResponse? = null,
-    @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null
+    @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,
+    val keywords: KeywordsResponse? = null
 )
 
 @Serializable
@@ -272,5 +273,18 @@ data class Video(
 data class ExternalIds(
     @SerialName("imdb_id") val imdbId: String? = null,
     @SerialName("tvdb_id") val tvdbId: Int? = null,
-    @SerialName("instagram_id") val instagramId: String? = null
+)
+
+@Serializable
+data class KeywordsResponse(
+    val keywords: List<Keyword>? = null,
+    val results: List<Keyword>? = null
+) {
+    fun getList(): List<Keyword> = keywords ?: results ?: emptyList()
+}
+
+@Serializable
+data class Keyword(
+    val id: Long,
+    val name: String
 )

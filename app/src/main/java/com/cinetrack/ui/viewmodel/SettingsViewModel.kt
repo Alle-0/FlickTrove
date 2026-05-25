@@ -68,6 +68,9 @@ class SettingsViewModel @Inject constructor(
     val vibrationEnabled: StateFlow<Boolean> = settingsRepository.vibrationEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val advancedVisualEffectsEnabled: StateFlow<Boolean> = settingsRepository.advancedVisualEffectsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null) {
@@ -111,6 +114,14 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleVibration(enabled)
             val status = if (enabled) "attiva" else "disattiva"
             actionFeedbackManager.emit("Vibrazione $status")
+        }
+    }
+
+    fun toggleAdvancedVisualEffects(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleAdvancedVisualEffects(enabled)
+            val status = if (enabled) "attivati" else "disattivati"
+            actionFeedbackManager.emit("Effetti visivi avanzati $status")
         }
     }
 
@@ -188,12 +199,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun migrateFromTrakt(json: String) {
+    fun migrateExternalData(fileContent: String) {
         viewModelScope.launch {
             _isBackupLoading.value = true
             try {
-                val count = backupRepository.migrateTrakt(json)
-                actionFeedbackManager.emit("Importati $count elementi da Trakt")
+                val isJson = fileContent.trimStart().startsWith("[") || fileContent.trimStart().startsWith("{")
+                val count = if (isJson) {
+                    backupRepository.migrateTrakt(fileContent)
+                } else {
+                    backupRepository.migrateCsv(fileContent)
+                }
+                actionFeedbackManager.emit("Importati $count elementi con successo")
             } catch (e: Exception) {
                 actionFeedbackManager.emit("Errore durante la migrazione: verifica il formato")
             } finally {

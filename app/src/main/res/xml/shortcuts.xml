@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="shortcut_search"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="com.cinetrack.SHORTCUT_SEARCH"
+            android:targetPackage="com.cinetrack"
+            android:targetClass="com.cinetrack.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_visti"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_visti"
+        android:shortcutShortLabel="@string/shortcut_visti_short"
+        android:shortcutLongLabel="@string/shortcut_visti_long">
+        <intent
+            android:action="com.cinetrack.SHORTCUT_VISTI"
+            android:targetPackage="com.cinetrack"
+            android:targetClass="com.cinetrack.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_movie"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_movie"
+        android:shortcutShortLabel="@string/shortcut_movie_short"
+        android:shortcutLongLabel="@string/shortcut_movie_long">
+        <intent
+            android:action="com.cinetrack.SHORTCUT_UPCOMING_MOVIES"
+            android:targetPackage="com.cinetrack"
+            android:targetClass="com.cinetrack.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shortcut_tv"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_tv"
+        android:shortcutShortLabel="@string/shortcut_tv_short"
+        android:shortcutLongLabel="@string/shortcut_tv_long">
+        <intent
+            android:action="com.cinetrack.SHORTCUT_UPCOMING_TV"
+            android:targetPackage="com.cinetrack"
+            android:targetClass="com.cinetrack.MainActivity" />
+    </shortcut>
+</shortcuts>

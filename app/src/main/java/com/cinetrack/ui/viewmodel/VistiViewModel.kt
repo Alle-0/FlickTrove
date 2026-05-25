@@ -8,6 +8,7 @@ import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
@@ -95,7 +96,7 @@ class VistiViewModel @Inject constructor(
             sortConfig = prefs.vistiSort,
             preferences = prefs
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = VistiUiState()

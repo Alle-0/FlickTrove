@@ -44,6 +44,7 @@ import com.cinetrack.ui.components.shared.MovieActionsState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
+
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.components.MovieCard
@@ -75,6 +76,7 @@ fun PersonDetailScreen(
     val gap = 12.dp
     val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
     val localHazeState = remember { dev.chrisbanes.haze.HazeState() }
+
     
     // Press state for back button to scale only icon
     var isBackPressed by remember { mutableStateOf(false) }
@@ -84,12 +86,16 @@ fun PersonDetailScreen(
         label = "BackIconScale"
     )
 
+    androidx.activity.compose.BackHandler(enabled = true) {
+        onBackClick()
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(PremiumBackground)
             .background(Color(0xFF0A0A0A))
+
     ) {
         // Removed CinematicBackground
 
@@ -305,10 +311,10 @@ fun PersonDetailScreen(
                                     .horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                if (castMovies.isNotEmpty()) CategoryPill("Cast - Film (${castMovies.size})", uiState.activeTab == "cast_movie") { viewModel.onTabChanged("cast_movie") }
-                                if (castTV.isNotEmpty()) CategoryPill("Cast - Serie (${castTV.size})", uiState.activeTab == "cast_tv") { viewModel.onTabChanged("cast_tv") }
-                                if (crewMovies.isNotEmpty()) CategoryPill("Regia - Film (${crewMovies.size})", uiState.activeTab == "crew_movie") { viewModel.onTabChanged("crew_movie") }
-                                if (crewTV.isNotEmpty()) CategoryPill("Regia - Serie (${crewTV.size})", uiState.activeTab == "crew_tv") { viewModel.onTabChanged("crew_tv") }
+                                if (castMovies.isNotEmpty()) CategoryPill("Cast - Film (${castMovies.size})", uiState.activeTab == "cast_movie", hazeState = localHazeState) { viewModel.onTabChanged("cast_movie") }
+                                if (castTV.isNotEmpty()) CategoryPill("Cast - Serie (${castTV.size})", uiState.activeTab == "cast_tv", hazeState = localHazeState) { viewModel.onTabChanged("cast_tv") }
+                                if (crewMovies.isNotEmpty()) CategoryPill("Regia - Film (${crewMovies.size})", uiState.activeTab == "crew_movie", hazeState = localHazeState) { viewModel.onTabChanged("crew_movie") }
+                                if (crewTV.isNotEmpty()) CategoryPill("Regia - Serie (${crewTV.size})", uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
                             }
 
                             val filmo = when (uiState.activeTab) {

@@ -28,7 +28,8 @@ fun GlassyButton(
     modifier: Modifier = Modifier,
     containerColor: Color = Color.White.copy(alpha = 0.1f),
     contentColor: Color = Color.White,
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    alpha: Float = 1f
 ) {
     Box(
         modifier = modifier
@@ -36,7 +37,8 @@ fun GlassyButton(
             .hazeGlass(
                 state = hazeState,
                 shape = RoundedCornerShape(16.dp),
-                containerColor = containerColor
+                containerColor = containerColor,
+                alpha = alpha
             )
             .bounceClick { onClick() },
         contentAlignment = Alignment.Center

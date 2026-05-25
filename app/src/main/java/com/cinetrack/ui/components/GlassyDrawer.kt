@@ -48,13 +48,32 @@ fun GlassyDrawer(
             .offset(x = (-10).dp)
             .zIndex(100f)
     ) {
-        // Sfondo semitrasparente con leggero blur per il menu laterale
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .hazeGlass(
-                    state = hazeState,
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF121214).copy(alpha = 0.95f),
+                            Color(0xFF1E1E22).copy(alpha = 0.92f)
+                        )
+                    ),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.15f),
+                            Color.White.copy(alpha = 0.02f)
+                        )
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
+                )
+                .shadow(
+                    elevation = 24.dp,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp),
+                    spotColor = Color.Black.copy(alpha = 0.5f)
                 )
         )
         Column(

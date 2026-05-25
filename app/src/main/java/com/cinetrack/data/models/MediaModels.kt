@@ -51,7 +51,8 @@ data class SortConfig(
     val sortDirection: String = "desc", // 'asc', 'desc'
     val selectedGenres: List<Long> = emptyList(),
     val selectedProviders: List<Long> = emptyList(),
-    val selectedDecades: List<String> = emptyList()
+    val selectedDecades: List<String> = emptyList(),
+    val selectedKeywords: List<Long> = emptyList()
 )
 
 @Serializable

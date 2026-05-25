@@ -64,23 +64,47 @@ fun Modifier.bounceClickWithOffset(
     val context = androidx.compose.ui.platform.LocalContext.current
     val vibrationEnabled = LocalVibrationEnabled.current
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = remember { Animatable(1f) }
     
     var lastOffset by remember { mutableStateOf(Offset.Zero) }
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
     val currentOnPress by rememberUpdatedState(onPress)
 
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) scaleDown else 1f,
-        animationSpec = spring(stiffness = if (isPressed) 10000f else Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
-        label = "bounce_scale"
-    )
+    LaunchedEffect(interactionSource, enabled) {
+        if (!enabled) {
+            scale.snapTo(1f)
+            return@LaunchedEffect
+        }
+        var pressJob: kotlinx.coroutines.Job? = null
+        interactionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is androidx.compose.foundation.interaction.PressInteraction.Press -> {
+                    pressJob = launch {
+                        scale.animateTo(
+                            targetValue = scaleDown,
+                            animationSpec = spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                        )
+                    }
+                }
+                is androidx.compose.foundation.interaction.PressInteraction.Release,
+                is androidx.compose.foundation.interaction.PressInteraction.Cancel -> {
+                    launch {
+                        pressJob?.join() // Attendi che la discesa sia completata
+                        scale.animateTo(
+                            targetValue = 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy)
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     this
         .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
+            scaleX = scale.value
+            scaleY = scale.value
         }
         .pointerInput(enabled, requireUnconsumed) {
             if (enabled) {

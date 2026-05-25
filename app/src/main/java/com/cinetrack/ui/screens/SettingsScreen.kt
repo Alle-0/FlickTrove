@@ -75,6 +75,9 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import java.io.OutputStreamWriter
 import coil.compose.AsyncImage
+import coil.imageLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 
@@ -106,13 +109,14 @@ fun SettingsScreen(
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
     var showLogoutConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
-    var showTraktDialog by remember { mutableStateOf(false) }
+    var showExternalMigrationDialog by remember { mutableStateOf(false) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -127,7 +131,21 @@ fun SettingsScreen(
 
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
-                           showTraktDialog || isBackupLoading
+                           showExternalMigrationDialog || isBackupLoading
+
+    var cacheSizeString by remember { mutableStateOf("0 MB") }
+    
+    fun updateCacheSize() {
+        scope.launch(Dispatchers.IO) {
+            val sizeBytes = context.imageLoader.diskCache?.size ?: 0L
+            val sizeMb = sizeBytes / (1024f * 1024f)
+            cacheSizeString = String.format(java.util.Locale.US, "%.1f MB", sizeMb)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        updateCacheSize()
+    }
 
     val settingsDimAlpha by animateFloatAsState(
         targetValue = if (anyDialogVisible) 0.45f else 0f,
@@ -176,14 +194,14 @@ fun SettingsScreen(
         }
     }
 
-    val traktLauncher = rememberLauncherForActivityResult(
+    val externalMigrationLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             try {
                 context.contentResolver.openInputStream(it)?.use { stream ->
-                    val json = stream.bufferedReader().use { reader -> reader.readText() }
-                    settingsViewModel.migrateFromTrakt(json)
+                    val content = stream.bufferedReader().use { reader -> reader.readText() }
+                    settingsViewModel.migrateExternalData(content)
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
@@ -226,130 +244,6 @@ fun SettingsScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                  ) {
-                    // Profile Header Card
-                    item {
-                        val isGuest = user?.isAnonymous == true
-                        val email = user?.email ?: "Ospite"
-                        val initials = if (isGuest) "G" else email.take(2).uppercase()
-                        
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(32.dp))
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(
-                                            Color.White.copy(alpha = 0.03f),
-                                            Color.White.copy(alpha = 0.01f)
-                                        )
-                                    )
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.White.copy(alpha = 0.08f),
-                                    shape = RoundedCornerShape(32.dp)
-                                )
-                                .padding(20.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Glow Avatar Container
-                                Box(
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            Brush.sweepGradient(
-                                                colors = listOf(
-                                                    currentAccentColor,
-                                                    currentAccentColor.copy(alpha = 0.2f),
-                                                    currentAccentColor
-                                                )
-                                            )
-                                        )
-                                        .padding(2.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(CircleShape)
-                                            .background(Color(0xFF0F0F15)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (!isGuest && user?.photoUrl != null) {
-                                            AsyncImage(
-                                                model = user.photoUrl,
-                                                contentDescription = "Avatar",
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentScale = ContentScale.Crop
-                                            )
-                                        } else {
-                                            Text(
-                                                text = initials,
-                                                style = MaterialTheme.typography.titleLarge.copy(
-                                                    fontWeight = FontWeight.Black,
-                                                    fontSize = 22.sp
-                                                ),
-                                                color = currentAccentColor
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Text(
-                                            text = if (isGuest) "Profilo Ospite" else "Cinefilo",
-                                            style = MaterialTheme.typography.titleMedium.copy(
-                                                fontWeight = FontWeight.Black,
-                                                letterSpacing = 0.5.sp
-                                            ),
-                                            color = Color.White
-                                        )
-                                    }
-                                    
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    
-                                    Text(
-                                        text = email,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = OnSurfaceMuted,
-                                        maxLines = 1
-                                    )
-                                    
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isGuest) Icons.Rounded.CloudOff else Icons.Rounded.CloudDone,
-                                            contentDescription = null,
-                                            tint = if (isGuest) Color.White.copy(alpha = 0.3f) else currentAccentColor,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Text(
-                                            text = if (isGuest) "Dati salvati in locale" else "Sincronizzato sul cloud",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = OnSurfaceMuted.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     // Section: Interfaccia
                     item {
                         SettingsSection(
@@ -422,6 +316,7 @@ fun SettingsScreen(
                                     settingsViewModel.toggleFolderBookmarks(!showFolderBookmarks)
                                 }
                             )
+
                         }
                     }
 
@@ -518,10 +413,10 @@ fun SettingsScreen(
                             SettingsItem(
                                 icon = Icons.Rounded.CloudSync,
                                 title = "Migrazione Esterna",
-                                description = "Trakt, Letterboxd, CSV...",
+                                description = "Trakt, Letterboxd, IMDb",
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                    showTraktDialog = true 
+                                    showExternalMigrationDialog = true 
                                 }
                             )
                             
@@ -580,7 +475,7 @@ fun SettingsScreen(
                             SettingsItem(
                                 icon = Icons.Rounded.DeleteSweep,
                                 title = "Svuota Cache Immagini",
-                                description = "0 MB • Libera spazio occupato da poster e backdrop",
+                                description = "$cacheSizeString • Libera spazio occupato da poster e backdrop",
                                 tint = Color(0xFFFFA000),
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -741,7 +636,7 @@ fun SettingsScreen(
                                 showCacheConfirm = false
                                 showLogoutConfirm = false
                                 showBackupDialog = false
-                                showTraktDialog = false
+                                showExternalMigrationDialog = false
                             }
                         )
                 )
@@ -881,6 +776,7 @@ fun SettingsScreen(
                             Button(
                                 onClick = {
                                     settingsViewModel.clearImageCache()
+                                    updateCacheSize()
                                     showCacheConfirm = false
                                 },
                                 modifier = Modifier.weight(1f),
@@ -1042,18 +938,18 @@ fun SettingsScreen(
 
         // Trakt Migration Dialog
         AnimatedVisibility(
-            visible = showTraktDialog,
+            visible = showExternalMigrationDialog,
             enter = fadeIn(tween(200)),
             exit = fadeOut(tween(200)),
             modifier = Modifier.zIndex(100f)
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
-            TraktMigrationDialog(
+            ExternalMigrationDialog(
                 hazeState = localHazeState, alpha = alpha,
-                onDismiss = { showTraktDialog = false },
+                onDismiss = { showExternalMigrationDialog = false },
                 onImport = { 
-                    showTraktDialog = false
-                    traktLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*")) 
+                    showExternalMigrationDialog = false
+                    externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*")) 
                 }
             )
         }
@@ -1189,7 +1085,7 @@ fun BackupDialog(
 }
 
 @Composable
-fun TraktMigrationDialog(
+fun ExternalMigrationDialog(
     hazeState: HazeState,
     onDismiss: () -> Unit,
     onImport: () -> Unit,
@@ -1223,13 +1119,13 @@ fun TraktMigrationDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    "Migrazione Trakt.tv",
+                    "Migrazione Esterna",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "Puoi importare la tua lista film da Trakt.tv caricando il file JSON esportato dal servizio. I film verranno aggiunti ai tuoi preferiti.",
+                    "Puoi importare la tua lista film caricando il file JSON esportato da Trakt.tv, o i file CSV di Letterboxd (es. watched.csv) e IMDb (es. watchlist.csv). I film verranno aggiunti ai tuoi preferiti.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1250,7 +1146,7 @@ fun TraktMigrationDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.FileDownload, null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Seleziona JSON Trakt", fontWeight = FontWeight.Bold, color = Color.Black)
+                        Text("Seleziona file (JSON o CSV)", fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                 }
                 
@@ -1533,6 +1429,7 @@ fun ColorSelectionDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateContentSize(animationSpec = tween(400))
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -1646,8 +1543,8 @@ fun ColorSelectionDialog(
                     // Animated Custom Section
                     AnimatedVisibility(
                         visible = isCustomMode,
-                        enter = expandVertically(animationSpec = tween(500)) + fadeIn(animationSpec = tween(500)),
-                        exit = shrinkVertically(animationSpec = tween(500)) + fadeOut(animationSpec = tween(500))
+                        enter = scaleIn(initialScale = 0.95f, animationSpec = tween(400)) + fadeIn(animationSpec = tween(400)),
+                        exit = scaleOut(targetScale = 0.95f, animationSpec = tween(400)) + fadeOut(animationSpec = tween(400))
                     ) {
                         // Custom Color Section (Wheel + Hex)
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1730,8 +1627,11 @@ fun ColorSelectionDialog(
                     // Track the screen-space centre of the Conferma button
                     var confirmButtonCenter by remember { mutableStateOf(Offset.Zero) }
 
-                    GlassyButton(
-                        text = "Conferma",
+                    Button(
+                        onClick = {
+                            onSelect(tempSelectedColor, confirmButtonCenter)
+                            onDismiss()
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onGloballyPositioned { coords ->
@@ -1741,14 +1641,16 @@ fun ColorSelectionDialog(
                                     y = pos.y + coords.size.height / 2f
                                 )
                             },
-                        containerColor = previewAccentColor,
-                        contentColor = Color.White,
-                        hazeState = hazeState,
-                        onClick = {
-                            onSelect(tempSelectedColor, confirmButtonCenter)
-                            onDismiss()
-                        }
-                    )
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text(
+                            text = "Conferma",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 

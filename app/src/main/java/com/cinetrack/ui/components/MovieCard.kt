@@ -519,6 +519,40 @@ fun MovieCard(
                 }
             }
 
+            // Dynamic Badges (Top Right)
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                val newEpisodes = movie.newEpisodesFound
+                if (movie.isUpcoming == true || (newEpisodes != null && newEpisodes > 0)) {
+                    MovieCardBadge(text = "NEW", color = com.cinetrack.ui.theme.NeonPink)
+                }
+
+                if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
+                    MovieCardBadge(text = "BEST", color = Color(0xFF00E5FF))
+                } else if ((movie.voteCount ?: 0) > 3000) {
+                    MovieCardBadge(text = "HOT", color = com.cinetrack.ui.theme.HazeStyles.AccentYellow)
+                } else if ((movie.voteAverage ?: 0.0) >= 8.0 && (movie.voteCount ?: 0) > 1000) {
+                    MovieCardBadge(text = "WOW", color = com.cinetrack.ui.theme.NeonTeal)
+                }
+                
+                val isOldAndGood = (movie.releaseDate?.startsWith("19") == true || movie.releaseDate?.startsWith("200") == true) && (movie.voteAverage ?: 0.0) >= 8.0
+                if (isOldAndGood) {
+                    MovieCardBadge(text = "CULT", color = Color(0xFF9C27B0))
+                }
+
+                val genresStr = movie.genreNamesString ?: ""
+                if (genresStr.contains("Horror", ignoreCase = true) || movie.genres?.any { it.name?.equals("Horror", ignoreCase = true) == true } == true) {
+                    MovieCardBadge(text = "HORROR", color = Color(0xFFE53935))
+                } else if (genresStr.contains("Animation", ignoreCase = true) || genresStr.contains("Anime", ignoreCase = true)) {
+                    MovieCardBadge(text = "ANIME", color = Color(0xFFFF9800))
+                }
+            }
+
             val guiAlpha by if (animatedVisibilityScope != null) {
                 animatedVisibilityScope.transition.animateFloat(
                     label = "guiAlpha",
@@ -651,6 +685,21 @@ fun MovieCard(
                             contentAlignment = Alignment.Center
                         ) {
                             val isBellOutlined = !isReleased && !isReminder
+                            
+                            val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                            var bellHasInitialized by remember { mutableStateOf(false) }
+                            
+                            LaunchedEffect(isReminder) {
+                                if (bellHasInitialized && !isReleased && isReminder) {
+                                    bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                                    bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                                }
+                                bellHasInitialized = true
+                            }
+                            
                             Icon(
                                 imageVector = when {
                                     isWatched -> CustomIcons.PremiumCheck
@@ -660,12 +709,39 @@ fun MovieCard(
                                 },
                                 contentDescription = "Action",
                                 tint = actionTint,
-                                modifier = Modifier.size(if (isBellOutlined) 15.5.dp else 14.dp)
+                                modifier = Modifier
+                                    .size(if (isBellOutlined) 15.5.dp else 14.dp)
+                                    .graphicsLayer {
+                                        if (!isReleased && isReminder) {
+                                            rotationZ = bellRotation.value
+                                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
+                                        }
+                                    }
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+            .border(0.5.dp, color.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+            .padding(horizontal = 5.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 7.5.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.5.sp,
+            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+        )
     }
 }

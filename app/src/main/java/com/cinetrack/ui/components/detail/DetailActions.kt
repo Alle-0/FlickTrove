@@ -1,12 +1,19 @@
 package com.cinetrack.ui.components.detail
 
+import kotlinx.coroutines.delay
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeStyle
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -31,6 +38,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.platform.LocalConfiguration
@@ -63,6 +71,10 @@ fun DetailActions(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) {}
     
     // Use a single transition for all coordinated animations
     val transition = updateTransition(targetState = watchState, label = "DetailActionsTransition")
@@ -94,8 +106,12 @@ fun DetailActions(
 
     val mainPillWeight by transition.animateFloat(
         transitionSpec = {
-            if (targetState == WatchState.WATCHED) tween(800, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
-            else spring(stiffness = Spring.StiffnessMedium)
+            if (targetState == WatchState.WATCHED) {
+                tween(800, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
+            } else {
+                // Expand smoothly so the user can see it grow from left to right
+                spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow)
+            }
         },
         label = "MainPillWeight"
     ) { state ->
@@ -104,8 +120,14 @@ fun DetailActions(
 
     val mainPillAlpha by transition.animateFloat(
         transitionSpec = { 
-            if (targetState == WatchState.WATCHED) tween(300, delayMillis = 300) // Fade later, after width starts shrinking
-            else tween(300, delayMillis = 100)
+            if (targetState == WatchState.WATCHED) {
+                tween(300, delayMillis = 300) // Fade later, after width starts shrinking
+            } else if (initialState == WatchState.WATCHED) {
+                // Immediate fade in, allowing the left-to-right expansion to be visible from the start
+                tween(400) 
+            } else {
+                tween(300, delayMillis = 100)
+            }
         },
         label = "MainPillAlpha"
     ) { state ->
@@ -166,6 +188,23 @@ fun DetailActions(
                         else spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
         label = "PillContentScale"
     )
+
+    // Glow explosion animation
+    val glowScale = remember { Animatable(1f) }
+    val glowAlpha = remember { Animatable(0f) }
+    
+    LaunchedEffect(watchState) {
+        if (watchState != WatchState.NONE) {
+            launch {
+                glowScale.snapTo(1f)
+                glowScale.animateTo(1.4f, tween(500, easing = FastOutSlowInEasing))
+            }
+            launch {
+                glowAlpha.snapTo(0.6f)
+                glowAlpha.animateTo(0f, tween(500, easing = FastOutSlowInEasing))
+            }
+        }
+    }
 
     // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
     val displayWatchState = if (watchState == WatchState.WATCHED && movie.mediaType != "tv") WatchState.BOOKMARKED else watchState
@@ -231,6 +270,7 @@ fun DetailActions(
                 .pointerInput(watchState, movie.mediaType) {
                     detectTapGestures(
                         onPress = {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                             isPillPressed = true
                             try {
                                 awaitRelease()
@@ -239,16 +279,20 @@ fun DetailActions(
                             }
                         },
                         onTap = {
-                            if (movie.mediaType == "tv") {
+                            if (!movie.isReleased) {
+                                // Simple toggle for unreleased movies and tv series
+                                val next = if (watchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
+                                if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                onStateChange(next)
+                            } else if (movie.mediaType == "tv") {
                                 if (watchState == WatchState.NONE) {
                                     onStateChange(WatchState.BOOKMARKED)
                                 } else {
                                     onEpisodesClick?.invoke()
                                 }
-                            } else if (!movie.isReleased) {
-                                // Simple toggle for unreleased movies
-                                val next = if (watchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
-                                onStateChange(next)
                             } else {
                                 val next = when (watchState) {
                                     WatchState.NONE -> WatchState.BOOKMARKED
@@ -261,9 +305,20 @@ fun DetailActions(
                     )
                 }
                 .drawBehind {
-                    val w = this.size.width
-                    val h = this.size.height
+                    val w = size.width
+                    val h = size.height
                     if (w < 1f || h < 1f) return@drawBehind
+                    
+                    if (glowAlpha.value > 0f) {
+                        scale(scale = glowScale.value) {
+                            drawRoundRect(
+                                color = displayColor.copy(alpha = glowAlpha.value),
+                                size = size,
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(28.dp.toPx()),
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
+                            )
+                        }
+                    }
                     
                     // TV Progress Border
                     if (movie.mediaType == "tv" && watchState != WatchState.NONE && animatedProgress > 0f) {
@@ -295,36 +350,78 @@ fun DetailActions(
                 },
             contentAlignment = Alignment.Center
         ) {
-            AnimatedContent(
-                targetState = displayWatchState,
-                transitionSpec = {
-                    val slideDirection = if (targetState > initialState) -1 else 1
-                    (fadeIn(tween(250)) + slideInHorizontally(tween(350)) { slideDirection * it / 3 })
-                        .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(300)) { -slideDirection * it / 3 })
-                        .using(SizeTransform(clip = false))
-                },
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
+                    .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow))
                     .graphicsLayer {
                         scaleX = pillContentScale
                         scaleY = pillContentScale
                     }
-            ) { targetState ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            ) {
+                val bellRotation = remember { Animatable(0f) }
+                
+                LaunchedEffect(displayWatchState) {
+                    if (!movie.isReleased && displayWatchState != WatchState.NONE) {
+                        delay(150)
+                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                    }
+                }
+
+                Crossfade(targetState = icon, label = "IconCrossfade") { currentIcon ->
                     Icon(
-                        imageVector = icon,
+                        imageVector = currentIcon,
                         contentDescription = null,
                         tint = displayColor,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer {
+                                rotationZ = bellRotation.value
+                                transformOrigin = TransformOrigin(0.5f, 0.2f) // Swing from the top
+                            }
                     )
-                    if (label.isNotEmpty()) {
-                        Spacer(modifier = Modifier.width(10.dp))
+                }
+
+                if (label.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(10.dp))
+                    AnimatedContent(
+                        targetState = displayWatchState,
+                        transitionSpec = {
+                            val slideDirection = if (targetState > initialState) 1 else -1
+                            if (!movie.isReleased) {
+                                (fadeIn(tween(250)) + slideInVertically(tween(350)) { -slideDirection * it / 2 })
+                                    .togetherWith(fadeOut(tween(200)) + slideOutVertically(tween(300)) { slideDirection * it / 2 })
+                                    .using(SizeTransform(clip = false))
+                            } else {
+                                (fadeIn(tween(250)) + slideInHorizontally(tween(350)) { slideDirection * it / 3 })
+                                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(300)) { -slideDirection * it / 3 })
+                                    .using(SizeTransform(clip = false))
+                            }
+                        },
+                        label = "TextAnim"
+                    ) { targetState ->
+                        val targetLabel = when {
+                            !movie.isReleased -> {
+                                if (targetState != WatchState.NONE) "RICORDA ATTIVO"
+                                else "RICORDAMI"
+                            }
+                            targetState == WatchState.NONE -> if (movie.mediaType == "tv") "DA VEDERE" else "DA GUARDARE"
+                            targetState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "SEGNA COME VISTO"
+                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "VISTO"
+                            else -> ""
+                        }
+
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = label,
+                                text = targetLabel,
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.1.sp,
@@ -335,18 +432,15 @@ fun DetailActions(
                                 overflow = TextOverflow.Ellipsis
                             )
                             
-                            if (movie.mediaType == "tv" && targetState != WatchState.NONE) {
+                            if (movie.mediaType == "tv" && targetState != WatchState.NONE && movie.isReleased) {
                                 val percentage = (animatedProgress * 100).toInt()
                                 Text(
-                                    text = "$percentage% COMPLETATO",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 10.sp,
-                                        lineHeight = 12.sp
+                                    text = if (percentage == 100) "COMPLETATA" else "$percentage% VISTO",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp
                                     ),
-                                    color = displayColor.copy(alpha = 0.8f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    color = displayColor.copy(alpha = 0.8f)
                                 )
                             }
                         }

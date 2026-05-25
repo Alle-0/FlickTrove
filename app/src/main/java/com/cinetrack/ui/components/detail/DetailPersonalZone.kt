@@ -18,13 +18,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.data.Movie
-
 import com.cinetrack.ui.utils.bounceClick
-
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import com.cinetrack.utils.AudioRecorderHelper
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.drawscope.scale
 
 @Composable
 fun DetailPersonalZone(
@@ -41,6 +47,16 @@ fun DetailPersonalZone(
     // Track the rating being selected in real-time
     var previewRating by remember(movie.personalRating) { mutableDoubleStateOf(movie.personalRating ?: 0.0) }
     
+    val context = LocalContext.current
+    val audioHelper = remember { AudioRecorderHelper(context) }
+    var hasAudio by remember { mutableStateOf(audioHelper.hasAudioNote(movie.id, movie.mediaType)) }
+    
+    LaunchedEffect(movie.id, expandedAction) {
+        if (expandedAction == null) {
+            hasAudio = audioHelper.hasAudioNote(movie.id, movie.mediaType)
+        }
+    }
+    
     if (expandedAction != null) {
         lastActiveAction = expandedAction
     }
@@ -49,6 +65,7 @@ fun DetailPersonalZone(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
+            .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
     ) {
         Text(
             text = "ZONA PERSONALE",
@@ -73,9 +90,17 @@ fun DetailPersonalZone(
                 onClick = { expandedAction = if (expandedAction == "rate") null else "rate" },
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
+            val hasText = !movie.personalNote.isNullOrBlank()
+            val noteValueText = when {
+                hasText && hasAudio -> "TESTO/AUDIO"
+                hasText -> "TESTO"
+                hasAudio -> "AUDIO"
+                else -> "VUOTA"
+            }
+            
             PersonalAction(
                 label = "NOTA",
-                value = if (!movie.personalNote.isNullOrBlank()) "SÌ" else "VUOTA",
+                value = noteValueText,
                 icon = Icons.Rounded.Edit,
                 accentColor = accentColor,
                 isActive = expandedAction == "note",
@@ -86,8 +111,8 @@ fun DetailPersonalZone(
 
         AnimatedVisibility(
             visible = expandedAction != null,
-            enter = expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
-            exit = shrinkVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
+            enter = scaleIn(initialScale = 0.95f, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+            exit = scaleOut(targetScale = 0.95f, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) + fadeOut()
         ) {
             Column {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -117,6 +142,8 @@ fun DetailPersonalZone(
                             onRatingChange = { previewRating = it }
                         )
                         "note" -> NoteEditorBox(
+                            movieId = movie.id,
+                            mediaType = movie.mediaType,
                             currentNote = movie.personalNote,
                             accentColor = accentColor,
                             hazeState = hazeState,
@@ -143,11 +170,39 @@ private fun PersonalAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = if (isPressed) spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                        else spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
+        label = "ActionScale"
+    )
+
+    val glowScale = remember { Animatable(1f) }
+    val glowAlpha = remember { Animatable(0f) }
+    
+    LaunchedEffect(isActive) {
+        if (isActive) {
+            launch {
+                glowScale.snapTo(1f)
+                glowScale.animateTo(1.4f, tween(500, easing = FastOutSlowInEasing))
+            }
+            launch {
+                glowAlpha.snapTo(0.5f)
+                glowAlpha.animateTo(0f, tween(500, easing = FastOutSlowInEasing))
+            }
+        }
+    }
+
     val hasValue = value != "—" && value != "VUOTA"
     
     Box(
         modifier = modifier
-            .bounceClick(scaleDown = 0.94f) { onClick() }
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(RoundedCornerShape(50))
             .background(
                 if (isActive) accentColor.copy(alpha = 0.15f) 
@@ -157,7 +212,37 @@ private fun PersonalAction(
                 width = 0.5.dp,
                 color = if (isActive) accentColor.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(50)
-            ),
+            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        isPressed = true
+                        try {
+                            awaitRelease()
+                        } finally {
+                            isPressed = false
+                        }
+                    },
+                    onTap = { onClick() }
+                )
+            }
+            .drawBehind {
+                val w = size.width
+                val h = size.height
+                if (w < 1f || h < 1f) return@drawBehind
+                
+                if (glowAlpha.value > 0f) {
+                    scale(scale = glowScale.value) {
+                        drawRoundRect(
+                            color = accentColor.copy(alpha = glowAlpha.value),
+                            size = size,
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(50f),
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
+                        )
+                    }
+                }
+            },
         contentAlignment = Alignment.CenterStart
     ) {
         Row(

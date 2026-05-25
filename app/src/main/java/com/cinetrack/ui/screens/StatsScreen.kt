@@ -78,8 +78,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.*
 import kotlin.math.roundToInt
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.withFrameMillis
@@ -333,7 +332,7 @@ fun StatsScreen(
 
                                 // Combined card: tempo totale + film più lungo
                                 MediaTimeCard(
-                                    timeLabel = "Tempo totale Film:",
+                                    timeLabel = "Tempo speso:",
                                     time = stats.movieTimeFormatted,
                                     longestLabel = "FILM PIÙ LUNGO",
                                     longestTitle = stats.longestMovie?.title ?: stats.longestMovie?.name,
@@ -359,7 +358,7 @@ fun StatsScreen(
                                     leftIcon = Icons.Rounded.Adjust,
                                     rightLabel = "COMPLETATE",
                                     rightValue = stats.tvWatched,
-                                    rightIcon = Icons.Rounded.CheckCircle,
+                                    rightIcon = Icons.Rounded.EmojiEvents,
                                     accentColor = MaterialTheme.colorScheme.primary,
                                     rightSuffix = if (stats.totalEpisodes > 0) "${stats.totalEpisodes} ep" else null
                                 )
@@ -367,7 +366,7 @@ fun StatsScreen(
                                 Spacer(Modifier.height(10.dp))
 
                                 MediaTimeCard(
-                                    timeLabel = "Tempo totale Serie:",
+                                    timeLabel = "Tempo speso:",
                                     time = stats.tvTimeFormatted,
                                     longestLabel = "SERIE PIÙ LUNGA",
                                     longestTitle = stats.longestTV?.title ?: stats.longestTV?.name,
@@ -490,9 +489,9 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
     val h = (animatedMinutes % 1440) / 60
     val m = animatedMinutes % 60
     val timeFormatted = when {
-        d > 0 -> "${d}G ${h}H ${m}M"
-        h > 0 -> "${h}H ${m}M"
-        else -> "${m}M"
+        d > 0 -> "${d}g ${h}h ${m}m"
+        h > 0 -> "${h}h ${m}m"
+        else -> "${m}m"
     }
 
     Box(
@@ -526,9 +525,9 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
                         val hours = (totalMinutes % 1440) / 60
                         val minutes = totalMinutes % 60
                         val time = when {
-                            days > 0 -> "${days}G ${hours}H ${minutes}M"
-                            hours > 0 -> "${hours}H ${minutes}M"
-                            else -> "${minutes}M"
+                            days > 0 -> "${days}g ${hours}h ${minutes}m"
+                            hours > 0 -> "${hours}h ${minutes}m"
+                            else -> "${minutes}m"
                         }
                         val text = "🏆 Il mio tempo totale su FlickTrove: $time di cinema e serie TV!\nScarica l'app per tracciare i tuoi progressi."
                         val sendIntent = android.content.Intent().apply {
@@ -874,15 +873,24 @@ fun MediaTimeCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
-                        Modifier
-                            .size(42.dp)
-                            .background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(13.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(sectionIcon, null, tint = accentColor, modifier = Modifier.size(22.dp))
+                    if (longestPosterPath != null) {
+                        Box(
+                            modifier = Modifier
+                                .height(56.dp)
+                                .width(38.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                        ) {
+                            coil.compose.AsyncImage(
+                                model = "https://image.tmdb.org/t/p/w342$longestPosterPath",
+                                contentDescription = null,
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
                     }
-                    Spacer(Modifier.width(12.dp))
+                    
                     Column(Modifier.weight(1f)) {
                         Text(
                             longestLabel,
@@ -900,24 +908,6 @@ fun MediaTimeCard(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(durText, color = Color.White.copy(alpha = 0.4f), fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                    }
-                    
-                    if (longestPosterPath != null) {
-                        Spacer(Modifier.width(12.dp))
-                        Box(
-                            modifier = Modifier
-                                .height(56.dp)
-                                .width(38.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                        ) {
-                            coil.compose.AsyncImage(
-                                model = "https://image.tmdb.org/t/p/w342$longestPosterPath",
-                                contentDescription = null,
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
                     }
                 }
             }
@@ -958,7 +948,7 @@ fun PersonSection(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            items(people.take(10)) { person ->
+            items(people.take(10), key = { it.id }) { person ->
                 PersonAvatar(person = person, accentColor = accentColor, onPersonClick = onPersonClick)
             }
         }
@@ -1124,11 +1114,11 @@ fun GenreDistributionSection(
     val totalCount = genreCounts.sumOf { it.second }
     
     val processedGenres = remember(genreCounts) {
-        if (genreCounts.size <= 5) {
+        if (genreCounts.size <= 8) {
             genreCounts
         } else {
-            val mainGenres = genreCounts.take(4)
-            val othersCount = genreCounts.drop(4).sumOf { it.second }
+            val mainGenres = genreCounts.take(7)
+            val othersCount = genreCounts.drop(7).sumOf { it.second }
             mainGenres + Pair("ALTRO", othersCount)
         }
     }
@@ -1142,7 +1132,12 @@ fun GenreDistributionSection(
         Color(0xFFFFB300), // Gold/Amber Neon
         Color(0xFF00FF87), // Green Neon
         Color(0xFFFF4F4F), // Red Neon
-        Color(0xFF7E8494)  // Platinum Gray (per "ALTRO")
+        Color(0xFF9D50BB), // Purple
+        Color(0xFFFF8C00), // Orange
+        Color(0xFF00E676), // Bright Green
+        Color(0xFFD500F9), // Deep Purple
+        Color(0xFFE040FB), // Light Purple
+        Color(0xFF18FFFF)  // Cyan 2
     )
     
     val chartSelectedIndex = remember(selectedGenreName, processedGenres) {
@@ -1196,12 +1191,8 @@ fun GenreDistributionSection(
     )
     
     val animatedHaloColor by animateColorAsState(
-        targetValue = if (selectedGenreName != null) {
-            if (chartSelectedIndex != -1 && chartSelectedIndex < processedGenres.lastIndex) {
-                genreColors[chartSelectedIndex % genreColors.size]
-            } else {
-                genreColors[4]
-            }
+        targetValue = if (selectedGenreName != null && chartSelectedIndex != -1) {
+            genreColors[chartSelectedIndex % genreColors.size]
         } else {
             MaterialTheme.colorScheme.primary
         },
@@ -1221,17 +1212,7 @@ fun GenreDistributionSection(
                 .padding(vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "DISTRIBUZIONE GENERI",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    letterSpacing = 1.sp
-                ),
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
-            )
+            // The internal title "DISTRIBUZIONE GENERI" was removed here to avoid redundancy
             
             Box(
                 modifier = Modifier
@@ -1444,10 +1425,10 @@ fun GenreDistributionSection(
                             }
                             val percentage = ((count.toFloat() / totalCount) * 100).roundToInt()
                             val percentageText = if (percentage == 0 && count > 0) "<1%" else "$percentage%"
-                            val countColor = if (chartSelectedIndex != -1 && chartSelectedIndex < processedGenres.lastIndex) {
+                            val countColor = if (chartSelectedIndex != -1) {
                                 genreColors[chartSelectedIndex % genreColors.size]
                             } else {
-                                genreColors[4] // Green Neon per ALTRO / generi minori
+                                MaterialTheme.colorScheme.primary
                             }
                             
                             Text(
@@ -1571,16 +1552,12 @@ fun GenreDistributionSection(
                         .verticalScroll(scrollState)
                         .padding(vertical = 12.dp)
                 ) {
-                    val displayList = if (expanded) genreCounts else processedGenres
+                    val displayList = if (expanded) genreCounts else genreCounts.take(7)
                     
                     displayList.forEachIndexed { index, (genre, count) ->
                         val percentage = ((count.toFloat() / totalCount) * 100).roundToInt()
                         
-                        val color = if (index < 4) {
-                            genreColors[index % genreColors.size]
-                        } else {
-                            genreColors[4] // Green Neon per ALTRO o generi minori (index >= 4)
-                        }
+                        val color = if (index < 7) genreColors[index] else genreColors[7]
                         
                         val isItemSelected = (selectedGenreName == genre)
                         val isDimmed = selectedGenreName != null && !isItemSelected
@@ -1706,6 +1683,7 @@ fun DecadesSection(decadeCounts: List<Pair<String, Int>>) {
                 
                 Column(
                     Modifier
+                        .zIndex(if (isSelected) 1f else 0f)
                         .weight(1f)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -1791,10 +1769,11 @@ fun DecadesSection(decadeCounts: List<Pair<String, Int>>) {
                             },
                         contentAlignment = Alignment.BottomCenter
                     ) {
+                        val minHeight = if (count > 0) 0.06f else 0.0f
                         Box(
                             Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(animFrac.coerceAtLeast(0.04f))
+                                .fillMaxHeight(animFrac.coerceAtLeast(minHeight))
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
@@ -1951,22 +1930,7 @@ fun WrappedBannerPill(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    AnimatedVisibility(
-                        visible = expanded,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        Text(
-                            text = "LE TUE STATS DEL",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 3.sp,
-                                color = Color.White.copy(alpha = 0.7f),
-                                fontSize = 8.sp
-                            ),
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        )
-                    }
+
                     Text(
                         text = "$year WRAPPED",
                         style = (if (expanded) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall).copy(
@@ -1996,8 +1960,8 @@ fun WrappedBannerPill(
 
             AnimatedVisibility(
                 visible = expanded,
-                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
-                exit = fadeOut(tween(300)) + shrinkVertically(tween(300))
+                enter = fadeIn(tween(400)) + scaleIn(initialScale = 0.95f, animationSpec = tween(400)),
+                exit = fadeOut(tween(300)) + scaleOut(targetScale = 0.95f, animationSpec = tween(300))
             ) {
                 Column {
                     Spacer(Modifier.height(20.dp))
@@ -2035,7 +1999,7 @@ fun WrappedBannerPill(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        WrappedMainStat("GENERE PIÙ SEGUITO", stats.topGenre ?: "---", Icons.Rounded.AutoAwesome, Modifier.weight(1f))
+                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", Icons.Rounded.AutoAwesome, Modifier.weight(1f))
                         WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, Icons.Rounded.AccessTime, Modifier.weight(1f))
                     }
                     
@@ -2136,7 +2100,7 @@ fun WrappedBannerPill(
                         ) {
                             WrappedSmallStat("FILM", stats.moviesWatched.toString(), Icons.Rounded.Movie, Modifier.weight(1f))
                             WrappedSmallStat("SERIE", stats.tvWatched.toString(), Icons.Rounded.Tv, Modifier.weight(1f))
-                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", Icons.Rounded.Videocam, Modifier.weight(1f))
+                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", Icons.Rounded.Videocam, Modifier.weight(2f))
                         }
                     }
 
@@ -2475,6 +2439,7 @@ fun RatingHistogram(distribution: IntArray) {
 
                     Column(
                         modifier = Modifier
+                            .zIndex(if (isSelected) 1f else 0f)
                             .weight(1f)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -2503,10 +2468,11 @@ fun RatingHistogram(distribution: IntArray) {
                                     },
                                 contentAlignment = Alignment.BottomCenter
                             ) {
+                                val minHeight = if (count > 0) 0.08f else 0.0f
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
-                                        .fillMaxHeight(animFrac.coerceAtLeast(0.06f))
+                                        .fillMaxHeight(animFrac.coerceAtLeast(minHeight))
                                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                         .background(
                                             Brush.verticalGradient(
@@ -2531,7 +2497,7 @@ fun RatingHistogram(distribution: IntArray) {
                                 exit = fadeOut(),
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
-                                    .offset(y = - (100.dp * animFrac.coerceAtLeast(0.06f) + 6.dp))
+                                    .offset(y = - (100.dp * animFrac.coerceAtLeast(if (count > 0) 0.08f else 0.0f) + 6.dp))
                             ) {
                                 if (count > 0 && isMax) {
                                     CountingText(
@@ -2551,7 +2517,7 @@ fun RatingHistogram(distribution: IntArray) {
                                 modifier = Modifier
                                     .zIndex(10f)
                                     .align(Alignment.BottomCenter)
-                                    .offset(y = - (100.dp * animFrac.coerceAtLeast(0.06f) + 6.dp))
+                                    .offset(y = - (100.dp * animFrac.coerceAtLeast(if (count > 0) 0.08f else 0.0f) + 6.dp))
                             ) {
                                 Box(
                                     modifier = Modifier

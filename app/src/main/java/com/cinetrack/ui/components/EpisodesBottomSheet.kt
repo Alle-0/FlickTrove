@@ -107,7 +107,9 @@ fun EpisodesBottomSheet(
         val windows = listOfNotNull(dialogWindow, activityWindow)
         windows.forEach { window ->
             androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+            @Suppress("DEPRECATION")
             window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            @Suppress("DEPRECATION")
             window.statusBarColor = android.graphics.Color.TRANSPARENT
             val insetsController = WindowInsetsControllerCompat(window, window.decorView)
             insetsController.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
@@ -217,7 +219,10 @@ fun EpisodesBottomSheet(
                     contentPadding = PaddingValues(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(currentSeasonData?.episodes ?: emptyList<Episode>()) { episode ->
+                    items(
+                        items = currentSeasonData?.episodes ?: emptyList<Episode>(),
+                        key = { it.episodeNumber }
+                    ) { episode ->
                         EpisodeCard(
                             episode = episode,
                             isWatched = (localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList<Int>()).contains(episode.episodeNumber),
@@ -291,7 +296,7 @@ private fun SeasonSelector(
         modifier = Modifier
             .padding(bottom = 16.dp)
     ) {
-        items(seasons) { seasonNum ->
+        items(seasons, key = { it }) { seasonNum ->
             val isActive = selectedSeason == seasonNum
             val isCompleted = completedSeasons.contains(seasonNum)
             

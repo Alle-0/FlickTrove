@@ -5,6 +5,8 @@ import com.cinetrack.data.local.dao.FavoriteDao
 import com.cinetrack.data.local.dao.FolderDao
 import com.cinetrack.data.models.BackupData
 import com.cinetrack.data.models.TraktExportItem
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -38,9 +40,26 @@ class BackupRepository @Inject constructor(
     suspend fun importData(jsonData: String) = withContext(Dispatchers.IO) {
         val backup = json.decodeFromString<BackupData>(jsonData)
         
-        // Restore Favorites
+        // Restore Favorites (Smart Merge)
         if (backup.favorites.isNotEmpty()) {
-            favoriteDao.insertAll(backup.favorites)
+            val localFavoritesMap = favoriteDao.getAll().associateBy { "${it.mediaType}_${it.id}" }
+            
+            val mergedFavorites = backup.favorites.map { importedMovie ->
+                val localMovie = localFavoritesMap["${importedMovie.mediaType}_${importedMovie.id}"]
+                if (localMovie != null) {
+                    // Smart Merge: Keep local personalNote, personalRating, and watched data if present locally
+                    importedMovie.copy(
+                        personalNote = localMovie.personalNote ?: importedMovie.personalNote,
+                        personalRating = localMovie.personalRating ?: importedMovie.personalRating,
+                        watchedAt = localMovie.watchedAt ?: importedMovie.watchedAt,
+                        watched = localMovie.watched || importedMovie.watched,
+                        clientUpdatedAt = maxOf(localMovie.clientUpdatedAt, importedMovie.clientUpdatedAt)
+                    )
+                } else {
+                    importedMovie
+                }
+            }
+            favoriteDao.insertAll(mergedFavorites)
         }
         
         // Restore Folders
@@ -85,5 +104,111 @@ class BackupRepository @Inject constructor(
         }
         
         count
+    }
+
+    private fun parseCsvLine(line: String): List<String> {
+        val result = mutableListOf<String>()
+        var current = StringBuilder()
+        var inQuotes = false
+        for (i in line.indices) {
+            val c = line[i]
+            if (c == '"') {
+                inQuotes = !inQuotes
+            } else if (c == ',' && !inQuotes) {
+                result.add(current.toString().trim())
+                current.clear()
+            } else {
+                current.append(c)
+            }
+        }
+        result.add(current.toString().trim())
+        return result
+    }
+
+    suspend fun migrateCsv(csvData: String): Int = withContext(Dispatchers.IO) {
+        val lines = csvData.lines().filter { it.isNotBlank() }
+        if (lines.isEmpty()) return@withContext 0
+
+        val headerLine = lines.first()
+        val headers = parseCsvLine(headerLine)
+        
+        val isLetterboxd = headers.contains("Letterboxd URI")
+        val isImdb = headers.contains("Const")
+        
+        if (!isLetterboxd && !isImdb) return@withContext 0
+        
+        val nameIdx = headers.indexOf("Name")
+        val yearIdx = headers.indexOf("Year")
+        val constIdx = headers.indexOf("Const")
+        val titleTypeIdx = headers.indexOf("Title Type")
+        val titleIdx = headers.indexOf("Title")
+
+        val dataLines = lines.drop(1)
+        
+        // Use async to fetch external IDs concurrently in chunks to respect API rate limits
+        val moviesToInsert = mutableListOf<Movie>()
+        
+        // Chunk to avoid hitting API limits simultaneously
+        val chunks = dataLines.chunked(20)
+        for (chunk in chunks) {
+            val deferreds = chunk.mapNotNull { line ->
+                val columns = parseCsvLine(line)
+                if (isLetterboxd) {
+                    if (nameIdx == -1 || columns.size <= nameIdx) return@mapNotNull null
+                    val name = columns[nameIdx]
+                    val year = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
+                    
+                    async {
+                        val tmdbMovie = movieRepository.searchMovieWithYear(name, year)
+                        tmdbMovie?.let {
+                            Movie(
+                                id = it.id,
+                                mediaType = it.mediaType ?: "movie",
+                                title = it.title,
+                                name = it.name,
+                                watched = true,
+                                favorite = false,
+                                watchedAt = java.time.Instant.now().toString(),
+                                syncStatus = "pending",
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                        }
+                    }
+                } else if (isImdb) {
+                    if (constIdx == -1 || columns.size <= constIdx) return@mapNotNull null
+                    val const = columns[constIdx]
+                    val titleType = if (titleTypeIdx != -1 && columns.size > titleTypeIdx) columns[titleTypeIdx] else "movie"
+                    
+                    async {
+                        val tmdbMovie = movieRepository.findByImdbId(const)
+                        tmdbMovie?.let {
+                            val mediaType = if (titleType.contains("tv", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
+                            Movie(
+                                id = it.id,
+                                mediaType = mediaType,
+                                title = it.title,
+                                name = it.name,
+                                watched = true,
+                                favorite = false,
+                                watchedAt = java.time.Instant.now().toString(),
+                                syncStatus = "pending",
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                        }
+                    }
+                } else {
+                    null
+                }
+            }
+            
+            val results = deferreds.awaitAll().filterNotNull()
+            moviesToInsert.addAll(results)
+        }
+        
+        if (moviesToInsert.isNotEmpty()) {
+            favoriteDao.importIgnore(moviesToInsert)
+        }
+        
+        moviesToInsert.size
     }
 }

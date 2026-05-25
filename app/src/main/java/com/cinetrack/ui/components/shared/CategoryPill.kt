@@ -91,7 +91,7 @@ fun CategoryPill(
 
             val indicatorOffset by animateDpAsState(
                 targetValue = if (activeTab == "tv") itemWidth else 0.dp,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
                 label = "pillIndicator"
             )
 
