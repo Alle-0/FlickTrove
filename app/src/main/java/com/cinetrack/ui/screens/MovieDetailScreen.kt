@@ -782,7 +782,10 @@ fun MovieDetailScreen(
         modifier = Modifier.zIndex(100f)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.6f))
+                .clickable { showRatingInfoDialog = false },
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -791,10 +794,10 @@ fun MovieDetailScreen(
                     .fillMaxWidth(0.85f)
                     .hazeGlass(
                         state = localHazeState,
-                        alpha = 1f,
+                        alpha = 0.85f,
                         shape = RoundedCornerShape(32.dp)
                     )
-                    .clickable(enabled = false) {} // Prevent click-through
+                    .clickable(enabled = false) {}
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp)
@@ -808,32 +811,58 @@ fun MovieDetailScreen(
                             Icons.Rounded.Info,
                             null,
                             tint = Color.White,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(28.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            "Legenda Rating (USA)",
+                            "Legenda Rating",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = Color.White
                         )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Film (MPAA)
+                    Text(
+                        "🎬  Film (USA / MPAA)",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         RatingLegendItem("G", Color(0xFF4CAF50), "Per tutti (General Audiences).")
                         RatingLegendItem("PG", Color(0xFF8BC34A), "Si consiglia la presenza dei genitori.")
                         RatingLegendItem("PG-13", Color(0xFFFF9800), "Sconsigliato ai minori di 13 anni.")
                         RatingLegendItem("R", Color(0xFFF44336), "Vietato ai minori di 17 anni non accompagnati.")
                         RatingLegendItem("NC-17", Color(0xFFD32F2F), "Vietato ai minori di 18 anni.")
+                        RatingLegendItem("NR", Color(0xFF9E9E9E), "Non classificato (Not Rated).")
                     }
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Serie TV (TV Parental Guidelines)
+                    Text(
+                        "📺  Serie TV (USA / TV Parental Guidelines)",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        RatingLegendItem("TV-Y", Color(0xFF4CAF50), "Per tutti i bambini.")
+                        RatingLegendItem("TV-Y7", Color(0xFF8BC34A), "Per bambini dai 7 anni in su.")
+                        RatingLegendItem("TV-G", Color(0xFF66BB6A), "Per tutto il pubblico.")
+                        RatingLegendItem("TV-PG", Color(0xFFFF9800), "Supervisione genitoriale consigliata.")
+                        RatingLegendItem("TV-14", Color(0xFFF44336), "Sconsigliato ai minori di 14 anni.")
+                        RatingLegendItem("TV-MA", Color(0xFFD32F2F), "Solo per adulti (18+).")
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = { showRatingInfoDialog = false },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White.copy(alpha = 0.2f)
+                            containerColor = Color.White.copy(alpha = 0.15f)
                         )
                     ) {
                         Text("Chiudi", fontWeight = FontWeight.Bold, color = Color.White)
