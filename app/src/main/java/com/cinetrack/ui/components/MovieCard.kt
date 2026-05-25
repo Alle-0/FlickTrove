@@ -529,27 +529,27 @@ fun MovieCard(
             ) {
                 val newEpisodes = movie.newEpisodesFound
                 if (movie.isUpcoming == true || (newEpisodes != null && newEpisodes > 0)) {
-                    MovieCardBadge(text = "NEW", color = com.cinetrack.ui.theme.NeonPink)
+                    MovieCardBadge(text = "NEW", color = com.cinetrack.ui.theme.NeonPink, hazeState = hazeState)
                 }
 
                 if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
-                    MovieCardBadge(text = "BEST", color = Color(0xFF00E5FF))
+                    MovieCardBadge(text = "BEST", color = Color(0xFF00E5FF), hazeState = hazeState)
                 } else if ((movie.voteCount ?: 0) > 3000) {
-                    MovieCardBadge(text = "HOT", color = com.cinetrack.ui.theme.HazeStyles.AccentYellow)
+                    MovieCardBadge(text = "HOT", color = com.cinetrack.ui.theme.HazeStyles.AccentYellow, hazeState = hazeState)
                 } else if ((movie.voteAverage ?: 0.0) >= 8.0 && (movie.voteCount ?: 0) > 1000) {
-                    MovieCardBadge(text = "WOW", color = com.cinetrack.ui.theme.NeonTeal)
+                    MovieCardBadge(text = "WOW", color = com.cinetrack.ui.theme.NeonTeal, hazeState = hazeState)
                 }
                 
                 val isOldAndGood = (movie.releaseDate?.startsWith("19") == true || movie.releaseDate?.startsWith("200") == true) && (movie.voteAverage ?: 0.0) >= 8.0
                 if (isOldAndGood) {
-                    MovieCardBadge(text = "CULT", color = Color(0xFF9C27B0))
+                    MovieCardBadge(text = "CULT", color = Color(0xFF9C27B0), hazeState = hazeState)
                 }
 
                 val genresStr = movie.genreNamesString ?: ""
                 if (genresStr.contains("Horror", ignoreCase = true) || movie.genres?.any { it.name?.equals("Horror", ignoreCase = true) == true } == true) {
-                    MovieCardBadge(text = "HORROR", color = Color(0xFFE53935))
+                    MovieCardBadge(text = "HORROR", color = Color(0xFFE53935), hazeState = hazeState)
                 } else if (genresStr.contains("Animation", ignoreCase = true) || genresStr.contains("Anime", ignoreCase = true)) {
-                    MovieCardBadge(text = "ANIME", color = Color(0xFFFF9800))
+                    MovieCardBadge(text = "ANIME", color = Color(0xFFFF9800), hazeState = hazeState)
                 }
             }
 
@@ -727,10 +727,14 @@ fun MovieCard(
 }
 
 @Composable
-private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier) {
+private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null) {
     Box(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.75f), CircleShape)
+            .then(
+                if (hazeState != null) Modifier.hazeGlass(state = hazeState, shape = CircleShape)
+                else Modifier
+            )
+            .background(Color.Black.copy(alpha = 0.45f), CircleShape)
             .border(0.5.dp, color, CircleShape)
             .padding(horizontal = 6.dp, vertical = 2.5.dp),
         contentAlignment = Alignment.Center
