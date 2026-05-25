@@ -298,19 +298,13 @@ fun SettingsScreen(
                                 title = "Segnalibri cartelle",
                                 description = "Mostra un nastro colorato sulle card per indicare l'appartenenza alle cartelle.",
                                 trailing = {
-                                    Switch(
+                                    FlickTroveSwitch(
                                         checked = showFolderBookmarks,
                                         onCheckedChange = { 
                                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                             settingsViewModel.toggleFolderBookmarks(it) 
                                         },
-                                        colors = SwitchDefaults.colors(
-                                            checkedThumbColor = Color.White,
-                                            checkedTrackColor = currentAccentColor,
-                                            uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
-                                            uncheckedTrackColor = Color.White.copy(alpha = 0.1f),
-                                            uncheckedBorderColor = Color.Transparent
-                                        )
+                                        accentColor = currentAccentColor
                                     )
                                 },
                                 onClick = {
@@ -336,19 +330,13 @@ fun SettingsScreen(
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Switch(
+                                        FlickTroveSwitch(
                                             checked = showBadges,
                                             onCheckedChange = { 
                                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                                 settingsViewModel.toggleBadges(it) 
                                             },
-                                            colors = SwitchDefaults.colors(
-                                                checkedThumbColor = Color.White,
-                                                checkedTrackColor = currentAccentColor,
-                                                uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
-                                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f),
-                                                uncheckedBorderColor = Color.Transparent
-                                            )
+                                            accentColor = currentAccentColor
                                         )
                                     }
                                 },
@@ -372,7 +360,7 @@ fun SettingsScreen(
                                 title = "Attiva Notifiche",
                                 description = "Ricevi un avviso il giorno dell'uscita dei film o delle serie che segui.",
                                 trailing = {
-                                    Switch(
+                                    FlickTroveSwitch(
                                         checked = notificationsEnabled,
                                         onCheckedChange = { checked ->
                                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
@@ -389,13 +377,7 @@ fun SettingsScreen(
                                                 settingsViewModel.toggleNotifications(false)
                                             }
                                         },
-                                        colors = SwitchDefaults.colors(
-                                            checkedThumbColor = Color.White,
-                                            checkedTrackColor = currentAccentColor,
-                                            uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
-                                            uncheckedTrackColor = Color.White.copy(alpha = 0.1f),
-                                            uncheckedBorderColor = Color.Transparent
-                                        )
+                                        accentColor = currentAccentColor
                                     )
                                 },
                                 onClick = {
@@ -1673,8 +1655,14 @@ fun ColorSelectionDialog(
                                 mutableStateOf(if (current.startsWith("#")) current.uppercase() else "#00BCD4") 
                             }
                             var isHexFocused by remember { mutableStateOf(false) }
-                            
                             var isDragging by remember { mutableStateOf(false) }
+
+                            // Sync hex ← wheel: only when drag ends and hex field not focused
+                            LaunchedEffect(isDragging, tempSelectedColor) {
+                                if (!isDragging && !isHexFocused && tempSelectedColor.length == 7) {
+                                    hexInput = tempSelectedColor.uppercase()
+                                }
+                            }
                             
                             ColorWheel(
                                 selectedColor = tempSelectedColor,
@@ -1720,7 +1708,11 @@ fun ColorSelectionDialog(
                                      onValueChange = { newValue ->
                                          if (newValue.length <= 6) {
                                              val clean = newValue.uppercase().filter { it.isDigit() || it in 'A'..'F' }
-                                             tempSelectedColor = "#$clean"
+                                             hexInput = clean
+                                             // Update wheel only when we have a full valid hex
+                                             if (clean.length == 6) {
+                                                 tempSelectedColor = "#$clean"
+                                             }
                                          }
                                      },
                                      textStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -1734,7 +1726,13 @@ fun ColorSelectionDialog(
                                      modifier = Modifier
                                          .width(80.dp)
                                          .padding(start = 4.dp)
-                                         .onFocusChanged { isHexFocused = it.isFocused }
+                                         .onFocusChanged { focusState ->
+                                             isHexFocused = focusState.isFocused
+                                             // When losing focus, sync hex display to current color
+                                             if (!focusState.isFocused && tempSelectedColor.length == 7) {
+                                                 hexInput = tempSelectedColor.uppercase().removePrefix("#")
+                                             }
+                                         }
                                  )
                              }
                         }
