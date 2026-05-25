@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -161,6 +162,7 @@ fun MovieDetailScreen(
     val localHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
 
+    var showRatingInfoDialog by remember { mutableStateOf(false) }
 
     // Removed showRatingDialog and showNoteDialog as they are now handled inline
 
@@ -319,7 +321,8 @@ fun MovieDetailScreen(
                                         accentColor = accentColor,
                                         hazeState = backdropHazeState,
                                         titleAlpha = 1f,
-                                        titleTranslationY = 0f
+                                        titleTranslationY = 0f,
+                                        onRatingClick = { showRatingInfoDialog = true }
                                     )
 
                                     DetailMetaRows(
@@ -768,6 +771,103 @@ fun MovieDetailScreen(
                 }
         }
         }
+        }
     }
+
+    // Ratings Info Dialog
+    AnimatedVisibility(
+        visible = showRatingInfoDialog,
+        enter = fadeIn(tween(200)),
+        exit = fadeOut(tween(200)),
+        modifier = Modifier.zIndex(100f)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 400.dp)
+                    .fillMaxWidth(0.85f)
+                    .hazeGlass(
+                        state = localHazeState,
+                        alpha = 1f,
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                    .clickable(enabled = false) {} // Prevent click-through
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Rounded.Info,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            "Legenda Rating (USA)",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        RatingLegendItem("G", Color(0xFF4CAF50), "Per tutti (General Audiences).")
+                        RatingLegendItem("PG", Color(0xFF8BC34A), "Si consiglia la presenza dei genitori.")
+                        RatingLegendItem("PG-13", Color(0xFFFF9800), "Sconsigliato ai minori di 13 anni.")
+                        RatingLegendItem("R", Color(0xFFF44336), "Vietato ai minori di 17 anni non accompagnati.")
+                        RatingLegendItem("NC-17", Color(0xFFD32F2F), "Vietato ai minori di 18 anni.")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Button(
+                        onClick = { showRatingInfoDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.2f)
+                        )
+                    ) {
+                        Text("Chiudi", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RatingLegendItem(cert: String, color: Color, desc: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .width(55.dp)
+                .background(color.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = cert,
+                color = color,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = desc,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.8f),
+            modifier = Modifier.weight(1f)
+        )
     }
 }

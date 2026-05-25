@@ -171,6 +171,7 @@ fun HomeScreen(
                             folderColors = folderColors,
                             showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                             showBadges = uiState.preferences.showBadges,
+                            hazeState = hazeState,
                             animatedVisibilityScope = animatedVisibilityScope,
                             staggerIndex = index,
                             onPress = { onMovieClick(movie) },

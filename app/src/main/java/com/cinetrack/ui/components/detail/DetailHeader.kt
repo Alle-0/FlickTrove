@@ -58,6 +58,7 @@ fun DetailHeader(
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    onRatingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -329,7 +330,8 @@ fun DetailHeader(
                                     label = "RATED",
                                     value = cert,
                                     valueColor = certColor,
-                                    showValueBox = true
+                                    showValueBox = true,
+                                    onClick = onRatingClick
                                 )
                             }
                         }
@@ -544,13 +546,15 @@ fun MetaBadge(
     label: String,
     value: String,
     valueColor: Color = Color.White,
-    showValueBox: Boolean = false
+    showValueBox: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .let { if (onClick != null) it.bounceClick(scaleDown = 0.95f) { onClick() } else it }
             .padding(horizontal = 10.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
