@@ -113,7 +113,7 @@ fun FolderPickerModalContent(
                 val springSpec = spring<Float>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
                 fadeIn(animationSpec = springSpec) togetherWith fadeOut(animationSpec = springSpec)
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             label = "FolderPickerTransition"
         ) { creating ->
             if (creating) {
@@ -149,7 +149,7 @@ private fun FolderListContent(
     
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(24.dp)
     ) {
         Row(
@@ -195,7 +195,7 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .height(180.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -208,7 +208,7 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .heightIn(max = 320.dp)
             ) {
                 LazyColumn(
                     state = listState,
@@ -387,8 +387,10 @@ private fun FolderCreateForm(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .heightIn(max = 450.dp)
             .premiumScrollbar(scrollState)
+            .verticalFadingEdges(scrollState, 16.dp, 16.dp)
             .verticalScroll(scrollState)
             .padding(24.dp)
     ) {

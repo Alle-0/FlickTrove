@@ -472,13 +472,6 @@ fun MovieDetailScreen(
             label = "width"
         ) { collapsedPillWidth }
 
-        val modalHeight by transition.animateDp(
-            transitionSpec = { 
-                spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow) 
-            },
-            label = "height"
-        ) { if (it) 500.dp else 44.dp }
-
         val modalCorner by transition.animateDp(label = "corner") { if (it) 28.dp else 22.dp }
         
         val modalExpansionProgress by transition.animateFloat(
@@ -568,7 +561,11 @@ fun MovieDetailScreen(
         ) {
                 Box(
                     modifier = Modifier
-                        .size(width = modalWidth, height = modalHeight),
+                        .width(modalWidth)
+                        .then(
+                            if (showFolderPicker) Modifier.wrapContentHeight().animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
+                            else Modifier.height(44.dp)
+                        ),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (currentEffectiveProgress > 0.01f) {
