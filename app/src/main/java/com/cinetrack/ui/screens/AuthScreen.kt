@@ -33,6 +33,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -130,7 +133,7 @@ fun AuthScreen(
                     )
                     Text(
                         text = "YOUR CINEMATIC ARCHIVE",
-                        color = Color.White.copy(alpha = 0.3f),
+                        color = Color.White.copy(alpha = 0.7f),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 4.sp,
@@ -212,12 +215,7 @@ fun AuthScreen(
                             else viewModel.signUp(email, password)
                         }
                         .background(
-                            color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = if (canProceed) Color.Transparent else Color.White.copy(alpha = 0.05f),
+                            color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(20.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -231,7 +229,7 @@ fun AuthScreen(
                     } else {
                         Text(
                             text = if (isLogin) "Accedi" else "Crea Account",
-                            color = if (canProceed) Color.Black else Color.White.copy(alpha = 0.2f),
+                            color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -254,7 +252,7 @@ fun AuthScreen(
                     Text(
                         text = if (isLogin) "Non hai un account? Registrati"
                                else "Hai già un account? Accedi",
-                        color = Color.White.copy(alpha = 0.6f),
+                        color = Color.White.copy(alpha = 0.85f),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -277,10 +275,9 @@ fun AuthScreen(
                                 )
                             )
                     )
-                    Text(
                         "OPPURE",
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        color = Color.White.copy(alpha = 0.15f),
+                        color = Color.White.copy(alpha = 0.5f),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 2.sp
@@ -307,14 +304,14 @@ fun AuthScreen(
                         }
                         .border(
                             width = 1.dp,
-                            color = Color.White.copy(alpha = 0.12f),
+                            color = Color.White.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "Continua come Ospite",
-                        color = Color.White.copy(alpha = 0.8f),
+                        color = Color.White.copy(alpha = 0.5f),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -341,7 +338,7 @@ fun AuthScreen(
                         append(".")
                     },
                     style = TextStyle(
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = Color.White.copy(alpha = 0.75f),
                         fontSize = 12.sp,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     ),
@@ -556,23 +553,23 @@ private fun PremiumTextField(
         ),
         label = "LabelScale"
     )
-    val labelColor by animateColorAsState(
-        targetValue = when {
-            isError -> Color(0xFFE57373)
-            isFocused -> PrimaryTeal
-            isFloating -> Color.White.copy(alpha = 0.6f)
-            else -> Color.White.copy(alpha = 0.35f)
-        },
-        label = "LabelColor"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isError -> Color(0xFFE57373).copy(alpha = 0.7f)
-            isFocused || value.isNotEmpty() -> PrimaryTeal.copy(alpha = 0.8f)
-            else -> Color.White.copy(alpha = 0.12f)
-        },
-        label = "BorderColor"
-    )
+        val labelColor by animateColorAsState(
+            targetValue = when {
+                isError -> Color(0xFFE57373)
+                isFocused -> PrimaryTeal
+                isFloating -> Color.White.copy(alpha = 0.9f)
+                else -> Color.White.copy(alpha = 0.7f)
+            },
+            label = "LabelColor"
+        )
+        val borderColor by animateColorAsState(
+            targetValue = when {
+                isError -> Color(0xFFE57373).copy(alpha = 0.7f)
+                isFocused || value.isNotEmpty() -> PrimaryTeal.copy(alpha = 0.8f)
+                else -> Color.White.copy(alpha = 0.25f)
+            },
+            label = "BorderColor"
+        )
     val containerColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.04f),
         label = "ContainerColor"
@@ -602,7 +599,7 @@ private fun PremiumTextField(
                     tint = when {
                         isError -> Color(0xFFE57373)
                         isFocused || value.isNotEmpty() -> PrimaryTeal
-                        else -> Color.White.copy(alpha = 0.25f)
+                        else -> Color.White.copy(alpha = 0.6f)
                     },
                     modifier = Modifier.size(20.dp)
                 )
