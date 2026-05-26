@@ -319,6 +319,52 @@ fun AuthScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // ── Legal Disclaimer ──────────────────────────────────────────
+                val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                androidx.compose.foundation.text.ClickableText(
+                    text = buildAnnotatedString {
+                        append("Continuando, accetti i nostri ")
+                        pushStringAnnotation(tag = "URL", annotation = "https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/TERMS_OF_SERVICE.md")
+                        withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
+                            append("Termini di Servizio")
+                        }
+                        pop()
+                        append(" e la ")
+                        pushStringAnnotation(tag = "URL", annotation = "https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/PRIVACY_POLICY.md")
+                        withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
+                            append("Privacy Policy")
+                        }
+                        pop()
+                        append(".")
+                    },
+                    style = TextStyle(
+                        color = Color.White.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    ),
+                    onClick = { offset ->
+                        // Questo trick serve a trovare l'annotazione URL cliccata 
+                        // all'interno della stringa e ad aprirla nel browser!
+                        val annotatedString = buildAnnotatedString {
+                            append("Continuando, accetti i nostri ")
+                            pushStringAnnotation(tag = "URL", annotation = "https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/TERMS_OF_SERVICE.md")
+                            withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) { append("Termini di Servizio") }
+                            pop()
+                            append(" e la ")
+                            pushStringAnnotation(tag = "URL", annotation = "https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/PRIVACY_POLICY.md")
+                            withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) { append("Privacy Policy") }
+                            pop()
+                            append(".")
+                        }
+                        annotatedString.getStringAnnotations("URL", offset, offset)
+                            .firstOrNull()?.let { annotation ->
+                                uriHandler.openUri(annotation.item)
+                            }
+                    }
+                )
             }
         }
 
