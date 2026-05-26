@@ -88,7 +88,10 @@ fun AuthScreen(
 
     LaunchedEffect(authState) {
         when (val state = authState) {
-            is AuthState.Authenticated -> onLoginSuccess()
+            is AuthState.Authenticated -> {
+                viewModel.resetProcessState()
+                onLoginSuccess()
+            }
             is AuthState.Error -> {
                 showFeedback(state.message, isError = true)
                 viewModel.clearError()

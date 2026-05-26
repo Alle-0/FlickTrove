@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
+    object Anonymous : AuthState
     data class Loading(val message: String? = null, val progress: Float? = null) : AuthState
     object Authenticated : AuthState
     data class Error(val message: String) : AuthState
@@ -69,10 +70,12 @@ class AuthViewModel @Inject constructor(
         callbackFlow {
             val listener = FirebaseAuth.AuthStateListener { auth ->
                 val user = auth.currentUser
-                if (user != null && !user.isAnonymous) {
-                    trySend(AuthState.Authenticated)
-                } else {
+                if (user == null) {
                     trySend(AuthState.Unauthenticated)
+                } else if (user.isAnonymous) {
+                    trySend(AuthState.Anonymous)
+                } else {
+                    trySend(AuthState.Authenticated)
                 }
             }
             auth.addAuthStateListener(listener)
@@ -179,9 +182,12 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             auth.signOut()
             movieRepository.clearAllData()
-            // State will update via callbackFlow
             _processState.update { null }
         }
+    }
+
+    fun resetProcessState() {
+        _processState.update { null }
     }
 
     fun deleteAccount(onComplete: (Boolean) -> Unit) {
