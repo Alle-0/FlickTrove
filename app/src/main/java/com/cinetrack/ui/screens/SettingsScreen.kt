@@ -1,7 +1,6 @@
 package com.cinetrack.ui.screens
 
 import com.cinetrack.ui.components.shared.ColorWheel
-import com.cinetrack.ui.components.shared.ProfileImagePicker
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.toComposeColor
 import androidx.compose.foundation.Image

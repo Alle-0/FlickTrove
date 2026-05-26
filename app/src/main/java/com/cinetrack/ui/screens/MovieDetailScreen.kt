@@ -51,7 +51,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
-import com.cinetrack.ui.components.shared.GlassyTextField
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
