@@ -197,6 +197,8 @@ fun DetailHeader(
                                 val m = it % 60
                                 if (h > 0) "${h}h ${m}m" else "${m}m"
                             } else null
+                        } ?: movie.numberOfSeasons?.let { 
+                            if (it > 0) "$it Stagion${if (it > 1) "i" else "e"}" else null 
                         } ?: "-"
 
                         Text(
