@@ -364,8 +364,9 @@ fun SearchScreen(
                                     }
                                     itemsIndexed(items = uiState.trendingMovies.take(6), key = { _, item -> "trending_movie_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
                                         if (item is TMDBSearchResult.MovieResult) {
-                                            val movie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == "movie" }
+                                            val baseMovie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
+                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
+                                            val movie = movieStatus ?: baseMovie
                                             val folderColors = remember(movie.id, uiState.movieFolderColors) {
                                                 uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
                                                     it.toComposeColor()
@@ -378,6 +379,7 @@ fun SearchScreen(
                                                 isWatched = movieStatus?.watched ?: false,
                                                 isReminder = movieStatus?.reminder ?: false,
                                                 progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                personalRating = movieStatus?.personalRating,
                                                 folderColors = folderColors,
                                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                                 animatedVisibilityScope = animatedVisibilityScope,
@@ -410,8 +412,9 @@ fun SearchScreen(
                                     }
                                     itemsIndexed(items = uiState.trendingTv.take(6), key = { _, item -> "trending_tv_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
                                         if (item is TMDBSearchResult.TvResult) {
-                                            val movie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == "tv" }
+                                            val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
+                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
+                                            val movie = movieStatus ?: baseMovie
                                             val folderColors = remember(movie.id, uiState.movieFolderColors) {
                                                 uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
                                                     it.toComposeColor()
@@ -424,6 +427,7 @@ fun SearchScreen(
                                                 isWatched = movieStatus?.watched ?: false,
                                                 isReminder = movieStatus?.reminder ?: false,
                                                 progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                personalRating = movieStatus?.personalRating,
                                                 folderColors = folderColors,
                                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                                 animatedVisibilityScope = animatedVisibilityScope,
@@ -498,8 +502,9 @@ fun SearchScreen(
                                 ) { index, item ->
                                     when(item) {
                                         is TMDBSearchResult.MovieResult -> {
-                                            val movie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == "movie" }
+                                            val baseMovie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
+                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
+                                            val movie = movieStatus ?: baseMovie
                                             
                                             val folderColors = remember(movie.id, uiState.movieFolderColors) {
                                                 uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
@@ -513,6 +518,7 @@ fun SearchScreen(
                                                 isWatched = movieStatus?.watched ?: false,
                                                 isReminder = movieStatus?.reminder ?: false,
                                                 progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                personalRating = movieStatus?.personalRating,
                                                 folderColors = folderColors,
                                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                                 animatedVisibilityScope = animatedVisibilityScope,
@@ -529,8 +535,9 @@ fun SearchScreen(
                                             )
                                         }
                                         is TMDBSearchResult.TvResult -> {
-                                            val movie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == "tv" }
+                                            val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
+                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
+                                            val movie = movieStatus ?: baseMovie
                                             val folderColors = remember(movie.id, uiState.movieFolderColors) {
                                                 uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
                                                     it.toComposeColor()
@@ -543,6 +550,7 @@ fun SearchScreen(
                                                 isWatched = movieStatus?.watched ?: false,
                                                 isReminder = movieStatus?.reminder ?: false,
                                                 progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                personalRating = movieStatus?.personalRating,
                                                 folderColors = folderColors,
                                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                                 animatedVisibilityScope = animatedVisibilityScope,
