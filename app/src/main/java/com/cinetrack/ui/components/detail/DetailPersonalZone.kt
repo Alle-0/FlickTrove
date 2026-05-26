@@ -179,22 +179,6 @@ private fun PersonalAction(
         label = "ActionScale"
     )
 
-    val glowScale = remember { Animatable(1f) }
-    val glowAlpha = remember { Animatable(0f) }
-    
-    LaunchedEffect(isActive) {
-        if (isActive) {
-            launch {
-                glowScale.snapTo(1f)
-                glowScale.animateTo(1.4f, tween(500, easing = FastOutSlowInEasing))
-            }
-            launch {
-                glowAlpha.snapTo(0.5f)
-                glowAlpha.animateTo(0f, tween(500, easing = FastOutSlowInEasing))
-            }
-        }
-    }
-
     val hasValue = value != "—" && value != "VUOTA"
     
     Box(
@@ -226,22 +210,6 @@ private fun PersonalAction(
                     },
                     onTap = { onClick() }
                 )
-            }
-            .drawBehind {
-                val w = size.width
-                val h = size.height
-                if (w < 1f || h < 1f) return@drawBehind
-                
-                if (glowAlpha.value > 0f) {
-                    scale(scale = glowScale.value) {
-                        drawRoundRect(
-                            color = accentColor.copy(alpha = glowAlpha.value),
-                            size = size,
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(50f),
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
-                        )
-                    }
-                }
             },
         contentAlignment = Alignment.CenterStart
     ) {

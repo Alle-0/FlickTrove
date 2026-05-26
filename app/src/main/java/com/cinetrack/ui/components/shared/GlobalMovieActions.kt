@@ -69,9 +69,10 @@ fun GlobalMovieActions(
         )
     }
 
-    // 3. Quick Note Modal
     if (manager.showNotesDialog) {
         QuickNoteModal(
+            movieId = movie.id,
+            mediaType = movie.mediaType,
             initialNote = movie.personalNote ?: "",
             movieTitle = movie.title ?: movie.name ?: "",
             accentColor = MaterialTheme.colorScheme.primary,
@@ -89,6 +90,7 @@ fun GlobalMovieActions(
         QuickFolderModal(
             movieTitle = movie.title ?: movie.name ?: "",
             folders = manager.foldersList,
+            accentColor = MaterialTheme.colorScheme.primary,
             hazeState = hazeState,
             isItemInFolder = { folderId -> manager.isItemInFolderCallback(movie, folderId) },
             onToggleItem = { folder -> manager.onToggleFolderCallback?.invoke(movie, folder) },

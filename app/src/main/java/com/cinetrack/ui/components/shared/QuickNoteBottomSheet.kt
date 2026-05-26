@@ -18,9 +18,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.cinetrack.utils.AudioRecorderHelper
+import androidx.compose.foundation.border
+import kotlinx.coroutines.launch
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.material.icons.rounded.Delete
 
 @Composable
 fun QuickNoteModal(
+    movieId: Long,
+    mediaType: String,
     initialNote: String,
     movieTitle: String,
     accentColor: Color,
@@ -30,6 +48,55 @@ fun QuickNoteModal(
 ) {
     var note by remember { mutableStateOf(initialNote) }
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    
+    val audioHelper = remember { AudioRecorderHelper(context) }
+    var hasAudio by remember { mutableStateOf(audioHelper.hasAudioNote(movieId, mediaType)) }
+    val isRecording by audioHelper.isRecording.collectAsState()
+    val isPlaying by audioHelper.isPlaying.collectAsState()
+    var audioDurationMs by remember { mutableStateOf(0L) }
+    
+    LaunchedEffect(hasAudio) {
+        if (hasAudio) {
+            audioDurationMs = audioHelper.getAudioDuration(movieId, mediaType)
+        }
+    }
+    
+    val formattedDuration = remember(audioDurationMs) {
+        if (audioDurationMs <= 0) "" else {
+            val seconds = (audioDurationMs / 1000) % 60
+            val minutes = (audioDurationMs / (1000 * 60)) % 60
+            String.format(java.util.Locale.getDefault(), "%d:%02d", minutes, seconds)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            audioHelper.release()
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            audioHelper.startRecording(movieId, mediaType)
+        }
+    }
+
+    val speechLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val data = result.data
+            val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!matches.isNullOrEmpty()) {
+                val spokenText = matches[0]
+                val prefix = if (note.isNotEmpty()) "$note " else ""
+                note = prefix + spokenText
+            }
+        }
+    }
 
     FlickTroveModal(
         onDismissRequest = onDismiss,
@@ -117,6 +184,184 @@ fun QuickNoteModal(
                     .padding(top = 8.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
+
+            // Bottom bar for Dictation and Audio Recording
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Speech to Text button
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.1f))
+                        .bounceClick {
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                            }
+                            speechLauncher.launch(intent)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Mic,
+                        contentDescription = "Detta nota",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Audio Recording UI
+                if (hasAudio && !isRecording) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(accentColor.copy(alpha = 0.2f))
+                                .border(1.dp, accentColor, RoundedCornerShape(50))
+                                .bounceClick {
+                                    if (isPlaying) {
+                                        audioHelper.stopPlaying()
+                                    } else {
+                                        audioHelper.startPlaying(movieId, mediaType)
+                                    }
+                                }
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Rounded.Stop else Icons.Rounded.PlayArrow,
+                                    contentDescription = if (isPlaying) "Ferma audio" else "Riproduci audio",
+                                    tint = accentColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                if (formattedDuration.isNotEmpty() && !isPlaying) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = formattedDuration,
+                                        color = accentColor,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                } else if (isPlaying) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "In ascolto",
+                                        color = accentColor,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                        
+                        val scopeAudioTrash = rememberCoroutineScope()
+                        val hapticAudioTrash = LocalHapticFeedback.current
+                        val audioTrashRotation = remember { Animatable(0f) }
+                        val audioTrashScale = remember { Animatable(1f) }
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(50))
+                                .bounceClick {
+                                    hapticAudioTrash.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    scopeAudioTrash.launch {
+                                        audioTrashScale.animateTo(1.15f, tween(50))
+                                        audioTrashRotation.animateTo(-15f, tween(40))
+                                        audioTrashRotation.animateTo(15f, tween(40))
+                                        audioTrashRotation.animateTo(-15f, tween(40))
+                                        audioTrashRotation.animateTo(15f, tween(40))
+                                        audioTrashRotation.animateTo(0f, tween(40))
+                                        audioTrashScale.animateTo(1f, tween(50))
+                                        
+                                        kotlinx.coroutines.delay(100)
+                                        audioHelper.deleteAudioNote(movieId, mediaType)
+                                        hasAudio = false
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = "Elimina audio",
+                                tint = Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .graphicsLayer {
+                                        rotationZ = audioTrashRotation.value
+                                        scaleX = audioTrashScale.value
+                                        scaleY = audioTrashScale.value
+                                    }
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isRecording) {
+                            Box(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color.Red.copy(alpha = 0.2f))
+                                    .border(1.dp, Color.Red, RoundedCornerShape(50))
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(Color.Red)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Registrazione in corso...",
+                                        color = Color.Red,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(if (isRecording) Color.Red else Color.White.copy(alpha = 0.1f))
+                                .bounceClick {
+                                    if (isRecording) {
+                                        audioHelper.stopRecording()
+                                        hasAudio = true
+                                        audioDurationMs = audioHelper.getAudioDuration(movieId, mediaType)
+                                    } else {
+                                        permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isRecording) Icons.Rounded.Stop else Icons.Rounded.MicOff,
+                                contentDescription = if (isRecording) "Ferma registrazione" else "Registra audio",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

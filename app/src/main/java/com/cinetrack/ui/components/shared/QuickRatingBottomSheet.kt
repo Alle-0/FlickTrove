@@ -63,16 +63,32 @@ fun QuickRatingModal(
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
 
-            Text(
-                text = "VOTO RAPIDO",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                ),
-                color = Color.White.copy(alpha = 0.4f),
-                textAlign = TextAlign.Center,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(top = 2.dp, bottom = 20.dp)
-            )
+            ) {
+                Text(
+                    text = "VOTO RAPIDO",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.4f),
+                    textAlign = TextAlign.Center
+                )
+                if (initialRating > 0.0 && currentRating != initialRating) {
+                    Text(
+                        text = "  •  PRECEDENTE: %.1f".format(initialRating),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = accentColor.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
             // Large Rating Display
             Row(
