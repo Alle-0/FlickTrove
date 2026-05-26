@@ -15,21 +15,24 @@ import androidx.compose.ui.unit.dp
 fun Modifier.premiumScrollbar(
     state: ScrollState,
     width: Float = 6f,
+    paddingEnd: Float = 4f,
+    paddingVertical: Float = 20f,
     color: Color = Color.White.copy(alpha = 0.5f)
 ): Modifier = drawWithContent {
     drawContent()
     
     val maxScroll = state.maxValue.toFloat()
     if (maxScroll > 0) {
-        val visibleHeight = size.height
-        val contentHeight = visibleHeight + maxScroll
-        val thumbHeight = (visibleHeight / contentHeight) * visibleHeight
+        val startY = paddingVertical.dp.toPx()
+        val trackHeight = size.height - (paddingVertical.dp.toPx() * 2)
+        val contentHeight = size.height + maxScroll
+        val thumbHeight = (size.height / contentHeight) * trackHeight
         val scrollOffset = state.value.toFloat()
-        val thumbOffset = (scrollOffset / maxScroll) * (visibleHeight - thumbHeight)
+        val thumbOffset = startY + (scrollOffset / maxScroll) * (trackHeight - thumbHeight)
         
         drawRoundRect(
             color = color,
-            topLeft = Offset(size.width - width.dp.toPx() - 4.dp.toPx(), thumbOffset),
+            topLeft = Offset(size.width - width.dp.toPx() - paddingEnd.dp.toPx(), thumbOffset),
             size = Size(width.dp.toPx(), thumbHeight),
             cornerRadius = CornerRadius(width.dp.toPx() / 2, width.dp.toPx() / 2)
         )
@@ -39,6 +42,8 @@ fun Modifier.premiumScrollbar(
 fun Modifier.premiumScrollbar(
     state: androidx.compose.foundation.lazy.LazyListState,
     width: Float = 6f,
+    paddingEnd: Float = 4f,
+    paddingVertical: Float = 20f,
     color: Color = Color.White.copy(alpha = 0.5f)
 ): Modifier = drawWithContent {
     drawContent()
@@ -46,19 +51,19 @@ fun Modifier.premiumScrollbar(
     val layoutInfo = state.layoutInfo
     val visibleItemsInfo = layoutInfo.visibleItemsInfo
     if (visibleItemsInfo.isNotEmpty() && layoutInfo.totalItemsCount > visibleItemsInfo.size) {
-        val visibleHeight = size.height
-        val firstItem = visibleItemsInfo.first()
-        val lastItem = visibleItemsInfo.last()
+        val startY = paddingVertical.dp.toPx()
+        val trackHeight = size.height - (paddingVertical.dp.toPx() * 2)
         
         val totalItemsCount = layoutInfo.totalItemsCount.toFloat()
-        val thumbHeight = (visibleItemsInfo.size / totalItemsCount) * visibleHeight
+        val thumbHeight = (visibleItemsInfo.size / totalItemsCount) * trackHeight
         
-        val scrollOffset = firstItem.index.toFloat() / totalItemsCount
-        val thumbOffset = scrollOffset * visibleHeight
+        // Calculate offset based on items scrolled
+        val scrollOffset = state.firstVisibleItemIndex.toFloat() / (layoutInfo.totalItemsCount - visibleItemsInfo.size).coerceAtLeast(1)
+        val thumbOffset = startY + scrollOffset * (trackHeight - thumbHeight)
         
         drawRoundRect(
             color = color,
-            topLeft = Offset(size.width - width.dp.toPx() - 4.dp.toPx(), thumbOffset),
+            topLeft = Offset(size.width - width.dp.toPx() - paddingEnd.dp.toPx(), thumbOffset),
             size = Size(width.dp.toPx(), thumbHeight),
             cornerRadius = CornerRadius(width.dp.toPx() / 2, width.dp.toPx() / 2)
         )

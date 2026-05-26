@@ -195,7 +195,7 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

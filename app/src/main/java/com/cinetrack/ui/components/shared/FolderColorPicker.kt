@@ -145,15 +145,10 @@ fun FolderColorPicker(
                 
                 Spacer(Modifier.height(16.dp))
                 
-                var hexInput by remember(selectedColor) { mutableStateOf(selectedColor.uppercase()) }
+                var manualHexInput by remember { mutableStateOf<String?>(null) }
+                val displayHex = manualHexInput ?: localColor.uppercase()
                 
                 var isHexFocused by remember { mutableStateOf(false) }
-                
-                androidx.compose.runtime.LaunchedEffect(localColor) {
-                    if (!isHexFocused) {
-                        hexInput = localColor.uppercase()
-                    }
-                }
                 
                 Box(
                     modifier = Modifier
@@ -167,17 +162,19 @@ fun FolderColorPicker(
                         .padding(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     BasicTextField(
-                        value = hexInput,
+                        value = displayHex,
                         onValueChange = { input ->
                             val clean = input.uppercase().filter { it.isDigit() || it in 'A'..'F' || it == '#' }
                             if (clean.length <= 7) {
-                                hexInput = if (clean.startsWith("#") || clean.isEmpty()) clean else "#$clean"
+                                val newHex = if (clean.startsWith("#") || clean.isEmpty()) clean else "#$clean"
+                                manualHexInput = newHex
                                 
                                 // Try to parse and update if valid
-                                if (hexInput.length == 7) {
-                                    val parsed = hexInput.toComposeColor(Color.Transparent)
+                                if (newHex.length == 7) {
+                                    val parsed = newHex.toComposeColor(Color.Transparent)
                                     if (parsed != Color.Transparent) {
-                                        onColorSelected(hexInput)
+                                        localColor = newHex
+                                        onColorSelected(newHex)
                                     }
                                 }
                             }
@@ -192,7 +189,12 @@ fun FolderColorPicker(
                         singleLine = true,
                         modifier = Modifier
                             .width(100.dp)
-                            .onFocusChanged { isHexFocused = it.isFocused }
+                            .onFocusChanged { 
+                                isHexFocused = it.isFocused
+                                if (!it.isFocused) {
+                                    manualHexInput = null
+                                }
+                            }
                     )
                 }
             }
