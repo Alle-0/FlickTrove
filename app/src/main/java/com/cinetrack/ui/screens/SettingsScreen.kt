@@ -899,6 +899,14 @@ fun SettingsScreen(
                             BadgeLegendItem(text = "COMEDY", color = Color(0xFFFFEA00), desc = "Commedia apprezzata (media ≥7.0)")
                             BadgeLegendItem(text = "HORROR", color = Color(0xFFE53935), desc = "Genere Horror")
                             BadgeLegendItem(text = "ANIME", color = Color(0xFFFF9800), desc = "Genere Animazione / Anime")
+                            BadgeLegendItem(text = "BLOCKBUSTER", color = Color(0xFF6200EA), desc = "Incassi stellari (> 500 mln $)")
+                            BadgeLegendItem(text = "INDIE", color = Color(0xFFAED581), desc = "Basso budget, alta qualità (budget < 5 mln, media ≥7.0)")
+                            BadgeLegendItem(text = "QUICK", color = Color(0xFFC6FF00), desc = "Breve ma intenso (Film < 90 min)")
+                            BadgeLegendItem(text = "SNACK", color = Color(0xFFC6FF00), desc = "Episodi brevi (Serie TV < 25 min)")
+                            BadgeLegendItem(text = "DIVISIVE", color = Color(0xFFFF9800), desc = "O si ama o si odia (media 5.0 - 6.5, >1000 voti)")
+                            BadgeLegendItem(text = "VINTAGE", color = Color(0xFFBCAAA4), desc = "Classico d'altri tempi (< 1970)")
+                            BadgeLegendItem(text = "DOCU", color = Color(0xFF9E9E9E), desc = "Documentari")
+                            BadgeLegendItem(text = "FAMILY", color = Color(0xFF81D4FA), desc = "Ideale per la famiglia")
                         }
                         
                         Spacer(modifier = Modifier.height(32.dp))

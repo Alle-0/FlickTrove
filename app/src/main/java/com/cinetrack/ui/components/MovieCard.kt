@@ -547,11 +547,23 @@ fun MovieCard(
                         MovieCardBadge(text = "HIDDEN GEM", color = Color(0xFF00E676), hazeState = hazeState)
                     }
                     
+                    if ((movie.voteCount ?: 0) > 1000 && (movie.voteAverage ?: 0.0) >= 5.0 && (movie.voteAverage ?: 0.0) <= 6.5) {
+                        MovieCardBadge(text = "DIVISIVE", color = Color(0xFFFF9800), hazeState = hazeState)
+                    }
+
+                    if ((movie.revenue ?: 0L) > 500_000_000L) {
+                        MovieCardBadge(text = "BLOCKBUSTER", color = Color(0xFF6200EA), hazeState = hazeState)
+                    } else if ((movie.budget ?: 0L) in 1L..5_000_000L && (movie.voteAverage ?: 0.0) >= 7.0) {
+                        MovieCardBadge(text = "INDIE", color = Color(0xFFAED581), hazeState = hazeState)
+                    }
+                    
                     val releaseYear = movie.releaseYear?.toIntOrNull() ?: 
                                       movie.releaseDate?.take(4)?.toIntOrNull() ?: 
                                       movie.firstAirDate?.take(4)?.toIntOrNull() ?: 9999
                     
-                    if (releaseYear < 1990 && (movie.voteAverage ?: 0.0) >= 7.0) {
+                    if (releaseYear < 1970) {
+                        MovieCardBadge(text = "VINTAGE", color = Color(0xFFBCAAA4), hazeState = hazeState)
+                    } else if (releaseYear < 1990 && (movie.voteAverage ?: 0.0) >= 7.0) {
                         MovieCardBadge(text = "CLASSIC", color = Color(0xFF8D6E63), hazeState = hazeState)
                     } else if (releaseYear in 1990..2010 && (movie.voteAverage ?: 0.0) >= 8.0) {
                         MovieCardBadge(text = "CULT", color = Color(0xFF9C27B0), hazeState = hazeState)
@@ -559,10 +571,14 @@ fun MovieCard(
                     
                     if ((movie.runtime ?: 0) > 160) {
                         MovieCardBadge(text = "EPIC", color = Color(0xFFFF5722), hazeState = hazeState)
+                    } else if (movie.mediaType != "tv" && (movie.runtime ?: 0) in 1..89) {
+                        MovieCardBadge(text = "QUICK", color = Color(0xFFC6FF00), hazeState = hazeState)
                     }
                     
                     if ((movie.numberOfSeasons ?: 0) >= 5 || (movie.numberOfEpisodes ?: 0) > 50) {
                         MovieCardBadge(text = "BINGE", color = Color(0xFF00BCD4), hazeState = hazeState)
+                    } else if (movie.mediaType == "tv" && (movie.episodeRunTime?.firstOrNull() ?: 0) in 1..25) {
+                        MovieCardBadge(text = "SNACK", color = Color(0xFFC6FF00), hazeState = hazeState)
                     }
     
                     val genresStr = movie.genreNamesString ?: ""
@@ -579,6 +595,10 @@ fun MovieCard(
                         MovieCardBadge(text = "SCI-FI", color = Color(0xFF2962FF), hazeState = hazeState)
                     } else if (hasGenre("Comedy") && (movie.voteAverage ?: 0.0) >= 7.0) {
                         MovieCardBadge(text = "COMEDY", color = Color(0xFFFFEA00), hazeState = hazeState)
+                    } else if (hasGenre("Documentary")) {
+                        MovieCardBadge(text = "DOCU", color = Color(0xFF9E9E9E), hazeState = hazeState)
+                    } else if (hasGenre("Family")) {
+                        MovieCardBadge(text = "FAMILY", color = Color(0xFF81D4FA), hazeState = hazeState)
                     }
                 }
             }
