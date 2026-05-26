@@ -351,10 +351,10 @@ fun SettingsScreen(
                         }
                     }
 
-                    // Section: Notifiche
+                    // Section: Notifiche e Vibrazione
                     item {
                         SettingsSection(
-                            title = "Notifiche",
+                            title = "Notifiche e Vibrazione",
                             icon = Icons.Rounded.NotificationsActive
                         ) {
                             SettingsItem(
@@ -872,6 +872,7 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .heightIn(max = 420.dp)
                                 .premiumScrollbar(legendScrollState)
+                                .padding(end = 12.dp)
                                 .verticalScroll(legendScrollState)
                         ) {
                             BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
@@ -1316,6 +1317,7 @@ fun FeedbackDialog(
                     .padding(28.dp)
                     .heightIn(max = 600.dp)
                     .premiumScrollbar(feedbackScrollState)
+                    .padding(end = 12.dp)
                     .verticalScroll(feedbackScrollState)
             ) {
                 Text(

@@ -807,6 +807,7 @@ fun MovieDetailScreen(
                         .padding(24.dp)
                         .heightIn(max = 420.dp)
                         .premiumScrollbar(dialogScrollState)
+                        .padding(end = 12.dp)
                         .verticalScroll(dialogScrollState)
                 ) {
                     Row(
