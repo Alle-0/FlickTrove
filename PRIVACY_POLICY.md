@@ -6,7 +6,7 @@ La presente Privacy Policy descrive come l'applicazione "FlickTrove" (da qui in 
 
 ### 1. Titolare del Trattamento
 Il Titolare del trattamento dei dati è lo sviluppatore indipendente dell'applicazione FlickTrove.
-Per qualsiasi domanda, dubbio o richiesta riguardante la privacy, l'esercizio dei diritti GDPR o il trattamento dei propri dati, è possibile contattare il Titolare all'indirizzo email: **[INSERIRE EMAIL CONTATTO]** (oppure tramite la pagina GitHub del progetto).
+Per qualsiasi domanda, dubbio o richiesta riguardante la privacy, l'esercizio dei diritti GDPR o il trattamento dei propri dati, è possibile contattare il Titolare all'indirizzo email: **alessandrobasile909@gmail.com** (oppure tramite la pagina GitHub del progetto).
 
 ### 2. Dati Raccolti e Finalità
 L'App è progettata secondo i principi di minimizzazione: raccogliamo unicamente il minimo indispensabile di informazioni per garantire la sicurezza del tuo account e fornirti le funzionalità promesse.
