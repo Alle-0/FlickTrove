@@ -103,7 +103,7 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val largeIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
+        val largeIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
 
         val mediaLabel = if (mediaType == "tv") "Serie TV" else "Film"
         val bodyText = "\"$movieTitle\" è ora disponibile! Aprilo per scoprire di più."
@@ -161,7 +161,7 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val largeIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
+        val largeIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
         val bodyText = "L'episodio $episodeString di \"$showTitle\" esce oggi!"
 
         val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
@@ -211,7 +211,7 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val largeIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
+        val largeIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
 
         val episodeWord = if (newEpisodesCount == 1) "episodio" else "episodi"
         val bodyText = "$newEpisodesCount nuov${if (newEpisodesCount == 1) "o" else "i"} $episodeWord " +
@@ -245,4 +245,17 @@ object NotificationHelper {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             data = android.net.Uri.parse("flicktrove://media/$mediaType/$mediaId")
         }
+
+    private fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): android.graphics.Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, drawableId) ?: return null
+        val bitmap = android.graphics.Bitmap.createBitmap(
+            drawable.intrinsicWidth.coerceAtLeast(1),
+            drawable.intrinsicHeight.coerceAtLeast(1),
+            android.graphics.Bitmap.Config.ARGB_8888
+        )
+        val canvas = android.graphics.Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
 }

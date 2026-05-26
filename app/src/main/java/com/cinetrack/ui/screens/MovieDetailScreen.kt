@@ -748,7 +748,7 @@ fun MovieDetailScreen(
                     }
 
                     // Modal Content Layer
-                    if (contentAlpha > 0.01f) {
+                    if (showFolderPicker || contentAlpha > 0.0f) {
                         Box(modifier = Modifier.fillMaxWidth().alpha(contentAlpha)) {
                             if (successState != null) {
                                 FolderPickerModalContent(
