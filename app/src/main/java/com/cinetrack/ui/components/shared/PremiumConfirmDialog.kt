@@ -70,15 +70,18 @@ fun PremiumConfirmDialog(
                     .clickable(enabled = false) {}, // Prevent click propagation to background
                 contentAlignment = Alignment.Center
             ) {
-                // Background Layer (haze blur or solid dark fallback)
+                // Background Layer (solid dark fallback)
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(32.dp),
-                            containerColor = Color(0x99121212),
-                            blurRadius = 40.dp
+                        .background(
+                            color = Color(0xFF121212).copy(alpha = 0.95f),
+                            shape = RoundedCornerShape(32.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(32.dp)
                         )
                 )
 
