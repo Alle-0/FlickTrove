@@ -865,11 +865,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         // Badge Legend
+                        val legendScrollState = rememberScrollState()
                         Column(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier
                                 .heightIn(max = 420.dp)
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(legendScrollState)
+                                .premiumScrollbar(legendScrollState)
                         ) {
                             BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
                             BadgeLegendItem(text = "MASTERPIECE", color = Color(0xFFFFD700), desc = "Capolavoro assoluto (media ≥8.8, >2000 voti)")
@@ -1305,12 +1307,14 @@ fun FeedbackDialog(
                 }
         ) {
 
+        val feedbackScrollState = rememberScrollState()
         Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(28.dp)
                     .heightIn(max = 600.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(feedbackScrollState)
+                    .premiumScrollbar(feedbackScrollState)
             ) {
                 Text(
                     "Invia Feedback",

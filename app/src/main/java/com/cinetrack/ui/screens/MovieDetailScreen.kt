@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.verticalScroll
+import com.cinetrack.ui.utils.premiumScrollbar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.*
@@ -799,8 +800,13 @@ fun MovieDetailScreen(
                     )
                     .clickable(enabled = false) {}
             ) {
+                val dialogScrollState = rememberScrollState()
                 Column(
-                    modifier = Modifier.padding(24.dp)
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .heightIn(max = 420.dp)
+                        .verticalScroll(dialogScrollState)
+                        .premiumScrollbar(dialogScrollState)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

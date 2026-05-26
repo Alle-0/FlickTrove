@@ -760,14 +760,15 @@ fun MovieCard(
 private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null) {
     Box(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(50))
             .border(0.5.dp, color.copy(alpha = 0.8f), RoundedCornerShape(50))
             .padding(horizontal = 6.dp, vertical = 2.5.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = color,
+            color = Color.White,
             fontSize = 7.5.sp,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 0.5.sp,
