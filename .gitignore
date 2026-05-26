@@ -25,3 +25,12 @@ app/build/
 # Log files
 *.log
 log.txt
+
+# Sensitive files
+google-services.json
+*.jks
+*.keystore
+local.properties
+.env
+apikey.properties
+secrets.properties
