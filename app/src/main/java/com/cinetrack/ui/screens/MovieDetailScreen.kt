@@ -803,10 +803,11 @@ fun MovieDetailScreen(
                 val dialogScrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(24.dp)
                         .heightIn(max = 420.dp)
-                        .verticalScroll(dialogScrollState)
                         .premiumScrollbar(dialogScrollState)
+                        .verticalScroll(dialogScrollState)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

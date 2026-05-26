@@ -869,9 +869,10 @@ fun SettingsScreen(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .heightIn(max = 420.dp)
-                                .verticalScroll(legendScrollState)
                                 .premiumScrollbar(legendScrollState)
+                                .verticalScroll(legendScrollState)
                         ) {
                             BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
                             BadgeLegendItem(text = "MASTERPIECE", color = Color(0xFFFFD700), desc = "Capolavoro assoluto (media ≥8.8, >2000 voti)")
@@ -1311,10 +1312,11 @@ fun FeedbackDialog(
         Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(28.dp)
                     .heightIn(max = 600.dp)
-                    .verticalScroll(feedbackScrollState)
                     .premiumScrollbar(feedbackScrollState)
+                    .verticalScroll(feedbackScrollState)
             ) {
                 Text(
                     "Invia Feedback",
