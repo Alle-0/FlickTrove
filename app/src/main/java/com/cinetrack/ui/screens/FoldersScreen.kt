@@ -101,14 +101,22 @@ fun FoldersScreen(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(Modifier.height(24.dp))
-                        Button(
-                            onClick = { isCreateDialogOpen = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                            shape = RoundedCornerShape(12.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(50))
+                                .bounceClick { isCreateDialogOpen = true }
+                                .padding(horizontal = 24.dp, vertical = 12.dp)
                         ) {
-                            Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Rounded.Add, null, tint = Color.White, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("CREA LA PRIMA")
+                            Text(
+                                "CREA LA PRIMA", 
+                                color = Color.White, 
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                            )
                         }
                     }
                 }
