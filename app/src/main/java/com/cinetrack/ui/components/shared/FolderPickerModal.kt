@@ -113,7 +113,7 @@ fun FolderPickerModalContent(
                 val springSpec = spring<Float>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
                 fadeIn(animationSpec = springSpec) togetherWith fadeOut(animationSpec = springSpec)
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             label = "FolderPickerTransition"
         ) { creating ->
             if (creating) {
@@ -149,7 +149,7 @@ private fun FolderListContent(
     
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(24.dp)
     ) {
         Row(
@@ -195,7 +195,7 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -208,7 +208,7 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 320.dp)
+                    .weight(1f)
             ) {
                 LazyColumn(
                     state = listState,
@@ -386,68 +386,73 @@ private fun FolderCreateForm(
 
     val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 450.dp)
-            .premiumScrollbar(scrollState)
-            .verticalFadingEdges(scrollState, 16.dp, 16.dp)
-            .verticalScroll(scrollState)
-            .padding(24.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .premiumScrollbar(scrollState)
+                .verticalScroll(scrollState)
+                .padding(24.dp)
         ) {
-            Text(
-                text = "Nuova Cartella",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
-                color = Color.White
-            )
-            IconButton(
-                onClick = onCancel,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = "Chiudi",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                Text(
+                    text = "Nuova Cartella",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+                    color = Color.White
                 )
+                IconButton(
+                    onClick = onCancel,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Chiudi",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
+            Spacer(Modifier.height(20.dp))
+            
+            OutlinedTextField(
+                value = name,
+                onValueChange = { if (it.length <= 25) name = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Nome", color = Color.White.copy(alpha = 0.4f)) },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                    cursorColor = Color.White
+                ),
+                singleLine = true
+            )
+            
+            Spacer(Modifier.height(20.dp))
+            
+            FolderColorPicker(
+                selectedColor = selectedColor,
+                onColorSelected = { selectedColor = it }
+            )
+            
+            Spacer(Modifier.height(24.dp))
         }
-        Spacer(Modifier.height(20.dp))
-        
-        OutlinedTextField(
-            value = name,
-            onValueChange = { if (it.length <= 25) name = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Nome", color = Color.White.copy(alpha = 0.4f)) },
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                cursorColor = Color.White
-            ),
-            singleLine = true
-        )
-        
-        Spacer(Modifier.height(20.dp))
-        
-        FolderColorPicker(
-            selectedColor = selectedColor,
-            onColorSelected = { selectedColor = it }
-        )
-        
-        Spacer(Modifier.height(32.dp))
         
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             TextButton(

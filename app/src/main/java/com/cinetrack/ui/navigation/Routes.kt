@@ -63,4 +63,7 @@ object FoldersRoute : FlickRoute
 data class FolderDetailRoute(val folderId: String, val folderName: String, val folderColor: String? = null) : FlickRoute
 
 @Serializable
+object LogoAnimationRoute : FlickRoute
+
+@Serializable
 object EmptyRoute : FlickRoute

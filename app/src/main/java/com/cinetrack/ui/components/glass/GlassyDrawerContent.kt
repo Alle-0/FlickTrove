@@ -158,7 +158,14 @@ fun GlassyDrawerContent(
                     icon = Icons.Rounded.Settings,
                     label = "Impostazioni",
                     isActive = activeRoute == "settings",
-                    onClick = { onNavigate("discover", "settings") },
+                    onClick = { onNavigate("settings", null) },
+                    accentColor = accentColor
+                )
+                DrawerItem(
+                    icon = Icons.Rounded.Animation,
+                    label = "Logo Animation",
+                    isActive = activeRoute == "logo_animation",
+                    onClick = { onNavigate("logo_animation", null) },
                     accentColor = accentColor
                 )
 

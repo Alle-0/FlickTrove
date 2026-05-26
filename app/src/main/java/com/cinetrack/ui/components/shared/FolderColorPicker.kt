@@ -132,12 +132,16 @@ fun FolderColorPicker(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 var localColor by remember(selectedColor) { mutableStateOf(selectedColor) }
+                var manualHexInput by remember { mutableStateOf<String?>(null) }
                 
                 val focusManager = LocalFocusManager.current
                 
                 ColorWheel(
                     selectedColor = localColor,
-                    onColorChanged = { localColor = it },
+                    onColorChanged = { 
+                        localColor = it
+                        manualHexInput = null // Fix: Clear manual input to update display hex live
+                    },
                     onInteractionStart = { focusManager.clearFocus() },
                     onInteractionEnd = { onColorSelected(localColor) },
                     modifier = Modifier.size(160.dp)
@@ -145,7 +149,6 @@ fun FolderColorPicker(
                 
                 Spacer(Modifier.height(16.dp))
                 
-                var manualHexInput by remember { mutableStateOf<String?>(null) }
                 val displayHex = manualHexInput ?: localColor.uppercase()
                 
                 var isHexFocused by remember { mutableStateOf(false) }

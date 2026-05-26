@@ -356,6 +356,7 @@ class MainActivity : ComponentActivity() {
                                     is RecommendationsRoute -> "recommendations"
                                     is SurpriseMeRoute -> "surprise_me"
                                     is SettingsRoute -> "settings"
+                                    is LogoAnimationRoute -> "logo_animation"
                                     else -> null
                                 },
                                 onClose = { scope.launch { drawerState.close() } },
@@ -386,6 +387,7 @@ class MainActivity : ComponentActivity() {
                                             "trending_movies" -> DiscoverRoute(type = "trending_movies")
                                             "trending_tv" -> DiscoverRoute(type = "trending_tv")
                                             "my_folders" -> FoldersRoute
+                                            "logo_animation" -> LogoAnimationRoute
                                             else -> HomeRoute
                                         }
                                         navController.navigate(finalRoute)
@@ -505,6 +507,7 @@ class MainActivity : ComponentActivity() {
                                                         is DetailRoute -> "Dettaglio"
                                                         is PersonRoute -> "Dettaglio Persona"
                                                         is SettingsRoute -> "Impostazioni"
+                                                        is LogoAnimationRoute -> "Animazione Logo"
                                                         else -> "FlickTrove"
                                                     },
                                                     onMenuClick = { scope.launch { drawerState.open() } },
@@ -773,6 +776,9 @@ class MainActivity : ComponentActivity() {
                                                     onActionModalVisibilityChanged = { isActionModalVisible = it }
                                                 )
                                             }
+                                            composable<LogoAnimationRoute> {
+                                                LogoAnimationScreen(hazeState = contentHazeState)
+                                            }
                                             composable<SettingsRoute> {
                                                 val authViewModel: AuthViewModel = hiltViewModel()
                                                 SettingsScreen(
@@ -850,6 +856,10 @@ class MainActivity : ComponentActivity() {
                                             composable<LoginRoute> {
                                                 AuthScreen(onLoginSuccess = { navController.navigate(HomeRoute) })
                                             }
+                                            composable<LogoAnimationRoute> {
+                                                com.cinetrack.ui.screens.LogoAnimationScreen()
+                                            }
+                                            
                                             composable<FoldersRoute>(
                                                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
                                                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
