@@ -505,49 +505,7 @@ fun MovieDetailScreen(
             )
         }
 
-        val currentEffectiveProgress = (symbioteProgress.coerceAtLeast(modalExpansionProgress)).coerceIn(0f, 1f)
 
-        val symbioteShape: Shape = remember(currentEffectiveProgress, density, modalCorner) {
-            GenericShape { size, _ ->
-                val circleSize = with(density) { 44.dp.toPx() }
-                val progress = currentEffectiveProgress
-                val pillWidth = size.width
-                val pillHeight = size.height
-                val radius = with(density) { modalCorner.toPx() }
-                
-                if (progress <= 0.01f && pillHeight <= with(density) { 45.dp.toPx() }) return@GenericShape
-
-                val stretchWidth = circleSize + (pillWidth / 2f - circleSize) * progress
-                val p4 = progress * progress * progress * progress
-                val innerRadius = radius * (1f - p4)
-                
-                val pathLeft = androidx.compose.ui.graphics.Path().apply {
-                    addRoundRect(androidx.compose.ui.geometry.RoundRect(
-                        left = 0f, top = 0f, right = stretchWidth + 2f, bottom = pillHeight,
-                        topLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
-                        topRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
-                        bottomRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
-                        bottomLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius)
-                    ))
-                }
-                
-                val pathRight = androidx.compose.ui.graphics.Path().apply {
-                    addRoundRect(androidx.compose.ui.geometry.RoundRect(
-                        left = pillWidth - stretchWidth - 2f, top = 0f, right = pillWidth, bottom = pillHeight,
-                        topLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
-                        topRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
-                        bottomRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
-                        bottomLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius)
-                    ))
-                }
-                
-                addPath(androidx.compose.ui.graphics.Path.combine(
-                    androidx.compose.ui.graphics.PathOperation.Union,
-                    pathLeft,
-                    pathRight
-                ))
-            }
-        }
 
         // Morphing Container (Pill Bar -> Modal)
         Box(
@@ -561,29 +519,27 @@ fun MovieDetailScreen(
         ) {
                 Box(
                     modifier = Modifier
-                        .width(modalWidth)
                         .animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
                         .then(
-                            if (showFolderPicker) Modifier.wrapContentHeight()
-                            else Modifier.height(44.dp)
+                            if (showFolderPicker) Modifier.width(screenWidth - 40.dp).wrapContentHeight()
+                            else Modifier.size(collapsedPillWidth, 44.dp)
                         ),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (currentEffectiveProgress > 0.01f) {
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .graphicsLayer {
-                                    clip = true
-                                    shape = symbioteShape
-                                }
-                                .hazeGlass(
-                                    state = localHazeState,
-                                    shape = symbioteShape,
-                                    useOffscreenStrategy = true
-                                )
-                        )
-                    }
+                    // Blur Background always active but grows seamlessly
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .graphicsLayer {
+                                clip = true
+                                shape = RoundedCornerShape(modalCorner)
+                            }
+                            .hazeGlass(
+                                state = localHazeState,
+                                shape = RoundedCornerShape(modalCorner),
+                                useOffscreenStrategy = true
+                            )
+                    )
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Pill Header Row (always 44.dp high)
                     val iconBrush = when {
@@ -617,7 +573,7 @@ fun MovieDetailScreen(
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (currentEffectiveProgress <= 0.01f) {
+                            if (modalExpansionProgress <= 0.01f) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -714,7 +670,7 @@ fun MovieDetailScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (currentEffectiveProgress <= 0.01f && successState != null) {
+                            if (modalExpansionProgress <= 0.01f && successState != null) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
