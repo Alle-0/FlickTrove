@@ -562,8 +562,9 @@ fun MovieDetailScreen(
                 Box(
                     modifier = Modifier
                         .width(modalWidth)
+                        .animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
                         .then(
-                            if (showFolderPicker) Modifier.wrapContentHeight().animateContentSize(spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
+                            if (showFolderPicker) Modifier.wrapContentHeight()
                             else Modifier.height(44.dp)
                         ),
                     contentAlignment = Alignment.TopCenter
