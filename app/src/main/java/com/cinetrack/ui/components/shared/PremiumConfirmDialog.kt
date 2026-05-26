@@ -66,7 +66,6 @@ fun PremiumConfirmDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
-                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                     .clip(RoundedCornerShape(32.dp))
                     .clickable(enabled = false) {}, // Prevent click propagation to background
                 contentAlignment = Alignment.Center
@@ -88,8 +87,7 @@ fun PremiumConfirmDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(28.dp)
-                        .zIndex(2f)
-                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
+                        .zIndex(2f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Icon Header

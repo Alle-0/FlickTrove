@@ -275,6 +275,7 @@ fun AuthScreen(
                                 )
                             )
                     )
+                    Text(
                         "OPPURE",
                         modifier = Modifier.padding(horizontal = 20.dp),
                         color = Color.White.copy(alpha = 0.5f),
