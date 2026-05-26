@@ -192,6 +192,13 @@ fun GlassyDrawer(
                     onClick = { onNavigate("settings") },
                     accentColor = accentColor
                 )
+                DrawerItem(
+                    icon = Icons.Rounded.Animation,
+                    label = "Logo Animation",
+                    isSelected = selectedRoute == "logo_animation",
+                    onClick = { onNavigate("logo_animation") },
+                    accentColor = accentColor
+                )
             }
         }
     }
