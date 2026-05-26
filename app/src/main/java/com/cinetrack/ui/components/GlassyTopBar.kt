@@ -143,6 +143,17 @@ fun GlassyTopBar(
                     )
                     Spacer(Modifier.width(8.dp))
                 }
+                
+                if (title == "FlickTrove") {
+                    Icon(
+                        painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
+                        contentDescription = "Logo",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                }
+                
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(

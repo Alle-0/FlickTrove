@@ -2111,15 +2111,27 @@ fun WrappedBannerPill(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "FLICKTROVE",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Black,
-                                color = Color.White,
-                                letterSpacing = 3.5.sp,
-                                fontSize = 12.sp
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
+                                contentDescription = "Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(16.dp).offset(y = (-1).dp)
                             )
-                        )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "FLICKTROVE",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White,
+                                    letterSpacing = 3.5.sp,
+                                    fontSize = 12.sp
+                                )
+                            )
+                        }
                         Text(
                             text = "THE CINEPHILE'S LEGACY",
                             style = MaterialTheme.typography.labelSmall.copy(
