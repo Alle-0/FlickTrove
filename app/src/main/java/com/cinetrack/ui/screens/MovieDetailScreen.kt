@@ -571,7 +571,7 @@ fun MovieDetailScreen(
                     if (currentEffectiveProgress > 0.01f) {
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .matchParentSize()
                                 .graphicsLayer {
                                     clip = true
                                     shape = symbioteShape
