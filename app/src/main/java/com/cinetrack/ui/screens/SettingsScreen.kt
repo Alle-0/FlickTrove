@@ -1,6 +1,8 @@
 package com.cinetrack.ui.screens
 
 import com.cinetrack.ui.components.shared.ColorWheel
+import com.cinetrack.ui.components.shared.ProfileImagePicker
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.toComposeColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.text.BasicTextField
@@ -1323,11 +1325,9 @@ fun FeedbackDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(28.dp)
-                    .heightIn(max = 600.dp)
-                    .premiumScrollbar(feedbackScrollState)
-                    .padding(end = 12.dp)
-                    .verticalScroll(feedbackScrollState)
+                    .heightIn(max = 500.dp)
             ) {
+                // Header (Fixed)
                 Text(
                     "Invia Feedback",
                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -1343,7 +1343,19 @@ fun FeedbackDialog(
                     color = OnSurfaceMuted
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Scrollable Content
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                        .premiumScrollbar(feedbackScrollState)
+                        .padding(end = 12.dp)
+                        .verticalFadingEdges(16.dp, 16.dp)
+                        .verticalScroll(feedbackScrollState)
+                ) {
 
                 // Rating Section
                 Row(
@@ -1409,9 +1421,11 @@ fun FeedbackDialog(
                                 .padding(top = 4.dp, end = 8.dp)
                         )
                     }
-                }
+                    } // Closes SpacedBy Column
+                } // End of scrollable Column
 
-                Spacer(modifier = Modifier.height(32.dp))
+                // Footer (Fixed)
+                Spacer(modifier = Modifier.height(20.dp))
 
                 val isEnabled = title.isNotBlank() && description.isNotBlank() && !isLoading
                 Box(
@@ -1447,7 +1461,7 @@ fun FeedbackDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(
                     onClick = onDismiss,

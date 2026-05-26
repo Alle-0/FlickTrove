@@ -51,6 +51,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
+import com.cinetrack.ui.components.shared.GlassyTextField
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
 import com.cinetrack.ui.viewmodel.DetailUiState
@@ -810,15 +812,13 @@ fun MovieDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp)
-                        .heightIn(max = 420.dp)
-                        .premiumScrollbar(dialogScrollState)
-                        .padding(end = 12.dp)
-                        .verticalScroll(dialogScrollState)
+                        .heightIn(max = 500.dp)
                 ) {
+                    // Title (Fixed)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Icon(
                             Icons.Rounded.Info,
@@ -833,7 +833,17 @@ fun MovieDetailScreen(
                             color = Color.White
                         )
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Scrollable Content
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f, fill = false)
+                            .premiumScrollbar(dialogScrollState)
+                            .padding(end = 12.dp)
+                            .verticalFadingEdges(16.dp, 16.dp)
+                            .verticalScroll(dialogScrollState)
+                    ) {
 
                     // Film (MPAA)
                     Text(
@@ -868,8 +878,10 @@ fun MovieDetailScreen(
                         RatingLegendItem("TV-14", Color(0xFFF44336), "Sconsigliato ai minori di 14 anni.")
                         RatingLegendItem("TV-MA", Color(0xFFD32F2F), "Solo per adulti (18+).")
                     }
+                                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    // Close Button (Fixed)
+                    Spacer(modifier = Modifier.height(20.dp))
                     Button(
                         onClick = { showRatingInfoDialog = false },
                         modifier = Modifier.fillMaxWidth(),
@@ -878,7 +890,7 @@ fun MovieDetailScreen(
                             containerColor = Color.White.copy(alpha = 0.15f)
                         )
                     ) {
-                        Text("Chiudi", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("Chiudi", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
