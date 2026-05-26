@@ -840,7 +840,7 @@ fun MovieDetailScreen(
                             .weight(1f, fill = false)
                             .premiumScrollbar(dialogScrollState)
                             .padding(end = 12.dp)
-                            .verticalFadingEdges(16.dp, 16.dp)
+                            .verticalFadingEdges(dialogScrollState, 16.dp, 16.dp)
                             .verticalScroll(dialogScrollState)
                     ) {
 

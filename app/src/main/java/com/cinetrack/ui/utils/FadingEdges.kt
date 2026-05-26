@@ -1,5 +1,6 @@
 package com.cinetrack.ui.utils
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
  * Aggiunge bordi sfumati (fading edges) in alto e in basso a un contenitore scrollabile.
  */
 fun Modifier.verticalFadingEdges(
+    scrollState: ScrollState,
     topEdgeHeight: Dp = 24.dp,
     bottomEdgeHeight: Dp = 24.dp
 ): Modifier = this
@@ -22,8 +24,11 @@ fun Modifier.verticalFadingEdges(
         drawContent()
         val topColors = listOf(Color.Transparent, Color.Black)
         val bottomColors = listOf(Color.Black, Color.Transparent)
+        
+        val showTop = scrollState.value > 0
+        val showBottom = scrollState.value < scrollState.maxValue
 
-        if (topEdgeHeight > 0.dp) {
+        if (showTop && topEdgeHeight > 0.dp) {
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = topColors,
@@ -33,7 +38,7 @@ fun Modifier.verticalFadingEdges(
                 blendMode = BlendMode.DstIn
             )
         }
-        if (bottomEdgeHeight > 0.dp) {
+        if (showBottom && bottomEdgeHeight > 0.dp) {
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = bottomColors,
