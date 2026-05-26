@@ -100,14 +100,15 @@ fun AuthScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .haze(hazeState, style = HazeStyles.PremiumDark)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { focusManager.clearFocus() })
             }
     ) {
         // ── Background Content ──
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(hazeState, style = HazeStyles.PremiumDark)
         ) {
             CinematicBackground()
 
