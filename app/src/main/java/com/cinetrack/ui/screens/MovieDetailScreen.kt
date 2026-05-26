@@ -782,10 +782,15 @@ fun MovieDetailScreen(
         exit = fadeOut(tween(200)),
         modifier = Modifier.zIndex(100f)
     ) {
+        val blurAlpha by transition.animateFloat(
+            transitionSpec = { tween(200) },
+            label = "blurAlpha"
+        ) { if (it == androidx.compose.animation.EnterExitState.Visible) 0.85f else 0f }
+        
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = 0.6f * (blurAlpha / 0.85f)))
                 .clickable { showRatingInfoDialog = false },
             contentAlignment = Alignment.Center
         ) {
@@ -795,7 +800,7 @@ fun MovieDetailScreen(
                     .fillMaxWidth(0.85f)
                     .hazeGlass(
                         state = localHazeState,
-                        alpha = 0.85f,
+                        alpha = blurAlpha,
                         shape = RoundedCornerShape(32.dp)
                     )
                     .clickable(enabled = false) {}
