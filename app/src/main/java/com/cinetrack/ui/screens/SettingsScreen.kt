@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -94,6 +95,7 @@ fun SettingsScreen(
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
+    val uriHandler = LocalUriHandler.current
     
     // State from SettingsViewModel
     val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
@@ -568,13 +570,19 @@ fun SettingsScreen(
                                 icon = Icons.AutoMirrored.Rounded.Article,
                                 title = "Termini di Servizio",
                                 isExternal = true,
-                                onClick = { /* Open URL */ }
+                                onClick = { 
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/TERMS_OF_SERVICE.md") 
+                                }
                             )
                             SettingsItem(
                                 icon = Icons.Rounded.Security,
                                 title = "Informativa sulla Privacy",
                                 isExternal = true,
-                                onClick = { /* Open URL */ }
+                                onClick = { 
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/PRIVACY_POLICY.md") 
+                                }
                             )
                             
                             Spacer(modifier = Modifier.height(16.dp))
