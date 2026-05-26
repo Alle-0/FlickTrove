@@ -244,12 +244,12 @@ class MainActivity : ComponentActivity() {
                     val action = intent.action
                     if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
                         // If auth state is not yet resolved, wait for it
-                        if (authState !is AuthState.Authenticated && authState !is AuthState.Unauthenticated && authState !is AuthState.Error) {
+                        if (authState !is AuthState.Authenticated && authState !is AuthState.Unauthenticated && authState !is AuthState.Error && authState !is AuthState.Anonymous) {
                             return@LaunchedEffect
                         }
                         
-                        // Only process deep links if authenticated
-                        if (authState is AuthState.Authenticated) {
+                        // Only process deep links if authenticated or guest
+                        if (authState is AuthState.Authenticated || authState is AuthState.Anonymous) {
                             if (uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")) {
                                 val segments = uri.pathSegments
                                 if (segments.size >= 2) {
@@ -669,7 +669,7 @@ class MainActivity : ComponentActivity() {
                                                 LaunchedEffect(authState) {
                                                     kotlinx.coroutines.delay(1200) // Ridotto da 2000 per una transizione più veloce
                                                     when (authState) {
-                                                        is AuthState.Authenticated -> {
+                                                        is AuthState.Authenticated, is AuthState.Anonymous -> {
                                                             navController.navigate(HomeRoute) {
                                                                 popUpTo(SplashRoute) { inclusive = true }
                                                             }
