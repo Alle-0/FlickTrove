@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import dev.chrisbanes.haze.HazeState
+import com.cinetrack.ui.components.glass.hazeGlass
 
 @Composable
 fun PremiumConfirmDialog(
@@ -70,12 +71,16 @@ fun PremiumConfirmDialog(
                     .clickable(enabled = false) {}, // Prevent click propagation to background
                 contentAlignment = Alignment.Center
             ) {
-                // Background Layer (solid dark background)
+                // Background Layer (haze blur or solid dark fallback)
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(Color(0xCC121212))
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(32.dp),
+                            containerColor = Color(0x99121212),
+                            blurRadius = 40.dp
+                        )
                 )
 
                 // Foreground Content above the dark background
