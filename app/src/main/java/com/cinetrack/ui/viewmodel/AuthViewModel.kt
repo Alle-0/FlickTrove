@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.repository.MovieRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -66,7 +68,12 @@ class AuthViewModel @Inject constructor(
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {
             val listener = FirebaseAuth.AuthStateListener { auth ->
-                trySend(if (auth.currentUser != null) AuthState.Authenticated else AuthState.Unauthenticated)
+                val user = auth.currentUser
+                if (user != null && !user.isAnonymous) {
+                    trySend(AuthState.Authenticated)
+                } else {
+                    trySend(AuthState.Unauthenticated)
+                }
             }
             auth.addAuthStateListener(listener)
             awaitClose { auth.removeAuthStateListener(listener) }
@@ -93,20 +100,28 @@ class AuthViewModel @Inject constructor(
 
         _processState.update { AuthState.Loading("Accesso in corso...") }
         
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener { result ->
-                val uid = result.user?.uid
-                viewModelScope.launch {
-                    _processState.update { AuthState.Loading("Sincronizzazione account in corso...", null) }
-                    movieRepository.syncWithFirebase(uid) { syncProgress ->
-                        _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+        viewModelScope.launch {
+            val currentUser = auth.currentUser
+            if (currentUser != null && currentUser.isAnonymous) {
+                // If user was a guest and logs into an EXISTING account, we clear their local guest data
+                movieRepository.clearAllData()
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener { result ->
+                    val uid = result.user?.uid
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Loading("Sincronizzazione account in corso...", null) }
+                        movieRepository.syncWithFirebase(uid) { syncProgress ->
+                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                        }
+                        _processState.update { null }
                     }
-                    _processState.update { null }
                 }
-            }
-            .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(exception.message ?: "Errore di autenticazione") }
-            }
+                .addOnFailureListener { exception ->
+                    _processState.update { AuthState.Error(exception.message ?: "Errore di autenticazione") }
+                }
+        }
     }
 
     fun signUp(email: String, password: String) {
@@ -122,13 +137,31 @@ class AuthViewModel @Inject constructor(
 
         _processState.update { AuthState.Loading("Creazione account...") }
         
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
-                _processState.update { null }
-            }
-            .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(exception.message ?: "Errore nella creazione dell'account") }
-            }
+        val currentUser = auth.currentUser
+        if (currentUser != null && currentUser.isAnonymous) {
+            // Upgrade anonymous user to permanent account via Account Linking
+            val credential = EmailAuthProvider.getCredential(email, password)
+            currentUser.linkWithCredential(credential)
+                .addOnSuccessListener {
+                    _processState.update { null }
+                }
+                .addOnFailureListener { exception ->
+                    if (exception is FirebaseAuthUserCollisionException) {
+                        _processState.update { AuthState.Error("L'email è già in uso. Effettua il login.") }
+                    } else {
+                        _processState.update { AuthState.Error(exception.message ?: "Errore nell'aggiornamento account") }
+                    }
+                }
+        } else {
+            // Normal sign up
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+                    _processState.update { null }
+                }
+                .addOnFailureListener { exception ->
+                    _processState.update { AuthState.Error(exception.message ?: "Errore nella creazione dell'account") }
+                }
+        }
     }
 
     fun loginGuest() {
