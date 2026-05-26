@@ -168,7 +168,7 @@ class AuthViewModel @Inject constructor(
         _processState.update { AuthState.Loading("Accesso Ospite...") }
         auth.signInAnonymously()
             .addOnSuccessListener {
-                _processState.update { null }
+                _processState.update { AuthState.Authenticated }
             }
             .addOnFailureListener { exception ->
                 _processState.update { AuthState.Error(exception.message ?: "Errore accesso Guest") }
