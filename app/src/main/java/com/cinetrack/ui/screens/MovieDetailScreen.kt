@@ -583,7 +583,7 @@ fun MovieDetailScreen(
                                 )
                         )
                     }
-                Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     // Pill Header Row (always 44.dp high)
                     val iconBrush = when {
                         folderColors.isEmpty() -> SolidColor(Color.White)
@@ -748,7 +748,7 @@ fun MovieDetailScreen(
 
                     // Modal Content Layer
                     if (contentAlpha > 0.01f) {
-                        Box(modifier = Modifier.weight(1f).fillMaxWidth().alpha(contentAlpha)) {
+                        Box(modifier = Modifier.fillMaxWidth().alpha(contentAlpha)) {
                             if (successState != null) {
                                 FolderPickerModalContent(
                                     folders = successState.folders,
@@ -759,7 +759,7 @@ fun MovieDetailScreen(
                                     onToggleItem = { folder -> viewModel.onEvent(DetailEvent.ToggleFolderMembership(folder)) },
                                     onCreateFolder = { name: String, color: String -> viewModel.onEvent(DetailEvent.CreateFolder(name, color)) },
                                     onClose = { showFolderPicker = false },
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             } else {
                                 // Loading state for picker
