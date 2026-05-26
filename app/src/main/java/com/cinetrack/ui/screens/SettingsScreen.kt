@@ -882,6 +882,7 @@ fun SettingsScreen(
                                 .heightIn(max = 420.dp)
                                 .premiumScrollbar(legendScrollState)
                                 .padding(end = 12.dp)
+                                .verticalFadingEdges(legendScrollState, 16.dp, 16.dp)
                                 .verticalScroll(legendScrollState)
                         ) {
                             BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")

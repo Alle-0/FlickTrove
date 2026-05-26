@@ -39,6 +39,7 @@ import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.toComposeColor
 
 @Composable
@@ -212,7 +213,8 @@ private fun FolderListContent(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize()
-                        .padding(end = 12.dp), // Space for scrollbar
+                        .padding(end = 12.dp) // Space for scrollbar
+                        .verticalFadingEdges(listState, 16.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 4.dp)
                 ) {

@@ -55,6 +55,7 @@ import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeChild
+import com.cinetrack.ui.utils.verticalFadingEdges
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
@@ -318,11 +319,13 @@ fun HomeFilterModal(
                         }
 
                         // --- SCROLLABLE CONTENT ---
+                        val filterScrollState = rememberScrollState()
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
-                                .verticalScroll(rememberScrollState())
+                                .verticalFadingEdges(filterScrollState, 16.dp, 16.dp)
+                                .verticalScroll(filterScrollState)
                                 .padding(bottom = 12.dp)
                         ) {
                             // --- SORT SECTION ---

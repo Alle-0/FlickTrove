@@ -21,7 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.theme.OnSurfaceMuted
+import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.util.toComposeColor
 
@@ -97,7 +100,8 @@ fun QuickFolderModal(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(end = 10.dp),
+                        .padding(end = 10.dp)
+                        .verticalFadingEdges(listState, 16.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 8.dp)
                 ) {
