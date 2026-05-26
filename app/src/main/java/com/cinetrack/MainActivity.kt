@@ -621,7 +621,7 @@ class MainActivity : ComponentActivity() {
                                                                 state = contentHazeState,
                                                                 shape = CircleShape
                                                             )
-                                                            .bounceClick(scaleDown = 0.92f) {
+                                                            .bounceClick(scaleDown = 0.92f, enabled = !dimBars) {
                                                                 if (buttonCenter != Offset.Zero) {
                                                                     searchZIndex = ++globalTopZIndex
                                                                     searchOverlayOffset = buttonCenter
@@ -635,6 +635,19 @@ class MainActivity : ComponentActivity() {
                                                             modifier = Modifier.size(28.dp),
                                                             tint = MaterialTheme.colorScheme.primary
                                                         )
+                                                        
+                                                        val searchDimAlpha by animateFloatAsState(
+                                                            targetValue = if (dimBars) 0.6f else 0f,
+                                                            animationSpec = tween(durationMillis = 300),
+                                                            label = "SearchDimAlpha"
+                                                        )
+                                                        if (searchDimAlpha > 0f) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .matchParentSize()
+                                                                    .background(Color.Black.copy(alpha = searchDimAlpha), CircleShape)
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
