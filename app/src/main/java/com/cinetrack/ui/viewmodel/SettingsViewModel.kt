@@ -65,6 +65,9 @@ class SettingsViewModel @Inject constructor(
     val showBadges: StateFlow<Boolean> = settingsRepository.showBadges
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val disabledBadges: StateFlow<Set<String>> = settingsRepository.disabledBadges
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
     val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -109,6 +112,18 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleBadges(enabled)
             val status = if (enabled) "visibili" else "nascosti"
             actionFeedbackManager.emit("Badge $status")
+        }
+    }
+
+    fun toggleBadgeEnabled(badge: String, enabled: Boolean) {
+        viewModelScope.launch {
+            val current = disabledBadges.value.toMutableSet()
+            if (enabled) {
+                current.remove(badge)
+            } else {
+                current.add(badge)
+            }
+            settingsRepository.updateDisabledBadges(current)
         }
     }
 

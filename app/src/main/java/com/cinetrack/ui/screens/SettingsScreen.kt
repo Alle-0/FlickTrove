@@ -29,6 +29,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -112,6 +114,7 @@ fun SettingsScreen(
     }
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
+    val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
@@ -875,6 +878,16 @@ fun SettingsScreen(
                         
                         // Badge Legend
                         val legendScrollState = rememberScrollState()
+                        val renderBadge = @Composable { text: String, color: Color, desc: String ->
+                            BadgeLegendItem(
+                                text = text,
+                                color = color,
+                                desc = desc,
+                                enabled = !disabledBadges.contains(text),
+                                onToggle = { enabled -> settingsViewModel.toggleBadgeEnabled(text, enabled) }
+                            )
+                        }
+                        
                         Column(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier
@@ -885,28 +898,28 @@ fun SettingsScreen(
                                 .verticalFadingEdges(legendScrollState, 16.dp, 16.dp)
                                 .verticalScroll(legendScrollState)
                         ) {
-                            BadgeLegendItem(text = "NEW", color = NeonPink, desc = "Prossimamente o Nuovi episodi rilasciati")
-                            BadgeLegendItem(text = "MASTERPIECE", color = Color(0xFFFFD700), desc = "Capolavoro assoluto (media ≥8.8, >2000 voti)")
-                            BadgeLegendItem(text = "BEST", color = Color(0xFF00E5FF), desc = "Media voto eccezionale (≥8.5, >300 voti)")
-                            BadgeLegendItem(text = "HOT", color = HazeStyles.AccentYellow, desc = "Molto popolare (voto > 3000 su TMDB)")
-                            BadgeLegendItem(text = "WOW", color = NeonTeal, desc = "Ottimo gradimento (media ≥8.0, >1000 voti)")
-                            BadgeLegendItem(text = "HIDDEN GEM", color = Color(0xFF00E676), desc = "Perla Nascosta (media ≥7.5, <500 voti)")
-                            BadgeLegendItem(text = "CULT", color = Color(0xFF9C27B0), desc = "Titolo iconico ('90 - '10, media ≥8.0)")
-                            BadgeLegendItem(text = "CLASSIC", color = Color(0xFF8D6E63), desc = "Classico del passato (< 1990, media ≥7.0)")
-                            BadgeLegendItem(text = "EPIC", color = Color(0xFFFF5722), desc = "Lunga durata, colossale (> 160 min)")
-                            BadgeLegendItem(text = "BINGE", color = Color(0xFF00BCD4), desc = "Ideale per abbuffate (Serie lunga, >50 ep.)")
-                            BadgeLegendItem(text = "SCI-FI", color = Color(0xFF2962FF), desc = "Genere Fantascienza")
-                            BadgeLegendItem(text = "COMEDY", color = Color(0xFFFFEA00), desc = "Commedia apprezzata (media ≥7.0)")
-                            BadgeLegendItem(text = "HORROR", color = Color(0xFFE53935), desc = "Genere Horror")
-                            BadgeLegendItem(text = "ANIME", color = Color(0xFFFF9800), desc = "Genere Animazione / Anime")
-                            BadgeLegendItem(text = "BLOCKBUSTER", color = Color(0xFF6200EA), desc = "Incassi stellari (> 500 mln $)")
-                            BadgeLegendItem(text = "INDIE", color = Color(0xFFAED581), desc = "Basso budget, alta qualità (budget < 5 mln, media ≥7.0)")
-                            BadgeLegendItem(text = "QUICK", color = Color(0xFFC6FF00), desc = "Breve ma intenso (Film < 90 min)")
-                            BadgeLegendItem(text = "SNACK", color = Color(0xFFC6FF00), desc = "Episodi brevi (Serie TV < 25 min)")
-                            BadgeLegendItem(text = "DIVISIVE", color = Color(0xFFFF9800), desc = "O si ama o si odia (media 5.0 - 6.5, >1000 voti)")
-                            BadgeLegendItem(text = "VINTAGE", color = Color(0xFFBCAAA4), desc = "Classico d'altri tempi (< 1970)")
-                            BadgeLegendItem(text = "DOCU", color = Color(0xFF9E9E9E), desc = "Documentari")
-                            BadgeLegendItem(text = "FAMILY", color = Color(0xFF81D4FA), desc = "Ideale per la famiglia")
+                            renderBadge("NEW", NeonPink, "Prossimamente o Nuovi episodi rilasciati")
+                            renderBadge("MASTERPIECE", Color(0xFFFFD700), "Capolavoro assoluto (media ≥8.8, >2000 voti)")
+                            renderBadge("BEST", Color(0xFF00E5FF), "Media voto eccezionale (≥8.5, >300 voti)")
+                            renderBadge("HOT", HazeStyles.AccentYellow, "Molto popolare (voto > 3000 su TMDB)")
+                            renderBadge("WOW", NeonTeal, "Ottimo gradimento (media ≥8.0, >1000 voti)")
+                            renderBadge("HIDDEN GEM", Color(0xFF00E676), "Perla Nascosta (media ≥7.5, <500 voti)")
+                            renderBadge("CULT", Color(0xFF9C27B0), "Titolo iconico ('90 - '10, media ≥8.0)")
+                            renderBadge("CLASSIC", Color(0xFF8D6E63), "Classico del passato (< 1990, media ≥7.0)")
+                            renderBadge("EPIC", Color(0xFFFF5722), "Lunga durata, colossale (> 160 min)")
+                            renderBadge("BINGE", Color(0xFF00BCD4), "Ideale per abbuffate (Serie lunga, >50 ep.)")
+                            renderBadge("SCI-FI", Color(0xFF2962FF), "Genere Fantascienza")
+                            renderBadge("COMEDY", Color(0xFFFFEA00), "Commedia apprezzata (media ≥7.0)")
+                            renderBadge("HORROR", Color(0xFFE53935), "Genere Horror")
+                            renderBadge("ANIME", Color(0xFFFF9800), "Genere Animazione / Anime")
+                            renderBadge("BLOCKBUSTER", Color(0xFF6200EA), "Incassi stellari (> 500 mln $)")
+                            renderBadge("INDIE", Color(0xFFAED581), "Basso budget, alta qualità (budget < 5 mln, media ≥7.0)")
+                            renderBadge("QUICK", Color(0xFFC6FF00), "Breve ma intenso (Film < 90 min)")
+                            renderBadge("SNACK", Color(0xFFC6FF00), "Episodi brevi (Serie TV < 25 min)")
+                            renderBadge("DIVISIVE", Color(0xFFFF9800), "O si ama o si odia (media 5.0 - 6.5, >1000 voti)")
+                            renderBadge("VINTAGE", Color(0xFFBCAAA4), "Classico d'altri tempi (< 1970)")
+                            renderBadge("DOCU", Color(0xFF9E9E9E), "Documentari")
+                            renderBadge("FAMILY", Color(0xFF81D4FA), "Ideale per la famiglia")
                         }
                         
                         Spacer(modifier = Modifier.height(32.dp))
@@ -2131,19 +2144,33 @@ fun AttributionRow(
 }
 
 @Composable
-fun BadgeLegendItem(text: String, color: Color, desc: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun BadgeLegendItem(
+    text: String, 
+    color: Color, 
+    desc: String,
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                indication = null
+            ) { onToggle(!enabled) }
+    ) {
         Box(
             modifier = Modifier
                 .widthIn(min = 55.dp)
                 .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(50))
-                .border(1.dp, color.copy(alpha = 0.6f), RoundedCornerShape(50))
+                .border(1.dp, if (enabled) color.copy(alpha = 0.6f) else Color.DarkGray, RoundedCornerShape(50))
                 .padding(horizontal = 8.dp, vertical = 3.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
-                color = color,
+                color = if (enabled) color else Color.Gray,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 0.3.sp,
@@ -2155,8 +2182,21 @@ fun BadgeLegendItem(text: String, color: Color, desc: String) {
         Text(
             text = desc,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 0.8f else 0.4f),
             modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Switch(
+            checked = enabled,
+            onCheckedChange = { onToggle(it) },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = color,
+                checkedTrackColor = color.copy(alpha = 0.3f),
+                uncheckedThumbColor = Color.Gray,
+                uncheckedTrackColor = Color(0xFF2C2C2E),
+                uncheckedBorderColor = Color.Transparent
+            ),
+            modifier = Modifier.scale(0.85f)
         )
     }
 }

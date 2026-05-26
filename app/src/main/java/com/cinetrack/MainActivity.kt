@@ -86,6 +86,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @Serializable
 data object DetailOverlayPlaceholder
 
+val LocalDisabledBadges = androidx.compose.runtime.compositionLocalOf<Set<String>> { emptySet() }
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val deepLinkIntent = mutableStateOf<Intent?>(null)
@@ -180,6 +182,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             
+            val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
+            
             val accentColor = remember(accentColorName) {
                 when (accentColorName) {
                     "Pink" -> NeonPink
@@ -197,7 +201,7 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     LocalMovieActions provides movieActionsManager,
                     com.cinetrack.ui.utils.LocalVibrationEnabled provides vibrationEnabled,
-
+                    LocalDisabledBadges provides disabledBadges
                 ) {
                 val navController = rememberNavController()
                 val detailNavController = rememberNavController()

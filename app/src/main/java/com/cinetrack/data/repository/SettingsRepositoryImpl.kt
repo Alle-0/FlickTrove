@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -21,6 +22,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
         val SHOW_BADGES = booleanPreferencesKey("show_badges")
+        val DISABLED_BADGES = stringSetPreferencesKey("disabled_badges")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
@@ -37,6 +39,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val showBadges: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.SHOW_BADGES] ?: true // Default value
+    }
+
+    override val disabledBadges: Flow<Set<String>> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DISABLED_BADGES] ?: emptySet()
     }
 
     override val notificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -70,6 +76,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleBadges(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_BADGES] = enabled
+        }
+    }
+
+    override suspend fun updateDisabledBadges(badges: Set<String>) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DISABLED_BADGES] = badges
         }
     }
 
