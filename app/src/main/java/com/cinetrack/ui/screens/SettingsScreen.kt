@@ -531,7 +531,7 @@ fun SettingsScreen(
                                     if (!isGuest) {
                                         showLogoutConfirm = true
                                     } else {
-                                        onLoggedOut()
+                                        viewModel.logout()
                                     }
                                 }
                             )
