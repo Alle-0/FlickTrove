@@ -76,8 +76,12 @@ fun DetailActions(
         contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) {}
     
+    // Stato ottimistico per scatenare l'animazione a 0 ms di latenza, 
+    // ancor prima che il ViewModel / Database confermino il salvataggio
+    var optimisticWatchState by remember(watchState) { mutableStateOf(watchState) }
+    
     // Use a single transition for all coordinated animations
-    val transition = updateTransition(targetState = watchState, label = "DetailActionsTransition")
+    val transition = updateTransition(targetState = optimisticWatchState, label = "DetailActionsTransition")
     
     // Target values for animations
     val displayColor by transition.animateColor(
@@ -134,8 +138,8 @@ fun DetailActions(
         if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
     }
 
-    val isPillVisible = !(watchState == WatchState.WATCHED && movie.mediaType != "tv")
-    val isTrashVisible = watchState != WatchState.NONE && movie.isReleased
+    val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
+    val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
 
     val spacing by transition.animateDp(
         transitionSpec = {
@@ -190,7 +194,7 @@ fun DetailActions(
     )
 
     // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
-    val displayWatchState = if (watchState == WatchState.WATCHED && movie.mediaType != "tv") WatchState.BOOKMARKED else watchState
+    val displayWatchState = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv") WatchState.BOOKMARKED else optimisticWatchState
 
     val icon = when {
         !movie.isReleased -> {
@@ -241,16 +245,12 @@ fun DetailActions(
                         compositingStrategy = if (mainPillAlpha < 1f) CompositingStrategy.Offscreen else CompositingStrategy.Auto
                         transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
                     }
-                    .then(
-                        if (mainPillAlpha > 0.1f) {
-                            Modifier.hazeGlass(
-                                state = hazeState,
-                                shape = RoundedCornerShape(28.dp),
-                                borderColor = if (watchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            )
-                        } else Modifier
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = RoundedCornerShape(28.dp),
+                        borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                     )
-                .pointerInput(watchState, movie.mediaType) {
+                .pointerInput(optimisticWatchState, movie.mediaType) {
                     detectTapGestures(
                         onPress = {
                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -264,24 +264,27 @@ fun DetailActions(
                         onTap = {
                             if (!movie.isReleased) {
                                 // Simple toggle for unreleased movies and tv series
-                                val next = if (watchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
+                                val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
                                 if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
                                     ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
+                                optimisticWatchState = next
                                 onStateChange(next)
                             } else if (movie.mediaType == "tv") {
-                                if (watchState == WatchState.NONE) {
+                                if (optimisticWatchState == WatchState.NONE) {
+                                    optimisticWatchState = WatchState.BOOKMARKED
                                     onStateChange(WatchState.BOOKMARKED)
                                 } else {
                                     onEpisodesClick?.invoke()
                                 }
                             } else {
-                                val next = when (watchState) {
+                                val next = when (optimisticWatchState) {
                                     WatchState.NONE -> WatchState.BOOKMARKED
                                     WatchState.BOOKMARKED -> WatchState.WATCHED
                                     WatchState.WATCHED -> WatchState.NONE
                                 }
+                                optimisticWatchState = next
                                 onStateChange(next)
                             }
                         }
@@ -293,7 +296,7 @@ fun DetailActions(
                     if (w < 1f || h < 1f) return@drawBehind
                     
                     // TV Progress Border
-                    if (movie.mediaType == "tv" && watchState != WatchState.NONE && animatedProgress > 0f) {
+                    if (movie.mediaType == "tv" && optimisticWatchState != WatchState.NONE && animatedProgress > 0f) {
                         val path = Path().apply {
                             addRoundRect(
                                 androidx.compose.ui.geometry.RoundRect(
@@ -326,7 +329,6 @@ fun DetailActions(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow))
                     .graphicsLayer {
                         scaleX = pillContentScale
                         scaleY = pillContentScale
@@ -368,11 +370,9 @@ fun DetailActions(
                             if (!movie.isReleased) {
                                 (fadeIn(tween(250)) + slideInVertically(tween(350)) { -slideDirection * it / 2 })
                                     .togetherWith(fadeOut(tween(200)) + slideOutVertically(tween(300)) { slideDirection * it / 2 })
-                                    .using(SizeTransform(clip = false))
                             } else {
                                 (fadeIn(tween(250)) + slideInHorizontally(tween(350)) { slideDirection * it / 3 })
                                     .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(300)) { -slideDirection * it / 3 })
-                                    .using(SizeTransform(clip = false))
                             }
                         },
                         label = "TextAnim"
@@ -467,14 +467,10 @@ fun DetailActions(
                                 onTap = { onRemove() }
                             )
                         }
-                        .then(
-                            if (trashAlpha > 0.1f) {
-                                Modifier.hazeGlass(
-                                    state = hazeState,
-                                    shape = CircleShape,
-                                    borderColor = trashColor.copy(alpha = 0.75f)
-                                )
-                            } else Modifier
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            borderColor = trashColor.copy(alpha = 0.75f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {

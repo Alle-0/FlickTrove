@@ -75,6 +75,10 @@ fun FoldersScreen(
     
     val localHazeState = remember { HazeState() }
     
+    androidx.activity.compose.BackHandler(enabled = activeMenuFolder != null) {
+        activeMenuFolder = null
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -136,7 +140,7 @@ fun FoldersScreen(
                     }
     
                     val sortedFolders = folders.sortedBy { it.name.lowercase() }
-                    items(sortedFolders, key = { it.id }) { folder ->
+                    items(sortedFolders, key = { it.id }, contentType = { "folder" }) { folder ->
                         Box(modifier = Modifier.animateItem()) {
                             FolderCard(
                                 folder = folder,

@@ -8,9 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 data class UpdatesUiState(
-    val movies: List<Movie> = emptyList(),
+    val movies: ImmutableList<Movie> = persistentListOf(),
     val isLoading: Boolean = true
 )
 
@@ -25,7 +28,7 @@ class UpdatesViewModel @Inject constructor(
                 (it.newEpisodesFound ?: 0) > 0 || it.reminder == true 
             }
                 .sortedByDescending { it.clientUpdatedAt }
-            UpdatesUiState(movies = updateList, isLoading = false)
+            UpdatesUiState(movies = updateList.toImmutableList(), isLoading = false)
         }
         .stateIn(
             scope = viewModelScope,

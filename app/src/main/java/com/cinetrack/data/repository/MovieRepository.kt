@@ -177,17 +177,21 @@ class MovieRepository @Inject constructor(
     fun getMoviesByCompositeIds(compositeIds: List<String>): Flow<List<Movie>> = favoriteDao.getByCompositeIds(compositeIds)
 
     suspend fun saveFolder(folderEntity: FolderEntity) {
-        folderDao.insert(folderEntity.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()))
+        val now = System.currentTimeMillis()
+        val updatedEntity = folderEntity.copy(syncStatus = "synced", clientUpdatedAt = now)
+        folderDao.insert(updatedEntity)
+        
         repositoryScope.launch {
             val folder = Folder(
-                id = folderEntity.id,
-                name = folderEntity.name,
-                icon = folderEntity.icon,
-                color = folderEntity.color,
-                description = folderEntity.description,
-                itemIds = folderEntity.itemIds,
-                createdAt = folderEntity.createdAt,
-                updatedAt = folderEntity.updatedAt
+                id = updatedEntity.id,
+                name = updatedEntity.name,
+                icon = updatedEntity.icon,
+                color = updatedEntity.color,
+                description = updatedEntity.description,
+                itemIds = updatedEntity.itemIds,
+                createdAt = updatedEntity.createdAt,
+                updatedAt = updatedEntity.updatedAt,
+                clientUpdatedAt = now
             )
             firebaseRemoteDataSource.setFolder(folder)
         }
@@ -206,7 +210,7 @@ class MovieRepository @Inject constructor(
     }
 
     // --- Remote Sync (The "Bunker" recovery) ---
-    suspend fun pushPendingChanges() {
+    suspend fun pushPendingChanges() = kotlinx.coroutines.withContext(Dispatchers.IO) {
         // Push pending Movies
         val pendingMovies = favoriteDao.getPendingSync()
         for (movie in pendingMovies) {
@@ -240,7 +244,8 @@ class MovieRepository @Inject constructor(
                         description = folder.description,
                         itemIds = folder.itemIds,
                         createdAt = folder.createdAt,
-                        updatedAt = folder.updatedAt
+                        updatedAt = folder.updatedAt,
+                        clientUpdatedAt = folder.clientUpdatedAt
                     )
                     firebaseRemoteDataSource.setFolder(folderDto)
                     folderDao.updateSyncStatus(folder.id, "synced")
@@ -253,10 +258,19 @@ class MovieRepository @Inject constructor(
 
     suspend fun syncWithFirebase(
         forcedUid: String? = null,
+        force: Boolean = false,
         onProgress: (suspend (SyncProgress) -> Unit)? = null
-    ) {
+    ) = kotlinx.coroutines.withContext(Dispatchers.IO) {
         suspend fun emit(message: String, progress: Float?) {
             onProgress?.invoke(SyncProgress(message, progress))
+        }
+
+        // Rate limiting cooldown guard (5 minutes)
+        val lastSync = preferenceRepository.userPreferencesFlow.first().lastSyncTimestamp
+        if (!force && System.currentTimeMillis() - lastSync < 300_000L) {
+            android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 5 minutes ago.")
+            emit("Sincronizzazione completata (cache)", 1f)
+            return@withContext
         }
 
         // 0. Push any pending local changes first
@@ -264,63 +278,131 @@ class MovieRepository @Inject constructor(
         emit("Carico modifiche in sospeso...", 0f)
         pushPendingChanges()
 
-        // 1. Pull Favorites
-        android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites (ForcedUID: $forcedUid)...")
-        emit("Scarico preferiti...", null)
-        val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites(forcedUid)
-        android.util.Log.d("MovieRepository", "Fetched ${remoteFavorites.size} favorites from Firebase")
-        if (remoteFavorites.isNotEmpty()) {
-            emit("Salvo preferiti...", 0.35f)
-            val moviesToInsert = remoteFavorites.map { it.copy(syncStatus = "synced") }
-            val chunks = moviesToInsert.chunked(50)
-            var inserted = 0
-            chunks.forEachIndexed { index, chunk ->
-                favoriteDao.insertAll(chunk)
-                inserted += chunk.size
-                val portion = (index + 1).toFloat() / chunks.size.toFloat()
-                val progress = 0.35f + (0.55f - 0.35f) * portion
-                emit("Salvo preferiti... ($inserted/${moviesToInsert.size})", progress)
+        try {
+            // 1. Pull & Reconcile Favorites
+            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites (ForcedUID: $forcedUid)...")
+            emit("Scarico preferiti...", null)
+            val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites(forcedUid)
+            android.util.Log.d("MovieRepository", "Fetched ${remoteFavorites.size} favorites from Firebase")
+            
+            emit("Sincronizzo preferiti...", 0.35f)
+            val localFavoritesList = favoriteDao.getAll()
+            val localFavorites = localFavoritesList.associateBy { "${it.mediaType}_${it.id}" }
+            val remoteFavoritesMap = remoteFavorites.associateBy { "${it.mediaType}_${it.id}" }
+            
+            val moviesToInsert = mutableListOf<Movie>()
+            val moviesToDelete = mutableListOf<Movie>()
+            
+            for (remoteMovie in remoteFavorites) {
+                val key = "${remoteMovie.mediaType}_${remoteMovie.id}"
+                val local = localFavorites[key]
+                if (local == null) {
+                    moviesToInsert.add(remoteMovie.copy(syncStatus = "synced"))
+                } else {
+                    if (remoteMovie.clientUpdatedAt >= local.clientUpdatedAt) {
+                        moviesToInsert.add(remoteMovie.copy(syncStatus = "synced"))
+                    } else {
+                        if (local.syncStatus == "synced") {
+                            favoriteDao.updateSyncStatus(local.id, local.mediaType, "pending")
+                        }
+                    }
+                }
             }
-            android.util.Log.d("MovieRepository", "Successfully inserted remote favorites into local DB")
-        } else {
-            emit("Preferiti aggiornati", 0.55f)
-        }
+            
+            for ((key, localMovie) in localFavorites) {
+                if (!remoteFavoritesMap.containsKey(key)) {
+                    if (localMovie.syncStatus == "synced") {
+                        moviesToDelete.add(localMovie)
+                    }
+                }
+            }
+            
+            if (moviesToInsert.isNotEmpty()) {
+                val chunks = moviesToInsert.chunked(50)
+                chunks.forEachIndexed { index, chunk ->
+                    favoriteDao.insertAll(chunk)
+                    val portion = (index + 1).toFloat() / chunks.size.toFloat()
+                    val progress = 0.35f + (0.55f - 0.35f) * portion
+                    emit("Salvo preferiti... (${(index + 1) * chunk.size}/${moviesToInsert.size})", progress)
+                }
+            }
+            
+            for (movieToDelete in moviesToDelete) {
+                favoriteDao.deleteById(movieToDelete.id, movieToDelete.mediaType)
+            }
+            android.util.Log.d("MovieRepository", "Successfully synchronized favorites with conflict resolution")
 
-        // 2. Pull Folders
-        emit("Scarico cartelle...", null)
-        val remoteFolders = firebaseRemoteDataSource.fetchAllFolders(forcedUid)
-        if (remoteFolders.isNotEmpty()) {
-            emit("Salvo cartelle...", 0.75f)
-            val foldersToInsert = remoteFolders.map { f ->
-                FolderEntity(
-                    id = f.id,
-                    name = f.name,
-                    icon = f.icon,
-                    color = f.color,
-                    description = f.description,
-                    itemIds = f.itemIds,
-                    createdAt = f.createdAt ?: "",
-                    updatedAt = f.updatedAt ?: "",
-                    syncStatus = "synced"
+            // 2. Pull & Reconcile Folders
+            emit("Scarico cartelle...", null)
+            val remoteFolders = firebaseRemoteDataSource.fetchAllFolders(forcedUid)
+            
+            emit("Sincronizzo cartelle...", 0.7f)
+            val localFoldersList = folderDao.getAll()
+            val localFolders = localFoldersList.associateBy { it.id }
+            val remoteFoldersMap = remoteFolders.associateBy { it.id }
+            
+            val foldersToInsert = mutableListOf<FolderEntity>()
+            val foldersToDelete = mutableListOf<FolderEntity>()
+            
+            for (remoteFolder in remoteFolders) {
+                val local = localFolders[remoteFolder.id]
+                val remoteEntity = FolderEntity(
+                    id = remoteFolder.id,
+                    name = remoteFolder.name,
+                    icon = remoteFolder.icon,
+                    color = remoteFolder.color,
+                    description = remoteFolder.description,
+                    itemIds = remoteFolder.itemIds,
+                    createdAt = remoteFolder.createdAt ?: "",
+                    updatedAt = remoteFolder.updatedAt ?: "",
+                    syncStatus = "synced",
+                    clientUpdatedAt = remoteFolder.clientUpdatedAt
                 )
+                
+                if (local == null) {
+                    foldersToInsert.add(remoteEntity)
+                } else {
+                    if (remoteFolder.clientUpdatedAt >= local.clientUpdatedAt) {
+                        foldersToInsert.add(remoteEntity)
+                    } else {
+                        if (local.syncStatus == "synced") {
+                            folderDao.updateSyncStatus(local.id, "pending")
+                        }
+                    }
+                }
             }
-            val chunks = foldersToInsert.chunked(50)
-            var inserted = 0
-            chunks.forEachIndexed { index, chunk ->
-                folderDao.insertAll(chunk)
-                inserted += chunk.size
-                val portion = (index + 1).toFloat() / chunks.size.toFloat()
-                val progress = 0.75f + (0.9f - 0.75f) * portion
-                emit("Salvo cartelle... ($inserted/${foldersToInsert.size})", progress)
+            
+            for ((id, localFolder) in localFolders) {
+                if (!remoteFoldersMap.containsKey(id)) {
+                    if (localFolder.syncStatus == "synced") {
+                        foldersToDelete.add(localFolder)
+                    }
+                }
             }
-        } else {
-            emit("Cartelle aggiornate", 0.9f)
-        }
+            
+            if (foldersToInsert.isNotEmpty()) {
+                val chunks = foldersToInsert.chunked(50)
+                chunks.forEachIndexed { index, chunk ->
+                    folderDao.insertAll(chunk)
+                    val portion = (index + 1).toFloat() / chunks.size.toFloat()
+                    val progress = 0.7f + (0.9f - 0.7f) * portion
+                    emit("Salvo cartelle... (${(index + 1) * chunk.size}/${foldersToInsert.size})", progress)
+                }
+            }
+            
+            for (folderToDelete in foldersToDelete) {
+                folderDao.deleteById(folderToDelete.id)
+            }
+            android.util.Log.d("MovieRepository", "Successfully synchronized folders with conflict resolution")
 
-        // 3. Pull Preferences
-        emit("Sincronizzo preferenze...", 0.92f)
-        syncPreferencesWithFirebase(forcedUid)
-        emit("Sync completata", 1f)
+            // 3. Pull Preferences
+            emit("Sincronizzo preferenze...", 0.92f)
+            syncPreferencesWithFirebase(forcedUid)
+            emit("Sync completata", 1f)
+        } catch (e: Exception) {
+            android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
+            emit("Errore di sincronizzazione", 1f)
+        }
     }
 
     suspend fun clearAllData() {
@@ -361,6 +443,12 @@ class MovieRepository @Inject constructor(
                 gridColumns = (remotePrefs["gridColumns"] as? Number)?.toInt() ?: currentPrefs.gridColumns,
                 notificationsEnabled = remotePrefs["notificationsEnabled"] as? Boolean ?: currentPrefs.notificationsEnabled,
                 showFolderBookmarks = remotePrefs["showFolderBookmarks"] as? Boolean ?: currentPrefs.showFolderBookmarks,
+                showBadges = remotePrefs["showBadges"] as? Boolean ?: currentPrefs.showBadges,
+                disabledBadges = (remotePrefs["disabledBadges"] as? List<*>)?.filterIsInstance<String>()?.toSet() ?: currentPrefs.disabledBadges,
+                vibrationEnabled = remotePrefs["vibrationEnabled"] as? Boolean ?: currentPrefs.vibrationEnabled,
+                accentColor = remotePrefs["accentColor"] as? String ?: currentPrefs.accentColor,
+                advancedVisualEffectsEnabled = remotePrefs["advancedVisualEffectsEnabled"] as? Boolean ?: currentPrefs.advancedVisualEffectsEnabled,
+                dynamicAppIconEnabled = remotePrefs["dynamicAppIconEnabled"] as? Boolean ?: currentPrefs.dynamicAppIconEnabled,
                 homeSort = parseSortConfig(remotePrefs["homeSort"], currentPrefs.homeSort),
                 vistiSort = parseSortConfig(remotePrefs["vistiSort"], currentPrefs.vistiSort),
                 discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
@@ -380,6 +468,12 @@ class MovieRepository @Inject constructor(
                 "gridColumns" to prefs.gridColumns,
                 "notificationsEnabled" to prefs.notificationsEnabled,
                 "showFolderBookmarks" to prefs.showFolderBookmarks,
+                "showBadges" to prefs.showBadges,
+                "disabledBadges" to prefs.disabledBadges.toList(),
+                "vibrationEnabled" to prefs.vibrationEnabled,
+                "accentColor" to prefs.accentColor,
+                "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
+                "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
                 "homeSort" to prefs.homeSort,
                 "vistiSort" to prefs.vistiSort,
                 "discoveryFilters" to prefs.discoveryFilters
@@ -528,6 +622,31 @@ class MovieRepository @Inject constructor(
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             null
+        }
+    }
+
+    suspend fun fetchComments(tmdbId: Long, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
+        return try {
+            val response = if (isTv) {
+                tmdbService.getTVReviews(tmdbId, apiKey)
+            } else {
+                tmdbService.getMovieReviews(tmdbId, apiKey)
+            }
+            
+            response.results.map { review ->
+                com.cinetrack.data.api.TraktComment(
+                    id = review.id.hashCode().toLong(),
+                    comment = review.content,
+                    likes = review.authorDetails?.rating?.toInt() ?: 0,
+                    user = com.cinetrack.data.api.TraktUser(
+                        username = review.author,
+                        name = review.authorDetails?.name?.takeIf { it.isNotBlank() } ?: review.author
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            emptyList()
         }
     }
 }

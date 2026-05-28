@@ -39,9 +39,13 @@ class TVUpdateWorker(
 
             val tvShows: List<Movie> = repository.getLocalMovies()
                 .filter { it.mediaType == "tv" }
+                .filter { it.status != "Ended" && it.status != "Canceled" }
 
             tvShows.forEach { show: Movie ->
                 try {
+                    // Delay to prevent TMDB API rate-limiting (429)
+                    kotlinx.coroutines.delay(500)
+                    
                     val latest = repository.fetchMovieDetails(show.id, true)
                     val latestEps = latest.numberOfEpisodes ?: 0
                     val currentEps = show.numberOfEpisodes ?: 0

@@ -66,7 +66,9 @@ fun PersonDetailScreen(
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     hazeState: dev.chrisbanes.haze.HazeState? = null,
     onBackClick: () -> Unit = {},
-    onMovieClick: (Movie) -> Unit
+    onMovieClick: (Movie) -> Unit,
+    detailStackDepth: Int = 1,
+    onHomeClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     
@@ -74,7 +76,12 @@ fun PersonDetailScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
     val localHazeState = remember { dev.chrisbanes.haze.HazeState() }
 
     
@@ -255,14 +262,16 @@ fun PersonDetailScreen(
                                         key = { _, it -> it.id.toString() + "_" + it.mediaType }
                                     ) { index, m ->
                                         val movieStatus = uiState.favorites.find { it.id == m.id && it.mediaType == m.mediaType }
+                                        val movie = movieStatus ?: m
                                         MovieCard(
-                                            movie = m,
-                                            cardWidth = cardWidth,
+                                            movie = movie,
+                                            cardWidth = 130.dp,
                                             isFavorite = movieStatus?.favorite ?: false,
                                             isWatched = movieStatus?.watched ?: false,
                                             isReminder = movieStatus?.reminder ?: false,
                                             progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                            folderColors = uiState.movieFolderColors["${m.mediaType}_${m.id}"]?.map {
+                                            personalRating = movieStatus?.personalRating,
+                                            folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map {
                                                 it.toComposeColor()
                                             } ?: emptyList(),
                                             showFolderBookmarks = uiState.preferences.showFolderBookmarks,
@@ -325,7 +334,7 @@ fun PersonDetailScreen(
                                 else -> castMovies
                             }
 
-                            filmo.chunked(3).forEachIndexed { rowIndex, rowMovies ->
+                            filmo.chunked(columns).forEachIndexed { rowIndex, rowMovies ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -334,29 +343,53 @@ fun PersonDetailScreen(
                                 ) {
                                     rowMovies.forEachIndexed { colIndex, movie ->
                                         val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
-                                        val staggerIdx = rowIndex * 3 + colIndex
+                                        val m = movieStatus ?: movie
+                                        val staggerIdx = rowIndex * columns + colIndex
+                                        val folderColors = uiState.movieFolderColors["${m.mediaType}_${m.id}"]?.map {
+                                            it.toComposeColor()
+                                        } ?: emptyList()
                                         Box(modifier = Modifier.weight(1f)) {
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movieStatus?.favorite ?: false,
-                                                isWatched = movieStatus?.watched ?: false,
-                                                isReminder = movieStatus?.reminder ?: false,
-                                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map {
-                                                    it.toComposeColor()
-                                                } ?: emptyList(),
-                                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                animatedVisibilityScope = null,
-                                                staggerIndex = staggerIdx,
-                                                onPress = { onMovieClick(movie) },
-                                                onAction = { viewModel.toggleFavorite(movie) },
-                                                onLongPress = actionsState.onLongPress,
-                                                onMessage = { viewModel.emitMessage(it) }
-                                            )
+                                            if (columns == 1) {
+                                                com.cinetrack.ui.components.MovieListCard(
+                                                    movie = m,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    showBadges = uiState.preferences.showBadges,
+                                                    hazeState = localHazeState,
+                                                    staggerIndex = staggerIdx,
+                                                    onPress = { onMovieClick(movie) },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = actionsState.onLongPress,
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            } else {
+                                                MovieCard(
+                                                    movie = m,
+                                                    cardWidth = cardWidth,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = null,
+                                                    staggerIndex = staggerIdx,
+                                                    onPress = { onMovieClick(movie) },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = actionsState.onLongPress,
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            }
                                         }
                                     }
-                                    repeat(3 - rowMovies.size) { Spacer(modifier = Modifier.weight(1f)) }
+                                    repeat(columns - rowMovies.size) { Spacer(modifier = Modifier.weight(1f)) }
                                 }
                             }
                         }
@@ -369,7 +402,6 @@ fun PersonDetailScreen(
         }
     }
 
-    // Floating Back Button (Top Left)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -378,6 +410,10 @@ fun PersonDetailScreen(
                 .padding(top = 8.dp, start = 16.dp),
             contentAlignment = Alignment.TopStart
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -410,6 +446,45 @@ fun PersonDetailScreen(
                         }
                 )
             }
+            // Home FAB — visible from the 3rd consecutive detail screen onwards
+            val homeButtonVisible = detailStackDepth >= 3
+            val homeButtonAlpha by animateFloatAsState(
+                targetValue = if (homeButtonVisible) 1f else 0f,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "HomeFabAlpha"
+            )
+            val homeButtonScale by animateFloatAsState(
+                targetValue = if (homeButtonVisible) 1f else 0.6f,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+                label = "HomeFabScale"
+            )
+            if (homeButtonAlpha > 0.01f) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .graphicsLayer {
+                            alpha = homeButtonAlpha
+                            scaleX = homeButtonScale
+                            scaleY = homeButtonScale
+                        }
+                        .hazeGlass(
+                            state = localHazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = true
+                        )
+                        .bounceClick { onHomeClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Home,
+                        contentDescription = "Torna alla schermata principale",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            } // end Column
         }
     }
 }

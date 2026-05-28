@@ -15,17 +15,25 @@ import com.cinetrack.ui.navigation.PersonRoute
 import androidx.navigation.toRoute
 import com.cinetrack.ui.utils.ErrorMapper
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.data.models.UserPreferences
 
 data class PersonDetailUiState(
+    val personId: Long = 0L,
+    val profilePath: String? = null,
     val person: Person? = null,
     val isLoading: Boolean = true,
     val showFullBio: Boolean = false,
     val activeTab: String = "cast_movie",
-    val favorites: List<Movie> = emptyList(),
-    val folders: List<com.cinetrack.data.local.entities.FolderEntity> = emptyList(),
-    val movieFolderColors: Map<String, List<String>> = emptyMap(),
+    val favorites: ImmutableList<Movie> = persistentListOf(),
+    val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
+    val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: UserPreferences = UserPreferences(),
     val error: String? = null
 )
@@ -77,22 +85,25 @@ class PersonDetailViewModel @Inject constructor(
         val preferences = groupB.third
 
         // Calculate folder colors for each movie
-        val folderColorsMap = mutableMapOf<String, MutableList<String>>()
+        val folderColorsMap = mutableMapOf<String, ImmutableList<String>>()
         folders.forEach { folder ->
             val color = folder.color ?: "#FFFFFF"
             folder.itemIds.forEach { itemId ->
-                folderColorsMap.getOrPut(itemId) { mutableListOf() }.add(color)
+                val list = folderColorsMap[itemId] ?: persistentListOf()
+                folderColorsMap[itemId] = (list + color).toImmutableList()
             }
         }
 
         PersonDetailUiState(
+            personId = route.id,
+            profilePath = route.profilePath,
             person = person,
             isLoading = isLoading,
             showFullBio = showFullBio,
             activeTab = activeTab,
-            favorites = favorites,
-            folders = folders,
-            movieFolderColors = folderColorsMap,
+            favorites = favorites.toImmutableList(),
+            folders = folders.toImmutableList(),
+            movieFolderColors = folderColorsMap.toImmutableMap(),
             preferences = preferences,
             error = error
         )
@@ -200,13 +211,17 @@ class PersonDetailViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 

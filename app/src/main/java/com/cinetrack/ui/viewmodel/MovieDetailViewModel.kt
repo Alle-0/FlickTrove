@@ -14,6 +14,7 @@ import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.ErrorMapper
+import com.cinetrack.utils.TranslationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -21,6 +22,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.cinetrack.data.local.entities.FolderEntity
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import java.util.UUID
 import java.time.Instant
 import androidx.navigation.toRoute
@@ -31,6 +34,7 @@ class MovieDetailViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
     private val actionFeedbackManager: ActionFeedbackManager,
+    private val translationManager: TranslationManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -42,8 +46,20 @@ class MovieDetailViewModel @Inject constructor(
     private val _loadingSeason = MutableStateFlow(false)
     private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.models.Season>>(emptyMap())
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
+    private val _traktComments = MutableStateFlow<List<com.cinetrack.data.api.TraktComment>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
     
+    data class TranslationState(
+        val isTranslating: Boolean = false,
+        val translatedText: String? = null,
+        val error: String? = null
+    )
+    private val _translationStates = MutableStateFlow<Map<Long, TranslationState>>(emptyMap())
+    val translationStates: StateFlow<Map<Long, TranslationState>> = _translationStates.asStateFlow()
+
+    private val _showTranslationPrompt = MutableStateFlow<Pair<Long, String>?>(null)
+    val showTranslationPrompt: StateFlow<Pair<Long, String>?> = _showTranslationPrompt.asStateFlow()
+
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)
     }
@@ -71,12 +87,13 @@ class MovieDetailViewModel @Inject constructor(
                 _error
             ) { seasonD, collectionM, errorMsg ->
                 Triple(seasonD, collectionM, errorMsg)
-            }
-        ) { groupA, groupB ->
+            },
+            _traktComments
+        ) { groupA, groupB, traktComms ->
             val (metadata, external, loadingS) = groupA
             val (seasonD, collectionM, errorMsg) = groupB
 
-            MetadataState(metadata, external, loadingS, seasonD, collectionM, errorMsg)
+            MetadataState(metadata, external, loadingS, seasonD, collectionM, errorMsg, traktComms)
         }
 
         return combine(
@@ -91,6 +108,7 @@ class MovieDetailViewModel @Inject constructor(
             val seasonD = meta.seasonD
             val collectionM = meta.collectionM
             val errorMsg = meta.errorMsg
+            val traktComms = meta.traktComments
 
             when {
                 errorMsg != null && metadata == null -> DetailUiState.Error(errorMsg)
@@ -150,23 +168,24 @@ class MovieDetailViewModel @Inject constructor(
                             else -> WatchState.NONE
                         },
                         watchedProgress = progress,
-                        directors = metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList(),
-                        cast = metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList(),
-                        streamingProviders = metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList(),
+                        directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
+                        cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
+                        streamingProviders = (metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
                         buyRentProviders = ((metadata.watchProviders?.results?.get("IT")?.buy ?: emptyList()) + 
-                                          (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId },
-                        trailers = metadata.videos?.results?.let { videos -> 
+                                           (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
+                        trailers = (metadata.videos?.results?.let { videos -> 
                             videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
-                        } ?: emptyList(),
-                        recommendations = metadata.recommendations?.results?.map { 
+                        } ?: emptyList()).toImmutableList(),
+                        recommendations = (metadata.recommendations?.results?.map { 
                             it.hydrate() 
-                        }?.distinctBy { it.id } ?: emptyList(),
-                        collectionMovies = collectionM.map { it.hydrate() },
+                        }?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
+                        collectionMovies = collectionM.map { it.hydrate() }.toImmutableList(),
                         externalRatings = external,
                         loadingSeason = loadingS,
-                        seasonDetails = seasonD,
-                        folders = folders.sortedByDescending { it.createdAt },
-                        watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link
+                        seasonDetails = seasonD.toImmutableMap(),
+                        folders = folders.sortedByDescending { it.createdAt }.toImmutableList(),
+                        watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link,
+                        traktComments = traktComms.toImmutableList()
                     )
                 }
             }
@@ -212,11 +231,15 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
+                val commentsDeferred = async { repository.fetchComments(tmdbId, mediaType == "tv") }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { null }
+                val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { emptyList() }
 
-                _externalRatings.update { 
+                _traktComments.value = commentsResult ?: emptyList()
+
+                _externalRatings.update {  
                     it.copy(
                         imdb = omdbResult?.imdbRating,
                         imdbVotes = omdbResult?.imdbVotes,
@@ -294,14 +317,18 @@ class MovieDetailViewModel @Inject constructor(
     private fun updateMovieRating(movie: Movie, rating: Double?) {
         viewModelScope.launch {
             val effectiveRating = if (rating == 0.0) null else rating
-            val updated = movie.copy(personalRating = effectiveRating)
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            val updated = current.copy(personalRating = effectiveRating)
             repository.saveMovie(updated)
         }
     }
 
     private fun updateMovieNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            val updated = movie.copy(personalNote = note)
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            val updated = current.copy(personalNote = note)
             repository.saveMovie(updated)
         }
     }
@@ -572,6 +599,41 @@ class MovieDetailViewModel @Inject constructor(
                 ?: details.releaseDates?.results?.firstOrNull()?.releaseDates?.firstOrNull { it.certification.isNotEmpty() }?.certification
         }
     }
+
+    fun requestTranslation(commentId: Long, text: String) {
+        viewModelScope.launch {
+            if (translationManager.isModelDownloaded()) {
+                // If model is already downloaded, translate immediately without prompt
+                translateComment(commentId, text, requireWifi = false)
+            } else {
+                // Ask user for permission to download
+                _showTranslationPrompt.value = Pair(commentId, text)
+            }
+        }
+    }
+
+    fun dismissTranslationPrompt() {
+        _showTranslationPrompt.value = null
+    }
+
+    fun translateComment(commentId: Long, text: String, requireWifi: Boolean) {
+        viewModelScope.launch {
+            _showTranslationPrompt.value = null
+            _translationStates.update { it + (commentId to TranslationState(isTranslating = true)) }
+            val success = translationManager.downloadModel(requireWifi)
+            if (success) {
+                val translated = translationManager.translate(text)
+                if (translated != null) {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = translated)) }
+                } else {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
+                }
+            } else {
+                _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
+                emitMessage("Errore nel download del modello lingua italiana.")
+            }
+        }
+    }
 }
 
 private data class MetadataState(
@@ -580,5 +642,6 @@ private data class MetadataState(
     val loadingS: Boolean,
     val seasonD: Map<Int, com.cinetrack.data.models.Season>,
     val collectionM: List<Movie>,
-    val errorMsg: String?
+    val errorMsg: String?,
+    val traktComments: List<com.cinetrack.data.api.TraktComment>
 )

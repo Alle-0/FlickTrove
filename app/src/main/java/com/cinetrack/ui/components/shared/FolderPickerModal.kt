@@ -218,7 +218,7 @@ private fun FolderListContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
-                    items(folders, key = { it.id }) { folder ->
+                    items(folders, key = { it.id }, contentType = { "folder_picker_item" }) { folder ->
                         Box(modifier = Modifier.animateItem()) {
                             FolderItem(
                                 folder = folder,
@@ -391,6 +391,7 @@ private fun FolderCreateForm(
         Column(
             modifier = Modifier
                 .weight(1f)
+                .verticalFadingEdges(scrollState, 24.dp, 24.dp)
                 .premiumScrollbar(scrollState)
                 .verticalScroll(scrollState)
                 .padding(24.dp)

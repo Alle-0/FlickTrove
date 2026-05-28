@@ -17,15 +17,22 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+
 data class FavoritesUiState(
-    val favorites: List<Movie> = emptyList(),
-    val watchlistMovies: List<Movie> = emptyList(),
-    val watchlistTV: List<Movie> = emptyList(),
-    val seenMovies: List<Movie> = emptyList(),
-    val seenTV: List<Movie> = emptyList(),
+    val favorites: ImmutableList<Movie> = persistentListOf(),
+    val watchlistMovies: ImmutableList<Movie> = persistentListOf(),
+    val watchlistTV: ImmutableList<Movie> = persistentListOf(),
+    val seenMovies: ImmutableList<Movie> = persistentListOf(),
+    val seenTV: ImmutableList<Movie> = persistentListOf(),
     val preferences: UserPreferences = UserPreferences(),
     val isLoading: Boolean = true,
-    val syncingIds: Set<Long> = emptySet(),
+    val syncingIds: ImmutableSet<Long> = persistentSetOf(),
     val updatesCount: Int = 0,
     val userCountry: String = Locale.getDefault().country
 )
@@ -38,7 +45,7 @@ class FavoritesViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
-    private val _syncingIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val _syncingIds = MutableStateFlow<PersistentSet<Long>>(persistentSetOf())
 
     val uiState: StateFlow<FavoritesUiState> = combine(
         movieRepository.getLocalMoviesFlow(),
@@ -49,11 +56,11 @@ class FavoritesViewModel @Inject constructor(
         val seen = movies.filter { it.watched }
 
         FavoritesUiState(
-            favorites = movies,
-            watchlistMovies = watchlist.filter { it.mediaType == "movie" },
-            watchlistTV = watchlist.filter { it.mediaType == "tv" },
-            seenMovies = seen.filter { it.mediaType == "movie" },
-            seenTV = seen.filter { it.mediaType == "tv" },
+            favorites = movies.toImmutableList(),
+            watchlistMovies = watchlist.filter { it.mediaType == "movie" }.toImmutableList(),
+            watchlistTV = watchlist.filter { it.mediaType == "tv" }.toImmutableList(),
+            seenMovies = seen.filter { it.mediaType == "movie" }.toImmutableList(),
+            seenTV = seen.filter { it.mediaType == "tv" }.toImmutableList(),
             preferences = prefs,
             isLoading = false,
             syncingIds = syncingIds,
@@ -81,7 +88,7 @@ class FavoritesViewModel @Inject constructor(
         val title = movie.title ?: movie.name ?: ""
         val previousState = movie.copy()
         viewModelScope.launch {
-            _syncingIds.update { it + movie.id }
+            _syncingIds.update { it.add(movie.id) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = movieRepository.getMovie(movie.id, movie.mediaType)
@@ -109,7 +116,7 @@ class FavoritesViewModel @Inject constructor(
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
-                _syncingIds.update { it - movie.id }
+                _syncingIds.update { it.remove(movie.id) }
             }
         }
     }
@@ -119,7 +126,7 @@ class FavoritesViewModel @Inject constructor(
         
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            _syncingIds.update { it + movie.id }
+            _syncingIds.update { it.add(movie.id) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = movieRepository.getMovie(movie.id, movie.mediaType)
@@ -147,22 +154,24 @@ class FavoritesViewModel @Inject constructor(
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
-                _syncingIds.update { it - movie.id }
+                _syncingIds.update { it.remove(movie.id) }
             }
         }
     }
 
     fun updateRating(movie: Movie, rating: Double?) {
         viewModelScope.launch {
-            val updated = movie.copy(personalRating = rating)
-            movieRepository.saveMovie(updated)
+            val local = movieRepository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            movieRepository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String?) {
         viewModelScope.launch {
-            val updated = movie.copy(personalNote = note)
-            movieRepository.saveMovie(updated)
+            val local = movieRepository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            movieRepository.saveMovie(current.copy(personalNote = note))
         }
     }
 

@@ -23,6 +23,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.*
+import com.cinetrack.ui.navigation.SettingsRoute
+import com.cinetrack.ui.navigation.SplashRoute
+import com.cinetrack.ui.navigation.SurpriseMeRoute
+import com.cinetrack.ui.navigation.UpdatesRoute
+import com.cinetrack.ui.navigation.VistiRoute
+import com.cinetrack.ui.navigation.SearchRoute
 import com.cinetrack.ui.navigation.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -73,6 +79,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import com.cinetrack.ui.components.shared.MovieActionsManager
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.components.shared.GlobalMovieActions
+import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.runtime.CompositionLocalProvider
 import com.cinetrack.util.toComposeColor
@@ -114,20 +121,35 @@ class MainActivity : ComponentActivity() {
             fadeOut.start()
         }
         
-        // Schedule Workers
+        // Schedule Workers with System/Hardware Constraints
         val workManager = androidx.work.WorkManager.getInstance(this)
+        
+        val networkConstraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED) // Wi-Fi only
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val localConstraints = androidx.work.Constraints.Builder()
+            .setRequiresBatteryNotLow(true)
+            .build()
         
         val migrationRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderMigrationWorker>(
             12, java.util.concurrent.TimeUnit.HOURS
-        ).build()
+        )
+            .setConstraints(localConstraints)
+            .build()
         
         val tvUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TVUpdateWorker>(
             24, java.util.concurrent.TimeUnit.HOURS
-        ).build()
+        )
+            .setConstraints(networkConstraints)
+            .build()
         
         val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.workers.ReminderWorker>(
             12, java.util.concurrent.TimeUnit.HOURS
-        ).build()
+        )
+            .setConstraints(localConstraints)
+            .build()
         
         workManager.enqueueUniquePeriodicWork(
             "ReminderMigration",
@@ -241,6 +263,27 @@ class MainActivity : ComponentActivity() {
                 var detailZIndex by remember { mutableStateOf(800f) }
                 var updatesZIndex by remember { mutableStateOf(700f) }
                 val detailZIndexMap = remember { mutableStateMapOf<String, Float>() }
+                var detailDepthHint by remember { mutableIntStateOf(0) }
+
+                val openDetail: (Long, String) -> Unit = { id, mediaType ->
+                    detailDepthHint += 1
+                    detailNavController.navigate(DetailRoute(id = id, mediaType = mediaType))
+                }
+                val openPerson: (Long, String?) -> Unit = { id, profilePath ->
+                    detailDepthHint += 1
+                    detailNavController.navigate(PersonRoute(id = id, profilePath = profilePath))
+                }
+                val popDetailOne: () -> Unit = {
+                    if (detailDepthHint > 0) detailDepthHint -= 1
+                    detailNavController.popBackStack()
+                }
+                val popDetailToRoot: () -> Unit = {
+                    detailDepthHint = 0
+                    detailNavController.popBackStack(
+                        route = DetailOverlayPlaceholder,
+                        inclusive = false
+                    )
+                }
 
                 LaunchedEffect(deepLinkIntent.value, authState) {
                     val intent = deepLinkIntent.value ?: return@LaunchedEffect
@@ -260,11 +303,8 @@ class MainActivity : ComponentActivity() {
                                     val type = segments[0]
                                     val id = segments[1].toLongOrNull()
                                     if (id != null) {
-                                        if (type == "person") {
-                                            detailNavController.navigate(PersonRoute(id = id))
-                                        } else {
-                                            detailNavController.navigate(DetailRoute(id = id, mediaType = type))
-                                        }
+                                        if (type == "person") openPerson(id, null)
+                                        else openDetail(id, type)
                                     }
                                 }
                             } else if (uri?.scheme == "flicktrove" && uri.host == "search") {
@@ -295,9 +335,32 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 
-                val isSearchOnTop = searchOverlayOffset != null && (!isDetailOverlayVisible || searchZIndex > detailZIndex) && (updatesOverlayOffset == null || searchZIndex > updatesZIndex)
+                // Count real screens from the public currentBackStack flow.
+                // Keep a short-lived peak value so transition phases do not hide the Home button.
+                val detailBackStack by detailNavController.currentBackStack.collectAsStateWithLifecycle()
+                val currentDetailDepth = remember(detailBackStack) {
+                    detailBackStack.count { entry ->
+                        entry.destination.hasRoute<DetailRoute>() || entry.destination.hasRoute<PersonRoute>()
+                    }
+                }
+                var peakDetailDepth by remember { mutableIntStateOf(0) }
+                LaunchedEffect(currentDetailDepth) {
+                    peakDetailDepth = when {
+                        currentDetailDepth > peakDetailDepth -> currentDetailDepth
+                        currentDetailDepth in 1 until peakDetailDepth -> currentDetailDepth
+                        else -> peakDetailDepth
+                    }
+                    if (currentDetailDepth > detailDepthHint) {
+                        detailDepthHint = currentDetailDepth
+                    } else if (currentDetailDepth in 1 until detailDepthHint) {
+                        detailDepthHint = currentDetailDepth
+                    }
+                }
+                val detailStackDepth = maxOf(currentDetailDepth, peakDetailDepth, detailDepthHint)
+                
+                val isSearchOnTop = false
                 val isUpdatesOnTop = updatesOverlayOffset != null && (!isDetailOverlayVisible || updatesZIndex > detailZIndex) && (searchOverlayOffset == null || updatesZIndex > searchZIndex)
-                val isDetailOnTop = isDetailOverlayVisible && !isSearchOnTop && !isUpdatesOnTop
+                val isDetailOnTop = isDetailOverlayVisible && !isUpdatesOnTop
 
                 LaunchedEffect(currentDetailEntry) {
                     currentDetailEntry?.let { entry ->
@@ -340,11 +403,14 @@ class MainActivity : ComponentActivity() {
                 
                 ModalNavigationDrawer(
                     drawerState = drawerState,
-                    gesturesEnabled = !isDetailOverlayVisible && !isLoginOrSplash && searchOverlayOffset == null && updatesOverlayOffset == null,
+                    gesturesEnabled = !isDetailOverlayVisible && !isLoginOrSplash && updatesOverlayOffset == null,
                     drawerContent = {
                         ModalDrawerSheet(
                             drawerContainerColor = Color.Transparent,
                             drawerContentColor = Color.White,
+                            drawerTonalElevation = 0.dp,
+                            drawerShape = androidx.compose.ui.graphics.RectangleShape,
+                            windowInsets = WindowInsets(0, 0, 0, 0),
                             modifier = Modifier
                                 .width(280.dp)
                                 .zIndex(100f)
@@ -407,6 +473,65 @@ class MainActivity : ComponentActivity() {
                     val discoverPadding = PaddingValues(top = drawerBarHeight + 16.dp, bottom = bottomBarHeight)
                     val immersivePadding = PaddingValues(top = 0.dp, bottom = 0.dp)
 
+                    // --- SYSTEM BACK HANDLING HIERARCHY ---
+                    val isAnyMovieActionModalOpen = movieActionsManager.showRatingDialog || 
+                            movieActionsManager.showNotesDialog || 
+                            movieActionsManager.showFolderDialog || 
+                            movieActionsManager.showActionsPopup
+
+                    val isModalActive = isAnyMovieActionModalOpen || showFolderDeleteConfirm || showFolderEditDialog || showFolderOptions || isYearPickerVisible || isFilterModalVisible
+
+                    androidx.activity.compose.BackHandler(enabled = isAnyMovieActionModalOpen) {
+                        movieActionsManager.closeAll()
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = showFolderOptions && !isAnyMovieActionModalOpen) {
+                        showFolderOptions = false
+                    }
+                    
+                    androidx.activity.compose.BackHandler(enabled = showFolderEditDialog && !isAnyMovieActionModalOpen && !showFolderOptions) {
+                        showFolderEditDialog = false
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = showFolderDeleteConfirm && !isAnyMovieActionModalOpen && !showFolderOptions && !showFolderEditDialog) {
+                        showFolderDeleteConfirm = false
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = isYearPickerVisible && !isAnyMovieActionModalOpen && !showFolderDeleteConfirm) {
+                        isYearPickerVisible = false
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = isFilterModalVisible && !isAnyMovieActionModalOpen && !showFolderDeleteConfirm && !isYearPickerVisible) {
+                        isFilterModalVisible = false
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = drawerState.isOpen && !isModalActive && !isSearchOnTop && !isUpdatesOnTop && !isDetailOnTop) {
+                        scope.launch { drawerState.close() }
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = isDetailOnTop && !isModalActive) {
+                        popDetailOne()
+                    }
+
+                    // Exit confirmation handler: only active at the root screen (when navController has no backstack)
+                    // and when no modal or overlay is currently active.
+                    val isRootScreen = navController.previousBackStackEntry == null
+                    val isAnyOverlayOrModalActive = isDetailOverlayVisible || 
+                             
+                            updatesOverlayOffset != null || 
+                            isModalActive || 
+                            drawerState.isOpen ||
+                            showExitConfirmation
+
+                    androidx.activity.compose.BackHandler(enabled = isRootScreen && !isAnyOverlayOrModalActive) {
+                        showExitConfirmation = true
+                    }
+
+                    androidx.activity.compose.BackHandler(enabled = showExitConfirmation) {
+                        showExitConfirmation = false
+                    }
+
+
                     SharedTransitionLayout {
                     Box(
                         modifier = Modifier.fillMaxSize()
@@ -455,7 +580,7 @@ class MainActivity : ComponentActivity() {
                                             content()
                                         }
                                         
-                                        val overlaysActive = (searchOverlayOffset != null || updatesOverlayOffset != null) && !isOverlayClosing
+                                        val overlaysActive = ( updatesOverlayOffset != null) && !isOverlayClosing
                                         val dimBars = overlaysActive || isFilterModalVisible || isActionModalVisible || isYearPickerVisible || isAnySettingsDialogOpen
                                         val dimOverlay = overlaysActive || isFilterModalVisible || isActionModalVisible || isYearPickerVisible
                                         
@@ -478,11 +603,23 @@ class MainActivity : ComponentActivity() {
                                                     .fillMaxWidth()
                                                     .graphicsLayer { alpha = barsAlpha }
                                             ) {
+                                                var discoverColumns: Int? = null
+                                                var onLayoutToggle: (() -> Unit)? = null
+                                                
                                                 val hasActiveFilters = if (activeTab is DiscoverRoute) {
                                                     val entry = navBackStackEntry
                                                     if (entry != null) {
                                                         val discoverViewModel: DiscoverViewModel = hiltViewModel(entry)
                                                         val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
+                                                        
+                                                        if (discoverUiState.preferences.showLayoutToggle) {
+                                                            discoverColumns = if (discoverUiState.preferences.gridColumns in 1..3) discoverUiState.preferences.gridColumns else 3
+                                                            onLayoutToggle = {
+                                                                val next = nextGridColumns(discoverColumns ?: 3)
+                                                                discoverViewModel.updateGridColumns(next)
+                                                            }
+                                                        }
+
                                                         discoverUiState.sortConfig.selectedGenres.isNotEmpty() || 
                                                         discoverUiState.sortConfig.selectedProviders.isNotEmpty() || 
                                                         discoverUiState.sortConfig.selectedDecades.isNotEmpty()
@@ -536,7 +673,9 @@ class MainActivity : ComponentActivity() {
                                                     isSyncing = false,
                                                     isDimmed = dimBars,
                                                     notificationCount = homeUiState.notificationCount,
-                                                    indicatorColor = indicatorColor
+                                                    indicatorColor = indicatorColor,
+                                                    onLayoutToggleClick = onLayoutToggle,
+                                                    layoutColumns = discoverColumns
                                                 )
                                             }
 
@@ -594,7 +733,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                         }
 
-                                        val isButtonVisible = searchOverlayOffset == null && updatesOverlayOffset == null && !isLoginOrSplash
+                                        val isButtonVisible =  updatesOverlayOffset == null && !isLoginOrSplash
 
                                         AnimatedVisibility(
                                             visible = isButtonVisible,
@@ -630,8 +769,7 @@ class MainActivity : ComponentActivity() {
                                                             )
                                                             .bounceClick(scaleDown = 0.92f, enabled = !dimBars) {
                                                                 if (buttonCenter != Offset.Zero) {
-                                                                    searchZIndex = ++globalTopZIndex
-                                                                    searchOverlayOffset = buttonCenter
+                                                                    detailNavController.navigate(SearchRoute(startX = buttonCenter.x, startY = buttonCenter.y))
                                                                 }
                                                             },
                                                         contentAlignment = Alignment.Center
@@ -673,23 +811,32 @@ class MainActivity : ComponentActivity() {
                                                     fadeOut(animationSpec = tween(1000))
                                                 }
                                             ) {
-                                                LaunchedEffect(authState) {
-                                                    kotlinx.coroutines.delay(1200) // Ridotto da 2000 per una transizione più veloce
-                                                    when (authState) {
-                                                        is AuthState.Authenticated, is AuthState.Anonymous -> {
-                                                            navController.navigate(HomeRoute) {
-                                                                popUpTo(SplashRoute) { inclusive = true }
+                                                var animationFinished by remember { mutableStateOf(false) }
+
+                                                LaunchedEffect(authState, animationFinished) {
+                                                    if (animationFinished) {
+                                                        when (authState) {
+                                                            is AuthState.Authenticated, is AuthState.Anonymous -> {
+                                                                navController.navigate(HomeRoute) {
+                                                                    popUpTo(SplashRoute) { inclusive = true }
+                                                                }
                                                             }
-                                                        }
-                                                        is AuthState.Unauthenticated, is AuthState.Error -> {
-                                                            navController.navigate(LoginRoute) {
-                                                                popUpTo(SplashRoute) { inclusive = true }
+                                                            is AuthState.Unauthenticated, is AuthState.Error -> {
+                                                                navController.navigate(LoginRoute) {
+                                                                    popUpTo(SplashRoute) { inclusive = true }
+                                                                }
                                                             }
+                                                            else -> {}
                                                         }
-                                                        else -> {}
                                                     }
                                                 }
-                                                PremiumSplashScreen(accentColor = accentColor)
+                                                
+                                                com.cinetrack.ui.screens.LogoAnimationScreen(
+                                                    hazeState = null,
+                                                    onAnimationEnd = {
+                                                        animationFinished = true
+                                                    }
+                                                )
                                             }
                                             composable<HomeRoute>(
                                                 exitTransition = {
@@ -714,7 +861,7 @@ class MainActivity : ComponentActivity() {
                                                         if (bounds != null) filterButtonBounds = bounds
                                                     },
                                                     onMovieClick = { movie -> 
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                     },
                                                     onActionModalVisibilityChanged = { isActionModalVisible = it }
                                                 )
@@ -742,7 +889,7 @@ class MainActivity : ComponentActivity() {
                                                         if (bounds != null) filterButtonBounds = bounds
                                                     },
                                                     onMovieClick = { movie -> 
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                     },
                                                     onActionModalVisibilityChanged = { isActionModalVisible = it }
                                                 )
@@ -771,7 +918,7 @@ class MainActivity : ComponentActivity() {
                                                         if (bounds != null) filterButtonBounds = bounds
                                                     },
                                                     onMovieClick = { movie -> 
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                     },
                                                     onActionModalVisibilityChanged = { isActionModalVisible = it }
                                                 )
@@ -812,7 +959,7 @@ class MainActivity : ComponentActivity() {
                                                         if (bounds != null) yearPickerButtonBounds = bounds
                                                     },
                                                     onPersonClick = { personId ->
-                                                        detailNavController.navigate(PersonRoute(id = personId))
+                                                        openPerson(personId, null)
                                                     }
                                                 )
                                             }
@@ -833,7 +980,7 @@ class MainActivity : ComponentActivity() {
                                                     viewModel = viewModel,
                                                     paddingValues = drawerPadding,
                                                     onMovieClick = { movie -> 
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                     },
                                                     onActionModalVisibilityChanged = { isActionModalVisible = it }
                                                 )
@@ -844,7 +991,7 @@ class MainActivity : ComponentActivity() {
                                                 LaunchedEffect(uiState.randomMovie, uiState.hasNoMovies) {
                                                     val movie = uiState.randomMovie
                                                     if (movie != null) {
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                         navController.navigate(HomeRoute) {
                                                             popUpTo(HomeRoute) { inclusive = false }
                                                         }
@@ -890,7 +1037,7 @@ class MainActivity : ComponentActivity() {
                                                     hazeState = contentHazeState,
                                                     animatedVisibilityScope = this@composable,
                                                     onMovieClick = { movie ->
-                                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                                        openDetail(movie.id, movie.mediaType)
                                                     },
                                                     onBack = { navController.popBackStack() },
                                                     showDeleteConfirm = showFolderDeleteConfirm,
@@ -988,6 +1135,59 @@ class MainActivity : ComponentActivity() {
                             composable<DetailOverlayPlaceholder> {
                                 Box(modifier = Modifier.fillMaxSize().background(Color.Transparent))
                             }
+                            composable<SearchRoute>(
+                                enterTransition = { EnterTransition.None },
+                                exitTransition = { fadeOut(tween(10)) },
+                                popEnterTransition = { EnterTransition.None },
+                                popExitTransition = { fadeOut(tween(10)) }
+                            ) { backStackEntry ->
+                                val route = backStackEntry.toRoute<SearchRoute>()
+                                val searchViewModel: SearchViewModel = hiltViewModel()
+                                
+                                LaunchedEffect(route) {
+                                    route.initialGenreId?.let { gid ->
+                                        searchViewModel.updateSortConfig(
+                                            searchViewModel.uiState.value.sortConfig.copy(
+                                                selectedGenres = listOf(gid)
+                                            )
+                                        )
+                                    }
+                                    route.initialKeywordId?.let { kid ->
+                                        searchViewModel.updateSortConfig(
+                                            searchViewModel.uiState.value.sortConfig.copy(
+                                                selectedKeywords = listOf(kid)
+                                            )
+                                        )
+                                    }
+                                }
+
+                                SearchScreen(
+                                    viewModel = searchViewModel,
+                                    paddingValues = immersivePadding,
+                                    startX = route.startX,
+                                    startY = route.startY,
+                                    initialGenreName = route.initialGenreName,
+                                    initialKeywordName = route.initialKeywordName,
+                                    isFilterVisible = isFilterModalVisible,
+                                    onBack = { 
+                                        searchViewModel.onQueryChanged("")
+                                        searchViewModel.updateSortConfig(com.cinetrack.data.models.SortConfig())
+                                        isFilterModalVisible = false
+                                        popDetailOne()
+                                    },
+                                    onToggleFilter = { visible, bounds ->
+                                        isFilterModalVisible = visible
+                                        if (bounds != null) filterButtonBounds = bounds
+                                    },
+                                    onMovieClick = { movie ->
+                                        openDetail(movie.id, movie.mediaType)
+                                    },
+                                    onPersonClick = { personId ->
+                                        openPerson(personId, null)
+                                    }
+                                )
+                            }
+
                             composable<DetailRoute>(
                                 enterTransition = { 
                                     slideInVertically(
@@ -996,19 +1196,22 @@ class MainActivity : ComponentActivity() {
                                     ) + fadeIn(tween(450))
                                 },
                                 exitTransition = { 
-                                    slideOutVertically(
+                                    if (targetState.destination.hasRoute<SearchRoute>()) fadeOut(tween(10, delayMillis = 800))
+                                    else slideOutVertically(
                                         targetOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeOut(tween(450))
                                 },
                                 popEnterTransition = { 
-                                    slideInVertically(
+                                    if (initialState.destination.hasRoute<SearchRoute>()) fadeIn(tween(10))
+                                    else slideInVertically(
                                         initialOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeIn(tween(450))
                                 },
                                 popExitTransition = { 
-                                    slideOutVertically(
+                                    if (targetState.destination.hasRoute<SearchRoute>()) fadeOut(tween(10, delayMillis = 800))
+                                    else slideOutVertically(
                                         targetOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeOut(tween(450))
@@ -1018,25 +1221,24 @@ class MainActivity : ComponentActivity() {
                                     viewModel = hiltViewModel(),
                                     paddingValues = detailPadding,
                                     hazeState = contentHazeState,
+                                    sharedTransitionScope = this@SharedTransitionLayout,
                                     animatedVisibilityScope = this@composable,
-                                    onBackClick = { detailNavController.popBackStack() },
-                                    onPersonClick = { personId ->
-                                        detailNavController.navigate(PersonRoute(id = personId))
+                                    onBackClick = { popDetailOne() },
+                                    onPersonClick = { personId, profilePath ->
+                                        openPerson(personId, profilePath)
                                     },
                                     onMovieClick = { movie ->
-                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                        openDetail(movie.id, movie.mediaType)
                                     },
                                     onGenreClick = { id, name, offset ->
-                                        searchZIndex = ++globalTopZIndex
-                                        searchInitialGenreId = id
-                                        searchInitialGenreName = name
-                                        searchOverlayOffset = offset
+                                        detailNavController.navigate(SearchRoute(startX = offset.x, startY = offset.y, initialGenreId = id, initialGenreName = name))
                                     },
                                     onKeywordClick = { keywordId, keywordName, offset ->
-                                        searchZIndex = ++globalTopZIndex
-                                        searchInitialKeywordId = keywordId
-                                        searchInitialKeywordName = keywordName
-                                        searchOverlayOffset = offset
+                                        detailNavController.navigate(SearchRoute(startX = offset.x, startY = offset.y, initialKeywordId = keywordId, initialKeywordName = keywordName))
+                                    },
+                                    detailStackDepth = detailStackDepth,
+                                    onHomeClick = {
+                                        popDetailToRoot()
                                     }
                                 )
                             }
@@ -1048,19 +1250,22 @@ class MainActivity : ComponentActivity() {
                                     ) + fadeIn(tween(450))
                                 },
                                 exitTransition = { 
-                                    slideOutVertically(
+                                    if (targetState.destination.hasRoute<SearchRoute>()) fadeOut(tween(10, delayMillis = 800))
+                                    else slideOutVertically(
                                         targetOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeOut(tween(450))
                                 },
                                 popEnterTransition = { 
-                                    slideInVertically(
+                                    if (initialState.destination.hasRoute<SearchRoute>()) fadeIn(tween(10))
+                                    else slideInVertically(
                                         initialOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeIn(tween(450))
                                 },
                                 popExitTransition = { 
-                                    slideOutVertically(
+                                    if (targetState.destination.hasRoute<SearchRoute>()) fadeOut(tween(10, delayMillis = 800))
+                                    else slideOutVertically(
                                         targetOffsetY = { it },
                                         animationSpec = tween(450, easing = FastOutSlowInEasing)
                                     ) + fadeOut(tween(450))
@@ -1070,10 +1275,15 @@ class MainActivity : ComponentActivity() {
                                     viewModel = hiltViewModel(),
                                     paddingValues = detailPadding,
                                     hazeState = contentHazeState,
+                                    sharedTransitionScope = this@SharedTransitionLayout,
                                     animatedVisibilityScope = this@composable,
-                                    onBackClick = { detailNavController.popBackStack() },
+                                    onBackClick = { popDetailOne() },
                                     onMovieClick = { movie ->
-                                        detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
+                                        openDetail(movie.id, movie.mediaType)
+                                    },
+                                    detailStackDepth = detailStackDepth,
+                                    onHomeClick = {
+                                        popDetailToRoot()
                                     }
                                 )
                             }
@@ -1098,79 +1308,15 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onClosing = { isOverlayClosing = true },
                                 onMovieClick = { movie -> 
-                                    detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType)) 
+                                    openDetail(movie.id, movie.mediaType)
                                 }
                             )
                         }
 
-                        AnimatedVisibility(
-                            visible = searchOverlayOffset != null,
-                            modifier = Modifier.zIndex(searchZIndex),
-                            enter = EnterTransition.None,
-                            exit = ExitTransition.None
-                        ) {
-                            val searchViewModel: SearchViewModel = hiltViewModel()
-                            
-                            LaunchedEffect(searchInitialQuery, searchInitialGenreId, searchInitialKeywordId) {
-                                searchInitialQuery?.let {
-                                    searchViewModel.onQueryChanged(it)
-                                    searchInitialQuery = null
-                                }
-                                searchInitialGenreId?.let { gid ->
-                                    searchViewModel.updateSortConfig(
-                                        searchViewModel.uiState.value.sortConfig.copy(
-                                            selectedGenres = listOf(gid)
-                                        )
-                                    )
-                                    searchInitialGenreId = null
-                                }
-                                searchInitialKeywordId?.let { kid ->
-                                    searchViewModel.updateSortConfig(
-                                        searchViewModel.uiState.value.sortConfig.copy(
-                                            selectedKeywords = listOf(kid)
-                                        )
-                                    )
-                                    searchInitialKeywordId = null
-                                }
-                            }
-                             SearchScreen(
-                                viewModel = searchViewModel,
-                                modifier = Modifier,
-                                paddingValues = immersivePadding,
-                                startX = searchOverlayOffset?.x,
-                                startY = searchOverlayOffset?.y,
-                                animatedVisibilityScope = this@AnimatedVisibility,
-                                initialGenreName = searchInitialGenreName,
-                                initialKeywordName = searchInitialKeywordName,
-                                isFilterVisible = isFilterModalVisible,
-                                isDetailVisible = isDetailOnTop,
-                                onBack = { 
-                                    searchViewModel.onQueryChanged("")
-                                    searchViewModel.updateSortConfig(com.cinetrack.data.models.SortConfig())
-                                    isFilterModalVisible = false
-                                    searchOverlayOffset = null 
-                                    searchInitialGenreName = null
-                                    searchInitialKeywordName = null
-                                    isOverlayClosing = false
-                                },
-                                onClosing = { isOverlayClosing = true },
-                                onToggleFilter = { visible, bounds ->
-                                    isFilterModalVisible = visible
-                                    if (bounds != null) filterButtonBounds = bounds
-                                },
-                                onMovieClick = { movie ->
-                                    detailNavController.navigate(DetailRoute(id = movie.id, mediaType = movie.mediaType))
-                                },
-                                onPersonClick = { personId ->
-                                    detailNavController.navigate(PersonRoute(id = personId))
-                                }
-                            )
-
-
-                        }
+                        
                         // --- MODALS (Rendered last to stay on top) ---
                         // Note: Search modal is handled inside SearchScreen.kt to use local hazeState
-                        if (searchOverlayOffset == null) {
+                        if (true) {
                             if (activeTab is HomeRoute) {
                                 val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
                                 Box(modifier = Modifier.zIndex(70000f)) {
@@ -1312,63 +1458,8 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        // --- SYSTEM BACK HANDLING HIERARCHY ---
-                        val isAnyMovieActionModalOpen = movieActionsManager.showRatingDialog || 
-                                movieActionsManager.showNotesDialog || 
-                                movieActionsManager.showFolderDialog || 
-                                movieActionsManager.showActionsPopup
+                        // Moved SYSTEM BACK HANDLING HIERARCHY to the top of the Surface
 
-                        val isModalActive = isAnyMovieActionModalOpen || showFolderDeleteConfirm || showFolderEditDialog || showFolderOptions || isYearPickerVisible || isFilterModalVisible
-
-                        androidx.activity.compose.BackHandler(enabled = isAnyMovieActionModalOpen) {
-                            movieActionsManager.closeAll()
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = showFolderOptions && !isAnyMovieActionModalOpen) {
-                            showFolderOptions = false
-                        }
-                        
-                        androidx.activity.compose.BackHandler(enabled = showFolderEditDialog && !isAnyMovieActionModalOpen && !showFolderOptions) {
-                            showFolderEditDialog = false
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = showFolderDeleteConfirm && !isAnyMovieActionModalOpen && !showFolderOptions && !showFolderEditDialog) {
-                            showFolderDeleteConfirm = false
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = isYearPickerVisible && !isAnyMovieActionModalOpen && !showFolderDeleteConfirm) {
-                            isYearPickerVisible = false
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = isFilterModalVisible && !isAnyMovieActionModalOpen && !showFolderDeleteConfirm && !isYearPickerVisible) {
-                            isFilterModalVisible = false
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = drawerState.isOpen && !isModalActive && !isSearchOnTop && !isUpdatesOnTop && !isDetailOnTop) {
-                            scope.launch { drawerState.close() }
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = isDetailOnTop && !isModalActive) {
-                            detailNavController.popBackStack()
-                        }
-
-                        // Exit confirmation handler: only active at the root screen (when navController has no backstack)
-                        // and when no modal or overlay is currently active.
-                        val isRootScreen = navController.previousBackStackEntry == null
-                        val isAnyOverlayOrModalActive = isDetailOverlayVisible || 
-                                searchOverlayOffset != null || 
-                                updatesOverlayOffset != null || 
-                                isModalActive || 
-                                drawerState.isOpen ||
-                                showExitConfirmation
-
-                        androidx.activity.compose.BackHandler(enabled = isRootScreen && !isAnyOverlayOrModalActive) {
-                            showExitConfirmation = true
-                        }
-
-                        androidx.activity.compose.BackHandler(enabled = showExitConfirmation) {
-                            showExitConfirmation = false
-                        }
 
                         } // End Haze Capture Box (drawerHazeState)
 

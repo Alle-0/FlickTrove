@@ -63,7 +63,9 @@ import androidx.compose.foundation.BorderStroke
 import com.cinetrack.ui.components.HomeFilterModal
 import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
+import com.cinetrack.ui.components.shared.nextGridColumns
 
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -105,7 +107,6 @@ fun SearchScreen(
     initialGenreName: String? = null,
     initialKeywordName: String? = null,
     isFilterVisible: Boolean = false,
-    isDetailVisible: Boolean = false,
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onToggleFilter: (Boolean, Rect?) -> Unit,
@@ -167,7 +168,7 @@ fun SearchScreen(
         }
     }
 
-    androidx.activity.compose.BackHandler(enabled = !isClosing && !isDetailVisible) {
+    androidx.activity.compose.BackHandler(enabled = !isClosing) {
         if (isFilterVisible) {
             onToggleFilter(false, null)
         } else {
@@ -186,8 +187,14 @@ fun SearchScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
-    val personCardWidth = (screenWidth - (padding * 2) - (gap * 3)) / 4
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
+    val personColumns = 4
+    val personCardWidth = (screenWidth - (padding * 2) - (gap * (personColumns - 1))) / personColumns
 
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -346,6 +353,8 @@ fun SearchScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
+                            val movieSpan = 12 / columns
+                            val personSpan = 12 / personColumns
                             val showEmptySearch = uiState.query.isEmpty() && (uiState.sortConfig.selectedGenres.isEmpty() && uiState.sortConfig.selectedKeywords.isEmpty() || uiState.category == "person")
                             
                             if (showEmptySearch) {
@@ -362,7 +371,7 @@ fun SearchScreen(
                                             )
                                         }
                                     }
-                                    itemsIndexed(items = uiState.trendingMovies.take(6), key = { _, item -> "trending_movie_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
+                                    itemsIndexed(items = uiState.trendingMovies.take(6), key = { _, item -> "trending_movie_${item.id}" }, span = { _, _ -> GridItemSpan(movieSpan) }) { index, item ->
                                         if (item is TMDBSearchResult.MovieResult) {
                                             val baseMovie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
                                             val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
@@ -372,28 +381,51 @@ fun SearchScreen(
                                                     it.toComposeColor()
                                                 } ?: emptyList()
                                             }
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movieStatus?.favorite ?: false,
-                                                isWatched = movieStatus?.watched ?: false,
-                                                isReminder = movieStatus?.reminder ?: false,
-                                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                personalRating = movieStatus?.personalRating,
-                                                folderColors = folderColors,
-                                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                animatedVisibilityScope = animatedVisibilityScope,
-                                                staggerIndex = index,
-                                                onPress = { 
-                                                    keyboardController?.hide()
-                                                    onMovieClick(movie) 
-                                                },
-                                                onAction = { viewModel.toggleFavorite(movie) },
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) }
-                                            )
+                                            if (columns == 1) {
+                                                com.cinetrack.ui.components.MovieListCard(
+                                                    movie = movie,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            } else {
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = cardWidth,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = animatedVisibilityScope,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -410,7 +442,7 @@ fun SearchScreen(
                                             )
                                         }
                                     }
-                                    itemsIndexed(items = uiState.trendingTv.take(6), key = { _, item -> "trending_tv_${item.id}" }, span = { _, _ -> GridItemSpan(4) }) { index, item ->
+                                    itemsIndexed(items = uiState.trendingTv.take(6), key = { _, item -> "trending_tv_${item.id}" }, span = { _, _ -> GridItemSpan(movieSpan) }) { index, item ->
                                         if (item is TMDBSearchResult.TvResult) {
                                             val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
                                             val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
@@ -420,28 +452,51 @@ fun SearchScreen(
                                                     it.toComposeColor()
                                                 } ?: emptyList()
                                             }
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movieStatus?.favorite ?: false,
-                                                isWatched = movieStatus?.watched ?: false,
-                                                isReminder = movieStatus?.reminder ?: false,
-                                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                personalRating = movieStatus?.personalRating,
-                                                folderColors = folderColors,
-                                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                animatedVisibilityScope = animatedVisibilityScope,
-                                                staggerIndex = index,
-                                                onPress = { 
-                                                    keyboardController?.hide()
-                                                    onMovieClick(movie) 
-                                                },
-                                                onAction = { viewModel.toggleFavorite(movie) },
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) }
-                                            )
+                                            if (columns == 1) {
+                                                com.cinetrack.ui.components.MovieListCard(
+                                                    movie = movie,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            } else {
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = cardWidth,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = animatedVisibilityScope,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -458,7 +513,7 @@ fun SearchScreen(
                                             )
                                         }
                                     }
-                                    items(items = uiState.trendingPeople.take(8), key = { "trending_person_${it.id}" }, contentType = { "person_result" }, span = { GridItemSpan(3) }) { item ->
+                                    items(items = uiState.trendingPeople.take(8), key = { "trending_person_${it.id}" }, contentType = { "person_result" }, span = { GridItemSpan(personSpan) }) { item ->
                                         if (item is TMDBSearchResult.PersonResult) {
                                             PersonCard(person = PersonSearchResult(id = item.id, name = item.name, profilePath = item.profilePath, knownForDepartment = item.knownForDepartment), width = personCardWidth, onClick = { 
                                                 keyboardController?.hide()
@@ -471,7 +526,7 @@ fun SearchScreen(
 
                                 
                                 if (uiState.results.isEmpty() && uiState.isLoading) {
-                                    items(if (uiState.category == "person") 16 else 12, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(3) else GridItemSpan(4) }) { 
+                                    items(if (uiState.category == "person") 16 else 12, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }) { 
                                         MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth) 
                                     }
                                 }
@@ -498,7 +553,7 @@ fun SearchScreen(
                                         is TMDBSearchResult.TvResult -> "${item.id}_tv"
                                         is TMDBSearchResult.PersonResult -> "${item.id}_person"
                                     }},
-                                    span = { _, _ -> if (uiState.category == "person") GridItemSpan(3) else GridItemSpan(4) }
+                                    span = { _, _ -> if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }
                                 ) { index, item ->
                                     when(item) {
                                         is TMDBSearchResult.MovieResult -> {
@@ -511,28 +566,51 @@ fun SearchScreen(
                                                     it.toComposeColor()
                                                 } ?: emptyList()
                                             }
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movieStatus?.favorite ?: false,
-                                                isWatched = movieStatus?.watched ?: false,
-                                                isReminder = movieStatus?.reminder ?: false,
-                                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                personalRating = movieStatus?.personalRating,
-                                                folderColors = folderColors,
-                                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                animatedVisibilityScope = animatedVisibilityScope,
-                                                staggerIndex = index,
-                                                onPress = { 
-                                                    keyboardController?.hide()
-                                                    onMovieClick(movie) 
-                                                },
-                                                onAction = { viewModel.toggleFavorite(movie) },
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) }
-                                            )
+                                            if (columns == 1) {
+                                                com.cinetrack.ui.components.MovieListCard(
+                                                    movie = movie,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            } else {
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = cardWidth,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = animatedVisibilityScope,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            }
                                         }
                                         is TMDBSearchResult.TvResult -> {
                                             val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
@@ -543,28 +621,51 @@ fun SearchScreen(
                                                     it.toComposeColor()
                                                 } ?: emptyList()
                                             }
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movieStatus?.favorite ?: false,
-                                                isWatched = movieStatus?.watched ?: false,
-                                                isReminder = movieStatus?.reminder ?: false,
-                                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                personalRating = movieStatus?.personalRating,
-                                                folderColors = folderColors,
-                                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                animatedVisibilityScope = animatedVisibilityScope,
-                                                staggerIndex = index,
-                                                onPress = { 
-                                                    keyboardController?.hide()
-                                                    onMovieClick(movie) 
-                                                },
-                                                onAction = { viewModel.toggleFavorite(movie) },
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) }
-                                            )
+                                            if (columns == 1) {
+                                                com.cinetrack.ui.components.MovieListCard(
+                                                    movie = movie,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            } else {
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = cardWidth,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = animatedVisibilityScope,
+                                                    staggerIndex = index,
+                                                    onPress = { 
+                                                        keyboardController?.hide()
+                                                        onMovieClick(movie) 
+                                                    },
+                                                    onAction = { viewModel.toggleFavorite(movie) },
+                                                    onLongPress = { m, pressOffset, cardPos ->
+                                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                                    },
+                                                    onMessage = { viewModel.emitMessage(it) }
+                                                )
+                                            }
                                         }
                                         is TMDBSearchResult.PersonResult -> {
                                             PersonCard(person = PersonSearchResult(id = item.id, name = item.name, profilePath = item.profilePath, knownForDepartment = item.knownForDepartment), width = personCardWidth, onClick = { 
@@ -576,7 +677,7 @@ fun SearchScreen(
                                 }
 
                                 if (uiState.isNextPageLoading) {
-                                    items(if (uiState.category == "person") 4 else 3, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(3) else GridItemSpan(4) }) { 
+                                    items(if (uiState.category == "person") 4 else columns, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }) { 
                                         MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth) 
                                     }
                                 }
@@ -648,6 +749,7 @@ fun SearchScreen(
                                             decorationBox = { innerTextField ->
                                                 Box(contentAlignment = Alignment.CenterStart) {
                                                     if (uiState.query.isEmpty()) {
+                                                        val hasLayoutButton = uiState.preferences.showLayoutToggle && uiState.category != "person"
                                                         val placeholderText = when {
                                                             uiState.sortConfig.selectedGenres.isNotEmpty() -> {
                                                                 val gid = uiState.sortConfig.selectedGenres.first()
@@ -663,7 +765,13 @@ fun SearchScreen(
                                                             else -> "Cerca film, serie, persone..."
                                                         }
                                                         val hasActiveFilter = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty()
-                                                        Text(text = placeholderText, color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f), fontSize = 14.sp)
+                                                        Text(
+                                                            text = placeholderText,
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f),
+                                                            fontSize = if (hasLayoutButton) 12.sp else 14.sp,
+                                                            maxLines = 1,
+                                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                        )
                                                     }
                                                     innerTextField()
                                                 }
@@ -677,6 +785,31 @@ fun SearchScreen(
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty() || uiState.sortConfig.selectedProviders.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty()
+                            
+                            if (uiState.preferences.showLayoutToggle && uiState.category != "person") {
+                                Box(modifier = Modifier.size(44.dp)) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                                    )
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().bounceClick(scaleDown = 0.92f) {
+                                            val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
+                                            viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
+                                        }.border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = layoutToggleIcon(uiState.preferences.gridColumns),
+                                            contentDescription = "Cambia Layout",
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                            }
+                            
                             Box(modifier = Modifier.size(44.dp).onGloballyPositioned { layoutCoordinates ->
                                 val position = layoutCoordinates.positionInWindow()
                                 filterBounds = Rect(position.x, position.y, position.x + layoutCoordinates.size.width, position.y + layoutCoordinates.size.height)
@@ -793,11 +926,13 @@ fun SearchScreen(
                             "person" -> 2
                             else -> 0
                         }
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 8.dp)
-                            .height(40.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 8.dp)
+                                .height(40.dp)
+                        ) {
                              Box(modifier = Modifier.fillMaxSize().background(
                                  color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                                  shape = CircleShape
@@ -878,8 +1013,8 @@ fun SearchScreen(
                                         CategoryTab("PERSONE", uiState.category == "person") { viewModel.onCategoryChanged("person") }
                                     }
                                 }
+                                 }
                              }
-                        }
 
                     }
                 }

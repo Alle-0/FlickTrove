@@ -213,7 +213,7 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
             contentPadding = PaddingValues(end = 24.dp), // To allow scroll past edge
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(providers, key = { it.providerId }) { provider ->
+            items(providers, key = { it.providerId }, contentType = { "provider" }) { provider ->
                 ProviderLogo(provider = provider, accentColor = accentColor, onClick = onProviderClick)
             }
         }

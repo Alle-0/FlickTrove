@@ -6,8 +6,14 @@ import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.Provider
 import com.cinetrack.data.models.Season
+import com.cinetrack.data.api.TraktComment
 
 import com.cinetrack.data.local.entities.FolderEntity
+
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 
 sealed class DetailUiState {
     object Loading : DetailUiState()
@@ -19,18 +25,19 @@ sealed class DetailUiState {
         val isWatched: Boolean,
         val watchState: WatchState,
         val watchedProgress: Float,
-        val directors: List<CrewMember>,
-        val cast: List<CastMember>,
-        val streamingProviders: List<Provider>,
-        val buyRentProviders: List<Provider>,
-        val trailers: List<String>,
-        val recommendations: List<Movie>,
-        val collectionMovies: List<Movie> = emptyList(),
+        val directors: ImmutableList<CrewMember>,
+        val cast: ImmutableList<CastMember>,
+        val streamingProviders: ImmutableList<Provider>,
+        val buyRentProviders: ImmutableList<Provider>,
+        val trailers: ImmutableList<String>,
+        val recommendations: ImmutableList<Movie>,
+        val collectionMovies: ImmutableList<Movie> = persistentListOf(),
         val externalRatings: ExternalRatings = ExternalRatings(),
         val loadingSeason: Boolean = false,
-        val seasonDetails: Map<Int, Season> = emptyMap(),
-        val folders: List<FolderEntity> = emptyList(),
-        val watchProviderLink: String? = null
+        val seasonDetails: ImmutableMap<Int, Season> = persistentMapOf(),
+        val folders: ImmutableList<FolderEntity> = persistentListOf(),
+        val watchProviderLink: String? = null,
+        val traktComments: ImmutableList<TraktComment> = persistentListOf()
     ) : DetailUiState()
 }
 

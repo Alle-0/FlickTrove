@@ -14,9 +14,15 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 
 data class HomeUiState(
-    val movies: List<Movie> = emptyList(),
+    val movies: ImmutableList<Movie> = persistentListOf(),
     val movieCount: Int = 0,
     val tvCount: Int = 0,
     val isLoading: Boolean = true,
@@ -24,8 +30,8 @@ data class HomeUiState(
     val activeTab: String = "movie",
     val sortConfig: SortConfig = SortConfig(),
     val notificationCount: Int = 0,
-    val movieFolderColors: Map<String, List<String>> = emptyMap(),
-    val folders: List<com.cinetrack.data.local.entities.FolderEntity> = emptyList(),
+    val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
+    val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences()
 )
 
@@ -87,25 +93,25 @@ class HomeViewModel @Inject constructor(
             isNewEpisode || isReleasedToday
         }
 
-        val movieFolderColors = mutableMapOf<String, List<String>>()
+        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
         folders.forEach { folder ->
             val color = folder.color ?: "#FFFFFF"
             folder.itemIds.forEach { itemId ->
-                val colors = movieFolderColors.getOrDefault(itemId, emptyList())
-                movieFolderColors[itemId] = colors + color
+                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
             }
         }
+        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
         HomeUiState(
-            movies = sorted,
+            movies = sorted.toImmutableList(),
             movieCount = movieCount,
             tvCount = tvCount,
             isLoading = false,
             searchQuery = query,
             activeTab = tab,
             notificationCount = notificationCount,
-            movieFolderColors = movieFolderColors,
-            folders = folders,
+            movieFolderColors = immutableMovieFolderColors,
+            folders = folders.toImmutableList(),
             sortConfig = prefs.homeSort,
             preferences = prefs
         )
@@ -127,6 +133,14 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateHomeSort(config)
             repository.savePreferencesRemote(uiState.value.preferences.copy(homeSort = config))
+        }
+    }
+
+    fun updateGridColumns(columns: Int) {
+        viewModelScope.launch {
+            val updated = uiState.value.preferences.copy(gridColumns = columns)
+            preferenceRepository.updateGridColumns(columns)
+            repository.savePreferencesRemote(updated)
         }
     }
 
@@ -171,13 +185,17 @@ class HomeViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 

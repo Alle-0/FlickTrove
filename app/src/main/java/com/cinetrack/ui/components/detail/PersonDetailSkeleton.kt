@@ -30,7 +30,14 @@ import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PersonDetailSkeleton(
     hazeState: HazeState? = null,

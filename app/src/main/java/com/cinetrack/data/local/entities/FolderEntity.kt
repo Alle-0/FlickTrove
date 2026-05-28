@@ -1,5 +1,6 @@
 package com.cinetrack.data.local.entities
 
+import androidx.compose.runtime.Stable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -8,6 +9,7 @@ import kotlinx.serialization.SerialName
 
 @Serializable
 @Entity(tableName = "folders")
+@Stable
 data class FolderEntity(
     @PrimaryKey val id: String,
     val name: String,

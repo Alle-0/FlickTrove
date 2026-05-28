@@ -1,9 +1,11 @@
 package com.cinetrack.data.models
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
 @Serializable
+@Stable
 data class Episode(
     val id: Long = 0L,
     val name: String = "",
@@ -16,6 +18,7 @@ data class Episode(
 )
 
 @Serializable
+@Stable
 data class Season(
     val id: Long = 0L,
     val name: String = "",
@@ -27,6 +30,7 @@ data class Season(
 )
 
 @Serializable
+@Stable
 data class PersonData(
     val id: Long = 0L,
     val name: String = "",
@@ -34,6 +38,7 @@ data class PersonData(
 )
 
 @Serializable
+@Stable
 data class Folder(
     var id: String = "",
     var name: String = "",
@@ -42,10 +47,12 @@ data class Folder(
     var description: String? = null,
     @SerialName("item_ids") var itemIds: List<String> = emptyList(),
     @SerialName("created_at") var createdAt: String? = null,
-    @SerialName("updated_at") var updatedAt: String? = null
+    @SerialName("updated_at") var updatedAt: String? = null,
+    @SerialName("client_updated_at") var clientUpdatedAt: Long = 0L
 )
 
 @Serializable
+@Stable
 data class SortConfig(
     val sortType: String = "created_at", // 'created_at', 'vote_average', 'release_date', 'title', 'personal_rating'
     val sortDirection: String = "desc", // 'asc', 'desc'
@@ -56,6 +63,7 @@ data class SortConfig(
 )
 
 @Serializable
+@Stable
 data class DiscoveryFilters(
     val selectedGenres: List<Long> = emptyList(),
     val selectedProviders: List<Long> = emptyList(),
@@ -64,6 +72,7 @@ data class DiscoveryFilters(
 )
 
 @Serializable
+@Stable
 data class UserPreferences(
     val homeSort: SortConfig = SortConfig(),
     val vistiSort: SortConfig = SortConfig(sortType = "watched_at"),
@@ -75,6 +84,9 @@ data class UserPreferences(
     val showBadges: Boolean = true,
     val disabledBadges: Set<String> = emptySet(),
     val vibrationEnabled: Boolean = true,
+    val accentColor: String = "Teal",
+    val advancedVisualEffectsEnabled: Boolean = true,
+    val dynamicAppIconEnabled: Boolean = false,
     val lastSyncTimestamp: Long = 0L
 )
 

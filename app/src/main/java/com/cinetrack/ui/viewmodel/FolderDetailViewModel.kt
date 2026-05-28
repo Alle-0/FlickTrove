@@ -15,13 +15,19 @@ import com.cinetrack.data.models.UserPreferences
 import javax.inject.Inject
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 
 sealed interface FolderDetailUiState {
     object Loading : FolderDetailUiState
     data class Success(
         val folder: FolderEntity,
-        val movies: List<Movie>,
-        val allFolders: List<FolderEntity> = emptyList()
+        val movies: ImmutableList<Movie>,
+        val allFolders: ImmutableList<FolderEntity> = persistentListOf()
     ) : FolderDetailUiState
     data class Error(val message: String) : FolderDetailUiState
 }
@@ -43,15 +49,15 @@ class FolderDetailViewModel @Inject constructor(
 
     private val allFoldersFlow = repository.getFoldersFlow()
 
-    val movieFolderColors: StateFlow<Map<String, List<String>>> = allFoldersFlow.map { folders ->
+    val movieFolderColors: StateFlow<ImmutableMap<String, ImmutableList<String>>> = allFoldersFlow.map { folders ->
         val map = mutableMapOf<String, MutableList<String>>()
         folders.forEach { folder ->
             folder.itemIds.forEach { id ->
                 map.getOrPut(id) { mutableListOf() }.add(folder.color ?: "#FFFFFF")
             }
         }
-        map
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+        map.mapValues { it.value.toImmutableList() }.toImmutableMap()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), persistentMapOf())
 
     val preferences = preferenceRepository.userPreferencesFlow.stateIn(
         scope = viewModelScope,
@@ -67,7 +73,7 @@ class FolderDetailViewModel @Inject constructor(
                 repository.getMoviesByCompositeIds(folder.itemIds),
                 allFoldersFlow
             ) { movies, allFolders ->
-                FolderDetailUiState.Success(folder, movies, allFolders)
+                FolderDetailUiState.Success(folder, movies.toImmutableList(), allFolders.toImmutableList())
             }
         }
     }.stateIn(
@@ -99,13 +105,17 @@ class FolderDetailViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 

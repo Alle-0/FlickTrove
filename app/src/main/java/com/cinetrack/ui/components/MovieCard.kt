@@ -94,11 +94,12 @@ fun MovieMenuItem(
     text: String,
     icon: ImageVector,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     iconColor: Color = Color.White.copy(alpha = 0.8f),
     isDestructive: Boolean = false
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(38.dp)
             .bounceClick(scaleDown = 0.96f, onClick = onClick)
@@ -135,10 +136,10 @@ fun MovieMenuItem(
 }
 
 @Composable
-private fun MovieCircularProgress(progress: Float) {
+fun MovieCircularProgress(progress: Float, modifier: Modifier = Modifier) {
     val accentColor = MaterialTheme.colorScheme.primary
-    Box(modifier = Modifier.size(26.dp), contentAlignment = Alignment.Center) {
-        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(1.dp)) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(2.dp)) {
             drawArc(
                 color = Color.White.copy(alpha = 0.15f),
                 startAngle = -90f,
@@ -158,7 +159,7 @@ private fun MovieCircularProgress(progress: Float) {
 }
 
 @Composable
-private fun MovieFolderBookmarks(folderColors: List<Color>) {
+fun MovieFolderBookmarks(folderColors: List<Color>) {
     if (folderColors.isEmpty()) return
     
     val indicatorBrush = if (folderColors.size > 1) {
@@ -224,8 +225,10 @@ fun MovieActionsPopup(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = fadeIn(tween(200, easing = LinearOutSlowInEasing)),
-                exit = fadeOut(tween(200, easing = FastOutLinearInEasing))
+                enter = fadeIn(tween(200, easing = LinearOutSlowInEasing)) + 
+                        expandVertically(expandFrom = Alignment.Top, animationSpec = tween(250, easing = FastOutSlowInEasing)),
+                exit = fadeOut(tween(200, easing = FastOutLinearInEasing)) + 
+                       shrinkVertically(shrinkTowards = Alignment.Top, animationSpec = tween(200, easing = FastOutLinearInEasing))
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize()
@@ -268,13 +271,7 @@ fun MovieActionsPopup(
                     Column(
                         modifier = Modifier
                             .offset { IntOffset(xPos.toInt(), yPos.toInt()) }
-                            .widthIn(min = 170.dp, max = 190.dp)
-                            .shadow(
-                                elevation = 16.dp,
-                                shape = RoundedCornerShape(24.dp),
-                                ambientColor = Color.Black.copy(alpha = 0.4f),
-                                spotColor = Color.Black.copy(alpha = 0.4f)
-                            )
+                            .width(170.dp)
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp)
@@ -312,29 +309,47 @@ fun MovieActionsPopup(
                             text = "Voto rapido",
                             icon = CustomIcons.PremiumStar,
                             iconColor = HazeStyles.AccentYellow,
+                            modifier = Modifier.animateEnterExit(
+                                enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
+                            ),
                             onClick = { onDismiss(); onQuickVote(movie) }
                         )
                         MovieMenuItem(
                             text = "Nota rapida",
                             icon = CustomIcons.PremiumEditNote,
                             iconColor = Color(0xFF60A5FA),
+                            modifier = Modifier.animateEnterExit(
+                                enter = slideInVertically(tween(300, delayMillis = 80)) { it / 2 } + fadeIn(tween(300, delayMillis = 80))
+                            ),
                             onClick = { onDismiss(); onQuickNote(movie) }
                         )
                         MovieMenuItem(
                             text = "Cartelle",
                             icon = CustomIcons.PremiumFolder,
                             iconColor = Color(0xFF34D399),
+                            modifier = Modifier.animateEnterExit(
+                                enter = slideInVertically(tween(300, delayMillis = 120)) { it / 2 } + fadeIn(tween(300, delayMillis = 120))
+                            ),
                             onClick = { onDismiss(); onFolders(movie) }
                         )
                         MovieMenuItem(
                             text = "Condividi",
                             icon = CustomIcons.PremiumShare,
                             iconColor = Color(0xFF818CF8),
+                            modifier = Modifier.animateEnterExit(
+                                enter = slideInVertically(tween(300, delayMillis = 160)) { it / 2 } + fadeIn(tween(300, delayMillis = 160))
+                            ),
                             onClick = { onDismiss(); onShare(movie) }
                         )
                         
                         Spacer(modifier = Modifier.height(4.dp))
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.1f)))
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .animateEnterExit(
+                                enter = fadeIn(tween(300, delayMillis = 200))
+                            )
+                            .background(Color.White.copy(alpha = 0.1f)))
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         MovieMenuItem(
@@ -342,6 +357,9 @@ fun MovieActionsPopup(
                             icon = CustomIcons.PremiumDelete,
                             iconColor = Color(0xFFE57373),
                             isDestructive = true,
+                            modifier = Modifier.animateEnterExit(
+                                enter = slideInVertically(tween(300, delayMillis = 240)) { it / 2 } + fadeIn(tween(300, delayMillis = 240))
+                            ),
                             onClick = { onDismiss(); onDelete(movie) }
                         )
                     }
@@ -380,13 +398,14 @@ fun MovieCard(
     val isTv = movie.mediaType == "tv"
     val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
     val context = LocalContext.current
+    val density = LocalDensity.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var cardPosition by remember { mutableStateOf(Offset.Zero) }
 
     val rippleState = rememberCardRippleState()
-    val density = LocalDensity.current
 
     // Premium Staggered Entrance Animation States
-    val hasAnimated = rememberSaveable(key = "anim_${movie.id}") { mutableStateOf(false) }
+    val hasAnimated = rememberSaveable { mutableStateOf(false) }
 
     val cardAlpha = remember { Animatable(if (hasAnimated.value) 1f else 0f) }
     val cardScale = remember { Animatable(if (hasAnimated.value) 1f else 0.85f) }
@@ -409,22 +428,12 @@ fun MovieCard(
         val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
 
         if (isScrollItem) {
-            // Lightweight fade+slide for items entering during scroll — no spring, no bounce
-            launch {
-                cardAlpha.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 180, easing = LinearOutSlowInEasing)
-                )
-            }
-            launch {
-                cardTranslateY.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                )
-            }
-            cardScale.snapTo(1f) // no scale animation while scrolling
+            // Snapping immediately to visible state without coroutine animations to prevent scroll jank
+            cardAlpha.snapTo(1f)
+            cardTranslateY.snapTo(0f)
+            cardScale.snapTo(1f)
         } else {
-            // Richer entrance for the initial grid (indices 0–8): use a stiffer spring (no bounce)
+            // Richer entrance for the initial grid (indices 0–11): use a stiffer spring (no bounce)
             val jobAlpha = launch {
                 cardAlpha.animateTo(
                     targetValue = 1f,
@@ -491,7 +500,7 @@ fun MovieCard(
                     AsyncImage(
                         model = ImageRequest.Builder(context)
                             .data(posterUrl)
-                            .crossfade(true)
+                            .crossfade(false)
                             .allowHardware(true)
                             .memoryCacheKey(posterUrl)
                             .diskCacheKey(posterUrl)
@@ -523,10 +532,11 @@ fun MovieCard(
 
             // Dynamic Badges (Top Right)
             if (showBadges) {
+                val isLarge = cardWidth > 150.dp
                 val disabledBadges = com.cinetrack.LocalDisabledBadges.current
                 val addBadge = @Composable { text: String, color: Color ->
                     if (!disabledBadges.contains(text)) {
-                        MovieCardBadge(text = text, color = color, hazeState = hazeState)
+                        MovieCardBadge(text = text, color = color, hazeState = hazeState, isLarge = isLarge)
                     }
                 }
                 
@@ -538,7 +548,7 @@ fun MovieCard(
                     horizontalAlignment = Alignment.End
                 ) {
                     val newEpisodes = movie.newEpisodesFound
-                    if (movie.isUpcoming == true || (newEpisodes != null && newEpisodes > 0)) {
+                    if (newEpisodes != null && newEpisodes > 0) {
                         addBadge("NEW", com.cinetrack.ui.theme.NeonPink)
                     }
     
@@ -638,26 +648,27 @@ fun MovieCard(
 
                 val displayRating = personalRating ?: movie.personalRating
                 val hasRating = displayRating != null && displayRating > 0.0
+                val isLarge = cardWidth > 150.dp
                 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(start = 12.dp, end = 8.dp, bottom = if (hasRating) 6.dp else 8.dp),
+                        .padding(start = if (isLarge) 16.dp else 12.dp, end = if (isLarge) 12.dp else 8.dp, bottom = if (hasRating) (if (isLarge) 10.dp else 6.dp) else (if (isLarge) 12.dp else 8.dp)),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
-                        modifier = Modifier.weight(1f).padding(end = 6.dp),
+                        modifier = Modifier.weight(1f).padding(end = if (isLarge) 10.dp else 6.dp),
                         verticalArrangement = Arrangement.spacedBy(1.dp)
                     ) {
                         Text(
                             text = movie.title ?: movie.name ?: "",
                             color = Color.White.copy(alpha = 0.9f),
-                            fontSize = 10.5.sp,
+                            fontSize = if (isLarge) 16.sp else 13.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
-                            lineHeight = 13.sp,
+                            lineHeight = if (isLarge) 19.sp else 16.sp,
                             overflow = TextOverflow.Ellipsis,
                             style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                         )
@@ -665,7 +676,7 @@ fun MovieCard(
                             Text(
                                 text = "★ ${String.format("%.1f", displayRating)}",
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = 9.sp,
+                                fontSize = if (isLarge) 13.5.sp else 11.5.sp,
                                 fontWeight = FontWeight.Black,
                                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                             )
@@ -674,7 +685,7 @@ fun MovieCard(
 
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(if (isLarge) 34.dp else 24.dp)
                             .bounceClick(
                                 scaleDown = 0.85f,
                                 onLongClick = {}, // Block long press menu from opening
@@ -685,20 +696,21 @@ fun MovieCard(
                                 val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
                                 val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
                                 rippleState.trigger(Offset(rippleX, rippleY))
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
 
                                 val isReleased = movie.isReleased
-                                if (isTv) {
+                                if (!isReleased) {
+                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                    else if (showActionHint) {
+                                        onMessage("Gestisci il promemoria nella pagina dei dettagli")
+                                    }
+                                } else if (isTv) {
                                     if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                                     else if (showActionHint) {
                                         onMessage("Gestisci gli episodi nella pagina dei dettagli")
                                     }
-                                } else if (!isReleased && isReminder) {
-                                    // For unreleased movies, reminders cannot be removed from the card
-                                    if (showActionHint) {
-                                        onMessage("Gestisci il promemoria nella pagina dei dettagli")
-                                    }
                                 } else {
-                                    // Normal behavior for released movies or adding a reminder
+                                    // Normal behavior for released movies
                                     onAction(movie)
                                 }
                             },
@@ -736,7 +748,7 @@ fun MovieCard(
 
                         Box(
                             modifier = Modifier
-                                .size(22.dp)
+                                .size(if (isLarge) 30.dp else 22.dp)
                                 .background(color = actionBg, shape = CircleShape)
                                 .border(width = 1.dp, color = actionBorder, shape = CircleShape),
                             contentAlignment = Alignment.Center
@@ -767,7 +779,7 @@ fun MovieCard(
                                 contentDescription = "Action",
                                 tint = actionTint,
                                 modifier = Modifier
-                                    .size(if (isBellOutlined) 15.5.dp else 14.dp)
+                                    .size(if (isLarge) (if (isBellOutlined) 20.dp else 18.dp) else (if (isBellOutlined) 15.5.dp else 14.dp))
                                     .graphicsLayer {
                                         if (!isReleased && isReminder) {
                                             rotationZ = bellRotation.value
@@ -784,19 +796,19 @@ fun MovieCard(
 }
 
 @Composable
-private fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null) {
+fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null, isLarge: Boolean = false) {
     Box(
         modifier = modifier
             .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50))
             .background(color.copy(alpha = 0.15f), RoundedCornerShape(50))
             .border(0.5.dp, color.copy(alpha = 0.8f), RoundedCornerShape(50))
-            .padding(horizontal = 6.dp, vertical = 2.5.dp),
+            .padding(horizontal = if (isLarge) 8.dp else 6.dp, vertical = if (isLarge) 4.dp else 2.5.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = Color.White,
-            fontSize = 7.5.sp,
+            fontSize = if (isLarge) 9.5.sp else 7.5.sp,
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 0.5.sp,
             maxLines = 1,

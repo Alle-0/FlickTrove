@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.platform.LocalContext
@@ -60,7 +61,9 @@ fun GlassyTopBar(
     notificationCount: Int = 0,
     onDeleteClick: (() -> Unit)? = null, // Deprecated, use onFolderOptionsClick
     onFolderOptionsClick: ((Offset) -> Unit)? = null,
-    indicatorColor: Color? = null
+    indicatorColor: Color? = null,
+    onLayoutToggleClick: (() -> Unit)? = null,
+    layoutColumns: Int? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -149,7 +152,7 @@ fun GlassyTopBar(
                         painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
                         contentDescription = "Logo",
                         tint = Color.Unspecified,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                     Spacer(Modifier.width(6.dp))
                 }
@@ -198,6 +201,25 @@ fun GlassyTopBar(
                             .alpha(syncAlpha)
                             .padding(end = 8.dp)
                     )
+                }
+
+                if (onLayoutToggleClick != null && layoutColumns != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = { onLayoutToggleClick.invoke() }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = layoutToggleIcon(layoutColumns),
+                            contentDescription = "Cambia Colonne",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 if (onFilterClick != null) {
@@ -313,7 +335,7 @@ fun GlassyTopBar(
                     }
                 }
 
-                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing) {
+                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null) {
                     Spacer(modifier = Modifier.size(48.dp))
                 }
             }

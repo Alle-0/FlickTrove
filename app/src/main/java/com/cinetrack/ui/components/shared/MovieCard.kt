@@ -65,7 +65,7 @@ fun MovieCard(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(posterUrl)
-                .crossfade(true)
+                .crossfade(false)
                 .build(),
             contentDescription = movie.title ?: movie.name,
             contentScale = ContentScale.Crop,

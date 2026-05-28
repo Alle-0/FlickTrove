@@ -45,11 +45,7 @@ class NetworkMonitor @Inject constructor(@dagger.hilt.android.qualifiers.Applica
             }
         }
 
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
-            
-        connectivityManager.registerNetworkCallback(request, callback)
+        connectivityManager.registerDefaultNetworkCallback(callback)
 
         val activeNetwork = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
@@ -79,10 +75,7 @@ class NetworkMonitor @Inject constructor(@dagger.hilt.android.qualifiers.Applica
                 trySend(false)
             }
         }
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
-        connectivityManager.registerNetworkCallback(request, callback)
+        connectivityManager.registerDefaultNetworkCallback(callback)
         val activeNetwork = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
         val initialStatus = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true

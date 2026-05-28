@@ -101,6 +101,10 @@ fun HomeFilterModal(
 
     val transition = updateTransition(targetState = isVisible, label = "FilterModalTransition")
 
+    androidx.activity.compose.BackHandler(enabled = isVisible) {
+        onDismissRequest()
+    }
+
     val progress by transition.animateFloat(
         transitionSpec = {
             if (initialState == false && targetState == true) {
@@ -485,7 +489,7 @@ fun HomeFilterModal(
                                     contentPadding = PaddingValues(horizontal = 12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    items(ProviderConstants.ALL_PROVIDERS, key = { it.providerId }) { provider ->
+                                    items(ProviderConstants.ALL_PROVIDERS, key = { it.providerId }, contentType = { "provider" }) { provider ->
                                         val isSelected = provider.providerId in localSortConfig.selectedProviders
                                         ProviderItem(
                                             name = provider.providerName,
@@ -510,7 +514,9 @@ fun HomeFilterModal(
                                 badgeCount = localSortConfig.selectedDecades.size,
                                 onToggle = { expandedSection = if (expandedSection == "period") null else "period" }
                             ) {
-                                val decades = listOf("2020", "2010", "2000", "1990", "1980", "1970", "1960")
+                                val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+                                val currentDecade = (currentYear / 10) * 10
+                                val decades = (currentDecade downTo 1960 step 10).map { it.toString() }
                                 FlowRow(
                                     modifier = Modifier.padding(horizontal = 12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),

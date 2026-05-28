@@ -26,6 +26,20 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.util.toComposeColor
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.ViewAgenda
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -51,6 +65,10 @@ fun DiscoverScreen(
         }
     }
 
+    androidx.activity.compose.BackHandler(enabled = isFilterVisible) {
+        onToggleFilter(false, null)
+    }
+
     LaunchedEffect(endOfListReached, uiState.isLoading, uiState.isNextPageLoading, uiState.isEndReached) {
         if (endOfListReached && !uiState.isLoading && !uiState.isNextPageLoading && !uiState.isEndReached) {
             viewModel.loadNextPage()
@@ -61,7 +79,12 @@ fun DiscoverScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
 
     val title = if (uiState.type == "genre") {
         uiState.genreName ?: "Genere"
@@ -79,7 +102,10 @@ fun DiscoverScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val topPadding = paddingValues.calculateTopPadding()
+    val localHazeState = remember { HazeState() }
+
+    Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         
         com.cinetrack.ui.components.shared.MovieActionsWrapper(
             hazeState = hazeState ?: HazeState(),
@@ -94,14 +120,15 @@ fun DiscoverScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .haze(localHazeState, style = HazeStyles.PremiumDark)
             ) {
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
                         bottom = paddingValues.calculateBottomPadding() + 16.dp, 
-                        top = paddingValues.calculateTopPadding()
+                        top = topPadding + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -111,7 +138,11 @@ fun DiscoverScreen(
 
                     if (uiState.isLoading) {
                         items(count = 15, contentType = { "skeleton" }) {
-                            com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                            if (columns == 1) {
+                                com.cinetrack.ui.components.shared.MovieListCardSkeleton()
+                            } else {
+                                com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                            }
                         }
                     } else if (uiState.movies.isEmpty()) {
                         item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
@@ -143,25 +174,48 @@ fun DiscoverScreen(
                             key = { index, movie -> movie.id.toString() + movie.mediaType }
                         ) { index, movie ->
                             val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
-                            MovieCard(
-                                movie = movie,
-                                cardWidth = cardWidth,
-                                isFavorite = movieStatus?.favorite ?: false,
-                                isWatched = movieStatus?.watched ?: false,
-                                isReminder = movieStatus?.reminder ?: false,
-                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                personalRating = movieStatus?.personalRating,
-                                folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                    it.toComposeColor()
-                                } ?: emptyList(),
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleFavorite(movie) },
-                                onLongPress = actionsState.onLongPress,
-                                onMessage = { viewModel.emitMessage(it) }
-                            )
+                            val folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
+                                it.toComposeColor()
+                            } ?: emptyList()
+                            
+                            if (columns == 1) {
+                                com.cinetrack.ui.components.MovieListCard(
+                                    movie = movie,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    isFavorite = movieStatus?.favorite ?: false,
+                                    isWatched = movieStatus?.watched ?: false,
+                                    isReminder = movieStatus?.reminder ?: false,
+                                    personalRating = movieStatus?.personalRating,
+                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                    folderColors = folderColors,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    showBadges = uiState.preferences.showBadges,
+                                    hazeState = hazeState,
+                                    staggerIndex = index,
+                                    onPress = { onMovieClick(movie) },
+                                    onAction = { viewModel.toggleFavorite(movie) },
+                                    onLongPress = actionsState.onLongPress,
+                                    onMessage = { viewModel.emitMessage(it) }
+                                )
+                            } else {
+                                MovieCard(
+                                    movie = movie,
+                                    cardWidth = cardWidth,
+                                    isFavorite = movieStatus?.favorite ?: false,
+                                    isWatched = movieStatus?.watched ?: false,
+                                    isReminder = movieStatus?.reminder ?: false,
+                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                    personalRating = movieStatus?.personalRating,
+                                    folderColors = folderColors,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    staggerIndex = index,
+                                    onPress = { onMovieClick(movie) },
+                                    onAction = { viewModel.toggleFavorite(movie) },
+                                    onLongPress = actionsState.onLongPress,
+                                    onMessage = { viewModel.emitMessage(it) }
+                                )
+                            }
                         }
                     }
 

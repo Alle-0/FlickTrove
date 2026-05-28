@@ -54,7 +54,6 @@ fun DetailTrailers(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 72.dp)
     ) {
         Row(
             modifier = Modifier
@@ -107,7 +106,7 @@ fun DetailTrailers(
             contentPadding = PaddingValues(horizontal = 24.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(trailers) { key ->
+            items(trailers, key = { it }, contentType = { "trailer" }) { key ->
                 val isActive = activeVideoKey == key
                 Box(
                     modifier = Modifier

@@ -15,30 +15,40 @@ import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
 import javax.inject.Named
 import com.cinetrack.data.local.entities.FolderEntity
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.PersistentSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 
 data class FilterPill(val id: Long, val name: String, val isKeyword: Boolean = false)
 
 data class SearchUiState(
     val query: String = "",
     val category: String = "movie",
-    val results: List<TMDBSearchResult> = emptyList(),
-    val trendingMovies: List<TMDBSearchResult> = emptyList(),
-    val trendingTv: List<TMDBSearchResult> = emptyList(),
-    val trendingPeople: List<TMDBSearchResult> = emptyList(),
+    val results: ImmutableList<TMDBSearchResult> = persistentListOf(),
+    val trendingMovies: ImmutableList<TMDBSearchResult> = persistentListOf(),
+    val trendingTv: ImmutableList<TMDBSearchResult> = persistentListOf(),
+    val trendingPeople: ImmutableList<TMDBSearchResult> = persistentListOf(),
     val isLoading: Boolean = false,
     val isNextPageLoading: Boolean = false,
     val isEndReached: Boolean = false,
-    val favorites: List<Movie> = emptyList(),
-    val folders: List<FolderEntity> = emptyList(),
-    val recentSearches: List<String> = emptyList(),
+    val favorites: ImmutableList<Movie> = persistentListOf(),
+    val folders: ImmutableList<FolderEntity> = persistentListOf(),
+    val recentSearches: ImmutableList<String> = persistentListOf(),
     val sortConfig: SortConfig = SortConfig(),
-    val movieFolderColors: Map<String, List<String>> = emptyMap(),
+    val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences(),
-    val togglingIds: Set<Long> = emptySet(),
+    val togglingIds: ImmutableSet<Long> = persistentSetOf(),
     val errorMessage: String? = null,
-    val suggestedFilters: List<FilterPill> = emptyList()
+    val suggestedFilters: ImmutableList<FilterPill> = persistentListOf()
 )
 
+@OptIn(kotlinx.coroutines.FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: MovieRepository,
@@ -59,7 +69,7 @@ class SearchViewModel @Inject constructor(
     private val _isEndReached = MutableStateFlow(false)
     private val _sortConfig = MutableStateFlow(SortConfig())
     private val _errorMessage = MutableStateFlow<String?>(null)
-    private val _togglingIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val _togglingIds = MutableStateFlow<PersistentSet<Long>>(persistentSetOf())
     private var currentPage = 1
     
     fun emitMessage(message: String) {
@@ -73,7 +83,7 @@ class SearchViewModel @Inject constructor(
     init {
         // Initial fetch for trending or discovery
         performSearch()
-
+ 
         // Reactive search handling with debouncing for query
         viewModelScope.launch {
             _query
@@ -182,14 +192,14 @@ class SearchViewModel @Inject constructor(
             sortedList
         }
 
-        val movieFolderColors = mutableMapOf<String, List<String>>()
+        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
         folders.forEach { folder ->
             val color = folder.color ?: "#FFFFFF"
             folder.itemIds.forEach { itemId ->
-                val colors = movieFolderColors.getOrDefault(itemId, emptyList())
-                movieFolderColors[itemId] = colors + color
+                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
             }
         }
+        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
         val lowerQuery = query.lowercase()
         val availableGenres = if (category == "movie") com.cinetrack.data.GenreConstants.MOVIE_GENRES else com.cinetrack.data.GenreConstants.TV_GENRES
@@ -218,22 +228,22 @@ class SearchViewModel @Inject constructor(
         SearchUiState(
             query = query,
             category = category,
-            results = filteredResults,
-            trendingMovies = trendingMovies,
-            trendingTv = trendingTv,
-            trendingPeople = trendingPeople,
+            results = filteredResults.toImmutableList(),
+            trendingMovies = trendingMovies.toImmutableList(),
+            trendingTv = trendingTv.toImmutableList(),
+            trendingPeople = trendingPeople.toImmutableList(),
             isLoading = isLoading,
             isNextPageLoading = isNextPageLoading,
             isEndReached = isEndReached,
-            favorites = localMovies,
-            folders = folders,
-            recentSearches = recentSearches,
+            favorites = localMovies.toImmutableList(),
+            folders = folders.toImmutableList(),
+            recentSearches = recentSearches.toImmutableList(),
             sortConfig = sortConfig,
-            movieFolderColors = movieFolderColors,
+            movieFolderColors = immutableMovieFolderColors,
             preferences = prefs,
             togglingIds = togglingIds,
             errorMessage = errorMessage,
-            suggestedFilters = suggestedFilters
+            suggestedFilters = suggestedFilters.toImmutableList()
         )
     }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
@@ -609,7 +619,7 @@ class SearchViewModel @Inject constructor(
         
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            _togglingIds.update { it + movie.id }
+            _togglingIds.update { it.add(movie.id) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = repository.getMovie(movie.id, movie.mediaType)
@@ -645,7 +655,7 @@ class SearchViewModel @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("SearchViewModel", "Error toggling favorite for $title", e)
             } finally {
-                _togglingIds.update { it - movie.id }
+                _togglingIds.update { it.remove(movie.id) }
             }
         }
     }
@@ -673,13 +683,17 @@ class SearchViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 
@@ -748,6 +762,12 @@ class SearchViewModel @Inject constructor(
             }
 
             genreMatch && decadeMatch
+        }
+    }
+
+    fun updatePreferences(prefs: com.cinetrack.data.models.UserPreferences) {
+        viewModelScope.launch {
+            preferenceRepository.updateAll(prefs)
         }
     }
 }

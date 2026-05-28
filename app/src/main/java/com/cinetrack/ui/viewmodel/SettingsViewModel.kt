@@ -8,6 +8,7 @@ import coil.imageLoader
 import com.cinetrack.data.repository.BackupRepository
 import com.cinetrack.data.repository.FeedbackRepository
 import com.cinetrack.data.repository.SettingsRepository
+import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +20,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.cinetrack.data.repository.PreferenceRepository
+import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.util.IconManager
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val preferenceRepository: PreferenceRepository,
     private val feedbackRepository: FeedbackRepository,
     private val backupRepository: BackupRepository,
+    private val movieRepository: MovieRepository,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
     @ApplicationContext private val context: Context
@@ -77,6 +84,13 @@ class SettingsViewModel @Inject constructor(
     val advancedVisualEffectsEnabled: StateFlow<Boolean> = settingsRepository.advancedVisualEffectsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val dynamicAppIconEnabled: StateFlow<Boolean> = settingsRepository.dynamicAppIconEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val showLayoutToggle: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showLayoutToggle }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null) {
@@ -85,6 +99,8 @@ class SettingsViewModel @Inject constructor(
                 _pendingReveal.value = Pair(color, revealOrigin)
             } else {
                 settingsRepository.updateAccentColor(color)
+                IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
+                movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
                 actionFeedbackManager.emit("Colore accento aggiornato")
             }
         }
@@ -94,6 +110,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _pendingReveal.value?.let { (color, _) ->
                 settingsRepository.updateAccentColor(color)
+                IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
+                movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
                 actionFeedbackManager.emit("Colore accento aggiornato")
             }
         }
@@ -102,6 +120,7 @@ class SettingsViewModel @Inject constructor(
     fun toggleFolderBookmarks(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleFolderBookmarks(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "visibili" else "nascosti"
             actionFeedbackManager.emit("Segnalibri cartelle $status")
         }
@@ -110,8 +129,17 @@ class SettingsViewModel @Inject constructor(
     fun toggleBadges(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleBadges(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "visibili" else "nascosti"
             actionFeedbackManager.emit("Badge $status")
+        }
+    }
+
+    fun toggleLayoutToggle(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowLayoutToggle(enabled)
+            val status = if (enabled) "visibile" else "nascosto"
+            actionFeedbackManager.emit("Pulsante layout $status")
         }
     }
 
@@ -124,12 +152,14 @@ class SettingsViewModel @Inject constructor(
                 current.add(badge)
             }
             settingsRepository.updateDisabledBadges(current)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }
 
     fun toggleNotifications(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleNotifications(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivate" else "disattivate"
             actionFeedbackManager.emit("Notifiche $status")
         }
@@ -138,14 +168,26 @@ class SettingsViewModel @Inject constructor(
     fun toggleVibration(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleVibration(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attiva" else "disattiva"
             actionFeedbackManager.emit("Vibrazione $status")
+        }
+    }
+
+    fun toggleDynamicAppIcon(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleDynamicAppIcon(enabled)
+            IconManager.updateAppIcon(context, accentColor.value, enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val status = if (enabled) "attivata" else "disattivata"
+            actionFeedbackManager.emit("Icona App Dinamica $status")
         }
     }
 
     fun toggleAdvancedVisualEffects(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleAdvancedVisualEffects(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivati" else "disattivati"
             actionFeedbackManager.emit("Effetti visivi avanzati $status")
         }

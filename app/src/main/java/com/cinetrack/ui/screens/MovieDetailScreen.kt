@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,9 +86,11 @@ fun MovieDetailScreen(
     hazeState: HazeState? = null,
     onBackClick: () -> Unit = {},
     onMovieClick: (Movie) -> Unit = {},
-    onPersonClick: (Long) -> Unit = {},
+    onPersonClick: (Long, String?) -> Unit = { _, _ -> },
     onGenreClick: (Long, String, Offset) -> Unit = { _, _, _ -> },
-    onKeywordClick: (Long, String, Offset) -> Unit = { _, _, _ -> }
+    onKeywordClick: (Long, String, Offset) -> Unit = { _, _, _ -> },
+    detailStackDepth: Int = 1,
+    onHomeClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
@@ -94,10 +98,19 @@ fun MovieDetailScreen(
     var extractedColor by remember { mutableStateOf<Color?>(null) }
     var showEpisodesSheet by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
+    var showRatingInfoDialog by remember { mutableStateOf(false) }
+    val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
+    val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
 
     androidx.activity.compose.BackHandler(enabled = true) {
-        if (showFolderPicker) {
+        if (showRatingInfoDialog) {
+            showRatingInfoDialog = false
+        } else if (showTranslationPrompt != null) {
+            viewModel.dismissTranslationPrompt()
+        } else if (showFolderPicker) {
             showFolderPicker = false
+        } else if (showEpisodesSheet) {
+            showEpisodesSheet = false
         } else {
             onBackClick()
         }
@@ -163,8 +176,11 @@ fun MovieDetailScreen(
 
     val localHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
-
-    var showRatingInfoDialog by remember { mutableStateOf(false) }
+    
+    val globalAccentColor = when (val state = uiState) {
+        is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
+        else -> extractedColor ?: Color(0xFF1A1A1A)
+    }
 
     // Removed showRatingDialog and showNoteDialog as they are now handled inline
 
@@ -295,7 +311,7 @@ fun MovieDetailScreen(
                     if (state != null) {
                         val activeMovie = state.movieEntry
                         val accentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
-
+                        
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(
                                 modifier = Modifier
@@ -322,8 +338,7 @@ fun MovieDetailScreen(
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
                                         hazeState = backdropHazeState,
-                                        titleAlpha = 1f,
-                                        titleTranslationY = 0f,
+                                        sharedTransitionScope = sharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true }
                                     )
 
@@ -370,6 +385,8 @@ fun MovieDetailScreen(
                                         directors = state.directors,
                                         cast = state.cast,
                                         accentColor = accentColor,
+                                        sharedTransitionScope = sharedTransitionScope,
+                                        animatedVisibilityScope = animatedVisibilityScope,
                                         onPersonClick = onPersonClick
                                     )
 
@@ -386,6 +403,19 @@ fun MovieDetailScreen(
                                         DetailTrailers(
                                             trailers = state.trailers,
                                             accentColor = accentColor
+                                        )
+                                        Spacer(modifier = Modifier.height(48.dp))
+                                    }
+                                    
+                                    if (state.traktComments.isNotEmpty()) {
+                                        DetailComments(
+                                            comments = state.traktComments,
+                                            accentColor = accentColor,
+                                            translationStates = translationStates,
+                                            hazeState = localHazeState,
+                                            onTranslateClick = { commentId, text ->
+                                                viewModel.requestTranslation(commentId, text)
+                                            }
                                         )
                                         Spacer(modifier = Modifier.height(48.dp))
                                     }
@@ -601,7 +631,11 @@ fun MovieDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Back Button - ALWAYS functional
+                        // Left side actions (Back + Home)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
@@ -643,6 +677,49 @@ fun MovieDetailScreen(
                                     }
                             )
                         }
+                        // Home FAB — visible from the 3rd consecutive detail screen onwards
+                        val homeButtonVisible = detailStackDepth >= 3
+                        val homeButtonAlpha by animateFloatAsState(
+                            targetValue = if (homeButtonVisible) 1f else 0f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                            label = "HomeFabAlpha"
+                        )
+                        val homeButtonScale by animateFloatAsState(
+                            targetValue = if (homeButtonVisible) 1f else 0.6f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+                            label = "HomeFabScale"
+                        )
+                        if (homeButtonAlpha > 0.01f) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .graphicsLayer {
+                                        alpha = homeButtonAlpha
+                                        scaleX = homeButtonScale
+                                        scaleY = homeButtonScale
+                                    }
+                                    .then(
+                                        if (currentEffectiveProgress <= 0.01f) {
+                                            Modifier.hazeGlass(
+                                                state = localHazeState,
+                                                shape = CircleShape,
+                                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                useOffscreenStrategy = true
+                                            )
+                                        } else Modifier
+                                    )
+                                    .bounceClick { onHomeClick() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Home,
+                                    contentDescription = "Torna alla schermata principale",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                        } // end Row
 
                         // Title Area: Swaps between Movie Title (on scroll) and Modal Title (on expansion)
                         Box(
@@ -895,7 +972,93 @@ fun MovieDetailScreen(
             }
         }
     }
+    // Translation Prompt Dialog
+    com.cinetrack.ui.components.shared.FlickTroveModal(
+        isVisible = showTranslationPrompt != null,
+        onDismissRequest = { viewModel.dismissTranslationPrompt() },
+        hazeState = localHazeState
+    ) {
+        val promptData = showTranslationPrompt
+        if (promptData != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = "Chiudi",
+                    tint = Color.White.copy(alpha = 0.65f),
+                    modifier = Modifier
+                        .size(18.dp)
+                        .bounceClick(scaleDown = 0.9f) { viewModel.dismissTranslationPrompt() }
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Icon(
+                imageVector = Icons.Rounded.Translate,
+                contentDescription = null,
+                tint = globalAccentColor,
+                modifier = Modifier.size(48.dp).padding(bottom = 16.dp)
+            )
+            Text(
+                "Traduci commento",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Il modello di traduzione (circa 30MB) potrebbe non essere presente. Vuoi consentire il download anche su rete dati cellulare?",
+                color = Color.White.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.translateComment(promptData.first, promptData.second, requireWifi = false)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = globalAccentColor.copy(alpha = 0.2f),
+                        contentColor = globalAccentColor
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Sì, usa rete", fontWeight = FontWeight.Bold)
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.translateComment(promptData.first, promptData.second, requireWifi = true)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White.copy(alpha = 0.05f),
+                        contentColor = Color.White.copy(alpha = 0.8f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("No, solo Wi-Fi")
+                }
+
+                TextButton(
+                    onClick = { viewModel.dismissTranslationPrompt() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Non ora", color = Color.White.copy(alpha = 0.65f))
+                }
+            }
+        }
+    }
 }
+
 
 @Composable
 private fun RatingLegendItem(cert: String, color: Color, desc: String) {

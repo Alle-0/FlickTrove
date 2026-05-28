@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -117,11 +118,34 @@ fun MovieCardSkeleton(
 }
 
 @Composable
-fun MovieCardSkeletonGrid(
-    columns: Int = 3,
-    rows: Int = 5,
-    itemPadding: Dp = 12.dp
-) {
-    // This will be used in screens, but as a skeleton preview it's useful
-    // In actual Compose screens we might use LazyVerticalGrid with shimmer
+fun MovieListCardSkeleton(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(140.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .width(93.dp)
+                    .fillMaxHeight()
+                    .shimmerEffect()
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(12.dp)
+            ) {
+                Box(modifier = Modifier.height(20.dp).fillMaxWidth(0.7f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.3f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth().clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.8f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+            }
+        }
+    }
 }

@@ -115,7 +115,7 @@ class AuthViewModel @Inject constructor(
                     val uid = result.user?.uid
                     viewModelScope.launch {
                         _processState.update { AuthState.Loading("Sincronizzazione account in corso...", null) }
-                        movieRepository.syncWithFirebase(uid) { syncProgress ->
+                        movieRepository.syncWithFirebase(uid, force = true) { syncProgress ->
                             _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                         }
                         _processState.update { null }

@@ -53,10 +53,11 @@ class BackupRepository @Inject constructor(
                         personalRating = localMovie.personalRating ?: importedMovie.personalRating,
                         watchedAt = localMovie.watchedAt ?: importedMovie.watchedAt,
                         watched = localMovie.watched || importedMovie.watched,
-                        clientUpdatedAt = maxOf(localMovie.clientUpdatedAt, importedMovie.clientUpdatedAt)
+                        clientUpdatedAt = maxOf(localMovie.clientUpdatedAt, importedMovie.clientUpdatedAt),
+                        syncStatus = "pending"
                     )
                 } else {
-                    importedMovie
+                    importedMovie.copy(syncStatus = "pending")
                 }
             }
             favoriteDao.insertAll(mergedFavorites)
@@ -64,7 +65,10 @@ class BackupRepository @Inject constructor(
         
         // Restore Folders
         if (backup.folders.isNotEmpty()) {
-            folderDao.insertAll(backup.folders)
+            val pendingFolders = backup.folders.map { folder ->
+                folder.copy(syncStatus = "pending")
+            }
+            folderDao.insertAll(pendingFolders)
         }
         
         // Restore Preferences

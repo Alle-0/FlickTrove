@@ -1,5 +1,6 @@
 package com.cinetrack.data.api
 
+import androidx.compose.runtime.Stable
 import com.cinetrack.data.Movie
 import com.cinetrack.data.Genre
 import kotlinx.serialization.Serializable
@@ -26,6 +27,7 @@ data class MultiSearchResponse(
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("media_type")
+@Stable
 sealed class TMDBSearchResult {
     abstract val id: Long
     abstract val mediaType: String
@@ -194,6 +196,7 @@ data class ProductionCountry(
 )
 
 @Serializable
+@Stable
 data class Provider(
     @SerialName("provider_id") val providerId: Long,
     @SerialName("provider_name") val providerName: String,
@@ -240,6 +243,7 @@ data class CreditsResponse(
 )
 
 @Serializable
+@Stable
 data class CastMember(
     val id: Long,
     val name: String,
@@ -248,6 +252,7 @@ data class CastMember(
 )
 
 @Serializable
+@Stable
 data class CrewMember(
     val id: Long,
     val name: String,
@@ -261,6 +266,7 @@ data class VideoResponse(
 )
 
 @Serializable
+@Stable
 data class Video(
     val id: String,
     val key: String,
@@ -284,6 +290,7 @@ data class KeywordsResponse(
 }
 
 @Serializable
+@Stable
 data class Keyword(
     val id: Long,
     val name: String

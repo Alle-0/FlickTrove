@@ -40,25 +40,39 @@ fun FlickTroveModal(
 ) {
     val cardShape = RoundedCornerShape(32.dp)
 
+    var isClosing by remember { mutableStateOf(false) }
+
     // Handle back button for dismissal
-    BackHandler(onBack = onDismissRequest)
+    BackHandler(onBack = { isClosing = true })
 
     var animateIn by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animateIn = true }
 
+    val targetAlpha = if (isVisible && animateIn && !isClosing) 1f else 0f
+
     val modalAlpha by animateFloatAsState(
-        targetValue = if (isVisible && animateIn) 1f else 0f,
+        targetValue = targetAlpha,
         animationSpec = tween(durationMillis = 300),
+        finishedListener = {
+            if (targetAlpha == 0f && isClosing) {
+                onDismissRequest()
+            }
+        },
         label = "alpha"
     )
 
+    // Sync isClosing with isVisible externally
+    LaunchedEffect(isVisible) {
+        isClosing = !isVisible
+    }
+
     if (modalAlpha > 0f) {
-            Box(
+        Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(100f)
                     .background(Color.Black.copy(alpha = 0.7f * modalAlpha))
-                    .bounceClick(scaleDown = 1f) { onDismissRequest() }
+                    .bounceClick(scaleDown = 1f) { isClosing = true }
                     .graphicsLayer { alpha = modalAlpha },
                 contentAlignment = Alignment.Center
             ) {
@@ -68,27 +82,27 @@ fun FlickTroveModal(
                         .fillMaxWidth(0.88f)
                         .padding(horizontal = 16.dp)
                         .bounceClick(scaleDown = 1f) { /* Consume clicks */ },
-                shape = cardShape,
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // Pass hazeState always — the card fades in via graphicsLayer alpha above,
-                        // so the blur is visible from the first frame without a jump.
-                        .hazeGlass(state = hazeState, shape = cardShape)
+                    shape = cardShape,
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            // Pass hazeState always — the card fades in via graphicsLayer alpha above,
+                            // so the blur is visible from the first frame without a jump.
+                            .hazeGlass(state = hazeState, shape = cardShape)
                     ) {
-                        content()
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            content()
+                        }
                     }
                 }
             }
         }
     }
-}

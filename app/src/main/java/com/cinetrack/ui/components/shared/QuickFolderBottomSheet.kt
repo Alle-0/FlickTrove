@@ -121,7 +121,7 @@ fun QuickFolderModal(
                             }
                         }
                     } else {
-                        items(folders, key = { it.id }) { folder ->
+                        items(folders, key = { it.id }, contentType = { "quick_folder" }) { folder ->
                             val inFolder = isItemInFolder(folder.id)
                             val folderColor = folder.color.toComposeColor(accentColor)
 

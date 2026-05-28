@@ -11,6 +11,9 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 sealed class TimeRange {
     data object AllTime : TimeRange()
@@ -21,7 +24,7 @@ data class StatsUiState(
     val stats: CalculatedStats? = null,
     val currentYearStats: CalculatedStats? = null,
     val timeRange: TimeRange = TimeRange.AllTime,
-    val availableYears: List<Int> = emptyList(),
+    val availableYears: ImmutableList<Int> = persistentListOf(),
     val isLoading: Boolean = true
 )
 
@@ -52,11 +55,11 @@ data class CalculatedStats(
     val tvEstimate: Boolean,
     val longestTV: Movie?,
     val longestTVMinutes: Int,
-    val genreCounts: List<Pair<String, Int>>,
-    val decadeCounts: List<Pair<String, Int>>,
-    val ratingDistribution: IntArray,
-    val topCast: List<PersonStat>,
-    val topDirectors: List<PersonStat>,
+    val genreCounts: ImmutableList<Pair<String, Int>>,
+    val decadeCounts: ImmutableList<Pair<String, Int>>,
+    val ratingDistribution: ImmutableList<Int>,
+    val topCast: ImmutableList<PersonStat>,
+    val topDirectors: ImmutableList<PersonStat>,
     val topGenre: String?
 )
 
@@ -99,7 +102,7 @@ class StatsViewModel @Inject constructor(
             stats = calculateStats(filteredMovies, movies),
             currentYearStats = calculateStats(currentYearMovies, movies),
             timeRange = range,
-            availableYears = years,
+            availableYears = years.toImmutableList(),
             isLoading = false
         )
     }.flowOn(Dispatchers.Default).stateIn(
@@ -208,10 +211,11 @@ class StatsViewModel @Inject constructor(
                 }
             }
         }
-        val topCast = castMap.entries
+                val topCast = castMap.entries
             .sortedByDescending { it.value.count }
             .take(50)
             .map { (id, accum) -> PersonStat(id, accum.name, accum.profilePath, accum.count) }
+            .toImmutableList()
 
         // Top Directors
         data class DirAccum(val name: String, val profilePath: String?, var count: Int)
@@ -231,6 +235,7 @@ class StatsViewModel @Inject constructor(
             .sortedByDescending { it.value.count }
             .take(50)
             .map { (id, accum) -> PersonStat(id, accum.name, accum.profilePath, accum.count) }
+            .toImmutableList()
 
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
 
@@ -253,9 +258,9 @@ class StatsViewModel @Inject constructor(
             tvEstimate = tvEstimate,
             longestTV = longestTVStat?.first,
             longestTVMinutes = longestTVStat?.second ?: 0,
-            genreCounts = genreCounts.entries.sortedByDescending { it.value }.map { it.key to it.value },
-            decadeCounts = decadeCounts.entries.sortedBy { it.key }.map { it.key to it.value },
-            ratingDistribution = ratings,
+            genreCounts = genreCounts.entries.sortedByDescending { it.value }.map { it.key to it.value }.toImmutableList(),
+            decadeCounts = decadeCounts.entries.sortedBy { it.key }.map { it.key to it.value }.toImmutableList(),
+            ratingDistribution = ratings.toList().toImmutableList(),
             topCast = topCast,
             topDirectors = topDirectors,
             topGenre = topGenre

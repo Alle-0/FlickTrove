@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import java.util.Calendar
+import kotlinx.collections.immutable.ImmutableList
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.*
@@ -948,7 +949,7 @@ fun PersonSection(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            items(people.take(10), key = { it.id }) { person ->
+            items(people.take(10), key = { it.id }, contentType = { "person" }) { person ->
                 PersonAvatar(person = person, accentColor = accentColor, onPersonClick = onPersonClick)
             }
         }
@@ -1817,19 +1818,6 @@ fun WrappedBannerPill(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-    Surface(
-        shape = RoundedCornerShape(28.dp),
-        color = Color.Transparent,
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
-    ) {
-    
     // Get theme colors in composable context
     val primary = MaterialTheme.colorScheme.primary
     val secondary = MaterialTheme.colorScheme.secondary
@@ -1840,13 +1828,21 @@ fun WrappedBannerPill(
             .fillMaxWidth()
             .padding(horizontal = if (expanded) 12.dp else 24.dp)
             .drawWithContent {
-                // Record content for sharing with explicit size
+                // Draw the content normally on screen
+                drawContent()
+                
+                // Record content for sharing with 3x scale for high quality
+                val scaleFactor = 3f
                 graphicsLayer.record(
-                    size = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt())
+                    size = androidx.compose.ui.unit.IntSize(
+                        (size.width * scaleFactor).toInt(), 
+                        (size.height * scaleFactor).toInt()
+                    )
                 ) {
-                    this@drawWithContent.drawContent()
+                    scale(scaleFactor, scaleFactor, pivot = Offset.Zero) {
+                        this@drawWithContent.drawContent()
+                    }
                 }
-                drawLayer(graphicsLayer)
             }
             .graphicsLayer {
                 // Use block version for compatibility
@@ -2119,7 +2115,7 @@ fun WrappedBannerPill(
                                 painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
                                 contentDescription = "Logo",
                                 tint = Color.Unspecified,
-                                modifier = Modifier.size(16.dp).offset(y = (-1).dp)
+                                modifier = Modifier.size(28.dp).offset(y = (-1).dp)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
@@ -2169,7 +2165,6 @@ fun WrappedBannerPill(
                 }
             }
         }
-    }
     }
 }
 
@@ -2403,7 +2398,7 @@ fun TimeRangePill(
 // Count above each bar
 // ═════════════════════════════════════════════════════════════@Composable
 @Composable
-fun RatingHistogram(distribution: IntArray) {
+fun RatingHistogram(distribution: ImmutableList<Int>) {
     val maxCount = distribution.maxOrNull()?.toFloat()?.coerceAtLeast(1f) ?: 1f
     val totalRatedMovies = remember(distribution) { distribution.sum() }
     var selectedRatingIdx by remember { mutableStateOf<Int?>(null) }
@@ -2852,6 +2847,10 @@ fun YearSelectionModal(
     )
 
     val transition = updateTransition(targetState = isVisible, label = "YearModalTransition")
+
+    androidx.activity.compose.BackHandler(enabled = isVisible) {
+        onDismiss()
+    }
 
     val progress by transition.animateFloat(
         transitionSpec = {

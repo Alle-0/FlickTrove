@@ -9,6 +9,7 @@ interface SettingsRepository {
     val disabledBadges: Flow<Set<String>>
     val notificationsEnabled: Flow<Boolean>
     val vibrationEnabled: Flow<Boolean>
+    val dynamicAppIconEnabled: Flow<Boolean>
     val advancedVisualEffectsEnabled: Flow<Boolean>
     val lastFeedbackTimestamp: Flow<Long>
 
@@ -17,6 +18,7 @@ interface SettingsRepository {
     suspend fun toggleBadges(enabled: Boolean)
     suspend fun toggleNotifications(enabled: Boolean)
     suspend fun toggleVibration(enabled: Boolean)
+    suspend fun toggleDynamicAppIcon(enabled: Boolean)
     suspend fun updateDisabledBadges(badges: Set<String>)
     suspend fun toggleAdvancedVisualEffects(enabled: Boolean)
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)

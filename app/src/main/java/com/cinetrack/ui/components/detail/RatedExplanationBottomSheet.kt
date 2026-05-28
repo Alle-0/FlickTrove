@@ -116,7 +116,7 @@ fun RatedExplanationBottomSheet(
                     )
                 }
 
-                items(RATING_DATA) { rating ->
+                items(RATING_DATA, key = { it.code }, contentType = { "rating" }) { rating ->
                     RatingEntry(rating)
                 }
 

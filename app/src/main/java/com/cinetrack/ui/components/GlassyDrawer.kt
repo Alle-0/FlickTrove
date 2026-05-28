@@ -46,7 +46,6 @@ fun GlassyDrawer(
             .fillMaxHeight()
             .width(290.dp)
             .offset(x = (-10).dp)
-            .zIndex(100f)
     ) {
         Box(
             modifier = Modifier
@@ -69,11 +68,6 @@ fun GlassyDrawer(
                         )
                     ),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
-                )
-                .shadow(
-                    elevation = 24.dp,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp),
-                    spotColor = Color.Black.copy(alpha = 0.5f)
                 )
         )
         Column(
@@ -192,13 +186,8 @@ fun GlassyDrawer(
                     onClick = { onNavigate("settings") },
                     accentColor = accentColor
                 )
-                DrawerItem(
-                    icon = Icons.Rounded.Animation,
-                    label = "Logo Animation",
-                    isSelected = selectedRoute == "logo_animation",
-                    onClick = { onNavigate("logo_animation") },
-                    accentColor = accentColor
-                )
+                
+
             }
         }
     }
@@ -240,9 +229,7 @@ private fun DrawerItem(
             Spacer(modifier = Modifier.width(8.dp))
         } else {
             // Spacer to keep icons aligned even when not selected
-            // Spacer(modifier = Modifier.width(11.dp)) 
-            // Better: just use a fixed width for the icon container if needed, 
-            // but let's see how it looks. I'll add a small spacer to compensate for the bar.
+            Spacer(modifier = Modifier.width(11.dp)) 
         }
 
         Box(

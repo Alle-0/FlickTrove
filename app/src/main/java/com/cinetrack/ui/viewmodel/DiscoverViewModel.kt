@@ -17,18 +17,25 @@ import androidx.navigation.toRoute
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.repository.PreferenceRepository
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+
 data class DiscoverUiState(
-    val movies: List<Movie> = emptyList(),
+    val movies: ImmutableList<Movie> = persistentListOf(),
     val isLoading: Boolean = true,
     val isNextPageLoading: Boolean = false,
     val type: String = "popular",
     val genreName: String? = null,
     val currentPage: Int = 1,
     val isEndReached: Boolean = false,
-    val favorites: List<Movie> = emptyList(),
+    val favorites: ImmutableList<Movie> = persistentListOf(),
     val sortConfig: SortConfig = SortConfig(),
-    val movieFolderColors: Map<String, List<String>> = emptyMap(),
-    val folders: List<com.cinetrack.data.local.entities.FolderEntity> = emptyList(),
+    val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
+    val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences()
 )
 
@@ -132,27 +139,27 @@ class DiscoverViewModel @Inject constructor(
             else -> filteredMovies
         }
 
-        val movieFolderColors = mutableMapOf<String, List<String>>()
+        val movieFolderColors = mutableMapOf<String, ImmutableList<String>>()
         folders.forEach { folder ->
             val color = folder.color ?: "#FFFFFF"
             folder.itemIds.forEach { itemId ->
-                val colors = movieFolderColors.getOrDefault(itemId, emptyList())
-                movieFolderColors[itemId] = colors + color
+                val colors = movieFolderColors[itemId] ?: persistentListOf()
+                movieFolderColors[itemId] = (colors + color).toImmutableList()
             }
         }
 
         DiscoverUiState(
-            movies = sortedMovies,
+            movies = sortedMovies.toImmutableList(),
             isLoading = isLoading,
             isNextPageLoading = isNextPageLoading,
             type = type,
             genreName = route.genreName,
             currentPage = currentPage,
             isEndReached = isEndReached,
-            favorites = localMovies,
+            favorites = localMovies.toImmutableList(),
             sortConfig = sortConfig,
-            movieFolderColors = movieFolderColors,
-            folders = folders,
+            movieFolderColors = movieFolderColors.toImmutableMap(),
+            folders = folders.toImmutableList(),
             preferences = prefs
         )
     }.flowOn(Dispatchers.Default).stateIn(
@@ -272,13 +279,17 @@ class DiscoverViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 
@@ -308,5 +319,12 @@ class DiscoverViewModel @Inject constructor(
 
     fun updateSortConfig(config: SortConfig) {
         _sortConfig.value = config
+    }
+
+    fun updateGridColumns(columns: Int) {
+        viewModelScope.launch {
+            preferenceRepository.updateGridColumns(columns)
+            repository.savePreferencesRemote(uiState.value.preferences.copy(gridColumns = columns))
+        }
     }
 }

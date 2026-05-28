@@ -74,7 +74,7 @@ fun DetailRecommendations(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(collectionMovies, key = { it.id }) { movie ->
+                    items(collectionMovies, key = { it.id }, contentType = { "movie" }) { movie ->
                         val isCurrent = movie.id == currentId
                         MovieCard(
                             movie = movie,
@@ -126,7 +126,8 @@ fun DetailRecommendations(
                     val filteredRecommendations = recommendedMovies.filter { it.id != currentId && it.id !in collectionIds }
                     items(
                         items = filteredRecommendations,
-                        key = { it.id.toString() + it.mediaType + "_rec" }
+                        key = { it.id.toString() + it.mediaType + "_rec" },
+                        contentType = { "movie" }
                     ) { movie ->
                         MovieCard(
                             movie = movie,

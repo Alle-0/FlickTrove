@@ -38,8 +38,18 @@ class ReminderWorker @AssistedInject constructor(
                             movieId = item.id,
                             mediaType = item.mediaType
                         )
+                        val updated = item.copy(
+                            favorite = true,
+                            reminder = false,
+                            migratedAt = today,
+                            clientUpdatedAt = System.currentTimeMillis(),
+                            syncStatus = "pending"
+                        )
+                        database.favoriteDao().insert(updated)
                     }
                 } else if (item.mediaType == "tv") {
+                    if (item.migratedAt == today) continue
+
                     // Check if the show itself premieres today
                     if (item.firstAirDate == today) {
                         NotificationHelper.showReleaseNotification(
@@ -48,6 +58,12 @@ class ReminderWorker @AssistedInject constructor(
                             movieId = item.id,
                             mediaType = item.mediaType
                         )
+                        val updated = item.copy(
+                            migratedAt = today,
+                            clientUpdatedAt = System.currentTimeMillis(),
+                            syncStatus = "pending"
+                        )
+                        database.favoriteDao().insert(updated)
                     } else if (item.nextEpisodeAirDate == today) {
                         val epString = item.nextEpisodeString ?: "nuovo episodio"
                         NotificationHelper.showEpisodeReleaseNotification(
@@ -56,6 +72,12 @@ class ReminderWorker @AssistedInject constructor(
                             showId = item.id,
                             episodeString = epString
                         )
+                        val updated = item.copy(
+                            migratedAt = today,
+                            clientUpdatedAt = System.currentTimeMillis(),
+                            syncStatus = "pending"
+                        )
+                        database.favoriteDao().insert(updated)
                     }
                 }
             }

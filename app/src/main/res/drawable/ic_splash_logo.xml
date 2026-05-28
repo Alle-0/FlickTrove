@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:drawable="@drawable/ic_launcher_foreground_vector"
-        android:width="124dp"
-        android:height="124dp"
+        android:width="150dp"
+        android:height="150dp"
         android:gravity="center" />
 </layer-list>

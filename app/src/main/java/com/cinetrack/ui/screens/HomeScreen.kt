@@ -41,7 +41,9 @@ import com.cinetrack.util.toComposeColor
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
+import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.HomeViewModel
@@ -65,9 +67,14 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
     
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
     val scope = rememberCoroutineScope()
@@ -85,6 +92,10 @@ fun HomeScreen(
     }
     
     val context = LocalContext.current
+
+    androidx.activity.compose.BackHandler(enabled = isFilterVisible) {
+        onToggleFilter(false, null)
+    }
 
     val stickyHeaderHeight = 60.dp
     val topPadding = paddingValues.calculateTopPadding()
@@ -110,7 +121,7 @@ fun HomeScreen(
             ) {
             if (uiState.isLoading) {
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
@@ -123,7 +134,11 @@ fun HomeScreen(
                     userScrollEnabled = false
                 ) {
                     items(count = 15, contentType = { "skeleton" }) {
-                        com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                        if (columns == 1) {
+                            com.cinetrack.ui.components.shared.MovieListCardSkeleton()
+                        } else {
+                            com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                        }
                     }
                 }
             } else if (uiState.movies.isEmpty()) {
@@ -140,7 +155,7 @@ fun HomeScreen(
             } else {
                 LazyVerticalGrid(
                     state = currentGridState,
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
@@ -153,7 +168,8 @@ fun HomeScreen(
                 ) {
                     itemsIndexed(
                         items = uiState.movies,
-                        key = { index, movie: Movie -> movie.id.toString() + movie.mediaType }
+                        key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
+                        contentType = { _, _ -> "movie_card" }
                     ) { index, movie ->
                         val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
                         val folderColors = remember(movie.id, uiState.movieFolderColors) {
@@ -161,26 +177,47 @@ fun HomeScreen(
                                 it.toComposeColor()
                             } ?: emptyList()
                         }
-                        MovieCard(
-                            movie = movie,
-                            cardWidth = cardWidth,
-                            isFavorite = movie.favorite,
-                            isWatched = movie.watched,
-                            isReminder = movie.reminder,
-                            progress = (movie.progress ?: 0.0).toFloat(),
-                            folderColors = folderColors,
-                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                            showBadges = uiState.preferences.showBadges,
-                            hazeState = hazeState,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            staggerIndex = index,
-                            onPress = { onMovieClick(movie) },
-                            onAction = { viewModel.toggleWatched(movie) },
-                            onLongPress = { m, pressOffset, cardPos ->
-                                actionsState.onLongPress(m, pressOffset, cardPos)
-                            },
-                            onMessage = { viewModel.emitMessage(it) }
-                        )
+                        if (columns == 1) {
+                            com.cinetrack.ui.components.MovieListCard(
+                                movie = movie,
+                                isFavorite = movie.favorite,
+                                isWatched = movie.watched,
+                                isReminder = movie.reminder,
+                                progress = (movie.progress ?: 0.0).toFloat(),
+                                folderColors = folderColors,
+                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                showBadges = uiState.preferences.showBadges,
+                                hazeState = hazeState,
+                                staggerIndex = index,
+                                onPress = { onMovieClick(movie) },
+                                onAction = { viewModel.toggleWatched(movie) },
+                                onLongPress = { m, pressOffset, cardPos ->
+                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                },
+                                onMessage = { viewModel.emitMessage(it) }
+                            )
+                        } else {
+                            MovieCard(
+                                movie = movie,
+                                cardWidth = cardWidth,
+                                isFavorite = movie.favorite,
+                                isWatched = movie.watched,
+                                isReminder = movie.reminder,
+                                progress = (movie.progress ?: 0.0).toFloat(),
+                                folderColors = folderColors,
+                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                showBadges = uiState.preferences.showBadges,
+                                hazeState = hazeState,
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                staggerIndex = index,
+                                onPress = { onMovieClick(movie) },
+                                onAction = { viewModel.toggleWatched(movie) },
+                                onLongPress = { m, pressOffset, cardPos ->
+                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                },
+                                onMessage = { viewModel.emitMessage(it) }
+                            )
+                        }
                     }
                 }
             }
@@ -192,16 +229,17 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
-                .padding(top = topPadding + 0.dp, start = 16.dp, end = 32.dp)
+                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
                 .height(stickyHeaderHeight),
             contentAlignment = Alignment.Center
         ) {
+                val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
 
                 // Category Tab Selector Island (Centered with more left offset for balance)
                 Box(
                     modifier = Modifier
                         .wrapContentSize()
-                        .offset(x = (-28).dp),
+                        .padding(end = rightControlsInset),
                     contentAlignment = Alignment.Center
                 ) {
                     Spacer(
@@ -230,46 +268,84 @@ fun HomeScreen(
                                        uiState.sortConfig.selectedProviders.isNotEmpty() || 
                                        uiState.sortConfig.selectedDecades.isNotEmpty()
 
-                // Circular Filter Button (Right Aligned)
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .align(Alignment.CenterEnd)
-                        .onGloballyPositioned { coords: androidx.compose.ui.layout.LayoutCoordinates ->
-                            filterButtonBounds = coords.boundsInRoot()
-                        }
+                // Circular Layout Toggle & Filter Buttons (Right Aligned)
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Background Layer
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
-                    )
+                    // Layout Toggle Button
+                    if (uiState.preferences.showLayoutToggle) {
+                        Box(
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            // Background Layer
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                            )
 
-                    // Interactive Content Layer
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick(scaleDown = 0.92f) { 
-                                onToggleFilter(true, filterButtonBounds) 
+                            // Interactive Content Layer
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClick(scaleDown = 0.92f) { 
+                                        viewModel.updateGridColumns(nextGridColumns(columns))
+                                    }
+                                    .border(
+                                        BorderStroke(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = layoutToggleIcon(columns),
+                                    contentDescription = "Cambia Layout",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
                             }
-                            .border(
-                                BorderStroke(
-                                    if (hasActiveFilters) 1.5.dp else 1.dp, 
-                                    if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                                ),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Tune,
-                            contentDescription = "Filtri",
-                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        
+                        }
+                    }
 
+                    // Filter Button
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .onGloballyPositioned { coords: androidx.compose.ui.layout.LayoutCoordinates ->
+                                filterButtonBounds = coords.boundsInRoot()
+                            }
+                    ) {
+                        // Background Layer
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                        )
+
+                        // Interactive Content Layer
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick(scaleDown = 0.92f) { 
+                                    onToggleFilter(true, filterButtonBounds) 
+                                }
+                                .border(
+                                    BorderStroke(
+                                        if (hasActiveFilters) 1.5.dp else 1.dp, 
+                                        if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                    ),
+                                    CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Tune,
+                                contentDescription = "Filtri",
+                                tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }

@@ -27,8 +27,7 @@ data class UpdatesRoute(
 @Serializable
 object StatsRoute : FlickRoute
 
-@Serializable
-object SearchRoute : FlickRoute
+
 
 @Serializable
 object RecommendationsRoute : FlickRoute
@@ -44,7 +43,8 @@ data class DetailRoute(
 
 @Serializable
 data class PersonRoute(
-    val id: Long
+    val id: Long,
+    val profilePath: String? = null
 ) : FlickRoute
 
 @Serializable
@@ -61,6 +61,16 @@ object FoldersRoute : FlickRoute
 
 @Serializable
 data class FolderDetailRoute(val folderId: String, val folderName: String, val folderColor: String? = null) : FlickRoute
+
+@Serializable
+data class SearchRoute(
+    val startX: Float? = null,
+    val startY: Float? = null,
+    val initialGenreName: String? = null,
+    val initialKeywordName: String? = null,
+    val initialGenreId: Long? = null,
+    val initialKeywordId: Long? = null
+) : FlickRoute
 
 @Serializable
 object LogoAnimationRoute : FlickRoute

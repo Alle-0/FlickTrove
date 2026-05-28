@@ -14,6 +14,9 @@ import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
 import java.util.UUID
 import java.time.Instant
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @HiltViewModel
 class FoldersViewModel @Inject constructor(
@@ -21,12 +24,12 @@ class FoldersViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
-    val folders: StateFlow<List<FolderEntity>> = repository.getFoldersFlow()
-        .map { it.sortedByDescending { folder -> folder.createdAt } }
+    val folders: StateFlow<ImmutableList<FolderEntity>> = repository.getFoldersFlow()
+        .map { it.sortedByDescending { folder -> folder.createdAt }.toImmutableList() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = persistentListOf()
         )
 
     fun createFolder(name: String, icon: String, color: String, description: String = "") {

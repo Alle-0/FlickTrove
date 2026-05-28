@@ -31,6 +31,9 @@ class PreferenceRepository @Inject constructor(
         val SHOW_BADGES = booleanPreferencesKey("show_badges")
         val DISABLED_BADGES = stringSetPreferencesKey("disabled_badges")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
+        val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
 
@@ -58,6 +61,9 @@ class PreferenceRepository @Inject constructor(
                 showBadges = preferences[PreferencesKeys.SHOW_BADGES] ?: true,
                 disabledBadges = preferences[PreferencesKeys.DISABLED_BADGES] ?: emptySet(),
                 vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true,
+                accentColor = preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal",
+                advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
+                dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
             )
         }
@@ -83,6 +89,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateGridColumns(columns: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.GRID_COLUMNS] = columns
+        }
+    }
+
+    suspend fun updateShowLayoutToggle(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = show
         }
     }
 
@@ -122,6 +134,9 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_BADGES] = prefs.showBadges
             preferences[PreferencesKeys.DISABLED_BADGES] = prefs.disabledBadges
             preferences[PreferencesKeys.VIBRATION_ENABLED] = prefs.vibrationEnabled
+            preferences[PreferencesKeys.ACCENT_COLOR] = prefs.accentColor
+            preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
+            preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
         }
     }

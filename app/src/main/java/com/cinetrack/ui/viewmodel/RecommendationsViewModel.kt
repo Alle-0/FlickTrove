@@ -11,16 +11,22 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.cinetrack.util.toComposeColor
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 
 data class RecommendationsUiState(
     val mediaType: String = "movie",
-    val recommendedMovies: List<Movie> = emptyList(),
+    val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
     val isLoading: Boolean = true,
     val isNextPageLoading: Boolean = false,
     val isEndReached: Boolean = false,
-    val favorites: List<Movie> = emptyList(),
-    val movieFolderColors: Map<String, List<String>> = emptyMap(),
-    val folders: List<com.cinetrack.data.local.entities.FolderEntity> = emptyList(),
+    val favorites: ImmutableList<Movie> = persistentListOf(),
+    val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
+    val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences()
 )
 
@@ -69,24 +75,24 @@ class RecommendationsViewModel @Inject constructor(
         
         val favorites = localMovies
         
-        val movieFolderColors = mutableMapOf<String, List<String>>()
+        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
         folders.forEach { folder ->
             val color = folder.color ?: "#FFFFFF"
             folder.itemIds.forEach { itemId ->
-                val colors = movieFolderColors.getOrDefault(itemId, emptyList())
-                movieFolderColors[itemId] = colors + color
+                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
             }
         }
+        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
         RecommendationsUiState(
             mediaType = mediaType,
             isLoading = isLoading,
             isNextPageLoading = isNextLoading,
             isEndReached = isEnd,
-            recommendedMovies = recommended,
-            favorites = favorites,
-            movieFolderColors = movieFolderColors,
-            folders = folders,
+            recommendedMovies = recommended.toImmutableList(),
+            favorites = favorites.toImmutableList(),
+            movieFolderColors = immutableMovieFolderColors,
+            folders = folders.toImmutableList(),
             preferences = prefs
         )
     }.stateIn(
@@ -176,13 +182,17 @@ class RecommendationsViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalRating = rating))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalRating = rating))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            repository.saveMovie(movie.copy(personalNote = note))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            val current = local ?: movie
+            repository.saveMovie(current.copy(personalNote = note))
         }
     }
 
@@ -322,6 +332,12 @@ class RecommendationsViewModel @Inject constructor(
             10765L -> 878L // Sci-Fi & Fantasy -> Sci-Fi
             10768L -> 10752L // War & Politics -> War
             else -> genreId
+        }
+    }
+
+    fun updatePreferences(prefs: com.cinetrack.data.models.UserPreferences) {
+        viewModelScope.launch {
+            preferenceRepository.updateAll(prefs)
         }
     }
 }

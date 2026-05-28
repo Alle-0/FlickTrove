@@ -25,18 +25,24 @@ import com.cinetrack.ui.utils.bounceClick
 import coil.compose.AsyncImage
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.CrewMember
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 
 /**
  * DetailCast
  * Renders Directors and Main Cast in horizontal LazyRows.
  * Features profile avatars and premium typography.
  */
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailCast(
     directors: List<CrewMember>,
     cast: List<CastMember>,
     accentColor: Color,
-    onPersonClick: (Long) -> Unit,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    onPersonClick: (Long, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (directors.isEmpty() && cast.isEmpty()) return
@@ -67,15 +73,17 @@ fun DetailCast(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
-                items(groupedDirectors, key = { "dir-${it.id}" }) { person ->
+                items(groupedDirectors, key = { "dir-${it.id}" }, contentType = { "person" }) { person ->
                     PersonCard(
                         id = person.id,
                         name = person.name,
                         subLabel = "", // Nascondiamo il label "Director" poiché la sezione è già titolata REGIA
                         imagePath = person.profilePath,
                         accentColor = accentColor,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
                         showSubLabelContainer = false,
-                        onClick = { onPersonClick(person.id) }
+                        onClick = { onPersonClick(person.id, person.profilePath) }
                     )
                 }
             }
@@ -106,14 +114,16 @@ fun DetailCast(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
-                items(groupedCast, key = { "cast-${it.id}" }) { person ->
+                items(groupedCast, key = { "cast-${it.id}" }, contentType = { "person" }) { person ->
                     PersonCard(
                         id = person.id,
                         name = person.name,
                         subLabel = person.character ?: "-",
                         imagePath = person.profilePath,
                         accentColor = accentColor,
-                        onClick = { onPersonClick(person.id) }
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        onClick = { onPersonClick(person.id, person.profilePath) }
                     )
                 }
             }
@@ -121,6 +131,7 @@ fun DetailCast(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PersonCard(
     id: Long,
@@ -128,6 +139,8 @@ fun PersonCard(
     subLabel: String,
     imagePath: String?,
     accentColor: Color,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     showSubLabelContainer: Boolean = true,
     onClick: () -> Unit
 ) {

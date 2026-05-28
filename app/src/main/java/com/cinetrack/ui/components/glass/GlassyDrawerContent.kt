@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import com.cinetrack.util.NotificationHelper
 import com.cinetrack.ui.theme.HazeStyles
 
 /**
@@ -161,13 +163,8 @@ fun GlassyDrawerContent(
                     onClick = { onNavigate("settings", null) },
                     accentColor = accentColor
                 )
-                DrawerItem(
-                    icon = Icons.Rounded.Animation,
-                    label = "Logo Animation",
-                    isActive = activeRoute == "logo_animation",
-                    onClick = { onNavigate("logo_animation", null) },
-                    accentColor = accentColor
-                )
+
+
 
                 Spacer(modifier = Modifier.height(24.dp))
                 

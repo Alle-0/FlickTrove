@@ -84,10 +84,17 @@ fun FolderDetailScreen(
                                     style = HazeStyles.PremiumDark
                                 )
                         ) {
-                            val cardWidth = (maxWidth - 48.dp) / 3 // 16*2 padding + 8*2 gap
+                            val columns = if (preferences.gridColumns in 1..3) preferences.gridColumns else 3
+                            val gap = 8.dp
+                            val padding = 16.dp
+                            val cardWidth = if (columns > 1) {
+                                (maxWidth - (padding * 2) - (gap * (columns - 1))) / columns
+                            } else {
+                                maxWidth - (padding * 2)
+                            }
                             
                             LazyVerticalGrid(
-                                columns = GridCells.Fixed(3),
+                                columns = GridCells.Fixed(columns),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
@@ -124,25 +131,50 @@ fun FolderDetailScreen(
                                     }
                                 } else {
                                     itemsIndexed(state.movies, key = { index, movie -> movie.id }) { index, movie ->
-                                        MovieCard(
-                                            movie = movie,
-                                            cardWidth = cardWidth,
-                                            isFavorite = movie.favorite,
-                                            isWatched = movie.watched,
-                                            isReminder = movie.reminder,
-                                            onPress = { onMovieClick(movie) },
-                                            animatedVisibilityScope = animatedVisibilityScope,
-                                            staggerIndex = index,
-                                            onLongPress = { m, pressOffset, cardPos ->
-                                                actionsState.onLongPress(m, pressOffset, cardPos)
-                                            },
-                                            onMessage = { viewModel.emitMessage(it) },
-                                            progress = movie.progress?.toFloat() ?: 0f,
-                                            folderColors = folderColors[movie.compositeId]?.map { 
-                                                it.toComposeColor()
-                                            } ?: emptyList(),
-                                            showFolderBookmarks = preferences.showFolderBookmarks
-                                        )
+                                        val currentFolderColors = folderColors[movie.compositeId]?.map { 
+                                            it.toComposeColor()
+                                        } ?: emptyList()
+                                        
+                                        if (columns == 1) {
+                                            com.cinetrack.ui.components.MovieListCard(
+                                                movie = movie,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                isFavorite = movie.favorite,
+                                                isWatched = movie.watched,
+                                                isReminder = movie.reminder,
+                                                personalRating = movie.personalRating,
+                                                progress = movie.progress?.toFloat() ?: 0f,
+                                                folderColors = currentFolderColors,
+                                                showFolderBookmarks = preferences.showFolderBookmarks,
+                                                showBadges = preferences.showBadges,
+                                                hazeState = localHazeState,
+                                                staggerIndex = index,
+                                                onPress = { onMovieClick(movie) },
+                                                onLongPress = { m, pressOffset, cardPos ->
+                                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                                },
+                                                onMessage = { viewModel.emitMessage(it) }
+                                            )
+                                        } else {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = cardWidth,
+                                                isFavorite = movie.favorite,
+                                                isWatched = movie.watched,
+                                                isReminder = movie.reminder,
+                                                personalRating = movie.personalRating,
+                                                onPress = { onMovieClick(movie) },
+                                                animatedVisibilityScope = animatedVisibilityScope,
+                                                staggerIndex = index,
+                                                onLongPress = { m, pressOffset, cardPos ->
+                                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                                },
+                                                onMessage = { viewModel.emitMessage(it) },
+                                                progress = movie.progress?.toFloat() ?: 0f,
+                                                folderColors = currentFolderColors,
+                                                showFolderBookmarks = preferences.showFolderBookmarks
+                                            )
+                                        }
                                     }
                                 }
                             }

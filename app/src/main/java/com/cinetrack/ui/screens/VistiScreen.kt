@@ -39,7 +39,9 @@ import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.MovieCard
 import com.cinetrack.ui.components.CategoryButton
 import com.cinetrack.ui.components.CategoryTabSelector
+import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
+import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.components.CinematicBackground
 
 import com.cinetrack.util.toComposeColor
@@ -69,11 +71,20 @@ fun VistiScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = (screenWidth - (padding * 2) - (gap * 2)) / 3
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
     
     val listState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     
+    androidx.activity.compose.BackHandler(enabled = isFilterVisible) {
+        onToggleFilter(false, null)
+    }
+
     val stickyHeaderHeight = 60.dp
     val topPadding = paddingValues.calculateTopPadding()
     val localHazeState = remember { HazeState() }
@@ -106,7 +117,7 @@ fun VistiScreen(
             ) {
             if (uiState.isLoading) {
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     state = listState,
                     contentPadding = PaddingValues(
                         start = 16.dp, 
@@ -120,7 +131,11 @@ fun VistiScreen(
                     userScrollEnabled = false
                 ) {
                     items(count = 15, contentType = { "skeleton" }) {
-                        com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                        if (columns == 1) {
+                            com.cinetrack.ui.components.shared.MovieListCardSkeleton()
+                        } else {
+                            com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                        }
                     }
                 }
             } else if (uiState.movies.isEmpty()) {
@@ -136,7 +151,7 @@ fun VistiScreen(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     state = listState,
                     contentPadding = PaddingValues(
                         start = 16.dp, 
@@ -157,24 +172,48 @@ fun VistiScreen(
                                 it.toComposeColor()
                             } ?: emptyList()
                         }
-                        MovieCard(
-                            movie = movie,
-                            cardWidth = cardWidth,
-                            isFavorite = movie.favorite,
-                            isWatched = movie.watched,
-                            isReminder = movie.reminder,
-                            progress = (movie.progress ?: 0.0).toFloat(),
-                            folderColors = folderColors,
-                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            staggerIndex = index,
-                            onPress = { onMovieClick(movie) },
-                            onAction = { viewModel.toggleWatched(movie) },
-                            onLongPress = { m, pressOffset, cardPos ->
-                                actionsState.onLongPress(m, pressOffset, cardPos)
-                            },
-                            onMessage = { viewModel.emitMessage(it) }
-                        )
+                        if (columns == 1) {
+                            com.cinetrack.ui.components.MovieListCard(
+                                movie = movie,
+                                modifier = Modifier.fillMaxWidth(),
+                                isFavorite = movie.favorite,
+                                isWatched = movie.watched,
+                                isReminder = movie.reminder,
+                                personalRating = movie.personalRating,
+                                progress = (movie.progress ?: 0.0).toFloat(),
+                                folderColors = folderColors,
+                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                showBadges = uiState.preferences.showBadges,
+                                hazeState = hazeState,
+                                staggerIndex = index,
+                                onPress = { onMovieClick(movie) },
+                                onAction = { viewModel.toggleWatched(movie) },
+                                onLongPress = { m, pressOffset, cardPos ->
+                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                },
+                                onMessage = { viewModel.emitMessage(it) }
+                            )
+                        } else {
+                            MovieCard(
+                                movie = movie,
+                                cardWidth = cardWidth,
+                                isFavorite = movie.favorite,
+                                isWatched = movie.watched,
+                                isReminder = movie.reminder,
+                                personalRating = movie.personalRating,
+                                progress = (movie.progress ?: 0.0).toFloat(),
+                                folderColors = folderColors,
+                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                staggerIndex = index,
+                                onPress = { onMovieClick(movie) },
+                                onAction = { viewModel.toggleWatched(movie) },
+                                onLongPress = { m, pressOffset, cardPos ->
+                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                },
+                                onMessage = { viewModel.emitMessage(it) }
+                            )
+                        }
                     }
                 }
             }
@@ -184,15 +223,17 @@ fun VistiScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = topPadding + 0.dp, start = 16.dp, end = 32.dp)
+                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
                 .height(stickyHeaderHeight),
             contentAlignment = Alignment.Center
         ) {
+            val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
+
             // Category Tab Selector Island (Centered with more left offset for balance)
             Box(
                 modifier = Modifier
                     .wrapContentSize()
-                    .offset(x = (-28).dp),
+                    .padding(end = rightControlsInset),
                 contentAlignment = Alignment.Center
             ) {
                 // Glassmorphic Layer (Separate from content to keep text sharp)
@@ -228,15 +269,45 @@ fun VistiScreen(
                                    uiState.sortConfig.selectedProviders.isNotEmpty() || 
                                    uiState.sortConfig.selectedDecades.isNotEmpty()
 
-            // Circular Filter Button (Right Aligned)
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .align(Alignment.CenterEnd)
-                    .onGloballyPositioned { coords: LayoutCoordinates ->
-                        filterButtonBounds = coords.boundsInRoot()
-                    }
+            Row(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Layout Toggle Button
+                if (uiState.preferences.showLayoutToggle) {
+                    Box(modifier = Modifier.size(36.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick(scaleDown = 0.92f) {
+                                    viewModel.updateGridColumns(nextGridColumns(columns))
+                                }
+                                .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = layoutToggleIcon(columns),
+                                contentDescription = "Cambia Colonne",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Circular Filter Button
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .onGloballyPositioned { coords: LayoutCoordinates ->
+                            filterButtonBounds = coords.boundsInRoot()
+                        }
+                ) {
                 // Background Layer
                 Box(
                     modifier = Modifier
@@ -276,6 +347,7 @@ fun VistiScreen(
                                 .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
                         )
                     }
+                }
                 }
             }
         }

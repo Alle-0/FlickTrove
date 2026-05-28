@@ -55,7 +55,9 @@ import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
+import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
+import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.viewmodel.RecommendationsViewModel
@@ -97,7 +99,14 @@ fun RecommendationsScreen(
     
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val cardWidth = (screenWidth - 44.dp) / 3
+    val padding = 16.dp
+    val gap = 12.dp
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val cardWidth = if (columns > 1) {
+        (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
+    } else {
+        screenWidth - (padding * 2)
+    }
 
     val topPadding = paddingValues.calculateTopPadding()
     val stickyHeaderHeight = 60.dp
@@ -318,7 +327,7 @@ fun RecommendationsScreen(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
+                    columns = GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
                         top = topPadding + stickyHeaderHeight + 12.dp,
                         bottom = paddingValues.calculateBottomPadding() + 16.dp,
@@ -371,22 +380,40 @@ fun RecommendationsScreen(
                             key = { _, movie -> movie.id.toString() + movie.mediaType }
                         ) { index, movie ->
                             val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
-                            MovieCard(
-                                movie = movie,
-                                cardWidth = cardWidth,
-                                isFavorite = movieStatus?.favorite ?: false,
-                                isWatched = movieStatus?.watched ?: false,
-                                isReminder = movieStatus?.reminder ?: false,
-                                progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                personalRating = movieStatus?.personalRating,
-                                folderColors = viewModel.getMovieFolderColors(movie),
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleFavorite(movie) },
-                                onLongPress = actionsState.onLongPress,
-                                onMessage = { viewModel.emitMessage(it) }
-                            )
+                            if (columns == 1) {
+                                com.cinetrack.ui.components.MovieListCard(
+                                    movie = movie.copy(personalRating = movieStatus?.personalRating),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    isFavorite = movieStatus?.favorite ?: false,
+                                    isWatched = movieStatus?.watched ?: false,
+                                    isReminder = movieStatus?.reminder ?: false,
+                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                    folderColors = viewModel.getMovieFolderColors(movie),
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    staggerIndex = index,
+                                    onPress = { onMovieClick(movie) },
+                                    onAction = { viewModel.toggleFavorite(movie) },
+                                    onLongPress = actionsState.onLongPress,
+                                    onMessage = { viewModel.emitMessage(it) }
+                                )
+                            } else {
+                                MovieCard(
+                                    movie = movie,
+                                    cardWidth = cardWidth,
+                                    isFavorite = movieStatus?.favorite ?: false,
+                                    isWatched = movieStatus?.watched ?: false,
+                                    isReminder = movieStatus?.reminder ?: false,
+                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                    personalRating = movieStatus?.personalRating,
+                                    folderColors = viewModel.getMovieFolderColors(movie),
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    staggerIndex = index,
+                                    onPress = { onMovieClick(movie) },
+                                    onAction = { viewModel.toggleFavorite(movie) },
+                                    onLongPress = actionsState.onLongPress,
+                                    onMessage = { viewModel.emitMessage(it) }
+                                )
+                            }
                         }
 
                         if (uiState.isNextPageLoading) {
@@ -416,14 +443,16 @@ fun RecommendationsScreen(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
-                .padding(top = topPadding + 0.dp, start = 16.dp, end = 32.dp)
+                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
                 .height(stickyHeaderHeight),
             contentAlignment = Alignment.Center
         ) {
+            val rightControlsInset = if (!isTinderMode && uiState.preferences.showLayoutToggle) 88.dp else 44.dp
+
             Box(
                 modifier = Modifier
                     .wrapContentSize()
-                    .offset(x = (-28).dp),
+                    .padding(end = rightControlsInset),
                 contentAlignment = Alignment.Center
             ) {
                 Spacer(
@@ -445,36 +474,64 @@ fun RecommendationsScreen(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .align(Alignment.CenterEnd)
+            Row(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer { }
-                        .bounceClick(scaleDown = 0.92f) {
-                            isTinderMode = !isTinderMode
+                if (!isTinderMode && uiState.preferences.showLayoutToggle) {
+                    Box(modifier = Modifier.size(36.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick(scaleDown = 0.92f) {
+                                    val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
+                                    viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
+                                }
+                                .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = layoutToggleIcon(uiState.preferences.gridColumns),
+                                contentDescription = "Cambia Colonne",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
-                        .border(
-                            BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (isTinderMode) Icons.Rounded.GridView else Icons.Rounded.Style,
-                        contentDescription = "Cambia Layout",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                    }
+                }
+
+                Box(modifier = Modifier.size(36.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                     )
+    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { }
+                            .bounceClick(scaleDown = 0.92f) {
+                                isTinderMode = !isTinderMode
+                            }
+                            .border(
+                                BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isTinderMode) Icons.Rounded.GridView else Icons.Rounded.Style,
+                            contentDescription = "Tinder Mode",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
@@ -553,7 +610,7 @@ private fun TinderMovieCard(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(posterUrl)
-                        .crossfade(true)
+                        .crossfade(false)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,

@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -53,8 +55,6 @@ fun DetailHeader(
     movie: Movie,
     ratings: ExternalRatings,
     accentColor: Color,
-    titleAlpha: Float = 1f,
-    titleTranslationY: Float = 0f,
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,

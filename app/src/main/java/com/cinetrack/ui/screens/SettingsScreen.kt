@@ -112,11 +112,13 @@ fun SettingsScreen(
             else -> accentColorName.toComposeColor(NeonTeal)
         }
     }
+    val dynamicAppIconEnabled by settingsViewModel.dynamicAppIconEnabled.collectAsStateWithLifecycle()
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
 
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -145,6 +147,7 @@ fun SettingsScreen(
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
+    @kotlin.OptIn(coil.annotation.ExperimentalCoilApi::class)
     fun updateCacheSize() {
         scope.launch(Dispatchers.IO) {
             val sizeBytes = context.imageLoader.diskCache?.size ?: 0L
@@ -302,6 +305,25 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
+                                icon = Icons.Rounded.AppShortcut,
+                                title = "Icona App Dinamica",
+                                description = "Cambia l'icona dell'app nella schermata home per adattarla al colore accento",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = dynamicAppIconEnabled,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleDynamicAppIcon(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleDynamicAppIcon(!dynamicAppIconEnabled)
+                                }
+                            )
+                            SettingsItem(
                                 icon = Icons.Rounded.Bookmarks,
                                 title = "Segnalibri cartelle",
                                 description = "Mostra un nastro colorato sulle card per indicare l'appartenenza alle cartelle.",
@@ -351,6 +373,25 @@ fun SettingsScreen(
                                 onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.toggleBadges(!showBadges)
+                                }
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.GridView,
+                                title = "Pulsante Layout",
+                                description = "Mostra il pulsante per cambiare il numero di colonne in Home",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = showLayoutToggle,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleLayoutToggle(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
                                 }
                             )
 

@@ -91,6 +91,7 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.0")
     implementation("androidx.glance:glance-material3:1.1.0")
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.compose.animation:animation-graphics")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.datastore.preferences)
@@ -106,6 +107,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.moshi.kotlin)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
@@ -121,6 +123,10 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
+    // Google ML Kit
+    implementation("com.google.mlkit:translate:17.0.3")
 
     // Paging 3
     implementation(libs.paging.runtime)

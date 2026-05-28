@@ -55,25 +55,20 @@ class FirebaseRemoteDataSource @Inject constructor(
             return emptyList()
         }
         
-        return try {
-            android.util.Log.d("FirebaseRemoteDataSource", "Fetching favorites for UID: $uid")
-            val snapshot = getFavoritesCollection(uid).get(Source.SERVER).await()
-            val list = mutableListOf<Movie>()
-            for (doc in snapshot.documents) {
-                try {
-                    val movie = doc.toObject(Movie::class.java)
-                    if (movie != null) {
-                        list.add(movie)
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing movie document ${doc.id}: ${e.message}", e)
+        android.util.Log.d("FirebaseRemoteDataSource", "Fetching favorites for UID: $uid")
+        val snapshot = getFavoritesCollection(uid).get(Source.SERVER).await()
+        val list = mutableListOf<Movie>()
+        for (doc in snapshot.documents) {
+            try {
+                val movie = doc.toObject(Movie::class.java)
+                if (movie != null) {
+                    list.add(movie)
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing movie document ${doc.id}: ${e.message}", e)
             }
-            list
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching favorites: ${e.message}", e)
-            emptyList()
         }
+        return list
     }
 
     /**
@@ -97,24 +92,19 @@ class FirebaseRemoteDataSource @Inject constructor(
         val uid = forcedUid ?: userId
         if (uid == null) return emptyList()
         
-        return try {
-            val snapshot = getFoldersCollection(uid).get(Source.SERVER).await()
-            val list = mutableListOf<Folder>()
-            for (doc in snapshot.documents) {
-                try {
-                    val folder = doc.toObject(Folder::class.java)
-                    if (folder != null) {
-                        list.add(folder)
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing folder document ${doc.id}: ${e.message}", e)
+        val snapshot = getFoldersCollection(uid).get(Source.SERVER).await()
+        val list = mutableListOf<Folder>()
+        for (doc in snapshot.documents) {
+            try {
+                val folder = doc.toObject(Folder::class.java)
+                if (folder != null) {
+                    list.add(folder)
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing folder document ${doc.id}: ${e.message}", e)
             }
-            list
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching folders: ${e.message}", e)
-            emptyList()
         }
+        return list
     }
 
     /**

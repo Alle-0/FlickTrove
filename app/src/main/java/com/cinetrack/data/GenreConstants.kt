@@ -1,8 +1,10 @@
 package com.cinetrack.data
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Stable
 data class Genre(val id: Long = 0L, val name: String = "")
 
 object GenreConstants {

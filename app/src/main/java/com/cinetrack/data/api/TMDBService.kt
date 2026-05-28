@@ -22,6 +22,22 @@ interface TMDBService {
         @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords"
     ): MovieDetailResponse
 
+    @GET("movie/{id}/reviews")
+    suspend fun getMovieReviews(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
+    ): ReviewsResponse
+
+    @GET("tv/{id}/reviews")
+    suspend fun getTVReviews(
+        @Path("id") id: Long,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
+    ): ReviewsResponse
+
     @GET("search/movie")
     suspend fun searchMovie(
         @Query("query") query: String,

@@ -356,7 +356,7 @@ data class Movie(
             val lowerStatus = status?.lowercase()
             if (lowerStatus != null) {
                 if (lowerStatus == "released") return true
-                if (lowerStatus == "planned" || lowerStatus == "in production" || 
+                if (lowerStatus == "planned" || lowerStatus == "in production" ||
                     lowerStatus == "post production" || lowerStatus == "rumored") {
                     return false
                 }
@@ -365,7 +365,11 @@ data class Movie(
             // 3. Fallback to isUpcoming flag
             if (isUpcoming == true) return false
 
-            // Default to true if no other indicators say otherwise
+            // 4. If no date at all and no status confirming release → treat as unreleased.
+            //    Films announced on TMDB without a date (e.g. "Zootopia 3") fall here.
+            if (dateStr.isNullOrBlank() && releaseYear.isNullOrBlank()) return false
+
+            // Default to true only when we have at least some date evidence
             return true
         }
 

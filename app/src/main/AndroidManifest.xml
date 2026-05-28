@@ -20,11 +20,8 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.App.Starting">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
+            <!-- Deep linking intent filter remains in the main activity -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -36,6 +33,76 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
+        <activity-alias
+            android:name=".MainActivityTeal"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:theme="@style/Theme.App.Starting"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityPink"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_pink"
+            android:roundIcon="@mipmap/ic_launcher_round_pink"
+            android:theme="@style/Theme.App.Starting.Pink"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityPurple"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_purple"
+            android:roundIcon="@mipmap/ic_launcher_round_purple"
+            android:theme="@style/Theme.App.Starting.Purple"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAmber"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_amber"
+            android:roundIcon="@mipmap/ic_launcher_round_amber"
+            android:theme="@style/Theme.App.Starting.Amber"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityBlue"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_blue"
+            android:roundIcon="@mipmap/ic_launcher_round_blue"
+            android:theme="@style/Theme.App.Starting.Blue"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

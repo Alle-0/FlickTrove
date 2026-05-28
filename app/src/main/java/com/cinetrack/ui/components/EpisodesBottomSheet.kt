@@ -221,7 +221,8 @@ fun EpisodesBottomSheet(
                 ) {
                     items(
                         items = currentSeasonData?.episodes ?: emptyList<Episode>(),
-                        key = { it.episodeNumber }
+                        key = { it.episodeNumber },
+                        contentType = { "episode" }
                     ) { episode ->
                         EpisodeCard(
                             episode = episode,
@@ -296,7 +297,7 @@ private fun SeasonSelector(
         modifier = Modifier
             .padding(bottom = 16.dp)
     ) {
-        items(seasons, key = { it }) { seasonNum ->
+        items(seasons, key = { it }, contentType = { "season_chip" }) { seasonNum ->
             val isActive = selectedSeason == seasonNum
             val isCompleted = completedSeasons.contains(seasonNum)
             
