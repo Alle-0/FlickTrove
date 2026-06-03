@@ -37,9 +37,7 @@ class TVUpdateWorker(
             val notifEnabled = settingsRepository.notificationsEnabled.first()
             val hasPermission = NotificationHelper.hasNotificationPermission(applicationContext)
 
-            val tvShows: List<Movie> = repository.getLocalMovies()
-                .filter { it.mediaType == "tv" }
-                .filter { it.status != "Ended" && it.status != "Canceled" }
+            val tvShows: List<Movie> = repository.getShowsForUpdate(150)
 
             tvShows.forEach { show: Movie ->
                 try {
@@ -77,12 +75,14 @@ class TVUpdateWorker(
                         }
                     }
                 } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
                     // Skip individual show failures, continue with the rest
                 }
             }
 
             Result.success()
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Result.retry()
         }
     }

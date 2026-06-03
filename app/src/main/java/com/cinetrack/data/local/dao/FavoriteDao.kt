@@ -33,17 +33,13 @@ interface FavoriteDao {
     @Query("UPDATE favorites SET sync_status = 'pending_delete', client_updated_at = :timestamp WHERE id = :id AND media_type = :mediaType")
     suspend fun markDeleted(id: Long, mediaType: String, timestamp: Long = System.currentTimeMillis())
 
-    @Query("""
-        SELECT * FROM favorites 
-        WHERE sync_status != 'pending_delete' 
-        AND (title LIKE '%' || :query || '%' OR name LIKE '%' || :query || '%')
-        AND (:mediaType = 'all' OR media_type = :mediaType)
-        LIMIT 20
-    """)
-    suspend fun search(query: String, mediaType: String): List<Movie>
+
 
     @Query("SELECT * FROM favorites WHERE sync_status != 'synced'")
     suspend fun getPendingSync(): List<Movie>
+
+    @Query("SELECT * FROM favorites WHERE media_type = 'tv' AND (status IS NULL OR status NOT IN ('Ended', 'Canceled')) ORDER BY client_updated_at ASC LIMIT :limit")
+    suspend fun getShowsForUpdate(limit: Int = 150): List<Movie>
 
     @Query("UPDATE favorites SET sync_status = :status WHERE id = :id AND media_type = :mediaType")
     suspend fun updateSyncStatus(id: Long, mediaType: String, status: String)

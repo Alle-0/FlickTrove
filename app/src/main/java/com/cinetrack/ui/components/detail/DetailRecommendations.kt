@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,7 +75,11 @@ fun DetailRecommendations(
                     contentPadding = PaddingValues(horizontal = 24.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(collectionMovies, key = { it.id }, contentType = { "movie" }) { movie ->
+                    itemsIndexed(
+                        items = collectionMovies,
+                        key = { _, movie -> movie.id },
+                        contentType = { _, _ -> "movie" }
+                    ) { index, movie ->
                         val isCurrent = movie.id == currentId
                         MovieCard(
                             movie = movie,
@@ -84,6 +89,7 @@ fun DetailRecommendations(
                             isReminder = movie.reminder,
                             progress = movie.progress?.toFloat() ?: 0f,
                             animatedVisibilityScope = if (isCurrent) null else animatedVisibilityScope,
+                            staggerIndex = index,
                             onPress = { if (!isCurrent) onMovieClick(movie) },
                             onLongPress = onLongPress,
                             onAction = onAction,
@@ -124,11 +130,11 @@ fun DetailRecommendations(
                 ) {
                     val collectionIds = collectionMovies.map { it.id }.toSet()
                     val filteredRecommendations = recommendedMovies.filter { it.id != currentId && it.id !in collectionIds }
-                    items(
+                    itemsIndexed(
                         items = filteredRecommendations,
-                        key = { it.id.toString() + it.mediaType + "_rec" },
-                        contentType = { "movie" }
-                    ) { movie ->
+                        key = { _, movie -> movie.id.toString() + movie.mediaType + "_rec" },
+                        contentType = { _, _ -> "movie" }
+                    ) { index, movie ->
                         MovieCard(
                             movie = movie,
                             cardWidth = 130.dp,
@@ -137,6 +143,7 @@ fun DetailRecommendations(
                             isReminder = movie.reminder,
                             progress = movie.progress?.toFloat() ?: 0f,
                             animatedVisibilityScope = animatedVisibilityScope,
+                            staggerIndex = index,
                             onPress = { onMovieClick(movie) },
                             onLongPress = onLongPress,
                             onAction = onAction,

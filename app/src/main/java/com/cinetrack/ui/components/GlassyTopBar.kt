@@ -45,6 +45,7 @@ import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.utils.NetworkMonitor
 
 @Composable
@@ -68,7 +69,7 @@ fun GlassyTopBar(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val networkMonitor = remember { NetworkMonitor(context) }
-    val connectionState by networkMonitor.connectionState.collectAsState(initial = com.cinetrack.utils.ConnectionState.ONLINE)
+    val connectionState by networkMonitor.connectionState.collectAsStateWithLifecycle(initialValue = com.cinetrack.utils.ConnectionState.ONLINE)
 
     val animatedDimAlpha by animateFloatAsState(
         targetValue = if (isDimmed) 0.6f else 0f,

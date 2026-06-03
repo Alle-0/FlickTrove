@@ -168,33 +168,33 @@ fun FoldersScreen(
         )
     }
 
-    if (folderToDelete != null) {
+    folderToDelete?.let { folder ->
         DeleteFolderDialog(
             onConfirm = {
-                viewModel.deleteFolder(folderToDelete!!.id)
+                viewModel.deleteFolder(folder.id)
                 folderToDelete = null
             },
             onDismiss = { folderToDelete = null },
-            folderName = folderToDelete!!.name,
+            folderName = folder.name,
             hazeState = hazeState
         )
     }
 
-    if (folderToEdit != null) {
+    folderToEdit?.let { folder ->
         FolderEditDialog(
-            initialName = folderToEdit!!.name,
-            initialColor = folderToEdit!!.color ?: "#FFFFFF",
+            initialName = folder.name,
+            initialColor = folder.color ?: "#FFFFFF",
             editMode = folderEditMode,
             onDismiss = { folderToEdit = null },
             onSave = { newName, newColor ->
-                viewModel.updateFolder(folderToEdit!!.copy(name = newName, color = newColor))
+                viewModel.updateFolder(folder.copy(name = newName, color = newColor))
                 folderToEdit = null
             },
             hazeState = hazeState
         )
     }
 
-    if (activeMenuFolder != null) {
+    activeMenuFolder?.let { folder ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -225,35 +225,51 @@ fun FoldersScreen(
                         .width(200.dp)
                         .clip(RoundedCornerShape(24.dp))
                         .then(Modifier.hazeGlass(state = localHazeState, shape = RoundedCornerShape(24.dp)))
-                        .padding(vertical = 8.dp)
                 ) {
-                    val folder = activeMenuFolder!!
-                    DropdownMenuItem(
-                        text = { Text("Rinomina Cartella", color = Color.White) },
-                        leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
-                        onClick = { 
-                            activeMenuFolder = null
-                            folderEditMode = FolderEditMode.NAME
-                            folderToEdit = folder
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Cambia Colore", color = Color.White) },
-                        leadingIcon = { Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) },
-                        onClick = { 
-                            activeMenuFolder = null
-                            folderEditMode = FolderEditMode.COLOR
-                            folderToEdit = folder
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Elimina Cartella", color = Color(0xFFFF3B30)) },
-                        leadingIcon = { Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp)) },
-                        onClick = { 
-                            activeMenuFolder = null
-                            folderToDelete = folder 
-                        }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick { 
+                                activeMenuFolder = null
+                                folderEditMode = FolderEditMode.NAME
+                                folderToEdit = folder
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text("Rinomina Cartella", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick { 
+                                activeMenuFolder = null
+                                folderEditMode = FolderEditMode.COLOR
+                                folderToEdit = folder
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text("Cambia Colore", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick { 
+                                activeMenuFolder = null
+                                folderToDelete = folder 
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Text("Elimina Cartella", color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                    }
                 }
             }
         }

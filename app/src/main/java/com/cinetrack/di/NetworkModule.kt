@@ -1,14 +1,15 @@
 package com.cinetrack.di
 
-import com.cinetrack.BuildConfig
 import com.cinetrack.data.api.OmdbService
 import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.api.TMDBService
+import com.cinetrack.utils.Keys
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -32,24 +33,33 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(preferenceRepository: com.cinetrack.data.repository.PreferenceRepository): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
+            level = if (com.cinetrack.BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BASIC
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
-        // Remove Accept-Encoding: gzip from every outgoing request.
-        // TMDb's CDN sometimes sends gzip responses with an incorrect Content-Length,
-        // causing okio's GzipSource to throw "gzip finished without exhausting source".
-        // By not advertising gzip support, the server returns plain JSON and the issue disappears.
-        val noGzipInterceptor = okhttp3.Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .removeHeader("Accept-Encoding")
-                .addHeader("Accept-Encoding", "identity")
-                .build()
-            chain.proceed(request)
+        val tmdbAuthInterceptor = okhttp3.Interceptor { chain ->
+            val original = chain.request()
+            if (original.url.host.contains("themoviedb.org")) {
+                val language = kotlinx.coroutines.runBlocking { 
+                    preferenceRepository.userPreferencesFlow.first().contentLanguage 
+                }
+                val url = original.url.newBuilder()
+                    .addQueryParameter("api_key", Keys.getTmdbKey())
+                    .setQueryParameter("language", language)
+                    .build()
+                val request = original.newBuilder().url(url).build()
+                chain.proceed(request)
+            } else {
+                chain.proceed(original)
+            }
         }
         return OkHttpClient.Builder()
-            .addInterceptor(noGzipInterceptor)
             .addInterceptor(logging)
+            .addInterceptor(tmdbAuthInterceptor)
             .build()
     }
 
@@ -103,13 +113,13 @@ object NetworkModule {
 
     @Provides
     @Named("tmdb_api_key")
-    fun provideTMDBApiKey(): String = BuildConfig.TMDB_API_KEY
+    fun provideTMDBApiKey(): String = Keys.getTmdbKey()
 
     @Provides
     @Named("omdb_api_key")
-    fun provideOMDBApiKey(): String = BuildConfig.OMDB_API_KEY
+    fun provideOMDBApiKey(): String = Keys.getOmdbKey()
 
     @Provides
     @Named("trakt_api_key")
-    fun provideTraktApiKey(): String = BuildConfig.TRAKT_API_KEY
+    fun provideTraktApiKey(): String = Keys.getTraktKey()
 }

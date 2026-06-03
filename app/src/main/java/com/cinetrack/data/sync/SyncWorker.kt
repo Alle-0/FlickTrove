@@ -25,6 +25,7 @@ class SyncWorker @AssistedInject constructor(
             
             Result.success()
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             // Retry if it's a transient failure, otherwise fail
             if (runAttemptCount < 3) {
                 Result.retry()

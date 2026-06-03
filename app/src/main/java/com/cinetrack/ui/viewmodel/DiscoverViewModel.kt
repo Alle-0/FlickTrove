@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.domain.GetDiscoverUiStateUseCase
 import javax.inject.Inject
 import com.cinetrack.ui.navigation.DiscoverRoute
 import com.cinetrack.util.toComposeColor
@@ -42,9 +44,11 @@ data class DiscoverUiState(
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
+    private val getDiscoverUiStateUseCase: GetDiscoverUiStateUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -80,87 +84,18 @@ class DiscoverViewModel @Inject constructor(
             Triple(local, sort, Pair(folders, prefs))
         }
     ) { groupA, groupB ->
-        val apiMovies = groupA.first
-        val (isLoading, isNextPageLoading, currentPage) = groupA.second
-        val isEndReached = groupA.third
-        
-        val localMovies = groupB.first
-        val sortConfig = groupB.second
-        val (folders, prefs) = groupB.third
-
-        // Sync api movies with local state
-        val syncedMovies = apiMovies.map { apiMovie ->
-            localMovies.find { it.id == apiMovie.id && it.mediaType == apiMovie.mediaType } ?: apiMovie
-        }
-        
-        // Apply local filtering
-        val filteredMovies = syncedMovies.filter { movie ->
-            val matchesGenres = if (sortConfig.selectedGenres.isEmpty()) true 
-                else movie.genreIds?.any { genreId -> sortConfig.selectedGenres.contains(genreId.toLong()) } ?: false
-            
-            val matchesProviders = if (sortConfig.selectedProviders.isEmpty()) true
-                else movie.streamingProviderIds?.any { providerId -> sortConfig.selectedProviders.contains(providerId) } ?: false
-                
-            val matchesDecade = if (sortConfig.selectedDecades.isEmpty()) true
-                else {
-                    val year = movie.releaseDate?.split("-")?.firstOrNull()?.toIntOrNull()
-                    if (year != null) {
-                        sortConfig.selectedDecades.any { decade ->
-                            try {
-                                val decadeStart = decade.toInt()
-                                year in decadeStart..(decadeStart + 9)
-                            } catch (e: Exception) {
-                                false
-                            }
-                        }
-                    } else false
-                }
-                
-            val isUpcomingSection = type.contains("upcoming") || type.contains("airing_today") || type.contains("on_the_air")
-            val meetsReleaseCriteria = isUpcomingSection || movie.isReleased
-                
-            matchesGenres && matchesProviders && matchesDecade && meetsReleaseCriteria
-        }
-        
-        // Apply local sorting
-        val sortedMovies = when (sortConfig.sortType) {
-            "release_date" -> {
-                if (sortConfig.sortDirection == "desc") filteredMovies.sortedByDescending { it.releaseDate ?: "" }
-                else filteredMovies.sortedBy { it.releaseDate ?: "9999-99-99" }
-            }
-            "vote_average" -> {
-                if (sortConfig.sortDirection == "desc") filteredMovies.sortedByDescending { it.voteAverage ?: 0.0 }
-                else filteredMovies.sortedBy { it.voteAverage ?: 10.0 }
-            }
-            "title" -> {
-                if (sortConfig.sortDirection == "desc") filteredMovies.sortedByDescending { it.title ?: it.name ?: "" }
-                else filteredMovies.sortedBy { it.title ?: it.name ?: "" }
-            }
-            else -> filteredMovies
-        }
-
-        val movieFolderColors = mutableMapOf<String, ImmutableList<String>>()
-        folders.forEach { folder ->
-            val color = folder.color ?: "#FFFFFF"
-            folder.itemIds.forEach { itemId ->
-                val colors = movieFolderColors[itemId] ?: persistentListOf()
-                movieFolderColors[itemId] = (colors + color).toImmutableList()
-            }
-        }
-
-        DiscoverUiState(
-            movies = sortedMovies.toImmutableList(),
-            isLoading = isLoading,
-            isNextPageLoading = isNextPageLoading,
+        getDiscoverUiStateUseCase(
+            apiMovies = groupA.first,
+            isLoading = groupA.second.first,
+            isNextPageLoading = groupA.second.second,
+            currentPage = groupA.second.third,
+            isEndReached = groupA.third,
+            localMovies = groupB.first,
+            sortConfig = groupB.second,
+            folders = groupB.third.first,
+            prefs = groupB.third.second,
             type = type,
-            genreName = route.genreName,
-            currentPage = currentPage,
-            isEndReached = isEndReached,
-            favorites = localMovies.toImmutableList(),
-            sortConfig = sortConfig,
-            movieFolderColors = movieFolderColors.toImmutableMap(),
-            folders = folders.toImmutableList(),
-            preferences = prefs
+            genreName = route.genreName
         )
     }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
@@ -250,7 +185,7 @@ class DiscoverViewModel @Inject constructor(
             }
 
             // 3. Perform the cycle
-            repository.cycleMovieStatus(current)
+            cycleMovieStatusUseCase(current)
 
             // 4. Re-fetch current state to determine what happened for feedback
             val updated = repository.getMovie(movie.id, movie.mediaType)

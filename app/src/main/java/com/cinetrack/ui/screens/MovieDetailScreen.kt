@@ -1,6 +1,10 @@
 @file:OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -94,16 +98,21 @@ fun MovieDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
-    var extractedColor by remember { mutableStateOf<Color?>(null) }
+    val folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
+    var isHeaderVisible by remember { mutableStateOf(true) }
     var showEpisodesSheet by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showRatingInfoDialog by remember { mutableStateOf(false) }
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
+    val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
     androidx.activity.compose.BackHandler(enabled = true) {
-        if (showRatingInfoDialog) {
+        if (movieActions.isAnyModalOpen) {
+            movieActions.closeAll()
+        } else if (showRatingInfoDialog) {
             showRatingInfoDialog = false
         } else if (showTranslationPrompt != null) {
             viewModel.dismissTranslationPrompt()
@@ -116,31 +125,15 @@ fun MovieDetailScreen(
         }
     }
     
+    val currentImageQuality = LocalImageQuality.current
     // Estrazione colore dinamica se accentColor è nullo nel database
-    LaunchedEffect(uiState) {
-        val state = uiState
-        if (state is DetailUiState.Success) {
-            val movie = state.movieEntry
-            val mediaType = movie.mediaType.ifEmpty { "movie" }
-            val sharedBoundsKey = "media_${mediaType}_${movie.id}"
-            val imageUrl = "https://image.tmdb.org/t/p/w92${movie.posterPath ?: movie.backdropPath}"
-            if (movie.accentColor == null && (movie.posterPath != null || movie.backdropPath != null)) {
-                val loader = Coil.imageLoader(context)
-                val request = ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .allowHardware(false)
-                    .build()
-                
-                val result = loader.execute(request)
-                if (result is SuccessResult) {
-                    val drawable = result.drawable
-                    if (drawable is BitmapDrawable && drawable.bitmap.width > 0 && drawable.bitmap.height > 0) {
-                        val bitmap = drawable.bitmap
-                        val averageColor = ColorUtils.extractAverageColor(bitmap)
-                        val brightColor = ColorUtils.ensureMinimumLuminance(averageColor, 0.5f)
-                        extractedColor = ColorUtils.saturateColor(brightColor, 2.0f)
-                    }
-                }
+    LaunchedEffect(uiState, currentImageQuality) {
+        val currentState = uiState
+        if (currentState is DetailUiState.Success) {
+            val movie = currentState.movieEntry
+            val imageUrl = buildTmdbImageUrl(movie.posterPath ?: movie.backdropPath, ImageType.POSTER, currentImageQuality)
+            if (imageUrl != null) {
+                viewModel.fetchAccentColor(imageUrl, movie)
             }
         }
     }
@@ -624,15 +617,14 @@ fun MovieDetailScreen(
                         else -> Brush.linearGradient(folderColors)
                     }
                     
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .height(44.dp)
                     ) {
                         // Left side actions (Back + Home)
                         Row(
+                            modifier = Modifier.align(Alignment.CenterStart),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
@@ -724,8 +716,9 @@ fun MovieDetailScreen(
                         // Title Area: Swaps between Movie Title (on scroll) and Modal Title (on expansion)
                         Box(
                             modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp),
+                                .align(Alignment.Center)
+                                .fillMaxHeight()
+                                .padding(horizontal = 90.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             // Movie Title: Visible when scrolled OR during modal expansion
@@ -776,6 +769,7 @@ fun MovieDetailScreen(
                         // Folder Button
                         Box(
                             modifier = Modifier
+                                .align(Alignment.CenterEnd)
                                 .size(44.dp)
                                 .alpha(if (successState != null) 1f else 0f)
                                 .then(

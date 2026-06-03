@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,8 +51,9 @@ fun MovieCard(
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-    val posterUrl = remember(movie.posterPath) {
-        if (movie.posterPath != null) "https://image.tmdb.org/t/p/w342${movie.posterPath}" else null
+    val imageQuality = LocalImageQuality.current
+    val posterUrl = remember(movie.posterPath, imageQuality) {
+        buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, imageQuality)
     }
 
     Box(
@@ -148,6 +153,7 @@ fun MovieCard(
 
 @Composable
 private fun RatingBadge(rating: Double, modifier: Modifier = Modifier) {
+    val multiplier = com.cinetrack.LocalTitleTextSizeMultiplier.current
     Box(
         modifier = modifier
             .background(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlphaFallback), RoundedCornerShape(8.dp))
@@ -157,7 +163,7 @@ private fun RatingBadge(rating: Double, modifier: Modifier = Modifier) {
         Text(
             text = String.format("%.1f", rating),
             color = Color.White,
-            fontSize = 10.sp,
+            fontSize = (10 * multiplier).sp,
             fontWeight = FontWeight.Black,
             letterSpacing = (-0.5).sp
         )

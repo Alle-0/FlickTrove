@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -636,7 +640,7 @@ fun UpdateCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w185${movie.posterPath}",
+                model = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current),
                 contentDescription = null,
                 modifier = Modifier.width(44.dp).height(58.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop

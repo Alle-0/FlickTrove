@@ -26,6 +26,9 @@ class MovieActionsManager {
     var showActionsPopup by mutableStateOf(false)
         private set
 
+    val isAnyModalOpen: Boolean
+        get() = showRatingDialog || showNotesDialog || showFolderDialog || showActionsPopup
+
     var popupPressOffset by mutableStateOf(Offset.Zero)
         private set
         

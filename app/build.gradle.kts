@@ -9,11 +9,16 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
     kotlin("plugin.parcelize")
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 android {
     namespace = "com.cinetrack"
     compileSdk = 36
+
+    val localProps = Properties().apply {
+        rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    }
 
     defaultConfig {
         applicationId = "com.cinetrack"
@@ -25,22 +30,40 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
+        val tmdbKey = localProps.getProperty("TMDB_API_KEY", "")
+        val omdbKey = localProps.getProperty("OMDB_API_KEY", "")
+        val traktKey = localProps.getProperty("TRAKT_API_KEY", "")
+
         // TMDB API KEY (To be replaced by user or local.properties)
-        buildConfigField("String", "TMDB_API_KEY", "\"ff53fa26279d57ecddf05f3371d94c03\"")
-        buildConfigField("String", "OMDB_API_KEY", "\"78f04527\"")
-        buildConfigField("String", "TRAKT_API_KEY", "\"26c1520987a8cc340d46415540ca47e4c8e4964d09a88599d3b7b9e94fd870f5\"")
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
+        buildConfigField("String", "OMDB_API_KEY", "\"$omdbKey\"")
+        buildConfigField("String", "TRAKT_API_KEY", "\"$traktKey\"")
+
+        externalNativeBuild {
+            cmake {
+                cppFlags("")
+                arguments(
+                    "-D_TMDB_API_KEY=\"$tmdbKey\"",
+                    "-D_OMDB_API_KEY=\"$omdbKey\"",
+                    "-D_TRAKT_API_KEY=\"$traktKey\""
+                )
+            }
+        }
     }
 
-    val localProps = Properties().apply {
-        rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    externalNativeBuild {
+        cmake {
+            path("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file(localProps["RELEASE_STORE_FILE"] as String)
-            storePassword = localProps["RELEASE_STORE_PASSWORD"] as String
-            keyAlias = localProps["RELEASE_KEY_ALIAS"] as String
-            keyPassword = localProps["RELEASE_KEY_PASSWORD"] as String
+            storeFile = file(localProps.getProperty("RELEASE_STORE_FILE", ""))
+            storePassword = localProps.getProperty("RELEASE_STORE_PASSWORD", "")
+            keyAlias = localProps.getProperty("RELEASE_KEY_ALIAS", "")
+            keyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD", "")
         }
     }
 
@@ -134,6 +157,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
 
     debugImplementation(libs.androidx.ui.tooling)
+    "baselineProfile"(project(":baselineprofile"))
 }
 
 ksp {

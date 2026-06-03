@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -93,8 +97,14 @@ fun PersonDetailScreen(
         label = "BackIconScale"
     )
 
+    val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
+
     androidx.activity.compose.BackHandler(enabled = true) {
-        onBackClick()
+        if (movieActions.isAnyModalOpen) {
+            movieActions.closeAll()
+        } else {
+            onBackClick()
+        }
     }
 
     Box(
@@ -137,6 +147,14 @@ fun PersonDetailScreen(
                 }
             } else {
                 uiState.person?.let { p ->
+                val favoritesMap = remember(uiState.favorites) {
+                    uiState.favorites.associateBy { "${it.mediaType}_${it.id}" }
+                }
+                val folderColorsMap = remember(uiState.movieFolderColors) {
+                    uiState.movieFolderColors.mapValues { entry ->
+                        entry.value.map { it.toComposeColor() }
+                    }
+                }
                 MovieActionsWrapper(
                     hazeState = localHazeState,
                     folders = uiState.folders,
@@ -157,7 +175,7 @@ fun PersonDetailScreen(
                     // Hero Profile Image
                     Box(modifier = Modifier.fillMaxWidth().height(480.dp)) {
                         AsyncImage(
-                            model = "https://image.tmdb.org/t/p/original/${p.profilePath}",
+                            model = buildTmdbImageUrl(p.profilePath, ImageType.PROFILE, LocalImageQuality.current),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -261,8 +279,9 @@ fun PersonDetailScreen(
                                         items = knownFor,
                                         key = { _, it -> it.id.toString() + "_" + it.mediaType }
                                     ) { index, m ->
-                                        val movieStatus = uiState.favorites.find { it.id == m.id && it.mediaType == m.mediaType }
+                                        val movieStatus = favoritesMap["${m.mediaType}_${m.id}"]
                                         val movie = movieStatus ?: m
+                                        val folderColors = folderColorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                                         MovieCard(
                                             movie = movie,
                                             cardWidth = 130.dp,
@@ -271,9 +290,7 @@ fun PersonDetailScreen(
                                             isReminder = movieStatus?.reminder ?: false,
                                             progress = movieStatus?.progress?.toFloat() ?: 0f,
                                             personalRating = movieStatus?.personalRating,
-                                            folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map {
-                                                it.toComposeColor()
-                                            } ?: emptyList(),
+                                            folderColors = folderColors,
                                             showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                             animatedVisibilityScope = animatedVisibilityScope,
                                             staggerIndex = index,
@@ -326,12 +343,14 @@ fun PersonDetailScreen(
                                 if (crewTV.isNotEmpty()) CategoryPill("Regia - Serie (${crewTV.size})", uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
                             }
 
-                            val filmo = when (uiState.activeTab) {
-                                "cast_movie" -> castMovies
-                                "cast_tv" -> castTV
-                                "crew_movie" -> crewMovies
-                                "crew_tv" -> crewTV
-                                else -> castMovies
+                            val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
+                                when (uiState.activeTab) {
+                                    "cast_movie" -> castMovies
+                                    "cast_tv" -> castTV
+                                    "crew_movie" -> crewMovies
+                                    "crew_tv" -> crewTV
+                                    else -> castMovies
+                                }
                             }
 
                             filmo.chunked(columns).forEachIndexed { rowIndex, rowMovies ->
@@ -342,12 +361,10 @@ fun PersonDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     rowMovies.forEachIndexed { colIndex, movie ->
-                                        val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
+                                        val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
                                         val m = movieStatus ?: movie
                                         val staggerIdx = rowIndex * columns + colIndex
-                                        val folderColors = uiState.movieFolderColors["${m.mediaType}_${m.id}"]?.map {
-                                            it.toComposeColor()
-                                        } ?: emptyList()
+                                        val folderColors = folderColorsMap["${m.mediaType}_${m.id}"] ?: emptyList()
                                         Box(modifier = Modifier.weight(1f)) {
                                             if (columns == 1) {
                                                 com.cinetrack.ui.components.MovieListCard(

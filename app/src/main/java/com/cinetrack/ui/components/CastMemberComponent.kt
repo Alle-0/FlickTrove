@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,7 +40,7 @@ fun CastMemberComponent(id: Int, name: String, character: String, profilePath: S
         ) {
             if (profilePath != null) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w185$profilePath",
+                    model = buildTmdbImageUrl(profilePath, ImageType.PROFILE, LocalImageQuality.current),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize().clip(CircleShape),
                     contentScale = ContentScale.Crop

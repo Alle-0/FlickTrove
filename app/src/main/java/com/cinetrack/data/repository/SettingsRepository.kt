@@ -12,6 +12,8 @@ interface SettingsRepository {
     val dynamicAppIconEnabled: Flow<Boolean>
     val advancedVisualEffectsEnabled: Flow<Boolean>
     val lastFeedbackTimestamp: Flow<Long>
+    val titleTextSizeMultiplier: Flow<Float>
+    val imageQuality: Flow<String>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -22,4 +24,6 @@ interface SettingsRepository {
     suspend fun updateDisabledBadges(badges: Set<String>)
     suspend fun toggleAdvancedVisualEffects(enabled: Boolean)
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)
+    suspend fun updateTitleTextSizeMultiplier(multiplier: Float)
+    suspend fun updateImageQuality(quality: String)
 }

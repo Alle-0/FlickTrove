@@ -38,14 +38,20 @@ class AudioRecorderHelper(private val context: Context) {
         if (!file.exists()) return 0L
         
         var duration = 0L
+        var retriever: android.media.MediaMetadataRetriever? = null
         try {
-            val retriever = android.media.MediaMetadataRetriever()
+            retriever = android.media.MediaMetadataRetriever()
             retriever.setDataSource(file.absolutePath)
             val time = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
             duration = time?.toLongOrNull() ?: 0L
-            retriever.release()
         } catch (e: Exception) {
             Log.e("AudioRecorderHelper", "Failed to get duration", e)
+        } finally {
+            try {
+                retriever?.release()
+            } catch (e: Exception) {
+                // Ignore release errors
+            }
         }
         return duration
     }

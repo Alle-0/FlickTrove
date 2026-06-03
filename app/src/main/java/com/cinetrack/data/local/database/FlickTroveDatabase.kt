@@ -57,7 +57,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     DATABASE_NAME
                 )
                 .addMigrations(MIGRATION_6_7)
-                .fallbackToDestructiveMigration() // Still fallback if coming from an older missing migration
+                .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }
         }

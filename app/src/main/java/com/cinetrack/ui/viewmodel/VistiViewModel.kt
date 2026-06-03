@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
+import com.cinetrack.domain.GetVistiUiStateUseCase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -34,6 +36,8 @@ data class VistiUiState(
 
 @HiltViewModel
 class VistiViewModel @Inject constructor(
+    private val getVistiUiStateUseCase: GetVistiUiStateUseCase,
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -46,63 +50,14 @@ class VistiViewModel @Inject constructor(
         actionFeedbackManager.emit(message)
     }
 
-    val uiState: StateFlow<VistiUiState> = combine(
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    val uiState: StateFlow<VistiUiState> = getVistiUiStateUseCase(
         repository.getLocalMoviesFlow(),
         repository.getFoldersFlow(),
         preferenceRepository.userPreferencesFlow,
-        _searchQuery,
+        _searchQuery.debounce(300).distinctUntilChanged(),
         _activeTab
-    ) { movies, folders, prefs, query, tab ->
-        val watchedMovies = movies.filter { it.watched }.distinctBy { "${it.id}_${it.mediaType}" }
-        val movieCount = watchedMovies.count { it.mediaType != "tv" }
-        val tvCount = watchedMovies.count { it.mediaType == "tv" }
-        
-        val filtered = watchedMovies.filter { movie ->
-            val matchesTab = if (tab == "movie") movie.mediaType != "tv" else movie.mediaType == "tv"
-            val matchesSearch = query.isEmpty() || 
-                (movie.title?.contains(query, ignoreCase = true) ?: false) ||
-                (movie.name?.contains(query, ignoreCase = true) ?: false)
-            
-            val matchesGenre = prefs.vistiSort.selectedGenres.isEmpty() || 
-                (movie.genreIds?.any { it in prefs.vistiSort.selectedGenres } ?: false)
-            
-            val matchesDecade = prefs.vistiSort.selectedDecades.isEmpty() || 
-                prefs.vistiSort.selectedDecades.any { decade ->
-                    val prefix = decade.substring(0, 3)
-                    (movie.releaseDate?.startsWith(prefix) ?: false) ||
-                    (movie.firstAirDate?.startsWith(prefix) ?: false)
-                }
-
-            val matchesProvider = prefs.vistiSort.selectedProviders.isEmpty() || 
-                (movie.streamingProviderIds?.any { it in prefs.vistiSort.selectedProviders } ?: false)
-            
-            matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider
-        }
-
-        val sorted = sortMovies(filtered, prefs.vistiSort)
-
-        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
-        folders.forEach { folder ->
-            val color = folder.color ?: "#FFFFFF"
-            folder.itemIds.forEach { itemId ->
-                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
-            }
-        }
-        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
-
-        VistiUiState(
-            movies = sorted.toImmutableList(),
-            movieCount = movieCount,
-            tvCount = tvCount,
-            isLoading = false,
-            searchQuery = query,
-            activeTab = tab,
-            movieFolderColors = immutableMovieFolderColors,
-            folders = folders.toImmutableList(),
-            sortConfig = prefs.vistiSort,
-            preferences = prefs
-        )
-    }.flowOn(Dispatchers.Default).stateIn(
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = VistiUiState()
@@ -142,7 +97,7 @@ class VistiViewModel @Inject constructor(
                 return@launch
             }
 
-            repository.cycleMovieStatus(current)
+            cycleMovieStatusUseCase(current)
 
             val updated = repository.getMovie(movie.id, movie.mediaType)
             val actionLabel = when {
@@ -193,72 +148,6 @@ class VistiViewModel @Inject constructor(
                 folder.itemIds + compositeId
             }
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-        }
-    }
-
-    private fun sortMovies(movies: List<Movie>, sort: SortConfig): List<Movie> {
-        val isDesc = sort.sortDirection == "desc"
-        return when (sort.sortType) {
-            "watched_at" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.watchedAt }
-                } else {
-                    movies.sortedBy { it.watchedAt }
-                }
-            }
-            "release_date" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.releaseDate ?: it.firstAirDate ?: "" }
-                } else {
-                    movies.sortedBy { it.releaseDate ?: it.firstAirDate ?: "" }
-                }
-            }
-            "title" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.title ?: it.name ?: "" }
-                } else {
-                    movies.sortedBy { it.title ?: it.name ?: "" }
-                }
-            }
-            "added_at", "created_at" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.clientUpdatedAt }
-                } else {
-                    movies.sortedBy { it.clientUpdatedAt }
-                }
-            }
-            "vote_average" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.voteAverage ?: 0.0 }
-                } else {
-                    movies.sortedBy { it.voteAverage ?: 0.0 }
-                }
-            }
-            "personal_rating" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { it.personalRating ?: 0.0 }
-                } else {
-                    movies.sortedBy { it.personalRating ?: 0.0 }
-                }
-            }
-            "runtime" -> {
-                if (isDesc) {
-                    movies.sortedByDescending { getMovieDuration(it) }
-                } else {
-                    movies.sortedBy { getMovieDuration(it) }
-                }
-            }
-            else -> movies
-        }
-    }
-
-    private fun getMovieDuration(movie: Movie): Int {
-        return if (movie.mediaType == "tv") {
-            val avgRuntime = movie.episodeRunTime?.average()?.toInt() ?: 0
-            val totalEpisodes = movie.numberOfEpisodes ?: 0
-            avgRuntime * totalEpisodes
-        } else {
-            movie.runtime ?: 0
         }
     }
 }

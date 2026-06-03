@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -64,10 +65,13 @@ fun Modifier.hazeGlass(
             )
         }
     }
+    
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    
     val modifierChain = this
         .clip(shape)
         .then(
-            if (state != null) {
+            if (state != null && advancedEffectsEnabled) {
                 // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeChild.
                 // We use the lambda-less version to be extremely explicit and avoid property-vs-parameter confusion.
                 if (useOffscreenStrategy) {
@@ -81,7 +85,8 @@ fun Modifier.hazeGlass(
                 }
             } else {
                 val fallbackColor = containerColor ?: HazeStyles.GlassColor
-                Modifier.background(fallbackColor.copy(alpha = HazeStyles.GlassAlphaFallback * alpha), shape)
+                val fallbackAlpha = if (advancedEffectsEnabled) HazeStyles.GlassAlphaFallback * alpha else 0.95f * alpha
+                Modifier.background(fallbackColor.copy(alpha = fallbackAlpha), shape)
             }
         )
         .glassOverlay(shape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
@@ -98,7 +103,12 @@ fun Modifier.glassmorphic(
     borderBrush: Brush? = null
 ) = composed {
     val isSPlus = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
-    val alpha = if (isSPlus) HazeStyles.GlassAlphaSPlus else HazeStyles.GlassAlphaFallback
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    val alpha = if (advancedEffectsEnabled) {
+        if (isSPlus) HazeStyles.GlassAlphaSPlus else HazeStyles.GlassAlphaFallback
+    } else {
+        0.95f
+    }
     
     this
         .clip(shape)

@@ -34,6 +34,8 @@ class PreferenceRepository @Inject constructor(
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
+        val APP_THEME = stringPreferencesKey("app_theme")
+        val CONTENT_LANGUAGE = stringPreferencesKey("content_language")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
 
@@ -62,6 +64,8 @@ class PreferenceRepository @Inject constructor(
                 disabledBadges = preferences[PreferencesKeys.DISABLED_BADGES] ?: emptySet(),
                 vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true,
                 accentColor = preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal",
+                appTheme = preferences[PreferencesKeys.APP_THEME] ?: "System",
+                contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "it-IT",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
@@ -116,6 +120,18 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateAppTheme(theme: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_THEME] = theme
+        }
+    }
+
+    suspend fun updateContentLanguage(language: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CONTENT_LANGUAGE] = language
+        }
+    }
+
     suspend fun updateLastSyncTimestamp(timestamp: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = timestamp
@@ -135,6 +151,8 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.DISABLED_BADGES] = prefs.disabledBadges
             preferences[PreferencesKeys.VIBRATION_ENABLED] = prefs.vibrationEnabled
             preferences[PreferencesKeys.ACCENT_COLOR] = prefs.accentColor
+            preferences[PreferencesKeys.APP_THEME] = prefs.appTheme
+            preferences[PreferencesKeys.CONTENT_LANGUAGE] = prefs.contentLanguage
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
@@ -144,6 +162,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateDisabledBadges(badges: Set<String>) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DISABLED_BADGES] = badges
+        }
+    }
+
+    suspend fun clearAll() {
+        dataStore.edit { preferences ->
+            preferences.clear()
         }
     }
 }

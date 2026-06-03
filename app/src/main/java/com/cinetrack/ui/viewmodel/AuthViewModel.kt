@@ -17,54 +17,18 @@ sealed interface AuthState {
     object Anonymous : AuthState
     data class Loading(val message: String? = null, val progress: Float? = null) : AuthState
     object Authenticated : AuthState
+    data class Success(val message: String) : AuthState
     data class Error(val message: String) : AuthState
 }
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val auth: FirebaseAuth,
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieRepository,
+    private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase
 ) : ViewModel() {
 
     private val _processState = MutableStateFlow<AuthState?>(null)
-
-    private val offensiveWords = listOf(
-        // Generiche / Insulti
-        "stronz", "cazzo", "cazzi", "cazzon", "cazzat", "merda", "merde", "merdos",
-        "puttan", "zoccol", "mignott", "bagascia", "baldracca", "bastard", 
-        "coglion", "minchia", "minchion", "cornut", "sfigat", "stracciacazz",
-        // Discriminazione / Omofobia
-        "frocio", "froci", "ricchion", "culatton", "mongoloid", "spastic", 
-        // Atti / Espliciti / Composte
-        "sborra", "sborro", "sborrat", "pompin", "bocchin", "succhiacazz", "succhiaminchi",
-        "vaffancul", "fancul", "rottincul", "leccacul", "rompicazz", "cacacazz", "scassacazz",
-        "testadicazz", "faccidimerda", "pezzodimerda", "figliodiputtan", "figlidiputtan",
-        // Bestemmie e imprecazioni
-        "porcodio", "diocane", "diocan", "porcamadonna", "dioporco", "diomerda",
-        "canedio", "diocristo", "cristodio", "madonnaputtana", "madonnacagna",
-        "mortacci"
-    )
-
-    private fun normalizeText(text: String): String {
-        return text.lowercase()
-            .replace("4", "a")
-            .replace("@", "a")
-            .replace("3", "e")
-            .replace("1", "i")
-            .replace("!", "i")
-            .replace("0", "o")
-            .replace("5", "s")
-            .replace("$", "s")
-            .replace("7", "t")
-            .replace("+", "t")
-            .replace("8", "b")
-            .replace("2", "z")
-    }
-
-    private fun containsOffensiveWords(text: String): Boolean {
-        val normalizedText = normalizeText(text)
-        return offensiveWords.any { normalizedText.contains(it) }
-    }
 
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {
@@ -91,7 +55,7 @@ class AuthViewModel @Inject constructor(
     )
 
     fun login(email: String, password: String) {
-        if (containsOffensiveWords(email)) {
+        if (emailValidatorUseCase.containsOffensiveWords(email)) {
             _processState.update { AuthState.Error("L'email contiene parole non consentite") }
             return
         }
@@ -112,10 +76,9 @@ class AuthViewModel @Inject constructor(
             
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
-                    val uid = result.user?.uid
                     viewModelScope.launch {
                         _processState.update { AuthState.Loading("Sincronizzazione account in corso...", null) }
-                        movieRepository.syncWithFirebase(uid, force = true) { syncProgress ->
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
                             _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                         }
                         _processState.update { null }
@@ -128,7 +91,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signUp(email: String, password: String) {
-        if (containsOffensiveWords(email)) {
+        if (emailValidatorUseCase.containsOffensiveWords(email)) {
             _processState.update { AuthState.Error("L'email contiene parole non consentite") }
             return
         }
@@ -171,7 +134,7 @@ class AuthViewModel @Inject constructor(
         _processState.update { AuthState.Loading("Accesso Ospite...") }
         auth.signInAnonymously()
             .addOnSuccessListener {
-                _processState.update { AuthState.Authenticated }
+                _processState.update { AuthState.Anonymous }
             }
             .addOnFailureListener { exception ->
                 _processState.update { AuthState.Error(exception.message ?: "Errore accesso Guest") }
@@ -221,7 +184,7 @@ class AuthViewModel @Inject constructor(
         _processState.update { AuthState.Loading("Invio email di ripristino...") }
         auth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
-                _processState.update { AuthState.Error("Email di ripristino inviata con successo") } // Using Error as a simple way to show message for now
+                _processState.update { AuthState.Success("Email di ripristino inviata con successo") }
             }
             .addOnFailureListener { exception ->
                 _processState.update { AuthState.Error(exception.message ?: "Errore invio email") }

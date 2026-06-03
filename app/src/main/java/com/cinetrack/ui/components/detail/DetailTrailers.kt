@@ -205,6 +205,8 @@ fun YouTubePlayer(videoId: String) {
                     javaScriptEnabled = true
                     domStorageEnabled = true
                     mediaPlaybackRequiresUserGesture = false // Cruciale per l'autoplay
+                    allowFileAccess = false
+                    allowContentAccess = false
                 }
                 
                 webViewClient = object : WebViewClient() {
@@ -256,6 +258,9 @@ fun YouTubePlayer(videoId: String) {
                         
                         customView = view
                         customViewCallback = callback
+                        
+                        // Sblocca la rotazione dello schermo (permette orizzontale e verticale)
+                        activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR
                     }
 
                     override fun onHideCustomView() {
@@ -271,6 +276,9 @@ fun YouTubePlayer(videoId: String) {
                         customView = null
                         customViewCallback?.onCustomViewHidden()
                         customViewCallback = null
+                        
+                        // Blocca di nuovo in verticale
+                        activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     }
                 }
                 setBackgroundColor(android.graphics.Color.BLACK)

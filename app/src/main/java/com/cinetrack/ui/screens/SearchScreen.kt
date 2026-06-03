@@ -106,16 +106,16 @@ fun SearchScreen(
     startY: Float? = null,
     initialGenreName: String? = null,
     initialKeywordName: String? = null,
-    isFilterVisible: Boolean = false,
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
-    onToggleFilter: (Boolean, Rect?) -> Unit,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    
+    var isFilterVisible by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(uiState.query)) }
@@ -167,10 +167,13 @@ fun SearchScreen(
             }
         }
     }
+    val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
     androidx.activity.compose.BackHandler(enabled = !isClosing) {
-        if (isFilterVisible) {
-            onToggleFilter(false, null)
+        if (movieActions.isAnyModalOpen) {
+            movieActions.closeAll()
+        } else if (isFilterVisible) {
+            isFilterVisible = false
         } else {
             triggerExit()
         }
@@ -239,7 +242,9 @@ fun SearchScreen(
                     if (initialGenreName == null && initialKeywordName == null) {
                         try {
                             focusRequester.requestFocus()
-                        } catch (e: Exception) { }
+                        } catch (e: IllegalStateException) {
+                            // FocusRequester non ancora agganciato al nodo Compose
+                        }
                     } else {
                         keyboardController?.hide()
                     }
@@ -817,7 +822,7 @@ fun SearchScreen(
                                 Box(modifier = Modifier.fillMaxSize()
                                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                                     .then(if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape) else Modifier))
-                                Box(modifier = Modifier.fillMaxSize().bounceClick { keyboardController?.hide(); focusManager.clearFocus(); onToggleFilter(true, filterBounds) }, contentAlignment = Alignment.Center) {
+                                Box(modifier = Modifier.fillMaxSize().bounceClick { keyboardController?.hide(); focusManager.clearFocus(); isFilterVisible = true }, contentAlignment = Alignment.Center) {
                                     Icon(imageVector = Icons.Rounded.Tune, contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
@@ -1036,10 +1041,7 @@ fun SearchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = dimAlpha))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { onToggleFilter(false, null) }
+                        .pointerInput(Unit) { detectTapGestures(onTap = { isFilterVisible = false }) }
                 )
             }
             
@@ -1050,11 +1052,10 @@ fun SearchScreen(
                 triggerBounds = filterBounds,
                 category = uiState.category,
                 onSortConfigChanged = { viewModel.updateSortConfig(it) },
-                onDismissRequest = { onToggleFilter(false, null) }
+                onDismissRequest = { isFilterVisible = false }
             )
         }
     }
-
 
 
 

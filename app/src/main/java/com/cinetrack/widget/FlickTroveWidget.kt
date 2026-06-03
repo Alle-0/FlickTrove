@@ -1,5 +1,9 @@
 package com.cinetrack.widget
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -79,7 +83,9 @@ class FlickTroveWidget : GlanceAppWidget() {
                             minDistanceDays = daysBetween
                             upcomingMovie = movie
                         }
-                    } catch (e: Exception) { }
+                    } catch (e: java.time.format.DateTimeParseException) {
+                        // Ignora i film con data malformata (es. 'TBA' o formati non validi)
+                    }
                 }
             }
             
@@ -92,7 +98,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                 if (posterPath != null) {
                     try {
                         val request = ImageRequest.Builder(context)
-                            .data("https://image.tmdb.org/t/p/w780$posterPath")
+                            .data(buildTmdbImageUrl(posterPath, ImageType.BACKDROP, ImageQuality.HIGH))
                             .size(600)
                             .allowHardware(false)
                             .build()

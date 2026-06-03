@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.api.Person
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -40,6 +41,7 @@ data class PersonDetailUiState(
 
 @HiltViewModel
 class PersonDetailViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
@@ -186,7 +188,7 @@ class PersonDetailViewModel @Inject constructor(
                     return@launch
                 }
                 
-                repository.cycleMovieStatus(current)
+                cycleMovieStatusUseCase(current)
                 
                 // 3. Re-fetch updated state to determine the correct label
                 val updated = repository.getMovie(movie.id, movie.mediaType)

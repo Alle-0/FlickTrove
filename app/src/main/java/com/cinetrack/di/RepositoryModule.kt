@@ -25,4 +25,10 @@ abstract class RepositoryModule {
     abstract fun bindFeedbackRepository(
         feedbackRepositoryImpl: FeedbackRepositoryImpl
     ): FeedbackRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWidgetNotifier(
+        glanceWidgetNotifier: com.cinetrack.widget.GlanceWidgetNotifier
+    ): com.cinetrack.domain.WidgetNotifier
 }

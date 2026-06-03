@@ -64,12 +64,16 @@ fun DetailComments(
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
         )
 
+        val sortedComments = remember(comments) {
+            comments.sortedByDescending { it.likes }
+        }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 24.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(comments, key = { it.id }, contentType = { "comment" }) { comment ->
+            items(sortedComments, key = { it.id }, contentType = { "comment" }) { comment ->
                 CommentCard(
                     comment = comment, 
                     accentColor = accentColor,

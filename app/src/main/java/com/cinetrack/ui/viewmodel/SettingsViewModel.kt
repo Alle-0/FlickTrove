@@ -91,6 +91,21 @@ class SettingsViewModel @Inject constructor(
         .map { it.showLayoutToggle }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val appTheme: StateFlow<String> = preferenceRepository.userPreferencesFlow
+        .map { it.appTheme }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
+
+    val contentLanguage: StateFlow<String> = preferenceRepository.userPreferencesFlow
+        .map { it.contentLanguage }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "it-IT")
+
+    val imageQuality: StateFlow<com.cinetrack.util.ImageQuality> = settingsRepository.imageQuality
+        .map { com.cinetrack.util.ImageQuality.valueOf(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.cinetrack.util.ImageQuality.HIGH)
+
+    val titleTextSizeMultiplier: StateFlow<Float> = settingsRepository.titleTextSizeMultiplier
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1.0f)
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null) {
@@ -193,6 +208,34 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateImageQuality(quality: com.cinetrack.util.ImageQuality) {
+        viewModelScope.launch {
+            settingsRepository.updateImageQuality(quality.name)
+            val desc = when(quality) {
+                com.cinetrack.util.ImageQuality.LOW -> "Bassa (Risparmio Dati)"
+                com.cinetrack.util.ImageQuality.MEDIUM -> "Media"
+                com.cinetrack.util.ImageQuality.HIGH -> "Alta (HD)"
+            }
+            actionFeedbackManager.emit("Qualità immagini: $desc")
+        }
+    }
+
+    fun updateAppTheme(theme: String) {
+        viewModelScope.launch {
+            preferenceRepository.updateAppTheme(theme)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            actionFeedbackManager.emit("Tema impostato su $theme")
+        }
+    }
+
+    fun updateContentLanguage(language: String) {
+        viewModelScope.launch {
+            preferenceRepository.updateContentLanguage(language)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            actionFeedbackManager.emit("Lingua impostata: $language")
+        }
+    }
+
     @OptIn(coil.annotation.ExperimentalCoilApi::class)
     fun clearImageCache() {
         viewModelScope.launch {
@@ -257,7 +300,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _isBackupLoading.value = true
             try {
-                backupRepository.importData(json)
+                backupRepository.importDataStream(json.byteInputStream())
                 actionFeedbackManager.emit("Dati ripristinati con successo")
             } catch (e: Exception) {
                 actionFeedbackManager.emit("Errore durante il ripristino: file non valido")
@@ -273,9 +316,9 @@ class SettingsViewModel @Inject constructor(
             try {
                 val isJson = fileContent.trimStart().startsWith("[") || fileContent.trimStart().startsWith("{")
                 val count = if (isJson) {
-                    backupRepository.migrateTrakt(fileContent)
+                    backupRepository.migrateTraktStream(fileContent.byteInputStream())
                 } else {
-                    backupRepository.migrateCsv(fileContent)
+                    backupRepository.migrateCsvStream(fileContent.byteInputStream())
                 }
                 actionFeedbackManager.emit("Importati $count elementi con successo")
             } catch (e: Exception) {

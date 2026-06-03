@@ -84,6 +84,7 @@ class ReminderWorker @AssistedInject constructor(
             
             Result.success()
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             e.printStackTrace()
             Result.retry()
         }

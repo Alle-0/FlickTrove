@@ -65,9 +65,9 @@ fun CategoryTabSelector(
     counts: List<Int>? = null,
     selectedIndex: Int,
     onOptionClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tabWidth: androidx.compose.ui.unit.Dp = 120.dp
 ) {
-    val tabWidth = 120.dp
     val tabHeight = 36.dp
     val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
     

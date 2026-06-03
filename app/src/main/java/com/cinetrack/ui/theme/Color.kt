@@ -8,6 +8,12 @@ val DarkSurface = Color(0xFF1A1A2E)
 val DeepBlack = Color(0xFF000000)
 val PremiumBackground = Color(0xFF08080A)
 
+// Light Theme Colors
+val LightGrey = Color(0xFFF5F5FA)
+val LightSurface = Color(0xFFFFFFFF)
+val TextDark = Color(0xFF121212)
+val TextDarkMuted = Color(0xFF666666)
+
 // Neon Accents (The "Cyberpunk" palette)
 val NeonTeal = Color(0xFF2DD4BF)   // Primary
 val NeonPink = Color(0xFFFF4081)   // Secondary

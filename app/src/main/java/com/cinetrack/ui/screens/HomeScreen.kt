@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -153,6 +157,15 @@ fun HomeScreen(
                     )
                 }
             } else {
+                val stableOnPress: (Movie) -> Unit = remember(onMovieClick) { { m -> onMovieClick(m) } }
+                val stableOnAction: (Movie) -> Unit = remember(viewModel) { { m -> viewModel.toggleWatched(m) } }
+                val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(actionsState) {
+                    { m, offset, pos -> actionsState.onLongPress(m, offset, pos) }
+                }
+                val stableOnMessage: (String) -> Unit = remember(viewModel) {
+                    { msg -> viewModel.emitMessage(msg) }
+                }
+
                 LazyVerticalGrid(
                     state = currentGridState,
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -166,57 +179,76 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    itemsIndexed(
-                        items = uiState.movies,
-                        key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
-                        contentType = { _, _ -> "movie_card" }
-                    ) { index, movie ->
-                        val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
-                        val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                            uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                it.toComposeColor()
-                            } ?: emptyList()
+                    val sections = listOf(
+                        "" to uiState.releasedMovies,
+                        "Non ancora usciti" to uiState.unreleasedMovies
+                    ).filter { it.second.isNotEmpty() }
+
+                    sections.forEachIndexed { sectionIndex, (title, items) ->
+                        if (title.isNotEmpty()) {
+                            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                                Text(
+                                    text = title.uppercase(),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(
+                                        top = if (sectionIndex > 0) 24.dp else 4.dp, 
+                                        bottom = 8.dp
+                                    )
+                                )
+                            }
                         }
-                        if (columns == 1) {
-                            com.cinetrack.ui.components.MovieListCard(
-                                movie = movie,
-                                isFavorite = movie.favorite,
-                                isWatched = movie.watched,
-                                isReminder = movie.reminder,
-                                progress = (movie.progress ?: 0.0).toFloat(),
-                                folderColors = folderColors,
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                showBadges = uiState.preferences.showBadges,
-                                hazeState = hazeState,
-                                staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleWatched(movie) },
-                                onLongPress = { m, pressOffset, cardPos ->
-                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                },
-                                onMessage = { viewModel.emitMessage(it) }
-                            )
-                        } else {
-                            MovieCard(
-                                movie = movie,
-                                cardWidth = cardWidth,
-                                isFavorite = movie.favorite,
-                                isWatched = movie.watched,
-                                isReminder = movie.reminder,
-                                progress = (movie.progress ?: 0.0).toFloat(),
-                                folderColors = folderColors,
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                showBadges = uiState.preferences.showBadges,
-                                hazeState = hazeState,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleWatched(movie) },
-                                onLongPress = { m, pressOffset, cardPos ->
-                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                },
-                                onMessage = { viewModel.emitMessage(it) }
-                            )
+
+                        itemsIndexed(
+                            items = items,
+                            key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
+                            contentType = { _, _ -> "movie_card" }
+                        ) { index, movie ->
+                            val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
+                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
+                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
+                                    it.toComposeColor()
+                                } ?: emptyList()
+                            }
+
+                            if (columns == 1) {
+                                com.cinetrack.ui.components.MovieListCard(
+                                    movie = movie,
+                                    isFavorite = movie.favorite,
+                                    isWatched = movie.watched,
+                                    isReminder = movie.reminder,
+                                    progress = (movie.progress ?: 0.0).toFloat(),
+                                    folderColors = folderColors,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    showBadges = uiState.preferences.showBadges,
+                                    hazeState = hazeState,
+                                    staggerIndex = index,
+                                    onPress = stableOnPress,
+                                    onAction = stableOnAction,
+                                    onLongPress = stableOnLongPress,
+                                    onMessage = stableOnMessage
+                                )
+                            } else {
+                                MovieCard(
+                                    movie = movie,
+                                    cardWidth = cardWidth,
+                                    isFavorite = movie.favorite,
+                                    isWatched = movie.watched,
+                                    isReminder = movie.reminder,
+                                    progress = (movie.progress ?: 0.0).toFloat(),
+                                    folderColors = folderColors,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    showBadges = uiState.preferences.showBadges,
+                                    hazeState = hazeState,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    staggerIndex = index,
+                                    onPress = stableOnPress,
+                                    onAction = stableOnAction,
+                                    onLongPress = stableOnLongPress,
+                                    onMessage = stableOnMessage
+                                )
+                            }
                         }
                     }
                 }

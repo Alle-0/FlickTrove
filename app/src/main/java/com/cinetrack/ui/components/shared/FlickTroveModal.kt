@@ -43,7 +43,7 @@ fun FlickTroveModal(
     var isClosing by remember { mutableStateOf(false) }
 
     // Handle back button for dismissal
-    BackHandler(onBack = { isClosing = true })
+    BackHandler(enabled = isVisible && !isClosing, onBack = { isClosing = true })
 
     var animateIn by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animateIn = true }
@@ -87,12 +87,17 @@ fun FlickTroveModal(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            // Pass hazeState always — the card fades in via graphicsLayer alpha above,
-                            // so the blur is visible from the first frame without a jump.
-                            .hazeGlass(state = hazeState, shape = cardShape)
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
+                        // Sibling 1: The blurred glass background card (fills parent exactly)
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(state = hazeState, shape = cardShape)
+                        )
+
+                        // Sibling 2: The crisp content card (completely untouched by blur!)
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -64,6 +68,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.utils.*
@@ -187,7 +192,8 @@ fun StatsScreen(
     viewModel: StatsViewModel,
     paddingValues: PaddingValues,
     onToggleYearPicker: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
-    onPersonClick: (Long) -> Unit = {}
+    onPersonClick: (Long) -> Unit = {},
+    onMovieClick: (Movie) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -196,6 +202,7 @@ fun StatsScreen(
     
     // Local haze state to isolate background blur from foreground content
     val localHazeState = remember { HazeState() }
+    var isSharingStats by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -274,32 +281,80 @@ fun StatsScreen(
                                         )
                                     }
 
-                                    if (currentYearStats != null && (currentYearStats.moviesWatched > 0 || currentYearStats.tvWatched > 0)) {
-                                        WrappedBannerPill(
-                                            stats = currentYearStats,
-                                            year = currentYear,
-                                            graphicsLayer = graphicsLayer,
-                                            onShare = {
-                                                val yearTitle = "$currentYear WRAPPED"
-                                                scope.launch(kotlinx.coroutines.Dispatchers.Main) {
-                                                    try {
-                                                        // Await at least one frame so the graphicsLayer
-                                                        // has been fully drawn before we capture it.
-                                                        withFrameMillis {}
-                                                        val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
-                                                        if (bitmap.width > 0 && bitmap.height > 0) {
-                                                            shareBitmap(context, bitmap, yearTitle)
-                                                        } else {
-                                                            shareStats(context, currentYearStats, yearTitle)
+                                    val isYearRange = uiState.timeRange is TimeRange.Year
+                                    val selectedYear = if (isYearRange) (uiState.timeRange as TimeRange.Year).year else currentYear
+                                    val safeStats = uiState.stats
+                                    val shouldShowWrapped = safeStats != null && (safeStats.moviesWatched > 0 || safeStats.tvWatched > 0)
+
+                                    if (shouldShowWrapped) {
+                                        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                            WrappedBannerPill(
+                                                stats = safeStats,
+                                                year = selectedYear,
+                                                graphicsLayer = graphicsLayer,
+                                                isSharing = isSharingStats,
+                                                onShare = {
+                                                    val yearTitle = "$selectedYear WRAPPED"
+                                                    isSharingStats = true
+                                                    scope.launch(kotlinx.coroutines.Dispatchers.Main) {
+                                                        try {
+                                                            kotlinx.coroutines.delay(150)
+                                                            withFrameMillis {}
+                                                            val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
+                                                            if (bitmap.width > 0 && bitmap.height > 0) {
+                                                                shareBitmap(context, bitmap, yearTitle)
+                                                            } else {
+                                                                shareStats(context, safeStats, yearTitle)
+                                                            }
+                                                        } catch (e: Exception) {
+                                                            e.printStackTrace()
+                                                            shareStats(context, safeStats, yearTitle)
+                                                        } finally {
+                                                            isSharingStats = false
                                                         }
-                                                    } catch (e: Exception) {
-                                                        e.printStackTrace()
-                                                        shareStats(context, currentYearStats, yearTitle)
+                                                    }
+                                                }
+                                            )
+                                        }
+                                        Spacer(Modifier.height(36.dp))
+                                    }
+
+                                    // ── VISTI QUEST'ANNO ────────────────────────────────────
+                                    if (isYearRange && uiState.moviesInSelectedRange.isNotEmpty()) {
+                                        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                            Box(modifier = Modifier.fillMaxWidth().statsCard()) {
+                                                Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                                                    val sectionTitle = "VISTI NEL $selectedYear"
+                                                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                                        StatsSectionHeader(
+                                                            icon = Icons.Rounded.Movie,
+                                                            title = sectionTitle,
+                                                            count = uiState.moviesInSelectedRange.size
+                                                        )
+                                                    }
+                                                    androidx.compose.foundation.lazy.LazyRow(
+                                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                                        contentPadding = PaddingValues(horizontal = 16.dp),
+                                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                                                    ) {
+                                                        items(uiState.moviesInSelectedRange.size) { index ->
+                                                            val movie = uiState.moviesInSelectedRange[index]
+                                                            com.cinetrack.ui.components.MovieCard(
+                                                                movie = movie,
+                                                                cardWidth = 100.dp,
+                                                                isWatched = movie.watched,
+                                                                isFavorite = movie.favorite,
+                                                                isReminder = movie.reminder,
+                                                                progress = (movie.progress ?: 0.0).toFloat(),
+                                                                hazeState = localHazeState,
+                                                                onPress = { onMovieClick(movie) }
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
-                                        )
-                                        Spacer(Modifier.height(24.dp))
+                                        }
+                                        Spacer(Modifier.height(36.dp))
                                     }
 
                                     // ── Hero: Tempo totale ────────────────────────────────────
@@ -459,6 +514,88 @@ fun StatsScreen(
                             }
                             Spacer(Modifier.height(paddingValues.calculateBottomPadding() + 80.dp))
                         }
+                    }
+                }
+            }
+        }
+
+        // Premium loading overlay for sharing
+        val sharingAlpha by animateFloatAsState(
+            targetValue = if (isSharingStats) 1f else 0f,
+            animationSpec = tween(300),
+            label = "sharingAlpha"
+        )
+
+        if (sharingAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(100f),
+                contentAlignment = Alignment.Center
+            ) {
+                // Scrim
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.65f * sharingAlpha))
+                        .pointerInput(Unit) {
+                            detectTapGestures { /* consume clicks */ }
+                        }
+                )
+
+                Card(
+                    modifier = Modifier
+                        .widthIn(max = 400.dp)
+                        .fillMaxWidth(0.85f)
+                        .padding(horizontal = 24.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(
+                                    state = null, // Disabilita haze per risolvere il bug del testo sfocato
+                                    shape = RoundedCornerShape(24.dp),
+                                    containerColor = DarkSurface.copy(alpha = 0.45f),
+                                    alpha = sharingAlpha,
+                                    useOffscreenStrategy = true
+                                )
+                        )
+
+                        // Sibling 2: The crisp content card (defines the parent size, completely untouched by blur!)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .graphicsLayer {
+                                    alpha = sharingAlpha
+                                }
+                                .padding(horizontal = 28.dp, vertical = 32.dp)
+                        ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 3.dp,
+                            modifier = Modifier.size(44.dp)
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(
+                            text = "Generazione Card...",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Stiamo creando la tua immagine da condividere",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
                     }
                 }
             }
@@ -883,7 +1020,7 @@ fun MediaTimeCard(
                                 .background(Color.White.copy(alpha = 0.05f))
                         ) {
                             coil.compose.AsyncImage(
-                                model = "https://image.tmdb.org/t/p/w342$longestPosterPath",
+                                model = buildTmdbImageUrl(longestPosterPath, ImageType.POSTER, LocalImageQuality.current),
                                 contentDescription = null,
                                 contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
@@ -981,7 +1118,7 @@ fun PersonAvatar(
             ) {
                 if (!person.profilePath.isNullOrBlank()) {
                     AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w185${person.profilePath}",
+                        model = buildTmdbImageUrl(person.profilePath, ImageType.PROFILE, LocalImageQuality.current),
                         contentDescription = person.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -1814,6 +1951,7 @@ fun WrappedBannerPill(
     stats: CalculatedStats,
     year: Int,
     graphicsLayer: androidx.compose.ui.graphics.layer.GraphicsLayer,
+    isSharing: Boolean = false,
     onShare: () -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -1826,7 +1964,6 @@ fun WrappedBannerPill(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = if (expanded) 12.dp else 24.dp)
             .drawWithContent {
                 // Draw the content normally on screen
                 drawContent()
@@ -1937,18 +2074,20 @@ fun WrappedBannerPill(
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                if (!isSharing) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
 
@@ -2033,7 +2172,7 @@ fun WrappedBannerPill(
                                 ) {
                                     if (!topActor.profilePath.isNullOrEmpty()) {
                                         AsyncImage(
-                                            model = "https://image.tmdb.org/t/p/w200${topActor.profilePath}",
+                                            model = buildTmdbImageUrl(topActor.profilePath, ImageType.PROFILE, LocalImageQuality.current),
                                             contentDescription = topActor.name,
                                             modifier = Modifier
                                                 .fillMaxSize()
@@ -2139,27 +2278,29 @@ fun WrappedBannerPill(
                         )
                     }
 
-                    Spacer(Modifier.height(20.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = { onShare() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White.copy(alpha = 0.25f),
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
+                    if (!isSharing) {
+                        Spacer(Modifier.height(20.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Rounded.AutoFixHigh, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(10.dp))
-                            Text("CONDIVIDI LA TUA CARD", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                            Button(
+                                onClick = { onShare() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.White.copy(alpha = 0.25f),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Icon(Icons.Rounded.AutoFixHigh, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(10.dp))
+                                Text("CONDIVIDI LA TUA CARD", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                            }
                         }
                     }
                 }

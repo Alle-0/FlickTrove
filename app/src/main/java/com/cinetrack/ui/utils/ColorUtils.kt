@@ -8,19 +8,22 @@ import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.max
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 object ColorUtils {
     /**
      * Extracts the average color from a bitmap by scaling it down to 1x1.
      * Matches the logic in the TS version (Skia 1x1 surface).
      */
-    fun extractAverageColor(bitmap: Bitmap): Color {
-        if (bitmap.width <= 0 || bitmap.height <= 0) return Color.Transparent
+    suspend fun extractAverageColor(bitmap: Bitmap): Color = withContext(Dispatchers.Default) {
+        if (bitmap.width <= 0 || bitmap.height <= 0) return@withContext Color.Transparent
         val smallBitmap = Bitmap.createScaledBitmap(bitmap, 1, 1, true)
         val colorInt = smallBitmap.getPixel(0, 0)
         if (smallBitmap != bitmap) {
             smallBitmap.recycle()
         }
-        return Color(colorInt)
+        Color(colorInt)
     }
 
     /**

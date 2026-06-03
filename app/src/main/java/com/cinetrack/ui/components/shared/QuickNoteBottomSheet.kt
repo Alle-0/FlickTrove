@@ -8,6 +8,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,8 +53,8 @@ fun QuickNoteModal(
     
     val audioHelper = remember { AudioRecorderHelper(context) }
     var hasAudio by remember { mutableStateOf(audioHelper.hasAudioNote(movieId, mediaType)) }
-    val isRecording by audioHelper.isRecording.collectAsState()
-    val isPlaying by audioHelper.isPlaying.collectAsState()
+    val isRecording by audioHelper.isRecording.collectAsStateWithLifecycle()
+    val isPlaying by audioHelper.isPlaying.collectAsStateWithLifecycle()
     var audioDurationMs by remember { mutableStateOf(0L) }
     
     LaunchedEffect(hasAudio) {

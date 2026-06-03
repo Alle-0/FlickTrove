@@ -25,6 +25,7 @@ data class StatsUiState(
     val currentYearStats: CalculatedStats? = null,
     val timeRange: TimeRange = TimeRange.AllTime,
     val availableYears: ImmutableList<Int> = persistentListOf(),
+    val moviesInSelectedRange: ImmutableList<Movie> = persistentListOf(),
     val isLoading: Boolean = true
 )
 
@@ -68,7 +69,9 @@ class StatsViewModel @Inject constructor(
     private val repository: MovieRepository
 ) : ViewModel() {
 
-    private val _timeRange = MutableStateFlow<TimeRange>(TimeRange.AllTime)
+    private val _timeRange = MutableStateFlow<TimeRange>(
+        TimeRange.Year(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR))
+    )
 
     val uiState: StateFlow<StatsUiState> = combine(
         repository.getLocalMoviesFlow(),
@@ -103,6 +106,7 @@ class StatsViewModel @Inject constructor(
             currentYearStats = calculateStats(currentYearMovies, movies),
             timeRange = range,
             availableYears = years.toImmutableList(),
+            moviesInSelectedRange = filteredMovies.toImmutableList(),
             isLoading = false
         )
     }.flowOn(Dispatchers.Default).stateIn(

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +30,7 @@ fun DetailBackdrop(
     modifier: Modifier = Modifier
 ) {
     val path = backdropPath ?: posterPath
-    val imageBaseUrl = "https://image.tmdb.org/t/p/w1280"
+    // imageBaseUrl is no longer needed
 
     Box(
         modifier = modifier
@@ -36,7 +40,7 @@ fun DetailBackdrop(
     ) {
         if (path != null) {
             AsyncImage(
-                model = "$imageBaseUrl/${path.removePrefix("/")}",
+                model = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

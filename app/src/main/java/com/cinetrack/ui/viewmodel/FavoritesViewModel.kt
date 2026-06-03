@@ -7,6 +7,7 @@ import com.cinetrack.data.models.DiscoveryFilters
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.models.UserPreferences
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
@@ -39,6 +40,7 @@ data class FavoritesUiState(
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val movieRepository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
@@ -101,7 +103,7 @@ class FavoritesViewModel @Inject constructor(
                 }
 
                 // 3. Perform the cycle
-                movieRepository.cycleMovieStatus(current)
+                cycleMovieStatusUseCase(current)
                 
                 val updated = movieRepository.getMovie(movie.id, movie.mediaType)
                 val actionLabel = when {
@@ -139,7 +141,7 @@ class FavoritesViewModel @Inject constructor(
                 }
 
                 // 3. Perform the cycle
-                movieRepository.cycleMovieStatus(current)
+                cycleMovieStatusUseCase(current)
                 
                 val updated = movieRepository.getMovie(movie.id, movie.mediaType)
                 val actionLabel = when {

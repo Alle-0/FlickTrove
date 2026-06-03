@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.ExperimentalSerializationApi
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,8 +40,9 @@ class BackupRepository @Inject constructor(
         json.encodeToString(backup)
     }
 
-    suspend fun importData(jsonData: String) = withContext(Dispatchers.IO) {
-        val backup = json.decodeFromString<BackupData>(jsonData)
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun importDataStream(inputStream: InputStream) = withContext(Dispatchers.IO) {
+        val backup = json.decodeFromStream<BackupData>(inputStream)
         
         // Restore Favorites (Smart Merge)
         if (backup.favorites.isNotEmpty()) {
@@ -77,8 +81,9 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun migrateTrakt(jsonData: String): Int = withContext(Dispatchers.IO) {
-        val items = json.decodeFromString<List<TraktExportItem>>(jsonData)
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun migrateTraktStream(inputStream: InputStream): Int = withContext(Dispatchers.IO) {
+        val items = json.decodeFromStream<List<TraktExportItem>>(inputStream)
         var count = 0
         
         val moviesToInsert = items.mapNotNull { item ->
@@ -129,90 +134,99 @@ class BackupRepository @Inject constructor(
         return result
     }
 
-    suspend fun migrateCsv(csvData: String): Int = withContext(Dispatchers.IO) {
-        val lines = csvData.lines().filter { it.isNotBlank() }
-        if (lines.isEmpty()) return@withContext 0
-
-        val headerLine = lines.first()
-        val headers = parseCsvLine(headerLine)
-        
-        val isLetterboxd = headers.contains("Letterboxd URI")
-        val isImdb = headers.contains("Const")
-        
-        if (!isLetterboxd && !isImdb) return@withContext 0
-        
-        val nameIdx = headers.indexOf("Name")
-        val yearIdx = headers.indexOf("Year")
-        val constIdx = headers.indexOf("Const")
-        val titleTypeIdx = headers.indexOf("Title Type")
-        val titleIdx = headers.indexOf("Title")
-
-        val dataLines = lines.drop(1)
-        
-        // Use async to fetch external IDs concurrently in chunks to respect API rate limits
-        val moviesToInsert = mutableListOf<Movie>()
-        
-        // Chunk to avoid hitting API limits simultaneously
-        val chunks = dataLines.chunked(20)
-        for (chunk in chunks) {
-            val deferreds = chunk.mapNotNull { line ->
-                val columns = parseCsvLine(line)
-                if (isLetterboxd) {
-                    if (nameIdx == -1 || columns.size <= nameIdx) return@mapNotNull null
-                    val name = columns[nameIdx]
-                    val year = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
-                    
-                    async {
-                        val tmdbMovie = movieRepository.searchMovieWithYear(name, year)
-                        tmdbMovie?.let {
-                            Movie(
-                                id = it.id,
-                                mediaType = it.mediaType ?: "movie",
-                                title = it.title,
-                                name = it.name,
-                                watched = true,
-                                favorite = false,
-                                watchedAt = java.time.Instant.now().toString(),
-                                syncStatus = "pending",
-                                clientUpdatedAt = System.currentTimeMillis()
-                            )
-                        }
-                    }
-                } else if (isImdb) {
-                    if (constIdx == -1 || columns.size <= constIdx) return@mapNotNull null
-                    val const = columns[constIdx]
-                    val titleType = if (titleTypeIdx != -1 && columns.size > titleTypeIdx) columns[titleTypeIdx] else "movie"
-                    
-                    async {
-                        val tmdbMovie = movieRepository.findByImdbId(const)
-                        tmdbMovie?.let {
-                            val mediaType = if (titleType.contains("tv", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
-                            Movie(
-                                id = it.id,
-                                mediaType = mediaType,
-                                title = it.title,
-                                name = it.name,
-                                watched = true,
-                                favorite = false,
-                                watchedAt = java.time.Instant.now().toString(),
-                                syncStatus = "pending",
-                                clientUpdatedAt = System.currentTimeMillis()
-                            )
-                        }
-                    }
-                } else {
-                    null
-                }
-            }
+    suspend fun migrateCsvStream(inputStream: InputStream): Int = withContext(Dispatchers.IO) {
+        var count = 0
+        inputStream.bufferedReader().useLines { linesSequence ->
+            val lines = linesSequence.filter { it.isNotBlank() }.iterator()
+            if (!lines.hasNext()) return@withContext 0
+            val headerLine = lines.next()
+            val headers = parseCsvLine(headerLine)
             
-            val results = deferreds.awaitAll().filterNotNull()
-            moviesToInsert.addAll(results)
+            val isLetterboxd = headers.contains("Letterboxd URI")
+            val isImdb = headers.contains("Const")
+            
+            if (!isLetterboxd && !isImdb) return@withContext 0
+            
+            val nameIdx = headers.indexOf("Name")
+            val yearIdx = headers.indexOf("Year")
+            val constIdx = headers.indexOf("Const")
+            val titleTypeIdx = headers.indexOf("Title Type")
+            val titleIdx = headers.indexOf("Title")
+
+            val dataLines = lines.asSequence()
+            
+            // Use async to fetch external IDs concurrently in chunks to respect API rate limits
+            val chunks = dataLines.chunked(20)
+            for (chunk in chunks) {
+                val deferreds = chunk.mapNotNull { line ->
+                    val columns = parseCsvLine(line)
+                    if (isLetterboxd) {
+                        if (nameIdx == -1 || columns.size <= nameIdx) return@mapNotNull null
+                        val name = columns[nameIdx]
+                        val year = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
+                        
+                        async {
+                            try {
+                                val tmdbMovie = movieRepository.searchMovieWithYear(name, year)
+                                tmdbMovie?.let {
+                                    Movie(
+                                        id = it.id,
+                                        mediaType = it.mediaType ?: "movie",
+                                        title = it.title,
+                                        name = it.name,
+                                        watched = true,
+                                        favorite = false,
+                                        watchedAt = java.time.Instant.now().toString(),
+                                        syncStatus = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("Migrazione", "Fallito per $name", e)
+                                null
+                            }
+                        }
+                    } else if (isImdb) {
+                        if (constIdx == -1 || columns.size <= constIdx) return@mapNotNull null
+                        val const = columns[constIdx]
+                        val titleType = if (titleTypeIdx != -1 && columns.size > titleTypeIdx) columns[titleTypeIdx] else "movie"
+                        
+                        async {
+                            try {
+                                val tmdbMovie = movieRepository.findByImdbId(const)
+                                tmdbMovie?.let {
+                                    val mediaType = if (titleType.contains("tv", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
+                                    Movie(
+                                        id = it.id,
+                                        mediaType = mediaType,
+                                        title = it.title,
+                                        name = it.name,
+                                        watched = true,
+                                        favorite = false,
+                                        watchedAt = java.time.Instant.now().toString(),
+                                        syncStatus = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("Migrazione", "Fallito per $const", e)
+                                null
+                            }
+                        }
+                    } else {
+                        null
+                    }
+                }
+                
+                val results = deferreds.awaitAll().filterNotNull()
+                if (results.isNotEmpty()) {
+                    favoriteDao.importIgnore(results)
+                    count += results.size
+                }
+                // Delay to prevent hitting API rate limits aggressively
+                kotlinx.coroutines.delay(100)
+            }
         }
-        
-        if (moviesToInsert.isNotEmpty()) {
-            favoriteDao.importIgnore(moviesToInsert)
-        }
-        
-        moviesToInsert.size
+        count
     }
 }

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -61,7 +65,7 @@ fun PersonCard(person: PersonSearchResult, modifier: Modifier = Modifier, width:
         ) {
             if (person.profilePath != null) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w185${person.profilePath}",
+                    model = buildTmdbImageUrl(person.profilePath, ImageType.PROFILE, LocalImageQuality.current),
                     contentDescription = person.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

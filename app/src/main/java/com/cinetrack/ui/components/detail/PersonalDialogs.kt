@@ -51,6 +51,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.utils.AudioRecorderHelper
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RatingPickerBox(
@@ -220,8 +221,8 @@ fun NoteEditorBox(
     val context = LocalContext.current
     val audioHelper = remember { AudioRecorderHelper(context) }
     var hasAudio by remember { mutableStateOf(audioHelper.hasAudioNote(movieId, mediaType)) }
-    val isRecording by audioHelper.isRecording.collectAsState()
-    val isPlaying by audioHelper.isPlaying.collectAsState()
+    val isRecording by audioHelper.isRecording.collectAsStateWithLifecycle()
+    val isPlaying by audioHelper.isPlaying.collectAsStateWithLifecycle()
     
     var audioDurationMs by remember { mutableStateOf(0L) }
     

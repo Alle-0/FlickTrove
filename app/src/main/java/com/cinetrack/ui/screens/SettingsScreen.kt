@@ -120,7 +120,16 @@ fun SettingsScreen(
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
 
+    val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
+    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
+    val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
 
+
+
+
+    var showThemeDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var showImageQualityDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
@@ -143,7 +152,8 @@ fun SettingsScreen(
 
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
-                           showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading
+                           showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
+                           showThemeDialog || showLanguageDialog || showImageQualityDialog
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -394,6 +404,38 @@ fun SettingsScreen(
                                     settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
                                 }
                             )
+                            SettingsItem(
+                                icon = Icons.Rounded.DarkMode,
+                                title = "Tema App",
+                                description = "AMOLED, Sistema, Chiaro, Scuro",
+                                trailing = {
+                                    Text(
+                                        text = appTheme,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    showThemeDialog = true
+                                }
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.Language,
+                                title = "Lingua Contenuti",
+                                description = "Lingua per titoli e trame TMDB",
+                                trailing = {
+                                    Text(
+                                        text = contentLanguage,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    showLanguageDialog = true
+                                }
+                            )
 
                         }
                     }
@@ -552,6 +594,27 @@ fun SettingsScreen(
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                     showCacheConfirm = true 
+                                }
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.HighQuality,
+                                title = "Qualità Immagini",
+                                description = "Gestisci consumo dati (Bassa, Media, Alta)",
+                                trailing = {
+                                    val desc = when(imageQuality) {
+                                        com.cinetrack.util.ImageQuality.LOW -> "Bassa"
+                                        com.cinetrack.util.ImageQuality.MEDIUM -> "Media"
+                                        com.cinetrack.util.ImageQuality.HIGH -> "Alta"
+                                    }
+                                    Text(
+                                        text = desc,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    showImageQualityDialog = true
                                 }
                             )
                         }
@@ -1052,6 +1115,56 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
+
+
+        AnimatedVisibility(
+            visible = showThemeDialog,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.zIndex(100f)
+        ) {
+            ThemeSelectionDialog(
+                current = appTheme,
+                accentColor = currentAccentColor,
+                onDismiss = { showThemeDialog = false },
+                onSelect = { 
+                    settingsViewModel.updateAppTheme(it)
+                    showThemeDialog = false
+                }
+            )
+        }
+        AnimatedVisibility(
+            visible = showLanguageDialog,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.zIndex(100f)
+        ) {
+            LanguageSelectionDialog(
+                current = contentLanguage,
+                accentColor = currentAccentColor,
+                onDismiss = { showLanguageDialog = false },
+                onSelect = { 
+                    settingsViewModel.updateContentLanguage(it)
+                    showLanguageDialog = false
+                }
+            )
+        }
+        AnimatedVisibility(
+            visible = showImageQualityDialog,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.zIndex(100f)
+        ) {
+            ImageQualitySelectionDialog(
+                current = imageQuality,
+                accentColor = currentAccentColor,
+                onDismiss = { showImageQualityDialog = false },
+                onSelect = { 
+                    settingsViewModel.updateImageQuality(it)
+                    showImageQualityDialog = false
+                }
+            )
         }
 
         // Color Selection Dialog

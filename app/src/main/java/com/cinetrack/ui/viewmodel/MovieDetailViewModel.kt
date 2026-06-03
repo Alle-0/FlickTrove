@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.components.detail.*
 import com.cinetrack.ui.theme.FlickTrove_KotlinTheme
 import com.cinetrack.data.api.CrewMember
@@ -21,6 +22,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import android.graphics.drawable.BitmapDrawable
+import androidx.compose.ui.graphics.Color
+import coil.Coil
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import com.cinetrack.ui.utils.ColorUtils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.cinetrack.data.local.entities.FolderEntity
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -31,10 +40,12 @@ import com.cinetrack.ui.navigation.DetailRoute
 
 @HiltViewModel
 class MovieDetailViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val translationManager: TranslationManager,
+    @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -59,6 +70,9 @@ class MovieDetailViewModel @Inject constructor(
 
     private val _showTranslationPrompt = MutableStateFlow<Pair<Long, String>?>(null)
     val showTranslationPrompt: StateFlow<Pair<Long, String>?> = _showTranslationPrompt.asStateFlow()
+
+    private val _extractedColor = MutableStateFlow<Color?>(null)
+    val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
 
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)
@@ -101,92 +115,105 @@ class MovieDetailViewModel @Inject constructor(
             repository.getLocalMoviesFlow(),
             repository.getFoldersFlow()
         ) { meta, localMovies, folders ->
-            val movie = localMovies.find { it.id == movieId && it.mediaType == mediaType }
-            val metadata = meta.metadata
-            val external = meta.external
-            val loadingS = meta.loadingS
-            val seasonD = meta.seasonD
-            val collectionM = meta.collectionM
-            val errorMsg = meta.errorMsg
-            val traktComms = meta.traktComments
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                val movie = localMovies.find { it.id == movieId && it.mediaType == mediaType }
+                val metadata = meta.metadata
+                val external = meta.external
+                val loadingS = meta.loadingS
+                val seasonD = meta.seasonD
+                val collectionM = meta.collectionM
+                val errorMsg = meta.errorMsg
+                val traktComms = meta.traktComments
 
-            when {
-                errorMsg != null && metadata == null -> DetailUiState.Error(errorMsg)
-                metadata == null -> DetailUiState.Loading
-                else -> {
-                    // Update the movie entry with fresh metadata fields
-                    val freshMovie = mapResponseToMovie(metadata, mediaType)
-                    val effectiveMovie = movie?.copy(
-                        genres = freshMovie.genres,
-                        runtime = freshMovie.runtime,
-                        tagline = freshMovie.tagline,
-                        overview = freshMovie.overview,
-                        title = freshMovie.title,
-                        name = freshMovie.name,
-                        posterPath = freshMovie.posterPath,
-                        backdropPath = freshMovie.backdropPath,
-                        voteAverage = freshMovie.voteAverage,
-                        voteCount = freshMovie.voteCount,
-                        numberOfSeasons = freshMovie.numberOfSeasons,
-                        numberOfEpisodes = freshMovie.numberOfEpisodes,
-                        revenue = freshMovie.revenue,
-                        budget = freshMovie.budget,
-                        seasons = freshMovie.seasons
-                    ) ?: freshMovie
+                when {
+                    errorMsg != null && metadata == null -> DetailUiState.Error(errorMsg)
+                    metadata == null -> DetailUiState.Loading
+                    else -> {
+                        // Update the movie entry with fresh metadata fields
+                        val freshMovie = mapResponseToMovie(metadata, mediaType)
+                        val effectiveMovie = movie?.copy(
+                            genres = freshMovie.genres,
+                            runtime = freshMovie.runtime,
+                            tagline = freshMovie.tagline,
+                            overview = freshMovie.overview,
+                            title = freshMovie.title,
+                            name = freshMovie.name,
+                            posterPath = freshMovie.posterPath,
+                            backdropPath = freshMovie.backdropPath,
+                            voteAverage = freshMovie.voteAverage,
+                            voteCount = freshMovie.voteCount,
+                            numberOfSeasons = freshMovie.numberOfSeasons,
+                            numberOfEpisodes = freshMovie.numberOfEpisodes,
+                            revenue = freshMovie.revenue,
+                            budget = freshMovie.budget,
+                            seasons = freshMovie.seasons,
+                            releaseDate = freshMovie.releaseDate,
+                            firstAirDate = freshMovie.firstAirDate,
+                            lastAirDate = freshMovie.lastAirDate,
+                            nextEpisodeAirDate = freshMovie.nextEpisodeAirDate,
+                            nextEpisodeString = freshMovie.nextEpisodeString,
+                            releaseYear = freshMovie.releaseYear,
+                            status = freshMovie.status,
+                            imdbId = freshMovie.imdbId
+                        ) ?: freshMovie
 
-                    val totalEpisodes = metadata.numberOfEpisodes ?: 0
-                    val watchedEpisodesCount = effectiveMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    val progress = if (mediaType == "tv" && totalEpisodes > 0) watchedEpisodesCount.toFloat() / totalEpisodes else 0f
-                
-                    // Helper to hydrate movie with local DB status
-                    fun Movie.hydrate(): Movie {
-                        val local = localMovies.find { it.id == this.id && it.mediaType == this.mediaType }
-                        return if (local != null) {
-                            this.copy(
-                                favorite = local.favorite,
-                                watched = local.watched,
-                                reminder = local.reminder,
-                                progress = local.progress,
-                                watchedEpisodes = local.watchedEpisodes,
-                                watchedAt = local.watchedAt,
-                                personalRating = local.personalRating,
-                                personalNote = local.personalNote
-                            )
-                        } else this
+                        val totalEpisodes = metadata.numberOfEpisodes ?: 0
+                        val watchedEpisodesCount = effectiveMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                        val progress = if (mediaType == "tv" && totalEpisodes > 0) watchedEpisodesCount.toFloat() / totalEpisodes else 0f
+                    
+                        // Pre-calculate map for O(1) lookups
+                        val localMoviesMap = localMovies.associateBy { "${it.mediaType}_${it.id}" }
+
+                        // Helper to hydrate movie with local DB status
+                        fun Movie.hydrate(): Movie {
+                            val local = localMoviesMap["${this.mediaType}_${this.id}"]
+                            return if (local != null) {
+                                this.copy(
+                                    favorite = local.favorite,
+                                    watched = local.watched,
+                                    reminder = local.reminder,
+                                    progress = local.progress,
+                                    watchedEpisodes = local.watchedEpisodes,
+                                    watchedAt = local.watchedAt,
+                                    personalRating = local.personalRating,
+                                    personalNote = local.personalNote
+                                )
+                            } else this
+                        }
+
+                        val finalMovie = effectiveMovie
+
+                        DetailUiState.Success(
+                            movieEntry = finalMovie,
+                            details = metadata,
+                            isFavorite = finalMovie.favorite,
+                            isWatched = finalMovie.watched,
+                            watchState = when {
+                                finalMovie.watched -> WatchState.WATCHED
+                                finalMovie.favorite || finalMovie.reminder -> WatchState.BOOKMARKED
+                                else -> WatchState.NONE
+                            },
+                            watchedProgress = progress,
+                            directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
+                            cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
+                            streamingProviders = (metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
+                            buyRentProviders = ((metadata.watchProviders?.results?.get("IT")?.buy ?: emptyList()) + 
+                                               (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
+                            trailers = (metadata.videos?.results?.let { videos -> 
+                                videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
+                            } ?: emptyList()).toImmutableList(),
+                            recommendations = (metadata.recommendations?.results?.map { 
+                                it.hydrate() 
+                            }?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
+                            collectionMovies = collectionM.map { it.hydrate() }.toImmutableList(),
+                            externalRatings = external,
+                            loadingSeason = loadingS,
+                            seasonDetails = seasonD.toImmutableMap(),
+                            folders = folders.sortedByDescending { it.createdAt }.toImmutableList(),
+                            watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link,
+                            traktComments = traktComms.toImmutableList()
+                        )
                     }
-
-                    val finalMovie = effectiveMovie
-
-                    DetailUiState.Success(
-                        movieEntry = finalMovie,
-                        details = metadata,
-                        isFavorite = finalMovie.favorite,
-                        isWatched = finalMovie.watched,
-                        watchState = when {
-                            finalMovie.watched -> WatchState.WATCHED
-                            finalMovie.favorite || finalMovie.reminder -> WatchState.BOOKMARKED
-                            else -> WatchState.NONE
-                        },
-                        watchedProgress = progress,
-                        directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
-                        cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
-                        streamingProviders = (metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
-                        buyRentProviders = ((metadata.watchProviders?.results?.get("IT")?.buy ?: emptyList()) + 
-                                           (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
-                        trailers = (metadata.videos?.results?.let { videos -> 
-                            videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
-                        } ?: emptyList()).toImmutableList(),
-                        recommendations = (metadata.recommendations?.results?.map { 
-                            it.hydrate() 
-                        }?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
-                        collectionMovies = collectionM.map { it.hydrate() }.toImmutableList(),
-                        externalRatings = external,
-                        loadingSeason = loadingS,
-                        seasonDetails = seasonD.toImmutableMap(),
-                        folders = folders.sortedByDescending { it.createdAt }.toImmutableList(),
-                        watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link,
-                        traktComments = traktComms.toImmutableList()
-                    )
                 }
             }
         }
@@ -202,6 +229,40 @@ class MovieDetailViewModel @Inject constructor(
             val imdbId = response.externalIds?.imdbId
             fetchExternalRatings(imdbId, id)
 
+            // Update local DB if movie already exists (to sync missing release dates etc.)
+            viewModelScope.launch {
+                val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
+                if (localMovie != null) {
+                    val freshMovie = mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                    val updatedMovie = localMovie.copy(
+                        genres = freshMovie.genres ?: localMovie.genres,
+                        runtime = freshMovie.runtime ?: localMovie.runtime,
+                        tagline = freshMovie.tagline ?: localMovie.tagline,
+                        overview = freshMovie.overview ?: localMovie.overview,
+                        title = freshMovie.title ?: localMovie.title,
+                        name = freshMovie.name ?: localMovie.name,
+                        posterPath = freshMovie.posterPath ?: localMovie.posterPath,
+                        backdropPath = freshMovie.backdropPath ?: localMovie.backdropPath,
+                        voteAverage = freshMovie.voteAverage ?: localMovie.voteAverage,
+                        voteCount = freshMovie.voteCount ?: localMovie.voteCount,
+                        numberOfSeasons = freshMovie.numberOfSeasons ?: localMovie.numberOfSeasons,
+                        numberOfEpisodes = freshMovie.numberOfEpisodes ?: localMovie.numberOfEpisodes,
+                        revenue = freshMovie.revenue ?: localMovie.revenue,
+                        budget = freshMovie.budget ?: localMovie.budget,
+                        seasons = freshMovie.seasons ?: localMovie.seasons,
+                        releaseDate = freshMovie.releaseDate ?: localMovie.releaseDate,
+                        firstAirDate = freshMovie.firstAirDate ?: localMovie.firstAirDate,
+                        lastAirDate = freshMovie.lastAirDate ?: localMovie.lastAirDate,
+                        nextEpisodeAirDate = freshMovie.nextEpisodeAirDate ?: localMovie.nextEpisodeAirDate,
+                        nextEpisodeString = freshMovie.nextEpisodeString ?: localMovie.nextEpisodeString,
+                        releaseYear = freshMovie.releaseYear ?: localMovie.releaseYear,
+                        status = freshMovie.status ?: localMovie.status,
+                        imdbId = freshMovie.imdbId ?: localMovie.imdbId
+                    )
+                    repository.saveMovie(updatedMovie)
+                }
+            }
+
             // Fetch Collection if present
             response.belongsToCollection?.id?.let { collectionId ->
                 viewModelScope.launch {
@@ -216,6 +277,7 @@ class MovieDetailViewModel @Inject constructor(
 
             _metadata.value = response
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             _error.value = ErrorMapper.map(e.message)
         } finally {
             val timeTaken = System.currentTimeMillis() - startTime
@@ -227,15 +289,15 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun fetchExternalRatings(imdbId: String?, tmdbId: Long) {
         viewModelScope.launch {
-            coroutineScope {
+            kotlinx.coroutines.supervisorScope {
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
                 val commentsDeferred = async { repository.fetchComments(tmdbId, mediaType == "tv") }
 
-                val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { null }
-                val traktResult = try { traktDeferred.await() } catch (e: Exception) { null }
-                val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { emptyList() }
+                val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
+                val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
+                val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; emptyList() }
 
                 _traktComments.value = commentsResult ?: emptyList()
 
@@ -436,7 +498,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            repository.cycleMovieStatus(state.movieEntry)
+            cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
             val actionLabel = when {
                 updated == null -> "rimosso"
@@ -462,7 +524,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            repository.cycleMovieStatus(state.movieEntry)
+            cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
             val actionLabel = when {
                 updated == null -> "rimosso"
@@ -489,7 +551,7 @@ class MovieDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            repository.cycleMovieStatus(current)
+            cycleMovieStatusUseCase(current)
             val updated = repository.getMovie(movie.id, movie.mediaType)
             val actionLabel = when {
                 updated == null -> "rimosso"
@@ -631,6 +693,30 @@ class MovieDetailViewModel @Inject constructor(
             } else {
                 _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
                 emitMessage("Errore nel download del modello lingua italiana.")
+            }
+        }
+    }
+
+    fun fetchAccentColor(imageUrl: String, movie: Movie) {
+        if (movie.accentColor == null && (movie.posterPath != null || movie.backdropPath != null)) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+                val loader = Coil.imageLoader(context)
+                val request = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .allowHardware(false)
+                    .build()
+                
+                val result = loader.execute(request)
+                if (result is SuccessResult) {
+                    val drawable = result.drawable
+                    if (drawable is BitmapDrawable && drawable.bitmap.width > 0 && drawable.bitmap.height > 0) {
+                        val bitmap = drawable.bitmap
+                        val averageColor = ColorUtils.extractAverageColor(bitmap)
+                        val brightColor = ColorUtils.ensureMinimumLuminance(averageColor, 0.5f)
+                        val finalColor = ColorUtils.saturateColor(brightColor, 2.0f)
+                        _extractedColor.value = finalColor
+                    }
+                }
             }
         }
     }

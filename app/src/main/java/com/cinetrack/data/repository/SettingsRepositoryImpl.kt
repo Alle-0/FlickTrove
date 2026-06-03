@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,6 +29,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
         val LAST_FEEDBACK_TIMESTAMP = longPreferencesKey("last_feedback_timestamp")
+        val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
+        val IMAGE_QUALITY = stringPreferencesKey("image_quality")
     }
 
     override val accentColor: Flow<String> = dataStore.data.map { preferences ->
@@ -64,6 +67,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val lastFeedbackTimestamp: Flow<Long> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.LAST_FEEDBACK_TIMESTAMP] ?: 0L
+    }
+
+    override val titleTextSizeMultiplier: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] ?: 1.0f
+    }
+
+    override val imageQuality: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM"
     }
 
     override suspend fun updateAccentColor(color: String) {
@@ -117,6 +128,18 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateLastFeedbackTimestamp(timestamp: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_FEEDBACK_TIMESTAMP] = timestamp
+        }
+    }
+
+    override suspend fun updateTitleTextSizeMultiplier(multiplier: Float) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] = multiplier
+        }
+    }
+
+    override suspend fun updateImageQuality(quality: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IMAGE_QUALITY] = quality
         }
     }
 }

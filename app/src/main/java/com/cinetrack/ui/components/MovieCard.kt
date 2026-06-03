@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.animation.*
@@ -396,7 +400,7 @@ fun MovieCard(
 ) {
     val cardHeight = cardWidth * 1.5f
     val isTv = movie.mediaType == "tv"
-    val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
+    val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -428,10 +432,20 @@ fun MovieCard(
         val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
 
         if (isScrollItem) {
-            // Snapping immediately to visible state without coroutine animations to prevent scroll jank
-            cardAlpha.snapTo(1f)
-            cardTranslateY.snapTo(0f)
-            cardScale.snapTo(1f)
+            // Lightweight fade+slide for items entering during scroll — no spring, no bounce
+            launch {
+                cardAlpha.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 180, easing = LinearOutSlowInEasing)
+                )
+            }
+            launch {
+                cardTranslateY.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                )
+            }
+            cardScale.snapTo(1f) // no scale animation while scrolling
         } else {
             // Richer entrance for the initial grid (indices 0–11): use a stiffer spring (no bounce)
             val jobAlpha = launch {
@@ -604,18 +618,28 @@ fun MovieCard(
                         movie.genres?.any { it.name?.equals(name, ignoreCase = true) == true } == true
                     }
                     
+                    var genreBadgeAdded = false
                     if (hasGenre("Horror")) {
                         addBadge("HORROR", Color(0xFFE53935))
-                    } else if (hasGenre("Animation") || hasGenre("Anime")) {
-                        addBadge("ANIME", Color(0xFFFF9800))
-                    } else if (hasGenre("Science Fiction") || hasGenre("Sci-Fi")) {
-                        addBadge("SCI-FI", Color(0xFF2962FF))
-                    } else if (hasGenre("Comedy") && (movie.voteAverage ?: 0.0) >= 7.0) {
-                        addBadge("COMEDY", Color(0xFFFFEA00))
-                    } else if (hasGenre("Documentary")) {
-                        addBadge("DOCU", Color(0xFF9E9E9E))
-                    } else if (hasGenre("Family")) {
-                        addBadge("FAMILY", Color(0xFF81D4FA))
+                        genreBadgeAdded = true
+                    }
+                    if (hasGenre("Thriller")) {
+                        addBadge("THRILLER", Color(0xFF651FFF))
+                        genreBadgeAdded = true
+                    }
+                    
+                    if (!genreBadgeAdded) {
+                        if (hasGenre("Animation") || hasGenre("Anime") || hasGenre("Animazione")) {
+                            addBadge("ANIME", Color(0xFFFF9800))
+                        } else if (hasGenre("Science Fiction") || hasGenre("Sci-Fi") || hasGenre("Fantascienza")) {
+                            addBadge("SCI-FI", Color(0xFF2962FF))
+                        } else if ((hasGenre("Comedy") || hasGenre("Commedia")) && (movie.voteAverage ?: 0.0) >= 7.0) {
+                            addBadge("COMEDY", Color(0xFFFFEA00))
+                        } else if (hasGenre("Documentary") || hasGenre("Documentario")) {
+                            addBadge("DOCU", Color(0xFF9E9E9E))
+                        } else if (hasGenre("Family") || hasGenre("Famiglia")) {
+                            addBadge("FAMILY", Color(0xFF81D4FA))
+                        }
                     }
                 }
             }
@@ -649,6 +673,7 @@ fun MovieCard(
                 val displayRating = personalRating ?: movie.personalRating
                 val hasRating = displayRating != null && displayRating > 0.0
                 val isLarge = cardWidth > 150.dp
+                val multiplier = com.cinetrack.LocalTitleTextSizeMultiplier.current
                 
                 Row(
                     modifier = Modifier
@@ -665,10 +690,10 @@ fun MovieCard(
                         Text(
                             text = movie.title ?: movie.name ?: "",
                             color = Color.White.copy(alpha = 0.9f),
-                            fontSize = if (isLarge) 16.sp else 13.sp,
+                            fontSize = ((if (isLarge) 16 else 13) * multiplier).sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
-                            lineHeight = if (isLarge) 19.sp else 16.sp,
+                            lineHeight = ((if (isLarge) 19 else 16) * multiplier).sp,
                             overflow = TextOverflow.Ellipsis,
                             style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                         )
@@ -676,7 +701,7 @@ fun MovieCard(
                             Text(
                                 text = "★ ${String.format("%.1f", displayRating)}",
                                 color = MaterialTheme.colorScheme.primary,
-                                fontSize = if (isLarge) 13.5.sp else 11.5.sp,
+                                fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
                                 fontWeight = FontWeight.Black,
                                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                             )

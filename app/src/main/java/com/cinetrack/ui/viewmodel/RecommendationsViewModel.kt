@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +33,7 @@ data class RecommendationsUiState(
 
 @HiltViewModel
 class RecommendationsViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -44,7 +46,7 @@ class RecommendationsViewModel @Inject constructor(
     private val _recommendedMovies = MutableStateFlow<List<Movie>>(emptyList())
     
     private var currentPage = 1
-    private var currentTopGenres: List<Long> = emptyList()
+    private var currentTopSourceIds: List<Long> = emptyList()
 
 
     val uiState: StateFlow<RecommendationsUiState> = combine(
@@ -149,7 +151,7 @@ class RecommendationsViewModel @Inject constructor(
                 return@launch
             }
 
-            repository.cycleMovieStatus(current)
+            cycleMovieStatusUseCase(current)
             
             val updated = repository.getMovie(movie.id, movie.mediaType)
             val actionLabel = when {
@@ -230,44 +232,23 @@ class RecommendationsViewModel @Inject constructor(
             }
 
             if (page == 1) {
-                val moviesFav = favorites.filter { it.mediaType != "tv" }
-                val tvFav = favorites.filter { it.mediaType == "tv" }
-
-                val genreWeights = mutableMapOf<Long, Double>()
-
-                if (type == "movie") {
-                    moviesFav.forEach { m ->
-                        m.genreIds?.forEach { id ->
-                            genreWeights[id] = (genreWeights[id] ?: 0.0) + (m.personalRating ?: 1.0)
-                        }
-                    }
-                    tvFav.forEach { m ->
-                        m.genreIds?.forEach { id ->
-                            val mapped = mapTVGenreToMovie(id)
-                            genreWeights[mapped] = (genreWeights[mapped] ?: 0.0) + (m.personalRating ?: 1.0)
-                        }
-                    }
+                val matchingFavs = if (type == "movie") {
+                    favorites.filter { it.mediaType != "tv" }
                 } else {
-                    tvFav.forEach { m ->
-                        m.genreIds?.forEach { id ->
-                            genreWeights[id] = (genreWeights[id] ?: 0.0) + (m.personalRating ?: 1.0)
-                        }
-                    }
-                    moviesFav.forEach { m ->
-                        m.genreIds?.forEach { id ->
-                            val mapped = mapMovieGenreToTV(id)
-                            genreWeights[mapped] = (genreWeights[mapped] ?: 0.0) + (m.personalRating ?: 1.0)
-                        }
-                    }
+                    favorites.filter { it.mediaType == "tv" }
                 }
 
-                currentTopGenres = genreWeights.toList()
-                    .sortedByDescending { it.second }
-                    .take(3)
-                    .map { it.first }
+                // Pick the top 3 best movies based on their personal rating (descending), 
+                // falling back to when they were watched or added
+                val topItems = matchingFavs.sortedWith(
+                    compareByDescending<Movie> { it.personalRating ?: 0.0 }
+                        .thenByDescending { it.watchedAt ?: it.clientUpdatedAt.toString() }
+                ).take(3)
+                
+                currentTopSourceIds = topItems.map { it.id }
             }
 
-            if (currentTopGenres.isEmpty()) {
+            if (currentTopSourceIds.isEmpty()) {
                 _recommendedMovies.value = emptyList()
                 _isEndReached.value = true
                 return
@@ -278,11 +259,11 @@ class RecommendationsViewModel @Inject constructor(
             val localCompositeIds = favorites.map { "${it.mediaType}_${it.id}" }.toSet()
             val existingIds = _recommendedMovies.value.map { it.id }.toSet()
 
-            currentTopGenres.forEach { genreId ->
+            currentTopSourceIds.forEach { sourceId ->
                 val data = if (type == "movie") {
-                    repository.getMoviesByGenre(genreId, page = page)
+                    repository.getMovieRecommendations(sourceId, page = page)
                 } else {
-                    repository.getTVShowsByGenre(genreId, page = page)
+                    repository.getTVRecommendations(sourceId, page = page)
                 }
                 results.addAll(
                     data.filter { movie ->

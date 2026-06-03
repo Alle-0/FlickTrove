@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -222,7 +226,7 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
 
 @Composable
 fun ProviderLogo(provider: Provider, accentColor: Color, onClick: () -> Unit) {
-    val logoBaseUrl = "https://image.tmdb.org/t/p/w92"
+    // logoBaseUrl is no longer needed
     val shape = RoundedCornerShape(12.dp)
     
     Box(
@@ -239,7 +243,7 @@ fun ProviderLogo(provider: Provider, accentColor: Color, onClick: () -> Unit) {
             .background(Color.Black.copy(alpha = 0.3f))
     ) {
         AsyncImage(
-            model = "$logoBaseUrl${provider.logoPath}",
+            model = buildTmdbImageUrl(provider.logoPath, ImageType.LOGO, LocalImageQuality.current),
             contentDescription = provider.providerName,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

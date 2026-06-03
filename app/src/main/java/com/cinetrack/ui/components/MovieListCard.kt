@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -62,7 +66,7 @@ fun MovieListCard(
     onMessage: (String) -> Unit = {}
 ) {
     val isTv = movie.mediaType == "tv"
-    val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
+    val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -133,7 +137,7 @@ fun MovieListCard(
                 .fillMaxSize()
                 .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
         ) {
-            val bgUrl = movie.backdropPath?.let { "https://image.tmdb.org/t/p/w780$it" } ?: posterUrl
+            val bgUrl = buildTmdbImageUrl(movie.backdropPath, ImageType.BACKDROP, LocalImageQuality.current) ?: posterUrl
             if (bgUrl != null) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
@@ -261,18 +265,28 @@ fun MovieListCard(
                         movie.genres?.any { it.name?.equals(name, ignoreCase = true) == true } == true
                     }
                     
+                    var genreBadgeAdded = false
                     if (hasGenre("Horror")) {
                         addBadge("HORROR", Color(0xFFE53935))
-                    } else if (hasGenre("Animation") || hasGenre("Anime")) {
-                        addBadge("ANIME", Color(0xFFFF9800))
-                    } else if (hasGenre("Science Fiction")) {
-                        addBadge("SCI-FI", Color(0xFF2962FF))
-                    } else if (hasGenre("Comedy")) {
-                        addBadge("COMEDY", Color(0xFFFFEA00))
-                    } else if (hasGenre("Documentary")) {
-                        addBadge("DOCU", Color(0xFF9E9E9E))
-                    } else if (hasGenre("Family")) {
-                        addBadge("FAMILY", Color(0xFF81D4FA))
+                        genreBadgeAdded = true
+                    }
+                    if (hasGenre("Thriller")) {
+                        addBadge("THRILLER", Color(0xFF651FFF))
+                        genreBadgeAdded = true
+                    }
+                    
+                    if (!genreBadgeAdded) {
+                        if (hasGenre("Animation") || hasGenre("Anime") || hasGenre("Animazione")) {
+                            addBadge("ANIME", Color(0xFFFF9800))
+                        } else if (hasGenre("Science Fiction") || hasGenre("Sci-Fi") || hasGenre("Fantascienza")) {
+                            addBadge("SCI-FI", Color(0xFF2962FF))
+                        } else if (hasGenre("Comedy") || hasGenre("Commedia")) {
+                            addBadge("COMEDY", Color(0xFFFFEA00))
+                        } else if (hasGenre("Documentary") || hasGenre("Documentario")) {
+                            addBadge("DOCU", Color(0xFF9E9E9E))
+                        } else if (hasGenre("Family") || hasGenre("Famiglia")) {
+                            addBadge("FAMILY", Color(0xFF81D4FA))
+                        }
                     }
                 }
             }
@@ -285,9 +299,10 @@ fun MovieListCard(
                     .padding(start = 16.dp, end = 56.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.Bottom
             ) {
+                val multiplier = com.cinetrack.LocalTitleTextSizeMultiplier.current
                 Text(
                     text = movie.title ?: movie.name ?: "",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 17.sp),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = (17 * multiplier).sp),
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -314,7 +329,7 @@ fun MovieListCard(
                     if (hasRating) {
                         Text(
                             text = "★ $vote",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black, fontSize = 13.sp),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black, fontSize = (13 * multiplier).sp),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }

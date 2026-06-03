@@ -21,5 +21,52 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         NotificationHelper.createNotificationChannels(this)
+
+        val workManager = androidx.work.WorkManager.getInstance(this)
+        
+        val networkConstraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val localConstraints = androidx.work.Constraints.Builder()
+            .setRequiresBatteryNotLow(true)
+            .build()
+        
+        val migrationRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderMigrationWorker>(
+            12, java.util.concurrent.TimeUnit.HOURS
+        )
+            .setConstraints(localConstraints)
+            .build()
+        
+        val tvUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TVUpdateWorker>(
+            24, java.util.concurrent.TimeUnit.HOURS
+        )
+            .setConstraints(networkConstraints)
+            .build()
+        
+        val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.workers.ReminderWorker>(
+            12, java.util.concurrent.TimeUnit.HOURS
+        )
+            .setConstraints(localConstraints)
+            .build()
+        
+        workManager.enqueueUniquePeriodicWork(
+            "ReminderMigration",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            migrationRequest
+        )
+        
+        workManager.enqueueUniquePeriodicWork(
+            "TVUpdate",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            tvUpdateRequest
+        )
+
+        workManager.enqueueUniquePeriodicWork(
+            "ReleaseReminder",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            releaseReminderRequest
+        )
     }
 }

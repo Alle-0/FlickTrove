@@ -85,6 +85,8 @@ data class UserPreferences(
     val disabledBadges: Set<String> = emptySet(),
     val vibrationEnabled: Boolean = true,
     val accentColor: String = "Teal",
+    val appTheme: String = "System", // System, Light, Dark, Amoled
+    val contentLanguage: String = "it-IT",
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
     val lastSyncTimestamp: Long = 0L

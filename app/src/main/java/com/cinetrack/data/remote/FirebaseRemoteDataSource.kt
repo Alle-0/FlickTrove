@@ -48,8 +48,8 @@ class FirebaseRemoteDataSource @Inject constructor(
             .await()
     }
 
-    suspend fun fetchAllFavorites(forcedUid: String? = null): List<Movie> {
-        val uid = forcedUid ?: userId
+    suspend fun fetchAllFavorites(): List<Movie> {
+        val uid = userId
         if (uid == null) {
             android.util.Log.w("FirebaseRemoteDataSource", "fetchAllFavorites: No user ID found!")
             return emptyList()
@@ -88,8 +88,8 @@ class FirebaseRemoteDataSource @Inject constructor(
             .await()
     }
 
-    suspend fun fetchAllFolders(forcedUid: String? = null): List<Folder> {
-        val uid = forcedUid ?: userId
+    suspend fun fetchAllFolders(): List<Folder> {
+        val uid = userId
         if (uid == null) return emptyList()
         
         val snapshot = getFoldersCollection(uid).get(Source.SERVER).await()
@@ -117,8 +117,8 @@ class FirebaseRemoteDataSource @Inject constructor(
             .await()
     }
 
-    suspend fun fetchUserPreferences(forcedUid: String? = null): Map<String, Any>? {
-        val uid = forcedUid ?: userId
+    suspend fun fetchUserPreferences(): Map<String, Any>? {
+        val uid = userId
         if (uid == null) return null
         
         return try {

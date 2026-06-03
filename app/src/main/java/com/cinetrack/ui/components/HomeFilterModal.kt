@@ -27,6 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.lerp as geometryLerp
@@ -731,7 +734,7 @@ private fun ProviderItem(
         ) {
             if (logoPath != null) {
                 SubcomposeAsyncImage(
-                    model = ProviderConstants.getLogoUrl(logoPath),
+                    model = buildTmdbImageUrl(logoPath, ImageType.LOGO, LocalImageQuality.current),
                     contentDescription = name,
                     modifier = Modifier
                         .size(40.dp)

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -53,6 +57,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 
+import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
+import androidx.compose.foundation.lazy.rememberLazyListState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EpisodesBottomSheet(
@@ -69,7 +77,19 @@ fun EpisodesBottomSheet(
     val loadingSeason = successState?.loadingSeason ?: false
     
     var selectedSeasonNumber by remember { 
-        mutableStateOf(movie.watchedEpisodes?.keys?.firstOrNull()?.toInt() ?: 1) 
+        mutableStateOf(
+            movie.seasons
+                ?.sortedBy { it.seasonNumber }
+                ?.firstOrNull { season ->
+                    val seasonNum = season.seasonNumber
+                    if (seasonNum == 0) return@firstOrNull false
+                    val watchedCount = movie.watchedEpisodes?.get(seasonNum.toString())?.size ?: 0
+                    val totalCount = season.episodeCount ?: 0
+                    totalCount > 0 && watchedCount < totalCount
+                }?.seasonNumber
+                ?: movie.seasons?.sortedBy { it.seasonNumber }?.firstOrNull { it.seasonNumber > 0 }?.seasonNumber
+                ?: 1
+        ) 
     }
 
     LaunchedEffect(selectedSeasonNumber) {
@@ -214,8 +234,13 @@ fun EpisodesBottomSheet(
                     CircularProgressIndicator(color = Color(0xFF00E676))
                 }
             } else {
+                val listState = rememberLazyListState()
                 LazyColumn(
-                    modifier = Modifier.nestedScroll(nestedScrollConnection),
+                    state = listState,
+                    modifier = Modifier
+                        .nestedScroll(nestedScrollConnection)
+                        .premiumScrollbar(listState)
+                        .verticalFadingEdges(listState, 16.dp, 16.dp),
                     contentPadding = PaddingValues(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -386,7 +411,7 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300${episode.stillPath}",
+                model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
                 contentDescription = null,
                 modifier = Modifier
                     .size(width = 120.dp, height = 68.dp)

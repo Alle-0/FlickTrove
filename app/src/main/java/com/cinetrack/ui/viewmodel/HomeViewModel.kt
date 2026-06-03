@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,8 @@ import kotlinx.collections.immutable.toImmutableMap
 
 data class HomeUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
+    val releasedMovies: ImmutableList<Movie> = persistentListOf(),
+    val unreleasedMovies: ImmutableList<Movie> = persistentListOf(),
     val movieCount: Int = 0,
     val tvCount: Int = 0,
     val isLoading: Boolean = true,
@@ -37,6 +40,8 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
+    private val getHomeUiStateUseCase: com.cinetrack.domain.GetHomeUiStateUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -49,73 +54,14 @@ class HomeViewModel @Inject constructor(
         actionFeedbackManager.emit(message)
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(
-        repository.getLocalMoviesFlow(),
-        repository.getFoldersFlow(),
-        preferenceRepository.userPreferencesFlow,
-        _searchQuery,
-        _activeTab
-    ) { movies, folders, prefs, query, tab ->
-        val toWatchMovies = movies.filter { (it.favorite || it.reminder) && !it.watched }
-        val movieCount = toWatchMovies.count { it.mediaType != "tv" }
-        val tvCount = toWatchMovies.count { it.mediaType == "tv" }
-
-        val filtered = toWatchMovies.filter { movie ->
-            val matchesTab = if (tab == "movie") movie.mediaType != "tv" else movie.mediaType == "tv"
-            val matchesSearch = query.isEmpty() || 
-                (movie.title?.contains(query, ignoreCase = true) ?: false) ||
-                (movie.name?.contains(query, ignoreCase = true) ?: false)
-            
-            val matchesGenre = prefs.homeSort.selectedGenres.isEmpty() || 
-                (movie.genreIds?.any { it in prefs.homeSort.selectedGenres } ?: false)
-            
-            val matchesDecade = prefs.homeSort.selectedDecades.isEmpty() || 
-                prefs.homeSort.selectedDecades.any { decade ->
-                    val prefix = decade.substring(0, 3)
-                    (movie.releaseDate?.startsWith(prefix) ?: false) ||
-                    (movie.firstAirDate?.startsWith(prefix) ?: false)
-                }
-
-            val matchesProvider = prefs.homeSort.selectedProviders.isEmpty() || 
-                (movie.streamingProviderIds?.any { it in prefs.homeSort.selectedProviders } ?: false)
-            
-            matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider
-        }
-
-        val sorted = sortMovies(filtered, prefs.homeSort)
-
-        val today = LocalDate.now().toString()
-        val notificationCount = movies.count { movie ->
-            val isNewEpisode = (movie.newEpisodesFound ?: 0) > 0
-            val isReleasedToday = (movie.newEpisodesFound ?: 0) == 0 && 
-                                    movie.reminder == true && 
-                                    movie.migratedAt == today
-            isNewEpisode || isReleasedToday
-        }
-
-        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
-        folders.forEach { folder ->
-            val color = folder.color ?: "#FFFFFF"
-            folder.itemIds.forEach { itemId ->
-                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
-            }
-        }
-        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
-
-        HomeUiState(
-            movies = sorted.toImmutableList(),
-            movieCount = movieCount,
-            tvCount = tvCount,
-            isLoading = false,
-            searchQuery = query,
-            activeTab = tab,
-            notificationCount = notificationCount,
-            movieFolderColors = immutableMovieFolderColors,
-            folders = folders.toImmutableList(),
-            sortConfig = prefs.homeSort,
-            preferences = prefs
-        )
-    }.flowOn(Dispatchers.Default).stateIn(
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    val uiState: StateFlow<HomeUiState> = getHomeUiStateUseCase(
+        moviesFlow = repository.getLocalMoviesFlow(),
+        foldersFlow = repository.getFoldersFlow(),
+        preferencesFlow = preferenceRepository.userPreferencesFlow,
+        searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
+        activeTabFlow = _activeTab
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = HomeUiState()
@@ -131,83 +77,118 @@ class HomeViewModel @Inject constructor(
 
     fun updateSortConfig(config: SortConfig) {
         viewModelScope.launch {
-            preferenceRepository.updateHomeSort(config)
-            repository.savePreferencesRemote(uiState.value.preferences.copy(homeSort = config))
+            try {
+                preferenceRepository.updateHomeSort(config)
+                repository.savePreferencesRemote(uiState.value.preferences.copy(homeSort = config))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante il salvataggio")
+            }
         }
     }
 
     fun updateGridColumns(columns: Int) {
         viewModelScope.launch {
-            val updated = uiState.value.preferences.copy(gridColumns = columns)
-            preferenceRepository.updateGridColumns(columns)
-            repository.savePreferencesRemote(updated)
+            try {
+                val updated = uiState.value.preferences.copy(gridColumns = columns)
+                preferenceRepository.updateGridColumns(columns)
+                repository.savePreferencesRemote(updated)
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante il salvataggio")
+            }
         }
     }
 
     fun toggleWatched(movie: Movie) {
-        val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            val previousState = current.copy()
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                val previousState = current.copy()
 
-            // IDEMPOTENCY CHECK: If already watched, do nothing
-            if (current.watched) {
-                return@launch
-            }
+                // IDEMPOTENCY CHECK: If already watched, do nothing
+                if (current.watched) {
+                    return@launch
+                }
 
-            repository.cycleMovieStatus(current)
-            
-            val updated = repository.getMovie(movie.id, movie.mediaType)
-            val actionLabel = when {
-                updated == null -> "rimosso"
-                updated.watched -> "segnato come visto"
-                updated.favorite -> "aggiunto a Da Vedere"
-                updated.reminder -> "promemoria impostato"
-                else -> "aggiornato"
-            }
-            
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
-                repository.saveMovie(previousState)
+                cycleMovieStatusUseCase(current)
+                
+                val updated = repository.getMovie(movie.id, movie.mediaType)
+                val actionLabel = when {
+                    updated == null -> "rimosso"
+                    updated.watched -> "segnato come visto"
+                    updated.favorite -> "aggiunto a Da Vedere"
+                    updated.reminder -> "promemoria impostato"
+                    else -> "aggiornato"
+                }
+                
+                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                    try {
+                        repository.saveMovie(previousState)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento")
             }
         }
     }
 
     fun deleteMovie(movie: Movie) {
         viewModelScope.launch {
-            repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
-                repository.saveMovie(movie)
+            try {
+                repository.deleteMovie(movie)
+                actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+                    try {
+                        repository.saveMovie(movie)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante la rimozione")
             }
         }
     }
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating))
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                repository.saveMovie(current.copy(personalRating = rating))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+            }
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalNote = note))
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                repository.saveMovie(current.copy(personalNote = note))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+            }
         }
     }
 
     fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
         viewModelScope.launch {
-            val compositeId = "${movie.mediaType}_${movie.id}"
-            val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                folder.itemIds - compositeId
-            } else {
-                folder.itemIds + compositeId
+            try {
+                val compositeId = "${movie.mediaType}_${movie.id}"
+                val newItemIds = if (folder.itemIds.contains(compositeId)) {
+                    folder.itemIds - compositeId
+                } else {
+                    folder.itemIds + compositeId
+                }
+                repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento cartella")
             }
-            repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
         }
     }
 

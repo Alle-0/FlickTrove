@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -605,7 +609,7 @@ private fun TinderMovieCard(
                 .fillMaxSize()
                 .haze(state = cardHazeState, style = HazeStyles.PremiumDark)
         ) {
-            val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+            val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
             if (posterUrl != null) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)

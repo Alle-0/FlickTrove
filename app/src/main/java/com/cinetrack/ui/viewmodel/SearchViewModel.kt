@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.api.TMDBSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -14,6 +15,7 @@ import com.cinetrack.ui.utils.ErrorMapper
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import javax.inject.Inject
 import javax.inject.Named
+import com.cinetrack.domain.applyFilter
 import com.cinetrack.data.local.entities.FolderEntity
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -43,33 +45,48 @@ data class SearchUiState(
     val sortConfig: SortConfig = SortConfig(),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences(),
-    val togglingIds: ImmutableSet<Long> = persistentSetOf(),
+    val togglingIds: PersistentSet<Long> = persistentSetOf(),
     val errorMessage: String? = null,
     val suggestedFilters: ImmutableList<FilterPill> = persistentListOf()
 )
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
-@HiltViewModel
+@dagger.hilt.android.lifecycle.HiltViewModel
 class SearchViewModel @Inject constructor(
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
+    private val getSearchUiStateUseCase: com.cinetrack.domain.GetSearchUiStateUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val tmdbService: TMDBService,
-    private val actionFeedbackManager: ActionFeedbackManager,
-    @Named("tmdb_api_key") private val apiKey: String
+    private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
-    private val _query = MutableStateFlow("")
-    private val _category = MutableStateFlow("movie")
-    private val _results = MutableStateFlow<List<TMDBSearchResult>>(emptyList())
-    private val _trendingMovies = MutableStateFlow<List<TMDBSearchResult>>(emptyList())
-    private val _trendingTv = MutableStateFlow<List<TMDBSearchResult>>(emptyList())
-    private val _trendingPeople = MutableStateFlow<List<TMDBSearchResult>>(emptyList())
-    private val _isLoading = MutableStateFlow(false)
-    private val _isNextPageLoading = MutableStateFlow(false)
-    private val _isEndReached = MutableStateFlow(false)
-    private val _sortConfig = MutableStateFlow(SortConfig())
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    private val _togglingIds = MutableStateFlow<PersistentSet<Long>>(persistentSetOf())
+    private val _uiState = MutableStateFlow(SearchUiState())
+    val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
+    
+    private var rawResults: List<TMDBSearchResult> = emptyList()
+    private var rawTrendingMovies: List<TMDBSearchResult> = emptyList()
+    private var rawTrendingTv: List<TMDBSearchResult> = emptyList()
+    private var rawTrendingPeople: List<TMDBSearchResult> = emptyList()
+    private var rawDynamicKeywords: List<FilterPill> = emptyList()
+    
+    private var localMovies: List<Movie> = emptyList()
+    private var localFolders: List<FolderEntity> = emptyList()
+    
+    private fun applyStateFilters() {
+        _uiState.update { currentState ->
+            getSearchUiStateUseCase(
+                currentState = currentState,
+                rawResults = rawResults,
+                rawTrendingMovies = rawTrendingMovies,
+                rawTrendingTv = rawTrendingTv,
+                rawTrendingPeople = rawTrendingPeople,
+                rawDynamicKeywords = rawDynamicKeywords,
+                localMovies = localMovies,
+                folders = localFolders
+            )
+        }
+    }
     private var currentPage = 1
     
     fun emitMessage(message: String) {
@@ -78,185 +95,56 @@ class SearchViewModel @Inject constructor(
     
     private var searchJob: Job? = null
     private var keywordSearchJob: Job? = null
-    private val _dynamicKeywords = MutableStateFlow<List<FilterPill>>(emptyList())
     
     init {
         // Initial fetch for trending or discovery
         performSearch()
  
-        // Reactive search handling with debouncing for query
+
         viewModelScope.launch {
-            _query
-                .debounce { q -> if (q.isEmpty()) 0L else 500L }
-                .distinctUntilChanged()
-                .collect { 
-                    performSearch()
-                }
+            repository.getLocalMoviesFlow().collect { movies ->
+                localMovies = movies
+                applyStateFilters()
+            }
+        }
+        viewModelScope.launch {
+            repository.getFoldersFlow().collect { folders ->
+                localFolders = folders
+                applyStateFilters()
+            }
+        }
+        viewModelScope.launch {
+            repository.getRecentSearches().collect { recent ->
+                _uiState.update { it.copy(recentSearches = recent.toImmutableList()) }
+            }
+        }
+        viewModelScope.launch {
+            preferenceRepository.userPreferencesFlow.collect { prefs ->
+                _uiState.update { it.copy(preferences = prefs) }
+            }
         }
 
-        // Category and Sort changes trigger search immediately
         viewModelScope.launch {
-            combine(_category, _sortConfig) { c, s -> c to s }
-                .drop(1) // Skip initial values as performSearch() is called above
+            _uiState.map { it.query }
+                .debounce { q -> if (q.isEmpty()) 0L else 500L }
                 .distinctUntilChanged()
-                .collect {
-                    performSearch()
-                }
+                .collect { performSearch() }
+        }
+        viewModelScope.launch {
+            _uiState.map { it.category to it.sortConfig }
+                .drop(1)
+                .distinctUntilChanged()
+                .collect { performSearch() }
         }
     }
 
-    val uiState: StateFlow<SearchUiState> = combine(
-        combine(
-            combine(_query, _dynamicKeywords) { q, dyn -> q to dyn },
-            _category,
-            _results,
-            _trendingMovies,
-            _trendingTv
-        ) { queryAndDyn, category, results, trendingMovies, trendingTv ->
-            Triple(queryAndDyn, category, Triple(results, trendingMovies, trendingTv))
-        },
-        combine(
-            _trendingPeople,
-            _isLoading,
-            _isNextPageLoading,
-            _isEndReached,
-            _sortConfig
-        ) { trendingPeople, loading, nextLoading, endReached, sort ->
-            Triple(trendingPeople, Triple(loading, nextLoading, endReached), sort)
-        },
-        combine(
-            _errorMessage,
-            repository.getLocalMoviesFlow(),
-            repository.getFoldersFlow(),
-            repository.getRecentSearches(),
-            combine(preferenceRepository.userPreferencesFlow, _togglingIds) { prefs, ids -> prefs to ids }
-        ) { error, local, folders, recent, prefsAndIds ->
-            val (prefs, togglingIds) = prefsAndIds
-            Triple(error, Pair(local, folders), Pair(recent, Pair(prefs, togglingIds)))
-        }
-    ) { groupA, groupB, groupC ->
-        android.util.Log.d("SearchViewModel", "uiState combine triggered: localMovies size = ${groupC.second.first.size}")
-        val (query, dynamicKeywords) = groupA.first
-        val category = groupA.second
-        val (resultsList, trendingMoviesList, trendingTvList) = groupA.third
-        
-        val trendingPeopleList = groupB.first
-        val (isLoading, isNextPageLoading, isEndReached) = groupB.second
-        val sortConfig = groupB.third
-        
-        val errorMessage = groupC.first
-        val (localMovies, folders) = groupC.second
-        val recentSearches = groupC.third.first
-        val (prefs, togglingIds) = groupC.third.second
-        
-        // DEBUG LOG
-        localMovies.find { it.id == 1007757L }?.let {
-            android.util.Log.d("SearchViewModel", "DEBUG: Movie 1007757 in favorites: watched=${it.watched}, favorite=${it.favorite}, reminder=${it.reminder}")
-        }
-        
-        val results = resultsList.distinctBy { "${it.id}_${it.mediaType}" }
-        val trendingMovies = trendingMoviesList.distinctBy { "${it.id}_${it.mediaType}" }
-        val trendingTv = trendingTvList.distinctBy { "${it.id}_${it.mediaType}" }
-        val trendingPeople = trendingPeopleList.distinctBy { "${it.id}_${it.mediaType}" }
-
-        // Apply local filtering based on sortConfig
-        val filteredResults = results.applyFilter(sortConfig).let { list ->
-            val isDesc = sortConfig.sortDirection == "desc"
-            
-            val sortedList = when (sortConfig.sortType) {
-                "vote_average" -> {
-                    if (isDesc) list.sortedByDescending { it.voteAverage }
-                    else list.sortedBy { it.voteAverage }
-                }
-                "personal_rating" -> {
-                    if (isDesc) {
-                        list.sortedByDescending { result ->
-                            localMovies.find { it.id == result.id && it.mediaType == result.mediaType }?.personalRating ?: 0.0
-                        }
-                    } else {
-                        list.sortedBy { result ->
-                            localMovies.find { it.id == result.id && it.mediaType == result.mediaType }?.personalRating ?: 0.0
-                        }
-                    }
-                }
-                "release_date" -> {
-                    if (isDesc) list.sortedByDescending { it.releaseDate }
-                    else list.sortedBy { it.releaseDate }
-                }
-                "title" -> {
-                    if (isDesc) list.sortedByDescending { it.title }
-                    else list.sortedBy { it.title }
-                }
-                else -> list
-            }
-            sortedList
-        }
-
-        val movieFolderColors = mutableMapOf<String, MutableList<String>>()
-        folders.forEach { folder ->
-            val color = folder.color ?: "#FFFFFF"
-            folder.itemIds.forEach { itemId ->
-                movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
-            }
-        }
-        val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
-
-        val lowerQuery = query.lowercase()
-        val availableGenres = if (category == "movie") com.cinetrack.data.GenreConstants.MOVIE_GENRES else com.cinetrack.data.GenreConstants.TV_GENRES
-        
-        val keywordToGenre = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds
-
-        val suggestedFilters = mutableListOf<FilterPill>()
-        if (query.length >= 2) {
-            availableGenres.filter { it.name.lowercase().contains(lowerQuery) }.forEach {
-                suggestedFilters.add(FilterPill(it.id, it.name, isKeyword = false))
-            }
-            keywordToGenre.forEach { (keyword, keywordId) ->
-                if (keyword.contains(lowerQuery)) {
-                    if (!suggestedFilters.any { it.id == keywordId && it.isKeyword }) {
-                        suggestedFilters.add(FilterPill(keywordId, keyword.replaceFirstChar { it.uppercase() }, isKeyword = true))
-                    }
-                }
-            }
-            dynamicKeywords.forEach { dynKw ->
-                if (!suggestedFilters.any { it.id == dynKw.id }) {
-                    suggestedFilters.add(dynKw)
-                }
-            }
-        }
-
-        SearchUiState(
-            query = query,
-            category = category,
-            results = filteredResults.toImmutableList(),
-            trendingMovies = trendingMovies.toImmutableList(),
-            trendingTv = trendingTv.toImmutableList(),
-            trendingPeople = trendingPeople.toImmutableList(),
-            isLoading = isLoading,
-            isNextPageLoading = isNextPageLoading,
-            isEndReached = isEndReached,
-            favorites = localMovies.toImmutableList(),
-            folders = folders.toImmutableList(),
-            recentSearches = recentSearches.toImmutableList(),
-            sortConfig = sortConfig,
-            movieFolderColors = immutableMovieFolderColors,
-            preferences = prefs,
-            togglingIds = togglingIds,
-            errorMessage = errorMessage,
-            suggestedFilters = suggestedFilters.toImmutableList()
-        )
-    }.flowOn(Dispatchers.Default).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SearchUiState()
-    )
 
     fun onQueryChanged(newQuery: String) {
-        if (_query.value == newQuery) return
-        _query.value = newQuery
+        if (_uiState.value.query == newQuery) return
+        _uiState.update { it.copy(query = newQuery) }
         
-        if (newQuery.isNotEmpty() && _sortConfig.value.selectedKeywords.isNotEmpty()) {
-            _sortConfig.value = _sortConfig.value.copy(selectedKeywords = emptyList())
+        if (newQuery.isNotEmpty() && _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) {
+            _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedKeywords = emptyList())) }
         }
         
         keywordSearchJob?.cancel()
@@ -264,28 +152,34 @@ class SearchViewModel @Inject constructor(
             keywordSearchJob = viewModelScope.launch {
                 kotlinx.coroutines.delay(400)
                 try {
-                    val response = tmdbService.searchKeyword(query = newQuery, apiKey = apiKey)
-                    _dynamicKeywords.value = response.getList().take(6).map { 
+                    val response = tmdbService.searchKeyword(query = newQuery)
+                    val pills = response.getList().take(6).map { 
                         FilterPill(it.id, it.name.replaceFirstChar { c -> c.uppercase() }, isKeyword = true) 
                     }
+                    rawDynamicKeywords = pills
+                    applyStateFilters()
                 } catch (e: Exception) {
-                    if (e !is kotlinx.coroutines.CancellationException) _dynamicKeywords.value = emptyList()
+                    if (e !is kotlinx.coroutines.CancellationException) {
+                        rawDynamicKeywords = emptyList()
+                        applyStateFilters()
+                    }
                 }
             }
         } else {
-            _dynamicKeywords.value = emptyList()
+            rawDynamicKeywords = emptyList()
+            applyStateFilters()
         }
     }
 
     fun onCategoryChanged(newCategory: String) {
-        if (_category.value == newCategory) return
-        _category.value = newCategory
+        if (_uiState.value.category == newCategory) return
+        _uiState.update { it.copy(category = newCategory) }
         // Reset selected genres on category change to avoid cross-contamination of movie/tv genre IDs
-        _sortConfig.value = _sortConfig.value.copy(selectedGenres = emptyList())
+        _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedGenres = emptyList())) }
     }
 
     fun updateSortConfig(config: SortConfig) {
-        _sortConfig.value = config
+        _uiState.update { it.copy(sortConfig = config) }
     }
 
     fun retry() {
@@ -294,33 +188,35 @@ class SearchViewModel @Inject constructor(
 
     private fun performSearch() {
         searchJob?.cancel()
-        val query = _query.value
-        val category = _category.value
-        _errorMessage.value = null
+        val query = _uiState.value.query
+        val category = _uiState.value.category
+        _uiState.update { it.copy(errorMessage = null) }
 
         if (query.isEmpty()) {
-            if ((_sortConfig.value.selectedGenres.isNotEmpty() || _sortConfig.value.selectedKeywords.isNotEmpty()) && category != "person") {
+            if ((_uiState.value.sortConfig.selectedGenres.isNotEmpty() || _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) && category != "person") {
                 fetchDiscovery()
             } else {
-                _results.value = emptyList()
+                rawResults = emptyList()
+                applyStateFilters()
                 fetchTrending()
             }
             return
         }
 
-        _results.value = emptyList()
+        rawResults = emptyList()
+        applyStateFilters()
 
         if (query.length <= 2) {
-            _isLoading.value = false
-            _isEndReached.value = false
+            _uiState.update { it.copy(isLoading = false) }
+            _uiState.update { it.copy(isEndReached = false) }
             currentPage = 1
             return
         }
-        _isEndReached.value = false
+        _uiState.update { it.copy(isEndReached = false) }
         currentPage = 1
 
         searchJob = viewModelScope.launch {
-            _isLoading.value = true
+            _uiState.update { it.copy(isLoading = true) }
             try {
                 var page = 1
                 var accumulatedResults = emptyList<TMDBSearchResult>()
@@ -332,24 +228,24 @@ class SearchViewModel @Inject constructor(
 
                     when (category) {
                         "movie" -> {
-                            val response = tmdbService.searchMovie(query, apiKey, page = page)
+                            val response = tmdbService.searchMovie(query, page = page)
                             newBatch = response.results.map { it.toMovieResultInternal() }
                             totalPages = response.totalPages ?: 1
                         }
                         "tv" -> {
-                            val response = tmdbService.searchTV(query, apiKey, page = page)
+                            val response = tmdbService.searchTV(query, page = page)
                             newBatch = response.results.map { it.toTvResultInternal() }
                             totalPages = response.totalPages ?: 1
                         }
                         "person" -> {
-                            val response = tmdbService.searchPeople(query, apiKey, page = page)
+                            val response = tmdbService.searchPeople(query, page = page)
                             newBatch = response.results.map { 
                                 TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                             }
                             totalPages = response.totalPages ?: 1
                         }
                         else -> {
-                            val response = tmdbService.searchMulti(query, apiKey, page = page)
+                            val response = tmdbService.searchMulti(query, page = page)
                             newBatch = response.results
                             totalPages = response.totalPages ?: 1
                         }
@@ -361,7 +257,8 @@ class SearchViewModel @Inject constructor(
                     }
 
                     accumulatedResults = accumulatedResults + newBatch
-                    _results.value = accumulatedResults
+                    rawResults = accumulatedResults
+                    applyStateFilters()
                     currentPage = page
                     
                     if (page >= totalPages) {
@@ -369,14 +266,14 @@ class SearchViewModel @Inject constructor(
                         break
                     }
 
-                    val filteredCount = accumulatedResults.applyFilter(_sortConfig.value).size
-                    if (_sortConfig.value.selectedGenres.isEmpty() || category == "person" || filteredCount >= 40) {
+                    val filteredCount = accumulatedResults.applyFilter(_uiState.value.sortConfig).size
+                    if (_uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person" || filteredCount >= 40) {
                         break
                     }
                     page++
                 }
                 
-                _isEndReached.value = reachedEnd
+                _uiState.update { it.copy(isEndReached = reachedEnd) }
 
                 if (accumulatedResults.isEmpty() && query.length >= 3) {
                     // FALLBACK: If no results found, try a fuzzy match by using a prefix of the longest word
@@ -385,10 +282,10 @@ class SearchViewModel @Inject constructor(
                         var fallbackPage = 1
                         while (fallbackPage <= 2) {
                             val fallbackBatch: List<TMDBSearchResult> = when (category) {
-                                "movie" -> tmdbService.searchMovie(fallbackQuery, apiKey, page = fallbackPage).results.map { it.toMovieResultInternal() }
-                                "tv" -> tmdbService.searchTV(fallbackQuery, apiKey, page = fallbackPage).results.map { it.toTvResultInternal() }
-                                "person" -> tmdbService.searchPeople(fallbackQuery, apiKey, page = fallbackPage).results.map { TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment) }
-                                else -> tmdbService.searchMulti(fallbackQuery, apiKey, page = fallbackPage).results
+                                "movie" -> tmdbService.searchMovie(fallbackQuery, page = fallbackPage).results.map { it.toMovieResultInternal() }
+                                "tv" -> tmdbService.searchTV(fallbackQuery, page = fallbackPage).results.map { it.toTvResultInternal() }
+                                "person" -> tmdbService.searchPeople(fallbackQuery, page = fallbackPage).results.map { TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment) }
+                                else -> tmdbService.searchMulti(fallbackQuery, page = fallbackPage).results
                             }
                             
                             if (fallbackBatch.isEmpty()) break
@@ -401,8 +298,8 @@ class SearchViewModel @Inject constructor(
                             }
                             
                             if (scoredFallback.isNotEmpty()) {
-                                accumulatedResults = (accumulatedResults + scoredFallback).distinctBy { "${it.id}_${it.mediaType}" }
-                                _results.value = accumulatedResults
+                                rawResults = accumulatedResults
+                                applyStateFilters()
                                 break // Found something fuzzy
                             }
                             fallbackPage++
@@ -415,26 +312,27 @@ class SearchViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                _isEndReached.value = true
-                _errorMessage.value = ErrorMapper.map(e.message)
+                _uiState.update { it.copy(isEndReached = true) }
+                _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
             } finally {
-                _isLoading.value = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
     
     private fun fetchDiscovery() {
         searchJob = viewModelScope.launch {
-            _isLoading.value = true
-            _isEndReached.value = false
+            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isEndReached = false) }
             currentPage = 1
             try {
-                val category = _category.value
-                val genreId = _sortConfig.value.selectedGenres.firstOrNull()
-                val keywordId = _sortConfig.value.selectedKeywords.firstOrNull()
+                val category = _uiState.value.category
+                val genreId = _uiState.value.sortConfig.selectedGenres.firstOrNull()
+                val keywordId = _uiState.value.sortConfig.selectedKeywords.firstOrNull()
                 
                 if (category == "person") {
-                    _results.value = emptyList()
+                    rawResults = emptyList()
+                    applyStateFilters()
                     fetchTrending()
                     return@launch
                 }
@@ -451,8 +349,8 @@ class SearchViewModel @Inject constructor(
                                     if (keywordId != null) options["with_keywords"] = keywordId.toString()
                                     
                                     when (category) {
-                                        "movie" -> tmdbService.discoverMovies(apiKey = apiKey, page = pageNum, options = options).results.map { it.toMovieResultInternal() }
-                                        "tv" -> tmdbService.discoverTV(apiKey = apiKey, page = pageNum, options = options).results.map { it.toTvResultInternal() }
+                                        "movie" -> tmdbService.discoverMovies(page = pageNum, options = options).results.map { it.toMovieResultInternal() }
+                                        "tv" -> tmdbService.discoverTV(page = pageNum, options = options).results.map { it.toTvResultInternal() }
                                         else -> emptyList()
                                     }
                                 } catch (e: Exception) {
@@ -471,23 +369,25 @@ class SearchViewModel @Inject constructor(
                     }
                 }
 
-                _results.value = results
+                rawResults = results
+                applyStateFilters()
                 currentPage = 5
-                _isEndReached.value = results.size < 100
+                _uiState.update { it.copy(isEndReached = results.size < 100) }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                _results.value = emptyList()
-                _errorMessage.value = ErrorMapper.map(e.message)
+                rawResults = emptyList()
+                applyStateFilters()
+                _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
             } finally {
-                _isLoading.value = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
     
     private fun fetchTrending() {
         searchJob = viewModelScope.launch {
-            _isLoading.value = true
-            _isEndReached.value = false
+            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isEndReached = false) }
             currentPage = 1
             try {
                 val movies = repository.getTrendingMovies(1).take(6).map { it.toMovieResultInternal() }
@@ -496,28 +396,29 @@ class SearchViewModel @Inject constructor(
                     TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                 }
                 
-                _trendingMovies.value = movies
-                _trendingTv.value = tv
-                _trendingPeople.value = people
-                _results.value = emptyList()
-                _isEndReached.value = true
+                rawTrendingMovies = movies
+                rawTrendingTv = tv
+                rawTrendingPeople = people
+                rawResults = emptyList()
+                applyStateFilters()
+                _uiState.update { it.copy(isEndReached = true) }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 android.util.Log.e("SearchViewModel", "fetchTrending failed!", e)
-                _errorMessage.value = ErrorMapper.map(e.message)
+                _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
             } finally {
-                _isLoading.value = false
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun loadNextPage() {
-        if (_isNextPageLoading.value || _isEndReached.value || _isLoading.value) return
-        val query = _query.value
-        val category = _category.value
+        if (_uiState.value.isNextPageLoading || _uiState.value.isEndReached || _uiState.value.isLoading) return
+        val query = _uiState.value.query
+        val category = _uiState.value.category
 
         viewModelScope.launch {
-            _isNextPageLoading.value = true
+            _uiState.update { it.copy(isNextPageLoading = true) }
             try {
                 var page = currentPage + 1
                 var reachedEnd = false
@@ -527,21 +428,21 @@ class SearchViewModel @Inject constructor(
                     val newBatch: List<TMDBSearchResult>
                     var totalPages = 1
 
-                    if (query.isEmpty() && (_sortConfig.value.selectedGenres.isNotEmpty() || _sortConfig.value.selectedKeywords.isNotEmpty())) {
-                        val genreId = _sortConfig.value.selectedGenres.firstOrNull()
-                        val keywordId = _sortConfig.value.selectedKeywords.firstOrNull()
+                    if (query.isEmpty() && (_uiState.value.sortConfig.selectedGenres.isNotEmpty() || _uiState.value.sortConfig.selectedKeywords.isNotEmpty())) {
+                        val genreId = _uiState.value.sortConfig.selectedGenres.firstOrNull()
+                        val keywordId = _uiState.value.sortConfig.selectedKeywords.firstOrNull()
                         val options = mutableMapOf<String, String>()
                         if (genreId != null) options["with_genres"] = genreId.toString()
                         if (keywordId != null) options["with_keywords"] = keywordId.toString()
 
                         when (category) {
                             "movie" -> {
-                                val response = tmdbService.discoverMovies(apiKey = apiKey, page = page, options = options)
+                                val response = tmdbService.discoverMovies(page = page, options = options)
                                 newBatch = response.results.map { it.toMovieResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
                             "tv" -> {
-                                val response = tmdbService.discoverTV(apiKey = apiKey, page = page, options = options)
+                                val response = tmdbService.discoverTV(page = page, options = options)
                                 newBatch = response.results.map { it.toTvResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
@@ -553,24 +454,24 @@ class SearchViewModel @Inject constructor(
                     } else {
                         when (category) {
                             "movie" -> {
-                                val response = tmdbService.searchMovie(query, apiKey, page = page)
+                                val response = tmdbService.searchMovie(query, page = page)
                                 newBatch = response.results.map { it.toMovieResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
                             "tv" -> {
-                                val response = tmdbService.searchTV(query, apiKey, page = page)
+                                val response = tmdbService.searchTV(query, page = page)
                                 newBatch = response.results.map { it.toTvResultInternal() }
                                 totalPages = response.totalPages ?: 1
                             }
                             "person" -> {
-                                val response = tmdbService.searchPeople(query, apiKey, page = page)
+                                val response = tmdbService.searchPeople(query, page = page)
                                 newBatch = response.results.map { 
                                     TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                                 }
                                 totalPages = response.totalPages ?: 1
                             }
                             else -> {
-                                val response = tmdbService.searchMulti(query, apiKey, page = page)
+                                val response = tmdbService.searchMulti(query, page = page)
                                 newBatch = response.results
                                 totalPages = response.totalPages ?: 1
                             }
@@ -582,13 +483,15 @@ class SearchViewModel @Inject constructor(
                         break
                     }
 
-                    _results.value = (_results.value + newBatch).distinctBy { result ->
+                    rawResults = (rawResults + newBatch).distinctBy { result ->
                         when (result) {
                             is TMDBSearchResult.MovieResult -> "movie_${result.id}"
                             is TMDBSearchResult.TvResult -> "tv_${result.id}"
                             is TMDBSearchResult.PersonResult -> "person_${result.id}"
+                            else -> "other_${result.id}"
                         }
                     }
+                    applyStateFilters()
                     currentPage = page
                     
                     if (page >= totalPages) {
@@ -596,30 +499,30 @@ class SearchViewModel @Inject constructor(
                         break
                     }
 
-                    val filteredFromThisBatch = newBatch.applyFilter(_sortConfig.value)
-                    if (filteredFromThisBatch.isNotEmpty() || _sortConfig.value.selectedGenres.isEmpty() || category == "person") {
+                    val filteredFromThisBatch = newBatch.applyFilter(_uiState.value.sortConfig)
+                    if (filteredFromThisBatch.isNotEmpty() || _uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person") {
                         fetchedEnoughForNextBatch = true
                         break
                     }
                     page++
                 }
                 
-                _isEndReached.value = reachedEnd
+                _uiState.update { it.copy(isEndReached = reachedEnd) }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                _isEndReached.value = true
+                _uiState.update { it.copy(isEndReached = true) }
             } finally {
-                _isNextPageLoading.value = false
+                _uiState.update { it.copy(isNextPageLoading = false) }
             }
         }
     }
 
     fun toggleFavorite(movie: Movie) {
-        if (_togglingIds.value.contains(movie.id)) return
+        if (_uiState.value.togglingIds.contains(movie.id)) return
         
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            _togglingIds.update { it.add(movie.id) }
+            _uiState.update { it.copy(togglingIds = it.togglingIds.add(movie.id)) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = repository.getMovie(movie.id, movie.mediaType)
@@ -633,7 +536,7 @@ class SearchViewModel @Inject constructor(
 
                 // 3. Perform the cycle
                 android.util.Log.d("SearchViewModel", "toggleFavorite: cycling status for $title (ID: ${movie.id})")
-                repository.cycleMovieStatus(current)
+                cycleMovieStatusUseCase(current)
                 
                 // 3. Re-fetch updated state to determine the correct label
                 val updated = repository.getMovie(movie.id, movie.mediaType)
@@ -655,57 +558,85 @@ class SearchViewModel @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("SearchViewModel", "Error toggling favorite for $title", e)
             } finally {
-                _togglingIds.update { it.remove(movie.id) }
+                _uiState.update { it.copy(togglingIds = it.togglingIds.remove(movie.id)) }
             }
         }
     }
 
     fun deleteMovie(movie: Movie) {
         viewModelScope.launch {
-            repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
-                repository.saveMovie(movie)
+            try {
+                repository.deleteMovie(movie)
+                actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+                    try {
+                        repository.saveMovie(movie)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante la rimozione")
             }
         }
     }
 
     fun deleteRecentSearch(query: String) {
         viewModelScope.launch {
-            repository.deleteSearchQuery(query)
+            try {
+                repository.deleteSearchQuery(query)
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error deleting recent search", e)
+            }
         }
     }
 
     fun clearRecentSearches() {
         viewModelScope.launch {
-            repository.clearRecentSearches()
+            try {
+                repository.clearRecentSearches()
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error clearing recent searches", e)
+            }
         }
     }
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating))
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                repository.saveMovie(current.copy(personalRating = rating))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+            }
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalNote = note))
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                repository.saveMovie(current.copy(personalNote = note))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+            }
         }
     }
 
     fun toggleItemInFolder(folder: FolderEntity, movie: Movie) {
         viewModelScope.launch {
-            val compositeId = "${movie.mediaType}_${movie.id}"
-            val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                folder.itemIds - compositeId
-            } else {
-                folder.itemIds + compositeId
+            try {
+                val compositeId = "${movie.mediaType}_${movie.id}"
+                val newItemIds = if (folder.itemIds.contains(compositeId)) {
+                    folder.itemIds - compositeId
+                } else {
+                    folder.itemIds + compositeId
+                }
+                repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit("Errore durante l'aggiornamento cartella")
             }
-            repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
         }
     }
 
@@ -731,66 +662,15 @@ class SearchViewModel @Inject constructor(
         overview = overview
     )
 
-    private fun List<TMDBSearchResult>.applyFilter(config: SortConfig): List<TMDBSearchResult> {
-        return this.filter { result ->
-            if (result is TMDBSearchResult.PersonResult) return@filter true
-
-            // 1. Genre Filter
-            val genreMatch = if (config.selectedGenres.isEmpty()) true else {
-                val genreIds = when (result) {
-                    is TMDBSearchResult.MovieResult -> result.genreIds
-                    is TMDBSearchResult.TvResult -> result.genreIds
-                    else -> emptyList()
-                }
-                config.selectedGenres.any { it.toLong() in genreIds }
-            }
-
-            // 2. Decade Filter
-            val decadeMatch = if (config.selectedDecades.isEmpty()) true else {
-                val date = when (result) {
-                    is TMDBSearchResult.MovieResult -> result.releaseDate
-                    is TMDBSearchResult.TvResult -> result.firstAirDate
-                    else -> null
-                }
-                val year = date?.split("-")?.firstOrNull()?.toIntOrNull()
-                if (year != null) {
-                    config.selectedDecades.any { decadeStr ->
-                        val start = decadeStr.removeSuffix("s").toIntOrNull()
-                        start != null && year in start..(start + 9)
-                    }
-                } else false
-            }
-
-            genreMatch && decadeMatch
-        }
-    }
-
     fun updatePreferences(prefs: com.cinetrack.data.models.UserPreferences) {
         viewModelScope.launch {
-            preferenceRepository.updateAll(prefs)
+            try {
+                preferenceRepository.updateAll(prefs)
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error updating preferences", e)
+            }
         }
     }
 }
-
-private val TMDBSearchResult.voteAverage: Double
-    get() = when (this) {
-        is TMDBSearchResult.MovieResult -> voteAverage ?: 0.0
-        is TMDBSearchResult.TvResult -> voteAverage ?: 0.0
-        else -> 0.0
-    }
-
-private val TMDBSearchResult.releaseDate: String
-    get() = when (this) {
-        is TMDBSearchResult.MovieResult -> releaseDate ?: ""
-        is TMDBSearchResult.TvResult -> firstAirDate ?: ""
-        else -> ""
-    }
-
-private val TMDBSearchResult.title: String
-    get() = when (this) {
-        is TMDBSearchResult.MovieResult -> title ?: ""
-        is TMDBSearchResult.TvResult -> name ?: ""
-        is TMDBSearchResult.PersonResult -> name
-    }
 
 

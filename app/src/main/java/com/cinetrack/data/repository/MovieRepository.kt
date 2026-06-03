@@ -43,8 +43,7 @@ class MovieRepository @Inject constructor(
     @Named("tmdb_api_key") private val apiKey: String,
     @Named("omdb_api_key") private val omdbApiKey: String,
     @Named("trakt_api_key") private val traktApiKey: String,
-    private val updateEpisodesUseCase: UpdateEpisodesUseCase,
-    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
+    private val widgetNotifier: com.cinetrack.domain.WidgetNotifier
 ) {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -58,12 +57,14 @@ class MovieRepository @Inject constructor(
 
     suspend fun getMovie(id: Long, mediaType: String): Movie? = favoriteDao.getById(id, mediaType)
 
+    suspend fun getShowsForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getShowsForUpdate(limit)
+
     suspend fun saveMovie(movie: Movie) {
         // 1. Update Room immediately
         favoriteDao.insert(movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()))
         
         // Notify Widget of changes
-        com.cinetrack.widget.WidgetUpdater.update(context)
+        widgetNotifier.notifyWidgetUpdated()
         
         // 2. Fire-and-forget to Firebase (SDK handles persistence/retry)
         repositoryScope.launch {
@@ -76,86 +77,13 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    suspend fun cycleMovieStatus(movie: Movie) {
-        android.util.Log.d("MovieRepository", "cycleMovieStatus START: id=${movie.id}, title=${movie.title ?: movie.name}, watched=${movie.watched}, fav=${movie.favorite}, rem=${movie.reminder}, released=${movie.isReleased}, mediaType=${movie.mediaType}")
-        
-        val updated = when {
-            // Case 1: State: Watched (Check) -> Idempotent (Stay Watched)
-            movie.watched -> {
-                android.util.Log.d("MovieRepository", "cycleMovieStatus: Branch [Watched -> Stay Watched] (Action ignored)")
-                movie
-            }
-            
-            // Case 2: State: To See (Eye/Bell) -> Next step
-            movie.favorite || movie.reminder -> {
-                if (movie.isReleased) {
-                    android.util.Log.d("MovieRepository", "cycleMovieStatus: Branch [To See -> Watched] (isReleased=true)")
-                    // Released: Move to Watched (Check)
-                    if (movie.mediaType == "tv") {
-                        updateEpisodesUseCase.markAllWatched(movie).copy(
-                            favorite = false,
-                            reminder = false, // Explicitly clear both
-                            clientUpdatedAt = System.currentTimeMillis()
-                        )
-                    } else {
-                        movie.copy(
-                            favorite = false,
-                            reminder = false,
-                            watched = true,
-                            watchedAt = java.time.Instant.now().toString(),
-                            clientUpdatedAt = System.currentTimeMillis()
-                        )
-                    }
-                } else {
-                    android.util.Log.d("MovieRepository", "cycleMovieStatus: Branch [To See -> Untracked] (isReleased=false, toggling OFF reminder)")
-                    // Unreleased: Toggle OFF reminder
-                    movie.copy(
-                        favorite = false,
-                        reminder = false,
-                        watched = false,
-                        clientUpdatedAt = System.currentTimeMillis()
-                    )
-                }
-            }
-            
-            // Case 3: State: Untracked (+) -> Move to To See (Eye/Bell)
-            else -> {
-                if (movie.isReleased) {
-                    android.util.Log.d("MovieRepository", "cycleMovieStatus: Branch [Untracked -> To See (Eye)] (isReleased=true)")
-                    movie.copy(
-                        favorite = true,
-                        reminder = false,
-                        watched = false,
-                        clientUpdatedAt = System.currentTimeMillis()
-                    )
-                } else {
-                    android.util.Log.d("MovieRepository", "cycleMovieStatus: Branch [Untracked -> To See (Bell)] (isReleased=false)")
-                    movie.copy(
-                        favorite = false,
-                        reminder = true,
-                        watched = false,
-                        clientUpdatedAt = System.currentTimeMillis()
-                    )
-                }
-            }
-        }
-        
-        android.util.Log.d("MovieRepository", "cycleMovieStatus: [${updated.title}] isReleased=${updated.isReleased} (date=${updated.releaseDate})")
-        android.util.Log.d("MovieRepository", "cycleMovieStatus END: id=${updated.id}, watched=${updated.watched}, fav=${updated.favorite}, rem=${updated.reminder}")
-        
-        if (updated != movie) {
-            android.util.Log.d("MovieRepository", "cycleMovieStatus: Saving updated movie")
-            saveMovie(updated)
-        } else {
-            android.util.Log.d("MovieRepository", "cycleMovieStatus: No changes to save")
-        }
-    }
+
 
     suspend fun deleteMovie(movie: Movie) {
         favoriteDao.deleteById(movie.id, movie.mediaType)
         
         // Notify Widget of changes
-        com.cinetrack.widget.WidgetUpdater.update(context)
+        widgetNotifier.notifyWidgetUpdated()
         
         repositoryScope.launch {
             firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
@@ -257,7 +185,6 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun syncWithFirebase(
-        forcedUid: String? = null,
         force: Boolean = false,
         onProgress: (suspend (SyncProgress) -> Unit)? = null
     ) = kotlinx.coroutines.withContext(Dispatchers.IO) {
@@ -280,9 +207,9 @@ class MovieRepository @Inject constructor(
 
         try {
             // 1. Pull & Reconcile Favorites
-            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites (ForcedUID: $forcedUid)...")
+            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites...")
             emit("Scarico preferiti...", null)
-            val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites(forcedUid)
+            val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites()
             android.util.Log.d("MovieRepository", "Fetched ${remoteFavorites.size} favorites from Firebase")
             
             emit("Sincronizzo preferiti...", 0.35f)
@@ -334,7 +261,7 @@ class MovieRepository @Inject constructor(
 
             // 2. Pull & Reconcile Folders
             emit("Scarico cartelle...", null)
-            val remoteFolders = firebaseRemoteDataSource.fetchAllFolders(forcedUid)
+            val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
             
             emit("Sincronizzo cartelle...", 0.7f)
             val localFoldersList = folderDao.getAll()
@@ -397,7 +324,7 @@ class MovieRepository @Inject constructor(
 
             // 3. Pull Preferences
             emit("Sincronizzo preferenze...", 0.92f)
-            syncPreferencesWithFirebase(forcedUid)
+            syncPreferencesWithFirebase()
             emit("Sync completata", 1f)
         } catch (e: Exception) {
             android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
@@ -408,13 +335,16 @@ class MovieRepository @Inject constructor(
     suspend fun clearAllData() {
         favoriteDao.clearAll()
         folderDao.clearAll()
+        preferenceRepository.clearAll()
     }
 
-    suspend fun syncPreferencesWithFirebase(forcedUid: String? = null) {
-        val remotePrefs = firebaseRemoteDataSource.fetchUserPreferences(forcedUid) ?: return
+    suspend fun syncPreferencesWithFirebase() {
+        val remotePrefs = firebaseRemoteDataSource.fetchUserPreferences() ?: return
         
         try {
-            val currentPrefs = preferenceRepository.userPreferencesFlow.first()
+            val currentPrefs = preferenceRepository.userPreferencesFlow
+                .catch { emit(com.cinetrack.data.models.UserPreferences()) }
+                .firstOrNull() ?: com.cinetrack.data.models.UserPreferences()
             
             // Helper to parse SortConfig from Firebase Map
             fun parseSortConfig(map: Any?, default: com.cinetrack.data.models.SortConfig): com.cinetrack.data.models.SortConfig {
@@ -503,17 +433,17 @@ class MovieRepository @Inject constructor(
 
     // --- Remote TMDb Operations ---
     suspend fun fetchMovieDetails(id: Long, isTv: Boolean): com.cinetrack.data.api.MovieDetailResponse {
-        return if (isTv) tmdbService.getTVDetails(id, apiKey) else tmdbService.getMovieDetails(id, apiKey)
+        return if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
     }
 
-    suspend fun searchMovies(query: String, page: Int = 1): List<Movie> = tmdbService.searchMovie(query, apiKey, page = page).results
+    suspend fun searchMovies(query: String, page: Int = 1): List<Movie> = tmdbService.searchMovie(query, page = page).results
     suspend fun searchMovieWithYear(query: String, year: String?): Movie? {
-        val results = tmdbService.searchMovie(query, apiKey, year = year).results
+        val results = tmdbService.searchMovie(query, year = year).results
         return results.firstOrNull()
     }
     
     suspend fun findByImdbId(imdbId: String): Movie? {
-        val response = tmdbService.findByExternalId(imdbId, "imdb_id", apiKey)
+        val response = tmdbService.findByExternalId(imdbId, "imdb_id")
         val movieRes = response.movieResults?.firstOrNull()
         if (movieRes != null) {
             return Movie(
@@ -545,22 +475,23 @@ class MovieRepository @Inject constructor(
         return null
     }
     
-    suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, apiKey, page = page).results
-    suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, apiKey, page = page).results
-    suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id, apiKey)
-    suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber, apiKey)
-    suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = tmdbService.getCollectionDetails(id, apiKey)
-    suspend fun searchPeople(query: String, page: Int = 1): List<PersonSearchResult> = tmdbService.searchPeople(query, apiKey, page = page).results
-    suspend fun getMoviesByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getMoviesByGenre(genreId, apiKey, page = page).results
-    suspend fun getTVShowsByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getTVShowsByGenre(genreId, apiKey, page = page).results
-    suspend fun getPopularMovies(page: Int = 1): List<Movie> = tmdbService.getPopularMovies(apiKey, page = page).results
+    suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, page = page).results
+    suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, page = page).results
+    suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id)
+    suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber)
+    suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = tmdbService.getCollectionDetails(id)
+    suspend fun searchPeople(query: String, page: Int = 1): List<PersonSearchResult> = tmdbService.searchPeople(query, page = page).results
+    suspend fun getMoviesByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getMoviesByGenre(genreId, page = page).results
+    suspend fun getTVShowsByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getTVShowsByGenre(genreId, page = page).results
+    suspend fun getPopularMovies(page: Int = 1): List<Movie> = tmdbService.getPopularMovies(page = page).results
+    suspend fun getMovieRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getMovieRecommendations(id, page = page).results
+    suspend fun getTVRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getTVRecommendations(id, page = page).results
 
-    suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(apiKey, page = page, region = "IT").results
+    suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = "IT").results
 
     suspend fun getUpcomingMovies(page: Int = 1): List<Movie> {
         val today = java.time.LocalDate.now()
         return tmdbService.discoverMovies(
-            apiKey = apiKey,
             page = page,
             options = mapOf(
                 "primary_release_date.gte" to today.toString(),
@@ -571,13 +502,12 @@ class MovieRepository @Inject constructor(
         ).results
     }
 
-    suspend fun getPopularTV(page: Int = 1): List<Movie> = tmdbService.getPopularTV(apiKey, page = page).results
-    suspend fun getAiringTodayTV(page: Int = 1): List<Movie> = tmdbService.getAiringTodayTV(apiKey, page = page).results
+    suspend fun getPopularTV(page: Int = 1): List<Movie> = tmdbService.getPopularTV(page = page).results
+    suspend fun getAiringTodayTV(page: Int = 1): List<Movie> = tmdbService.getAiringTodayTV(page = page).results
 
     suspend fun getOnTheAirTV(page: Int = 1): List<Movie> {
         val today = java.time.LocalDate.now()
         return tmdbService.discoverTV(
-            apiKey = apiKey,
             page = page,
             options = mapOf(
                 "first_air_date.gte" to today.toString(),
@@ -587,11 +517,11 @@ class MovieRepository @Inject constructor(
         ).results
     }
 
-    suspend fun getTrendingAll(page: Int = 1): List<Movie> = tmdbService.getTrendingAll(apiKey, page = page).results
-    suspend fun getTrendingMovies(page: Int = 1): List<Movie> = tmdbService.getTrendingMovies(apiKey, page = page).results
-    suspend fun getTrendingTV(page: Int = 1): List<Movie> = tmdbService.getTrendingTV(apiKey, page = page).results
-    suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(apiKey, page = page).results
-    suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(apiKey, page = page).results
+    suspend fun getTrendingAll(page: Int = 1): List<Movie> = tmdbService.getTrendingAll(page = page).results
+    suspend fun getTrendingMovies(page: Int = 1): List<Movie> = tmdbService.getTrendingMovies(page = page).results
+    suspend fun getTrendingTV(page: Int = 1): List<Movie> = tmdbService.getTrendingTV(page = page).results
+    suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(page = page).results
+    suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
 
     suspend fun fetchOmdbRatings(imdbId: String): ExtraRatings {
         return try {
@@ -628,9 +558,9 @@ class MovieRepository @Inject constructor(
     suspend fun fetchComments(tmdbId: Long, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
         return try {
             val response = if (isTv) {
-                tmdbService.getTVReviews(tmdbId, apiKey)
+                tmdbService.getTVReviews(tmdbId)
             } else {
-                tmdbService.getMovieReviews(tmdbId, apiKey)
+                tmdbService.getMovieReviews(tmdbId)
             }
             
             response.results.map { review ->
@@ -643,7 +573,7 @@ class MovieRepository @Inject constructor(
                         name = review.authorDetails?.name?.takeIf { it.isNotBlank() } ?: review.author
                     )
                 )
-            }
+            }.sortedByDescending { it.likes }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             emptyList()

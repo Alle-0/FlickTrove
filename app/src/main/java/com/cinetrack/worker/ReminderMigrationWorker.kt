@@ -66,10 +66,14 @@ class ReminderMigrationWorker(
                         mediaType = movie.mediaType
                     )
                 }
+                
+                // Rate-limit network requests to Firebase and OkHttp pool
+                kotlinx.coroutines.delay(200)
             }
 
             Result.success()
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Result.retry()
         }
     }
