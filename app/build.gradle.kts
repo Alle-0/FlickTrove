@@ -38,24 +38,6 @@ android {
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
         buildConfigField("String", "OMDB_API_KEY", "\"$omdbKey\"")
         buildConfigField("String", "TRAKT_API_KEY", "\"$traktKey\"")
-
-        externalNativeBuild {
-            cmake {
-                cppFlags("")
-                arguments(
-                    "-D_TMDB_API_KEY=\"$tmdbKey\"",
-                    "-D_OMDB_API_KEY=\"$omdbKey\"",
-                    "-D_TRAKT_API_KEY=\"$traktKey\""
-                )
-            }
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
     }
 
     signingConfigs {

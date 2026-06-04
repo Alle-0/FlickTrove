@@ -220,6 +220,19 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateTitleTextSizeMultiplier(multiplier: Float) {
+        viewModelScope.launch {
+            settingsRepository.updateTitleTextSizeMultiplier(multiplier)
+            val desc = when(multiplier) {
+                0.8f -> "Piccolo"
+                1.0f -> "Predefinito"
+                1.2f -> "Grande"
+                else -> "Personalizzato"
+            }
+            actionFeedbackManager.emit("Dimensione testo: $desc")
+        }
+    }
+
     fun updateAppTheme(theme: String) {
         viewModelScope.launch {
             preferenceRepository.updateAppTheme(theme)

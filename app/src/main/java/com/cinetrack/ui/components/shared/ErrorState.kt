@@ -1,8 +1,10 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +26,7 @@ fun ErrorState(message: String, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Rounded.Warning,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_error),
             contentDescription = null,
             tint = Color(0xFFEF4444),
             modifier = Modifier.size(64.dp)

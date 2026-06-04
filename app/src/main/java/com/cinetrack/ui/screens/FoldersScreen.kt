@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
@@ -93,7 +97,7 @@ fun FoldersScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
-                            imageVector = Icons.Rounded.FolderOpen,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
                             contentDescription = null,
                             tint = Color.White.copy(alpha = 0.2f),
                             modifier = Modifier.size(80.dp)
@@ -114,7 +118,7 @@ fun FoldersScreen(
                                 .bounceClick { isCreateDialogOpen = true }
                                 .padding(horizontal = 24.dp, vertical = 12.dp)
                         ) {
-                            Icon(Icons.Rounded.Add, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "CREA LA PRIMA", 
@@ -237,7 +241,7 @@ fun FoldersScreen(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
                         Text("Rinomina Cartella", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
@@ -252,7 +256,7 @@ fun FoldersScreen(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
                         Text("Cambia Colore", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
@@ -266,7 +270,7 @@ fun FoldersScreen(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
                         Text("Elimina Cartella", color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
@@ -313,7 +317,7 @@ fun FolderCard(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Rounded.Folder,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                 contentDescription = null,
                 tint = folderColor,
                 modifier = Modifier.size(18.dp)
@@ -343,7 +347,7 @@ fun FolderCard(
         Spacer(Modifier.width(8.dp))
         
         Icon(
-            imageVector = Icons.Rounded.ChevronRight,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.2f),
             modifier = Modifier.size(20.dp)
@@ -372,7 +376,7 @@ fun NewFolderCard(onClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                Icons.Rounded.Add,
+                ImageVector.vectorResource(id = R.drawable.ic_plus),
                 null,
                 tint = Color.White,
                 modifier = Modifier.size(18.dp)
@@ -457,7 +461,7 @@ fun FolderCreateDialog(
                                 .bounceClick { onDismiss() },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Rounded.Close, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(Modifier.height(24.dp))

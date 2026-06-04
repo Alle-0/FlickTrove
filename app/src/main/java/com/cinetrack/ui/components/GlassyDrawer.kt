@@ -31,6 +31,8 @@ import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 @Composable
 fun GlassyDrawer(
@@ -111,21 +113,21 @@ fun GlassyDrawer(
             ) {
                 SectionHeader("Film")
                 DrawerItem(
-                    icon = Icons.AutoMirrored.Rounded.TrendingUp,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
                     label = "Film popolari",
                     isSelected = selectedRoute == "popular_movies",
                     onClick = { onNavigate("popular_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.Movie,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                     label = "Adesso al cinema",
                     isSelected = selectedRoute == "now_playing_movies",
                     onClick = { onNavigate("now_playing_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.Event,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     label = "Film in uscita",
                     isSelected = selectedRoute == "upcoming_movies",
                     onClick = { onNavigate("upcoming_movies") },
@@ -134,21 +136,21 @@ fun GlassyDrawer(
                 
                 SectionHeader("Serie TV")
                 DrawerItem(
-                    icon = Icons.Rounded.Tv,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                     label = "Serie popolari",
                     isSelected = selectedRoute == "popular_tv",
                     onClick = { onNavigate("popular_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.Monitor,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                     label = "Serie ora in streaming",
                     isSelected = selectedRoute == "airing_today_tv",
                     onClick = { onNavigate("airing_today_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.Event,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     label = "Serie in arrivo",
                     isSelected = selectedRoute == "on_the_air_tv",
                     onClick = { onNavigate("on_the_air_tv") },
@@ -157,21 +159,21 @@ fun GlassyDrawer(
 
                 SectionHeader("Personalizzato")
                 DrawerItem(
-                    icon = Icons.Rounded.AutoAwesome,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                     label = "Consigliati per te",
                     isSelected = selectedRoute == "recommendations",
                     onClick = { onNavigate("recommendations") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.AutoAwesome,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
                     label = "Sorprendimi",
                     isSelected = selectedRoute == "surprise_me",
                     onClick = { onNavigate("surprise_me") },
                     accentColor = accentColor
                 )
                 DrawerItem(
-                    icon = Icons.Rounded.FolderSpecial,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
                     label = "Le mie cartelle",
                     isSelected = selectedRoute == "my_folders",
                     onClick = { onNavigate("my_folders") },
@@ -180,7 +182,7 @@ fun GlassyDrawer(
 
                 SectionHeader("Generale")
                 DrawerItem(
-                    icon = Icons.Rounded.Settings,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
                     label = "Impostazioni",
                     isSelected = selectedRoute == "settings",
                     onClick = { onNavigate("settings") },

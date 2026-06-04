@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -23,8 +27,6 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.premiumScrollbar
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import com.cinetrack.ui.utils.bounceClick
 
 enum class FolderEditMode { NAME, COLOR }
@@ -97,7 +99,7 @@ fun FolderEditDialog(
                                 .bounceClick { onDismiss() },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Rounded.Close, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(Modifier.height(24.dp))

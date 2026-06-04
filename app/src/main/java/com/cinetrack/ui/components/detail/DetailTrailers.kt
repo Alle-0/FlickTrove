@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -14,9 +18,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -91,7 +92,7 @@ fun DetailTrailers(
                             color = accentColor
                         )
                         Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = accentColor,
                             modifier = Modifier.size(12.dp)
@@ -167,7 +168,7 @@ fun TrailerThumbnail(videoId: String, accentColor: Color) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)

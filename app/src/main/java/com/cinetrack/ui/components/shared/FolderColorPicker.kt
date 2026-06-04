@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import android.graphics.Color.HSVToColor
 import android.graphics.Color.colorToHSV
 import androidx.compose.animation.AnimatedVisibility
@@ -16,8 +20,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -111,7 +113,7 @@ fun FolderColorPicker(
             ) {
                 if (!isCustomMode) {
                     Icon(
-                        imageVector = Icons.Rounded.Add,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                         contentDescription = "Custom Color",
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -21,11 +25,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -141,20 +140,12 @@ fun CategoryPill(
                 if (onGridColumnsChange != null) {
                     IconButton(
                         onClick = {
-                            val next = when (gridColumns) {
-                                3 -> 2
-                                2 -> 1
-                                else -> 3
-                            }
+                            val next = nextGridColumns(gridColumns)
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onGridColumnsChange(next)
                         }
                     ) {
-                        val icon = when (gridColumns) {
-                            3 -> Icons.Rounded.Menu
-                            2 -> Icons.AutoMirrored.Rounded.List
-                            else -> Icons.Rounded.Favorite
-                        }
+                        val icon = layoutToggleIcon(gridColumns)
                         Icon(icon, null, tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                 }
@@ -168,7 +159,7 @@ fun CategoryPill(
                     borderWidth = if (hasActiveFilters) 1.5.dp else 1.2.dp
                 ) {
                     Icon(
-                        Icons.Rounded.Tune,
+                        ImageVector.vectorResource(id = R.drawable.ic_filtri),
                         null,
                         tint = if (hasActiveFilters) accentColor else Color.White,
                         modifier = Modifier.size(18.dp)

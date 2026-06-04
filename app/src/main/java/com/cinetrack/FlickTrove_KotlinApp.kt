@@ -33,12 +33,6 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             .setRequiresBatteryNotLow(true)
             .build()
         
-        val migrationRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderMigrationWorker>(
-            12, java.util.concurrent.TimeUnit.HOURS
-        )
-            .setConstraints(localConstraints)
-            .build()
-        
         val tvUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TVUpdateWorker>(
             24, java.util.concurrent.TimeUnit.HOURS
         )
@@ -51,11 +45,7 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             .setConstraints(localConstraints)
             .build()
         
-        workManager.enqueueUniquePeriodicWork(
-            "ReminderMigration",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-            migrationRequest
-        )
+        workManager.cancelUniqueWork("ReminderMigration")
         
         workManager.enqueueUniquePeriodicWork(
             "TVUpdate",

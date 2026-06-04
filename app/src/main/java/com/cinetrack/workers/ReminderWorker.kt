@@ -31,7 +31,8 @@ class ReminderWorker @AssistedInject constructor(
                 if (item.watched) continue
                 
                 if (item.mediaType == "movie") {
-                    if (item.releaseDate == today) {
+                    val rDate = item.releaseDate
+                    if (!rDate.isNullOrEmpty() && rDate <= today) {
                         NotificationHelper.showReleaseNotification(
                             context = context,
                             movieTitle = item.displayName,

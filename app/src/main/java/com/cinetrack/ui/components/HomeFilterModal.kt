@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -291,7 +295,7 @@ fun HomeFilterModal(
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Rounded.RestartAlt,
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                                             contentDescription = "Reset filtri",
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(14.dp)
@@ -316,10 +320,10 @@ fun HomeFilterModal(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Close,
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                         contentDescription = "Chiudi",
                                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }
@@ -374,14 +378,14 @@ fun HomeFilterModal(
                                         DirectionChip(
                                             label = "Decrescente",
                                             isSelected = localSortConfig.sortDirection == "desc",
-                                            icon = Icons.Rounded.KeyboardArrowDown,
+                                            icon = ImageVector.vectorResource(id = R.drawable.ic_skip),
                                             modifier = Modifier.weight(1f),
                                             onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
                                         )
                                         DirectionChip(
                                             label = "Crescente",
                                             isSelected = localSortConfig.sortDirection == "asc",
-                                            icon = Icons.Rounded.KeyboardArrowUp,
+                                            icon = ImageVector.vectorResource(id = R.drawable.ic_skip),
                                             modifier = Modifier.weight(1f),
                                             onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
                                         )
@@ -463,7 +467,7 @@ fun HomeFilterModal(
                                         ) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
-                                                    imageVector = Icons.Rounded.Add,
+                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                                                     contentDescription = null,
                                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                                     modifier = Modifier.size(14.dp)
@@ -644,7 +648,7 @@ private fun ExpandableSection(
                     }
                 }
                 Icon(
-                    imageVector = Icons.Rounded.KeyboardArrowDown,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     modifier = Modifier
@@ -812,7 +816,7 @@ private fun SortOptionItem(
 
         if (isSelected) {
             Icon(
-                imageVector = Icons.Rounded.Check,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp)

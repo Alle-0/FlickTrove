@@ -1,5 +1,8 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -311,7 +314,7 @@ fun MovieActionsPopup(
                         Spacer(modifier = Modifier.height(4.dp))
                         MovieMenuItem(
                             text = "Voto rapido",
-                            icon = CustomIcons.PremiumStar,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                             iconColor = HazeStyles.AccentYellow,
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
@@ -320,7 +323,7 @@ fun MovieActionsPopup(
                         )
                         MovieMenuItem(
                             text = "Nota rapida",
-                            icon = CustomIcons.PremiumEditNote,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                             iconColor = Color(0xFF60A5FA),
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 80)) { it / 2 } + fadeIn(tween(300, delayMillis = 80))
@@ -329,7 +332,7 @@ fun MovieActionsPopup(
                         )
                         MovieMenuItem(
                             text = "Cartelle",
-                            icon = CustomIcons.PremiumFolder,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                             iconColor = Color(0xFF34D399),
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 120)) { it / 2 } + fadeIn(tween(300, delayMillis = 120))
@@ -338,7 +341,7 @@ fun MovieActionsPopup(
                         )
                         MovieMenuItem(
                             text = "Condividi",
-                            icon = CustomIcons.PremiumShare,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             iconColor = Color(0xFF818CF8),
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 160)) { it / 2 } + fadeIn(tween(300, delayMillis = 160))
@@ -358,7 +361,7 @@ fun MovieActionsPopup(
                         
                         MovieMenuItem(
                             text = "Elimina",
-                            icon = CustomIcons.PremiumDelete,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                             iconColor = Color(0xFFE57373),
                             isDestructive = true,
                             modifier = Modifier.animateEnterExit(
@@ -529,7 +532,7 @@ fun MovieCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (isTv) Icons.Rounded.Tv else Icons.Rounded.Movie,
+                            imageVector = if (isTv) ImageVector.vectorResource(id = R.drawable.ic_tv) else ImageVector.vectorResource(id = R.drawable.ic_ciack),
                             contentDescription = null,
                             tint = Color.White.copy(alpha = 0.2f),
                             modifier = Modifier.size(40.dp)
@@ -698,13 +701,24 @@ fun MovieCard(
                             style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                         )
                         if (hasRating) {
-                            Text(
-                                text = "★ ${String.format("%.1f", displayRating)}",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
-                                fontWeight = FontWeight.Black,
-                                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
+                                )
+                                Text(
+                                    text = String.format("%.1f", displayRating),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
+                                    fontWeight = FontWeight.Black,
+                                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                                )
+                            }
                         }
                     }
 
@@ -794,23 +808,30 @@ fun MovieCard(
                                 bellHasInitialized = true
                             }
                             
+                            val isTickOrPlus = isWatched || (isReleased && !isOcchio)
+                            val iconSizeModifier = Modifier.size(
+                                if (isLarge) {
+                                    if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 18.dp
+                                } else {
+                                    if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 14.dp
+                                }
+                            )
+                            
                             Icon(
                                 imageVector = when {
-                                    isWatched -> CustomIcons.PremiumCheck
-                                    !isReleased -> if (isReminder) CustomIcons.PremiumBellFilled else Icons.Rounded.NotificationsNone
-                                    isOcchio -> Icons.Rounded.Visibility
-                                    else -> CustomIcons.PremiumAdd
+                                    isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
+                                    !isReleased -> if (isReminder) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
+                                    isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
+                                    else -> ImageVector.vectorResource(id = R.drawable.ic_plus_card)
                                 },
                                 contentDescription = "Action",
                                 tint = actionTint,
-                                modifier = Modifier
-                                    .size(if (isLarge) (if (isBellOutlined) 20.dp else 18.dp) else (if (isBellOutlined) 15.5.dp else 14.dp))
-                                    .graphicsLayer {
-                                        if (!isReleased && isReminder) {
-                                            rotationZ = bellRotation.value
-                                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
-                                        }
+                                modifier = iconSizeModifier.graphicsLayer {
+                                    if (!isReleased && isReminder) {
+                                        rotationZ = bellRotation.value
+                                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
                                     }
+                                }
                             )
                         }
                     }

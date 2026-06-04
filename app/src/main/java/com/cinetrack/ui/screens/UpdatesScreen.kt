@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -534,9 +536,10 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
             }
 
             Icon(
-                imageVector = Icons.Rounded.ChevronRight,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.2f)
+                tint = Color.White.copy(alpha = 0.2f),
+                modifier = Modifier.size(24.dp)
             )
         }
     }

@@ -1,15 +1,15 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
@@ -139,7 +139,7 @@ private fun CommentCard(
                     } else {
                         val hasTranslation = translationState?.translatedText != null
                         Icon(
-                            imageVector = Icons.Rounded.Translate,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
                             contentDescription = "Traduci",
                             tint = if (hasTranslation && !showOriginal) accentColor else Color.White.copy(alpha = 0.5f),
                             modifier = Modifier
@@ -155,7 +155,7 @@ private fun CommentCard(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                     Icon(
-                        imageVector = Icons.Rounded.Favorite,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
                         contentDescription = "Likes",
                         tint = accentColor,
                         modifier = Modifier.size(12.dp)

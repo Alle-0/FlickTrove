@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -15,11 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -181,7 +180,7 @@ private fun FolderListContent(
                     .background(Color.White.copy(alpha = 0.1f))
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Close,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                     contentDescription = "Chiudi",
                     tint = Color.White,
                     modifier = Modifier.size(18.dp)
@@ -299,7 +298,7 @@ private fun FolderListContent(
                 contentColor = Color.Black
             )
         ) {
-            Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
+            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text("NUOVA CARTELLA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         }
@@ -333,7 +332,7 @@ private fun FolderItem(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Rounded.Folder,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                 contentDescription = null,
                 tint = folder.color.toComposeColor(),
                 modifier = Modifier.size(18.dp)
@@ -366,7 +365,7 @@ private fun FolderItem(
                 exit = fadeOut() + scaleOut(targetScale = 0.8f)
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Check,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
                     contentDescription = "Selected",
                     tint = Color(0xFF4ADE80),
                     modifier = Modifier.size(20.dp)
@@ -414,7 +413,7 @@ private fun FolderCreateForm(
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                         contentDescription = "Chiudi",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)

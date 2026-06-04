@@ -1,11 +1,11 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +28,9 @@ fun ImagePlaceholder(
     isBackdrop: Boolean = false
 ) {
     val icon = when (mediaType) {
-        "tv" -> Icons.AutoMirrored.Rounded.List
-        "person" -> Icons.Rounded.Person
-        else -> Icons.Rounded.PlayArrow
+        "tv" -> ImageVector.vectorResource(id = R.drawable.ic_lista)
+        "person" -> ImageVector.vectorResource(id = R.drawable.ic_persona)
+        else -> ImageVector.vectorResource(id = R.drawable.ic_play)
     }
 
     Box(

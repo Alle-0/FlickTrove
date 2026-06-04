@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -18,8 +22,6 @@ import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.MovieCard
 
 import com.cinetrack.ui.viewmodel.DiscoverViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SearchOff
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.theme.HazeStyles
@@ -31,9 +33,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.ViewAgenda
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.zIndex
@@ -79,7 +78,7 @@ fun DiscoverScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
     val cardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
@@ -154,7 +153,7 @@ fun DiscoverScreen(
                             ) {
                                 Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
                                     Icon(
-                                        Icons.Rounded.SearchOff,
+                                        ImageVector.vectorResource(id = R.drawable.ic_lente),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.3f),
                                         modifier = Modifier.size(64.dp)

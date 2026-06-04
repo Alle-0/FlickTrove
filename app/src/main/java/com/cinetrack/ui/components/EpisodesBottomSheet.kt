@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -12,9 +16,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -303,7 +304,7 @@ private fun Header(movie: Movie, onDismiss: () -> Unit) {
             shape = CircleShape
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.White)
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White)
             }
         }
     }
@@ -385,7 +386,7 @@ private fun BulkAction(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isAllWatched) {
-                Icon(Icons.Rounded.Check, contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_tick), contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(6.dp))
             }
             Text(
@@ -449,7 +450,7 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
             ) {
                 if (isWatched) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Rounded.Check, contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_tick), contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
                     }
                 }
             }

@@ -1,14 +1,13 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,10 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-enum class FeedbackType(val label: String, val icon: ImageVector) {
-    BUG("Bug", Icons.Rounded.Warning),
-    IDEA("Idea", Icons.Rounded.Info),
-    OTHER("Altro", Icons.Rounded.Email)
+enum class FeedbackType(val label: String, val iconRes: Int) {
+    BUG("Bug", R.drawable.ic_error),
+    IDEA("Idea", R.drawable.ic_documento),
+    OTHER("Altro", R.drawable.ic_documento)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +48,7 @@ fun FeedbackBottomSheet(
             horizontalAlignment = Alignment.Start
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Rounded.Info, contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_documento), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
                 Text(
                     text = "Invia Feedback",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
@@ -86,7 +85,7 @@ fun FeedbackBottomSheet(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Icon(
-                                imageVector = type.icon,
+                                imageVector = ImageVector.vectorResource(id = type.iconRes),
                                 contentDescription = null,
                                 tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.4f),
                                 modifier = Modifier.size(18.dp)
@@ -121,7 +120,7 @@ fun FeedbackBottomSheet(
 
             if (errorMessage != null) {
                 Row(modifier = Modifier.padding(vertical = 12.dp)) {
-                    Icon(Icons.Rounded.Warning, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_error), contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(text = errorMessage, color = Color.Red, style = MaterialTheme.typography.bodySmall)
                 }

@@ -1,14 +1,15 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -66,7 +67,7 @@ fun RatedExplanationBottomSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Info,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_documento),
                         contentDescription = null,
                         tint = accentColor,
                         modifier = Modifier.size(20.dp)
@@ -89,7 +90,7 @@ fun RatedExplanationBottomSheet(
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                         contentDescription = "Close",
                         tint = Color.White.copy(alpha = 0.4f)
                     )

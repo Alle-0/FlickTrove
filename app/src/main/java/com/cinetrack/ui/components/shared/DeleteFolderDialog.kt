@@ -1,14 +1,15 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -72,7 +73,7 @@ fun DeleteFolderDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Report,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_error_pieno),
                         contentDescription = null,
                         tint = ErrorRed,
                         modifier = Modifier.size(28.dp)
@@ -126,7 +127,7 @@ fun DeleteFolderDialog(
                         shape = RoundedCornerShape(16.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                     ) {
-                        Icon(Icons.Rounded.DeleteOutline, null, modifier = Modifier.size(18.dp))
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
                         Text("ELIMINA CARTELLA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
                     }

@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -84,7 +88,7 @@ fun FolderDetailScreen(
                                     style = HazeStyles.PremiumDark
                                 )
                         ) {
-                            val columns = if (preferences.gridColumns in 1..3) preferences.gridColumns else 3
+                            val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
                             val gap = 8.dp
                             val padding = 16.dp
                             val cardWidth = if (columns > 1) {
@@ -115,7 +119,7 @@ fun FolderDetailScreen(
                                         ) {
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Icon(
-                                                    imageVector = Icons.Rounded.Movie,
+                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                                                     contentDescription = null,
                                                     tint = Color.White.copy(alpha = 0.15f),
                                                     modifier = Modifier.size(64.dp)

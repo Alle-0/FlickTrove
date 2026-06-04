@@ -21,7 +21,12 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.*
 import kotlin.math.roundToInt
+import kotlin.math.ceil
 import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.R
 
 @Composable
 fun FluidRatingBar(
@@ -35,6 +40,8 @@ fun FluidRatingBar(
     showGlow: Boolean = false
 ) {
     val haptic = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    val gapPx = remember(density) { with(density) { 8.dp.toPx() } }
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     
     // Animation for smooth sliding
@@ -52,7 +59,7 @@ fun FluidRatingBar(
             .onSizeChanged { containerSize = it }
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    val newRating = calculateRatingFromX(offset.x, containerSize.width.toFloat(), maxRating)
+                    val newRating = calculateRatingFromX(offset.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
                     if (rating != newRating) {
                         onRatingChange(newRating)
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -61,7 +68,8 @@ fun FluidRatingBar(
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, _ ->
-                    val newRating = calculateRatingFromX(change.position.x, containerSize.width.toFloat(), maxRating)
+                    change.consume()
+                    val newRating = calculateRatingFromX(change.position.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
                     if (rating != newRating) {
                         onRatingChange(newRating)
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -138,7 +146,7 @@ fun PremiumStar(
     ) {
         // Base Star (Empty/Background)
         Icon(
-            imageVector = Icons.Rounded.Star,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             tint = Color.White.copy(alpha = 0.1f)
@@ -165,7 +173,7 @@ fun PremiumStar(
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Star,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     tint = accentColor
@@ -175,9 +183,14 @@ fun PremiumStar(
     }
 }
 
-private fun calculateRatingFromX(x: Float, totalWidth: Float, maxRating: Double): Double {
-    val rawRating = (x / totalWidth) * maxRating
-    // Round to nearest 0.5 for a 10-point scale
-    val stepped = (rawRating * 2.0).roundToInt() / 2.0
-    return stepped.coerceIn(0.0, maxRating)
+private fun calculateRatingFromX(x: Float, totalWidth: Float, maxRating: Double, numStars: Int, gapPx: Float): Double {
+    if (totalWidth <= 0f) return 0.0
+    // Aggiungiamo un padding logico del 5% ai bordi per rendere i voti estremi (0.0 e 10.0) 
+    // facili da selezionare quanto i voti centrali, garantendo hit-target identici per tutti.
+    val padding = totalWidth * 0.05f
+    val effectiveWidth = totalWidth - 2 * padding
+    val effectiveX = (x - padding).coerceIn(0f, effectiveWidth)
+    
+    val rawRating = (effectiveX / effectiveWidth) * maxRating
+    return ((rawRating * 2).roundToInt() / 2.0).coerceIn(0.0, maxRating)
 }

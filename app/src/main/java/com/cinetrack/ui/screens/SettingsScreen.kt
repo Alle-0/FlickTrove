@@ -24,6 +24,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.*
+import androidx.compose.material.icons.rounded.CloudSync
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -55,6 +57,9 @@ import com.cinetrack.ui.viewmodel.*
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.glass.*
+import com.cinetrack.ui.components.shared.*
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
 import android.Manifest
@@ -123,13 +128,9 @@ fun SettingsScreen(
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
+    val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
+    val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
 
-
-
-
-    var showThemeDialog by remember { mutableStateOf(false) }
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showImageQualityDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
@@ -153,7 +154,7 @@ fun SettingsScreen(
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showThemeDialog || showLanguageDialog || showImageQualityDialog
+                           false
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -271,10 +272,10 @@ fun SettingsScreen(
                     item {
                         SettingsSection(
                             title = "Interfaccia",
-                            icon = Icons.Rounded.Dashboard
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
                         ) {
                             SettingsItem(
-                                icon = Icons.Rounded.Palette,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_palette),
                                 title = "Colore accento",
                                 description = "Personalizza l'aspetto dell'app",
                                 trailing = {
@@ -315,7 +316,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.AppShortcut,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_magia),
                                 title = "Icona App Dinamica",
                                 description = "Cambia l'icona dell'app nella schermata home per adattarla al colore accento",
                                 trailing = {
@@ -334,7 +335,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.Bookmarks,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
                                 title = "Segnalibri cartelle",
                                 description = "Mostra un nastro colorato sulle card per indicare l'appartenenza alle cartelle.",
                                 trailing = {
@@ -353,7 +354,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.Style,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_rank),
                                 title = "Badge informativi",
                                 description = "Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.",
                                 trailing = {
@@ -386,7 +387,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.GridView,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
                                 title = "Pulsante Layout",
                                 description = "Mostra il pulsante per cambiare il numero di colonne in Home",
                                 trailing = {
@@ -404,39 +405,73 @@ fun SettingsScreen(
                                     settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
                                 }
                             )
-                            SettingsItem(
-                                icon = Icons.Rounded.DarkMode,
-                                title = "Tema App",
-                                description = "AMOLED, Sistema, Chiaro, Scuro",
-                                trailing = {
-                                    Text(
-                                        text = appTheme,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = currentAccentColor
-                                    )
-                                },
-                                onClick = {
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    showThemeDialog = true
-                                }
-                            )
-                            SettingsItem(
-                                icon = Icons.Rounded.Language,
-                                title = "Lingua Contenuti",
-                                description = "Lingua per titoli e trame TMDB",
-                                trailing = {
-                                    Text(
-                                        text = contentLanguage,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = currentAccentColor
-                                    )
-                                },
-                                onClick = {
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    showLanguageDialog = true
-                                }
-                            )
+                        }
+                    }
 
+                    // Section: Accessibilità
+                    item {
+                        SettingsSection(
+                            title = "Accessibilità",
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_accessibilita)
+                        ) {
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_maiuscolo),
+                                title = "Dimensione testo titoli",
+                                description = "Ingrandisce o riduce i testi principali",
+                                trailing = { },
+                                onClick = { },
+                                customContent = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val options = listOf(
+                                            Triple(0.8f, "Piccolo", titleTextSizeMultiplier == 0.8f),
+                                            Triple(1.0f, "Medio", titleTextSizeMultiplier == 1.0f),
+                                            Triple(1.2f, "Grande", titleTextSizeMultiplier == 1.2f)
+                                        )
+                                        options.forEach { (value, label, isSelected) ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                                    .clickable { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                        settingsViewModel.updateTitleTextSizeMultiplier(value) 
+                                                    }
+                                                    .padding(vertical = 10.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                title = "Effetti visivi avanzati",
+                                description = "Abilita sfocature e animazioni complesse",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = advancedVisualEffectsEnabled,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleAdvancedVisualEffects(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleAdvancedVisualEffects(!advancedVisualEffectsEnabled)
+                                }
+                            )
                         }
                     }
 
@@ -444,10 +479,10 @@ fun SettingsScreen(
                     item {
                         SettingsSection(
                             title = "Notifiche e Vibrazione",
-                            icon = Icons.Rounded.NotificationsActive
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_bell_piena)
                         ) {
                             SettingsItem(
-                                icon = Icons.Rounded.Notifications,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
                                 title = "Attiva Notifiche",
                                 description = "Ricevi un avviso il giorno dell'uscita dei film o delle serie che segui.",
                                 trailing = {
@@ -489,7 +524,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.Vibration,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
                                 title = "Feedback aptico",
                                 description = "Vibrazione alle azioni dell'interfaccia",
                                 trailing = {
@@ -517,15 +552,73 @@ fun SettingsScreen(
                         }
                     }
 
-                    // Section: Memoria e Dati
+                    // Section: Archiviazione e Rete
                     item {
                         SettingsSection(
-                            title = "Memoria e Dati",
-                            icon = Icons.Rounded.Dns,
+                            title = "Immagini",
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_image)
+                        ) {
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_hd),
+                                title = "Qualità Immagini",
+                                description = "Gestisci consumo dati",
+                                trailing = { },
+                                onClick = { },
+                                customContent = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val options = listOf(
+                                            Triple(com.cinetrack.util.ImageQuality.LOW, "Bassa", imageQuality == com.cinetrack.util.ImageQuality.LOW),
+                                            Triple(com.cinetrack.util.ImageQuality.MEDIUM, "Media", imageQuality == com.cinetrack.util.ImageQuality.MEDIUM),
+                                            Triple(com.cinetrack.util.ImageQuality.HIGH, "Alta", imageQuality == com.cinetrack.util.ImageQuality.HIGH)
+                                        )
+                                        options.forEach { (value, label, isSelected) ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                                    .clickable { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                        settingsViewModel.updateImageQuality(value) 
+                                                    }
+                                                    .padding(vertical = 10.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
+                                title = "Svuota Cache Immagini",
+                                description = "$cacheSizeString • Libera spazio occupato da poster e backdrop",
+                                tint = Color(0xFFFFA000),
+                                onClick = { 
+                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                    showCacheConfirm = true 
+                                }
+                            )
+                        }
+                    }
+
+                    // Section: Sincronizzazione e Backup
+                    item {
+                        SettingsSection(
+                            title = "Sincronizzazione e Backup",
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                             footerText = "Lo Smart Merge unirà i dati proteggendo sempre i tuoi voti e note locali."
                         ) {
                             SettingsItem(
-                                icon = Icons.Rounded.CloudSync,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                                 title = "Migrazione Esterna",
                                 description = "Trakt, Letterboxd, IMDb",
                                 onClick = { 
@@ -536,7 +629,7 @@ fun SettingsScreen(
                             
                              // Grouped Backup Card
                             SettingsItem(
-                                icon = Icons.Rounded.Storage,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                                 title = "Backup Dispositivo FlickTrove",
                                 onClick = {},
                                 trailing = { }, // No arrow
@@ -559,7 +652,7 @@ fun SettingsScreen(
                                                 .padding(vertical = 8.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            Icon(Icons.Rounded.Download, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text("Esporta", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
                                         }
@@ -578,43 +671,11 @@ fun SettingsScreen(
                                                 .padding(vertical = 8.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            Icon(Icons.Rounded.Upload, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text("Ripristina", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
                                         }
                                     }
-                                }
-                            )
-
-                            SettingsItem(
-                                icon = Icons.Rounded.DeleteSweep,
-                                title = "Svuota Cache Immagini",
-                                description = "$cacheSizeString • Libera spazio occupato da poster e backdrop",
-                                tint = Color(0xFFFFA000),
-                                onClick = { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                    showCacheConfirm = true 
-                                }
-                            )
-                            SettingsItem(
-                                icon = Icons.Rounded.HighQuality,
-                                title = "Qualità Immagini",
-                                description = "Gestisci consumo dati (Bassa, Media, Alta)",
-                                trailing = {
-                                    val desc = when(imageQuality) {
-                                        com.cinetrack.util.ImageQuality.LOW -> "Bassa"
-                                        com.cinetrack.util.ImageQuality.MEDIUM -> "Media"
-                                        com.cinetrack.util.ImageQuality.HIGH -> "Alta"
-                                    }
-                                    Text(
-                                        text = desc,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = currentAccentColor
-                                    )
-                                },
-                                onClick = {
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    showImageQualityDialog = true
                                 }
                             )
                         }
@@ -628,10 +689,10 @@ fun SettingsScreen(
                         SettingsSection(
                             title = "Account",
                             subtitle = email,
-                            icon = Icons.Rounded.Person
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_persona)
                         ) {
                             SettingsItem(
-                                icon = if (!isGuest) Icons.AutoMirrored.Rounded.Logout else Icons.AutoMirrored.Rounded.Login,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_exit),
                                 title = if (!isGuest) "Esci" else "Accedi",
                                 tint = if (!isGuest) Color.White else currentAccentColor,
                                 onClick = {
@@ -646,7 +707,7 @@ fun SettingsScreen(
                             
                             if (!isGuest && user != null) {
                                 SettingsItem(
-                                    icon = Icons.Rounded.DeleteOutline,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                     title = "Elimina Account",
                                     tint = Color(0xFFFF5252),
                                     borderColor = Color(0xFFFF5252),
@@ -663,10 +724,10 @@ fun SettingsScreen(
                     item {
                         SettingsSection(
                             title = "Supporto e Informazioni",
-                            icon = Icons.AutoMirrored.Rounded.Help
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_question_mark_pieno)
                         ) {
                             SettingsItem(
-                                icon = Icons.Rounded.ChatBubbleOutline,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_comment),
                                 title = "Invia Feedback",
                                 description = "Segnala bug o suggerisci nuove funzioni",
                                 onClick = { 
@@ -675,7 +736,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.AutoMirrored.Rounded.Article,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
                                 title = "Termini di Servizio",
                                 isExternal = true,
                                 onClick = { 
@@ -684,7 +745,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.Security,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_scudo_privacy),
                                 title = "Informativa sulla Privacy",
                                 isExternal = true,
                                 onClick = { 
@@ -809,7 +870,7 @@ fun SettingsScreen(
                         modifier = Modifier.padding(24.dp)
                     ) {
                         Icon(
-                            Icons.Rounded.PersonRemove,
+                            ImageVector.vectorResource(id = R.drawable.ic_x),
                             null,
                             tint = Color(0xFFFF5252),
                             modifier = Modifier.size(48.dp)
@@ -886,7 +947,7 @@ fun SettingsScreen(
                         modifier = Modifier.padding(24.dp)
                     ) {
                         Icon(
-                            Icons.Rounded.DeleteSweep,
+                            ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
                             null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(48.dp)
@@ -1069,7 +1130,7 @@ fun SettingsScreen(
                         modifier = Modifier.padding(24.dp)
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Rounded.Logout,
+                            ImageVector.vectorResource(id = R.drawable.ic_exit),
                             null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(48.dp)
@@ -1118,54 +1179,8 @@ fun SettingsScreen(
         }
 
 
-        AnimatedVisibility(
-            visible = showThemeDialog,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
-            modifier = Modifier.zIndex(100f)
-        ) {
-            ThemeSelectionDialog(
-                current = appTheme,
-                accentColor = currentAccentColor,
-                onDismiss = { showThemeDialog = false },
-                onSelect = { 
-                    settingsViewModel.updateAppTheme(it)
-                    showThemeDialog = false
-                }
-            )
-        }
-        AnimatedVisibility(
-            visible = showLanguageDialog,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
-            modifier = Modifier.zIndex(100f)
-        ) {
-            LanguageSelectionDialog(
-                current = contentLanguage,
-                accentColor = currentAccentColor,
-                onDismiss = { showLanguageDialog = false },
-                onSelect = { 
-                    settingsViewModel.updateContentLanguage(it)
-                    showLanguageDialog = false
-                }
-            )
-        }
-        AnimatedVisibility(
-            visible = showImageQualityDialog,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
-            modifier = Modifier.zIndex(100f)
-        ) {
-            ImageQualitySelectionDialog(
-                current = imageQuality,
-                accentColor = currentAccentColor,
-                onDismiss = { showImageQualityDialog = false },
-                onSelect = { 
-                    settingsViewModel.updateImageQuality(it)
-                    showImageQualityDialog = false
-                }
-            )
-        }
+
+
 
         // Color Selection Dialog
         AnimatedVisibility(
@@ -1411,7 +1426,7 @@ fun ExternalMigrationDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Icon(
-                    Icons.Rounded.CloudSync,
+                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                     null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)

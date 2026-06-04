@@ -39,7 +39,8 @@ class ReminderMigrationWorker(
             val localMovies = repository.getLocalMovies()
 
             val toMigrate = localMovies.filter { movie: Movie ->
-                movie.reminder && (movie.releaseDate ?: movie.firstAirDate ?: "") <= today
+                val date = movie.releaseDate ?: movie.firstAirDate ?: ""
+                movie.reminder && date.isNotEmpty() && date <= today
             }
 
             // Read the preference once – honour the user's choice

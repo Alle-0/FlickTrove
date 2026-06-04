@@ -1,13 +1,14 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,12 +47,12 @@ fun GuestWarningBottomSheet(
 
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row {
-                    Icon(Icons.Rounded.CheckCircle, null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_tick_pieno), null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(16.dp))
                     Text("Dati salvati solo localmente.", color = Color.White)
                 }
                 Row {
-                    Icon(Icons.Rounded.Warning, null, tint = ErrorRed)
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_error), null, tint = ErrorRed)
                     Spacer(Modifier.width(16.dp))
                     Text("Rischio perdita dati se disinstalli l'app.", color = Color.White)
                 }

@@ -1,6 +1,10 @@
 @file:OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -249,7 +253,7 @@ fun MovieDetailScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.CloudOff,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_cloud),
                             contentDescription = null,
                             modifier = Modifier.size(80.dp),
                             tint = Color.White.copy(alpha = 0.3f)
@@ -658,11 +662,11 @@ fun MovieDetailScreen(
                                 )
                             }
                             Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
                                 contentDescription = "Back",
                                 tint = Color.White,
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(20.dp)
                                     .graphicsLayer {
                                         scaleX = backIconScale
                                         scaleY = backIconScale
@@ -704,7 +708,7 @@ fun MovieDetailScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Home,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_interfaccia),
                                     contentDescription = "Torna alla schermata principale",
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
@@ -800,7 +804,7 @@ fun MovieDetailScreen(
                                 )
                             }
                             Icon(
-                                imageVector = Icons.Rounded.Folder,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
                                 contentDescription = "Folder",
                                 modifier = Modifier
                                     .size(24.dp)
@@ -891,7 +895,7 @@ fun MovieDetailScreen(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
                     ) {
                         Icon(
-                            Icons.Rounded.Info,
+                            ImageVector.vectorResource(id = R.drawable.ic_documento),
                             null,
                             tint = Color.White,
                             modifier = Modifier.size(28.dp)
@@ -979,7 +983,7 @@ fun MovieDetailScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Close,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                     contentDescription = "Chiudi",
                     tint = Color.White.copy(alpha = 0.65f),
                     modifier = Modifier
@@ -989,7 +993,7 @@ fun MovieDetailScreen(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Icon(
-                imageVector = Icons.Rounded.Translate,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
                 contentDescription = null,
                 tint = globalAccentColor,
                 modifier = Modifier.size(48.dp).padding(bottom = 16.dp)

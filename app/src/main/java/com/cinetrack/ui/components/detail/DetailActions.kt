@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import kotlinx.coroutines.delay
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -198,19 +202,19 @@ fun DetailActions(
 
     val icon = when {
         !movie.isReleased -> {
-            if (displayWatchState != WatchState.NONE) Icons.Rounded.Notifications
-            else Icons.Rounded.NotificationsNone
+            if (displayWatchState != WatchState.NONE) ImageVector.vectorResource(id = R.drawable.ic_bell_piena)
+            else ImageVector.vectorResource(id = R.drawable.ic_bell)
         }
-        displayWatchState == WatchState.NONE -> Icons.AutoMirrored.Rounded.PlaylistAdd
+        displayWatchState == WatchState.NONE -> ImageVector.vectorResource(id = R.drawable.ic_lista_plus)
         displayWatchState == WatchState.BOOKMARKED -> {
-            if (movie.mediaType == "tv") Icons.AutoMirrored.Rounded.FormatListBulleted
-            else Icons.Rounded.Visibility
+            if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
+            else ImageVector.vectorResource(id = R.drawable.ic_eye)
         }
         displayWatchState == WatchState.WATCHED -> {
-            if (movie.mediaType == "tv") Icons.AutoMirrored.Rounded.FormatListBulleted
-            else Icons.Rounded.Done
+            if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
+            else ImageVector.vectorResource(id = R.drawable.ic_tick)
         }
-        else -> Icons.AutoMirrored.Rounded.PlaylistAdd
+        else -> ImageVector.vectorResource(id = R.drawable.ic_lista_plus)
     }
     
     val label = when {
@@ -475,7 +479,7 @@ fun DetailActions(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.DeleteOutline,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
                         contentDescription = "Remove",
                         tint = trashColor,
                         modifier = Modifier

@@ -1,5 +1,9 @@
 package com.cinetrack
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import android.os.Bundle
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -544,7 +548,7 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                                         val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
                                                         
                                                         if (discoverUiState.preferences.showLayoutToggle) {
-                                                            discoverColumns = if (discoverUiState.preferences.gridColumns in 1..3) discoverUiState.preferences.gridColumns else 3
+                                                            discoverColumns = if (discoverUiState.preferences.gridColumns in 1..4) discoverUiState.preferences.gridColumns else 3
                                                             onLayoutToggle = {
                                                                 val next = nextGridColumns(discoverColumns ?: 3)
                                                                 discoverViewModel.updateGridColumns(next)
@@ -706,9 +710,9 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                                         contentAlignment = Alignment.Center
                                                     ) {
                                                         Icon(
-                                                            imageVector = CustomIcons.PremiumSearch,
+                                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
                                                             contentDescription = "Search",
-                                                            modifier = Modifier.size(28.dp),
+                                                            modifier = Modifier.size(24.dp),
                                                             tint = MaterialTheme.colorScheme.primary
                                                         )
                                                         
@@ -1044,7 +1048,7 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(Icons.Rounded.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                             Spacer(Modifier.width(12.dp))
                                             Text("Rinomina Cartella", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                         }
@@ -1059,7 +1063,7 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(Icons.Rounded.Palette, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                             Spacer(Modifier.width(12.dp))
                                             Text("Cambia Colore", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                         }
@@ -1073,7 +1077,7 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(Icons.Rounded.Delete, contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
+                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                                             Spacer(Modifier.width(12.dp))
                                             Text("Elimina Cartella", color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                         }

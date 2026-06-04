@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.util.NotificationHelper
 import com.cinetrack.ui.theme.HazeStyles
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 /**
  * A premium glassmorphic drawer content component.
@@ -82,7 +84,7 @@ fun GlassyDrawerContent(
             ) {
                 DrawerSection(title = "Cinema")
                 DrawerItem(
-                    icon = Icons.AutoMirrored.Rounded.TrendingUp,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
                     label = "Film più visti",
                     isActive = activeRoute == "trending_movies",
                     onClick = { onNavigate("discover", "trending_movies") },

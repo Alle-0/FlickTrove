@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -13,19 +17,11 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.material.icons.rounded.CloudOff
-import androidx.compose.material.icons.rounded.SignalWifiStatusbarConnectedNoInternet4
-import androidx.compose.material.icons.rounded.WifiOff
 import com.cinetrack.ui.assets.CustomIcons
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -190,7 +186,7 @@ fun SearchScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
     val cardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
@@ -315,7 +311,7 @@ fun SearchScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.CloudOff,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cloud),
                                 contentDescription = null,
                                 modifier = Modifier.size(80.dp),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
@@ -340,7 +336,7 @@ fun SearchScreen(
                                 shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier.height(48.dp)
                             ) {
-                                Icon(Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("RIPROVA")
                             }
@@ -542,7 +538,7 @@ fun SearchScreen(
                                             modifier = Modifier.fillMaxWidth().padding(top = 80.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            Icon(imageVector = Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+                                            Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
                                             Spacer(modifier = Modifier.height(16.dp))
                                             Text(text = "Nessun risultato", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                             Spacer(modifier = Modifier.height(8.dp))
@@ -727,7 +723,7 @@ fun SearchScreen(
                                 Box(modifier = Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { triggerExit() }, contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = "Torna indietro", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
+                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = "Torna indietro", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -784,7 +780,7 @@ fun SearchScreen(
                                         )
                                     }
                                     if (uiState.query.isNotEmpty()) {
-                                        Icon(imageVector = Icons.Rounded.Close, contentDescription = "Pulisci", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(20.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
+                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Pulisci", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(20.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
                                     }
                                 }
                             }
@@ -823,7 +819,7 @@ fun SearchScreen(
                                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                                     .then(if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape) else Modifier))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { keyboardController?.hide(); focusManager.clearFocus(); isFilterVisible = true }, contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = Icons.Rounded.Tune, contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
+                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri), contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -866,7 +862,7 @@ fun SearchScreen(
                                             Spacer(modifier = Modifier.width(6.dp))
                                             CompositionLocalProvider(androidx.compose.material3.LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
                                                 Icon(
-                                                    imageVector = Icons.Rounded.Close,
+                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                                     contentDescription = "Rimuovi ricerca",
                                                     modifier = Modifier
                                                         .size(14.dp)

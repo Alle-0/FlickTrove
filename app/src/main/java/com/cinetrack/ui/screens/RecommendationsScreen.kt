@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -105,7 +109,7 @@ fun RecommendationsScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
     val cardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
@@ -356,7 +360,7 @@ fun RecommendationsScreen(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Icon(
-                                    Icons.Rounded.Star,
+                                    ImageVector.vectorResource(id = R.drawable.ic_star),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(60.dp)
@@ -530,7 +534,7 @@ fun RecommendationsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (isTinderMode) Icons.Rounded.GridView else Icons.Rounded.Style,
+                            imageVector = if (isTinderMode) ImageVector.vectorResource(id = R.drawable.ic_grid) else ImageVector.vectorResource(id = R.drawable.ic_temi),
                             contentDescription = "Tinder Mode",
                             tint = Color.White,
                             modifier = Modifier.size(18.dp)
@@ -635,7 +639,7 @@ private fun TinderMovieCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Movie,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.15f),
                         modifier = Modifier.size(80.dp)
@@ -785,7 +789,7 @@ private fun TinderMovieCard(
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Star,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
                             contentDescription = null,
                             tint = Color(0xFFFFC107),
                             modifier = Modifier.size(16.dp)
@@ -866,7 +870,7 @@ private fun TinderControls(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Rounded.Close,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                 contentDescription = "Passa",
                 tint = Color(0xFFEF4444),
                 modifier = Modifier.size(26.dp)
@@ -883,7 +887,7 @@ private fun TinderControls(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Rounded.Info,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_documento),
                 contentDescription = "Info",
                 tint = Color(0xFF3B82F6),
                 modifier = Modifier.size(22.dp)
@@ -900,7 +904,7 @@ private fun TinderControls(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Rounded.Favorite,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
                 contentDescription = "Preferiti",
                 tint = Color(0xFF22C55E),
                 modifier = Modifier.size(24.dp)
@@ -959,7 +963,7 @@ private fun TinderEmptyState(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Refresh,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(38.dp)

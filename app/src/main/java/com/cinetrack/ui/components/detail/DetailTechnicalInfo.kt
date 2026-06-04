@@ -1,5 +1,8 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -57,14 +60,14 @@ fun DetailTechnicalInfo(
                 TechnicalItem(
                     label = "DATA USCITA",
                     value = details.releaseDate ?: details.firstAirDate ?: "—",
-                    icon = Icons.Rounded.CalendarMonth,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
                     label = "BUDGET",
                     value = if (details.budget != null && details.budget > 0) "${formatter.format(details.budget)} USD" else "—",
-                    icon = Icons.Rounded.AttachMoney,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_dollar),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
@@ -75,14 +78,14 @@ fun DetailTechnicalInfo(
                 TechnicalItem(
                     label = "LINGUA",
                     value = details.originalLanguage?.uppercase(Locale.getDefault()) ?: "—",
-                    icon = Icons.Rounded.Translate,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
                     label = "INCASSI",
                     value = if (details.revenue != null && details.revenue > 0) "${formatter.format(details.revenue)} USD" else "—",
-                    icon = Icons.Rounded.Public,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_world),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
@@ -93,14 +96,14 @@ fun DetailTechnicalInfo(
                 TechnicalItem(
                     label = "PRODUZIONE",
                     value = details.productionCompanies?.firstOrNull()?.name ?: "—",
-                    icon = Icons.Rounded.Business,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_edifici),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
                     label = "PAESE",
                     value = details.productionCountries?.firstOrNull()?.name ?: "—",
-                    icon = Icons.Rounded.AccountBalance,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_partenone),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )

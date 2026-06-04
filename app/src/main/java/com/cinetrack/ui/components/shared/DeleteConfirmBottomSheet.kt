@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -65,7 +69,7 @@ fun DeleteConfirmBottomSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Report,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_error_pieno),
                         contentDescription = null,
                         tint = ErrorRed,
                         modifier = Modifier.size(32.dp)
@@ -170,7 +174,7 @@ fun DeleteConfirmBottomSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.DeleteOutline,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier

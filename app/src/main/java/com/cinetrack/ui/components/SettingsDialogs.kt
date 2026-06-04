@@ -242,3 +242,27 @@ fun <T> GenericSelectionDialog(
         }
     }
 }
+
+@Composable
+fun TextSizeSelectionDialog(
+    current: Float,
+    accentColor: Color,
+    onDismiss: () -> Unit,
+    onSelect: (Float) -> Unit
+) {
+    val options = listOf(
+        0.8f to "Piccolo",
+        1.0f to "Predefinito",
+        1.2f to "Grande"
+    )
+    
+    GenericSelectionDialog(
+        title = "Dimensione testo titoli",
+        icon = Icons.Rounded.FormatSize,
+        options = options,
+        current = current,
+        accentColor = accentColor,
+        onDismiss = onDismiss,
+        onSelect = onSelect
+    )
+}

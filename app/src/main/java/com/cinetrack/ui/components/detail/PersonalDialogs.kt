@@ -92,7 +92,12 @@ fun RatingPickerBox(
                     Surface(
                         color = Color.White.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .bounceClick {
+                                rating = currentRating
+                                onRatingChange(currentRating)
+                            }
                     ) {
                         Text(
                             String.format("PREC. %.1f", currentRating),

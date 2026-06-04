@@ -1,5 +1,8 @@
 package com.cinetrack.ui.components
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -17,10 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Bookmark
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.Icon
@@ -85,7 +84,7 @@ fun GlassyBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             NavItem(
-                icon = Icons.Rounded.Bookmark,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
                 label = "DA VEDERE",
                 isSelected = selectedRoute == "index",
                 enabled = !isDimmed,
@@ -93,7 +92,7 @@ fun GlassyBottomBar(
                 accentColor = accentColor
             )
             NavItem(
-                icon = Icons.Rounded.CheckCircle,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_tick_pieno),
                 label = "VISTI",
                 isSelected = selectedRoute == "visti",
                 enabled = !isDimmed,
@@ -101,7 +100,7 @@ fun GlassyBottomBar(
                 accentColor = accentColor
             )
             NavItem(
-                icon = Icons.Rounded.BarChart,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
                 label = "STATISTICHE",
                 isSelected = selectedRoute == "stats",
                 enabled = !isDimmed,

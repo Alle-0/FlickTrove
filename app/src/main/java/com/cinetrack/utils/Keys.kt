@@ -1,11 +1,9 @@
 package com.cinetrack.utils
 
-object Keys {
-    init {
-        System.loadLibrary("cinetrack")
-    }
+import com.cinetrack.BuildConfig
 
-    external fun getTmdbKey(): String
-    external fun getOmdbKey(): String
-    external fun getTraktKey(): String
+object Keys {
+    fun getTmdbKey(): String = BuildConfig.TMDB_API_KEY
+    fun getOmdbKey(): String = BuildConfig.OMDB_API_KEY
+    fun getTraktKey(): String = BuildConfig.TRAKT_API_KEY
 }

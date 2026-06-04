@@ -1,12 +1,10 @@
 package com.cinetrack.ui.components.shared
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,7 +59,7 @@ fun QuickActionBottomSheet(
             // Action Items
             QuickActionItem(
                 label = "Voto rapido",
-                icon = Icons.Rounded.Star,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                 iconColor = accentColor,
                 onClick = {
                     onDismiss()
@@ -73,7 +71,7 @@ fun QuickActionBottomSheet(
 
             QuickActionItem(
                 label = "Nota rapida",
-                icon = Icons.Rounded.Edit,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                 iconColor = Color.White,
                 onClick = {
                     onDismiss()
@@ -85,7 +83,7 @@ fun QuickActionBottomSheet(
 
             QuickActionItem(
                 label = "Cartelle",
-                icon = Icons.AutoMirrored.Rounded.List,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                 iconColor = Color(0xFF6366F1),
                 onClick = {
                     onDismiss()
@@ -97,7 +95,7 @@ fun QuickActionBottomSheet(
 
             QuickActionItem(
                 label = "Elimina",
-                icon = Icons.Rounded.Delete,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                 iconColor = Color(0xFFFF4444),
                 labelColor = Color(0xFFFF4444),
                 onClick = {

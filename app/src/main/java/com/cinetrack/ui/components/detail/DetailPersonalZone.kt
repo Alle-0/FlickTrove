@@ -1,12 +1,12 @@
 package com.cinetrack.ui.components.detail
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -84,7 +84,7 @@ fun DetailPersonalZone(
             PersonalAction(
                 label = "VALUTA",
                 value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
-                icon = Icons.Rounded.Star,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                 accentColor = accentColor,
                 isActive = expandedAction == "rate",
                 onClick = { expandedAction = if (expandedAction == "rate") null else "rate" },
@@ -101,7 +101,7 @@ fun DetailPersonalZone(
             PersonalAction(
                 label = "NOTA",
                 value = noteValueText,
-                icon = Icons.Rounded.Edit,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                 accentColor = accentColor,
                 isActive = expandedAction == "note",
                 onClick = { expandedAction = if (expandedAction == "note") null else "note" },

@@ -1,5 +1,8 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -80,7 +83,7 @@ fun PersonDetailScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val padding = 16.dp
     val gap = 12.dp
-    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
+    val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
     val cardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
@@ -250,12 +253,12 @@ fun PersonDetailScreen(
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(Icons.Rounded.Star, "DATA DI NASCITA", p.birthday ?: "N/D")
-                                    PersonInfoItem(Icons.Rounded.Place, "LUOGO DI NASCITA", p.placeOfBirth ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), "DATA DI NASCITA", p.birthday ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_partenone), "LUOGO DI NASCITA", p.placeOfBirth ?: "N/D")
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(Icons.Rounded.Info, "CONOSCIUTO PER", p.knownForDepartment ?: "N/D")
-                                    PersonInfoItem(Icons.Rounded.Star, "POPOLARITÀ", p.popularity?.let { "%.1f".format(it) } ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_documento), "CONOSCIUTO PER", p.knownForDepartment ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), "POPOLARITÀ", p.popularity?.let { "%.1f".format(it) } ?: "N/D")
                                 }
                             }
                         }
@@ -452,11 +455,11 @@ fun PersonDetailScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                    ImageVector.vectorResource(id = R.drawable.ic_left),
                     contentDescription = "Back",
                     tint = Color.White,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                         .graphicsLayer {
                             scaleX = backIconScale
                             scaleY = backIconScale
@@ -494,7 +497,7 @@ fun PersonDetailScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Home,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_interfaccia),
                         contentDescription = "Torna alla schermata principale",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)

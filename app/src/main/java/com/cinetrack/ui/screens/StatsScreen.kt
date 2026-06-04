@@ -1,5 +1,8 @@
 package com.cinetrack.ui.screens
 
+import com.cinetrack.R
+
+import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -327,7 +330,7 @@ fun StatsScreen(
                                                     val sectionTitle = "VISTI NEL $selectedYear"
                                                     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                                         StatsSectionHeader(
-                                                            icon = Icons.Rounded.Movie,
+                                                            icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                                                             title = sectionTitle,
                                                             count = uiState.moviesInSelectedRange.size
                                                         )
@@ -369,7 +372,7 @@ fun StatsScreen(
                             // ── I TUOI FILM ───────────────────────────────────────────
                             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                 StatsSectionHeader(
-                                    icon = Icons.Rounded.Movie,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                                     title = "I TUOI FILM",
                                     count = null
                                 )
@@ -377,10 +380,10 @@ fun StatsScreen(
                                 DualStatPill(
                                     leftLabel = "DA VEDERE",
                                     leftValue = stats.moviesToWatch,
-                                    leftIcon = Icons.Rounded.Adjust,
+                                    leftIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
                                     rightLabel = "VISTI",
                                     rightValue = stats.moviesWatched,
-                                    rightIcon = Icons.Rounded.EmojiEvents,
+                                    rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                     accentColor = MaterialTheme.colorScheme.primary
                                 )
 
@@ -394,7 +397,7 @@ fun StatsScreen(
                                     longestTitle = stats.longestMovie?.title ?: stats.longestMovie?.name,
                                     longestDurationMinutes = stats.longestMovieMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
-                                    sectionIcon = Icons.Rounded.Movie,
+                                    sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                                     longestPosterPath = stats.longestMovie?.posterPath
                                 )
                             }
@@ -403,7 +406,7 @@ fun StatsScreen(
                             // ── SERIE TV ──────────────────────────────────────────────
                             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                 StatsSectionHeader(
-                                    icon = Icons.Rounded.Tv,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                                     title = "SERIE TV",
                                     count = null
                                 )
@@ -411,10 +414,10 @@ fun StatsScreen(
                                 DualStatPill(
                                     leftLabel = "DA VEDERE",
                                     leftValue = stats.tvToWatch,
-                                    leftIcon = Icons.Rounded.Adjust,
+                                    leftIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
                                     rightLabel = "COMPLETATE",
                                     rightValue = stats.tvWatched,
-                                    rightIcon = Icons.Rounded.EmojiEvents,
+                                    rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                     accentColor = MaterialTheme.colorScheme.primary,
                                     rightSuffix = if (stats.totalEpisodes > 0) "${stats.totalEpisodes} ep" else null
                                 )
@@ -428,7 +431,7 @@ fun StatsScreen(
                                     longestTitle = stats.longestTV?.title ?: stats.longestTV?.name,
                                     longestDurationMinutes = stats.longestTVMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
-                                    sectionIcon = Icons.Rounded.Tv,
+                                    sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                                     longestSuffix = stats.longestTV?.let {
                                         val eps = it.watchedEpisodes?.values?.sumOf { s -> s.size } ?: 0
                                         if (eps > 0) "• $eps episodi" else null
@@ -442,7 +445,7 @@ fun StatsScreen(
                                 var castExpanded by rememberSaveable { mutableStateOf(false) }
                                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                     StatsSectionHeader(
-                                        icon = Icons.Rounded.EmojiEvents,
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                         title = "I TUOI MITI (CAST)",
                                         count = null
                                     )
@@ -460,7 +463,7 @@ fun StatsScreen(
                                 var dirExpanded by rememberSaveable { mutableStateOf(false) }
                                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                     StatsSectionHeader(
-                                        icon = Icons.Rounded.BarChart,
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
                                         title = "TOP REGISTI",
                                         count = null
                                     )
@@ -480,7 +483,7 @@ fun StatsScreen(
                                 if (stats.genreCounts.isNotEmpty()) {
                                     var genreExpanded by rememberSaveable { mutableStateOf(false) }
                                     StatsSectionHeader(
-                                        icon = Icons.AutoMirrored.Rounded.TrendingUp,
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
                                         title = "DISTRIBUZIONE GENERI",
                                         count = null
                                     )
@@ -495,7 +498,7 @@ fun StatsScreen(
                                 // ── Le Tue Decadi d'Oro ───────────────────────────────────
                                 if (stats.decadeCounts.isNotEmpty()) {
                                     StatsSectionHeader(
-                                        icon = Icons.Rounded.DateRange,
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                                         title = "LE TUE DECADI D'ORO",
                                         count = null
                                     )
@@ -505,7 +508,7 @@ fun StatsScreen(
 
                                 // ── Distribuzione Voti ────────────────────────────────────
                                 StatsSectionHeader(
-                                    icon = Icons.Rounded.Star,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                                     title = "DISTRIBUZIONE VOTI",
                                     count = null
                                 )
@@ -647,7 +650,7 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.AccessTime, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "TEMPO TOTALE TRASCORSO",
@@ -677,7 +680,7 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
                     },
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Icon(Icons.Rounded.Share, null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(14.dp))
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_share), null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(14.dp))
                 }
             }
             Spacer(Modifier.height(10.dp))
@@ -756,7 +759,7 @@ fun StatsSectionHeader(
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
-                    imageVector = if (actionLabel.contains("MENO", ignoreCase = true)) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                    imageVector = if (actionLabel.contains("MENO", ignoreCase = true)) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(14.dp)
@@ -993,7 +996,7 @@ fun MediaTimeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.AccessTime, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(timeLabel, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
                 }
@@ -1764,7 +1767,7 @@ fun GenreDistributionSection(
                                 fontWeight = FontWeight.ExtraBold
                             )
                             Icon(
-                                imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
+                                imageVector = if (expanded) Icons.Rounded.KeyboardDoubleArrowUp else Icons.Rounded.KeyboardDoubleArrowDown,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -2082,7 +2085,7 @@ fun WrappedBannerPill(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                            imageVector = if (expanded) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
@@ -2134,8 +2137,8 @@ fun WrappedBannerPill(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", Icons.Rounded.AutoAwesome, Modifier.weight(1f))
-                        WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, Icons.Rounded.AccessTime, Modifier.weight(1f))
+                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", ImageVector.vectorResource(id = R.drawable.ic_bacchetta), Modifier.weight(1f))
+                        WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, ImageVector.vectorResource(id = R.drawable.ic_clock), Modifier.weight(1f))
                     }
                     
                     Spacer(Modifier.height(20.dp))
@@ -2182,7 +2185,7 @@ fun WrappedBannerPill(
                                         )
                                     } else {
                                         Icon(
-                                            imageVector = Icons.Rounded.Person,
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
                                             contentDescription = null,
                                             tint = Color.White.copy(alpha = 0.5f),
                                             modifier = Modifier.size(32.dp)
@@ -2213,7 +2216,7 @@ fun WrappedBannerPill(
                                 }
                                 
                                 Icon(
-                                    imageVector = Icons.Rounded.Star,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.size(24.dp)
@@ -2233,9 +2236,9 @@ fun WrappedBannerPill(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            WrappedSmallStat("FILM", stats.moviesWatched.toString(), Icons.Rounded.Movie, Modifier.weight(1f))
-                            WrappedSmallStat("SERIE", stats.tvWatched.toString(), Icons.Rounded.Tv, Modifier.weight(1f))
-                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", Icons.Rounded.Videocam, Modifier.weight(2f))
+                            WrappedSmallStat("FILM", stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciack), Modifier.weight(1f))
+                            WrappedSmallStat("SERIE", stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1f))
+                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(2f))
                         }
                     }
 
@@ -2297,7 +2300,7 @@ fun WrappedBannerPill(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ) {
-                                Icon(Icons.Rounded.AutoFixHigh, null, modifier = Modifier.size(18.dp))
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_sparkle), null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(10.dp))
                                 Text("CONDIVIDI LA TUA CARD", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
                             }
@@ -2927,7 +2930,7 @@ private fun YearSelectionButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                Icons.Rounded.CalendarToday,
+                ImageVector.vectorResource(id = R.drawable.ic_calendario),
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -3193,7 +3196,7 @@ fun ModalItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (isSelected) {
                 Icon(
-                    Icons.Rounded.Check,
+                    ImageVector.vectorResource(id = R.drawable.ic_tick),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)

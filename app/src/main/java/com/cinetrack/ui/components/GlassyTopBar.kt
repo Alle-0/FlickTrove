@@ -14,6 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.*
 import com.cinetrack.ui.assets.CustomIcons
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -125,10 +128,10 @@ fun GlassyTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (onBackPress != null) Icons.Rounded.ArrowBackIosNew else Icons.AutoMirrored.Rounded.Notes,
+                    imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
                     contentDescription = "Navigation",
                     tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(if (onBackPress != null) 16.dp else 20.dp)
                 )
             }
 
@@ -279,7 +282,7 @@ fun GlassyTopBar(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = CustomIcons.PremiumBellFilled,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
                                 contentDescription = "Aggiornamenti",
                                 tint = Color.White,
                                 modifier = Modifier.size(20.dp)
