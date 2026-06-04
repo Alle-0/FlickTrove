@@ -73,7 +73,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
+    val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
     val padding = 16.dp
     val gap = 12.dp
     val cardWidth = if (columns > 1) {

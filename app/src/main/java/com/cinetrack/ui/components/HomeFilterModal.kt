@@ -378,14 +378,16 @@ fun HomeFilterModal(
                                         DirectionChip(
                                             label = "Decrescente",
                                             isSelected = localSortConfig.sortDirection == "desc",
-                                            icon = ImageVector.vectorResource(id = R.drawable.ic_skip),
+                                            icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                            iconRotation = 90f,
                                             modifier = Modifier.weight(1f),
                                             onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
                                         )
                                         DirectionChip(
                                             label = "Crescente",
                                             isSelected = localSortConfig.sortDirection == "asc",
-                                            icon = ImageVector.vectorResource(id = R.drawable.ic_skip),
+                                            icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                            iconRotation = -90f,
                                             modifier = Modifier.weight(1f),
                                             onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
                                         )
@@ -830,6 +832,7 @@ private fun DirectionChip(
     label: String,
     isSelected: Boolean,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconRotation: Float = 0f,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -856,7 +859,7 @@ private fun DirectionChip(
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(16.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(16.dp).graphicsLayer(rotationZ = iconRotation))
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,

@@ -436,7 +436,7 @@ fun SettingsScreen(
                                                     .weight(1f)
                                                     .clip(RoundedCornerShape(12.dp))
                                                     .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                                    .clickable { 
+                                                    .bounceClick { 
                                                         if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                                         settingsViewModel.updateTitleTextSizeMultiplier(value) 
                                                     }
@@ -1001,7 +1001,7 @@ fun SettingsScreen(
             visible = showBadgesInfoDialog,
             enter = fadeIn(tween(200)),
             exit = fadeOut(tween(200)),
-            modifier = Modifier.zIndex(100f)
+            modifier = Modifier.zIndex(200f)
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
             Box(
@@ -1426,7 +1426,7 @@ fun ExternalMigrationDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud_thin),
                     null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)
@@ -2208,7 +2208,7 @@ fun SettingsItem(
                     trailing()
                 } else if (customContent == null) {
                     Icon(
-                        imageVector = if (isExternal) Icons.AutoMirrored.Rounded.OpenInNew else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        imageVector = ImageVector.vectorResource(id = if (isExternal) com.cinetrack.R.drawable.ic_external_link else com.cinetrack.R.drawable.ic_right),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.2f),
                         modifier = Modifier.size(18.dp)

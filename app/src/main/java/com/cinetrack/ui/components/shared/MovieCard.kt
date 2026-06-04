@@ -132,7 +132,7 @@ fun MovieCard(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(bottom = 6.dp, end = 2.dp)
-                        .size(26.dp)
+                        .size(34.dp)
                         .background(
                             HazeStyles.GlassColor.copy(alpha = 0.5f),
                             CircleShape
@@ -144,7 +144,7 @@ fun MovieCard(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_eye),
                         contentDescription = "Watched",
                         tint = HazeStyles.AccentYellow,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }

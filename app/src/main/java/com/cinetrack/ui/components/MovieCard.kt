@@ -811,9 +811,9 @@ fun MovieCard(
                             val isTickOrPlus = isWatched || (isReleased && !isOcchio)
                             val iconSizeModifier = Modifier.size(
                                 if (isLarge) {
-                                    if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 18.dp
+                                    if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 21.dp
                                 } else {
-                                    if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 14.dp
+                                    if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 17.dp
                                 }
                             )
                             

@@ -304,7 +304,7 @@ private fun Header(movie: Movie, onDismiss: () -> Unit) {
             shape = CircleShape
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White)
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
             }
         }
     }

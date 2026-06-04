@@ -668,7 +668,7 @@ fun FlickTroveApp(deepLinkIntent: androidx.compose.runtime.MutableState<android.
                                             )
                                         }
 
-                                        val isButtonVisible =  updatesOverlayOffset == null && !isLoginOrSplash
+                                        val isButtonVisible = updatesOverlayOffset == null && !isLoginOrSplash && !isAnySettingsDialogOpen
 
                                         AnimatedVisibility(
                                             visible = isButtonVisible,

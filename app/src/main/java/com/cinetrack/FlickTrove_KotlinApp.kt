@@ -58,5 +58,19 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             androidx.work.ExistingPeriodicWorkPolicy.KEEP,
             releaseReminderRequest
         )
+
+        // Refresh the home-screen widget daily so upcoming release dates
+        // stay accurate even if TMDB updates them (e.g. a film is delayed).
+        val widgetRefreshRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.WidgetRefreshWorker>(
+            24, java.util.concurrent.TimeUnit.HOURS
+        )
+            .setConstraints(localConstraints)
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "WidgetDailyRefresh",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            widgetRefreshRequest
+        )
     }
 }
