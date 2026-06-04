@@ -46,6 +46,24 @@ class BaselineProfileGenerator {
                 if (searchButton != null) {
                     searchButton.click()
                     device.waitForIdle()
+                    
+                    // Digita una query di ricerca per far apparire le MovieCard
+                    val searchField = device.wait(androidx.test.uiautomator.Until.findObject(By.textContains("Cerca")), 5000)
+                    if (searchField != null) {
+                        searchField.text = "Batman"
+                        device.waitForIdle()
+                        device.pressEnter()
+                        device.waitForIdle()
+                    }
+                    
+                    // Aspettiamo che carichi i risultati della ricerca (le MovieCard)
+                    val scrollableList = device.wait(androidx.test.uiautomator.Until.findObject(By.scrollable(true)), 10000)
+                    if (scrollableList != null) {
+                        scrollableList.setGestureMargin(device.displayWidth / 5)
+                        // Scorriamo per forzare il rendering e la pre-compilazione di più MovieCard
+                        scrollableList.scroll(androidx.test.uiautomator.Direction.DOWN, 1f)
+                        device.waitForIdle()
+                    }
                 }
             }
         )
