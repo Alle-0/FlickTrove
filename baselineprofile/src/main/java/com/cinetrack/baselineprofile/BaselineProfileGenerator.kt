@@ -59,7 +59,9 @@ class BaselineProfileGenerator {
                     // Aspettiamo che carichi i risultati della ricerca (le MovieCard)
                     val scrollableList = device.wait(androidx.test.uiautomator.Until.findObject(By.scrollable(true)), 10000)
                     if (scrollableList != null) {
-                        scrollableList.setGestureMargin(device.displayWidth / 5)
+                        // Ignoriamo la metà inferiore dello schermo nel caso in cui la tastiera sia aperta
+                        scrollableList.setGestureMargins(0, 0, 0, device.displayHeight / 2)
+                        
                         // Scorriamo per forzare il rendering e la pre-compilazione di più MovieCard
                         scrollableList.scroll(androidx.test.uiautomator.Direction.DOWN, 1f)
                         device.waitForIdle()
