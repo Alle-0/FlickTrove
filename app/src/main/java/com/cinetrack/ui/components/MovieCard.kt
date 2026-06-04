@@ -678,162 +678,162 @@ fun MovieCard(
                 val isLarge = cardWidth > 150.dp
                 val multiplier = com.cinetrack.LocalTitleTextSizeMultiplier.current
                 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(start = if (isLarge) 16.dp else 12.dp, end = if (isLarge) 12.dp else 8.dp, bottom = if (hasRating) (if (isLarge) 10.dp else 6.dp) else (if (isLarge) 12.dp else 8.dp)),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .align(Alignment.BottomStart)
+                        .padding(
+                            start = if (isLarge) 16.dp else 12.dp, 
+                            end = if (isLarge) 52.dp else 36.dp, 
+                            bottom = if (hasRating) (if (isLarge) 10.dp else 6.dp) else (if (isLarge) 12.dp else 8.dp)
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f).padding(end = if (isLarge) 10.dp else 6.dp),
-                        verticalArrangement = Arrangement.spacedBy(1.dp)
-                    ) {
-                        Text(
-                            text = movie.title ?: movie.name ?: "",
-                            color = Color.White.copy(alpha = 0.9f),
-                            fontSize = ((if (isLarge) 16 else 13) * multiplier).sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            lineHeight = ((if (isLarge) 19 else 16) * multiplier).sp,
-                            overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                        )
-                        if (hasRating) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
-                                )
-                                Text(
-                                    text = String.format("%.1f", displayRating),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
-                                    fontWeight = FontWeight.Black,
-                                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                                )
-                            }
+                    Text(
+                        text = movie.title ?: movie.name ?: "",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = ((if (isLarge) 16 else 13) * multiplier).sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        lineHeight = ((if (isLarge) 19 else 16) * multiplier).sp,
+                        overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                    )
+                    if (hasRating) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
+                            )
+                            Text(
+                                text = String.format("%.1f", displayRating),
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
+                                fontWeight = FontWeight.Black,
+                                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                            )
                         }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = if (isLarge) 12.dp else 8.dp, bottom = if (isLarge) 12.dp else 8.dp)
+                        .size(if (isLarge) 34.dp else 24.dp)
+                        .bounceClick(
+                            scaleDown = 0.85f,
+                            onLongClick = {}, // Block long press menu from opening
+                            vibrateOnLongClick = false,
+                            onPress = null
+                        ) {
+                            // Trigger ripple on the parent card from the button center on release
+                            val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
+                            val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
+                            rippleState.trigger(Offset(rippleX, rippleY))
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+
+                            val isReleased = movie.isReleased
+                            if (!isReleased) {
+                                if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                else if (showActionHint) {
+                                    onMessage("Gestisci il promemoria nella pagina dei dettagli")
+                                }
+                            } else if (isTv) {
+                                if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                else if (showActionHint) {
+                                    onMessage("Gestisci gli episodi nella pagina dei dettagli")
+                                }
+                            } else {
+                                // Normal behavior for released movies
+                                onAction(movie)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isTv && !isWatched && progress > 0f) {
+                        MovieCircularProgress(progress = progress)
+                    }
+
+                    val appAccent = MaterialTheme.colorScheme.primary
+                    val isReleased = movie.isReleased
+                    val isPromemoriaAttiva = !isReleased && isReminder
+                    val isOcchio = isReleased && (isReminder || isFavorite)
+
+                    val actionBg = when {
+                        isWatched -> Color(0xFF10B981).copy(alpha = 0.1f) // Green for Watched
+                        isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
+                        isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
+                        else -> HazeStyles.GlassColor.copy(alpha = 0.60f)
+                    }
+
+                    val actionBorder = when {
+                        isWatched -> Color(0xFF10B981)
+                        isPromemoriaAttiva -> appAccent
+                        isOcchio -> HazeStyles.AccentYellow
+                        else -> HazeStyles.GlassBorderColor
+                    }.copy(alpha = 0.3f)
+
+                    val actionTint = when {
+                        isWatched -> Color(0xFF10B981)
+                        isPromemoriaAttiva -> appAccent
+                        isOcchio -> HazeStyles.AccentYellow
+                        else -> Color.White
                     }
 
                     Box(
                         modifier = Modifier
-                            .size(if (isLarge) 34.dp else 24.dp)
-                            .bounceClick(
-                                scaleDown = 0.85f,
-                                onLongClick = {}, // Block long press menu from opening
-                                vibrateOnLongClick = false,
-                                onPress = null
-                            ) {
-                                // Trigger ripple on the parent card from the button center on release
-                                val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
-                                val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
-                                rippleState.trigger(Offset(rippleX, rippleY))
-                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-
-                                val isReleased = movie.isReleased
-                                if (!isReleased) {
-                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                                    else if (showActionHint) {
-                                        onMessage("Gestisci il promemoria nella pagina dei dettagli")
-                                    }
-                                } else if (isTv) {
-                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                                    else if (showActionHint) {
-                                        onMessage("Gestisci gli episodi nella pagina dei dettagli")
-                                    }
-                                } else {
-                                    // Normal behavior for released movies
-                                    onAction(movie)
-                                }
-                            },
+                            .size(if (isLarge) 30.dp else 22.dp)
+                            .background(color = actionBg, shape = CircleShape)
+                            .border(width = 1.dp, color = actionBorder, shape = CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (isTv && !isWatched && progress > 0f) {
-                            MovieCircularProgress(progress = progress)
-                        }
-
-                        val appAccent = MaterialTheme.colorScheme.primary
-                        val isReleased = movie.isReleased
-                        val isPromemoriaAttiva = !isReleased && isReminder
-                        val isOcchio = isReleased && (isReminder || isFavorite)
-
-                        val actionBg = when {
-                            isWatched -> Color(0xFF10B981).copy(alpha = 0.1f) // Green for Watched
-                            isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
-                            isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
-                            else -> HazeStyles.GlassColor.copy(alpha = 0.60f)
-                        }
-
-                        val actionBorder = when {
-                            isWatched -> Color(0xFF10B981)
-                            isPromemoriaAttiva -> appAccent
-                            isOcchio -> HazeStyles.AccentYellow
-                            else -> HazeStyles.GlassBorderColor
-                        }.copy(alpha = 0.3f)
-
-                        val actionTint = when {
-                            isWatched -> Color(0xFF10B981)
-                            isPromemoriaAttiva -> appAccent
-                            isOcchio -> HazeStyles.AccentYellow
-                            else -> Color.White
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .size(if (isLarge) 30.dp else 22.dp)
-                                .background(color = actionBg, shape = CircleShape)
-                                .border(width = 1.dp, color = actionBorder, shape = CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val isBellOutlined = !isReleased && !isReminder
-                            
-                            val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
-                            var bellHasInitialized by remember { mutableStateOf(false) }
-                            
-                            LaunchedEffect(isReminder) {
-                                if (bellHasInitialized && !isReleased && isReminder) {
-                                    bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                                    bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                                }
-                                bellHasInitialized = true
+                        val isBellOutlined = !isReleased && !isReminder
+                        
+                        val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                        var bellHasInitialized by remember { mutableStateOf(false) }
+                        
+                        LaunchedEffect(isReminder) {
+                            if (bellHasInitialized && !isReleased && isReminder) {
+                                bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                                bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
                             }
-                            
-                            val isTickOrPlus = isWatched || (isReleased && !isOcchio)
-                            val iconSizeModifier = Modifier.size(
-                                if (isLarge) {
-                                    if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 21.dp
-                                } else {
-                                    if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 17.dp
-                                }
-                            )
-                            
-                            Icon(
-                                imageVector = when {
-                                    isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
-                                    !isReleased -> if (isReminder) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
-                                    isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
-                                    else -> ImageVector.vectorResource(id = R.drawable.ic_plus_card)
-                                },
-                                contentDescription = "Action",
-                                tint = actionTint,
-                                modifier = iconSizeModifier.graphicsLayer {
-                                    if (!isReleased && isReminder) {
-                                        rotationZ = bellRotation.value
-                                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
-                                    }
-                                }
-                            )
+                            bellHasInitialized = true
                         }
+                        
+                        val isTickOrPlus = isWatched || (isReleased && !isOcchio)
+                        val iconSizeModifier = Modifier.size(
+                            if (isLarge) {
+                                if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 21.dp
+                            } else {
+                                if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 17.dp
+                            }
+                        )
+                        
+                        Icon(
+                            imageVector = when {
+                                isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
+                                !isReleased -> if (isReminder) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
+                                isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
+                                else -> ImageVector.vectorResource(id = R.drawable.ic_plus_card)
+                            },
+                            contentDescription = "Action",
+                            tint = actionTint,
+                            modifier = iconSizeModifier.graphicsLayer {
+                                if (!isReleased && isReminder) {
+                                    rotationZ = bellRotation.value
+                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
+                                }
+                            }
+                        )
                     }
                 }
             }

@@ -247,9 +247,13 @@ fun SettingsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .haze(
-                    state = localHazeState,
-                    style = HazeStyles.PremiumDark
+                .then(
+                    if (anyDialogVisible) {
+                        Modifier.haze(
+                            state = localHazeState,
+                            style = HazeStyles.PremiumDark
+                        )
+                    } else Modifier
                 )
         ) {
             Column(modifier = Modifier.fillMaxSize()) {

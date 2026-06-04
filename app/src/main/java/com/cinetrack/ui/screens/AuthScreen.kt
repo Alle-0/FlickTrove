@@ -3,6 +3,9 @@ package com.cinetrack.ui.screens
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.animation.*
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
@@ -88,7 +91,7 @@ fun AuthScreen(
 
     LaunchedEffect(authState) {
         when (val state = authState) {
-            is AuthState.Authenticated -> {
+            is AuthState.Authenticated, is AuthState.Anonymous -> {
                 viewModel.resetProcessState()
                 onLoginSuccess()
             }
@@ -161,7 +164,7 @@ fun AuthScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = "Email",
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
+                        icon = androidx.compose.material.icons.Icons.Default.Email,
                         isError = !isEmailValid && email.isNotEmpty(),
                         errorText = if (!isEmailValid && email.isNotEmpty()) "Email non valida" else null,
                         enabled = authState !is AuthState.Loading
@@ -171,7 +174,7 @@ fun AuthScreen(
                         value = password,
                         onValueChange = { password = it },
                         label = "Password",
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_lock),
+                        icon = androidx.compose.material.icons.Icons.Default.Lock,
                         isError = !isPasswordValid && password.isNotEmpty(),
                         errorText = if (!isPasswordValid && password.isNotEmpty()) "Minimo 6 caratteri" else null,
                         isPassword = true,

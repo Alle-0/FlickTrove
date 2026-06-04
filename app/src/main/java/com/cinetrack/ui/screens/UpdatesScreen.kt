@@ -233,7 +233,7 @@ fun UpdatesScreen(
                                             UpdateCard(
                                                 movie = movie,
                                                 label = "In Arrivo: ${movie.releaseDate ?: movie.firstAirDate}",
-                                                icon = CustomIcons.PremiumBellFilled,
+                                                iconRes = R.drawable.ic_bell_piena,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 onAction = { /* Optional: toggle reminder */ },
                                                 onPress = { onMovieClick(movie) }
@@ -316,7 +316,7 @@ fun UpdatesScreen(
                                                 UpdateCard(
                                                     movie = movie,
                                                     label = "${movie.newEpisodesFound} nuovi episodi",
-                                                    icon = CustomIcons.PremiumCheck,
+                                                    iconRes = R.drawable.ic_tick_card,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     onAction = { viewModel.clearUpdate(movie.id, movie.mediaType) },
                                                     onPress = { onMovieClick(movie) }
@@ -364,7 +364,7 @@ fun UpdatesScreen(
                                                 UpdateCard(
                                                     movie = movie,
                                                     label = "Disponibile ora",
-                                                    icon = CustomIcons.PremiumCheck,
+                                                    iconRes = R.drawable.ic_tick_card,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     onAction = { viewModel.clearMigrated(movie.id, movie.mediaType) },
                                                     onPress = { onMovieClick(movie) }
@@ -514,7 +514,7 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = CustomIcons.PremiumBellFilled,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
@@ -561,7 +561,7 @@ fun EmptyNotificationsState() {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = CustomIcons.PremiumBell,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell),
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.05f),
                 modifier = Modifier.size(60.dp)
@@ -599,7 +599,7 @@ fun SectionHeader(text: String, action: (@Composable () -> Unit)? = null) {
 fun UpdateCard(
     movie: Movie, 
     label: String, 
-    icon: ImageVector, 
+    iconRes: Int, 
     color: Color, 
     onAction: () -> Unit, 
     onPress: () -> Unit
@@ -682,7 +682,7 @@ fun UpdateCard(
                     scaleY = actionScale
                 }
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = color.copy(alpha = 0.8f))
+                Icon(imageVector = ImageVector.vectorResource(id = iconRes), contentDescription = null, tint = color.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
             }
         }
     }

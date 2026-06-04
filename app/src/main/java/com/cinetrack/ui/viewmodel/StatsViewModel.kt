@@ -70,7 +70,7 @@ class StatsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _timeRange = MutableStateFlow<TimeRange>(
-        TimeRange.Year(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR))
+        TimeRange.AllTime
     )
 
     val uiState: StateFlow<StatsUiState> = combine(

@@ -865,8 +865,9 @@ fun SearchScreen(
                                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                                     contentDescription = "Rimuovi ricerca",
                                                     modifier = Modifier
-                                                        .size(14.dp)
-                                                        .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) },
+                                                        .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) }
+                                                        .size(18.dp)
+                                                        .padding(4.dp),
                                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                                 )
                                             }
