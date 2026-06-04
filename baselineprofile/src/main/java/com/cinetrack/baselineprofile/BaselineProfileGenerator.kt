@@ -48,7 +48,7 @@ class BaselineProfileGenerator {
                     device.waitForIdle()
                     
                     // Digita una query di ricerca per far apparire le MovieCard
-                    val searchField = device.wait(androidx.test.uiautomator.Until.findObject(By.textContains("Cerca")), 5000)
+                    val searchField = device.wait(androidx.test.uiautomator.Until.findObject(By.clazz("android.widget.EditText")), 5000)
                     if (searchField != null) {
                         searchField.text = "Batman"
                         device.waitForIdle()
