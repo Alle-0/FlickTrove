@@ -354,7 +354,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_rank),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
                                 title = "Badge informativi",
                                 description = "Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.",
                                 trailing = {
@@ -524,7 +524,7 @@ fun SettingsScreen(
                                 }
                             )
                             SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_vibra),
                                 title = "Feedback aptico",
                                 description = "Vibrazione alle azioni dell'interfaccia",
                                 trailing = {

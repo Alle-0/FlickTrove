@@ -250,9 +250,9 @@ fun GlassyTopBar(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Tune,
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
                             contentDescription = "Filtri",
-                            tint = Color.White,
+                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                     }

@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
 import android.content.Intent
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.R
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -121,7 +124,7 @@ fun QuickNoteModal(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Edit,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)

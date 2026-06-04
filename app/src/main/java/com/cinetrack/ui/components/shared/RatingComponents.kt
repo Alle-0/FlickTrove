@@ -60,20 +60,16 @@ fun FluidRatingBar(
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
                     val newRating = calculateRatingFromX(offset.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
-                    if (rating != newRating) {
-                        onRatingChange(newRating)
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
+                    onRatingChange(newRating)
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 }
             }
             .pointerInput(Unit) {
                 detectDragGestures { change, _ ->
                     change.consume()
                     val newRating = calculateRatingFromX(change.position.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
-                    if (rating != newRating) {
-                        onRatingChange(newRating)
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
+                    onRatingChange(newRating)
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 }
             },
         contentAlignment = Alignment.Center
@@ -184,13 +180,18 @@ fun PremiumStar(
 }
 
 private fun calculateRatingFromX(x: Float, totalWidth: Float, maxRating: Double, numStars: Int, gapPx: Float): Double {
-    if (totalWidth <= 0f) return 0.0
-    // Aggiungiamo un padding logico del 5% ai bordi per rendere i voti estremi (0.0 e 10.0) 
-    // facili da selezionare quanto i voti centrali, garantendo hit-target identici per tutti.
-    val padding = totalWidth * 0.05f
-    val effectiveWidth = totalWidth - 2 * padding
-    val effectiveX = (x - padding).coerceIn(0f, effectiveWidth)
+    if (totalWidth <= 0f || numStars <= 0) return 0.0
     
-    val rawRating = (effectiveX / effectiveWidth) * maxRating
+    val starSize = (totalWidth - (numStars - 1) * gapPx) / numStars
+    val starBlockWidth = starSize + gapPx
+    
+    val clampedX = x.coerceIn(0f, totalWidth)
+    val starIndex = (clampedX / starBlockWidth).toInt().coerceIn(0, numStars - 1)
+    val localX = clampedX - starIndex * starBlockWidth
+    
+    val fraction = (localX / starSize).coerceIn(0f, 1f)
+    val starValue = maxRating / numStars
+    val rawRating = (starIndex + fraction) * starValue
+    
     return ((rawRating * 2).roundToInt() / 2.0).coerceIn(0.0, maxRating)
 }
