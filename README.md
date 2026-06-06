@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="License">
 </p>
 
 **Traccia film, serie TV e attori con uno stile mozzafiato.**
@@ -19,12 +20,26 @@
 <details open>
   <summary><b>📖 Indice</b></summary>
   <ol>
-    <li><a href="#-features">✨ Features Principali</a></li>
+    <li><a href="#-il-progetto">🎯 Il Progetto</a></li>
+    <li><a href="#-features-principali">✨ Features Principali</a></li>
     <li><a href="#-architettura-e-tecnologia">🛠 Architettura e Tecnologia</a></li>
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
-    <li><a href="#-installazione--setup">⚙️ Installazione & Setup</a></li>
+    <li><a href="#%EF%B8%8F-installazione--setup">⚙️ Installazione & Setup</a></li>
+    <li><a href="#-utilizzo">🚀 Utilizzo</a></li>
+    <li><a href="#-come-contribuire">🤝 Come Contribuire</a></li>
+    <li><a href="#-licenza">📄 Licenza</a></li>
+    <li><a href="#-contatti--ringraziamenti">📫 Contatti & Ringraziamenti</a></li>
   </ol>
 </details>
+
+---
+
+## 🎯 Il Progetto
+
+**Qual è la motivazione dietro FlickTrove?**
+Ci sono moltissime app per tracciare film e serie TV, ma spesso mancano di cura per i dettagli visivi o risultano poco fluide. L'obiettivo di FlickTrove è quello di fornire agli appassionati non solo uno strumento utile e funzionale, ma un'esperienza premium, reattiva e piacevole da usare, sfruttando al massimo le moderne tecnologie Android. 
+
+Il progetto risolve il bisogno di avere una libreria personale elegante, sincronizzata in cloud, e con notifiche tempestive per le nuove uscite.
 
 ---
 
@@ -43,7 +58,7 @@ FlickTrove non è solo un tracker, ma una libreria personale costruita su misura
 
 ## 🛠 Architettura e Tecnologia
 
-Dietro un'interfaccia splendida c'è un motore solido e scalabile.
+Dietro un'interfaccia splendida c'è un motore solido e scalabile. Abbiamo utilizzato le best practice dello sviluppo Android moderno.
 
 | Categoria | Stack / Libreria |
 | :--- | :--- |
@@ -70,7 +85,7 @@ Il design è il vero fiore all'occhiello di FlickTrove.
 
 - 🪟 **Glassmorphism Integrale**: Utilizziamo un motore di blur custom (tramite la libreria *Haze*) per sfocare i contenuti sotto pannelli, drawer e top bar in tempo reale a 60/120fps.
 - 🌈 **Dynamic Theming**: I colori predominanti di locandine e sfondi vengono estratti dinamicamente da Coil per tematizzare l'intera schermata (gradienti, bottoni e accenti).
-- ✨ **Animazioni Premium**: Micro-interazioni, feedback aptico aptico personalizzato e bounce-click effect rendono l'app incredibilmente reattiva e "viva" sotto le dita.
+- ✨ **Animazioni Premium**: Micro-interazioni, feedback aptico personalizzato e bounce-click effect rendono l'app incredibilmente reattiva e "viva" sotto le dita.
 
 ---
 
@@ -78,19 +93,75 @@ Il design è il vero fiore all'occhiello di FlickTrove.
 
 Per compilare FlickTrove localmente avrai bisogno di una chiave API fornita da **The Movie Database (TMDB)**.
 
+### Prerequisiti
+- [Android Studio](https://developer.android.com/studio) (versione recente)
+- JDK 17+
+
+### Passaggi
+
 1. **Ottieni la chiave API:**
    Registrati su [TheMovieDB.org](https://www.themoviedb.org/documentation/api) e richiedi una API Key per sviluppatori (è gratis!).
 
-2. **Configura il progetto:**
-   Clona la repository e apri il file `local.properties` (se non esiste, crealo nella root del progetto). Aggiungi questa riga:
+2. **Clona la repository:**
+   ```bash
+   git clone https://github.com/Alle-0/FlickTrove_Kotlin.git
+   ```
+
+3. **Configura il progetto:**
+   Apri il progetto, e nel file `local.properties` (se non esiste, crealo nella root del progetto), aggiungi questa riga:
    ```properties
    TMDB_API_KEY="INSERISCI_QUI_LA_TUA_CHIAVE"
    ```
 
-3. **Compila e Avvia:**
-   Apri il progetto su *Android Studio*, attendi il Gradle sync, seleziona il tuo dispositivo fisico o emulatore e clicca su **Run** (▶️).
+4. **Compila e Avvia:**
+   Attendi la sincronizzazione di Gradle in Android Studio, seleziona il tuo dispositivo fisico o emulatore e clicca su **Run** (▶️).
 
 ---
+
+## 🚀 Utilizzo
+
+Una volta avviata l'app:
+1. Accedi o crea un account (i dati verranno salvati su Firebase).
+2. Usa la barra di ricerca per trovare il tuo primo film o serie TV.
+3. Clicca su "Aggiungi a libreria" e seleziona in quale cartella inserirlo.
+4. *(Opzionale)* Vai alla tab "Statistiche" per monitorare il tuo tempo di visione.
+
+*Includi qui alcuni screenshot dell'app per far capire subito all'utente come si presenta l'interfaccia visiva!*
+
+---
+
+## 🤝 Come Contribuire
+
+I contributi sono ciò che rende la community open source un posto fantastico per imparare, trarre ispirazione e creare. Ogni contributo tu voglia dare è **molto apprezzato**.
+
+1. Esegui un Fork del progetto
+2. Crea il tuo Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Fai il Commit dei tuoi cambiamenti (`git commit -m 'Aggiungi qualche AmazingFeature'`)
+4. Fai il Push sul Branch (`git push origin feature/AmazingFeature`)
+5. Apri una Pull Request
+
+Se trovi dei bug o hai suggerimenti, sentiti libero di aprire una **Issue**.
+
+---
+
+## 📄 Licenza
+
+Distribuito sotto la licenza Apache 2.0. Vedi `LICENSE` per maggiori informazioni.
+
+---
+
+## 📫 Contatti & Ringraziamenti
+
+**Contatti:**
+* Alle-0 - alle0.github@example.com
+* Link al progetto: [https://github.com/Alle-0/FlickTrove_Kotlin](https://github.com/Alle-0/FlickTrove_Kotlin)
+
+**Ringraziamenti & Risorse Utili:**
+* [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - Per i dati su film e serie TV
+* [Haze](https://github.com/chrisbanes/haze) - Per gli incredibili effetti glassmorphici
+* [Shields.io](https://shields.io) - Per i badge README
+
+<br>
 
 <div align="center">
   <i>Sviluppato con passione per i maniaci del cinema e delle serie TV.</i>
