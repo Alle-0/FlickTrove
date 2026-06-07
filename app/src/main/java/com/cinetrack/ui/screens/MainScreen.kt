@@ -168,8 +168,8 @@ class MainScreen : Screen {
                     GlassyDrawer(
                         hazeState = drawerHazeState,
                         selectedRoute = when (currentTab) {
-                            is HomeTab -> "popular_movies"
-                            is DiscoverTab -> "upcoming_movies"
+                            is HomeTab -> null
+                            is DiscoverTab -> DiscoverTab.requestedType
                             is VistiTab -> "visti"
                             is RecommendationsTab -> "recommendations"
                             is FoldersTab -> "my_folders"
