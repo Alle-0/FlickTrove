@@ -177,12 +177,9 @@ fun SearchScreenContent(
 
     val internalHazeState = hazeState ?: remember { HazeState() }
 
-    val triggerExit = {
-        keyboardController?.hide()
-        focusManager.clearFocus()
-        onClosing()
-        onBack()
-    }
+    // This will be set by animatedTriggerExit defined inside BoxWithConstraints
+    val onExitRequest = remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
+
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
     androidx.activity.compose.BackHandler {
@@ -191,7 +188,7 @@ fun SearchScreenContent(
         } else if (isFilterVisible) {
             isFilterVisible = false
         } else {
-            triggerExit()
+            onExitRequest.value?.invoke()
         }
     }
 
@@ -217,25 +214,94 @@ fun SearchScreenContent(
 
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(Color.Black)
-        ) {
-            LaunchedEffect(Unit) {
+        val width = constraints.maxWidth.toFloat()
+        val height = constraints.maxHeight.toFloat()
+
+        var isMeasured by remember { mutableStateOf(false) }
+        val revealAmount = remember { Animatable(0f) }
+        var isClosing by remember { mutableStateOf(false) }
+
+        if (width > 0 && !isMeasured) {
+            LaunchedEffect(Unit) { isMeasured = true }
+        }
+
+        LaunchedEffect(isMeasured) {
+            if (isMeasured) {
+                revealAmount.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 600, easing = CubicBezierEasing(0.7f, 0f, 0.2f, 1f))
+                )
+                // Request keyboard focus after reveal completes
                 if (!hasRequestedFocus) {
                     hasRequestedFocus = true
                     if (initialGenreName == null && initialKeywordName == null) {
-                        try {
-                            focusRequester.requestFocus()
-                        } catch (e: IllegalStateException) {
-                            // FocusRequester non ancora agganciato al nodo Compose
-                        }
+                        try { focusRequester.requestFocus() } catch (e: IllegalStateException) {}
                     } else {
                         keyboardController?.hide()
                     }
                 }
             }
+        }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+        val localDensity = LocalDensity.current
+        val statusBarsTopPx = androidx.compose.foundation.layout.WindowInsets.statusBars.getTop(localDensity).toFloat()
+        val revealCenter = remember(width, height, statusBarsTopPx, startX, startY) {
+            if (startX != null && startY != null) {
+                androidx.compose.ui.geometry.Offset(startX, startY)
+            } else {
+                with(localDensity) {
+                    androidx.compose.ui.geometry.Offset(width - 36.dp.toPx(), height - 120.dp.toPx())
+                }
+            }
+        }
+        val maxRevealRadius = remember(revealCenter, width, height) {
+            val distTopLeft = sqrt(revealCenter.x.pow(2) + revealCenter.y.pow(2))
+            val distTopRight = sqrt((width - revealCenter.x).pow(2) + revealCenter.y.pow(2))
+            val distBottomLeft = sqrt(revealCenter.x.pow(2) + (height - revealCenter.y).pow(2))
+            val distBottomRight = sqrt((width - revealCenter.x).pow(2) + (height - revealCenter.y).pow(2))
+            max(max(distTopLeft, distTopRight), max(distBottomLeft, distBottomRight)) * 1.1f
+        }
+
+        // Override triggerExit to animate close before popping
+        val animatedTriggerExit = {
+            if (!isClosing) {
+                isClosing = true
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                onClosing()
+                scope.launch {
+                    revealAmount.animateTo(
+                        targetValue = 0f,
+                        animationSpec = tween(durationMillis = 500, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
+                    )
+                    onBack()
+                }
+            }
+        }
+        // Wire into the BackHandler callback defined above BoxWithConstraints
+        onExitRequest.value = animatedTriggerExit
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val radius = revealAmount.value * maxRevealRadius
+                    clip = true
+                    shape = object : Shape {
+                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                            val path = Path().apply {
+                                addOval(androidx.compose.ui.geometry.Rect(center = revealCenter, radius = radius))
+                            }
+                            return Outline.Generic(path)
+                        }
+                    }
+                }
+        ) {
+
+        LaunchedEffect(Unit) { /* focus handled after reveal */ }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+
                 com.cinetrack.ui.components.shared.MovieActionsWrapper(
                     hazeState = internalHazeState,
                     folders = uiState.folders,
@@ -720,7 +786,7 @@ fun SearchScreenContent(
                             Box(modifier = Modifier.size(44.dp)) {
                                 Box(modifier = Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
-                                Box(modifier = Modifier.fillMaxSize().bounceClick { triggerExit() }, contentAlignment = Alignment.Center) {
+                                Box(modifier = Modifier.fillMaxSize().bounceClick { onExitRequest.value?.invoke() }, contentAlignment = Alignment.Center) {
                                     Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = "Torna indietro", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
@@ -833,16 +899,7 @@ fun SearchScreenContent(
                             )
                         }
                         
-                        if (uiState.query.isEmpty() && uiState.sortConfig.selectedGenres.isEmpty() && uiState.sortConfig.selectedKeywords.isEmpty() && uiState.sortConfig.selectedDecades.isEmpty() && uiState.sortConfig.selectedProviders.isEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Digita almeno 3 lettere per iniziare la ricerca testuale.",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(horizontal = 24.dp),
-                                fontSize = 10.sp,
-                                lineHeight = 12.sp
-                            )
-                        }
+
                         
                         Spacer(modifier = Modifier.height(16.dp))
 

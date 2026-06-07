@@ -87,17 +87,17 @@ object HomeTab : Tab {
         val viewModel = getViewModel<HomeViewModel>()
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        var isFilterVisible by remember { mutableStateOf(false) }
         var isActionModalVisible by remember { mutableStateOf(false) }
         
         HomeScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
             hazeState = hazeState,
-            isFilterVisible = isFilterVisible,
-            onToggleFilter = { visible, _ -> isFilterVisible = visible },
+            isFilterVisible = false, // managed by MainScreen
+            onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onActionModalVisibilityChanged = { isActionModalVisible = it },
             onMovieClick = { movie -> 
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
@@ -439,17 +439,6 @@ fun HomeScreenContent(
                 }
                 }
             }
-        }
-        
-        Box(modifier = Modifier.zIndex(70000f)) {
-            HomeFilterModal(
-                isVisible = isFilterVisible,
-                sortConfig = uiState.sortConfig,
-                hazeState = activeHazeState,
-                triggerBounds = filterButtonBounds,
-                onSortConfigChanged = { viewModel.updateSortConfig(it) },
-                onDismissRequest = { onToggleFilter(false, null) }
-            )
         }
     }
 }

@@ -30,6 +30,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -41,7 +43,9 @@ import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalDeepLinkIntent
+import com.cinetrack.ui.LocalFilterRequest
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.components.GlassyBottomBar
 import com.cinetrack.ui.components.GlassyDrawer
 import com.cinetrack.ui.components.GlassyTopBar
@@ -56,7 +60,6 @@ import com.cinetrack.ui.viewmodel.HomeViewModel
 import com.cinetrack.ui.viewmodel.StatsViewModel
 import com.cinetrack.ui.viewmodel.UndoViewModel
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
-import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
@@ -199,7 +202,11 @@ class MainScreen : Screen {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CompositionLocalProvider(
                         LocalAppPadding provides PaddingValues(bottom = 80.dp),
-                        LocalHazeState provides contentHazeState
+                        LocalHazeState provides contentHazeState,
+                        LocalFilterRequest provides { bounds ->
+                            filterButtonBounds = bounds
+                            isFilterModalVisible = true
+                        }
                     ) {
                         CurrentTab()
                     }
@@ -338,7 +345,35 @@ class MainScreen : Screen {
                     }
 
                     // Modals
-                    if (currentTab is DiscoverTab) {
+                    if (currentTab is HomeTab) {
+                        val homeViewModel: HomeViewModel = getViewModel()
+                        val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+                        Box(modifier = Modifier.zIndex(70000f)) {
+                            HomeFilterModal(
+                                isVisible = isFilterModalVisible,
+                                sortConfig = homeUiState.sortConfig,
+                                hazeState = contentHazeState,
+                                triggerBounds = filterButtonBounds,
+                                onSortConfigChanged = { homeViewModel.updateSortConfig(it) },
+                                onDismissRequest = { isFilterModalVisible = false }
+                            )
+                        }
+                    } else if (currentTab is VistiTab) {
+                        val vistiViewModel: VistiViewModel = getViewModel()
+                        val vistiUiState by vistiViewModel.uiState.collectAsStateWithLifecycle()
+                        Box(modifier = Modifier.zIndex(70000f)) {
+                            HomeFilterModal(
+                                isVisible = isFilterModalVisible,
+                                isVisti = true,
+                                sortConfig = vistiUiState.sortConfig,
+                                hazeState = contentHazeState,
+                                triggerBounds = filterButtonBounds,
+                                category = vistiUiState.activeTab,
+                                onSortConfigChanged = { vistiViewModel.updateSortConfig(it); isFilterModalVisible = false },
+                                onDismissRequest = { isFilterModalVisible = false }
+                            )
+                        }
+                    } else if (currentTab is DiscoverTab) {
                         val discoverViewModel: DiscoverViewModel = getViewModel()
                         val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
                         Box(modifier = Modifier.zIndex(70000f)) {
@@ -368,22 +403,24 @@ class MainScreen : Screen {
                         }
                     }
 
-                    // Undo Toast
-                    UndoToast(
-                        actionFeedbackManager = undoViewModel.actionFeedbackManager,
-                        hazeState = contentHazeState,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(50000f)
-                    )
-
                     // Search FAB
                     if (isPrimaryTab) {
                         val searchFabHaze = contentHazeState
+                        var fabCenter by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(end = 20.dp, bottom = 90.dp)
                                 .zIndex(60f)
                                 .size(52.dp)
+                                .onGloballyPositioned { coords ->
+                                    val pos = coords.positionInWindow()
+                                    val size = coords.size
+                                    fabCenter = androidx.compose.ui.geometry.Offset(
+                                        pos.x + size.width / 2f,
+                                        pos.y + size.height / 2f
+                                    )
+                                }
                                 .clip(androidx.compose.foundation.shape.CircleShape)
                                 .hazeGlass(
                                     state = searchFabHaze,
@@ -395,7 +432,11 @@ class MainScreen : Screen {
                                     androidx.compose.foundation.shape.CircleShape
                                 )
                                 .bounceClick(scaleDown = 0.9f) {
-                                    rootNavigator.push(SearchScreen(startX = 540f, startY = 1140f))
+                                    val center = fabCenter
+                                    rootNavigator.push(SearchScreen(
+                                        startX = center?.x ?: 540f,
+                                        startY = center?.y ?: 1140f
+                                    ))
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -407,6 +448,13 @@ class MainScreen : Screen {
                             )
                         }
                     }
+
+                    // Undo Toast — rendered AFTER FAB so it appears on top and blurs it
+                    UndoToast(
+                        actionFeedbackManager = undoViewModel.actionFeedbackManager,
+                        hazeState = contentHazeState,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(50000f)
+                    )
 
                     // Exit Confirmation
                     if (showExitConfirmation) {

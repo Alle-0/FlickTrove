@@ -85,17 +85,17 @@ object VistiTab : Tab {
         val viewModel = getViewModel<VistiViewModel>()
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        var isFilterVisible by remember { mutableStateOf(false) }
         var isActionModalVisible by remember { mutableStateOf(false) }
         
         VistiScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
             hazeState = hazeState,
-            isFilterVisible = isFilterVisible,
-            onToggleFilter = { visible, _ -> isFilterVisible = visible },
+            isFilterVisible = false, // managed by MainScreen
+            onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onActionModalVisibilityChanged = { isActionModalVisible = it },
             onMovieClick = { movie -> 
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
@@ -413,21 +413,5 @@ fun VistiScreenContent(
         }
         }
         } // end Box B (fillMaxSize)
-        
-        Box(modifier = Modifier.zIndex(70000f)) {
-            HomeFilterModal(
-                isVisible = isFilterVisible,
-                isVisti = true,
-                sortConfig = uiState.sortConfig,
-                hazeState = activeHazeState,
-                triggerBounds = filterButtonBounds,
-                category = uiState.activeTab,
-                onSortConfigChanged = { newConfig ->
-                    viewModel.updateSortConfig(newConfig)
-                    onToggleFilter(false, null)
-                },
-                onDismissRequest = { onToggleFilter(false, null) }
-            )
-        }
     } // end MovieActionsWrapper
 }
