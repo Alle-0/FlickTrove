@@ -10,6 +10,7 @@ import android.view.animation.AnticipateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.activity.viewModels
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,8 +22,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.*
+import cafe.adriel.voyager.hilt.getViewModel
 import com.cinetrack.ui.navigation.SettingsRoute
 import com.cinetrack.ui.navigation.SplashRoute
 import com.cinetrack.ui.navigation.SurpriseMeRoute
@@ -33,8 +33,6 @@ import com.cinetrack.ui.navigation.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.navigation.toRoute
-import androidx.navigation.NavDestination.Companion.hasRoute
 import com.cinetrack.ui.screens.*
 import com.cinetrack.ui.viewmodel.*
 import com.cinetrack.ui.theme.*
@@ -53,7 +51,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.ui.Alignment
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.hapticfeedback.*
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -100,6 +97,7 @@ val LocalAdvancedVisualEffects = androidx.compose.runtime.compositionLocalOf<Boo
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val deepLinkIntent = mutableStateOf<Intent?>(null)
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     @OptIn(ExperimentalSharedTransitionApi::class)
 
@@ -134,7 +132,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            FlickTroveApp(deepLinkIntent)
+            FlickTroveApp(deepLinkIntent, settingsViewModel)
         } // setContent
 } // onCreate
 

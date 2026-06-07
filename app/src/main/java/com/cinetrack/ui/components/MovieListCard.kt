@@ -45,6 +45,7 @@ import com.cinetrack.ui.utils.rememberCardRippleState
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.cinetrack.data.generateBadges
 
 @Composable
 fun MovieListCard(
@@ -78,41 +79,42 @@ fun MovieListCard(
     // Premium Staggered Entrance Animation States
     val hasAnimated = rememberSaveable { mutableStateOf(false) }
 
-    val cardAlpha = remember { Animatable(if (hasAnimated.value) 1f else 0f) }
-    val cardScale = remember { Animatable(if (hasAnimated.value) 1f else 0.85f) }
-    val cardTranslateY = remember { Animatable(if (hasAnimated.value) 0f else 40f) }
-
     LaunchedEffect(movie.id) {
         if (hasAnimated.value) return@LaunchedEffect
-
-        val delayMillis = if (staggerIndex in 0..11) staggerIndex * 40L else 0L
-        if (delayMillis > 0) delay(delayMillis)
-
-        val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
-
-        if (isScrollItem) {
-            // Snapping immediately to visible state without coroutine animations to prevent scroll jank
-            cardAlpha.snapTo(1f)
-            cardTranslateY.snapTo(0f)
-            cardScale.snapTo(1f)
-        } else {
-            val jobAlpha = launch { cardAlpha.animateTo(1f, tween(250, easing = LinearOutSlowInEasing)) }
-            val jobScale = launch { cardScale.animateTo(1f, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)) }
-            val jobTranslate = launch { cardTranslateY.animateTo(0f, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)) }
-            jobAlpha.join(); jobScale.join(); jobTranslate.join()
-        }
+        if (staggerIndex in 0..11) delay(staggerIndex * 40L)
         hasAnimated.value = true
     }
+
+    val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
+    val isVisible = hasAnimated.value || isScrollItem
+
+    val cardAlpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
+        label = "alpha"
+    )
+
+    val cardScale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0.85f,
+        animationSpec = if (isScrollItem) snap() else spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "scale"
+    )
+
+    val cardTranslateY by animateFloatAsState(
+        targetValue = if (isVisible) 0f else 40f,
+        animationSpec = if (isScrollItem) tween(200, easing = FastOutSlowInEasing) else spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "translateY"
+    )
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(110.dp)
             .graphicsLayer {
-                alpha = cardAlpha.value
-                scaleX = cardScale.value
-                scaleY = cardScale.value
-                translationY = cardTranslateY.value * density.density
+                alpha = cardAlpha
+                scaleX = cardScale
+                scaleY = cardScale
+                translationY = cardTranslateY * density.density
             }
             .onGloballyPositioned { coordinates -> 
                 cardPosition = coordinates.positionInWindow()
@@ -195,11 +197,7 @@ fun MovieListCard(
             // Dynamic Badges (Top Right)
             if (showBadges) {
                 val disabledBadges = com.cinetrack.LocalDisabledBadges.current
-                val addBadge = @Composable { text: String, color: Color ->
-                    if (!disabledBadges.contains(text)) {
-                        MovieCardBadge(text = text, color = color, hazeState = hazeState, isLarge = false)
-                    }
-                }
+                val badges = remember(movie) { movie.generateBadges() }
                 
                 androidx.compose.foundation.layout.Column(
                     modifier = Modifier
@@ -208,85 +206,13 @@ fun MovieListCard(
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    val newEpisodes = movie.newEpisodesFound
-                    if (newEpisodes != null && newEpisodes > 0) {
-                        addBadge("NEW", com.cinetrack.ui.theme.NeonPink)
-                    }
-    
-                    if ((movie.voteAverage ?: 0.0) >= 8.8 && (movie.voteCount ?: 0) > 2000) {
-                        addBadge("MASTERPIECE", Color(0xFFFFD700))
-                    } else if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
-                        addBadge("BEST", Color(0xFF00E5FF))
-                    } else if ((movie.voteCount ?: 0) > 3000) {
-                        addBadge("HOT", com.cinetrack.ui.theme.HazeStyles.AccentYellow)
-                    } else if ((movie.voteAverage ?: 0.0) >= 8.0 && (movie.voteCount ?: 0) > 1000) {
-                        addBadge("WOW", com.cinetrack.ui.theme.NeonTeal)
-                    } else if ((movie.voteAverage ?: 0.0) >= 7.5 && (movie.voteCount ?: 0) in 50..500) {
-                        addBadge("HIDDEN GEM", Color(0xFF00E676))
-                    }
-                    
-                    if ((movie.voteCount ?: 0) > 1000 && (movie.voteAverage ?: 0.0) >= 5.0 && (movie.voteAverage ?: 0.0) <= 6.5) {
-                        addBadge("DIVISIVE", Color(0xFFFF9800))
-                    }
-
-                    if ((movie.revenue ?: 0L) > 500_000_000L) {
-                        addBadge("BLOCKBUSTER", Color(0xFF6200EA))
-                    } else if ((movie.budget ?: 0L) in 1L..5_000_000L && (movie.voteAverage ?: 0.0) >= 7.0) {
-                        addBadge("INDIE", Color(0xFFAED581))
-                    }
-                    
-                    val releaseYearNum = movie.releaseYear?.toIntOrNull() ?: 
-                                      movie.releaseDate?.take(4)?.toIntOrNull() ?: 
-                                      movie.firstAirDate?.take(4)?.toIntOrNull() ?: 9999
-                    
-                    if (releaseYearNum < 1970) {
-                        addBadge("VINTAGE", Color(0xFFBCAAA4))
-                    } else if (releaseYearNum < 1990 && (movie.voteAverage ?: 0.0) >= 7.0) {
-                        addBadge("CLASSIC", Color(0xFF8D6E63))
-                    } else if (releaseYearNum in 1990..2010 && (movie.voteAverage ?: 0.0) >= 8.0) {
-                        addBadge("CULT", Color(0xFF9C27B0))
-                    }
-                    
-                    if ((movie.runtime ?: 0) > 160) {
-                        addBadge("EPIC", Color(0xFFFF5722))
-                    } else if (movie.mediaType != "tv" && (movie.runtime ?: 0) in 1..89) {
-                        addBadge("QUICK", Color(0xFFC6FF00))
-                    }
-                    
-                    if ((movie.numberOfSeasons ?: 0) >= 5 || (movie.numberOfEpisodes ?: 0) > 50) {
-                        addBadge("BINGE", Color(0xFF00BCD4))
-                    } else if (movie.mediaType == "tv" && (movie.episodeRunTime?.firstOrNull() ?: 0) in 1..25) {
-                        addBadge("SNACK", Color(0xFFC6FF00))
-                    }
-    
-                    val genresStr = movie.genreNamesString ?: ""
-                    val hasGenre = { name: String -> 
-                        genresStr.contains(name, ignoreCase = true) || 
-                        movie.genres?.any { it.name?.equals(name, ignoreCase = true) == true } == true
-                    }
-                    
-                    var genreBadgeAdded = false
-                    if (hasGenre("Horror")) {
-                        addBadge("HORROR", Color(0xFFE53935))
-                        genreBadgeAdded = true
-                    }
-                    if (hasGenre("Thriller")) {
-                        addBadge("THRILLER", Color(0xFF651FFF))
-                        genreBadgeAdded = true
-                    }
-                    
-                    if (!genreBadgeAdded) {
-                        if (hasGenre("Animation") || hasGenre("Anime") || hasGenre("Animazione")) {
-                            addBadge("ANIME", Color(0xFFFF9800))
-                        } else if (hasGenre("Science Fiction") || hasGenre("Sci-Fi") || hasGenre("Fantascienza")) {
-                            addBadge("SCI-FI", Color(0xFF2962FF))
-                        } else if (hasGenre("Comedy") || hasGenre("Commedia")) {
-                            addBadge("COMEDY", Color(0xFFFFEA00))
-                        } else if (hasGenre("Documentary") || hasGenre("Documentario")) {
-                            addBadge("DOCU", Color(0xFF9E9E9E))
-                        } else if (hasGenre("Family") || hasGenre("Famiglia")) {
-                            addBadge("FAMILY", Color(0xFF81D4FA))
-                        }
+                    badges.filter { it.text !in disabledBadges }.forEach { badge ->
+                        MovieCardBadge(
+                            text = badge.text, 
+                            color = Color(badge.colorValue), 
+                            hazeState = hazeState, 
+                            isLarge = false
+                        )
                     }
                 }
             }
@@ -393,7 +319,7 @@ fun MovieListCard(
 
                 val appAccent = MaterialTheme.colorScheme.primary
                 val isReleased = movie.isReleased
-                val isPromemoriaAttiva = !isReleased && isReminder
+                val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
                 val isOcchio = isReleased && (isReminder || isFavorite)
 
                 val actionBg = when {
@@ -424,13 +350,13 @@ fun MovieListCard(
                         .border(width = 1.dp, color = actionBorder, shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    val isBellOutlined = !isReleased && !isReminder
+                    val isBellOutlined = !isReleased && !(isReminder || isFavorite)
                     
                     val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
                     var bellHasInitialized by remember { mutableStateOf(false) }
                     
-                    LaunchedEffect(isReminder) {
-                        if (bellHasInitialized && !isReleased && isReminder) {
+                    LaunchedEffect(isReminder, isFavorite) {
+                        if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
                             bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
                             bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
                             bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
@@ -443,7 +369,7 @@ fun MovieListCard(
                     Icon(
                         imageVector = when {
                             isWatched -> com.cinetrack.ui.assets.CustomIcons.PremiumCheck
-                            !isReleased -> if (isReminder) com.cinetrack.ui.assets.CustomIcons.PremiumBellFilled else Icons.Rounded.NotificationsNone
+                            !isReleased -> if (isReminder || isFavorite) com.cinetrack.ui.assets.CustomIcons.PremiumBellFilled else Icons.Rounded.NotificationsNone
                             isOcchio -> androidx.compose.material.icons.Icons.Rounded.Visibility
                             else -> com.cinetrack.ui.assets.CustomIcons.PremiumAdd
                         },
@@ -452,7 +378,7 @@ fun MovieListCard(
                         modifier = Modifier
                             .size(if (isBellOutlined) 20.dp else 18.dp)
                             .graphicsLayer {
-                                if (!isReleased && isReminder) {
+                                if (!isReleased && (isReminder || isFavorite)) {
                                     rotationZ = bellRotation.value
                                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
                                 }

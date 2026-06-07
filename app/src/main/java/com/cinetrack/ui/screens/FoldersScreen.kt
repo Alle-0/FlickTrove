@@ -61,8 +61,49 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
+import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.LocalHazeState
+
+object FoldersTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 3u,
+                    title = "Folders",
+                    icon = null
+                )
+            }
+        }
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<FoldersViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val hazeState = LocalHazeState.current
+        val tabNavigator = LocalTabNavigator.current
+
+        FoldersScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            onFolderClick = { folder ->
+                tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
+            }
+        )
+    }
+}
+
 @Composable
-fun FoldersScreen(
+fun FoldersScreenContent(
     viewModel: FoldersViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
@@ -77,7 +118,7 @@ fun FoldersScreen(
     var activeMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
     var activeMenuBounds by remember { mutableStateOf(Rect.Zero) }
     
-    val localHazeState = remember { HazeState() }
+    val activeHazeState = hazeState ?: remember { HazeState() }
     
     androidx.activity.compose.BackHandler(enabled = activeMenuFolder != null) {
         activeMenuFolder = null
@@ -87,7 +128,7 @@ fun FoldersScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .haze(state = localHazeState)
+                .haze(state = activeHazeState)
         ) {
             // --- FOREGROUND LAYER (SHARP CONTENT) ---
             if (folders.isEmpty()) {
@@ -133,7 +174,7 @@ fun FoldersScreen(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 16.dp,
                         bottom = paddingValues.calculateBottomPadding() + 32.dp
                     ),
                     modifier = Modifier.fillMaxSize(),
@@ -228,7 +269,7 @@ fun FoldersScreen(
                     modifier = Modifier
                         .width(200.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .then(Modifier.hazeGlass(state = localHazeState, shape = RoundedCornerShape(24.dp)))
+                        .then(Modifier.hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp)))
                 ) {
                     Row(
                         modifier = Modifier

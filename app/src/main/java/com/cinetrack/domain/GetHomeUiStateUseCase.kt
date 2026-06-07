@@ -5,10 +5,8 @@ import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.models.UserPreferences
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.ui.viewmodel.HomeUiState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOn
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
@@ -22,50 +20,49 @@ class GetHomeUiStateUseCase @Inject constructor() {
         searchQueryFlow: Flow<String>,
         activeTabFlow: Flow<String>
     ): Flow<HomeUiState> {
+        @OptIn(kotlinx.coroutines.FlowPreview::class)
+        val baseMoviesFlow = moviesFlow.map { movies -> 
+            movies.filter { (it.favorite || it.reminder) && !it.watched } 
+        }.distinctUntilChanged()
+        
+        @OptIn(kotlinx.coroutines.FlowPreview::class)
+        val debouncedSearch = searchQueryFlow
+            .debounce(300)
+            .distinctUntilChanged()
+
         return combine(
-            moviesFlow,
+            baseMoviesFlow,
             foldersFlow,
             preferencesFlow,
-            searchQueryFlow,
+            debouncedSearch,
             activeTabFlow
-        ) { movies, folders, prefs, query, tab ->
-            val toWatchMovies = movies.filter { (it.favorite || it.reminder) && !it.watched }
+        ) { toWatchMovies, folders, prefs, query, tab ->
+            
             val movieCount = toWatchMovies.count { it.mediaType != "tv" }
             val tvCount = toWatchMovies.count { it.mediaType == "tv" }
 
-            val filtered = toWatchMovies.filter { movie ->
-                val matchesTab = if (tab == "movie") movie.mediaType != "tv" else movie.mediaType == "tv"
-                val matchesSearch = query.isEmpty() || 
-                    (movie.title?.contains(query, ignoreCase = true) ?: false) ||
-                    (movie.name?.contains(query, ignoreCase = true) ?: false)
-                
-                val matchesGenre = prefs.homeSort.selectedGenres.isEmpty() || 
-                    (movie.genreIds?.any { it in prefs.homeSort.selectedGenres } ?: false)
-                
-                val matchesDecade = prefs.homeSort.selectedDecades.isEmpty() || 
+            val filtered = toWatchMovies.asSequence()
+                .filter { if (tab == "movie") it.mediaType != "tv" else it.mediaType == "tv" }
+                .filter { query.isEmpty() || it.title?.contains(query, ignoreCase = true) == true || it.name?.contains(query, ignoreCase = true) == true }
+                .filter { prefs.homeSort.selectedGenres.isEmpty() || it.genreIds?.any { g -> g in prefs.homeSort.selectedGenres } == true }
+                .filter { movie ->
+                    prefs.homeSort.selectedDecades.isEmpty() || 
                     prefs.homeSort.selectedDecades.any { decade ->
                         val prefix = decade.take(3)
-                        (movie.releaseDate?.startsWith(prefix) ?: false) ||
-                        (movie.firstAirDate?.startsWith(prefix) ?: false)
+                        (movie.releaseDate?.startsWith(prefix) == true) || (movie.firstAirDate?.startsWith(prefix) == true)
                     }
-
-                val matchesProvider = prefs.homeSort.selectedProviders.isEmpty() || 
-                    (movie.streamingProviderIds?.any { it in prefs.homeSort.selectedProviders } ?: false)
-                
-                matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider
-            }
+                }
+                .filter { prefs.homeSort.selectedProviders.isEmpty() || it.streamingProviderIds?.any { p -> p in prefs.homeSort.selectedProviders } == true }
+                .toList()
 
             val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort)
             
-            val today = LocalDate.now().toString()
-            val partitionResult: Pair<List<Movie>, List<Movie>> = sorted.partition { movie: Movie ->
-                val date = movie.releaseDate ?: movie.firstAirDate
-                date != null && date > today && date.isNotEmpty()
-            }
+            val partitionResult: Pair<List<Movie>, List<Movie>> = sorted.partition { !it.isReleased }
             val unreleased = partitionResult.first
             val released = partitionResult.second
 
-            val notificationCount = movies.count { movie ->
+            val today = LocalDate.now().toString()
+            val notificationCount = toWatchMovies.count { movie ->
                 val isNewEpisode = (movie.newEpisodesFound ?: 0) > 0
                 val isReleasedToday = (movie.newEpisodesFound ?: 0) == 0 && 
                                         movie.reminder == true && 
@@ -73,14 +70,14 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 isNewEpisode || isReleasedToday
             }
 
-            val movieFolderColors = mutableMapOf<String, MutableList<String>>()
-            folders.forEach { folder ->
-                val color = folder.color ?: "#FFFFFF"
-                folder.itemIds.forEach { itemId ->
-                    movieFolderColors.getOrPut(itemId) { mutableListOf() }.add(color)
+            val movieFolderColors = buildMap<String, MutableList<String>> {
+                folders.forEach { folder ->
+                    val color = folder.color ?: "#FFFFFF"
+                    folder.itemIds.forEach { itemId ->
+                        getOrPut(itemId) { mutableListOf() }.add(color)
+                    }
                 }
-            }
-            val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
+            }.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
             HomeUiState(
                 movies = sorted.toImmutableList(),
@@ -92,7 +89,7 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 searchQuery = query,
                 activeTab = tab,
                 notificationCount = notificationCount,
-                movieFolderColors = immutableMovieFolderColors,
+                movieFolderColors = movieFolderColors,
                 folders = folders.toImmutableList(),
                 sortConfig = prefs.homeSort,
                 preferences = prefs

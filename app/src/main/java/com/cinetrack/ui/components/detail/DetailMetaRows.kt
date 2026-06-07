@@ -49,7 +49,7 @@ fun DetailMetaRows(
     accentColor: Color,
     onGenreClick: (Genre, Offset) -> Unit,
     onKeywordClick: (Long, String, Offset) -> Unit,
-    onProviderClick: () -> Unit,
+    onProviderClick: (Provider) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -199,7 +199,7 @@ fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) 
 }
 
 @Composable
-fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, onProviderClick: () -> Unit) {
+fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, onProviderClick: (Provider) -> Unit) {
     Column {
         Text(
             text = label,
@@ -225,13 +225,13 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
 }
 
 @Composable
-fun ProviderLogo(provider: Provider, accentColor: Color, onClick: () -> Unit) {
+fun ProviderLogo(provider: Provider, accentColor: Color, onClick: (Provider) -> Unit) {
     // logoBaseUrl is no longer needed
     val shape = RoundedCornerShape(12.dp)
     
     Box(
         modifier = Modifier
-            .bounceClick(onClick = onClick)
+            .bounceClick { onClick(provider) }
             .size(38.dp)
             .border(
                 width = 0.5.dp,

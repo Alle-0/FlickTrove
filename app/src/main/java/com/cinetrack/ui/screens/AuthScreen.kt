@@ -42,7 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
+import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -66,7 +66,7 @@ private data class FeedbackMessage(
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: AuthViewModel,
     onLoginSuccess: () -> Unit
 ) {
     var isLogin by remember { mutableStateOf(true) }

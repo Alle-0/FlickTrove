@@ -4,6 +4,8 @@ import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -168,7 +170,7 @@ fun TrailerThumbnail(videoId: String, accentColor: Color) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
+                    imageVector = Icons.Rounded.PlayArrow,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)

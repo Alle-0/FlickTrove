@@ -40,14 +40,67 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.components.HomeFilterModal
+
+object DiscoverTab : Tab {
+    var requestedType: String = "popular"
+
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 1u,
+                    title = "Discover",
+                    icon = null
+                )
+            }
+        }
+
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<DiscoverViewModel>()
+        
+        LaunchedEffect(requestedType) {
+            viewModel.init(requestedType)
+        }
+
+        val paddingValues = LocalAppPadding.current
+        val hazeState = LocalHazeState.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        var isFilterVisible by remember { mutableStateOf(false) }
+        var isActionModalVisible by remember { mutableStateOf(false) }
+        
+        DiscoverScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            isFilterVisible = isFilterVisible,
+            onToggleFilter = { visible, _ -> isFilterVisible = visible },
+            onActionModalVisibilityChanged = { isActionModalVisible = it },
+            onMovieClick = { movie -> 
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun DiscoverScreen(
+fun DiscoverScreenContent(
     viewModel: DiscoverViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit,
@@ -101,8 +154,8 @@ fun DiscoverScreen(
         }
     }
 
-    val topPadding = paddingValues.calculateTopPadding()
-    val localHazeState = remember { HazeState() }
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp
+    val activeHazeState = hazeState ?: remember { HazeState() }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         
@@ -119,7 +172,7 @@ fun DiscoverScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(localHazeState, style = HazeStyles.PremiumDark)
+                    .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
                 LazyVerticalGrid(
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -207,7 +260,6 @@ fun DiscoverScreen(
                                     personalRating = movieStatus?.personalRating,
                                     folderColors = folderColors,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    animatedVisibilityScope = animatedVisibilityScope,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },

@@ -76,9 +76,49 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import kotlin.math.abs
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
+
+object RecommendationsTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 5u,
+                    title = "Recommendations",
+                    icon = null
+                )
+            }
+        }
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<RecommendationsViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        var isActionModalVisible by remember { mutableStateOf(false) }
+
+        RecommendationsScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            onActionModalVisibilityChanged = { isActionModalVisible = it },
+            onMovieClick = { movie ->
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RecommendationsScreen(
+fun RecommendationsScreenContent(
     viewModel: RecommendationsViewModel,
     paddingValues: PaddingValues,
     onMovieClick: (Movie) -> Unit,

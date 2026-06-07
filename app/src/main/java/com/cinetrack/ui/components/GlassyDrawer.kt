@@ -105,11 +105,13 @@ fun GlassyDrawer(
                 }
             }
 
+            val scrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(bottom = 20.dp)
-                    .verticalScroll(rememberScrollState())
+                    .fadingEdge(scrollState)
+                    .verticalScroll(scrollState)
             ) {
                 SectionHeader("Film")
                 DrawerItem(
@@ -273,3 +275,45 @@ private fun SectionHeader(title: String) {
         modifier = Modifier.padding(start = 24.dp, top = 22.dp, bottom = 4.dp)
     )
 }
+
+fun Modifier.fadingEdge(scrollState: androidx.compose.foundation.ScrollState): Modifier = this
+    .graphicsLayer { alpha = 0.99f }
+    .drawWithContent {
+        drawContent()
+
+        val topFadingEdgeStrength = (scrollState.value / 100f).coerceIn(0f, 1f)
+        val bottomFadingEdgeStrength = if (scrollState.maxValue > 0) {
+            ((scrollState.maxValue - scrollState.value) / 100f).coerceIn(0f, 1f)
+        } else 0f
+        
+        val edgeHeight = 32.dp.toPx()
+
+        if (topFadingEdgeStrength > 0f) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.Black
+                    ),
+                    startY = 0f,
+                    endY = edgeHeight
+                ),
+                alpha = topFadingEdgeStrength,
+                blendMode = BlendMode.DstIn
+            )
+        }
+        if (bottomFadingEdgeStrength > 0f) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Black,
+                        Color.Transparent
+                    ),
+                    startY = size.height - edgeHeight,
+                    endY = size.height
+                ),
+                alpha = bottomFadingEdgeStrength,
+                blendMode = BlendMode.DstIn
+            )
+        }
+    }

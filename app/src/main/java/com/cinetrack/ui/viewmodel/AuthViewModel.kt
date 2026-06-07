@@ -11,6 +11,10 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import com.google.firebase.FirebaseNetworkException
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
@@ -85,7 +89,7 @@ class AuthViewModel @Inject constructor(
                     }
                 }
                 .addOnFailureListener { exception ->
-                    _processState.update { AuthState.Error(exception.message ?: "Errore di autenticazione") }
+                    _processState.update { AuthState.Error(getErrorMessage(exception)) }
                 }
         }
     }
@@ -112,11 +116,7 @@ class AuthViewModel @Inject constructor(
                     _processState.update { null }
                 }
                 .addOnFailureListener { exception ->
-                    if (exception is FirebaseAuthUserCollisionException) {
-                        _processState.update { AuthState.Error("L'email è già in uso. Effettua il login.") }
-                    } else {
-                        _processState.update { AuthState.Error(exception.message ?: "Errore nell'aggiornamento account") }
-                    }
+                    _processState.update { AuthState.Error(getErrorMessage(exception)) }
                 }
         } else {
             // Normal sign up
@@ -125,7 +125,7 @@ class AuthViewModel @Inject constructor(
                     _processState.update { null }
                 }
                 .addOnFailureListener { exception ->
-                    _processState.update { AuthState.Error(exception.message ?: "Errore nella creazione dell'account") }
+                    _processState.update { AuthState.Error(getErrorMessage(exception)) }
                 }
         }
     }
@@ -137,7 +137,7 @@ class AuthViewModel @Inject constructor(
                 _processState.update { AuthState.Anonymous }
             }
             .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(exception.message ?: "Errore accesso Guest") }
+                _processState.update { AuthState.Error(getErrorMessage(exception)) }
             }
     }
 
@@ -171,7 +171,7 @@ class AuthViewModel @Inject constructor(
                 }
             }
             .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(exception.message ?: "Errore durante l'eliminazione dell'account") }
+                _processState.update { AuthState.Error(getErrorMessage(exception)) }
                 onComplete(false)
             }
     }
@@ -187,13 +187,29 @@ class AuthViewModel @Inject constructor(
                 _processState.update { AuthState.Success("Email di ripristino inviata con successo") }
             }
             .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(exception.message ?: "Errore invio email") }
+                _processState.update { AuthState.Error(getErrorMessage(exception)) }
             }
     }
 
     fun clearError() {
         if (_processState.value is AuthState.Error) {
             _processState.update { null }
+        }
+    }
+
+    private fun getErrorMessage(exception: Exception): String {
+        val msg = exception.message ?: ""
+        return when (exception) {
+            is FirebaseAuthInvalidCredentialsException -> "Email o password errati."
+            is FirebaseAuthInvalidUserException -> "Nessun account trovato con questa email."
+            is FirebaseAuthUserCollisionException -> "L'email è già registrata. Effettua l'accesso."
+            is FirebaseNetworkException -> "Nessuna connessione a internet."
+            is FirebaseAuthRecentLoginRequiredException -> "Operazione sensibile. Effettua nuovamente l'accesso."
+            else -> {
+                if (msg.contains("INVALID_LOGIN_CREDENTIALS")) "Email o password errati."
+                else if (msg.contains("TOO_MANY_ATTEMPTS_TRY_LATER")) "Troppi tentativi falliti. Riprova più tardi."
+                else "Errore imprevisto: ${exception.localizedMessage}"
+            }
         }
     }
 }

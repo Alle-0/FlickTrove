@@ -74,6 +74,8 @@ fun HomeFilterModal(
     hazeState: HazeState?,
     triggerBounds: Rect? = null,
     category: String = "movie",
+    suggestedFilters: List<com.cinetrack.ui.viewmodel.FilterPill> = emptyList(),
+    initialKeywordName: String? = null,
     onSortConfigChanged: (SortConfig) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -409,8 +411,12 @@ fun HomeFilterModal(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         localSortConfig.selectedKeywords.forEach { keywordId ->
-                                            val keywordName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries
-                                                .firstOrNull { it.value == keywordId }?.key?.uppercase() ?: "SOTTOGENERE SELEZIONATO"
+                                            val dictName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries
+                                                .firstOrNull { it.value == keywordId }?.key?.uppercase()
+                                            
+                                            val suggestedName = suggestedFilters.find { it.id == keywordId }?.name?.uppercase()
+                                            
+                                            val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: "SOTTOGENERE SELEZIONATO"
                                                 
                                             FilterChip(
                                                 label = keywordName,

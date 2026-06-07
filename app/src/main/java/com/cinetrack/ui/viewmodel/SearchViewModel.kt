@@ -42,7 +42,7 @@ data class SearchUiState(
     val favorites: ImmutableList<Movie> = persistentListOf(),
     val folders: ImmutableList<FolderEntity> = persistentListOf(),
     val recentSearches: ImmutableList<String> = persistentListOf(),
-    val sortConfig: SortConfig = SortConfig(),
+    val sortConfig: SortConfig = SortConfig(sortType = "popularity"),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences(),
     val togglingIds: PersistentSet<Long> = persistentSetOf(),
@@ -193,7 +193,9 @@ class SearchViewModel @Inject constructor(
         _uiState.update { it.copy(errorMessage = null) }
 
         if (query.isEmpty()) {
-            if ((_uiState.value.sortConfig.selectedGenres.isNotEmpty() || _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) && category != "person") {
+            val config = _uiState.value.sortConfig
+            val hasFilters = config.selectedGenres.isNotEmpty() || config.selectedKeywords.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "popularity"
+            if (hasFilters && category != "person") {
                 fetchDiscovery()
             } else {
                 rawResults = emptyList()
@@ -320,6 +322,39 @@ class SearchViewModel @Inject constructor(
         }
     }
     
+    private fun buildTmdbOptions(config: SortConfig, category: String): Map<String, String> {
+        val options = mutableMapOf<String, String>()
+        if (config.selectedGenres.isNotEmpty()) options["with_genres"] = config.selectedGenres.joinToString("|")
+        if (config.selectedKeywords.isNotEmpty()) options["with_keywords"] = config.selectedKeywords.joinToString("|")
+
+        if (config.selectedDecades.isNotEmpty()) {
+            val decades = config.selectedDecades.mapNotNull { it.removeSuffix("s").toIntOrNull() }
+            if (decades.isNotEmpty()) {
+                val minYear = decades.minOrNull() ?: 1900
+                val maxYear = (decades.maxOrNull() ?: 2020) + 9
+                if (category == "tv") {
+                    options["first_air_date.gte"] = "$minYear-01-01"
+                    options["first_air_date.lte"] = "$maxYear-12-31"
+                } else {
+                    options["primary_release_date.gte"] = "$minYear-01-01"
+                    options["primary_release_date.lte"] = "$maxYear-12-31"
+                }
+            }
+        }
+
+        val direction = config.sortDirection
+        val sortBy = when (config.sortType) {
+            "vote_average" -> "vote_average.$direction"
+            "release_date" -> if (category == "tv") "first_air_date.$direction" else "primary_release_date.$direction"
+            "title" -> if (category == "tv") "name.$direction" else "title.$direction"
+            else -> "popularity.$direction"
+        }
+        options["sort_by"] = sortBy
+        if (config.sortType == "vote_average") options["vote_count.gte"] = "100"
+
+        return options
+    }
+
     private fun fetchDiscovery() {
         searchJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -327,8 +362,7 @@ class SearchViewModel @Inject constructor(
             currentPage = 1
             try {
                 val category = _uiState.value.category
-                val genreId = _uiState.value.sortConfig.selectedGenres.firstOrNull()
-                val keywordId = _uiState.value.sortConfig.selectedKeywords.firstOrNull()
+                val config = _uiState.value.sortConfig
                 
                 if (category == "person") {
                     rawResults = emptyList()
@@ -337,17 +371,14 @@ class SearchViewModel @Inject constructor(
                     return@launch
                 }
 
-                // If we have a genre, we fetch by genre. If not, we fetch trending and then apply local decade filter.
-                // Note: Full decade-based TMDB discovery would require a repository update.
-                val results = if (genreId != null || keywordId != null) {
+                val hasFilters = config.selectedGenres.isNotEmpty() || config.selectedKeywords.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "popularity"
+
+                val results = if (hasFilters) {
                     coroutineScope {
+                        val options = buildTmdbOptions(config, category)
                         (1..5).map { pageNum ->
                             async {
                                 try {
-                                    val options = mutableMapOf<String, String>()
-                                    if (genreId != null) options["with_genres"] = genreId.toString()
-                                    if (keywordId != null) options["with_keywords"] = keywordId.toString()
-                                    
                                     when (category) {
                                         "movie" -> tmdbService.discoverMovies(page = pageNum, options = options).results.map { it.toMovieResultInternal() }
                                         "tv" -> tmdbService.discoverTV(page = pageNum, options = options).results.map { it.toTvResultInternal() }
@@ -361,7 +392,6 @@ class SearchViewModel @Inject constructor(
                         }.awaitAll().flatten()
                     }
                 } else {
-                    // Fallback to trending and filter locally by decade
                     when (category) {
                         "movie" -> repository.getTrendingMovies(1).map { it.toMovieResultInternal() }
                         "tv" -> repository.getTrendingTV(1).map { it.toTvResultInternal() }
@@ -428,12 +458,11 @@ class SearchViewModel @Inject constructor(
                     val newBatch: List<TMDBSearchResult>
                     var totalPages = 1
 
-                    if (query.isEmpty() && (_uiState.value.sortConfig.selectedGenres.isNotEmpty() || _uiState.value.sortConfig.selectedKeywords.isNotEmpty())) {
-                        val genreId = _uiState.value.sortConfig.selectedGenres.firstOrNull()
-                        val keywordId = _uiState.value.sortConfig.selectedKeywords.firstOrNull()
-                        val options = mutableMapOf<String, String>()
-                        if (genreId != null) options["with_genres"] = genreId.toString()
-                        if (keywordId != null) options["with_keywords"] = keywordId.toString()
+                    val config = _uiState.value.sortConfig
+                    val hasFilters = config.selectedGenres.isNotEmpty() || config.selectedKeywords.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "popularity"
+                    
+                    if (query.isEmpty() && hasFilters && category != "person") {
+                        val options = buildTmdbOptions(config, category)
 
                         when (category) {
                             "movie" -> {

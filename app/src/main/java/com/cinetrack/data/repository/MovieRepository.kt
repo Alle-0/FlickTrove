@@ -71,8 +71,11 @@ class MovieRepository @Inject constructor(
             try {
                 firebaseRemoteDataSource.setMovie(movie)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Firebase sync failed for ${movie.id}", e)
-                favoriteDao.updateSyncStatus(movie.id, movie.mediaType, "pending")
+                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                    favoriteDao.updateSyncStatus(movie.id, movie.mediaType, "pending")
+                }
             }
         }
     }
@@ -80,20 +83,29 @@ class MovieRepository @Inject constructor(
 
 
     suspend fun deleteMovie(movie: Movie) {
-        favoriteDao.deleteById(movie.id, movie.mediaType)
+        favoriteDao.markDeleted(movie.id, movie.mediaType)
         
         // Notify Widget of changes
         widgetNotifier.notifyWidgetUpdated()
         
         repositoryScope.launch {
-            firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+            try {
+                firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                // Will be retried by syncWorker
+            }
         }
     }
 
     suspend fun markAsDeleted(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
         repositoryScope.launch {
-            firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+            try {
+                firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+            }
         }
     }
 
@@ -110,18 +122,26 @@ class MovieRepository @Inject constructor(
         folderDao.insert(updatedEntity)
         
         repositoryScope.launch {
-            val folder = Folder(
-                id = updatedEntity.id,
-                name = updatedEntity.name,
-                icon = updatedEntity.icon,
-                color = updatedEntity.color,
-                description = updatedEntity.description,
-                itemIds = updatedEntity.itemIds,
-                createdAt = updatedEntity.createdAt,
-                updatedAt = updatedEntity.updatedAt,
-                clientUpdatedAt = now
-            )
-            firebaseRemoteDataSource.setFolder(folder)
+            try {
+                val folder = Folder(
+                    id = updatedEntity.id,
+                    name = updatedEntity.name,
+                    icon = updatedEntity.icon,
+                    color = updatedEntity.color,
+                    description = updatedEntity.description,
+                    itemIds = updatedEntity.itemIds,
+                    createdAt = updatedEntity.createdAt,
+                    updatedAt = updatedEntity.updatedAt,
+                    clientUpdatedAt = now
+                )
+                firebaseRemoteDataSource.setFolder(folder)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Firebase folder sync failed for ${updatedEntity.id}", e)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                    folderDao.updateSyncStatus(updatedEntity.id, "pending")
+                }
+            }
         }
     }
 
@@ -132,6 +152,7 @@ class MovieRepository @Inject constructor(
                 firebaseRemoteDataSource.deleteFolder(folderId)
                 folderDao.deleteById(folderId)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 // Keep as pending_delete for sync retry
             }
         }
@@ -152,6 +173,7 @@ class MovieRepository @Inject constructor(
                     favoriteDao.updateSyncStatus(movie.id, movie.mediaType, "synced")
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Failed to push pending movie ${movie.id}", e)
             }
         }
@@ -179,6 +201,7 @@ class MovieRepository @Inject constructor(
                     folderDao.updateSyncStatus(folder.id, "synced")
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Failed to push pending folder ${folder.id}", e)
             }
         }
@@ -327,6 +350,7 @@ class MovieRepository @Inject constructor(
             syncPreferencesWithFirebase()
             emit("Sync completata", 1f)
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
             emit("Errore di sincronizzazione", 1f)
         }
@@ -387,28 +411,34 @@ class MovieRepository @Inject constructor(
             
             preferenceRepository.updateAll(updatedPrefs)
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             android.util.Log.e("MovieRepository", "Error syncing preferences: ${e.message}")
         }
     }
 
     suspend fun savePreferencesRemote(prefs: com.cinetrack.data.models.UserPreferences) {
         repositoryScope.launch {
-            // Convert to Map for Firestore
-            val prefsMap = mapOf(
-                "gridColumns" to prefs.gridColumns,
-                "notificationsEnabled" to prefs.notificationsEnabled,
-                "showFolderBookmarks" to prefs.showFolderBookmarks,
-                "showBadges" to prefs.showBadges,
-                "disabledBadges" to prefs.disabledBadges.toList(),
-                "vibrationEnabled" to prefs.vibrationEnabled,
-                "accentColor" to prefs.accentColor,
-                "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
-                "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
-                "homeSort" to prefs.homeSort,
-                "vistiSort" to prefs.vistiSort,
-                "discoveryFilters" to prefs.discoveryFilters
-            )
-            firebaseRemoteDataSource.setUserPreferences(prefsMap)
+            try {
+                // Convert to Map for Firestore
+                val prefsMap = mapOf(
+                    "gridColumns" to prefs.gridColumns,
+                    "notificationsEnabled" to prefs.notificationsEnabled,
+                    "showFolderBookmarks" to prefs.showFolderBookmarks,
+                    "showBadges" to prefs.showBadges,
+                    "disabledBadges" to prefs.disabledBadges.toList(),
+                    "vibrationEnabled" to prefs.vibrationEnabled,
+                    "accentColor" to prefs.accentColor,
+                    "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
+                    "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
+                    "homeSort" to prefs.homeSort,
+                    "vistiSort" to prefs.vistiSort,
+                    "discoveryFilters" to prefs.discoveryFilters
+                )
+                firebaseRemoteDataSource.setUserPreferences(prefsMap)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Error saving preferences remote", e)
+            }
         }
     }
 
@@ -555,25 +585,15 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchComments(tmdbId: Long, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
+    suspend fun fetchComments(id: String, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
+        val type = if (isTv) "shows" else "movies"
         return try {
-            val response = if (isTv) {
-                tmdbService.getTVReviews(tmdbId)
-            } else {
-                tmdbService.getMovieReviews(tmdbId)
-            }
-            
-            response.results.map { review ->
-                com.cinetrack.data.api.TraktComment(
-                    id = review.id.hashCode().toLong(),
-                    comment = review.content,
-                    likes = review.authorDetails?.rating?.toInt() ?: 0,
-                    user = com.cinetrack.data.api.TraktUser(
-                        username = review.author,
-                        name = review.authorDetails?.name?.takeIf { it.isNotBlank() } ?: review.author
-                    )
-                )
-            }.sortedByDescending { it.likes }
+            traktService.getComments(
+                type = type,
+                id = id,
+                sort = "likes",
+                apiKey = traktApiKey
+            )
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             emptyList()

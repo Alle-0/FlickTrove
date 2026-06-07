@@ -193,14 +193,14 @@ fun DetailHeader(
                                 .background(Color.White.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape)
                         )
 
-                        val runtime = movie.runtime?.let {
+                        val runtime = movie.numberOfSeasons?.let { 
+                            if (it > 0) "$it Stagion${if (it > 1) "i" else "e"}" else null 
+                        } ?: movie.runtime?.let {
                             if (it > 0) {
                                 val h = it / 60
                                 val m = it % 60
                                 if (h > 0) "${h}h ${m}m" else "${m}m"
                             } else null
-                        } ?: movie.numberOfSeasons?.let { 
-                            if (it > 0) "$it Stagion${if (it > 1) "i" else "e"}" else null 
                         } ?: "-"
 
                         Text(

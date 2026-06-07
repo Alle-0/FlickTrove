@@ -81,12 +81,58 @@ import coil.Coil
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.theme.HazeStyles
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.core.screen.Screen
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.util.toComposeColor
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+
+data class MovieDetailScreen(
+    val movieId: Long,
+    val mediaType: String
+) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<MovieDetailViewModel>()
+        val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(movieId, mediaType) {
+            kotlinx.coroutines.delay(250)
+            viewModel.initMovie(movieId, mediaType)
+        }
+
+        MovieDetailScreenContent(
+            viewModel = viewModel,
+            paddingValues = PaddingValues(0.dp),
+            onBackClick = { navigator.pop() },
+            onMovieClick = { movie ->
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            },
+            onPersonClick = { personId, _ ->
+                // navigator.push(PersonDetailScreen(personId))
+            },
+            onGenreClick = { genreId, genreName, _ ->
+                navigator.push(SearchScreen(initialGenreId = genreId, initialGenreName = genreName))
+            },
+            onKeywordClick = { keywordId, keywordName, _ ->
+                // SearchScreen currently does not support initialKeywordId in its constructor, 
+                // but we can pass it as initialKeywordName
+                navigator.push(SearchScreen(initialKeywordName = keywordName))
+            },
+            onHomeClick = {
+                navigator.popUntilRoot()
+            }
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun MovieDetailScreen(
+fun MovieDetailScreenContent(
     viewModel: MovieDetailViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -112,6 +158,12 @@ fun MovieDetailScreen(
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
+
+    var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasCompletedFirstEnter = true
+    }
+    val effectiveSharedTransitionScope = if (hasCompletedFirstEnter) null else sharedTransitionScope
 
     androidx.activity.compose.BackHandler(enabled = true) {
         if (movieActions.isAnyModalOpen) {
@@ -335,7 +387,7 @@ fun MovieDetailScreen(
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
                                         hazeState = backdropHazeState,
-                                        sharedTransitionScope = sharedTransitionScope,
+                                        sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true }
                                     )
 
@@ -347,8 +399,33 @@ fun MovieDetailScreen(
                                         accentColor = accentColor,
                                         onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
                                         onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
-                                        onProviderClick = {
-                                            state.watchProviderLink?.let { link ->
+                                        onProviderClick = { provider ->
+                                            val title = java.net.URLEncoder.encode(state.movieEntry.displayName, "UTF-8")
+                                            val name = provider.providerName.lowercase().trim()
+                                            val deepLink = when {
+                                                name.contains("netflix") -> "https://www.netflix.com/search?q=$title"
+                                                name.contains("prime video") || name.contains("amazon prime") || name.contains("amazon video") -> "https://app.primevideo.com/search?searchTerm=$title"
+                                                name.contains("disney") -> "https://www.disneyplus.com/search?q=$title"
+                                                name.contains("apple") -> "https://tv.apple.com/search?term=$title"
+                                                name.contains("crunchyroll") -> "https://www.crunchyroll.com/search?q=$title"
+                                                name.contains("now") || name.contains("sky") -> "https://www.nowtv.it/ricerca?q=$title"
+                                                name.contains("paramount") -> "https://www.paramountplus.com/search?q=$title"
+                                                name.contains("youtube") -> "https://www.youtube.com/results?search_query=$title"
+                                                name.contains("google play") -> "https://play.google.com/store/search?q=$title&c=movies"
+                                                name.contains("rakuten") -> "https://rakuten.tv/it/search?q=$title"
+                                                name.contains("timvision") -> "https://www.timvision.it/search?q=$title"
+                                                name.contains("infinity") || name.contains("mediaset") -> "https://mediasetinfinity.mediaset.it/ricerca/$title"
+                                                name.contains("raiplay") -> "https://www.raiplay.it/ricerca.html?q=$title"
+                                                name.contains("discovery") -> "https://www.discoveryplus.com/it/search?query=$title"
+                                                name.contains("max") || name.contains("hbo") -> "https://play.max.com/search?q=$title"
+                                                name.contains("hulu") -> "https://www.hulu.com/search?q=$title"
+                                                name.contains("peacock") -> "https://www.peacocktv.com/watch/search?q=$title"
+                                                name.contains("chili") -> "https://it.chili.com/search?q=$title"
+                                                name.contains("mgm") -> "https://www.mgmplus.com/search?q=$title"
+                                                else -> state.watchProviderLink
+                                            }
+                                            
+                                            deepLink?.let { link ->
                                                 try {
                                                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
                                                     context.startActivity(intent)
@@ -382,7 +459,7 @@ fun MovieDetailScreen(
                                         directors = state.directors,
                                         cast = state.cast,
                                         accentColor = accentColor,
-                                        sharedTransitionScope = sharedTransitionScope,
+                                        sharedTransitionScope = effectiveSharedTransitionScope,
                                         animatedVisibilityScope = animatedVisibilityScope,
                                         onPersonClick = onPersonClick
                                     )
@@ -708,7 +785,7 @@ fun MovieDetailScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_interfaccia),
+                                    imageVector = Icons.Rounded.Home,
                                     contentDescription = "Torna alla schermata principale",
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
@@ -971,12 +1048,19 @@ fun MovieDetailScreen(
         }
     }
     // Translation Prompt Dialog
+    var rememberedPromptData by remember { mutableStateOf<Pair<Long, String>?>(null) }
+    LaunchedEffect(showTranslationPrompt) {
+        if (showTranslationPrompt != null) {
+            rememberedPromptData = showTranslationPrompt
+        }
+    }
+
     com.cinetrack.ui.components.shared.FlickTroveModal(
         isVisible = showTranslationPrompt != null,
         onDismissRequest = { viewModel.dismissTranslationPrompt() },
         hazeState = localHazeState
     ) {
-        val promptData = showTranslationPrompt
+        val promptData = showTranslationPrompt ?: rememberedPromptData
         if (promptData != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

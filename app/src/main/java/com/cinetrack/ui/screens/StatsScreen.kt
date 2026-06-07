@@ -55,6 +55,13 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.geometry.Offset
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -190,10 +197,50 @@ class TicketShape(
     }
 }
 
+
+
+object StatsTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 4u,
+                    title = "Stats",
+                    icon = null
+                )
+            }
+        }
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<StatsViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val hazeState = com.cinetrack.ui.LocalHazeState.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        var isYearPickerVisible by remember { mutableStateOf(false) }
+
+        StatsScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            onToggleYearPicker = { visible, _ -> isYearPickerVisible = visible },
+            onPersonClick = { personId ->
+                // navigator.push(PersonDetailScreen(personId))
+            },
+            onMovieClick = { movie ->
+                // navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+    }
+}
+
 @Composable
-fun StatsScreen(
+fun StatsScreenContent(
     viewModel: StatsViewModel,
     paddingValues: PaddingValues,
+    hazeState: HazeState? = null,
     onToggleYearPicker: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onPersonClick: (Long) -> Unit = {},
     onMovieClick: (Movie) -> Unit = {}
@@ -204,7 +251,7 @@ fun StatsScreen(
     val context = LocalContext.current
     
     // Local haze state to isolate background blur from foreground content
-    val localHazeState = remember { HazeState() }
+    val activeHazeState = hazeState ?: remember { HazeState() }
     var isSharingStats by remember { mutableStateOf(false) }
 
     Box(
@@ -219,7 +266,7 @@ fun StatsScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(localHazeState, style = HazeStyles.PremiumDark)
+                    .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
                 // Darker background to make bars look "scure" (dark)
                 Box(Modifier.fillMaxSize().background(Color(0xFF050507)))
@@ -257,7 +304,7 @@ fun StatsScreen(
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     // Top safe area spacer
-                                    Spacer(Modifier.height(paddingValues.calculateTopPadding()))
+                                    Spacer(Modifier.height(paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp))
 
                                     // ── Year Selection Button (Top Bar Style) ─────────────────
                                     Box(
@@ -349,7 +396,7 @@ fun StatsScreen(
                                                                 isFavorite = movie.favorite,
                                                                 isReminder = movie.reminder,
                                                                 progress = (movie.progress ?: 0.0).toFloat(),
-                                                                hazeState = localHazeState,
+                                                                hazeState = activeHazeState,
                                                                 onPress = { onMovieClick(movie) }
                                                             )
                                                         }

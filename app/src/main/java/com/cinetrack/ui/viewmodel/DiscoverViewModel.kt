@@ -13,9 +13,8 @@ import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.domain.GetDiscoverUiStateUseCase
 import javax.inject.Inject
-import com.cinetrack.ui.navigation.DiscoverRoute
+
 import com.cinetrack.util.toComposeColor
-import androidx.navigation.toRoute
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.repository.PreferenceRepository
 
@@ -52,8 +51,9 @@ class DiscoverViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val route = savedStateHandle.toRoute<DiscoverRoute>()
-    private val type: String = route.type
+    private var type: String = "popular"
+    private var genreId: Long? = null
+    private var genreName: String? = null
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     private val _isLoading = MutableStateFlow(true)
     private val _isNextPageLoading = MutableStateFlow(false)
@@ -95,21 +95,22 @@ class DiscoverViewModel @Inject constructor(
             folders = groupB.third.first,
             prefs = groupB.third.second,
             type = type,
-            genreName = route.genreName
+            genreName = genreName
         )
     }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = DiscoverUiState(type = type, genreName = route.genreName)
+        initialValue = DiscoverUiState(type = type, genreName = genreName)
     )
 
-    init {
-        // If a genreId was passed via navigation, set it in the filter state
-        route.genreId?.let { gid ->
-            _sortConfig.value = _sortConfig.value.copy(
-                selectedGenres = listOf(gid)
-            )
-        }
+    fun init(newType: String = "popular", newGenreId: Long? = null, newGenreName: String? = null) {
+        if (this.type == newType && this.genreId == newGenreId) return
+        this.type = newType
+        this.genreId = newGenreId
+        this.genreName = newGenreName
+        _sortConfig.value = _sortConfig.value.copy(
+            selectedGenres = if (newGenreId != null) listOf(newGenreId) else emptyList()
+        )
         fetchMovies()
     }
 
@@ -127,9 +128,10 @@ class DiscoverViewModel @Inject constructor(
 
             try {
                 val pageToFetch = if (isNextPage) _currentPage.value + 1 else 1
-                val fetchedResults = if (route.genreId != null) {
+                val currentGenreId = genreId
+                val fetchedResults = if (currentGenreId != null) {
                     // Fetch by genre if provided in route
-                    repository.getMoviesByGenre(route.genreId, page = pageToFetch).map { it.copy(mediaType = "movie") }
+                    repository.getMoviesByGenre(currentGenreId, page = pageToFetch).map { it.copy(mediaType = "movie") }
                 } else {
                     when (type) {
                         "popular_movies", "popular" -> repository.getPopularMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }

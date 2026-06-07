@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,14 +58,59 @@ import dev.chrisbanes.haze.*
 import kotlinx.coroutines.launch
 import android.content.Intent
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.LocalHazeState
+
+object HomeTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 0u,
+                    title = "Home",
+                    icon = null
+                )
+            }
+        }
+
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<HomeViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val hazeState = LocalHazeState.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        var isFilterVisible by remember { mutableStateOf(false) }
+        var isActionModalVisible by remember { mutableStateOf(false) }
+        
+        HomeScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            isFilterVisible = isFilterVisible,
+            onToggleFilter = { visible, _ -> isFilterVisible = visible },
+            onActionModalVisibilityChanged = { isActionModalVisible = it },
+            onMovieClick = { movie -> 
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun HomeScreen(
+fun HomeScreenContent(
     viewModel: HomeViewModel,
     paddingValues: PaddingValues,
     hazeState: dev.chrisbanes.haze.HazeState? = null,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onActionModalVisibilityChanged: (Boolean) -> Unit = {},
@@ -90,11 +136,15 @@ fun HomeScreen(
     
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
     
+    var previousSortConfig by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
-        if (uiState.movies.isNotEmpty()) {
-            movieGridState.scrollToItem(0)
-            tvGridState.scrollToItem(0)
+        if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
+            if (uiState.movies.isNotEmpty()) {
+                movieGridState.scrollToItem(0)
+                tvGridState.scrollToItem(0)
+            }
         }
+        previousSortConfig = uiState.sortConfig
     }
     
     val context = LocalContext.current
@@ -104,8 +154,8 @@ fun HomeScreen(
     }
 
     val stickyHeaderHeight = 60.dp
-    val topPadding = paddingValues.calculateTopPadding()
-    val localHazeState = remember { HazeState() }
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
+    val activeHazeState = hazeState ?: remember { HazeState() }
 
     MovieActionsWrapper(
         hazeState = hazeState ?: HazeState(),
@@ -123,7 +173,7 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(localHazeState, style = HazeStyles.PremiumDark)
+                    .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
             if (uiState.isLoading) {
                 LazyVerticalGrid(
@@ -243,7 +293,6 @@ fun HomeScreen(
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                     showBadges = uiState.preferences.showBadges,
                                     hazeState = hazeState,
-                                    animatedVisibilityScope = animatedVisibilityScope,
                                     staggerIndex = index,
                                     onPress = stableOnPress,
                                     onAction = stableOnAction,
@@ -261,12 +310,17 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = topPadding)
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
-                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
-                .height(stickyHeaderHeight),
-            contentAlignment = Alignment.Center
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(stickyHeaderHeight)
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
 
                 // Category Tab Selector Island (Centered with more left offset for balance)
@@ -279,7 +333,7 @@ fun HomeScreen(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                            .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                     )
                     
                     val options = listOf("FILM", "SERIE TV")
@@ -316,7 +370,7 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                    .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                             )
 
                             // Interactive Content Layer
@@ -354,7 +408,7 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                         )
 
                         // Interactive Content Layer
@@ -381,6 +435,7 @@ fun HomeScreen(
                             )
                         }
                     }
+                }
                 }
             }
         }

@@ -64,9 +64,42 @@ import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+
+data class PersonDetailScreen(
+    val personId: Long,
+    val profilePath: String?
+) : Screen {
+    @OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<PersonDetailViewModel>()
+        val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(personId) {
+            viewModel.initPerson(personId, profilePath)
+        }
+
+        PersonDetailScreenContent(
+            viewModel = viewModel,
+            paddingValues = PaddingValues(0.dp),
+            onBackClick = { navigator.pop() },
+            onMovieClick = { movie ->
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            },
+            onHomeClick = {
+                navigator.popUntilRoot()
+            }
+        )
+    }
+}
+
+@OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 @Composable
-fun PersonDetailScreen(
+fun PersonDetailScreenContent(
     viewModel: PersonDetailViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -497,7 +530,7 @@ fun PersonDetailScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_interfaccia),
+                        imageVector = Icons.Rounded.Home,
                         contentDescription = "Torna alla schermata principale",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)

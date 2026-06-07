@@ -80,9 +80,20 @@ class GetSearchUiStateUseCase @Inject constructor() {
         val dynamicKeywords = rawDynamicKeywords.filter { it.isKeyword }
             
         val suggestedFilters = mutableListOf<FilterPill>()
+
+        // Always show currently selected genres as pills so the user knows they are active
+        sortConfig.selectedGenres.forEach { selectedId ->
+            val genre = availableGenres.find { it.id == selectedId }
+            if (genre != null) {
+                suggestedFilters.add(FilterPill(genre.id, genre.name, isKeyword = false))
+            }
+        }
+
         if (query.length >= 2) {
-            availableGenres.filter { it.name.lowercase().contains(lowerQuery) }.forEach {
-                suggestedFilters.add(FilterPill(it.id, it.name, isKeyword = false))
+            availableGenres.filter { it.name.lowercase().contains(lowerQuery) }.forEach { genre ->
+                if (!suggestedFilters.any { it.id == genre.id }) {
+                    suggestedFilters.add(FilterPill(genre.id, genre.name, isKeyword = false))
+                }
             }
             keywordToGenre.forEach { (keyword, keywordId) ->
                 if (keyword.contains(lowerQuery)) {

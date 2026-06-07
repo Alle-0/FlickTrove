@@ -68,7 +68,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.cinetrack.util.VibrationHelper
 import com.google.firebase.auth.FirebaseAuth
-import androidx.hilt.navigation.compose.hiltViewModel
+import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chrisbanes.haze.*
 import androidx.compose.ui.graphics.Brush
@@ -92,14 +92,56 @@ import kotlinx.coroutines.withContext
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
+
+object SettingsTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 6u,
+                    title = "Settings",
+                    icon = null
+                )
+            }
+        }
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<AuthViewModel>()
+        val settingsViewModel = getViewModel<SettingsViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val hazeState = com.cinetrack.ui.LocalHazeState.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        SettingsScreenContent(
+            viewModel = viewModel,
+            settingsViewModel = settingsViewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            onLoggedOut = {
+                // navigator.replaceAll(LoginScreen())
+            }
+        )
+    }
+}
+
 @Composable
-fun SettingsScreen(
+fun SettingsScreenContent(
     viewModel: AuthViewModel,
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel,
     paddingValues: PaddingValues,
+    hazeState: HazeState? = null,
     onLoggedOut: () -> Unit
 ) {
-    val localHazeState = remember { HazeState() }
+    val activeHazeState = hazeState ?: remember { HazeState() }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
@@ -250,7 +292,7 @@ fun SettingsScreen(
                 .then(
                     if (anyDialogVisible) {
                         Modifier.haze(
-                            state = localHazeState,
+                            state = activeHazeState,
                             style = HazeStyles.PremiumDark
                         )
                     } else Modifier
@@ -866,7 +908,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.85f)
-                        .hazeGlass(state = localHazeState, alpha = alpha, shape = RoundedCornerShape(32.dp))
+                        .hazeGlass(state = activeHazeState, alpha = alpha, shape = RoundedCornerShape(32.dp))
                         .clickable(enabled = false) {}
                 ) {
                     Column(
@@ -941,7 +983,7 @@ fun SettingsScreen(
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.85f)
                         .hazeGlass(
-                            state = localHazeState, alpha = alpha,
+                            state = activeHazeState, alpha = alpha,
                             shape = RoundedCornerShape(32.dp)
                         )
                         .clickable(enabled = false) {}
@@ -1017,7 +1059,7 @@ fun SettingsScreen(
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.85f)
                         .hazeGlass(
-                            state = localHazeState, alpha = alpha,
+                            state = activeHazeState, alpha = alpha,
                             shape = RoundedCornerShape(32.dp)
                         )
                         .clickable(enabled = false) {}
@@ -1080,7 +1122,7 @@ fun SettingsScreen(
                             renderBadge("SCI-FI", Color(0xFF2962FF), "Genere Fantascienza")
                             renderBadge("COMEDY", Color(0xFFFFEA00), "Commedia apprezzata (media ≥7.0)")
                             renderBadge("HORROR", Color(0xFFE53935), "Genere Horror")
-                            renderBadge("ANIME", Color(0xFFFF9800), "Genere Animazione / Anime")
+                            renderBadge("ANIMAZIONE", Color(0xFFFF9800), "Genere Animazione")
                             renderBadge("BLOCKBUSTER", Color(0xFF6200EA), "Incassi stellari (> 500 mln $)")
                             renderBadge("INDIE", Color(0xFFAED581), "Basso budget, alta qualità (budget < 5 mln, media ≥7.0)")
                             renderBadge("QUICK", Color(0xFFC6FF00), "Breve ma intenso (Film < 90 min)")
@@ -1124,7 +1166,7 @@ fun SettingsScreen(
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.85f)
                         .hazeGlass(
-                            state = localHazeState, alpha = alpha,
+                            state = activeHazeState, alpha = alpha,
                             shape = RoundedCornerShape(32.dp)
                         )
                         .clickable(enabled = false) {}
@@ -1195,7 +1237,7 @@ fun SettingsScreen(
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
             ColorSelectionDialog(
-                hazeState = localHazeState, alpha = alpha,
+                hazeState = activeHazeState, alpha = alpha,
                 current = accentColorName,
                 onDismiss = { showColorDialog = false },
                 onSelect = { colorName, origin ->
@@ -1219,7 +1261,7 @@ fun SettingsScreen(
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
             FeedbackDialog(
-                hazeState = localHazeState, alpha = alpha,
+                hazeState = activeHazeState, alpha = alpha,
                 initialEmail = user?.email ?: "",
                 isLoading = isFeedbackLoading,
                 onDismiss = { if (!isFeedbackLoading) showFeedbackDialog = false },
@@ -1240,7 +1282,7 @@ fun SettingsScreen(
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
             BackupDialog(
-                hazeState = localHazeState, alpha = alpha,
+                hazeState = activeHazeState, alpha = alpha,
                 isBackupLoading = isBackupLoading,
                 onDismiss = { if (!isBackupLoading) showBackupDialog = false },
                 onExport = { 
@@ -1263,7 +1305,7 @@ fun SettingsScreen(
         ) {
             val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == androidx.compose.animation.EnterExitState.Visible) 1f else 0f }
             ExternalMigrationDialog(
-                hazeState = localHazeState, alpha = alpha,
+                hazeState = activeHazeState, alpha = alpha,
                 onDismiss = { showExternalMigrationDialog = false },
                 onImport = { 
                     showExternalMigrationDialog = false

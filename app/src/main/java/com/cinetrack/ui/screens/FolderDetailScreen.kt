@@ -30,9 +30,66 @@ import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.util.toComposeColor
 
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import androidx.compose.runtime.remember
+
+data class FolderDetailTab(
+    val folderId: String,
+    val folderName: String,
+    val folderColor: String? = null
+) : Tab {
+    override val options: TabOptions
+        @Composable
+        get() = remember {
+            TabOptions(
+                index = 99u,
+                title = folderName,
+                icon = null
+            )
+        }
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<FolderDetailViewModel>()
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        LaunchedEffect(folderId) {
+            viewModel.initFolder(folderId)
+        }
+
+        var showDeleteConfirm by remember { mutableStateOf(false) }
+        var showEditDialog by remember { mutableStateOf(false) }
+        var folderEditMode by remember { mutableStateOf(com.cinetrack.ui.components.shared.FolderEditMode.NAME) }
+
+        @OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+        FolderDetailScreenContent(
+            viewModel = viewModel,
+            paddingValues = PaddingValues(0.dp),
+            showDeleteConfirm = showDeleteConfirm,
+            onShowDeleteConfirmChange = { showDeleteConfirm = it },
+            showEditDialog = showEditDialog,
+            onShowEditDialogChange = { showEditDialog = it },
+            folderEditMode = folderEditMode,
+            onFolderUpdated = { _, _ -> },
+            onMovieClick = { movie ->
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            },
+            onBack = { 
+                // We'll handle this back navigation by resetting the tab in MainScreen or via BackHandler here
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun FolderDetailScreen(
+fun FolderDetailScreenContent(
     viewModel: FolderDetailViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
@@ -67,10 +124,10 @@ fun FolderDetailScreen(
                     }
                 }
                 is FolderDetailUiState.Success -> {
-                    val localHazeState = remember { HazeState() }
+                    val activeHazeState = hazeState ?: remember { HazeState() }
                     
                     MovieActionsWrapper(
-                        hazeState = localHazeState,
+                        hazeState = activeHazeState,
                         folders = state.allFolders,
                         isItemInFolder = { movie, folderId ->
                             state.allFolders.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") ?: false
@@ -84,7 +141,7 @@ fun FolderDetailScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .haze(
-                                    state = localHazeState,
+                                    state = activeHazeState,
                                     style = HazeStyles.PremiumDark
                                 )
                         ) {
@@ -103,7 +160,7 @@ fun FolderDetailScreen(
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
-                                    top = paddingValues.calculateTopPadding() + 16.dp,
+                                    top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 16.dp,
                                     bottom = paddingValues.calculateBottomPadding() + 32.dp
                                 ),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -151,7 +208,7 @@ fun FolderDetailScreen(
                                                 folderColors = currentFolderColors,
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
                                                 showBadges = preferences.showBadges,
-                                                hazeState = localHazeState,
+                                                hazeState = activeHazeState,
                                                 staggerIndex = index,
                                                 onPress = { onMovieClick(movie) },
                                                 onLongPress = { m, pressOffset, cardPos ->
@@ -192,7 +249,7 @@ fun FolderDetailScreen(
                                     },
                                     onDismiss = { onShowDeleteConfirmChange(false) },
                                     folderName = state.folder.name,
-                                    hazeState = localHazeState
+                                    hazeState = activeHazeState
                                 )
                             }
                             
@@ -207,7 +264,7 @@ fun FolderDetailScreen(
                                         viewModel.updateFolderDetails(newName, newColor)
                                         onFolderUpdated(newName, newColor)
                                     },
-                                    hazeState = localHazeState
+                                    hazeState = activeHazeState
                                 )
                             }
                         }

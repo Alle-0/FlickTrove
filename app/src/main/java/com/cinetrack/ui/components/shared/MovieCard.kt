@@ -43,6 +43,7 @@ import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.theme.NeonPink
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.data.generateBadges
 
 @Composable
 fun MovieCard(
@@ -89,29 +90,9 @@ fun MovieCard(
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.End
             ) {
-                val newEpisodes = movie.newEpisodesFound
-                if (movie.isUpcoming == true || (newEpisodes != null && newEpisodes > 0)) {
-                    TextBadge(text = "NEW", color = NeonPink)
-                }
-
-                if ((movie.voteAverage ?: 0.0) >= 8.5 && (movie.voteCount ?: 0) > 300) {
-                    TextBadge(text = "BEST", color = Color(0xFF00E5FF))
-                } else if ((movie.voteCount ?: 0) > 3000) {
-                    TextBadge(text = "HOT", color = HazeStyles.AccentYellow)
-                } else if ((movie.voteAverage ?: 0.0) >= 8.0 && (movie.voteCount ?: 0) > 1000) {
-                    TextBadge(text = "WOW", color = NeonTeal)
-                }
-                
-                val isOldAndGood = (movie.releaseDate?.startsWith("19") == true || movie.releaseDate?.startsWith("200") == true) && (movie.voteAverage ?: 0.0) >= 8.0
-                if (isOldAndGood) {
-                    TextBadge(text = "CULT", color = Color(0xFF9C27B0))
-                }
-
-                val genresStr = movie.genreNamesString ?: ""
-                if (genresStr.contains("Horror", ignoreCase = true) || movie.genres?.any { it.name?.equals("Horror", ignoreCase = true) == true } == true) {
-                    TextBadge(text = "HORROR", color = Color(0xFFE53935))
-                } else if (genresStr.contains("Animation", ignoreCase = true) || genresStr.contains("Anime", ignoreCase = true)) {
-                    TextBadge(text = "ANIME", color = Color(0xFFFF9800))
+                val badges = remember(movie) { movie.generateBadges() }
+                badges.forEach { badge ->
+                    TextBadge(text = badge.text, color = Color(badge.colorValue))
                 }
             }
 

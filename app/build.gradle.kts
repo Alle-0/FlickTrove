@@ -97,14 +97,17 @@ dependencies {
     implementation("androidx.glance:glance-material3:1.1.0")
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.compose.animation:animation-graphics")
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.voyager.navigator)
+    implementation(libs.voyager.tab.navigator)
+    implementation(libs.voyager.transitions)
+    implementation(libs.voyager.hilt)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.datastore.preferences)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
+
     implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.work.compiler)
 

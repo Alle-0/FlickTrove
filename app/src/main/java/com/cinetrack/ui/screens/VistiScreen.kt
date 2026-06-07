@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -55,14 +56,77 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.theme.HazeStyles
 
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.components.HomeFilterModal
+
+object VistiTab : Tab {
+    override val options: TabOptions
+        @Composable
+        get() {
+            return remember {
+                TabOptions(
+                    index = 2u,
+                    title = "Library",
+                    icon = null
+                )
+            }
+        }
+
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<VistiViewModel>()
+        val paddingValues = LocalAppPadding.current
+        val hazeState = LocalHazeState.current
+        val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
+        var isFilterVisible by remember { mutableStateOf(false) }
+        var isActionModalVisible by remember { mutableStateOf(false) }
+        
+        VistiScreenContent(
+            viewModel = viewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            isFilterVisible = isFilterVisible,
+            onToggleFilter = { visible, _ -> isFilterVisible = visible },
+            onActionModalVisibilityChanged = { isActionModalVisible = it },
+            onMovieClick = { movie -> 
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+        
+        if (isFilterVisible) {
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            HomeFilterModal(
+                isVisible = isFilterVisible,
+                isVisti = true,
+                sortConfig = uiState.sortConfig,
+                hazeState = hazeState,
+                triggerBounds = null,
+                category = uiState.activeTab,
+                onSortConfigChanged = { newConfig ->
+                    viewModel.updateSortConfig(newConfig)
+                    isFilterVisible = false
+                },
+                onDismissRequest = { isFilterVisible = false }
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun VistiScreen(
+fun VistiScreenContent(
     viewModel: VistiViewModel,
     paddingValues: PaddingValues,
     hazeState: dev.chrisbanes.haze.HazeState? = null,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, Rect?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {},
@@ -88,13 +152,17 @@ fun VistiScreen(
     }
 
     val stickyHeaderHeight = 60.dp
-    val topPadding = paddingValues.calculateTopPadding()
-    val localHazeState = remember { HazeState() }
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
+    val activeHazeState = hazeState ?: remember { HazeState() }
 
+    var previousSortConfig by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
-        if (uiState.movies.isNotEmpty()) {
-            listState.scrollToItem(0)
+        if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
+            if (uiState.movies.isNotEmpty()) {
+                listState.scrollToItem(0)
+            }
         }
+        previousSortConfig = uiState.sortConfig
     }
 
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
@@ -115,7 +183,7 @@ fun VistiScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(localHazeState, style = HazeStyles.PremiumDark)
+                    .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
             if (uiState.isLoading) {
                 LazyVerticalGrid(
@@ -206,7 +274,6 @@ fun VistiScreen(
                                 progress = (movie.progress ?: 0.0).toFloat(),
                                 folderColors = folderColors,
                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                animatedVisibilityScope = animatedVisibilityScope,
                                 staggerIndex = index,
                                 onPress = { onMovieClick(movie) },
                                 onAction = { viewModel.toggleWatched(movie) },
@@ -225,10 +292,17 @@ fun VistiScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
-                .height(stickyHeaderHeight),
-            contentAlignment = Alignment.Center
+                .padding(top = topPadding)
+                .align(Alignment.TopCenter)
+                .zIndex(1f)
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(stickyHeaderHeight)
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
             val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
 
             // Category Tab Selector Island (Centered with more left offset for balance)
@@ -243,7 +317,7 @@ fun VistiScreen(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = localHazeState, shape = RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                            .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                     )
                     
                     // Content Layer (Always sharp)
@@ -281,7 +355,7 @@ fun VistiScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                         )
                         Box(
                             modifier = Modifier
@@ -314,7 +388,7 @@ fun VistiScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .hazeGlass(state = localHazeState, shape = RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                        .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                 )
 
                 // Interactive Content Layer
@@ -355,4 +429,5 @@ fun VistiScreen(
         }
         }
     }
+}
 }

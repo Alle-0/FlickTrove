@@ -41,7 +41,13 @@ class FolderDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val folderId: String = checkNotNull(savedStateHandle["folderId"])
+    private val _folderId = MutableStateFlow<String?>(null)
+
+    fun initFolder(id: String) {
+        if (_folderId.value == null) {
+            _folderId.value = id
+        }
+    }
 
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)
@@ -65,8 +71,9 @@ class FolderDetailViewModel @Inject constructor(
         initialValue = UserPreferences()
     )
 
-    val uiState: StateFlow<FolderDetailUiState> = repository.getFolderFlow(folderId).flatMapLatest { folder ->
-        if (folder == null) {
+    val uiState: StateFlow<FolderDetailUiState> = _folderId.filterNotNull().flatMapLatest { id ->
+        repository.getFolderFlow(id).flatMapLatest { folder ->
+            if (folder == null) {
             flowOf(FolderDetailUiState.Error("Cartella non trovata"))
         } else {
             combine(
@@ -75,6 +82,7 @@ class FolderDetailViewModel @Inject constructor(
             ) { movies, allFolders ->
                 FolderDetailUiState.Success(folder, movies.toImmutableList(), allFolders.toImmutableList())
             }
+        }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -150,7 +158,9 @@ class FolderDetailViewModel @Inject constructor(
             val currentState = uiState.value
             if (currentState is FolderDetailUiState.Success) {
                 val folder = currentState.folder
-                repository.deleteFolder(folderId)
+                _folderId.value?.let { id ->
+                    repository.deleteFolder(id)
+                }
                 actionFeedbackManager.emit("Cartella \"${folder.name}\" eliminata") {
                     repository.saveFolder(folder)
                 }

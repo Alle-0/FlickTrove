@@ -301,11 +301,13 @@ fun DetailActions(
                     
                     // TV Progress Border
                     if (movie.mediaType == "tv" && optimisticWatchState != WatchState.NONE && animatedProgress > 0f) {
+                        val strokeWidthPx = 4.dp.toPx()
+                        val halfStroke = strokeWidthPx / 2f
                         val path = Path().apply {
                             addRoundRect(
                                 androidx.compose.ui.geometry.RoundRect(
-                                    rect = androidx.compose.ui.geometry.Rect(0f, 0f, w, h),
-                                    cornerRadius = CornerRadius(28.dp.toPx())
+                                    rect = androidx.compose.ui.geometry.Rect(halfStroke, halfStroke, w - halfStroke, h - halfStroke),
+                                    cornerRadius = CornerRadius(28.dp.toPx() - halfStroke)
                                 )
                             )
                         }
@@ -317,7 +319,7 @@ fun DetailActions(
                             path = path,
                             color = displayColor,
                             style = Stroke(
-                                width = 6.dp.toPx(),
+                                width = strokeWidthPx,
                                 cap = StrokeCap.Round,
                                 pathEffect = PathEffect.dashPathEffect(
                                     floatArrayOf(length * animatedProgress, length),

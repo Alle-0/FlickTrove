@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.lifecycle.SavedStateHandle
 import com.cinetrack.ui.navigation.PersonRoute
-import androidx.navigation.toRoute
 import com.cinetrack.ui.utils.ErrorMapper
 
 import kotlinx.collections.immutable.ImmutableList
@@ -48,13 +47,21 @@ class PersonDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val route = savedStateHandle.toRoute<PersonRoute>()
-    private val _personId = MutableStateFlow<Long>(route.id)
+    private val _personId = MutableStateFlow<Long>(0L)
+    private var _profilePath: String? = null
     private val _showFullBio = MutableStateFlow(false)
     private val _activeTab = MutableStateFlow("cast_movie")
     private val _isLoading = MutableStateFlow(true)
     private val _person = MutableStateFlow<Person?>(null)
     private val _error = MutableStateFlow<String?>(null)
+
+    fun initPerson(id: Long, profilePath: String?) {
+        if (_personId.value == 0L && id != 0L) {
+            _personId.value = id
+            _profilePath = profilePath
+            fetchPerson(id)
+        }
+    }
 
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)
@@ -97,8 +104,8 @@ class PersonDetailViewModel @Inject constructor(
         }
 
         PersonDetailUiState(
-            personId = route.id,
-            profilePath = route.profilePath,
+            personId = _personId.value,
+            profilePath = _profilePath,
             person = person,
             isLoading = isLoading,
             showFullBio = showFullBio,
@@ -116,7 +123,7 @@ class PersonDetailViewModel @Inject constructor(
     )
 
     init {
-        fetchPerson(route.id)
+        // Initialization moved to initPerson()
     }
 
     private fun fetchPerson(id: Long) {

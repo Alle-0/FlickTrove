@@ -35,7 +35,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import java.util.UUID
 import java.time.Instant
-import androidx.navigation.toRoute
 import com.cinetrack.ui.navigation.DetailRoute
 
 @HiltViewModel
@@ -49,8 +48,21 @@ class MovieDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val movieId: Long = savedStateHandle.get<Long>("id") ?: 0L
-    val mediaType: String = savedStateHandle.get<String>("mediaType") ?: "movie"
+    var movieId: Long = 0L
+        private set
+    var mediaType: String = "movie"
+        private set
+
+    fun initMovie(id: Long, type: String) {
+        if (movieId == 0L && id != 0L) {
+            movieId = id
+            mediaType = type
+            // Trigger fetch
+            viewModelScope.launch {
+                fetchFromTMDB(movieId, mediaType == "tv")
+            }
+        }
+    }
 
     private val _metadata = MutableStateFlow<MovieDetailResponse?>(null)
     private val _externalRatings = MutableStateFlow(ExternalRatings())
@@ -79,7 +91,6 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<DetailUiState> = buildUiState()
-        .onStart { fetchFromTMDB(movieId, mediaType == "tv") }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -268,7 +279,9 @@ class MovieDetailViewModel @Inject constructor(
                 viewModelScope.launch {
                     try {
                         val collectionResponse = repository.fetchCollectionDetails(collectionId)
-                        _collectionMovies.value = collectionResponse.parts.map { it.copy(mediaType = "movie") }
+                        _collectionMovies.value = collectionResponse.parts
+                            .map { it.copy(mediaType = "movie") }
+                            .sortedBy { it.releaseDate ?: "9999-12-31" }
                     } catch (e: Exception) {
                         // Silent fail for collection
                     }
@@ -293,7 +306,7 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { repository.fetchComments(tmdbId, mediaType == "tv") }
+                val commentsDeferred = async { repository.fetchComments(traktId, mediaType == "tv") }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }

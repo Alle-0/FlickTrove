@@ -87,12 +87,62 @@ import androidx.compose.ui.focus.focusRequester
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.max
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.core.screen.Screen
 import kotlin.math.pow
 import kotlin.math.sqrt
+import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+
+data class SearchScreen(
+    val startX: Float? = null,
+    val startY: Float? = null,
+    val initialGenreId: Long? = null,
+    val initialGenreName: String? = null,
+    val initialKeywordId: Long? = null,
+    val initialKeywordName: String? = null
+) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
+    @Composable
+    override fun Content() {
+        val viewModel = getViewModel<SearchViewModel>()
+        val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(initialGenreId, initialGenreName, initialKeywordName) {
+            if (initialGenreId != null) {
+                viewModel.updateSortConfig(viewModel.uiState.value.sortConfig.copy(selectedGenres = listOf(initialGenreId), selectedKeywords = emptyList()))
+                // We want to force a blank search so the genre filter kicks in immediately
+                viewModel.onQueryChanged("")
+            } else if (initialGenreName != null) {
+                viewModel.onQueryChanged("") // Or handle initial search
+            }
+        }
+
+        SearchScreenContent(
+            viewModel = viewModel,
+            paddingValues = PaddingValues(0.dp),
+            startX = startX,
+            startY = startY,
+            initialGenreName = initialGenreName,
+            initialKeywordName = initialKeywordName,
+            onBack = { navigator.pop() },
+            onClosing = { },
+            onMovieClick = { movie ->
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            },
+            onPersonClick = { personId ->
+                navigator.push(PersonDetailScreen(personId, null))
+            }
+        )
+    }
+}
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SearchScreen(
+fun SearchScreenContent(
     viewModel: SearchViewModel,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
@@ -125,47 +175,17 @@ fun SearchScreen(
         }
     }
 
-    var isMeasured by remember { mutableStateOf(false) }
-    val revealAmount = remember { Animatable(0f) }
-    var isClosing by remember { mutableStateOf(false) }
-
     val internalHazeState = hazeState ?: remember { HazeState() }
 
-
-
-    LaunchedEffect(isMeasured) {
-        if (isMeasured) {
-            revealAmount.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = 800,
-                    easing = CubicBezierEasing(0.7f, 0f, 0.2f, 1f)
-                )
-            )
-        }
-    }
-
     val triggerExit = {
-        if (!isClosing) {
-            isClosing = true
-            keyboardController?.hide()
-            focusManager.clearFocus()
-            onClosing()
-            scope.launch {
-                revealAmount.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(
-                        durationMillis = 800,
-                        easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
-                    )
-                )
-                onBack()
-            }
-        }
+        keyboardController?.hide()
+        focusManager.clearFocus()
+        onClosing()
+        onBack()
     }
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
-    androidx.activity.compose.BackHandler(enabled = !isClosing) {
+    androidx.activity.compose.BackHandler {
         if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
         } else if (isFilterVisible) {
@@ -176,7 +196,7 @@ fun SearchScreen(
     }
 
     val focusRequester = remember { FocusRequester() }
-    var hasRequestedFocus by remember { mutableStateOf(false) }
+    var hasRequestedFocus by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     var filterBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
     
     val density = androidx.compose.ui.platform.LocalDensity.current
@@ -197,43 +217,11 @@ fun SearchScreen(
 
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val width = constraints.maxWidth.toFloat()
-        val height = constraints.maxHeight.toFloat()
-
-        if (width > 0 && !isMeasured) {
-            LaunchedEffect(Unit) { isMeasured = true }
-        }
-
-        val center = Offset(x = startX ?: (width / 2f), y = startY ?: (height / 2f))
-
-        val maxRadius = remember(center, width, height) {
-            val distTopLeft = sqrt(center.x.pow(2) + center.y.pow(2))
-            val distTopRight = sqrt((width - center.x).pow(2) + center.y.pow(2))
-            val distBottomLeft = sqrt(center.x.pow(2) + (height - center.y).pow(2))
-            val distBottomRight = sqrt((width - center.x).pow(2) + (height - center.y).pow(2))
-            max(max(distTopLeft, distTopRight), max(distBottomLeft, distBottomRight)) * 1.1f
-        }
-
-        // Reveal Container
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    val radius = revealAmount.value * maxRadius
-                    clip = true
-                    shape = object : Shape {
-                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-                            val path = Path().apply { addOval(Rect(center = center, radius = radius)) }
-                            return Outline.Generic(path)
-                        }
-                    }
-                }
-                .background(Color.Black)
+            modifier = Modifier.fillMaxSize().background(Color.Black)
         ) {
-            val isTransitioning = isClosing || revealAmount.value < 1f
-
-            LaunchedEffect(isTransitioning) {
-                if (!isTransitioning && !hasRequestedFocus) {
+            LaunchedEffect(Unit) {
+                if (!hasRequestedFocus) {
                     hasRequestedFocus = true
                     if (initialGenreName == null && initialKeywordName == null) {
                         try {
@@ -281,10 +269,14 @@ fun SearchScreen(
 
                     val gridState = rememberLazyGridState()
                     
+                    var previousSortConfig by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
                     LaunchedEffect(uiState.sortConfig) {
-                        if (uiState.results.isNotEmpty()) {
-                            gridState.scrollToItem(0)
+                        if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
+                            if (uiState.results.isNotEmpty()) {
+                                gridState.scrollToItem(0)
+                            }
                         }
+                        previousSortConfig = uiState.sortConfig
                     }
                     
                     val shouldLoadMore = remember {
@@ -356,7 +348,8 @@ fun SearchScreen(
                         ) {
                             val movieSpan = 12 / columns
                             val personSpan = 12 / personColumns
-                            val showEmptySearch = uiState.query.isEmpty() && (uiState.sortConfig.selectedGenres.isEmpty() && uiState.sortConfig.selectedKeywords.isEmpty() || uiState.category == "person")
+                            val hasDiscoveryFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty() || uiState.sortConfig.sortType != "popularity"
+                            val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person")
                             
                             if (showEmptySearch) {
 
@@ -542,7 +535,12 @@ fun SearchScreen(
                                             Spacer(modifier = Modifier.height(16.dp))
                                             Text(text = "Nessun risultato", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            Text(text = "Nessun risultato trovato.\nProva a semplificare la ricerca", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                            Text(
+                                                text = if (uiState.query.length in 1..2) "Nessun risultato trovato.\nDigita almeno 3 lettere" else "Nessun risultato trovato.\nProva a semplificare la ricerca", 
+                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), 
+                                                fontSize = 14.sp, 
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            )
                                         }
                                     }
                                 }
@@ -754,7 +752,7 @@ fun SearchScreen(
                                                         val placeholderText = when {
                                                             uiState.sortConfig.selectedGenres.isNotEmpty() -> {
                                                                 val gid = uiState.sortConfig.selectedGenres.first()
-                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: "Genere"
+                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: initialGenreName ?: "Genere"
                                                                 "Genere: $name"
                                                             }
                                                             uiState.sortConfig.selectedKeywords.isNotEmpty() -> {
@@ -785,7 +783,7 @@ fun SearchScreen(
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty() || uiState.sortConfig.selectedProviders.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty()
+                            val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty() || uiState.sortConfig.selectedProviders.isNotEmpty() || uiState.sortConfig.selectedDecades.isNotEmpty() || uiState.sortConfig.sortType != "popularity"
                             
                             if (uiState.preferences.showLayoutToggle && uiState.category != "person") {
                                 Box(modifier = Modifier.size(44.dp)) {
@@ -822,6 +820,28 @@ fun SearchScreen(
                                     Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri), contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
+                        }
+                        
+                        if (uiState.sortConfig.selectedKeywords.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Nota: il filtro parola chiave viene ignorato nella ricerca testuale.",
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                fontSize = 10.sp,
+                                lineHeight = 12.sp
+                            )
+                        }
+                        
+                        if (uiState.query.isEmpty() && uiState.sortConfig.selectedGenres.isEmpty() && uiState.sortConfig.selectedKeywords.isEmpty() && uiState.sortConfig.selectedDecades.isEmpty() && uiState.sortConfig.selectedProviders.isEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Digita almeno 3 lettere per iniziare la ricerca testuale.",
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                                fontSize = 10.sp,
+                                lineHeight = 12.sp
+                            )
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
@@ -1048,6 +1068,8 @@ fun SearchScreen(
                 hazeState = internalHazeState,
                 triggerBounds = filterBounds,
                 category = uiState.category,
+                suggestedFilters = uiState.suggestedFilters,
+                initialKeywordName = initialKeywordName,
                 onSortConfigChanged = { viewModel.updateSortConfig(it) },
                 onDismissRequest = { isFilterVisible = false }
             )
