@@ -102,22 +102,6 @@ object VistiTab : Tab {
             }
         )
         
-        if (isFilterVisible) {
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            HomeFilterModal(
-                isVisible = isFilterVisible,
-                isVisti = true,
-                sortConfig = uiState.sortConfig,
-                hazeState = hazeState,
-                triggerBounds = null,
-                category = uiState.activeTab,
-                onSortConfigChanged = { newConfig ->
-                    viewModel.updateSortConfig(newConfig)
-                    isFilterVisible = false
-                },
-                onDismissRequest = { isFilterVisible = false }
-            )
-        }
     }
 }
 
@@ -428,6 +412,22 @@ fun VistiScreenContent(
             }
         }
         }
-    }
-}
+        } // end Box B (fillMaxSize)
+        
+        Box(modifier = Modifier.zIndex(70000f)) {
+            HomeFilterModal(
+                isVisible = isFilterVisible,
+                isVisti = true,
+                sortConfig = uiState.sortConfig,
+                hazeState = activeHazeState,
+                triggerBounds = filterButtonBounds,
+                category = uiState.activeTab,
+                onSortConfigChanged = { newConfig ->
+                    viewModel.updateSortConfig(newConfig)
+                    onToggleFilter(false, null)
+                },
+                onDismissRequest = { onToggleFilter(false, null) }
+            )
+        }
+    } // end MovieActionsWrapper
 }

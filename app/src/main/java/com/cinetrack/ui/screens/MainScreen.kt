@@ -371,9 +371,42 @@ class MainScreen : Screen {
                     // Undo Toast
                     UndoToast(
                         actionFeedbackManager = undoViewModel.actionFeedbackManager,
-                        hazeState = drawerHazeState, 
+                        hazeState = contentHazeState,
                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(50000f)
                     )
+
+                    // Search FAB
+                    if (isPrimaryTab) {
+                        val searchFabHaze = contentHazeState
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 20.dp, bottom = 90.dp)
+                                .zIndex(60f)
+                                .size(52.dp)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .hazeGlass(
+                                    state = searchFabHaze,
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                                .border(
+                                    1.dp,
+                                    com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                    androidx.compose.foundation.shape.CircleShape
+                                )
+                                .bounceClick(scaleDown = 0.9f) {
+                                    rootNavigator.push(SearchScreen(startX = 540f, startY = 1140f))
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
+                                contentDescription = "Cerca",
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
 
                     // Exit Confirmation
                     if (showExitConfirmation) {
