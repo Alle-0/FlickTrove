@@ -10,6 +10,8 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.Box
+import dev.chrisbanes.haze.haze
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,6 +74,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
 
     FlickTrove_KotlinTheme(themeSetting = appTheme, accentColor = accentColor) {
         val movieActionsManager = remember { MovieActionsManager() }
+        val globalHazeState = remember { dev.chrisbanes.haze.HazeState() }
 
         CompositionLocalProvider(
             LocalMovieActions provides movieActionsManager,
@@ -89,31 +92,40 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                Navigator(SplashScreen()) { navigator ->
-                    cafe.adriel.voyager.transitions.ScreenTransition(
-                        navigator = navigator,
-                        transition = {
-                            val isPop = navigator.lastEvent == cafe.adriel.voyager.core.stack.StackEvent.Pop
-                            val enter = if (isPop) {
-                                androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
-                            } else {
-                                androidx.compose.animation.slideInVertically(
-                                    initialOffsetY = { it },
-                                    animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
-                                )
-                            }
-                            val exit = if (isPop) {
-                                androidx.compose.animation.slideOutVertically(
-                                    targetOffsetY = { it },
-                                    animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
-                                )
-                            } else {
-                                androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
-                            }
-                            (enter togetherWith exit).apply {
-                                targetContentZIndex = if (isPop) -1f else 1f
-                            }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize().haze(globalHazeState, style = com.cinetrack.ui.theme.HazeStyles.PremiumDark)) {
+                        Navigator(SplashScreen()) { navigator ->
+                            cafe.adriel.voyager.transitions.ScreenTransition(
+                                navigator = navigator,
+                                transition = {
+                                    val isPop = navigator.lastEvent == cafe.adriel.voyager.core.stack.StackEvent.Pop
+                                    val enter = if (isPop) {
+                                        androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
+                                    } else {
+                                        androidx.compose.animation.slideInVertically(
+                                            initialOffsetY = { it },
+                                            animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                        )
+                                    }
+                                    val exit = if (isPop) {
+                                        androidx.compose.animation.slideOutVertically(
+                                            targetOffsetY = { it },
+                                            animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                        )
+                                    } else {
+                                        androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+                                    }
+                                    (enter togetherWith exit).apply {
+                                        targetContentZIndex = if (isPop) -1f else 1f
+                                    }
+                                }
+                            )
                         }
+                    }
+                    
+                    com.cinetrack.ui.components.shared.GlobalMovieActions(
+                        manager = movieActionsManager,
+                        hazeState = globalHazeState
                     )
                 }
             }
