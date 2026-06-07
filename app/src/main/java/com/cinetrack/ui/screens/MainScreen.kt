@@ -179,21 +179,23 @@ class MainScreen : Screen {
                         },
                         onClose = { scope.launch { drawerState.close() } },
                         onNavigate = { routeStr ->
-                            scope.launch { drawerState.close() }
-                            when (routeStr) {
-                                "my_folders" -> tabNavigator.current = FoldersTab
-                                "recommendations" -> tabNavigator.current = RecommendationsTab
-                                "settings" -> tabNavigator.current = SettingsTab
-                                "stats" -> tabNavigator.current = StatsTab
-                                "visti" -> tabNavigator.current = VistiTab
-                                "popular_movies", "now_playing_movies", "upcoming_movies", "popular_tv", "airing_today_tv", "on_the_air_tv" -> {
-                                    DiscoverTab.requestedType = routeStr
-                                    tabNavigator.current = DiscoverTab
+                            scope.launch {
+                                drawerState.close()
+                                when (routeStr) {
+                                    "my_folders" -> tabNavigator.current = FoldersTab
+                                    "recommendations" -> tabNavigator.current = RecommendationsTab
+                                    "settings" -> tabNavigator.current = SettingsTab
+                                    "stats" -> tabNavigator.current = StatsTab
+                                    "visti" -> tabNavigator.current = VistiTab
+                                    "popular_movies", "now_playing_movies", "upcoming_movies", "popular_tv", "airing_today_tv", "on_the_air_tv" -> {
+                                        DiscoverTab.requestedType = routeStr
+                                        tabNavigator.current = DiscoverTab
+                                    }
+                                    "surprise_me" -> {
+                                        triggerSurpriseMe = true
+                                    }
+                                    else -> tabNavigator.current = HomeTab
                                 }
-                                "surprise_me" -> {
-                                    triggerSurpriseMe = true
-                                }
-                                else -> tabNavigator.current = HomeTab
                             }
                         }
                     )
@@ -344,62 +346,64 @@ class MainScreen : Screen {
                         }
                     }
 
-                    // Modals
-                    if (currentTab is HomeTab) {
-                        val homeViewModel: HomeViewModel = getViewModel()
-                        val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
-                        Box(modifier = Modifier.zIndex(70000f)) {
-                            HomeFilterModal(
-                                isVisible = isFilterModalVisible,
-                                sortConfig = homeUiState.sortConfig,
-                                hazeState = contentHazeState,
-                                triggerBounds = filterButtonBounds,
-                                onSortConfigChanged = { homeViewModel.updateSortConfig(it) },
-                                onDismissRequest = { isFilterModalVisible = false }
-                            )
-                        }
-                    } else if (currentTab is VistiTab) {
-                        val vistiViewModel: VistiViewModel = getViewModel()
-                        val vistiUiState by vistiViewModel.uiState.collectAsStateWithLifecycle()
-                        Box(modifier = Modifier.zIndex(70000f)) {
-                            HomeFilterModal(
-                                isVisible = isFilterModalVisible,
-                                isVisti = true,
-                                sortConfig = vistiUiState.sortConfig,
-                                hazeState = contentHazeState,
-                                triggerBounds = filterButtonBounds,
-                                category = vistiUiState.activeTab,
-                                onSortConfigChanged = { vistiViewModel.updateSortConfig(it); isFilterModalVisible = false },
-                                onDismissRequest = { isFilterModalVisible = false }
-                            )
-                        }
-                    } else if (currentTab is DiscoverTab) {
-                        val discoverViewModel: DiscoverViewModel = getViewModel()
-                        val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
-                        Box(modifier = Modifier.zIndex(70000f)) {
-                            HomeFilterModal(
-                                isVisible = isFilterModalVisible,
-                                sortConfig = discoverUiState.sortConfig,
-                                hazeState = contentHazeState,
-                                triggerBounds = filterButtonBounds,
-                                onSortConfigChanged = { discoverViewModel.updateSortConfig(it) },
-                                onDismissRequest = { isFilterModalVisible = false }
-                            )
-                        }
-                    } else if (currentTab is StatsTab) {
-                        val statsViewModel: StatsViewModel = getViewModel()
-                        val statsUiState by statsViewModel.uiState.collectAsStateWithLifecycle()
-                        Box(modifier = Modifier.zIndex(70000f)) {
-                            YearSelectionModal(
-                                isVisible = isYearPickerVisible,
-                                onDismiss = { isYearPickerVisible = false },
-                                currentRange = statsUiState.timeRange,
-                                availableYears = statsUiState.availableYears,
-                                hazeState = contentHazeState,
-                                triggerBounds = yearPickerButtonBounds,
-                                onYearSelected = { statsViewModel.setTimeRange(TimeRange.Year(it)) },
-                                onAllTimeSelected = { statsViewModel.setTimeRange(TimeRange.AllTime) }
-                            )
+                    // Modals — wrapped in key(currentTab) to reset composable state safely on tab change
+                    key(currentTab) {
+                        if (currentTab is HomeTab) {
+                            val homeViewModel: HomeViewModel = getViewModel()
+                            val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+                            Box(modifier = Modifier.zIndex(70000f)) {
+                                HomeFilterModal(
+                                    isVisible = isFilterModalVisible,
+                                    sortConfig = homeUiState.sortConfig,
+                                    hazeState = contentHazeState,
+                                    triggerBounds = filterButtonBounds,
+                                    onSortConfigChanged = { homeViewModel.updateSortConfig(it) },
+                                    onDismissRequest = { isFilterModalVisible = false }
+                                )
+                            }
+                        } else if (currentTab is VistiTab) {
+                            val vistiViewModel: VistiViewModel = getViewModel()
+                            val vistiUiState by vistiViewModel.uiState.collectAsStateWithLifecycle()
+                            Box(modifier = Modifier.zIndex(70000f)) {
+                                HomeFilterModal(
+                                    isVisible = isFilterModalVisible,
+                                    isVisti = true,
+                                    sortConfig = vistiUiState.sortConfig,
+                                    hazeState = contentHazeState,
+                                    triggerBounds = filterButtonBounds,
+                                    category = vistiUiState.activeTab,
+                                    onSortConfigChanged = { vistiViewModel.updateSortConfig(it); isFilterModalVisible = false },
+                                    onDismissRequest = { isFilterModalVisible = false }
+                                )
+                            }
+                        } else if (currentTab is DiscoverTab) {
+                            val discoverViewModel: DiscoverViewModel = getViewModel()
+                            val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
+                            Box(modifier = Modifier.zIndex(70000f)) {
+                                HomeFilterModal(
+                                    isVisible = isFilterModalVisible,
+                                    sortConfig = discoverUiState.sortConfig,
+                                    hazeState = contentHazeState,
+                                    triggerBounds = filterButtonBounds,
+                                    onSortConfigChanged = { discoverViewModel.updateSortConfig(it) },
+                                    onDismissRequest = { isFilterModalVisible = false }
+                                )
+                            }
+                        } else if (currentTab is StatsTab) {
+                            val statsViewModel: StatsViewModel = getViewModel()
+                            val statsUiState by statsViewModel.uiState.collectAsStateWithLifecycle()
+                            Box(modifier = Modifier.zIndex(70000f)) {
+                                YearSelectionModal(
+                                    isVisible = isYearPickerVisible,
+                                    onDismiss = { isYearPickerVisible = false },
+                                    currentRange = statsUiState.timeRange,
+                                    availableYears = statsUiState.availableYears,
+                                    hazeState = contentHazeState,
+                                    triggerBounds = yearPickerButtonBounds,
+                                    onYearSelected = { statsViewModel.setTimeRange(TimeRange.Year(it)) },
+                                    onAllTimeSelected = { statsViewModel.setTimeRange(TimeRange.AllTime) }
+                                )
+                            }
                         }
                     }
 
