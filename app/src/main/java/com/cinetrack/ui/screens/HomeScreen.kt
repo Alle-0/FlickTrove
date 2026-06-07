@@ -137,7 +137,7 @@ fun HomeScreenContent(
     
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
     
-    var previousSortConfig by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
+    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
         if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
             if (uiState.movies.isNotEmpty()) {
