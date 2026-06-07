@@ -156,7 +156,7 @@ fun RecommendationsScreenContent(
         screenWidth - (padding * 2)
     }
 
-    val topPadding = paddingValues.calculateTopPadding()
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp
     val stickyHeaderHeight = 60.dp
 
     Box(

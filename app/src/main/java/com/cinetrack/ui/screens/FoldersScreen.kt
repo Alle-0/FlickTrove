@@ -174,7 +174,7 @@ fun FoldersScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 16.dp,
+                        top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
                         bottom = paddingValues.calculateBottomPadding() + 32.dp
                     ),
                     modifier = Modifier.fillMaxSize(),

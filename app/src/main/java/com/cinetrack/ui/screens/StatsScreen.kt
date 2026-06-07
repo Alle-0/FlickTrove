@@ -304,7 +304,7 @@ fun StatsScreenContent(
                                         .verticalScroll(rememberScrollState())
                                 ) {
                                     // Top safe area spacer
-                                    Spacer(Modifier.height(paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp))
+                                    Spacer(Modifier.height(paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp))
 
                                     // ── Year Selection Button (Top Bar Style) ─────────────────
                                     Box(

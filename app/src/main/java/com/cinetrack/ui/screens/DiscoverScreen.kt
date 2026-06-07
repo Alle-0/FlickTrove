@@ -180,7 +180,7 @@ fun DiscoverScreenContent(
                         start = 16.dp, 
                         end = 16.dp, 
                         bottom = paddingValues.calculateBottomPadding() + 16.dp, 
-                        top = topPadding + 12.dp
+                        top = topPadding + 60.dp + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
