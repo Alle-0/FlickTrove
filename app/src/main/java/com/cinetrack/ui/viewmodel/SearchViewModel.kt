@@ -73,6 +73,9 @@ class SearchViewModel @Inject constructor(
     private var localMovies: List<Movie> = emptyList()
     private var localFolders: List<FolderEntity> = emptyList()
     
+    val lazyGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
+    
     private fun applyStateFilters() {
         _uiState.update { currentState ->
             getSearchUiStateUseCase(

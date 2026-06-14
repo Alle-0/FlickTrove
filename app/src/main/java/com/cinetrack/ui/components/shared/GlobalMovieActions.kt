@@ -25,6 +25,10 @@ fun GlobalMovieActions(
     val movie = manager.activeMovie ?: return
 
     Box(modifier = modifier) {
+        androidx.activity.compose.BackHandler(enabled = manager.isAnyModalOpen) {
+            manager.closeAll()
+        }
+
         // 1. Actions Popup
         if (manager.showActionsPopup) {
         MovieActionsPopup(

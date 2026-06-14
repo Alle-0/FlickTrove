@@ -176,6 +176,7 @@ fun SearchScreenContent(
     }
 
     val internalHazeState = hazeState ?: remember { HazeState() }
+    val globalSearchHazeState = remember { HazeState() }
 
     // This will be set by animatedTriggerExit defined inside BoxWithConstraints
     val onExitRequest = remember { androidx.compose.runtime.mutableStateOf<(() -> Unit)?>(null) }
@@ -218,7 +219,8 @@ fun SearchScreenContent(
         val height = constraints.maxHeight.toFloat()
 
         var isMeasured by remember { mutableStateOf(false) }
-        val revealAmount = remember { Animatable(0f) }
+        var hasRevealed by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+        val revealAmount = remember(hasRevealed) { Animatable(if (hasRevealed) 1f else 0f) }
         var isClosing by remember { mutableStateOf(false) }
 
         if (width > 0 && !isMeasured) {
@@ -227,10 +229,17 @@ fun SearchScreenContent(
 
         LaunchedEffect(isMeasured) {
             if (isMeasured) {
-                revealAmount.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 600, easing = CubicBezierEasing(0.7f, 0f, 0.2f, 1f))
-                )
+                if (!hasRevealed) {
+                    revealAmount.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = 800, 
+                            easing = CubicBezierEasing(0.7f, 0f, 0.2f, 1f)
+                        )
+                    )
+                    hasRevealed = true
+                }
+                
                 // Request keyboard focus after reveal completes
                 if (!hasRequestedFocus) {
                     hasRequestedFocus = true
@@ -272,7 +281,10 @@ fun SearchScreenContent(
                 scope.launch {
                     revealAmount.animateTo(
                         targetValue = 0f,
-                        animationSpec = tween(durationMillis = 500, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
+                        animationSpec = tween(
+                            durationMillis = 800, 
+                            easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
+                        )
                     )
                     onBack()
                 }
@@ -285,6 +297,7 @@ fun SearchScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
+                    compositingStrategy = CompositingStrategy.Offscreen
                     val radius = revealAmount.value * maxRevealRadius
                     clip = true
                     shape = object : Shape {
@@ -313,7 +326,7 @@ fun SearchScreenContent(
                     onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
                     onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
                 ) { actionsState ->
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().haze(globalSearchHazeState).background(MaterialTheme.colorScheme.background)) {
                 // 1. Background Source Layer (Only captures what's behind the header/glass)
                 Box(
                     modifier = Modifier
@@ -327,13 +340,13 @@ fun SearchScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(com.cinetrack.ui.theme.PremiumBackground)
+                            .background(Color.Transparent)
                             .pointerInput(Unit) {
                                 detectTapGestures(onTap = { focusManager.clearFocus() })
                             }
                     ) {
 
-                    val gridState = rememberLazyGridState()
+                    val gridState = viewModel.lazyGridState
                     
                     var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
                     LaunchedEffect(uiState.sortConfig) {
@@ -394,7 +407,7 @@ fun SearchScreenContent(
                                 shape = RoundedCornerShape(16.dp),
                                 modifier = Modifier.height(48.dp)
                             ) {
-                                Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(20.dp))
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("RIPROVA")
                             }
@@ -451,6 +464,7 @@ fun SearchScreenContent(
                                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     staggerIndex = index,
                                                     onPress = { 
                                                         keyboardController?.hide()
@@ -473,6 +487,7 @@ fun SearchScreenContent(
                                                     personalRating = movieStatus?.personalRating,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     animatedVisibilityScope = animatedVisibilityScope,
                                                     staggerIndex = index,
                                                     onPress = { 
@@ -522,6 +537,7 @@ fun SearchScreenContent(
                                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     staggerIndex = index,
                                                     onPress = { 
                                                         keyboardController?.hide()
@@ -544,6 +560,7 @@ fun SearchScreenContent(
                                                     personalRating = movieStatus?.personalRating,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     animatedVisibilityScope = animatedVisibilityScope,
                                                     staggerIndex = index,
                                                     onPress = { 
@@ -597,7 +614,7 @@ fun SearchScreenContent(
                                             modifier = Modifier.fillMaxWidth().padding(top = 80.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f))
+                                            Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                                             Spacer(modifier = Modifier.height(16.dp))
                                             Text(text = "Nessun risultato", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                             Spacer(modifier = Modifier.height(8.dp))
@@ -641,6 +658,7 @@ fun SearchScreenContent(
                                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     staggerIndex = index,
                                                     onPress = { 
                                                         keyboardController?.hide()
@@ -663,6 +681,7 @@ fun SearchScreenContent(
                                                     personalRating = movieStatus?.personalRating,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     animatedVisibilityScope = animatedVisibilityScope,
                                                     staggerIndex = index,
                                                     onPress = { 
@@ -696,6 +715,7 @@ fun SearchScreenContent(
                                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     staggerIndex = index,
                                                     onPress = { 
                                                         keyboardController?.hide()
@@ -718,6 +738,7 @@ fun SearchScreenContent(
                                                     personalRating = movieStatus?.personalRating,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     animatedVisibilityScope = animatedVisibilityScope,
                                                     staggerIndex = index,
                                                     onPress = { 
@@ -794,9 +815,9 @@ fun SearchScreenContent(
                              Box(modifier = Modifier.weight(1f).height(44.dp), contentAlignment = Alignment.CenterStart) {
                                  Box(modifier = Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
-                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 14.dp)) {
-                                    Icon(imageVector = CustomIcons.PremiumSearch, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
-                                    Spacer(modifier = Modifier.width(10.dp))
+                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 14.dp)) {
+                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                                        Spacer(modifier = Modifier.width(10.dp))
                                     val primaryColor = MaterialTheme.colorScheme.primary
                                     CompositionLocalProvider(LocalTextSelectionColors provides TextSelectionColors(handleColor = primaryColor, backgroundColor = primaryColor.copy(alpha = 0.4f))) {
                                         BasicTextField(
@@ -1099,8 +1120,8 @@ fun SearchScreenContent(
                 }
                 }
                 }
+                }
             }
-        }
 
         // --- Modal (Top Level to avoid clipping/zIndex issues) ---
         Box(modifier = Modifier.zIndex(5000f)) {
@@ -1122,7 +1143,7 @@ fun SearchScreenContent(
             HomeFilterModal(
                 isVisible = isFilterVisible,
                 sortConfig = uiState.sortConfig,
-                hazeState = internalHazeState,
+                hazeState = globalSearchHazeState,
                 triggerBounds = filterBounds,
                 category = uiState.category,
                 suggestedFilters = uiState.suggestedFilters,

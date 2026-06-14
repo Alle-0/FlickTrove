@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
@@ -49,6 +50,10 @@ class HomeViewModel @Inject constructor(
 
     private val _searchQuery = MutableStateFlow("")
     private val _activeTab = MutableStateFlow("movie")
+    
+    val movieGridState = LazyGridState()
+    val tvGridState = LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
     
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)

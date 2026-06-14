@@ -89,6 +89,7 @@ data class UserPreferences(
     val contentLanguage: String = "it-IT",
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
+    val showSplitReleasesHome: Boolean = true,
     val lastSyncTimestamp: Long = 0L
 )
 

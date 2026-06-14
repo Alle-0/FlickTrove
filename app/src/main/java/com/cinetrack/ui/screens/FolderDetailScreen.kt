@@ -24,6 +24,7 @@ import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.viewmodel.FolderDetailViewModel
 import com.cinetrack.ui.viewmodel.FolderDetailUiState
 import com.cinetrack.ui.components.MovieCard
+import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.shared.DeleteFolderDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -58,6 +59,7 @@ data class FolderDetailTab(
     override fun Content() {
         val viewModel = getViewModel<FolderDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val hazeState = com.cinetrack.ui.LocalHazeState.current
 
         LaunchedEffect(folderId) {
             viewModel.initFolder(folderId)
@@ -71,6 +73,7 @@ data class FolderDetailTab(
         FolderDetailScreenContent(
             viewModel = viewModel,
             paddingValues = PaddingValues(0.dp),
+            hazeState = hazeState,
             showDeleteConfirm = showDeleteConfirm,
             onShowDeleteConfirmChange = { showDeleteConfirm = it },
             showEditDialog = showEditDialog,
@@ -125,6 +128,7 @@ fun FolderDetailScreenContent(
                 }
                 is FolderDetailUiState.Success -> {
                     val activeHazeState = hazeState ?: remember { HazeState() }
+                    val lazyGridState = viewModel.lazyGridState
                     
                     MovieActionsWrapper(
                         hazeState = activeHazeState,
@@ -145,6 +149,7 @@ fun FolderDetailScreenContent(
                                     style = HazeStyles.PremiumDark
                                 )
                         ) {
+                            CinematicBackground(modifier = Modifier.fillMaxSize())
                             val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
                             val gap = 8.dp
                             val padding = 16.dp
@@ -155,6 +160,7 @@ fun FolderDetailScreenContent(
                             }
                             
                             LazyVerticalGrid(
+                                state = lazyGridState,
                                 columns = GridCells.Fixed(columns),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
@@ -209,6 +215,7 @@ fun FolderDetailScreenContent(
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
                                                 showBadges = preferences.showBadges,
                                                 hazeState = activeHazeState,
+                                                hasAnimatedSet = viewModel.animatedMovieIds,
                                                 staggerIndex = index,
                                                 onPress = { onMovieClick(movie) },
                                                 onLongPress = { m, pressOffset, cardPos ->
@@ -233,7 +240,8 @@ fun FolderDetailScreenContent(
                                                 onMessage = { viewModel.emitMessage(it) },
                                                 progress = movie.progress?.toFloat() ?: 0f,
                                                 folderColors = currentFolderColors,
-                                                showFolderBookmarks = preferences.showFolderBookmarks
+                                                showFolderBookmarks = preferences.showFolderBookmarks,
+                                                hasAnimatedSet = viewModel.animatedMovieIds
                                             )
                                         }
                                     }

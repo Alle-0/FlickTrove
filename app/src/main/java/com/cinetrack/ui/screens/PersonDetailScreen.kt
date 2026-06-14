@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.cinetrack.data.Movie
@@ -60,7 +61,7 @@ import com.cinetrack.ui.components.CategoryPill
 import com.cinetrack.ui.components.detail.PersonDetailSkeleton
 import com.cinetrack.ui.viewmodel.PersonDetailUiState
 import com.cinetrack.data.local.entities.FolderEntity
-import com.cinetrack.ui.theme.PremiumBackground
+import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 
@@ -78,6 +79,9 @@ data class PersonDetailScreen(
     override fun Content() {
         val viewModel = getViewModel<PersonDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow
+        val detailStackDepth = androidx.compose.runtime.remember(navigator.items) {
+            navigator.items.count { it is com.cinetrack.ui.screens.MovieDetailScreen || it is PersonDetailScreen }
+        }
 
         LaunchedEffect(personId) {
             viewModel.initPerson(personId, profilePath)
@@ -90,6 +94,7 @@ data class PersonDetailScreen(
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },
+            detailStackDepth = detailStackDepth,
             onHomeClick = {
                 navigator.popUntilRoot()
             }
@@ -146,7 +151,6 @@ fun PersonDetailScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PremiumBackground)
             .background(Color(0xFF0A0A0A))
 
     ) {
@@ -205,7 +209,7 @@ fun PersonDetailScreenContent(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(viewModel.scrollState)
                             .haze(localHazeState, style = HazeStyles.PremiumDark)
                     ) {
                     // Hero Profile Image
@@ -414,6 +418,7 @@ fun PersonDetailScreenContent(
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                                     showBadges = uiState.preferences.showBadges,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     hazeState = localHazeState,
                                                     staggerIndex = staggerIdx,
                                                     onPress = { onMovieClick(movie) },
@@ -432,6 +437,7 @@ fun PersonDetailScreenContent(
                                                     personalRating = movieStatus?.personalRating,
                                                     folderColors = folderColors,
                                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                                     animatedVisibilityScope = null,
                                                     staggerIndex = staggerIdx,
                                                     onPress = { onMovieClick(movie) },
@@ -530,7 +536,7 @@ fun PersonDetailScreenContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Home,
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_home),
                         contentDescription = "Torna alla schermata principale",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)

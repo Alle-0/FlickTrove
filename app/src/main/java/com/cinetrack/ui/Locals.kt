@@ -13,3 +13,4 @@ val LocalHazeState = compositionLocalOf<dev.chrisbanes.haze.HazeState?> { null }
 val LocalDeepLinkIntent = staticCompositionLocalOf<MutableState<Intent?>> { error("No intent") }
 // Callback to open the filter modal from inside a tab; passes optional trigger Rect
 val LocalFilterRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }
+val LocalSearchOverlay = compositionLocalOf<((offset: androidx.compose.ui.geometry.Offset?, genreId: Long?, genreName: String?, keywordId: Long?, keywordName: String?) -> Unit)?> { null }

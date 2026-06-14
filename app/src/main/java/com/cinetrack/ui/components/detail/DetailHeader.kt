@@ -19,11 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -453,30 +457,65 @@ fun ExtraRatingItem(label: String, value: String, subLabel: String? = null) {
 @Composable
 fun AwardBox(awards: String, accentColor: Color, onClick: () -> Unit = {}) {
     val gold = Color(0xFFFFD700)
+    var textWidth by remember { mutableStateOf(0) }
+    var containerWidth by remember { mutableStateOf(0) }
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f) { onClick() }
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .background(gold.copy(alpha = 0.05f), CircleShape)
             .border(0.5.dp, gold.copy(alpha = 0.15f), CircleShape)
             .padding(horizontal = 16.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = awards,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Black,
-            color = gold.copy(alpha = 0.8f),
-            maxLines = 1,
-            softWrap = false,
-            letterSpacing = 0.5.sp,
-            modifier = Modifier.basicMarquee(
-                iterations = Int.MAX_VALUE,
-                repeatDelayMillis = 1200
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onSizeChanged { containerWidth = it.width }
+                .then(
+                    if (textWidth > containerWidth && containerWidth > 0) {
+                        Modifier
+                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                            .drawWithContent {
+                                drawContent()
+                                val fadeWidthPx = 16.dp.toPx()
+                                val fadeFraction = if (size.width > 0f) (fadeWidthPx / size.width).coerceAtMost(0.49f) else 0f
+                                drawRect(
+                                    brush = Brush.horizontalGradient(
+                                        0f to Color.Transparent,
+                                        fadeFraction to Color.Black,
+                                        1f - fadeFraction to Color.Black,
+                                        1f to Color.Transparent
+                                    ),
+                                    blendMode = BlendMode.DstIn
+                                )
+                            }
+                    } else Modifier
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = awards,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Black,
+                color = gold.copy(alpha = 0.8f),
+                maxLines = 1,
+                softWrap = false,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier
+                    .basicMarquee(
+                        iterations = Int.MAX_VALUE,
+                        repeatDelayMillis = 1200
+                    )
+                    .then(
+                        if (textWidth > containerWidth && containerWidth > 0) {
+                            Modifier.padding(horizontal = 16.dp)
+                        } else Modifier
+                    )
+                    .onSizeChanged { textWidth = it.width }
             )
-        )
+        }
     }
 }
 

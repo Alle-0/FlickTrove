@@ -36,6 +36,7 @@ class PreferenceRepository @Inject constructor(
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
         val APP_THEME = stringPreferencesKey("app_theme")
         val CONTENT_LANGUAGE = stringPreferencesKey("content_language")
+        val SHOW_SPLIT_RELEASES_HOME = booleanPreferencesKey("show_split_releases_home")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
 
@@ -68,6 +69,7 @@ class PreferenceRepository @Inject constructor(
                 contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "it-IT",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
+                showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
             )
         }
@@ -138,6 +140,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateShowSplitReleasesHome(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = show
+        }
+    }
+
     suspend fun updateAll(prefs: UserPreferences) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_SORT] = json.encodeToString(prefs.homeSort)
@@ -155,6 +163,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.CONTENT_LANGUAGE] = prefs.contentLanguage
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
+            preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = prefs.showSplitReleasesHome
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
         }
     }

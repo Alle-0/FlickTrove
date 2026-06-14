@@ -17,6 +17,7 @@ import javax.inject.Inject
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.data.models.SortConfig
 import com.cinetrack.data.repository.PreferenceRepository
+import androidx.compose.foundation.lazy.grid.LazyGridState
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -60,6 +61,9 @@ class DiscoverViewModel @Inject constructor(
     private val _currentPage = MutableStateFlow(1)
     private val _isEndReached = MutableStateFlow(false)
     private val _sortConfig = MutableStateFlow(SortConfig())
+    
+    val lazyGridState = LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
     
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)

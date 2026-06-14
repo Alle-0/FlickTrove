@@ -71,7 +71,7 @@ fun GlassyDrawerContent(
                     )
                 )
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Rounded.Close, contentDescription = "Close", tint = accentColor)
+                    Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Close", tint = accentColor, modifier = Modifier.size(24.dp))
                 }
             }
 

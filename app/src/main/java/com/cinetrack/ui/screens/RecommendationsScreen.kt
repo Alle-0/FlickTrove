@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+// AppBackground removed — using CinematicBackground directly
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
@@ -67,7 +68,7 @@ import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
-import com.cinetrack.ui.theme.PremiumBackground
+// StatsBackground removed; using CinematicBackground instead
 import com.cinetrack.ui.viewmodel.RecommendationsViewModel
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
@@ -99,15 +100,28 @@ object RecommendationsTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<RecommendationsViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<RecommendationsViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<RecommendationsViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val hazeState = com.cinetrack.ui.LocalHazeState.current
 
         var isActionModalVisible by remember { mutableStateOf(false) }
 
         RecommendationsScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
+            hazeState = hazeState,
             onActionModalVisibilityChanged = { isActionModalVisible = it },
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
@@ -121,13 +135,14 @@ object RecommendationsTab : Tab {
 fun RecommendationsScreenContent(
     viewModel: RecommendationsViewModel,
     paddingValues: PaddingValues,
+    hazeState: HazeState? = null,
     onMovieClick: (Movie) -> Unit,
     onActionModalVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val lazyGridState = rememberLazyGridState()
+    val lazyGridState = viewModel.lazyGridState
     
-    val localHazeState = remember { dev.chrisbanes.haze.HazeState() }
+    val localHazeState = hazeState ?: remember { dev.chrisbanes.haze.HazeState() }
     
     var isTinderMode by rememberSaveable { mutableStateOf(false) }
     var topCardIndex by rememberSaveable(uiState.mediaType) { mutableStateOf(0) }
@@ -156,22 +171,17 @@ fun RecommendationsScreenContent(
         screenWidth - (padding * 2)
     }
 
-    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
     val stickyHeaderHeight = 60.dp
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PremiumBackground)
-    ) {
-        // Haze source: only covers content (not the sticky header),
-        // so the sticky header's hazeGlass won't blur its own text.
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Haze source: covers CinematicBackground and content
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .haze(state = localHazeState, style = HazeStyles.PremiumDark)
         ) {
-        CinematicBackground()
+            CinematicBackground(modifier = Modifier.fillMaxSize())
 
         MovieActionsWrapper(
             hazeState = localHazeState,
@@ -438,6 +448,7 @@ fun RecommendationsScreenContent(
                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                     folderColors = viewModel.getMovieFolderColors(movie),
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },
@@ -455,6 +466,7 @@ fun RecommendationsScreenContent(
                                     personalRating = movieStatus?.personalRating,
                                     folderColors = viewModel.getMovieFolderColors(movie),
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },

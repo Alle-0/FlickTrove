@@ -32,6 +32,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.*
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -96,6 +99,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import androidx.compose.ui.graphics.*
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
@@ -115,21 +119,128 @@ object SettingsTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<AuthViewModel>()
-        val settingsViewModel = getViewModel<SettingsViewModel>()
+        val viewModel = androidx.hilt.navigation.compose.hiltViewModel<AuthViewModel>()
+        val settingsViewModel = androidx.hilt.navigation.compose.hiltViewModel<SettingsViewModel>()
+        
         val paddingValues = LocalAppPadding.current
         val hazeState = com.cinetrack.ui.LocalHazeState.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        SettingsScreenContent(
-            viewModel = viewModel,
-            settingsViewModel = settingsViewModel,
-            paddingValues = paddingValues,
-            hazeState = hazeState,
-            onLoggedOut = {
-                // navigator.replaceAll(LoginScreen())
+        val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val pendingReveal by settingsViewModel.pendingReveal.collectAsStateWithLifecycle()
+        
+        val graphicsLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
+        var capturedImage by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+        var isScreenshotReady by remember { mutableStateOf(false) }
+        val animatedRadius = remember { androidx.compose.animation.core.Animatable(0f) }
+        
+        val currentBackgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+        var oldBackgroundColor by remember { mutableStateOf(androidx.compose.ui.graphics.Color.Black) }
+
+        LaunchedEffect(pendingReveal) {
+            if (pendingReveal != null) {
+                val (colorName, origin) = pendingReveal!!
+                
+                // Save the old background color before applying the new theme
+                oldBackgroundColor = currentBackgroundColor
+                
+                // 1. Capture the image NOW, before we change the theme or structure
+                try {
+                    capturedImage = graphicsLayer.toImageBitmap()
+                } catch (e: Exception) {
+                    // Ignore
+                }
+                
+                // 2. Reset the radius immediately BEFORE we show the top layer
+                animatedRadius.snapTo(0f)
+                
+                // 3. Enable screenshot drawing and clipping
+                isScreenshotReady = true
+                
+                // 4. Apply the new theme
+                settingsViewModel.applyPendingTheme()
+                
+                // 5. Wait a moment to hide the heavy theme recomposition lag
+                kotlinx.coroutines.delay(50)
+                
+                // 6. Animate the circle
+                // We calculate max radius safely here using arbitrary large value 
+                // (2500dp converted to px is approx 7500 on xxhdpi, 10000 is safer)
+                animatedRadius.animateTo(
+                    targetValue = 10000f,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = 900, 
+                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                    )
+                )
+                
+                // 7. Cleanup
+                capturedImage = null
+                isScreenshotReady = false
+                settingsViewModel.clearPendingReveal()
             }
-        )
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Bottom Layer: Old UI Screenshot
+            if (isScreenshotReady && capturedImage != null) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(oldBackgroundColor)
+                ) {
+                    androidx.compose.foundation.Image(
+                        bitmap = capturedImage!!,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            }
+
+            // Top Layer: The actual UI (records when not animating, clips when animating)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawWithContent {
+                        if (!isScreenshotReady) {
+                            graphicsLayer.record { this@drawWithContent.drawContent() }
+                        }
+                        drawContent()
+                    }
+                    .graphicsLayer {
+                        if (isScreenshotReady && pendingReveal != null) {
+                            val origin = pendingReveal!!.second
+                            clip = true
+                            shape = object : androidx.compose.ui.graphics.Shape {
+                                override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
+                                    val p = androidx.compose.ui.graphics.Path().apply {
+                                        addOval(androidx.compose.ui.geometry.Rect(
+                                            origin.x - animatedRadius.value, 
+                                            origin.y - animatedRadius.value, 
+                                            origin.x + animatedRadius.value, 
+                                            origin.y + animatedRadius.value
+                                        ))
+                                    }
+                                    return androidx.compose.ui.graphics.Outline.Generic(p)
+                                }
+                            }
+                        }
+                    }
+                    .then(
+                        if (isScreenshotReady) Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                        else Modifier
+                    )
+            ) {
+                SettingsScreenContent(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    paddingValues = paddingValues,
+                    hazeState = hazeState,
+                    scrollState = scrollState,
+                    onLoggedOut = { }
+                )
+            }
+        }
     }
 }
 
@@ -139,6 +250,7 @@ fun SettingsScreenContent(
     settingsViewModel: SettingsViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
+    scrollState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
     onLoggedOut: () -> Unit
 ) {
     val activeHazeState = hazeState ?: remember { HazeState() }
@@ -166,6 +278,7 @@ fun SettingsScreenContent(
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
+    val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
 
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
@@ -178,6 +291,8 @@ fun SettingsScreenContent(
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
+
+    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 90.dp
     var showLogoutConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
@@ -285,29 +400,30 @@ fun SettingsScreenContent(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Content Layer - Recorded by localHazeState
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(
-                    if (anyDialogVisible) {
-                        Modifier.haze(
-                            state = activeHazeState,
-                            style = HazeStyles.PremiumDark
-                        )
-                    } else Modifier
+                .haze(
+                    state = activeHazeState,
+                    style = HazeStyles.PremiumDark
                 )
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            CinematicBackground(modifier = Modifier.fillMaxSize())
+            // Content Layer - Recorded by localHazeState
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
 
                 LazyColumn(
+                    state = scrollState,
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         },
                     contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding() + 24.dp,
+                        top = topPadding + 48.dp, // Aumentato padding superiore
                         bottom = paddingValues.calculateBottomPadding() + 32.dp,
                         start = 16.dp,
                         end = 16.dp
@@ -449,6 +565,25 @@ fun SettingsScreenContent(
                                 onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
+                                }
+                            )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_strisce),
+                                title = "Divisione uscite Home",
+                                description = "Separa i titoli già usciti da quelli in arrivo nella Home",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = showSplitReleasesHome,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleSplitReleasesHome(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
                                 }
                             )
                         }
@@ -891,6 +1026,7 @@ fun SettingsScreenContent(
                 )
             }
         }
+        } // End of haze capture Box
 
         // Custom Glassy Delete Account Dialog
         AnimatedVisibility(
@@ -1472,7 +1608,7 @@ fun ExternalMigrationDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud_thin),
+                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                     null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)
@@ -1504,7 +1640,7 @@ fun ExternalMigrationDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.FileDownload, null, tint = Color.Black)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Seleziona file (JSON o CSV)", fontWeight = FontWeight.Bold, color = Color.Black)
                     }
@@ -2108,7 +2244,7 @@ fun SettingsSection(
             if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null,
+                    contentDescription = null, // L'accessibilità è gestita dal testo adiacente
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )

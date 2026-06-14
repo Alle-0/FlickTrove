@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,9 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
 
 @Composable
 fun GlassyBottomBar(
@@ -85,6 +89,7 @@ fun GlassyBottomBar(
         ) {
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
+                animatedIconRes = R.drawable.ic_segnalibro_anim,
                 label = "DA VEDERE",
                 isSelected = selectedRoute == "index",
                 enabled = !isDimmed,
@@ -123,6 +128,7 @@ fun GlassyBottomBar(
 @Composable
 private fun RowScope.NavItem(
     icon: ImageVector,
+    animatedIconRes: Int? = null,
     label: String,
     isSelected: Boolean,
     enabled: Boolean,
@@ -174,17 +180,39 @@ private fun RowScope.NavItem(
             label = "iconTint"
         )
 
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = tintColor,
-            modifier = Modifier
-                .size(22.dp)
-                .graphicsLayer {
-                    scaleX = iconScale.value
-                    scaleY = iconScale.value
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = tintColor,
+                modifier = Modifier
+                    .size(22.dp)
+                    .graphicsLayer {
+                        scaleX = iconScale.value
+                        scaleY = iconScale.value
+                    }
+            )
+            
+            if (isSelected && animatedIconRes != null) {
+                val animatedIcon = AnimatedImageVector.animatedVectorResource(id = animatedIconRes)
+                var atEnd by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                androidx.compose.runtime.LaunchedEffect(Unit) {
+                    atEnd = true
                 }
-        )
+                val painter = rememberAnimatedVectorPainter(animatedIcon, atEnd = atEnd)
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale.value
+                            scaleY = iconScale.value
+                        }
+                )
+            }
+        }
         
         Text(
             text = label,

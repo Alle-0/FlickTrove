@@ -94,7 +94,7 @@ fun FlickTroveModal(
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
-                                .hazeGlass(state = hazeState, shape = cardShape)
+                                .hazeGlass(state = hazeState, shape = cardShape, alpha = modalAlpha)
                         )
 
                         // Sibling 2: The crisp content card (completely untouched by blur!)

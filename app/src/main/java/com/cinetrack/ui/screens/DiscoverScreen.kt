@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +52,7 @@ import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.HomeFilterModal
 
 object DiscoverTab : Tab {
-    var requestedType: String = "popular"
+    var requestedType: String by androidx.compose.runtime.mutableStateOf("popular_movies")
 
     override val options: TabOptions
         @Composable
@@ -68,7 +69,18 @@ object DiscoverTab : Tab {
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<DiscoverViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<DiscoverViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<DiscoverViewModel>()
+        }
         
         LaunchedEffect(requestedType) {
             viewModel.init(requestedType)
@@ -107,7 +119,7 @@ fun DiscoverScreenContent(
     onActionModalVisibilityChanged: (Boolean) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val lazyGridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+    val lazyGridState = viewModel.lazyGridState
     
     // Detect scroll to end
     val endOfListReached by remember {
@@ -157,8 +169,9 @@ fun DiscoverScreenContent(
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp
     val activeHazeState = hazeState ?: remember { HazeState() }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-        
+    Box(modifier = Modifier.fillMaxSize()) {
+        CinematicBackground(modifier = Modifier.fillMaxSize())
+
         com.cinetrack.ui.components.shared.MovieActionsWrapper(
             hazeState = hazeState ?: HazeState(),
             folders = uiState.folders,
@@ -208,7 +221,7 @@ fun DiscoverScreenContent(
                                     Icon(
                                         ImageVector.vectorResource(id = R.drawable.ic_lente),
                                         contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.3f),
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                                         modifier = Modifier.size(64.dp)
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
@@ -242,6 +255,7 @@ fun DiscoverScreenContent(
                                     folderColors = folderColors,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                     showBadges = uiState.preferences.showBadges,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     hazeState = hazeState,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
@@ -260,6 +274,7 @@ fun DiscoverScreenContent(
                                     personalRating = movieStatus?.personalRating,
                                     folderColors = folderColors,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },

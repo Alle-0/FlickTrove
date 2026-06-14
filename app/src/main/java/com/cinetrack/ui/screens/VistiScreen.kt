@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +83,18 @@ object VistiTab : Tab {
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<VistiViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<VistiViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<VistiViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
@@ -128,7 +140,7 @@ fun VistiScreenContent(
         screenWidth - (padding * 2)
     }
     
-    val listState = rememberLazyGridState()
+    val listState = if (uiState.activeTab == "movie") viewModel.movieGridState else viewModel.tvGridState
     val scope = rememberCoroutineScope()
     
     androidx.activity.compose.BackHandler(enabled = isFilterVisible) {
@@ -169,6 +181,7 @@ fun VistiScreenContent(
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
+            CinematicBackground(modifier = Modifier.fillMaxSize())
             if (uiState.isLoading) {
                 LazyVerticalGrid(
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -239,6 +252,7 @@ fun VistiScreenContent(
                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                 showBadges = uiState.preferences.showBadges,
                                 hazeState = hazeState,
+                                hasAnimatedSet = viewModel.animatedMovieIds,
                                 staggerIndex = index,
                                 onPress = { onMovieClick(movie) },
                                 onAction = { viewModel.toggleWatched(movie) },
@@ -258,6 +272,7 @@ fun VistiScreenContent(
                                 progress = (movie.progress ?: 0.0).toFloat(),
                                 folderColors = folderColors,
                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                hasAnimatedSet = viewModel.animatedMovieIds,
                                 staggerIndex = index,
                                 onPress = { onMovieClick(movie) },
                                 onAction = { viewModel.toggleWatched(movie) },
@@ -316,9 +331,6 @@ fun VistiScreenContent(
                         selectedIndex = selectedIndex,
                         onOptionClick = { index ->
                             viewModel.onTabChanged(if (index == 0) "movie" else "tv")
-                            scope.launch {
-                                listState.scrollToItem(0)
-                            }
                         }
                     )
                 }

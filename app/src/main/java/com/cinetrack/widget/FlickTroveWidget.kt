@@ -206,7 +206,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
-                            provider = ImageProvider(R.drawable.ic_widget_search),
+                            provider = ImageProvider(R.drawable.ic_lente),
                             contentDescription = "Cerca",
                             modifier = GlanceModifier.size(18.dp),
                             colorFilter = ColorFilter.tint(androidx.glance.color.ColorProvider(day = Color.White, night = Color.White))

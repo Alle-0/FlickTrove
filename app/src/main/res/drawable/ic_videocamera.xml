@@ -1,30 +1,5 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <path
-        android:pathData="M30 36C32.2091 36 34 34.2091 34 32V18C34 15.2386 31.7614 13 29 13H15"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <path
-        android:pathData="M23 36H8C5.23858 36 3 33.7614 3 31V18C3 15.2386 5.23858 13 8 13"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <path
-        android:pathData="M37 16.5L43.0089 14.3969C44.9595 13.7142 47 15.1619 47 17.2284V31.7716C47 33.8381 44.9595 35.2858 43.0089 34.6031L37 32.5"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <path
-        android:pathData="M 23.5,17.75 h 4 a 1.75,1.75 0 0,1 1.75,1.75 v 0 a 1.75,1.75 0 0,1 -1.75,1.75 h -4 a 1.75,1.75 0 0,1 -1.75,-1.75 v 0 a 1.75,1.75 0 0,1 1.75,-1.75 z"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
+<?xml version='1.0' encoding='utf-8'?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+  <path android:pathData="M 11.5,16 c 1.3807,0 2.5,-1.1193 2.5,-2.5 l 0,-4 C 14,8.11929 12.8807,7 11.5,7 l -2,0 M 7.5,16 l -2,0 C 4.11929,16 3,14.8807 3,13.5 l 0,-4 C 3,8.11929 4.11929,7 5.5,7 M 17,8.22727 l 1.4134,-0.43364 C 19.6991,7.39913 21,8.36071 21,9.70566 l 0,3.58864 c 0,1.345 -1.3009,2.3066 -2.5866,1.9121 L 17,14.7727" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round" />
+  <path android:fillColor="#000000" android:pathData="M 10,9 l 1,0 a 1,1 0 0,1 1,1 a 1,1 0 0,1 -1,1 l -1,0 a 1,1 0 0,1 -1,-1 a 1,1 0 0,1 1,-1" />
 </vector>

@@ -57,7 +57,9 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.HomeViewModel
 import dev.chrisbanes.haze.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import android.content.Intent
+import androidx.activity.ComponentActivity
 
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
@@ -84,7 +86,18 @@ object HomeTab : Tab {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<HomeViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? ComponentActivity
+        
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<HomeViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<HomeViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
@@ -132,8 +145,8 @@ fun HomeScreenContent(
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
     val scope = rememberCoroutineScope()
     
-    val movieGridState = rememberLazyGridState()
-    val tvGridState = rememberLazyGridState()
+    val movieGridState = viewModel.movieGridState
+    val tvGridState = viewModel.tvGridState
     
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
     
@@ -170,13 +183,24 @@ fun HomeScreenContent(
         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) },
         onActionModalVisibilityChanged = onActionModalVisibilityChanged
     ) { actionsState ->
+        var showSkeleton by remember { mutableStateOf(false) }
+        LaunchedEffect(uiState.isLoading) {
+            if (uiState.isLoading) {
+                delay(150) // Prevent skeleton flash on fast loads or returns
+                showSkeleton = true
+            } else {
+                showSkeleton = false
+            }
+        }
+
         Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+            CinematicBackground(modifier = Modifier.fillMaxSize())
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
-            if (uiState.isLoading) {
+            if (showSkeleton) {
                 LazyVerticalGrid(
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
@@ -232,10 +256,14 @@ fun HomeScreenContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    val sections = listOf(
-                        "" to uiState.releasedMovies,
-                        "Non ancora usciti" to uiState.unreleasedMovies
-                    ).filter { it.second.isNotEmpty() }
+                    val sections = if (uiState.preferences.showSplitReleasesHome) {
+                        listOf(
+                            "" to uiState.releasedMovies,
+                            "Non ancora usciti" to uiState.unreleasedMovies
+                        ).filter { it.second.isNotEmpty() }
+                    } else {
+                        listOf("" to uiState.movies)
+                    }
 
                     sections.forEachIndexed { sectionIndex, (title, items) ->
                         if (title.isNotEmpty()) {
@@ -277,6 +305,7 @@ fun HomeScreenContent(
                                     showBadges = uiState.preferences.showBadges,
                                     hazeState = hazeState,
                                     staggerIndex = index,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     onPress = stableOnPress,
                                     onAction = stableOnAction,
                                     onLongPress = stableOnLongPress,
@@ -295,6 +324,7 @@ fun HomeScreenContent(
                                     showBadges = uiState.preferences.showBadges,
                                     hazeState = hazeState,
                                     staggerIndex = index,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
                                     onPress = stableOnPress,
                                     onAction = stableOnAction,
                                     onLongPress = stableOnLongPress,

@@ -68,7 +68,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
-import com.cinetrack.ui.theme.PremiumBackground
+// StatsBackground/AppBackground removed; using CinematicBackground directly
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.CinematicBackground
@@ -99,11 +99,12 @@ fun UpdatesScreen(
 
     val pagerState = rememberPagerState(pageCount = { 2 })
     var isMeasured by remember { mutableStateOf(false) }
-    val revealAmount = remember { Animatable(0f) }
+    var hasRevealed by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val revealAmount = remember(hasRevealed) { Animatable(if (hasRevealed) 1f else 0f) }
     var isClosing by remember { mutableStateOf(false) }
 
     LaunchedEffect(isMeasured) {
-        if (isMeasured) {
+        if (isMeasured && !hasRevealed) {
             revealAmount.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
@@ -111,6 +112,7 @@ fun UpdatesScreen(
                     easing = CubicBezierEasing(0.7f, 0f, 0.2f, 1f)
                 )
             )
+            hasRevealed = true
         }
     }
 
@@ -171,10 +173,11 @@ fun UpdatesScreen(
             max(max(distTopLeft, distTopRight), max(distBottomLeft, distBottomRight)) * 1.1f
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
                     val radius = revealAmount.value * maxRadius
                     clip = true
                     shape = object : Shape {
@@ -186,11 +189,11 @@ fun UpdatesScreen(
                         }
                     }
                 }
-                .background(PremiumBackground)
-        ) {
+                
+            ) {
             val internalHazeState = remember { HazeState() }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 // 1. Content Layer
                 Box(
                     modifier = Modifier
@@ -463,9 +466,9 @@ fun UpdatesScreen(
             } // end outer Box (hazeGlass header)
         } // end Box(fillMaxSize)
     } // end Box(graphicsLayer clip)
+        } // end Box(fillMaxSize)
     } // end BoxWithConstraints
 } // end UpdatesScreen
-
 
 @Composable
 fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {

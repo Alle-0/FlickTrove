@@ -54,6 +54,9 @@ class PersonDetailViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     private val _person = MutableStateFlow<Person?>(null)
     private val _error = MutableStateFlow<String?>(null)
+    
+    val scrollState = androidx.compose.foundation.ScrollState(0)
+    val animatedMovieIds = mutableSetOf<String>()
 
     fun initPerson(id: Long, profilePath: String?) {
         if (_personId.value == 0L && id != 0L) {

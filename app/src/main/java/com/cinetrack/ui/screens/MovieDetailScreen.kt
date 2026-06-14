@@ -99,11 +99,16 @@ data class MovieDetailScreen(
     override fun Content() {
         val viewModel = getViewModel<MovieDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow
+        val detailStackDepth = androidx.compose.runtime.remember(navigator.items) {
+            navigator.items.count { it is MovieDetailScreen || it is com.cinetrack.ui.screens.PersonDetailScreen }
+        }
 
         LaunchedEffect(movieId, mediaType) {
             kotlinx.coroutines.delay(250)
             viewModel.initMovie(movieId, mediaType)
         }
+
+        val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
 
         MovieDetailScreenContent(
             viewModel = viewModel,
@@ -112,16 +117,15 @@ data class MovieDetailScreen(
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },
-            onPersonClick = { personId, _ ->
-                // navigator.push(PersonDetailScreen(personId))
+            detailStackDepth = detailStackDepth,
+            onPersonClick = { personId, profilePath ->
+                navigator.push(PersonDetailScreen(personId, profilePath))
             },
-            onGenreClick = { genreId, genreName, _ ->
-                navigator.push(SearchScreen(initialGenreId = genreId, initialGenreName = genreName))
+            onGenreClick = { genreId, genreName, offset ->
+                searchOverlay?.invoke(offset, genreId, genreName, null, null)
             },
-            onKeywordClick = { keywordId, keywordName, _ ->
-                // SearchScreen currently does not support initialKeywordId in its constructor, 
-                // but we can pass it as initialKeywordName
-                navigator.push(SearchScreen(initialKeywordName = keywordName))
+            onKeywordClick = { keywordId, keywordName, offset ->
+                searchOverlay?.invoke(offset, null, null, keywordId, keywordName)
             },
             onHomeClick = {
                 navigator.popUntilRoot()
@@ -785,7 +789,7 @@ fun MovieDetailScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Home,
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_home),
                                     contentDescription = "Torna alla schermata principale",
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)

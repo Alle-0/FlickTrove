@@ -16,6 +16,7 @@ import javax.inject.Inject
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.collections.immutable.ImmutableList
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -42,9 +43,12 @@ class FolderDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
+    
+    val lazyGridState = LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
 
     fun initFolder(id: String) {
-        if (_folderId.value == null) {
+        if (_folderId.value != id) {
             _folderId.value = id
         }
     }

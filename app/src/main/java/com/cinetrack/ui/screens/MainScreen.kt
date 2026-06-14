@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
@@ -62,6 +63,7 @@ import com.cinetrack.ui.viewmodel.UndoViewModel
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
 
 class MainScreen : Screen {
@@ -73,7 +75,9 @@ class MainScreen : Screen {
         val scope = rememberCoroutineScope()
         val drawerHazeState = remember { HazeState() }
         val contentHazeState = remember { HazeState() }
+        val globalHazeState = remember { HazeState() }
         val undoViewModel: UndoViewModel = getViewModel()
+        val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
         
         // Hoisted Modals State
         var isFilterModalVisible by remember { mutableStateOf(false) }
@@ -92,23 +96,12 @@ class MainScreen : Screen {
         var updatesOverlayOffset by remember { mutableStateOf<Offset?>(null) }
         var isOverlayClosing by remember { mutableStateOf(false) }
         
-        var triggerSurpriseMe by remember { mutableStateOf(false) }
+        var showSurpriseMeOverlay by remember { mutableStateOf(false) }
         val surpriseMeViewModel: com.cinetrack.ui.viewmodel.SurpriseMeViewModel = getViewModel()
-        val surpriseMeState by surpriseMeViewModel.uiState.collectAsStateWithLifecycle()
         val context = LocalContext.current
         
-        LaunchedEffect(triggerSurpriseMe) {
-            if (triggerSurpriseMe) {
-                if (surpriseMeState.randomMovie != null) {
-                    rootNavigator.push(MovieDetailScreen(surpriseMeState.randomMovie!!.id, surpriseMeState.randomMovie!!.mediaType))
-                } else if (surpriseMeState.hasNoMovies) {
-                    android.widget.Toast.makeText(context, "Nessun film da vedere!", android.widget.Toast.LENGTH_SHORT).show()
-                }
-                triggerSurpriseMe = false
-            }
-        }
-        
         val deepLinkIntent = LocalDeepLinkIntent.current
+        val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
         TabNavigator(HomeTab) { tabNavigator ->
             val currentTab = tabNavigator.current
@@ -129,9 +122,9 @@ class MainScreen : Screen {
                             }
                         }
                     } else if (uri?.scheme == "flicktrove" && uri.host == "search") {
-                        rootNavigator.push(SearchScreen(startX = 540f, startY = 1140f))
+                        searchOverlay?.invoke(androidx.compose.ui.geometry.Offset(540f, 1140f), null, null, null, null)
                     } else if (action == "com.cinetrack.SHORTCUT_SEARCH") {
-                        rootNavigator.push(SearchScreen(startX = 540f, startY = 1140f))
+                        searchOverlay?.invoke(androidx.compose.ui.geometry.Offset(540f, 1140f), null, null, null, null)
                     } else if (action == "com.cinetrack.SHORTCUT_VISTI") {
                         tabNavigator.current = VistiTab
                     } else if (action == "com.cinetrack.SHORTCUT_UPCOMING_MOVIES") {
@@ -162,7 +155,15 @@ class MainScreen : Screen {
 
             ModalNavigationDrawer(
                 drawerState = drawerState,
-                gesturesEnabled = updatesOverlayOffset == null,
+                gesturesEnabled = updatesOverlayOffset == null &&
+                        !showSurpriseMeOverlay &&
+                        !isFilterModalVisible &&
+                        !isYearPickerVisible &&
+                        !showFolderOptions &&
+                        !showFolderEditDialog &&
+                        !showFolderDeleteConfirm &&
+                        !showExitConfirmation &&
+                        !movieActions.isAnyModalOpen,
                 scrimColor = Color.Black.copy(alpha = 0.5f),
                 drawerContent = {
                     GlassyDrawer(
@@ -192,7 +193,7 @@ class MainScreen : Screen {
                                         tabNavigator.current = DiscoverTab
                                     }
                                     "surprise_me" -> {
-                                        triggerSurpriseMe = true
+                                        showSurpriseMeOverlay = true
                                     }
                                     else -> tabNavigator.current = HomeTab
                                 }
@@ -201,7 +202,8 @@ class MainScreen : Screen {
                     )
                 }
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
+                    Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
                     CompositionLocalProvider(
                         LocalAppPadding provides PaddingValues(bottom = 80.dp),
                         LocalHazeState provides contentHazeState,
@@ -211,6 +213,102 @@ class MainScreen : Screen {
                         }
                     ) {
                         CurrentTab()
+                    }
+
+                    // Top Bar Layer
+                    val title = when (currentTab) {
+                        is HomeTab -> "FlickTrove"
+                        is VistiTab -> "La tua Lista"
+                        is DiscoverTab -> "Scopri"
+                        is RecommendationsTab -> "Consigliati per te"
+                        is StatsTab -> "Statistiche"
+                        is FoldersTab -> "Le mie cartelle"
+                        is SettingsTab -> "Impostazioni"
+                        is FolderDetailTab -> currentTab.folderName
+                        else -> "FlickTrove"
+                    }
+
+                    Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
+                        GlassyTopBar(
+                            title = title,
+                            hazeState = contentHazeState,
+                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
+                            onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
+                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab) { { offset -> updatesOverlayOffset = offset } } else null,
+                            onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
+                            // hasActiveFilters = TODO
+                        )
+                    }
+
+                    // Bottom Bar Layer
+                    val isPrimaryTab = currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is DiscoverTab || currentTab is FoldersTab || currentTab is FolderDetailTab || currentTab is SettingsTab || currentTab is RecommendationsTab
+                    if (isPrimaryTab) {
+                        Box(modifier = Modifier.align(Alignment.BottomCenter).zIndex(50f)) {
+                            GlassyBottomBar(
+                                hazeState = contentHazeState,
+                                selectedRoute = when (currentTab) {
+                                    is HomeTab -> "index"
+                                    is VistiTab -> "visti"
+                                    is StatsTab -> "stats"
+                                    else -> null
+                                },
+                                onNavigate = { routeStr ->
+                                    when (routeStr) {
+                                        "index" -> tabNavigator.current = HomeTab
+                                        "visti" -> tabNavigator.current = VistiTab
+                                        "stats" -> tabNavigator.current = StatsTab
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    // Search FAB
+                    if (isPrimaryTab) {
+                        val searchFabHaze = contentHazeState
+                        var fabCenter by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 20.dp, bottom = 90.dp)
+                                .zIndex(60f)
+                                .size(52.dp)
+                                .onGloballyPositioned { coords ->
+                                    val pos = coords.positionInWindow()
+                                    val size = coords.size
+                                    fabCenter = androidx.compose.ui.geometry.Offset(
+                                        pos.x + size.width / 2f,
+                                        pos.y + size.height / 2f
+                                    )
+                                }
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .hazeGlass(
+                                    state = searchFabHaze,
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                                .border(
+                                    1.dp,
+                                    com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                    androidx.compose.foundation.shape.CircleShape
+                                )
+                                .bounceClick(scaleDown = 0.9f) {
+                                    val center = fabCenter
+                                    val startX = center?.x ?: 540f
+                                    val startY = center?.y ?: 1140f
+                                    searchOverlay?.invoke(androidx.compose.ui.geometry.Offset(startX, startY), null, null, null, null)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
+                                contentDescription = "Cerca",
+                                tint = com.cinetrack.ui.theme.PrimaryTeal,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+
                     }
 
                     // --- FOLDER OPTIONS MODAL ---
@@ -297,55 +395,6 @@ class MainScreen : Screen {
                         }
                     }
 
-                    // Top Bar Layer
-                    val title = when (currentTab) {
-                        is HomeTab -> "FlickTrove"
-                        is VistiTab -> "La tua Lista"
-                        is DiscoverTab -> "Scopri"
-                        is RecommendationsTab -> "Consigliati per te"
-                        is StatsTab -> "Statistiche"
-                        is FoldersTab -> "Le mie cartelle"
-                        is SettingsTab -> "Impostazioni"
-                        is FolderDetailTab -> currentTab.folderName
-                        else -> "FlickTrove"
-                    }
-
-                    Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
-                        GlassyTopBar(
-                            title = title,
-                            hazeState = contentHazeState,
-                            onMenuClick = { scope.launch { drawerState.open() } },
-                            onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
-                            onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
-                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab) { { offset -> updatesOverlayOffset = offset } } else null,
-                            onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
-                            // hasActiveFilters = TODO
-                        )
-                    }
-
-                    // Bottom Bar Layer
-                    val isPrimaryTab = currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is DiscoverTab || currentTab is FoldersTab || currentTab is FolderDetailTab
-                    if (isPrimaryTab) {
-                        Box(modifier = Modifier.align(Alignment.BottomCenter).zIndex(50f)) {
-                            GlassyBottomBar(
-                                hazeState = contentHazeState,
-                                selectedRoute = when (currentTab) {
-                                    is HomeTab -> "index"
-                                    is VistiTab -> "visti"
-                                    is StatsTab -> "stats"
-                                    else -> "index"
-                                },
-                                onNavigate = { routeStr ->
-                                    when (routeStr) {
-                                        "index" -> tabNavigator.current = HomeTab
-                                        "visti" -> tabNavigator.current = VistiTab
-                                        "stats" -> tabNavigator.current = StatsTab
-                                    }
-                                }
-                            )
-                        }
-                    }
-
                     // Modals — wrapped in key(currentTab) to reset composable state safely on tab change
                     key(currentTab) {
                         if (currentTab is HomeTab) {
@@ -355,7 +404,7 @@ class MainScreen : Screen {
                                 HomeFilterModal(
                                     isVisible = isFilterModalVisible,
                                     sortConfig = homeUiState.sortConfig,
-                                    hazeState = contentHazeState,
+                                    hazeState = globalHazeState,
                                     triggerBounds = filterButtonBounds,
                                     onSortConfigChanged = { homeViewModel.updateSortConfig(it) },
                                     onDismissRequest = { isFilterModalVisible = false }
@@ -369,7 +418,7 @@ class MainScreen : Screen {
                                     isVisible = isFilterModalVisible,
                                     isVisti = true,
                                     sortConfig = vistiUiState.sortConfig,
-                                    hazeState = contentHazeState,
+                                    hazeState = globalHazeState,
                                     triggerBounds = filterButtonBounds,
                                     category = vistiUiState.activeTab,
                                     onSortConfigChanged = { vistiViewModel.updateSortConfig(it); isFilterModalVisible = false },
@@ -383,7 +432,7 @@ class MainScreen : Screen {
                                 HomeFilterModal(
                                     isVisible = isFilterModalVisible,
                                     sortConfig = discoverUiState.sortConfig,
-                                    hazeState = contentHazeState,
+                                    hazeState = globalHazeState,
                                     triggerBounds = filterButtonBounds,
                                     onSortConfigChanged = { discoverViewModel.updateSortConfig(it) },
                                     onDismissRequest = { isFilterModalVisible = false }
@@ -398,7 +447,7 @@ class MainScreen : Screen {
                                     onDismiss = { isYearPickerVisible = false },
                                     currentRange = statsUiState.timeRange,
                                     availableYears = statsUiState.availableYears,
-                                    hazeState = contentHazeState,
+                                    hazeState = globalHazeState,
                                     triggerBounds = yearPickerButtonBounds,
                                     onYearSelected = { statsViewModel.setTimeRange(TimeRange.Year(it)) },
                                     onAllTimeSelected = { statsViewModel.setTimeRange(TimeRange.AllTime) }
@@ -407,56 +456,10 @@ class MainScreen : Screen {
                         }
                     }
 
-                    // Search FAB
-                    if (isPrimaryTab) {
-                        val searchFabHaze = contentHazeState
-                        var fabCenter by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(end = 20.dp, bottom = 90.dp)
-                                .zIndex(60f)
-                                .size(52.dp)
-                                .onGloballyPositioned { coords ->
-                                    val pos = coords.positionInWindow()
-                                    val size = coords.size
-                                    fabCenter = androidx.compose.ui.geometry.Offset(
-                                        pos.x + size.width / 2f,
-                                        pos.y + size.height / 2f
-                                    )
-                                }
-                                .clip(androidx.compose.foundation.shape.CircleShape)
-                                .hazeGlass(
-                                    state = searchFabHaze,
-                                    shape = androidx.compose.foundation.shape.CircleShape
-                                )
-                                .border(
-                                    1.dp,
-                                    com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                    androidx.compose.foundation.shape.CircleShape
-                                )
-                                .bounceClick(scaleDown = 0.9f) {
-                                    val center = fabCenter
-                                    rootNavigator.push(SearchScreen(
-                                        startX = center?.x ?: 540f,
-                                        startY = center?.y ?: 1140f
-                                    ))
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
-                                contentDescription = "Cerca",
-                                tint = Color.White,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    }
-
                     // Undo Toast — rendered AFTER FAB so it appears on top and blurs it
                     UndoToast(
                         actionFeedbackManager = undoViewModel.actionFeedbackManager,
-                        hazeState = contentHazeState,
+                        hazeState = globalHazeState,
                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(50000f)
                     )
 
@@ -465,7 +468,7 @@ class MainScreen : Screen {
                         com.cinetrack.ui.components.shared.FlickTroveModal(
                             isVisible = true,
                             onDismissRequest = { showExitConfirmation = false },
-                            hazeState = contentHazeState
+                            hazeState = globalHazeState
                         ) {
                             Text(
                                 text = "Esci da FlickTrove?",
@@ -513,11 +516,28 @@ class MainScreen : Screen {
                             onBack = { updatesOverlayOffset = null },
                             onClosing = { isOverlayClosing = true },
                             onMovieClick = { movie ->
-                                updatesOverlayOffset = null
                                 rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
                             },
                             modifier = Modifier.zIndex(80000f)
                         )
+                    }
+
+                    if (showSurpriseMeOverlay) {
+                        Box(modifier = Modifier.zIndex(90000f)) {
+                            SurpriseMeOverlay(
+                                viewModel = surpriseMeViewModel,
+                                globalHazeState = globalHazeState,
+                                onMovieFound = { movie ->
+                                    showSurpriseMeOverlay = false
+                                    if (movie != null) {
+                                        rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+                                    } else {
+                                        android.widget.Toast.makeText(context, "Nessun film trovato per questi criteri!", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onClose = { showSurpriseMeOverlay = false }
+                            )
+                        }
                     }
                 }
             }

@@ -98,9 +98,10 @@ fun GlassyDrawer(
                 )
                 IconButton(onClick = onClose) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                         contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.8f)
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

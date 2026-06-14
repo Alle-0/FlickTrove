@@ -22,6 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.core.*
 import androidx.compose.ui.unit.dp
@@ -118,7 +121,7 @@ fun RatingPickerBox(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Close,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                     contentDescription = "Chiudi",
                     tint = Color.White.copy(alpha = 0.5f),
                     modifier = Modifier.size(24.dp)
@@ -299,7 +302,7 @@ fun NoteEditorBox(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Close,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                     contentDescription = "Chiudi",
                     tint = Color.White.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp)

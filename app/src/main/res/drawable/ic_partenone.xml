@@ -1,24 +1,4 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <path
-        android:pathData="M38 41H40.5C41.8807 41 43 39.8807 43 38.5C43 37.1193 41.8807 36 40.5 36H7.5C6.11929 36 5 37.1193 5 38.5C5 39.8807 6.11929 41 7.5 41H32"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <path
-        android:pathData="M15 13H41.3411C42.2573 13 43 12.2573 43 11.3411C43 10.5896 42.4947 9.93193 41.7686 9.73828L25.2883 5.34355C24.4442 5.11845 23.5558 5.11845 22.7117 5.34355L6.23144 9.73828C5.50526 9.93193 5 10.5896 5 11.3411C5 12.2573 5.7427 13 6.65886 13H9"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
-    <path
-        android:pathData="M9 33L10 16M13 16L14 33M21.5 33L22.5 16M25.5 16L26.5 33M34 33L35 16M38 16L39 33"
-        android:strokeColor="#FF000000"
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
+<?xml version='1.0' encoding='utf-8'?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+  <path android:pathData="M 18.6316,21 L 20,21 c 0.5523,0 1,-0.4477 1,-1 s -0.4477,-1 -1,-1 L 4,19 c -0.55228,0 -1,0.4477 -1,1 s 0.44772,1 1,1 l 11.7895,0 M 7.73684,7 L 20.1654,7 C 20.6263,7 21,6.62635 21,6.16542 c 0,-0.37383 -0.2486,-0.70206 -0.6084,-0.80335 L 12.8129,3.2288 c -0.5316,-0.14963 -1.0942,-0.14962 -1.6258,0 L 3.60845,5.36207 C 3.24859,5.46336 3,5.79159 3,6.16542 C 3,6.62635 3.37365,7 3.83458,7 l 1.06016,0 M 4,17 l 0.53333,-8 m 1.6,0 l 0.53334,8 m 4.00003,0 L 11.2,9 m 1.6,0 l 0.5333,8 m 4,0 l 0.5334,-8 m 1.6,0 L 20,17" android:strokeColor="#000000" android:strokeWidth="1.5" android:strokeLineCap="round" />
 </vector>

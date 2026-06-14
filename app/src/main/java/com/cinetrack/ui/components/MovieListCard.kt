@@ -61,6 +61,7 @@ fun MovieListCard(
     showBadges: Boolean = true,
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
+    hasAnimatedSet: MutableSet<String>? = null,
     onPress: (Movie) -> Unit = {},
     onLongPress: (Movie, Offset, Offset) -> Unit = { _, _, _ -> },
     onAction: (Movie) -> Unit = {},
@@ -77,12 +78,14 @@ fun MovieListCard(
     val rippleState = rememberCardRippleState()
 
     // Premium Staggered Entrance Animation States
-    val hasAnimated = rememberSaveable { mutableStateOf(false) }
+    val compositeId = "${movie.id}_${movie.mediaType}"
+    val hasAnimated = rememberSaveable { mutableStateOf(hasAnimatedSet?.contains(compositeId) == true) }
 
     LaunchedEffect(movie.id) {
         if (hasAnimated.value) return@LaunchedEffect
         if (staggerIndex in 0..11) delay(staggerIndex * 40L)
         hasAnimated.value = true
+        hasAnimatedSet?.add(compositeId)
     }
 
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12

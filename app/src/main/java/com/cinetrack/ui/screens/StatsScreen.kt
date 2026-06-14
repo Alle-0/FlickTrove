@@ -220,17 +220,40 @@ object StatsTab : Tab {
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
         var isYearPickerVisible by remember { mutableStateOf(false) }
+        var yearPickerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+        val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val activeHazeState = hazeState ?: remember { HazeState() }
 
         StatsScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
-            hazeState = hazeState,
-            onToggleYearPicker = { visible, _ -> isYearPickerVisible = visible },
+            hazeState = activeHazeState,
+            onToggleYearPicker = { visible, bounds ->
+                isYearPickerVisible = visible
+                yearPickerButtonBounds = bounds
+            },
             onPersonClick = { personId ->
                 // navigator.push(PersonDetailScreen(personId))
             },
             onMovieClick = { movie ->
                 // navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            }
+        )
+
+        YearSelectionModal(
+            isVisible = isYearPickerVisible,
+            onDismiss = { isYearPickerVisible = false },
+            currentRange = statsUiState.timeRange,
+            availableYears = statsUiState.availableYears,
+            hazeState = activeHazeState,
+            triggerBounds = yearPickerButtonBounds,
+            onYearSelected = { year ->
+                viewModel.setTimeRange(TimeRange.Year(year))
+                isYearPickerVisible = false
+            },
+            onAllTimeSelected = {
+                viewModel.setTimeRange(TimeRange.AllTime)
+                isYearPickerVisible = false
             }
         )
     }
@@ -254,9 +277,7 @@ fun StatsScreenContent(
     val activeHazeState = hazeState ?: remember { HazeState() }
     var isSharingStats by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         // ── Background & Content Layer (Captured by Haze for Modals) ──────
         Box(
             modifier = Modifier
@@ -268,9 +289,6 @@ fun StatsScreenContent(
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
-                // Darker background to make bars look "scure" (dark)
-                Box(Modifier.fillMaxSize().background(Color(0xFF050507)))
-                
                 CinematicBackground(
                     modifier = Modifier.fillMaxSize()
                 )
@@ -2006,6 +2024,18 @@ fun WrappedBannerPill(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
+    // Animate shape parameters for a smooth transition
+    val cutoutRadius by animateDpAsState(
+        targetValue = if (expanded) 16.dp else 10.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "cutout"
+    )
+    val cornerRadius by animateDpAsState(
+        targetValue = if (expanded) 32.dp else 18.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "corner"
+    )
+
     // Get theme colors in composable context
     val primary = MaterialTheme.colorScheme.primary
     val secondary = MaterialTheme.colorScheme.secondary
@@ -2035,17 +2065,11 @@ fun WrappedBannerPill(
                 // Use block version for compatibility
                 clip = true
                 shape = TicketShape(
-                    cutoutRadius = if (expanded) 16.dp else 10.dp,
-                    cornerRadius = if (expanded) 32.dp else 18.dp
+                    cutoutRadius = cutoutRadius,
+                    cornerRadius = cornerRadius
                 )
             }
             .background(Color(0xFF0A0A0C))
-            .animateContentSize(
-                spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
             .drawBehind {
                 // Use drawBehind for better compatibility and performance
                 drawRect(color = Color(0xFF0A0A0C))
@@ -2080,8 +2104,8 @@ fun WrappedBannerPill(
                 width = 1.2.dp, 
                 color = Color.White.copy(alpha = 0.2f), 
                 shape = TicketShape(
-                    cutoutRadius = if (expanded) 16.dp else 10.dp,
-                    cornerRadius = if (expanded) 32.dp else 18.dp
+                    cutoutRadius = cutoutRadius,
+                    cornerRadius = cornerRadius
                 )
             )
     ) {
@@ -2145,8 +2169,8 @@ fun WrappedBannerPill(
 
             AnimatedVisibility(
                 visible = expanded,
-                enter = fadeIn(tween(400)) + scaleIn(initialScale = 0.95f, animationSpec = tween(400)),
-                exit = fadeOut(tween(300)) + scaleOut(targetScale = 0.95f, animationSpec = tween(300))
+                enter = fadeIn(tween(300)) + expandVertically(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)),
+                exit = fadeOut(tween(200)) + shrinkVertically(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium))
             ) {
                 Column {
                     Spacer(Modifier.height(20.dp))
@@ -2793,11 +2817,18 @@ fun StatsSkeleton(paddingValues: PaddingValues) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Top safe area spacer
-        Spacer(Modifier.height(paddingValues.calculateTopPadding()))
+        // Top safe area spacer (same offset used by the loaded stats screen)
+        Spacer(
+            Modifier.height(
+                paddingValues.calculateTopPadding() +
+                    androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+                    46.dp +
+                    60.dp +
+                    20.dp
+            )
+        )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(20.dp))
 
             // Year selection placeholder (Title + Button)
             Row(

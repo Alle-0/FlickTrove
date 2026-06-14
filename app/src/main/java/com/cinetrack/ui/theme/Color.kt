@@ -3,10 +3,11 @@ package com.cinetrack.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Core Brand Colors
-val DarkGrey = Color(0xFF0F0F1A)
-val DarkSurface = Color(0xFF1A1A2E)
+val DarkGrey = Color(0xFF0A0A0A)
+val DarkSurface = Color(0xFF121212)
 val DeepBlack = Color(0xFF000000)
-val PremiumBackground = Color(0xFF08080A)
+val PremiumBackground = Color(0xFF050505)
+// `StatsBackground` removed — use `CinematicBackground` overlay instead of a separate base token
 
 // Light Theme Colors
 val LightGrey = Color(0xFFF5F5FA)

@@ -13,23 +13,51 @@ object IconManager {
     private const val ALIAS_BLUE = "com.cinetrack.MainActivityBlue"
 
     fun updateAppIcon(context: Context, colorName: String, isDynamicIconEnabled: Boolean) {
+        if (!isDynamicIconEnabled) {
+            return
+        }
+
         val packageManager = context.packageManager
         
         val aliases = listOf(ALIAS_TEAL, ALIAS_PINK, ALIAS_PURPLE, ALIAS_AMBER, ALIAS_BLUE)
         
-        val activeAlias = if (isDynamicIconEnabled) {
-            when {
-                colorName == "Pink" -> ALIAS_PINK
-                colorName == "Purple" -> ALIAS_PURPLE
-                colorName == "Amber" -> ALIAS_AMBER
-                colorName == "Blue" -> ALIAS_BLUE
-                colorName == "Teal" -> ALIAS_TEAL
-                colorName.startsWith("#") -> getClosestPresetAlias(colorName)
-                else -> ALIAS_TEAL
-            }
-        } else {
-            ALIAS_TEAL
+        val activeAlias = when {
+            colorName == "Pink" -> ALIAS_PINK
+            colorName == "Purple" -> ALIAS_PURPLE
+            colorName == "Amber" -> ALIAS_AMBER
+            colorName == "Blue" -> ALIAS_BLUE
+            colorName == "Teal" -> ALIAS_TEAL
+            colorName.startsWith("#") -> getClosestPresetAlias(colorName)
+            else -> ALIAS_TEAL
         }
+
+        // Check if the alias is already enabled to avoid unnecessary restarts
+        val isCurrentlyEnabled = packageManager.getComponentEnabledSetting(
+            ComponentName(context, activeAlias)
+        ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        
+        if (isCurrentlyEnabled) {
+            return
+        }
+
+        // Schedule an app restart because changing the component setting will kill the app
+        val restartIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
+            component = ComponentName(context, activeAlias)
+            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            1234,
+            restartIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        alarmManager.set(
+            android.app.AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 1500, // 1.5 second delay
+            pendingIntent
+        )
 
         // Enable the active alias
         packageManager.setComponentEnabledSetting(

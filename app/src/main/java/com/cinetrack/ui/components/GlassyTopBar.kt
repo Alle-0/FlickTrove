@@ -106,77 +106,89 @@ fun GlassyTopBar(
                 .hazeGlass(state = hazeState, shape = RoundedCornerShape(50))
         )
 
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(46.dp)
-                .padding(horizontal = 12.dp)
-                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
-            verticalAlignment = Alignment.CenterVertically
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
-
-            // Menu/Back Button
             Box(
                 modifier = Modifier
-                    .size(32.dp)
-                    .bounceClick(
-                        enabled = !isDimmed,
-                        onClick = {
-                            onBackPress?.invoke() ?: onMenuClick?.invoke()
-                        }
-                    ),
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
-                    contentDescription = "Navigation",
-                    tint = Color.White,
-                    modifier = Modifier.size(if (onBackPress != null) 16.dp else 20.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (indicatorColor != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(indicatorColor)
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    
+                    if (title == "FlickTrove") {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
+                            contentDescription = "Logo",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = Color.White,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (indicatorColor != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(indicatorColor)
-                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-                    )
-                    Spacer(Modifier.width(8.dp))
-                }
-                
-                if (title == "FlickTrove") {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_launcher_foreground_vector),
-                        contentDescription = "Logo",
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                }
-                
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.wrapContentWidth()
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
+                // Menu/Back Button
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .bounceClick(
+                            enabled = !isDimmed,
+                            onClick = {
+                                onBackPress?.invoke() ?: onMenuClick?.invoke()
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
+                        contentDescription = "Navigation",
+                        tint = Color.White,
+                        modifier = Modifier.size(if (onBackPress != null) 16.dp else 20.dp)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.wrapContentWidth()
+                ) {
                 if (connectionState == com.cinetrack.utils.ConnectionState.OFFLINE) {
                     Icon(
                         imageVector = Icons.Rounded.CloudOff,
@@ -339,9 +351,10 @@ fun GlassyTopBar(
                     }
                 }
 
-                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null) {
+                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null) {
                     Spacer(modifier = Modifier.size(48.dp))
                 }
+            }
             }
 
         }

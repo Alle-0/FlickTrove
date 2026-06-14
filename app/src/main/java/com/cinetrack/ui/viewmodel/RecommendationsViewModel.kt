@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import com.cinetrack.util.toComposeColor
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -44,6 +45,9 @@ class RecommendationsViewModel @Inject constructor(
     private val _isNextPageLoading = MutableStateFlow(false)
     private val _isEndReached = MutableStateFlow(false)
     private val _recommendedMovies = MutableStateFlow<List<Movie>>(emptyList())
+    
+    val lazyGridState = LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
     
     private var currentPage = 1
     private var currentTopSourceIds: List<Long> = emptyList()

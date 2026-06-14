@@ -91,6 +91,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showLayoutToggle }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val showSplitReleasesHome: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showSplitReleasesHome }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val appTheme: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.appTheme }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
@@ -155,6 +159,15 @@ class SettingsViewModel @Inject constructor(
             preferenceRepository.updateShowLayoutToggle(enabled)
             val status = if (enabled) "visibile" else "nascosto"
             actionFeedbackManager.emit("Pulsante layout $status")
+        }
+    }
+
+    fun toggleSplitReleasesHome(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowSplitReleasesHome(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val status = if (enabled) "attivata" else "disattivata"
+            actionFeedbackManager.emit("Divisione uscite $status")
         }
     }
 

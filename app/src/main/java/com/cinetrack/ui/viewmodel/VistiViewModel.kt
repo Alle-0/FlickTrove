@@ -46,6 +46,10 @@ class VistiViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     private val _activeTab = MutableStateFlow("movie")
     
+    val movieGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
+    val tvGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
+    val animatedMovieIds = mutableSetOf<String>()
+    
     fun emitMessage(message: String) {
         actionFeedbackManager.emit(message)
     }
