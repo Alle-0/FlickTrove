@@ -456,12 +456,7 @@ class MainScreen : Screen {
                         }
                     }
 
-                    // Undo Toast — rendered AFTER FAB so it appears on top and blurs it
-                    UndoToast(
-                        actionFeedbackManager = undoViewModel.actionFeedbackManager,
-                        hazeState = globalHazeState,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(50000f)
-                    )
+
 
                     // Exit Confirmation
                     if (showExitConfirmation) {

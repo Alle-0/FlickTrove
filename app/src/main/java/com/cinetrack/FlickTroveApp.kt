@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 
@@ -40,6 +41,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
+
+    val undoViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.UndoViewModel>()
 
     val context = LocalContext.current
 
@@ -228,6 +231,12 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                     com.cinetrack.ui.components.shared.GlobalMovieActions(
                         manager = movieActionsManager,
                         hazeState = globalHazeState
+                    )
+                    
+                    com.cinetrack.ui.components.UndoToast(
+                        actionFeedbackManager = undoViewModel.actionFeedbackManager,
+                        hazeState = globalHazeState,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(200000f)
                     )
                 }
             }

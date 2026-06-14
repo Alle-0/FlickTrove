@@ -237,7 +237,9 @@ object SettingsTab : Tab {
                     paddingValues = paddingValues,
                     hazeState = hazeState,
                     scrollState = scrollState,
-                    onLoggedOut = { }
+                    onLoggedOut = {
+                        navigator.replaceAll(com.cinetrack.ui.screens.LoginScreen())
+                    }
                 )
             }
         }
@@ -1345,6 +1347,7 @@ fun SettingsScreenContent(
                                 onClick = {
                                     showLogoutConfirm = false
                                     viewModel.logout()
+                                    onLoggedOut()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(16.dp),
