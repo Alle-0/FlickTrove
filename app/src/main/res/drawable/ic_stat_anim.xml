@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <!-- Middle Pill Continuous -->
+            <path
+                android:name="snake_mid"
+                android:pathData="M 10,5.5 L 10,5 C 10,3.8954 10.8954,3 12,3 C 13.1046,3 14,3.8954 14,5 L 14,19 C 14,20.1046 13.1046,21 12,21 C 10.8954,21 10,20.1046 10,19 L 10,10 L 10,5.5 Z"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:trimPathStart="0"
+                android:trimPathEnd="0.889" />
+
+            <!-- Right Pill Continuous -->
+            <path
+                android:name="snake_right"
+                android:pathData="M 21,18 L 21,19 C 21,20.1046 20.1046,21 19,21 C 17.8954,21 17,20.1046 17,19 L 17,10 C 17,8.8954 17.8954,8 19,8 C 20.1046,8 21,8.8954 21,10 L 21,13.5 L 21,18 Z"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:trimPathStart="0"
+                android:trimPathEnd="0.852" />
+
+            <!-- Left Pill Continuous -->
+            <path
+                android:name="snake_left"
+                android:pathData="M 7,15 L 7,19 C 7,20.1046 6.1046,21 5,21 C 3.8954,21 3,20.1046 3,19 L 3,15 C 3,13.8954 3.8954,13 5,13 C 6.1046,13 7,13.8954 7,15 Z"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:trimPathStart="0"
+                android:trimPathEnd="1.0" />
+
+        </vector>
+    </aapt:attr>
+
+    <!-- Animators for Snake Mid -->
+    <target android:name="snake_mid">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="0" android:valueTo="1" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+        </aapt:attr>
+    </target>
+
+    <!-- Animators for Snake Right -->
+    <target android:name="snake_right">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="0" android:valueTo="1" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+        </aapt:attr>
+    </target>
+
+    <!-- Animators for Snake Left -->
+    <target android:name="snake_left">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="0" android:valueTo="1" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+        </aapt:attr>
+    </target>
+</animated-vector>

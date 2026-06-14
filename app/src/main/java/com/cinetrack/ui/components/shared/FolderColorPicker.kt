@@ -116,7 +116,7 @@ fun FolderColorPicker(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                         contentDescription = "Custom Color",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
@@ -133,71 +133,87 @@ fun FolderColorPicker(
                     .padding(top = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var localColor by remember(selectedColor) { mutableStateOf(selectedColor) }
-                var manualHexInput by remember { mutableStateOf<String?>(null) }
-                
+                var localColor by remember { mutableStateOf(selectedColor) }
+                var hexInput by remember { 
+                    mutableStateOf(if (selectedColor.startsWith("#")) selectedColor.uppercase().removePrefix("#") else "6366F1") 
+                }
+                var isHexFocused by remember { mutableStateOf(false) }
+                var isDragging by remember { mutableStateOf(false) }
+
                 val focusManager = LocalFocusManager.current
+
+                // Sync hex ← wheel: only when drag ends and hex field not focused
+                androidx.compose.runtime.LaunchedEffect(isDragging, localColor) {
+                    if (!isDragging && !isHexFocused && localColor.length == 7) {
+                        hexInput = localColor.uppercase().removePrefix("#")
+                    }
+                }
                 
                 ColorWheel(
                     selectedColor = localColor,
-                    onColorChanged = { 
-                        localColor = it
-                        manualHexInput = null // Fix: Clear manual input to update display hex live
+                    onColorChanged = { localColor = it },
+                    onInteractionStart = { 
+                        isDragging = true
+                        focusManager.clearFocus()
                     },
-                    onInteractionStart = { focusManager.clearFocus() },
-                    onInteractionEnd = { onColorSelected(localColor) },
+                    onInteractionEnd = { 
+                        isDragging = false
+                        onColorSelected(localColor)
+                    },
                     modifier = Modifier.size(160.dp)
                 )
                 
                 Spacer(Modifier.height(16.dp))
                 
-                val displayHex = manualHexInput ?: localColor.uppercase()
-                
-                var isHexFocused by remember { mutableStateOf(false) }
-                
-                Box(
+                Row(
                     modifier = Modifier
+                        .width(160.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.05f))
                         .border(
-                            width = if (isHexFocused) 2.5.dp else 1.dp,
+                            width = if (isHexFocused) 2.dp else 1.dp,
                             color = if (isHexFocused) Color.White else Color.White.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
+                    Text(
+                        text = "#",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
+                        color = Color.White.copy(alpha = 0.3f)
+                    )
                     BasicTextField(
-                        value = displayHex,
-                        onValueChange = { input ->
-                            val clean = input.uppercase().filter { it.isDigit() || it in 'A'..'F' || it == '#' }
-                            if (clean.length <= 7) {
-                                val newHex = if (clean.startsWith("#") || clean.isEmpty()) clean else "#$clean"
-                                manualHexInput = newHex
-                                
-                                // Try to parse and update if valid
-                                if (newHex.length == 7) {
-                                    val parsed = newHex.toComposeColor(Color.Transparent)
-                                    if (parsed != Color.Transparent) {
-                                        localColor = newHex
-                                        onColorSelected(newHex)
-                                    }
+                        value = if (hexInput.startsWith("#")) hexInput.substring(1) else hexInput,
+                        onValueChange = { newValue ->
+                            if (newValue.length <= 6) {
+                                val clean = newValue.uppercase().filter { it.isDigit() || it in 'A'..'F' }
+                                hexInput = clean
+                                // Update wheel only when we have a full valid hex
+                                if (clean.length == 6) {
+                                    val newHex = "#$clean"
+                                    localColor = newHex
+                                    onColorSelected(newHex)
                                 }
                             }
                         },
-                        textStyle = MaterialTheme.typography.labelMedium.copy(
-                            letterSpacing = 2.sp,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
                             color = Color.White,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            letterSpacing = 1.sp
                         ),
                         cursorBrush = SolidColor(Color.White),
                         singleLine = true,
                         modifier = Modifier
-                            .width(100.dp)
-                            .onFocusChanged { 
-                                isHexFocused = it.isFocused
-                                if (!it.isFocused) {
-                                    manualHexInput = null
+                            .width(80.dp)
+                            .padding(start = 4.dp)
+                            .onFocusChanged { focusState ->
+                                isHexFocused = focusState.isFocused
+                                // When losing focus, sync hex display to current color
+                                if (!focusState.isFocused && localColor.length == 7) {
+                                    hexInput = localColor.uppercase().removePrefix("#")
                                 }
                             }
                     )

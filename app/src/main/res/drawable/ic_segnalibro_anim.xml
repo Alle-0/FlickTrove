@@ -7,38 +7,54 @@
             android:height="24dp"
             android:viewportWidth="24"
             android:viewportHeight="24">
-            
+
+            <!-- Serpentello 1 (La U in alto originale, animato su tracciato continuo) -->
             <path
-                android:name="bookmark_path"
+                android:name="snake1"
                 android:pathData="M 6,17.9414 L 6,6 C 6,4.34315 7.34315,3 9,3 L 15,3 C 16.6569,3 18,4.34315 18,6 L 18,17.9414 C 18,19.6002 16.097,20.538 14.7816,19.5274 L 13.2184,18.3266 C 12.4999,17.7745 11.5001,17.7745 10.7816,18.3266 L 9.21845,19.5274 C 7.90304,20.538 6,19.6002 6,17.9414 Z"
                 android:strokeColor="#FFFFFF"
-                android:strokeWidth="2.5"
+                android:strokeWidth="2"
                 android:strokeLineCap="round"
                 android:strokeLineJoin="round"
                 android:trimPathStart="0"
-                android:trimPathEnd="0" />
+                android:trimPathEnd="0.406"
+                android:trimPathOffset="0.22" />
 
+            <!-- Serpentello 2 (Il nastro in basso originale, animato su tracciato continuo) -->
+            <path
+                android:name="snake2"
+                android:pathData="M 6,17.9414 L 6,6 C 6,4.34315 7.34315,3 9,3 L 15,3 C 16.6569,3 18,4.34315 18,6 L 18,17.9414 C 18,19.6002 16.097,20.538 14.7816,19.5274 L 13.2184,18.3266 C 12.4999,17.7745 11.5001,17.7745 10.7816,18.3266 L 9.21845,19.5274 C 7.90304,20.538 6,19.6002 6,17.9414 Z"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:trimPathStart="0"
+                android:trimPathEnd="0.415"
+                android:trimPathOffset="0.715" />
         </vector>
     </aapt:attr>
 
-    <target android:name="bookmark_path">
+    <!-- Animazione Serpentello 1 -->
+    <target android:name="snake1">
         <aapt:attr name="android:animation">
-            <set>
-                <objectAnimator
-                    android:propertyName="trimPathEnd"
-                    android:valueFrom="0"
-                    android:valueTo="1"
-                    android:duration="600"
-                    android:interpolator="@android:anim/decelerate_interpolator" />
-                <objectAnimator
-                    android:propertyName="trimPathStart"
-                    android:valueFrom="0"
-                    android:valueTo="1"
-                    android:duration="600"
-                    android:startOffset="200"
-                    android:interpolator="@android:anim/accelerate_interpolator" />
-            </set>
+            <objectAnimator
+                android:propertyName="trimPathOffset"
+                android:valueFrom="0.22"
+                android:valueTo="1.22"
+                android:duration="1200"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
         </aapt:attr>
     </target>
 
+    <!-- Animazione Serpentello 2 -->
+    <target android:name="snake2">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathOffset"
+                android:valueFrom="0.715"
+                android:valueTo="1.715"
+                android:duration="1200"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+        </aapt:attr>
+    </target>
 </animated-vector>

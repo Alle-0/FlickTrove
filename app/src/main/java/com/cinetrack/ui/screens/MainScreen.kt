@@ -235,7 +235,7 @@ class MainScreen : Screen {
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
-                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab) { { offset -> updatesOverlayOffset = offset } } else null,
+                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab) { { offset -> updatesOverlayOffset = offset } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             // hasActiveFilters = TODO
                         )

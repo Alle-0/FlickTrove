@@ -98,6 +98,7 @@ fun GlassyBottomBar(
             )
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_tick_pieno),
+                animatedIconRes = R.drawable.ic_tick_pieno_anim,
                 label = "VISTI",
                 isSelected = selectedRoute == "visti",
                 enabled = !isDimmed,
@@ -106,6 +107,7 @@ fun GlassyBottomBar(
             )
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
+                animatedIconRes = R.drawable.ic_stat_anim,
                 label = "STATISTICHE",
                 isSelected = selectedRoute == "stats",
                 enabled = !isDimmed,
@@ -181,10 +183,11 @@ private fun RowScope.NavItem(
         )
 
         Box(contentAlignment = Alignment.Center) {
+            // Sfondo fisso: quando è selezionato diventa un "binario" semitrasparente
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = tintColor,
+                tint = if (isSelected && animatedIconRes != null) Color.White.copy(alpha = 0.25f) else tintColor,
                 modifier = Modifier
                     .size(22.dp)
                     .graphicsLayer {
@@ -203,7 +206,7 @@ private fun RowScope.NavItem(
                 Icon(
                     painter = painter,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.9f),
+                    tint = tintColor,
                     modifier = Modifier
                         .size(22.dp)
                         .graphicsLayer {

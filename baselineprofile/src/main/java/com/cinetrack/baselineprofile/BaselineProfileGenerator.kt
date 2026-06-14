@@ -39,10 +39,10 @@ class BaselineProfileGenerator {
                 }
                 
                 // Wait a bit for the Home to load
-                device.wait(androidx.test.uiautomator.Until.hasObject(By.desc("Search")), 10000)
+                device.wait(androidx.test.uiautomator.Until.hasObject(By.desc("Cerca")), 10000)
 
                 // We click the Search button to precompile the SearchScreen and related components
-                val searchButton = device.findObject(By.desc("Search"))
+                val searchButton = device.findObject(By.desc("Cerca"))
                 if (searchButton != null) {
                     searchButton.click()
                     device.waitForIdle()

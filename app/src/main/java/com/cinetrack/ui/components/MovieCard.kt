@@ -695,12 +695,13 @@ fun MovieCard(
                             bellHasInitialized = true
                         }
                         
-                        val isTickOrPlus = isWatched || (isReleased && !isOcchio)
+                        val isTick = isWatched
+                        val isPlus = !isWatched && isReleased && !isOcchio
                         val iconSizeModifier = Modifier.size(
                             if (isLarge) {
-                                if (isTickOrPlus) 13.dp else if (isBellOutlined) 20.dp else 21.dp
+                                if (isTick) 13.dp else if (isPlus) 18.dp else if (isBellOutlined) 20.dp else 21.dp
                             } else {
-                                if (isTickOrPlus) 10.dp else if (isBellOutlined) 15.5.dp else 17.dp
+                                if (isTick) 10.dp else if (isPlus) 14.5.dp else if (isBellOutlined) 15.5.dp else 17.dp
                             }
                         )
                         
@@ -709,7 +710,7 @@ fun MovieCard(
                                 isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
                                 !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
                                 isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
-                                else -> ImageVector.vectorResource(id = R.drawable.ic_plus_card)
+                                else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
                             },
                             contentDescription = "Action",
                             tint = actionTint,

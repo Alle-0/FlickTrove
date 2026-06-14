@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <!-- The drawing dot (perfectly aligned with the hole) -->
+            <path
+                android:name="dot_stroke"
+                android:pathData="M 6.00,13.60 L 6.57,14.03"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2.1"
+                android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+
+            <!-- The drawing slash (perfectly aligned with the hole) -->
+            <path
+                android:name="slash_stroke"
+                android:pathData="M 9.62,16.37 c 0.70,0.54 1.70,0.40 2.24,-0.30 L 18.03,8.00"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2.1"
+                android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+
+            <!-- Final Icon (Filled Tick) -->
+            <path
+                android:name="final_icon"
+                android:pathData="M 12,1.9999 c 5.5228,1.99999999999E-05 10,4.47721 10,10 c 0,5.5228 -4.4771,10 -10,10 c -5.52281,0 -9.99996,-4.4771 -9.99996,-10 c 4.99999999999E-05,-5.5228 4.47718,-10 9.99996,-10 z m 6.6397,5.20508 c -0.4388,-0.33522 -1.067,-0.25114 -1.4024,0.1875 l -6.1709,8.07322 c -0.1998,0.2613 -0.5736,0.311 -0.8349,0.1114 c -0.43847,-0.3358 -1.06658,-0.2529 -1.40236,0.1855 c -0.33573,0.4384 -0.25281,1.0665 0.18555,1.4023 c 1.13871,0.872 2.76941,0.655 3.64061,-0.4843 l 6.1719,-8.07327 c 0.3352,-0.43876 0.2512,-1.06699 -0.1875,-1.40235 z M 6.60844,12.8026 c -0.4384,-0.3357 -1.06652,-0.2527 -1.40235,0.1856 c -0.33561,0.4384 -0.25267,1.0665 0.18555,1.4023 l 0.57129,0.4366 c 0.4384,0.3355 1.06558,0.2526 1.40137,-0.1856 c 0.33574,-0.4384 0.25284,-1.0665 -0.18555,-1.4023 l -0.57031,-0.4366 z"
+                android:fillColor="#FFFFFF"
+                android:fillAlpha="0" />
+        </vector>
+    </aapt:attr>
+
+    <!-- Draw Dot -->
+    <target android:name="dot_stroke">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1" android:duration="250" android:interpolator="@android:anim/decelerate_interpolator" />
+                <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="1" android:valueTo="0" android:startOffset="600" android:duration="200" android:interpolator="@android:anim/linear_interpolator" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Draw Slash -->
+    <target android:name="slash_stroke">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1" android:startOffset="150" android:duration="350" android:interpolator="@android:anim/decelerate_interpolator" />
+                <objectAnimator android:propertyName="strokeAlpha" android:valueFrom="1" android:valueTo="0" android:startOffset="600" android:duration="200" android:interpolator="@android:anim/linear_interpolator" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Fade in Final Icon -->
+    <target android:name="final_icon">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1" android:startOffset="600" android:duration="200" android:interpolator="@android:anim/linear_interpolator" />
+        </aapt:attr>
+    </target>
+</animated-vector>

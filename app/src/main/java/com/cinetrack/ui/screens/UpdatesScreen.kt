@@ -436,10 +436,10 @@ fun UpdatesScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
                                 contentDescription = "Back",
                                 tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }

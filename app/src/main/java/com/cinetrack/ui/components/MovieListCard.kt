@@ -46,6 +46,9 @@ import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.cinetrack.data.generateBadges
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 @Composable
 fun MovieListCard(
@@ -374,7 +377,7 @@ fun MovieListCard(
                             isWatched -> com.cinetrack.ui.assets.CustomIcons.PremiumCheck
                             !isReleased -> if (isReminder || isFavorite) com.cinetrack.ui.assets.CustomIcons.PremiumBellFilled else Icons.Rounded.NotificationsNone
                             isOcchio -> androidx.compose.material.icons.Icons.Rounded.Visibility
-                            else -> com.cinetrack.ui.assets.CustomIcons.PremiumAdd
+                            else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
                         },
                         contentDescription = "Action",
                         tint = actionTint,
