@@ -18,6 +18,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
+import com.cinetrack.ui.components.shared.layoutToggleIcon
+import com.cinetrack.ui.components.shared.nextGridColumns
+import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
@@ -60,6 +69,7 @@ data class FolderDetailTab(
         val viewModel = getViewModel<FolderDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
         val hazeState = com.cinetrack.ui.LocalHazeState.current
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
 
         LaunchedEffect(folderId) {
             viewModel.initFolder(folderId)
@@ -72,7 +82,7 @@ data class FolderDetailTab(
         @OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
         FolderDetailScreenContent(
             viewModel = viewModel,
-            paddingValues = PaddingValues(0.dp),
+            paddingValues = com.cinetrack.ui.LocalAppPadding.current,
             hazeState = hazeState,
             showDeleteConfirm = showDeleteConfirm,
             onShowDeleteConfirmChange = { showDeleteConfirm = it },
@@ -83,6 +93,7 @@ data class FolderDetailTab(
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },
+            onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onBack = { 
                 // We'll handle this back navigation by resetting the tab in MainScreen or via BackHandler here
             }
@@ -105,11 +116,29 @@ fun FolderDetailScreenContent(
     folderEditMode: com.cinetrack.ui.components.shared.FolderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME,
     onFolderUpdated: (String, String) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {},
+    onToggleFilter: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val folderColors by viewModel.movieFolderColors.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    var filterButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    val activeFilterConfig = com.cinetrack.ui.LocalActiveFilterConfig.current
+
+    LaunchedEffect(uiState) {
+        val successState = uiState as? FolderDetailUiState.Success
+        if (successState != null) {
+            activeFilterConfig.value = com.cinetrack.ui.FilterModalConfig(
+                triggerBounds = null,
+                isVisti = false,
+                category = successState.activeTab,
+                sortConfig = successState.sortConfig,
+                onSortConfigChanged = { viewModel.updateSortConfig(it) }
+            )
+        } else {
+            activeFilterConfig.value = null
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -166,7 +195,7 @@ fun FolderDetailScreenContent(
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
-                                    top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
+                                    top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
                                     bottom = paddingValues.calculateBottomPadding() + 32.dp
                                 ),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -274,6 +303,144 @@ fun FolderDetailScreenContent(
                                     },
                                     hazeState = activeHazeState
                                 )
+                            }
+                        }
+                    }
+
+                    // Perfectly Centered Floating Sticky Header
+                    val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
+                    val stickyHeaderHeight = 60.dp
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = topPadding)
+                            .align(Alignment.TopCenter)
+                            .zIndex(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(stickyHeaderHeight)
+                                .padding(horizontal = 24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
+                            
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .padding(end = rightControlsInset),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .matchParentSize()
+                                            .hazeGlass(state = activeHazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                    )
+                                    
+                                    val options = listOf("TUTTI", "FILM", "SERIE TV")
+                                    val counts = listOf(state.movieCount + state.tvCount, state.movieCount, state.tvCount)
+                                    val selectedIndex = when(state.activeTab) { "movie" -> 1; "tv" -> 2; else -> 0 }
+                                    
+                                    com.cinetrack.ui.components.CategoryTabSelector(
+                                        options = options,
+                                        counts = counts,
+                                        selectedIndex = selectedIndex,
+                                        onOptionClick = { index ->
+                                            viewModel.onTabChanged(when(index) { 1 -> "movie"; 2 -> "tv"; else -> "all" })
+                                        }
+                                    )
+                                }
+                            }
+                            
+                            val hasActiveFilters = false // Pending folder filtering implementation
+                            Row(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Layout Toggle Button
+                                if (preferences.showLayoutToggle) {
+                                    Box(modifier = Modifier.size(36.dp)) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .hazeGlass(
+                                                    state = activeHazeState, 
+                                                    shape = CircleShape, 
+                                                    blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                                    useOffscreenStrategy = false
+                                                )
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .bounceClick(scaleDown = 0.92f) {
+                                                    val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
+                                                    viewModel.updateGridColumns(nextGridColumns(columns))
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
+                                            Icon(
+                                                imageVector = layoutToggleIcon(columns),
+                                                contentDescription = "Cambia Colonne",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Circular Filter Button
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .onGloballyPositioned { coords: LayoutCoordinates ->
+                                            filterButtonBounds = coords.boundsInRoot()
+                                        }
+                                ) {
+                                    // Background Layer
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .hazeGlass(
+                                                state = activeHazeState, 
+                                                shape = androidx.compose.foundation.shape.RoundedCornerShape(50), 
+                                                blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                                useOffscreenStrategy = false,
+                                                borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
+                                                borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                            )
+                                    )
+                                    // Icon Layer
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .bounceClick(scaleDown = 0.92f) {
+                                                onToggleFilter(true, filterButtonBounds)
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                                            contentDescription = "Filtri",
+                                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                    
+                                    if (hasActiveFilters) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = 2.dp, y = (-2).dp)
+                                                .size(10.dp)
+                                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                                .border(2.dp, Color(0xFF1E1E1E), CircleShape)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

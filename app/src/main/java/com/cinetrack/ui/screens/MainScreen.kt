@@ -42,6 +42,7 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.cinetrack.R
+import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalDeepLinkIntent
 import com.cinetrack.ui.LocalFilterRequest
@@ -203,10 +204,12 @@ class MainScreen : Screen {
                 }
             ) {
                 Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
+                    val activeFilterConfig = remember { mutableStateOf<com.cinetrack.ui.FilterModalConfig?>(null) }
                     Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
                     CompositionLocalProvider(
                         LocalAppPadding provides PaddingValues(bottom = 80.dp),
                         LocalHazeState provides contentHazeState,
+                        com.cinetrack.ui.LocalActiveFilterConfig provides activeFilterConfig,
                         LocalFilterRequest provides { bounds ->
                             filterButtonBounds = bounds
                             isFilterModalVisible = true
@@ -235,6 +238,7 @@ class MainScreen : Screen {
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
+                            indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                             onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab) { { offset -> updatesOverlayOffset = offset } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             // hasActiveFilters = TODO
@@ -452,6 +456,25 @@ class MainScreen : Screen {
                                     onYearSelected = { statsViewModel.setTimeRange(TimeRange.Year(it)) },
                                     onAllTimeSelected = { statsViewModel.setTimeRange(TimeRange.AllTime) }
                                 )
+                            }
+                        } else if (currentTab is FolderDetailTab) {
+                            val filterConfig = activeFilterConfig.value
+                            if (filterConfig != null) {
+                                Box(modifier = Modifier.zIndex(70000f)) {
+                                    HomeFilterModal(
+                                        isVisible = isFilterModalVisible,
+                                        isVisti = filterConfig.isVisti,
+                                        sortConfig = filterConfig.sortConfig,
+                                        hazeState = globalHazeState,
+                                        triggerBounds = filterButtonBounds,
+                                        category = filterConfig.category,
+                                        onSortConfigChanged = { 
+                                            filterConfig.onSortConfigChanged(it)
+                                            isFilterModalVisible = false
+                                        },
+                                        onDismissRequest = { isFilterModalVisible = false }
+                                    )
+                                }
                             }
                         }
                     }

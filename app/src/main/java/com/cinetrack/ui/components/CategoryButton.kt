@@ -65,28 +65,28 @@ fun CategoryTabSelector(
     counts: List<Int>? = null,
     selectedIndex: Int,
     onOptionClick: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    tabWidth: androidx.compose.ui.unit.Dp = 120.dp
+    modifier: Modifier = Modifier
 ) {
     val tabHeight = 36.dp
-    val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
-    
-    val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
 
-    androidx.compose.runtime.LaunchedEffect(selectedIndex) {
-        if (!offsetAnimatable.isRunning) {
+    BoxWithConstraints(
+        modifier = modifier
+            .height(tabHeight)
+            .wrapContentWidth()
+    ) {
+        val calculatedWidth = maxWidth / options.size
+        val tabWidth = androidx.compose.ui.unit.min(120.dp, calculatedWidth)
+        val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
+        
+        val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
+
+        androidx.compose.runtime.LaunchedEffect(selectedIndex, tabWidthPx) {
             offsetAnimatable.animateTo(
                 targetValue = selectedIndex * tabWidthPx,
                 animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
             )
         }
-    }
 
-    Box(
-        modifier = modifier
-            .height(tabHeight)
-            .width(tabWidth * options.size)
-    ) {
         // Sliding Highlighter
         Surface(
             modifier = Modifier
@@ -99,7 +99,7 @@ fun CategoryTabSelector(
         ) {}
 
         // Content
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(modifier = Modifier.width(tabWidth * options.size).fillMaxHeight()) {
             options.forEachIndexed { index, title ->
                 val isSelected = index == selectedIndex
                 val textColor by animateColorAsState(

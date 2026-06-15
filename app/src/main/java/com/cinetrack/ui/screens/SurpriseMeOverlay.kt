@@ -1,5 +1,6 @@
 package com.cinetrack.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -52,6 +53,14 @@ fun SurpriseMeOverlay(
     var selectedCompany by remember { mutableStateOf<SurpriseCompany?>(null) }
 
     val scope = rememberCoroutineScope()
+
+    BackHandler {
+        if (step in 1..3) {
+            step--
+        } else {
+            onClose()
+        }
+    }
 
     Box(
         modifier = Modifier

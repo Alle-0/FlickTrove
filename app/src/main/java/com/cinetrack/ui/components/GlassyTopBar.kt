@@ -181,7 +181,7 @@ fun GlassyTopBar(
                         imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
                         contentDescription = "Navigation",
                         tint = Color.White,
-                        modifier = Modifier.size(if (onBackPress != null) 16.dp else 20.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 

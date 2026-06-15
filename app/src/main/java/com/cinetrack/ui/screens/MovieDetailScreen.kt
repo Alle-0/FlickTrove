@@ -73,6 +73,9 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.HazeStyle
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.graphics.drawable.BitmapDrawable
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -152,6 +155,7 @@ fun MovieDetailScreenContent(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
     val folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList()
     val context = androidx.compose.ui.platform.LocalContext.current
     val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
@@ -264,6 +268,13 @@ fun MovieDetailScreenContent(
         targetValue = if (isFolderButtonPressed) 0.88f else 1f,
         animationSpec = spring(stiffness = if (isFolderButtonPressed) 10000f else Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
         label = "FolderIconScale"
+    )
+
+    var isShareButtonPressed by remember { mutableStateOf(false) }
+    val shareIconScale by animateFloatAsState(
+        targetValue = if (isShareButtonPressed) 0.88f else 1f,
+        animationSpec = spring(stiffness = if (isShareButtonPressed) 10000f else Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
+        label = "ShareIconScale"
     )
 
     var cachedSuccess by remember { mutableStateOf<DetailUiState.Success?>(null) }
@@ -851,12 +862,100 @@ fun MovieDetailScreenContent(
                         }
 
 
-                        // Folder Button
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(44.dp)
-                                .alpha(if (successState != null) 1f else 0f)
+                        // Right side actions (Share + Folder)
+                        Row(
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            // Share Button
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .alpha(if (successState != null) 1f else 0f)
+                                    .then(
+                                        if (successState != null) {
+                                            Modifier.pointerInput(Unit) {
+                                                detectTapGestures(
+                                                    onPress = {
+                                                        isShareButtonPressed = true
+                                                        try { awaitRelease() } finally { isShareButtonPressed = false }
+                                                    },
+                                                    onTap = { 
+                                                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                                            val imageUrl = buildTmdbImageUrl(successState.movieEntry.posterPath ?: successState.movieEntry.backdropPath, ImageType.POSTER, currentImageQuality)
+                                                            val fileUri = if (imageUrl != null) {
+                                                                val request = coil.request.ImageRequest.Builder(context)
+                                                                    .data(imageUrl)
+                                                                    .build()
+                                                                val result = context.imageLoader.execute(request)
+                                                                if (result is coil.request.SuccessResult) {
+                                                                    val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                                                    val imagesDir = java.io.File(context.cacheDir, "images")
+                                                                    imagesDir.mkdirs()
+                                                                    val file = java.io.File(imagesDir, "share_poster.jpg")
+                                                                    val fos = java.io.FileOutputStream(file)
+                                                                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                                                                    fos.close()
+                                                                    androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                                                                } else null
+                                                            } else null
+
+                                                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                                                val sendIntent: android.content.Intent = android.content.Intent().apply {
+                                                                    action = android.content.Intent.ACTION_SEND
+                                                                    val link = "https://flicktrove.com/detail/${successState.movieEntry.mediaType}/${successState.movieEntry.id}"
+                                                                    putExtra(android.content.Intent.EXTRA_TEXT, "Dai un'occhiata a ${successState.movieEntry.displayName} su FlickTrove!\n\n$link")
+                                                                    if (fileUri != null) {
+                                                                        putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                                                        type = "image/jpeg"
+                                                                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                                    } else {
+                                                                        type = "text/plain"
+                                                                    }
+                                                                }
+                                                                val shareIntent = android.content.Intent.createChooser(sendIntent, null)
+                                                                context.startActivity(shareIntent)
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        } else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (currentEffectiveProgress <= 0.01f && successState != null) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .hazeGlass(
+                                                state = localHazeState,
+                                                shape = CircleShape,
+                                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                useOffscreenStrategy = true
+                                            )
+                                    )
+                                }
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_share),
+                                    contentDescription = "Share",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .offset(x = (-1.5).dp)
+                                        .size(15.dp)
+                                        .graphicsLayer {
+                                            scaleX = shareIconScale
+                                            scaleY = shareIconScale
+                                        }
+                                )
+                            }
+
+                            // Folder Button
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .alpha(if (successState != null) 1f else 0f)
                                 .then(
                                     if (successState != null) {
                                         Modifier.pointerInput(Unit) {
@@ -902,6 +1001,7 @@ fun MovieDetailScreenContent(
                                     },
                                 tint = Color.White
                             )
+                        }
                         }
                     }
 

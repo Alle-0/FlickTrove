@@ -401,7 +401,12 @@ fun HomeScreenContent(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                    .hazeGlass(
+                                        state = activeHazeState, 
+                                        shape = CircleShape, 
+                                        blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                        useOffscreenStrategy = false
+                                    )
                             )
 
                             // Interactive Content Layer
@@ -410,11 +415,7 @@ fun HomeScreenContent(
                                     .fillMaxSize()
                                     .bounceClick(scaleDown = 0.92f) { 
                                         viewModel.updateGridColumns(nextGridColumns(columns))
-                                    }
-                                    .border(
-                                        BorderStroke(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)),
-                                        CircleShape
-                                    ),
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -439,7 +440,14 @@ fun HomeScreenContent(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                .hazeGlass(
+                                    state = activeHazeState, 
+                                    shape = CircleShape, 
+                                    blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                    useOffscreenStrategy = false,
+                                    borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
+                                    borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                )
                         )
 
                         // Interactive Content Layer
@@ -448,14 +456,7 @@ fun HomeScreenContent(
                                 .fillMaxSize()
                                 .bounceClick(scaleDown = 0.92f) { 
                                     onToggleFilter(true, filterButtonBounds) 
-                                }
-                                .border(
-                                    BorderStroke(
-                                        if (hasActiveFilters) 1.5.dp else 1.dp, 
-                                        if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                                    ),
-                                    CircleShape
-                                ),
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
