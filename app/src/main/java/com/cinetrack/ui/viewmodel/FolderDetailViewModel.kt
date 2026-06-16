@@ -16,7 +16,7 @@ import javax.inject.Inject
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.collections.immutable.ImmutableList
-import androidx.compose.foundation.lazy.grid.LazyGridState
+import com.cinetrack.ui.utils.GlobalErrorHandler
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -43,12 +43,12 @@ class FolderDetailViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val preferenceRepository: PreferenceRepository,
+    private val globalErrorHandler: GlobalErrorHandler,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
     
-    val lazyGridState = LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
 
     fun initFolder(id: String) {
@@ -97,6 +97,7 @@ class FolderDetailViewModel @Inject constructor(
         _folderId.filterNotNull().flatMapLatest { id ->
             repository.getFolderFlow(id).flatMapLatest { folder ->
                 if (folder == null) {
+                    globalErrorHandler.emitError("Cartella non trovata") { initFolder(id) }
                     kotlinx.coroutines.flow.flowOf(FolderDetailUiState.Error("Cartella non trovata") as FolderDetailUiState)
                 } else {
                     combine(

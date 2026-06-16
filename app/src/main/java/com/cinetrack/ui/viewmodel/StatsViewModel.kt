@@ -82,8 +82,16 @@ class StatsViewModel @Inject constructor(
         // This ensures the year picker shows years when the user actually watched things.
         val years = watchedMovies.mapNotNull { movie ->
             val date = movie.watchedAt
-            if (!date.isNullOrBlank() && date.length >= 4) {
-                try { date.substring(0, 4).toInt() } catch (e: Exception) { null }
+            if (!date.isNullOrBlank()) {
+                try {
+                    java.time.Instant.parse(date).atZone(java.time.ZoneId.systemDefault()).year
+                } catch (e: Exception) {
+                    try {
+                        java.time.LocalDate.parse(date).year
+                    } catch (e2: Exception) {
+                        date.take(4).toIntOrNull()
+                    }
+                }
             } else null
         }.distinct().sortedDescending()
 
@@ -173,8 +181,16 @@ class StatsViewModel @Inject constructor(
         // Decades - fill gaps to make it a proper timeline
         val years = watched.mapNotNull { m ->
             val date = m.releaseDate ?: m.firstAirDate
-            if (!date.isNullOrBlank() && date.length >= 4) {
-                try { date.substring(0, 4).toInt() } catch (e: Exception) { null }
+            if (!date.isNullOrBlank()) {
+                try {
+                    java.time.LocalDate.parse(date).year
+                } catch (e: Exception) {
+                    try {
+                        java.time.Instant.parse(date).atZone(java.time.ZoneId.systemDefault()).year
+                    } catch (e2: Exception) {
+                        date.take(4).toIntOrNull()
+                    }
+                }
             } else null
         }.filter { it > 0 }
 

@@ -347,8 +347,6 @@ class MainScreen : Screen {
                                         .width(200.dp)
                                         .clip(RoundedCornerShape(24.dp))
                                         .hazeGlass(state = contentHazeState, shape = RoundedCornerShape(24.dp))
-                                        .background(Color(0xFF1E1E1E).copy(alpha = 0.5f))
-                                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
                                 ) {
                                     Row(
                                         modifier = Modifier

@@ -95,6 +95,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showSplitReleasesHome }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showAppEntryAnimation: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showAppEntryAnimation }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val appTheme: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.appTheme }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
@@ -168,6 +172,15 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivata" else "disattivata"
             actionFeedbackManager.emit("Divisione uscite $status")
+        }
+    }
+
+    fun toggleAppEntryAnimation(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowAppEntryAnimation(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val status = if (enabled) "attivata" else "disattivata"
+            actionFeedbackManager.emit("Animazione logo $status")
         }
     }
 

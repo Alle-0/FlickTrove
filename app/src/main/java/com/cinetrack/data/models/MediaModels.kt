@@ -90,6 +90,7 @@ data class UserPreferences(
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
     val showSplitReleasesHome: Boolean = true,
+    val showAppEntryAnimation: Boolean = true,
     val lastSyncTimestamp: Long = 0L
 )
 

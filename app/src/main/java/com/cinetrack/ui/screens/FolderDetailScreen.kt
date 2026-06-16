@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -101,6 +102,8 @@ data class FolderDetailTab(
     }
 }
 
+class BoundsHolder { var rect: androidx.compose.ui.geometry.Rect? = null }
+
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FolderDetailScreenContent(
@@ -122,17 +125,22 @@ fun FolderDetailScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val folderColors by viewModel.movieFolderColors.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
-    var filterButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    val filterButtonBounds = remember { BoundsHolder() }
     val activeFilterConfig = com.cinetrack.ui.LocalActiveFilterConfig.current
+    
+    val lazyGridState = rememberLazyGridState()
 
-    LaunchedEffect(uiState) {
-        val successState = uiState as? FolderDetailUiState.Success
-        if (successState != null) {
+    val successStateForScroll = uiState as? FolderDetailUiState.Success
+    val currentActiveTab = successStateForScroll?.activeTab ?: "all"
+    val currentSortConfig = successStateForScroll?.sortConfig ?: com.cinetrack.data.models.SortConfig()
+
+    LaunchedEffect(currentActiveTab, currentSortConfig, successStateForScroll != null) {
+        if (successStateForScroll != null) {
             activeFilterConfig.value = com.cinetrack.ui.FilterModalConfig(
                 triggerBounds = null,
                 isVisti = false,
-                category = successState.activeTab,
-                sortConfig = successState.sortConfig,
+                category = currentActiveTab,
+                sortConfig = currentSortConfig,
                 onSortConfigChanged = { viewModel.updateSortConfig(it) }
             )
         } else {
@@ -140,10 +148,13 @@ fun FolderDetailScreenContent(
         }
     }
 
-    val successStateForScroll = uiState as? FolderDetailUiState.Success
+    DisposableEffect(Unit) {
+        onDispose { activeFilterConfig.value = null }
+    }
+
     LaunchedEffect(successStateForScroll?.sortConfig, successStateForScroll?.activeTab) {
         if (successStateForScroll != null && successStateForScroll.movies.isNotEmpty()) {
-            viewModel.lazyGridState.scrollToItem(0)
+            lazyGridState.scrollToItem(0)
         }
     }
 
@@ -159,15 +170,25 @@ fun FolderDetailScreenContent(
                 }
                 is FolderDetailUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = state.message, color = Color.White.copy(alpha = 0.5f))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Rounded.ErrorOutline,
+                                contentDescription = "Errore",
+                                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = state.message, color = Color.White.copy(alpha = 0.7f))
+                        }
                     }
                 }
                 is FolderDetailUiState.Success -> {
-                    val activeHazeState = hazeState ?: remember { HazeState() }
-                    val lazyGridState = viewModel.lazyGridState
+                    val externalHazeState = hazeState ?: remember { HazeState() }
+                    val internalHazeState = remember { HazeState() }
                     
-                    MovieActionsWrapper(
-                        hazeState = activeHazeState,
+                    Box(modifier = Modifier.fillMaxSize().haze(state = externalHazeState, style = HazeStyles.PremiumDark)) {
+                        MovieActionsWrapper(
+                        hazeState = externalHazeState,
                         folders = state.allFolders,
                         isItemInFolder = { movie, folderId ->
                             state.allFolders.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") ?: false
@@ -178,14 +199,10 @@ fun FolderDetailScreenContent(
                         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
                     ) { actionsState ->
                         BoxWithConstraints(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .haze(
-                                    state = activeHazeState,
-                                    style = HazeStyles.PremiumDark
-                                )
+                            modifier = Modifier.fillMaxSize().haze(state = internalHazeState, style = HazeStyles.PremiumDark)
                         ) {
-                            CinematicBackground(modifier = Modifier.fillMaxSize())
+                            CompositionLocalProvider(com.cinetrack.ui.LocalHazeState provides internalHazeState) {
+                                CinematicBackground(modifier = Modifier.fillMaxSize())
                             val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
                             val gap = 8.dp
                             val padding = 16.dp
@@ -195,6 +212,14 @@ fun FolderDetailScreenContent(
                                 maxWidth - (padding * 2)
                             }
                             
+                            val currentOnMovieClick by rememberUpdatedState(onMovieClick)
+                            val currentOnLongPress by rememberUpdatedState { m: Movie, p: androidx.compose.ui.geometry.Offset, c: androidx.compose.ui.geometry.Offset -> actionsState.onLongPress(m, p, c) }
+                            val currentOnMessage by rememberUpdatedState(viewModel::emitMessage)
+
+                            val handlePress: (Movie) -> Unit = remember { { m -> currentOnMovieClick(m) } }
+                            val handleLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember { { m, p, c -> currentOnLongPress(m, p, c) } }
+                            val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(msg) } }
+
                             LazyVerticalGrid(
                                 state = lazyGridState,
                                 columns = GridCells.Fixed(columns),
@@ -234,9 +259,11 @@ fun FolderDetailScreenContent(
                                     }
                                 } else {
                                     itemsIndexed(state.movies, key = { index, movie -> movie.id }) { index, movie ->
-                                        val currentFolderColors = folderColors[movie.compositeId]?.map { 
-                                            it.toComposeColor()
-                                        } ?: emptyList()
+                                        val currentFolderColors = remember(folderColors[movie.compositeId]) {
+                                            folderColors[movie.compositeId]?.map { 
+                                                it.toComposeColor()
+                                            } ?: emptyList()
+                                        }
                                         
                                         if (columns == 1) {
                                             com.cinetrack.ui.components.MovieListCard(
@@ -250,14 +277,12 @@ fun FolderDetailScreenContent(
                                                 folderColors = currentFolderColors,
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
                                                 showBadges = preferences.showBadges,
-                                                hazeState = activeHazeState,
+                                                hazeState = internalHazeState,
                                                 hasAnimatedSet = viewModel.animatedMovieIds,
                                                 staggerIndex = index,
-                                                onPress = { onMovieClick(movie) },
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) }
+                                                onPress = handlePress,
+                                                onLongPress = handleLongPress,
+                                                onMessage = handleMessage
                                             )
                                         } else {
                                             MovieCard(
@@ -267,13 +292,11 @@ fun FolderDetailScreenContent(
                                                 isWatched = movie.watched,
                                                 isReminder = movie.reminder,
                                                 personalRating = movie.personalRating,
-                                                onPress = { onMovieClick(movie) },
+                                                onPress = handlePress,
                                                 animatedVisibilityScope = animatedVisibilityScope,
                                                 staggerIndex = index,
-                                                onLongPress = { m, pressOffset, cardPos ->
-                                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                                },
-                                                onMessage = { viewModel.emitMessage(it) },
+                                                onLongPress = handleLongPress,
+                                                onMessage = handleMessage,
                                                 progress = movie.progress?.toFloat() ?: 0f,
                                                 folderColors = currentFolderColors,
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
@@ -281,6 +304,7 @@ fun FolderDetailScreenContent(
                                             )
                                         }
                                     }
+                                }
                                 }
                             }
 
@@ -293,7 +317,7 @@ fun FolderDetailScreenContent(
                                     },
                                     onDismiss = { onShowDeleteConfirmChange(false) },
                                     folderName = state.folder.name,
-                                    hazeState = activeHazeState
+                                    hazeState = externalHazeState
                                 )
                             }
                             
@@ -308,7 +332,7 @@ fun FolderDetailScreenContent(
                                         viewModel.updateFolderDetails(newName, newColor)
                                         onFolderUpdated(newName, newColor)
                                     },
-                                    hazeState = activeHazeState
+                                    hazeState = externalHazeState
                                 )
                             }
                         }
@@ -343,7 +367,7 @@ fun FolderDetailScreenContent(
                                     Spacer(
                                         modifier = Modifier
                                             .matchParentSize()
-                                            .hazeGlass(state = activeHazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                            .hazeGlass(state = internalHazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                                     )
                                     
                                     val options = listOf("TUTTI", "FILM", "SERIE TV")
@@ -373,7 +397,7 @@ fun FolderDetailScreenContent(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .hazeGlass(
-                                                    state = activeHazeState, 
+                                                    state = internalHazeState, 
                                                     shape = CircleShape, 
                                                     blurRadius = HazeStyles.SmallGlassBlurRadius, 
                                                     useOffscreenStrategy = false
@@ -401,18 +425,17 @@ fun FolderDetailScreenContent(
 
                                 // Circular Filter Button
                                 Box(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .onGloballyPositioned { coords: LayoutCoordinates ->
-                                            filterButtonBounds = coords.boundsInRoot()
-                                        }
-                                ) {
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .onGloballyPositioned { coords: LayoutCoordinates ->
+                                                filterButtonBounds.rect = coords.boundsInRoot()
+                                            }                              ) {
                                     // Background Layer
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .hazeGlass(
-                                                state = activeHazeState, 
+                                                state = internalHazeState, 
                                                 shape = androidx.compose.foundation.shape.RoundedCornerShape(50), 
                                                 blurRadius = HazeStyles.SmallGlassBlurRadius, 
                                                 useOffscreenStrategy = false,
@@ -425,7 +448,7 @@ fun FolderDetailScreenContent(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .bounceClick(scaleDown = 0.92f) {
-                                                onToggleFilter(true, filterButtonBounds)
+                                                onToggleFilter(true, filterButtonBounds.rect)
                                             },
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -450,6 +473,7 @@ fun FolderDetailScreenContent(
                                 }
                             }
                         }
+                    }
                     }
                 }
             }

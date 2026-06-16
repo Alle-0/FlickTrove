@@ -43,6 +43,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
 
     val undoViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.UndoViewModel>()
+    val errorViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.GlobalErrorViewModel>()
 
     val context = LocalContext.current
 
@@ -237,6 +238,12 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                         actionFeedbackManager = undoViewModel.actionFeedbackManager,
                         hazeState = globalHazeState,
                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(200000f)
+                    )
+                    
+                    com.cinetrack.ui.components.GlobalErrorToast(
+                        globalErrorHandler = errorViewModel.globalErrorHandler,
+                        hazeState = globalHazeState,
+                        modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)
                     )
                 }
             }

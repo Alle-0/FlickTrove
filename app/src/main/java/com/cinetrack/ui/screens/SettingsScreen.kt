@@ -281,6 +281,7 @@ fun SettingsScreenContent(
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
+    val showAppEntryAnimation by settingsViewModel.showAppEntryAnimation.collectAsStateWithLifecycle()
 
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
@@ -432,72 +433,12 @@ fun SettingsScreenContent(
                     ),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                  ) {
-                    // Section: Interfaccia
+                    // Section: Interfaccia e Layout
                     item {
                         SettingsSection(
-                            title = "Interfaccia",
+                            title = "Interfaccia e Layout",
                             icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
                         ) {
-                            SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_palette),
-                                title = "Colore accento",
-                                description = "Personalizza l'aspetto dell'app",
-                                trailing = {
-                                    // Stunning Premium Circular Accent Selector with outer glow ring
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.size(34.dp)
-                                    ) {
-                                        // Dynamic outer glow
-                                        Box(
-                                            modifier = Modifier
-                                                .size(34.dp)
-                                                .clip(CircleShape)
-                                                .background(currentAccentColor.copy(alpha = 0.15f))
-                                                .border(
-                                                    width = 1.dp,
-                                                    color = currentAccentColor.copy(alpha = 0.3f),
-                                                    shape = CircleShape
-                                                )
-                                        )
-                                        // Main color circle
-                                        Box(
-                                            modifier = Modifier
-                                                .size(22.dp)
-                                                .clip(CircleShape)
-                                                .background(currentAccentColor)
-                                                .border(
-                                                    width = 1.5.dp,
-                                                    color = Color.White.copy(alpha = 0.8f),
-                                                    shape = CircleShape
-                                                )
-                                        )
-                                    }
-                                },
-                                onClick = { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                    showColorDialog = true 
-                                }
-                            )
-                            SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_magia),
-                                title = "Icona App Dinamica",
-                                description = "Cambia l'icona dell'app nella schermata home per adattarla al colore accento",
-                                trailing = {
-                                    FlickTroveSwitch(
-                                        checked = dynamicAppIconEnabled,
-                                        onCheckedChange = { 
-                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                            settingsViewModel.toggleDynamicAppIcon(it) 
-                                        },
-                                        accentColor = currentAccentColor
-                                    )
-                                },
-                                onClick = {
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    settingsViewModel.toggleDynamicAppIcon(!dynamicAppIconEnabled)
-                                }
-                            )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
                                 title = "Segnalibri cartelle",
@@ -586,6 +527,94 @@ fun SettingsScreenContent(
                                 onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
+                                }
+                            )
+                        }
+                    }
+
+                    // Section: Estetica
+                    item {
+                        SettingsSection(
+                            title = "Estetica",
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_palette)
+                        ) {
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_palette),
+                                title = "Colore accento",
+                                description = "Personalizza l'aspetto dell'app",
+                                trailing = {
+                                    // Stunning Premium Circular Accent Selector with outer glow ring
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        // Dynamic outer glow
+                                        Box(
+                                            modifier = Modifier
+                                                .size(34.dp)
+                                                .clip(CircleShape)
+                                                .background(currentAccentColor.copy(alpha = 0.15f))
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = currentAccentColor.copy(alpha = 0.3f),
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                        // Main color circle
+                                        Box(
+                                            modifier = Modifier
+                                                .size(22.dp)
+                                                .clip(CircleShape)
+                                                .background(currentAccentColor)
+                                                .border(
+                                                    width = 1.5.dp,
+                                                    color = Color.White.copy(alpha = 0.8f),
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+                                },
+                                onClick = { 
+                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                    showColorDialog = true 
+                                }
+                            )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_magia),
+                                title = "Icona App Dinamica",
+                                description = "Cambia l'icona dell'app nella schermata home per adattarla al colore accento",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = dynamicAppIconEnabled,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleDynamicAppIcon(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleDynamicAppIcon(!dynamicAppIconEnabled)
+                                }
+                            )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle), // reuse sparkle or use play
+                                title = "Animazione Iniziale",
+                                description = "Mostra l'animazione del logo all'apertura dell'app",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = showAppEntryAnimation,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleAppEntryAnimation(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleAppEntryAnimation(!showAppEntryAnimation)
                                 }
                             )
                         }
