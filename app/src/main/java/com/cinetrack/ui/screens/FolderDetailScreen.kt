@@ -140,6 +140,13 @@ fun FolderDetailScreenContent(
         }
     }
 
+    val successStateForScroll = uiState as? FolderDetailUiState.Success
+    LaunchedEffect(successStateForScroll?.sortConfig, successStateForScroll?.activeTab) {
+        if (successStateForScroll != null && successStateForScroll.movies.isNotEmpty()) {
+            viewModel.lazyGridState.scrollToItem(0)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize()

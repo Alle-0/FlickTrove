@@ -145,6 +145,7 @@ class MovieDetailViewModel @Inject constructor(
                         val effectiveMovie = movie?.copy(
                             genres = freshMovie.genres,
                             runtime = freshMovie.runtime,
+                            episodeRunTime = freshMovie.episodeRunTime,
                             tagline = freshMovie.tagline,
                             overview = freshMovie.overview,
                             title = freshMovie.title,
@@ -248,6 +249,7 @@ class MovieDetailViewModel @Inject constructor(
                     val updatedMovie = localMovie.copy(
                         genres = freshMovie.genres ?: localMovie.genres,
                         runtime = freshMovie.runtime ?: localMovie.runtime,
+                        episodeRunTime = freshMovie.episodeRunTime ?: localMovie.episodeRunTime,
                         tagline = freshMovie.tagline ?: localMovie.tagline,
                         overview = freshMovie.overview ?: localMovie.overview,
                         title = freshMovie.title ?: localMovie.title,
@@ -351,6 +353,7 @@ class MovieDetailViewModel @Inject constructor(
             releaseDate = response.releaseDate,
             firstAirDate = response.firstAirDate,
             runtime = effectiveRuntime,
+            episodeRunTime = response.episodeRunTime,
             revenue = response.revenue,
             budget = response.budget,
             tagline = response.tagline,

@@ -232,11 +232,11 @@ object StatsTab : Tab {
                 isYearPickerVisible = visible
                 yearPickerButtonBounds = bounds
             },
-            onPersonClick = { personId ->
-                // navigator.push(PersonDetailScreen(personId))
+            onPersonClick = { personId, profilePath ->
+                navigator.push(PersonDetailScreen(personId, profilePath))
             },
             onMovieClick = { movie ->
-                // navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             }
         )
 
@@ -265,7 +265,7 @@ fun StatsScreenContent(
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
     onToggleYearPicker: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
-    onPersonClick: (Long) -> Unit = {},
+    onPersonClick: (Long, String?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -463,7 +463,10 @@ fun StatsScreenContent(
                                     longestDurationMinutes = stats.longestMovieMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
                                     sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
-                                    longestPosterPath = stats.longestMovie?.posterPath
+                                    longestPosterPath = stats.longestMovie?.posterPath,
+                                    onLongestItemClick = {
+                                        stats.longestMovie?.let { onMovieClick(it) }
+                                    }
                                 )
                             }
                             Spacer(Modifier.height(36.dp))
@@ -501,7 +504,10 @@ fun StatsScreenContent(
                                         val eps = it.watchedEpisodes?.values?.sumOf { s -> s.size } ?: 0
                                         if (eps > 0) "• $eps episodi" else null
                                     },
-                                    longestPosterPath = stats.longestTV?.posterPath
+                                    longestPosterPath = stats.longestTV?.posterPath,
+                                    onLongestItemClick = {
+                                        stats.longestTV?.let { onMovieClick(it) }
+                                    }
                                 )
                             }
                             Spacer(Modifier.height(36.dp))
@@ -1039,7 +1045,8 @@ fun MediaTimeCard(
     accentColor: Color,
     sectionIcon: ImageVector,
     longestSuffix: String? = null,
-    longestPosterPath: String? = null
+    longestPosterPath: String? = null,
+    onLongestItemClick: (() -> Unit)? = null
 ) {
     val h = longestDurationMinutes / 60
     val m = longestDurationMinutes % 60
@@ -1077,7 +1084,11 @@ fun MediaTimeCard(
                 Spacer(Modifier.height(10.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .then(if (onLongestItemClick != null) Modifier.clickable { onLongestItemClick() } else Modifier)
+                        .padding(vertical = 4.dp)
                 ) {
                     if (longestPosterPath != null) {
                         Box(
@@ -1132,7 +1143,7 @@ fun PersonSection(
     people: List<PersonStat>,
     accentColor: Color,
     isExpanded: Boolean,
-    onPersonClick: (Long) -> Unit = {}
+    onPersonClick: (Long, String?) -> Unit = { _, _ -> }
 ) {
     if (isExpanded) {
         // Full grid when expanded
@@ -1165,7 +1176,7 @@ fun PersonSection(
 fun PersonAvatar(
     person: PersonStat,
     accentColor: Color,
-    onPersonClick: (Long) -> Unit = {}
+    onPersonClick: (Long, String?) -> Unit = { _, _ -> }
 ) {
     val avatarSize = 66.dp
     val badgeSize  = 22.dp
@@ -1173,7 +1184,7 @@ fun PersonAvatar(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(72.dp)
-            .bounceClick { onPersonClick(person.id) }
+            .bounceClick { onPersonClick(person.id, person.profilePath) }
     ) {
         Box(modifier = Modifier.size(avatarSize)) {
             // Outer teal ring

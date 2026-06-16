@@ -24,31 +24,14 @@ fun CinematicBackground(
     accentColor: Color? = null
 ) {
     val baseTint = accentColor ?: MaterialTheme.colorScheme.primary
-    val infiniteTransition = rememberInfiniteTransition(label = "background")
-    
-    // Animation for 3 moving spheres
-    val anim1 by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Reverse),
-        label = "sphere1"
-    )
-    val anim2 by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(18000, easing = LinearEasing), RepeatMode.Reverse),
-        label = "sphere2"
-    )
-    val anim3 by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(22000, easing = LinearEasing), RepeatMode.Reverse),
-        label = "sphere3"
-    )
+
 
     Canvas(modifier = modifier.fillMaxSize().background(backgroundColor)) {
         val w = size.width
         val h = size.height
 
         // Sphere 1: Top Left
-        val center1 = Offset(x = w * 0.15f + (anim1 * 60).dp.toPx(), y = h * 0.2f + (anim2 * 40).dp.toPx())
+        val center1 = Offset(x = w * 0.15f, y = h * 0.2f)
         val radius1 = w * 0.55f
         drawCircle(
             brush = Brush.radialGradient(
@@ -63,7 +46,7 @@ fun CinematicBackground(
         )
 
         // Sphere 2: Bottom Left
-        val center2 = Offset(x = w * 0.2f - (anim3 * 70).dp.toPx(), y = h * 0.75f + (anim1 * 50).dp.toPx())
+        val center2 = Offset(x = w * 0.2f, y = h * 0.75f)
         val radius2 = w * 0.5f
         drawCircle(
             brush = Brush.radialGradient(
@@ -78,7 +61,7 @@ fun CinematicBackground(
         )
 
         // Sphere 3: Center Right
-        val center3 = Offset(x = w * 0.85f - (anim2 * 80).dp.toPx(), y = h * 0.5f - (anim3 * 60).dp.toPx())
+        val center3 = Offset(x = w * 0.85f, y = h * 0.5f)
         val radius3 = w * 0.65f
         drawCircle(
             brush = Brush.radialGradient(

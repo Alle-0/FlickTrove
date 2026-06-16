@@ -402,6 +402,7 @@ fun SettingsScreenContent(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        CinematicBackground(modifier = Modifier.fillMaxSize())
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -410,7 +411,6 @@ fun SettingsScreenContent(
                     style = HazeStyles.PremiumDark
                 )
         ) {
-            CinematicBackground(modifier = Modifier.fillMaxSize())
             // Content Layer - Recorded by localHazeState
             Box(
                 modifier = Modifier.fillMaxSize()

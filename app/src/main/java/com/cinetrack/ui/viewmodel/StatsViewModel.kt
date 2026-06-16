@@ -148,7 +148,12 @@ class StatsViewModel @Inject constructor(
         var tvEstimate = false
         val tvStats = watchedTV.map { m ->
             val watchedCount = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-            val avgRunTime = m.episodeRunTime?.firstOrNull() ?: 45
+            var avgRunTime = m.episodeRunTime?.firstOrNull() ?: 45
+            if (avgRunTime > 240) {
+                val totalEps = m.numberOfEpisodes?.takeIf { it > 0 } ?: 1
+                val calculatedAvg = avgRunTime / totalEps
+                avgRunTime = if (calculatedAvg in 10..240) calculatedAvg else 45
+            }
             if (m.episodeRunTime.isNullOrEmpty()) tvEstimate = true
             m to (watchedCount * avgRunTime)
         }
