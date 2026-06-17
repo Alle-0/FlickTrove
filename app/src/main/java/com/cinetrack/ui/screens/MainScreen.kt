@@ -94,10 +94,12 @@ class MainScreen : Screen {
         
         var showExitConfirmation by remember { mutableStateOf(false) }
 
-        var updatesOverlayOffset by remember { mutableStateOf<Offset?>(null) }
+        var updatesOverlayOffsetX by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<Float?>(null) }
+        var updatesOverlayOffsetY by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<Float?>(null) }
+        val updatesOverlayOffset = if (updatesOverlayOffsetX != null && updatesOverlayOffsetY != null) Offset(updatesOverlayOffsetX!!, updatesOverlayOffsetY!!) else null
         var isOverlayClosing by remember { mutableStateOf(false) }
         
-        var showSurpriseMeOverlay by remember { mutableStateOf(false) }
+        var showSurpriseMeOverlay by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         val surpriseMeViewModel: com.cinetrack.ui.viewmodel.SurpriseMeViewModel = getViewModel()
         val context = LocalContext.current
         
@@ -239,7 +241,7 @@ class MainScreen : Screen {
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                             indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab) { { offset -> updatesOverlayOffset = offset } } else null,
+                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             // hasActiveFilters = TODO
                         )
@@ -527,9 +529,9 @@ class MainScreen : Screen {
                         UpdatesScreen(
                             viewModel = getViewModel(),
                             paddingValues = PaddingValues(bottom = 80.dp),
-                            startX = updatesOverlayOffset!!.x,
-                            startY = updatesOverlayOffset!!.y,
-                            onBack = { updatesOverlayOffset = null },
+                            startX = updatesOverlayOffset.x,
+                            startY = updatesOverlayOffset.y,
+                            onBack = { updatesOverlayOffsetX = null; updatesOverlayOffsetY = null },
                             onClosing = { isOverlayClosing = true },
                             onMovieClick = { movie ->
                                 rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
