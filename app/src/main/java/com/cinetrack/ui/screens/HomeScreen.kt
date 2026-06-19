@@ -142,7 +142,7 @@ fun HomeScreenContent(
         screenWidth - (padding * 2)
     }
     
-    var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
+    var filterButtonBounds = remember { arrayOf<Rect?>(null) }
     val scope = rememberCoroutineScope()
     
     val movieGridState = viewModel.movieGridState
@@ -433,7 +433,7 @@ fun HomeScreenContent(
                         modifier = Modifier
                             .size(36.dp)
                             .onGloballyPositioned { coords: androidx.compose.ui.layout.LayoutCoordinates ->
-                                filterButtonBounds = coords.boundsInRoot()
+                                filterButtonBounds[0] = coords.boundsInRoot()
                             }
                     ) {
                         // Background Layer
@@ -455,7 +455,7 @@ fun HomeScreenContent(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .bounceClick(scaleDown = 0.92f) { 
-                                    onToggleFilter(true, filterButtonBounds) 
+                                    onToggleFilter(true, filterButtonBounds[0]) 
                                 },
                             contentAlignment = Alignment.Center
                         ) {

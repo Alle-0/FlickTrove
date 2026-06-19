@@ -11,4 +11,5 @@
     <string name="shortcut_tv_short">Serie in arrivo</string>
     <string name="shortcut_tv_long">Serie in arrivo</string>
     <string name="widget_name">In uscita &amp; Cerca</string>
+    <string name="widget_list_name">Prossimamente (Lista)</string>
 </resources>

@@ -15,6 +15,7 @@ object WidgetUpdater {
         scope.launch {
             try {
                 FlickTroveWidget().updateAll(context)
+                FlickTroveListWidget().updateAll(context)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

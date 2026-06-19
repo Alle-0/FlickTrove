@@ -409,7 +409,7 @@ fun MovieCard(
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    var cardPosition by remember { mutableStateOf(Offset.Zero) }
+    val cardPosition = remember { arrayOf(Offset.Zero) }
 
     val rippleState = rememberCardRippleState()
 
@@ -457,7 +457,7 @@ fun MovieCard(
                 translationY = cardTranslateY * density.density
             }
             .onGloballyPositioned { coordinates ->
-                cardPosition = coordinates.positionInWindow()
+                cardPosition[0] = coordinates.positionInWindow()
             }
             .clip(RoundedCornerShape(28.dp))
             .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
@@ -465,7 +465,7 @@ fun MovieCard(
                 scaleDown = 0.93f, 
                 requireUnconsumed = false,
                 onLongClick = { offset ->
-                    onLongPress(movie, offset, cardPosition)
+                    onLongPress(movie, offset, cardPosition[0])
                 }
             ) { offset -> 
                 onPress(movie) 

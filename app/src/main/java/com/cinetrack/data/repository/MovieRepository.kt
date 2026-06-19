@@ -59,6 +59,8 @@ class MovieRepository @Inject constructor(
 
     suspend fun getShowsForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getShowsForUpdate(limit)
 
+    suspend fun getUpcomingMoviesForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getUpcomingMoviesForUpdate(limit)
+
     suspend fun saveMovie(movie: Movie) {
         // 1. Update Room immediately
         favoriteDao.insert(movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()))

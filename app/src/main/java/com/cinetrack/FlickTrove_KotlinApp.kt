@@ -39,6 +39,12 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             .setConstraints(networkConstraints)
             .build()
         
+        val movieUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.MovieUpdateWorker>(
+            24, java.util.concurrent.TimeUnit.HOURS
+        )
+            .setConstraints(networkConstraints)
+            .build()
+        
         val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.workers.ReminderWorker>(
             12, java.util.concurrent.TimeUnit.HOURS
         )
@@ -51,6 +57,12 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             "TVUpdate",
             androidx.work.ExistingPeriodicWorkPolicy.KEEP,
             tvUpdateRequest
+        )
+
+        workManager.enqueueUniquePeriodicWork(
+            "MovieUpdate",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            movieUpdateRequest
         )
 
         workManager.enqueueUniquePeriodicWork(

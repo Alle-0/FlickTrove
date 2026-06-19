@@ -161,19 +161,19 @@ fun DetailMetaRows(
 
 @Composable
 fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) {
-    var pillCenter by remember { mutableStateOf(Offset.Zero) }
+    val pillCenter = remember { arrayOf(Offset.Zero) }
     val shape = RoundedCornerShape(20.dp)
 
     Box(
         modifier = Modifier
             .onGloballyPositioned { layoutCoordinates ->
                 val position = layoutCoordinates.positionInWindow()
-                pillCenter = Offset(
+                pillCenter[0] = Offset(
                     position.x + layoutCoordinates.size.width / 2f,
                     position.y + layoutCoordinates.size.height / 2f
                 )
             }
-            .bounceClick { onGenreClick(pillCenter) },
+            .bounceClick { onGenreClick(pillCenter[0]) },
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -315,19 +315,19 @@ fun KeywordCollapsePill(accentColor: Color, onClick: () -> Unit) {
 
 @Composable
 fun KeywordPill(keyword: String, accentColor: Color, onKeywordClick: (Offset) -> Unit) {
-    var pillCenter by remember { mutableStateOf(Offset.Zero) }
+    val pillCenter = remember { arrayOf(Offset.Zero) }
     val shape = RoundedCornerShape(20.dp)
 
     Box(
         modifier = Modifier
             .onGloballyPositioned { layoutCoordinates ->
                 val position = layoutCoordinates.positionInWindow()
-                pillCenter = Offset(
+                pillCenter[0] = Offset(
                     position.x + layoutCoordinates.size.width / 2f,
                     position.y + layoutCoordinates.size.height / 2f
                 )
             }
-            .bounceClick { onKeywordClick(pillCenter) },
+            .bounceClick { onKeywordClick(pillCenter[0]) },
         contentAlignment = Alignment.Center
     ) {
         Box(

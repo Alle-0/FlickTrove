@@ -4,6 +4,9 @@ import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -162,6 +165,7 @@ fun SearchScreenContent(
     val focusManager = LocalFocusManager.current
     
     var isFilterVisible by remember { mutableStateOf(false) }
+    var isSuggestionsExpanded by remember { mutableStateOf(true) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(uiState.query)) }
@@ -195,7 +199,7 @@ fun SearchScreenContent(
 
     val focusRequester = remember { FocusRequester() }
     var hasRequestedFocus by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
-    var filterBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    val filterBounds = remember { arrayOf<androidx.compose.ui.geometry.Rect?>(null) }
     
     val density = androidx.compose.ui.platform.LocalDensity.current
     var headerHeight by remember { mutableStateOf(250.dp) }
@@ -898,7 +902,7 @@ fun SearchScreenContent(
                             
                             Box(modifier = Modifier.size(44.dp).onGloballyPositioned { layoutCoordinates ->
                                 val position = layoutCoordinates.positionInWindow()
-                                filterBounds = Rect(position.x, position.y, position.x + layoutCoordinates.size.width, position.y + layoutCoordinates.size.height)
+                                filterBounds[0] = Rect(position.x, position.y, position.x + layoutCoordinates.size.width, position.y + layoutCoordinates.size.height)
                             }) {
                                 Box(modifier = Modifier.fillMaxSize()
                                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
@@ -979,44 +983,63 @@ fun SearchScreenContent(
 
                         if (uiState.suggestedFilters.isNotEmpty() && uiState.query.isNotEmpty()) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { 
+                                        isSuggestionsExpanded = !isSuggestionsExpanded 
+                                    }
+                                    .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text("GENERI E TEMI SUGGERITI", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Icon(
+                                    imageVector = if (isSuggestionsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (isSuggestionsExpanded) "Comprimi" else "Espandi",
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth()) {
-                                items(uiState.suggestedFilters, key = { "${it.id}_${it.isKeyword}_${it.name}" }, contentType = { "suggested_filter" }) { filter ->
-                                    Box(
-                                        modifier = Modifier
-                                            .height(32.dp)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
-                                            .bounceClick { 
-                                                if (filter.isKeyword) {
-                                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = listOf(filter.id), selectedGenres = emptyList()))
-                                                } else {
-                                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = listOf(filter.id), selectedKeywords = emptyList()))
-                                                }
-                                                viewModel.onQueryChanged("")
-                                                keyboardController?.hide()
-                                                focusManager.clearFocus()
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = filter.name, 
-                                            modifier = Modifier.padding(horizontal = 14.dp), 
-                                            color = MaterialTheme.colorScheme.primary, 
-                                            fontSize = 12.sp, 
-                                            fontWeight = FontWeight.Bold
-                                        )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = isSuggestionsExpanded,
+                                enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+                                exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+                            ) {
+                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                                    items(uiState.suggestedFilters, key = { "${it.id}_${it.isKeyword}_${it.name}" }, contentType = { "suggested_filter" }) { filter ->
+                                        Box(
+                                            modifier = Modifier
+                                                .height(32.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
+                                                .bounceClick { 
+                                                    if (filter.isKeyword) {
+                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = listOf(filter.id), selectedGenres = emptyList()))
+                                                    } else {
+                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = listOf(filter.id), selectedKeywords = emptyList()))
+                                                    }
+                                                    viewModel.onQueryChanged("")
+                                                    keyboardController?.hide()
+                                                    focusManager.clearFocus()
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = filter.name, 
+                                                modifier = Modifier.padding(horizontal = 14.dp), 
+                                                color = MaterialTheme.colorScheme.primary, 
+                                                fontSize = 12.sp, 
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
                                     }
                                 }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         // Category Selector (Pillow)
@@ -1144,7 +1167,7 @@ fun SearchScreenContent(
                 isVisible = isFilterVisible,
                 sortConfig = uiState.sortConfig,
                 hazeState = globalSearchHazeState,
-                triggerBounds = filterBounds,
+                triggerBounds = filterBounds[0],
                 category = uiState.category,
                 suggestedFilters = uiState.suggestedFilters,
                 initialKeywordName = initialKeywordName,

@@ -41,6 +41,9 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE media_type = 'tv' AND (status IS NULL OR status NOT IN ('Ended', 'Canceled')) ORDER BY client_updated_at ASC LIMIT :limit")
     suspend fun getShowsForUpdate(limit: Int = 150): List<Movie>
 
+    @Query("SELECT * FROM favorites WHERE media_type = 'movie' AND reminder = 1 AND watched = 0 ORDER BY client_updated_at ASC LIMIT :limit")
+    suspend fun getUpcomingMoviesForUpdate(limit: Int = 150): List<Movie>
+
     @Query("UPDATE favorites SET sync_status = :status WHERE id = :id AND media_type = :mediaType")
     suspend fun updateSyncStatus(id: Long, mediaType: String, status: String)
 

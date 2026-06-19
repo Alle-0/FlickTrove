@@ -239,7 +239,7 @@ fun GlassyTopBar(
                 }
 
                 if (onFilterClick != null) {
-                    var buttonCenter by remember { mutableStateOf(Offset.Zero) }
+                    val filterButtonCenter = remember { arrayOf(Offset.Zero) }
                     
                     Box(
                         modifier = Modifier
@@ -250,14 +250,14 @@ fun GlassyTopBar(
                             )
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInWindow()
-                                buttonCenter = Offset(
+                                filterButtonCenter[0] = Offset(
                                     x = position.x + coords.size.width / 2f,
                                     y = position.y + coords.size.height / 2f
                                 )
                             }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = { onFilterClick.invoke(buttonCenter) }
+                                onClick = { onFilterClick.invoke(filterButtonCenter[0]) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -271,14 +271,14 @@ fun GlassyTopBar(
                 }
 
                 if (onUpdatesClick != null) {
-                    var buttonCenter by remember { mutableStateOf(Offset.Zero) }
+                    val updatesButtonCenter = remember { arrayOf(Offset.Zero) }
 
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInWindow()
-                                buttonCenter = Offset(
+                                updatesButtonCenter[0] = Offset(
                                     x = position.x + coords.size.width / 2f,
                                     y = position.y + coords.size.height / 2f
                                 )
@@ -289,7 +289,7 @@ fun GlassyTopBar(
                                 .fillMaxSize()
                                 .bounceClick(
                                     enabled = !isDimmed,
-                                    onClick = { onUpdatesClick.invoke(buttonCenter) }
+                                    onClick = { onUpdatesClick.invoke(updatesButtonCenter[0]) }
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -328,17 +328,17 @@ fun GlassyTopBar(
                 }
                 
                 if (onFolderOptionsClick != null) {
-                    var optionsOffset by remember { mutableStateOf(Offset.Zero) }
+                    val optionsOffset = remember { arrayOf(Offset.Zero) }
                     Box(
                         modifier = Modifier
                             .size(32.dp)
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInWindow()
-                                optionsOffset = Offset(position.x, position.y + coords.size.height)
+                                optionsOffset[0] = Offset(position.x, position.y + coords.size.height)
                             }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = { onFolderOptionsClick(optionsOffset) }
+                                onClick = { onFolderOptionsClick(optionsOffset[0]) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {

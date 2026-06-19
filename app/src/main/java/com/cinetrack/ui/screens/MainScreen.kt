@@ -273,7 +273,7 @@ class MainScreen : Screen {
                     // Search FAB
                     if (isPrimaryTab) {
                         val searchFabHaze = contentHazeState
-                        var fabCenter by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+                        val fabCenter = remember { arrayOf<androidx.compose.ui.geometry.Offset?>(null) }
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -283,7 +283,7 @@ class MainScreen : Screen {
                                 .onGloballyPositioned { coords ->
                                     val pos = coords.positionInWindow()
                                     val size = coords.size
-                                    fabCenter = androidx.compose.ui.geometry.Offset(
+                                    fabCenter[0] = androidx.compose.ui.geometry.Offset(
                                         pos.x + size.width / 2f,
                                         pos.y + size.height / 2f
                                     )
@@ -299,7 +299,7 @@ class MainScreen : Screen {
                                     androidx.compose.foundation.shape.CircleShape
                                 )
                                 .bounceClick(scaleDown = 0.9f) {
-                                    val center = fabCenter
+                                    val center = fabCenter[0]
                                     val startX = center?.x ?: 540f
                                     val startY = center?.y ?: 1140f
                                     searchOverlay?.invoke(androidx.compose.ui.geometry.Offset(startX, startY), null, null, null, null)
@@ -309,7 +309,7 @@ class MainScreen : Screen {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
                                 contentDescription = "Cerca",
-                                tint = com.cinetrack.ui.theme.PrimaryTeal,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )
                         }

@@ -617,6 +617,25 @@ fun SettingsScreenContent(
                                     settingsViewModel.toggleAppEntryAnimation(!showAppEntryAnimation)
                                 }
                             )
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
+                                title = "Sfondo AMOLED",
+                                description = "Usa il nero assoluto invece del grigio scuro",
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = appTheme == "AMOLED",
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.updateAppTheme(if (it) "AMOLED" else "System")
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.updateAppTheme(if (appTheme == "AMOLED") "System" else "AMOLED")
+                                }
+                            )
                         }
                     }
 
@@ -2188,18 +2207,18 @@ fun ColorSelectionDialog(
                     Spacer(modifier = Modifier.height(32.dp))
                     
                     // Track the screen-space centre of the Conferma button
-                    var confirmButtonCenter by remember { mutableStateOf(Offset.Zero) }
+                    val confirmButtonCenter = remember { arrayOf(Offset.Zero) }
 
                     Button(
                         onClick = {
-                            onSelect(tempSelectedColor, confirmButtonCenter)
+                            onSelect(tempSelectedColor, confirmButtonCenter[0])
                             onDismiss()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .onGloballyPositioned { coords ->
                                 val pos = coords.positionInWindow()
-                                confirmButtonCenter = Offset(
+                                confirmButtonCenter[0] = Offset(
                                     x = pos.x + coords.size.width / 2f,
                                     y = pos.y + coords.size.height / 2f
                                 )

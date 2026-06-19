@@ -330,12 +330,12 @@ fun FolderCard(
     onLongClick: (Rect) -> Unit
 ) {
     val folderColor = folder.color.toComposeColor()
-    var bounds by remember { mutableStateOf(Rect.Zero) }
+    val bounds = remember { arrayOf(Rect.Zero) }
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .onGloballyPositioned { bounds = it.boundsInWindow() }
+            .onGloballyPositioned { bounds[0] = it.boundsInWindow() }
     ) {
         Row(
             modifier = Modifier
@@ -344,7 +344,7 @@ fun FolderCard(
                 .background(Color.White.copy(alpha = 0.05f))
                 .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
                 .bounceClick(
-                    onLongClick = { onLongClick(bounds) },
+                    onLongClick = { onLongClick(bounds[0]) },
                     onClick = onClick
                 )
                 .padding(12.dp),

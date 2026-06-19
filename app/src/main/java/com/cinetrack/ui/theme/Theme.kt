@@ -63,7 +63,7 @@ fun FlickTrove_KotlinTheme(
 ) {
     val isSystemDark = isSystemInDarkTheme()
     
-    val baseColorScheme = DarkColorScheme
+    val baseColorScheme = if (themeSetting == "AMOLED") AMOLEDColorScheme else DarkColorScheme
 
     val colorScheme = baseColorScheme.copy(
         primary = accentColor

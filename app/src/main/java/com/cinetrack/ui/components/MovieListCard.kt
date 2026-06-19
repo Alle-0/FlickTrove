@@ -75,8 +75,8 @@ fun MovieListCard(
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    var cardPosition by remember { mutableStateOf(Offset.Zero) }
-    var cardSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
+    val cardPosition = remember { arrayOf(Offset.Zero) }
+    val cardSize = remember { arrayOf(androidx.compose.ui.unit.IntSize.Zero) }
 
     val rippleState = rememberCardRippleState()
 
@@ -123,15 +123,15 @@ fun MovieListCard(
                 translationY = cardTranslateY * density.density
             }
             .onGloballyPositioned { coordinates -> 
-                cardPosition = coordinates.positionInWindow()
-                cardSize = coordinates.size
+                cardPosition[0] = coordinates.positionInWindow()
+                cardSize[0] = coordinates.size
             }
             .clip(RoundedCornerShape(24.dp))
             .bounceClickWithOffset(
                 scaleDown = 0.95f, 
                 requireUnconsumed = false,
                 onLongClick = { offset -> 
-                    onLongPress(movie, offset, cardPosition) 
+                    onLongPress(movie, offset, cardPosition[0]) 
                 }
             ) { offset -> 
                 rippleState.trigger(offset)
@@ -292,14 +292,14 @@ fun MovieListCard(
                         onPress = null
                     ) {
                         // Trigger ripple on the parent card from the button center on release
-                        val rippleX = if (cardSize.width > 0) {
-                            cardSize.width.toFloat() - with(density) { 29.dp.toPx() } // button size 34/2 + end padding 12 = 29
+                        val rippleX = if (cardSize[0].width > 0) {
+                            cardSize[0].width.toFloat() - with(density) { 29.dp.toPx() } // button size 34/2 + end padding 12 = 29
                         } else {
                             with(density) { 300.dp.toPx() - 29.dp.toPx() }
                         }
                         
-                        val rippleY = if (cardSize.height > 0) {
-                            cardSize.height.toFloat() - with(density) { 29.dp.toPx() } // bottom padding 12 + 17 = 29
+                        val rippleY = if (cardSize[0].height > 0) {
+                            cardSize[0].height.toFloat() - with(density) { 29.dp.toPx() } // bottom padding 12 + 17 = 29
                         } else {
                             with(density) { 110.dp.toPx() - 29.dp.toPx() }
                         }

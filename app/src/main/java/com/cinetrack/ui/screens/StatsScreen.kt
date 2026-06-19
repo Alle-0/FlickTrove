@@ -220,7 +220,7 @@ object StatsTab : Tab {
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
         var isYearPickerVisible by remember { mutableStateOf(false) }
-        var yearPickerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+        val yearPickerButtonBounds = remember { arrayOf<androidx.compose.ui.geometry.Rect?>(null) }
         val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
         val activeHazeState = hazeState ?: remember { HazeState() }
 
@@ -230,7 +230,7 @@ object StatsTab : Tab {
             hazeState = activeHazeState,
             onToggleYearPicker = { visible, bounds ->
                 isYearPickerVisible = visible
-                yearPickerButtonBounds = bounds
+                yearPickerButtonBounds[0] = bounds
             },
             onPersonClick = { personId, profilePath ->
                 navigator.push(PersonDetailScreen(personId, profilePath))
@@ -246,7 +246,7 @@ object StatsTab : Tab {
             currentRange = statsUiState.timeRange,
             availableYears = statsUiState.availableYears,
             hazeState = activeHazeState,
-            triggerBounds = yearPickerButtonBounds,
+            triggerBounds = yearPickerButtonBounds[0],
             onYearSelected = { year ->
                 viewModel.setTimeRange(TimeRange.Year(year))
                 isYearPickerVisible = false
@@ -2987,14 +2987,14 @@ private fun YearSelectionButton(
     onToggle: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var buttonCoords by remember { mutableStateOf<androidx.compose.ui.layout.LayoutCoordinates?>(null) }
+    val buttonCoords = remember { arrayOf<androidx.compose.ui.layout.LayoutCoordinates?>(null) }
 
     Box(
         modifier = modifier
             .height(40.dp)
-            .onGloballyPositioned { buttonCoords = it }
+            .onGloballyPositioned { buttonCoords[0] = it }
             .bounceClick {
-                val rect = buttonCoords?.let {
+                val rect = buttonCoords[0]?.let {
                     val pos = it.positionInWindow()
                     androidx.compose.ui.geometry.Rect(
                         pos.x,

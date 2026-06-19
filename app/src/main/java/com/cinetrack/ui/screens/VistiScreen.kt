@@ -161,7 +161,7 @@ fun VistiScreenContent(
         previousSortConfig = uiState.sortConfig
     }
 
-    var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
+    var filterButtonBounds = remember { arrayOf<Rect?>(null) }
 
     MovieActionsWrapper(
         hazeState = hazeState ?: HazeState(),
@@ -381,7 +381,7 @@ fun VistiScreenContent(
                     modifier = Modifier
                         .size(36.dp)
                         .onGloballyPositioned { coords: LayoutCoordinates ->
-                            filterButtonBounds = coords.boundsInRoot()
+                            filterButtonBounds[0] = coords.boundsInRoot()
                         }
                 ) {
                 // Background Layer
@@ -403,7 +403,7 @@ fun VistiScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .bounceClick(scaleDown = 0.92f) {
-                            onToggleFilter(true, filterButtonBounds)
+                            onToggleFilter(true, filterButtonBounds[0])
                         },
                     contentAlignment = Alignment.Center
                 ) {
