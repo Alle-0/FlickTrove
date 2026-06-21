@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import java.util.Calendar
 import kotlinx.collections.immutable.ImmutableList
 import androidx.compose.material.icons.Icons
@@ -1735,6 +1736,17 @@ fun GenreDistributionSection(
                     .heightIn(max = if (expanded) 320.dp else 200.dp)
             ) {
                 val scrollState = rememberScrollState()
+                val nestedScrollConnection = remember {
+                    object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
+                        override fun onPostScroll(
+                            consumed: androidx.compose.ui.geometry.Offset,
+                            available: androidx.compose.ui.geometry.Offset,
+                            source: androidx.compose.ui.input.nestedscroll.NestedScrollSource
+                        ): androidx.compose.ui.geometry.Offset {
+                            return available
+                        }
+                    }
+                }
                 
                 Column(
                     modifier = Modifier
@@ -1747,7 +1759,7 @@ fun GenreDistributionSection(
                                 drawRect(
                                     brush = Brush.verticalGradient(
                                         0f to Color.Transparent,
-                                        0.15f to Color.Black,
+                                        1f to Color.Black,
                                         startY = 0f,
                                         endY = size.height * 0.15f
                                     ),
@@ -1757,7 +1769,7 @@ fun GenreDistributionSection(
                             if (scrollState.value < scrollState.maxValue) {
                                 drawRect(
                                     brush = Brush.verticalGradient(
-                                        0.85f to Color.Black,
+                                        0f to Color.Black,
                                         1f to Color.Transparent,
                                         startY = size.height * 0.75f,
                                         endY = size.height
@@ -1766,6 +1778,7 @@ fun GenreDistributionSection(
                                 )
                             }
                         }
+                        .nestedScroll(nestedScrollConnection)
                         .verticalScroll(scrollState)
                         .padding(vertical = 12.dp)
                 ) {

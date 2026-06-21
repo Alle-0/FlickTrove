@@ -26,6 +26,7 @@ class PreferenceRepository @Inject constructor(
         val DISCOVERY_FILTERS = stringPreferencesKey("discovery_filters")
         val GRID_COLUMNS = intPreferencesKey("grid_columns")
         val SHOW_LAYOUT_TOGGLE = booleanPreferencesKey("show_layout_toggle")
+        val IS_SEARCH_SUGGESTIONS_EXPANDED = booleanPreferencesKey("is_search_suggestions_expanded")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
         val SHOW_BADGES = booleanPreferencesKey("show_badges")
@@ -60,6 +61,7 @@ class PreferenceRepository @Inject constructor(
                 discoveryFilters = discoveryFiltersJson?.let { json.decodeFromString<DiscoveryFilters>(it) } ?: DiscoveryFilters(),
                 gridColumns = preferences[PreferencesKeys.GRID_COLUMNS] ?: 3,
                 showLayoutToggle = preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] ?: false,
+                isSearchSuggestionsExpanded = preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] ?: true,
                 notificationsEnabled = preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true,
                 showFolderBookmarks = preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] ?: true,
                 showBadges = preferences[PreferencesKeys.SHOW_BADGES] ?: true,
@@ -103,6 +105,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateShowLayoutToggle(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = show
+        }
+    }
+
+    suspend fun updateIsSearchSuggestionsExpanded(expanded: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] = expanded
         }
     }
 
@@ -161,6 +169,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.DISCOVERY_FILTERS] = json.encodeToString(prefs.discoveryFilters)
             preferences[PreferencesKeys.GRID_COLUMNS] = prefs.gridColumns
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = prefs.showLayoutToggle
+            preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] = prefs.isSearchSuggestionsExpanded
             preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = prefs.notificationsEnabled
             preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] = prefs.showFolderBookmarks
             preferences[PreferencesKeys.SHOW_BADGES] = prefs.showBadges

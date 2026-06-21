@@ -79,6 +79,7 @@ data class UserPreferences(
     val discoveryFilters: DiscoveryFilters = DiscoveryFilters(),
     val gridColumns: Int = 3,
     val showLayoutToggle: Boolean = false,
+    val isSearchSuggestionsExpanded: Boolean = true,
     val notificationsEnabled: Boolean = true,
     val showFolderBookmarks: Boolean = true,
     val showBadges: Boolean = true,

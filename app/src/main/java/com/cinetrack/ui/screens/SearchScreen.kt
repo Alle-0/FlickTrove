@@ -165,7 +165,7 @@ fun SearchScreenContent(
     val focusManager = LocalFocusManager.current
     
     var isFilterVisible by remember { mutableStateOf(false) }
-    var isSuggestionsExpanded by remember { mutableStateOf(true) }
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var textFieldValue by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(uiState.query)) }
@@ -869,7 +869,7 @@ fun SearchScreenContent(
                                         )
                                     }
                                     if (uiState.query.isNotEmpty()) {
-                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Pulisci", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(20.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
+                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Pulisci", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(14.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
                                     }
                                 }
                             }
@@ -988,23 +988,24 @@ fun SearchScreenContent(
                                     .padding(horizontal = 16.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable { 
-                                        isSuggestionsExpanded = !isSuggestionsExpanded 
+                                        viewModel.toggleSuggestionsExpanded()
                                     }
                                     .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text("GENERI E TEMI SUGGERITI", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
-                                    imageVector = if (isSuggestionsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = if (isSuggestionsExpanded) "Comprimi" else "Espandi",
+                                    imageVector = if (uiState.preferences.isSearchSuggestionsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (uiState.preferences.isSearchSuggestionsExpanded) "Comprimi" else "Espandi",
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             androidx.compose.animation.AnimatedVisibility(
-                                visible = isSuggestionsExpanded,
+                                visible = uiState.preferences.isSearchSuggestionsExpanded,
                                 enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
                                 exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
                             ) {
@@ -1018,9 +1019,13 @@ fun SearchScreenContent(
                                                 .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
                                                 .bounceClick { 
                                                     if (filter.isKeyword) {
-                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = listOf(filter.id), selectedGenres = emptyList()))
+                                                        val currentKw = uiState.sortConfig.selectedKeywords
+                                                        val newKw = if (currentKw.contains(filter.id)) emptyList() else listOf(filter.id)
+                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = newKw))
                                                     } else {
-                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = listOf(filter.id), selectedKeywords = emptyList()))
+                                                        val currentGenres = uiState.sortConfig.selectedGenres
+                                                        val newGenres = if (currentGenres.contains(filter.id)) emptyList() else listOf(filter.id)
+                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = newGenres))
                                                     }
                                                     viewModel.onQueryChanged("")
                                                     keyboardController?.hide()

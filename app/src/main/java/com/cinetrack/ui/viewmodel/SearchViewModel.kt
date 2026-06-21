@@ -703,6 +703,17 @@ class SearchViewModel @Inject constructor(
             }
         }
     }
+
+    fun toggleSuggestionsExpanded() {
+        val current = _uiState.value.preferences.isSearchSuggestionsExpanded
+        viewModelScope.launch {
+            try {
+                preferenceRepository.updateIsSearchSuggestionsExpanded(!current)
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error updating suggestions expanded preference", e)
+            }
+        }
+    }
 }
 
 

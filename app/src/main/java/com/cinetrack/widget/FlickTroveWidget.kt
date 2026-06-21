@@ -55,12 +55,12 @@ class FlickTroveWidget : GlanceAppWidget() {
     
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            WidgetContent(context)
+            SingleMovieWidgetContent(context)
         }
     }
 
     @Composable
-    private fun WidgetContent(context: Context) {
+    private fun SingleMovieWidgetContent(context: Context) {
         var moviesToWatch by remember { mutableStateOf<List<Pair<Movie, Bitmap?>>>(emptyList()) }
 
         LaunchedEffect(Unit) {
