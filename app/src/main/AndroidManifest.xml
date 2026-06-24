@@ -31,6 +31,17 @@
                 <data android:scheme="flicktrove" android:host="media" />
             </intent-filter>
 
+            <!-- App Links (Verified Web URLs) per condividere su WhatsApp e social -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="flicktrove.com" />
+                <data android:host="www.flicktrove.com" />
+            </intent-filter>
+
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />

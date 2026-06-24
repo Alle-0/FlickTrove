@@ -401,6 +401,7 @@ fun MovieDetailScreenContent(
                                         movie = activeMovie,
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
+                                        matchPercentage = state.matchPercentage,
                                         hazeState = backdropHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true }

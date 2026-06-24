@@ -73,7 +73,17 @@ fun DetailSkeleton(
                             .shimmerEffect()
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Match Percentage Pill
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .width(72.dp)
+                            .height(18.dp)
+                            .clip(CircleShape)
+                            .shimmerEffect()
+                    )
 
                     // Fused Container
                     val containerShape = RoundedCornerShape(28.dp)

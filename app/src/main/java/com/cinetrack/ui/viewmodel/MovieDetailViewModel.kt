@@ -44,6 +44,7 @@ class MovieDetailViewModel @Inject constructor(
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val translationManager: TranslationManager,
+    private val detailUiStateMapper: DetailUiStateMapper,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -98,26 +99,29 @@ class MovieDetailViewModel @Inject constructor(
         )
 
     private fun buildUiState(): Flow<DetailUiState> {
+        val flow1 = combine(
+            _metadata,
+            _externalRatings,
+            _loadingSeason
+        ) { metadata, external, loadingS ->
+            Triple(metadata, external, loadingS)
+        }
+
+        val flow2 = combine(
+            _seasonDetails,
+            _collectionMovies,
+            _error
+        ) { seasonD, collectionM, errorMsg ->
+            Triple(seasonD, collectionM, errorMsg)
+        }
+
         val metadataFlow = combine(
-            combine(
-                _metadata,
-                _externalRatings,
-                _loadingSeason
-            ) { metadata, external, loadingS ->
-                Triple(metadata, external, loadingS)
-            },
-            combine(
-                _seasonDetails,
-                _collectionMovies,
-                _error
-            ) { seasonD, collectionM, errorMsg ->
-                Triple(seasonD, collectionM, errorMsg)
-            },
+            flow1,
+            flow2,
             _traktComments
         ) { groupA, groupB, traktComms ->
             val (metadata, external, loadingS) = groupA
             val (seasonD, collectionM, errorMsg) = groupB
-
             MetadataState(metadata, external, loadingS, seasonD, collectionM, errorMsg, traktComms)
         }
 
@@ -127,106 +131,19 @@ class MovieDetailViewModel @Inject constructor(
             repository.getFoldersFlow()
         ) { meta, localMovies, folders ->
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                val movie = localMovies.find { it.id == movieId && it.mediaType == mediaType }
-                val metadata = meta.metadata
-                val external = meta.external
-                val loadingS = meta.loadingS
-                val seasonD = meta.seasonD
-                val collectionM = meta.collectionM
-                val errorMsg = meta.errorMsg
-                val traktComms = meta.traktComments
-
-                when {
-                    errorMsg != null && metadata == null -> DetailUiState.Error(errorMsg)
-                    metadata == null -> DetailUiState.Loading
-                    else -> {
-                        // Update the movie entry with fresh metadata fields
-                        val freshMovie = mapResponseToMovie(metadata, mediaType)
-                        val effectiveMovie = movie?.copy(
-                            genres = freshMovie.genres,
-                            runtime = freshMovie.runtime,
-                            episodeRunTime = freshMovie.episodeRunTime,
-                            tagline = freshMovie.tagline,
-                            overview = freshMovie.overview,
-                            title = freshMovie.title,
-                            name = freshMovie.name,
-                            posterPath = freshMovie.posterPath,
-                            backdropPath = freshMovie.backdropPath,
-                            voteAverage = freshMovie.voteAverage,
-                            voteCount = freshMovie.voteCount,
-                            numberOfSeasons = freshMovie.numberOfSeasons,
-                            numberOfEpisodes = freshMovie.numberOfEpisodes,
-                            revenue = freshMovie.revenue,
-                            budget = freshMovie.budget,
-                            seasons = freshMovie.seasons,
-                            releaseDate = freshMovie.releaseDate,
-                            firstAirDate = freshMovie.firstAirDate,
-                            lastAirDate = freshMovie.lastAirDate,
-                            nextEpisodeAirDate = freshMovie.nextEpisodeAirDate,
-                            nextEpisodeString = freshMovie.nextEpisodeString,
-                            releaseYear = freshMovie.releaseYear,
-                            status = freshMovie.status,
-                            imdbId = freshMovie.imdbId
-                        ) ?: freshMovie
-
-                        val totalEpisodes = metadata.numberOfEpisodes ?: 0
-                        val watchedEpisodesCount = effectiveMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                        val progress = if (mediaType == "tv" && totalEpisodes > 0) watchedEpisodesCount.toFloat() / totalEpisodes else 0f
-                    
-                        // Pre-calculate map for O(1) lookups
-                        val localMoviesMap = localMovies.associateBy { "${it.mediaType}_${it.id}" }
-
-                        // Helper to hydrate movie with local DB status
-                        fun Movie.hydrate(): Movie {
-                            val local = localMoviesMap["${this.mediaType}_${this.id}"]
-                            return if (local != null) {
-                                this.copy(
-                                    favorite = local.favorite,
-                                    watched = local.watched,
-                                    reminder = local.reminder,
-                                    progress = local.progress,
-                                    watchedEpisodes = local.watchedEpisodes,
-                                    watchedAt = local.watchedAt,
-                                    personalRating = local.personalRating,
-                                    personalNote = local.personalNote
-                                )
-                            } else this
-                        }
-
-                        val finalMovie = effectiveMovie
-
-                        DetailUiState.Success(
-                            movieEntry = finalMovie,
-                            details = metadata,
-                            isFavorite = finalMovie.favorite,
-                            isWatched = finalMovie.watched,
-                            watchState = when {
-                                finalMovie.watched -> WatchState.WATCHED
-                                finalMovie.favorite || finalMovie.reminder -> WatchState.BOOKMARKED
-                                else -> WatchState.NONE
-                            },
-                            watchedProgress = progress,
-                            directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
-                            cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
-                            streamingProviders = (metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
-                            buyRentProviders = ((metadata.watchProviders?.results?.get("IT")?.buy ?: emptyList()) + 
-                                               (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
-                            trailers = (metadata.videos?.results?.let { videos -> 
-                                videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
-                            } ?: emptyList()).toImmutableList(),
-                            recommendations = (metadata.recommendations?.results?.map { 
-                                it.hydrate() 
-                            }?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
-                            collectionMovies = collectionM.map { it.hydrate() }.toImmutableList(),
-                            externalRatings = external,
-                            loadingSeason = loadingS,
-                            seasonDetails = seasonD.toImmutableMap(),
-                            folders = folders.sortedByDescending { it.createdAt }.toImmutableList(),
-                            watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link,
-                            traktComments = traktComms.toImmutableList()
-                        )
-                    }
-                }
+                detailUiStateMapper.mapToState(
+                    movieId = movieId,
+                    mediaType = mediaType,
+                    metadata = meta.metadata,
+                    externalRatings = meta.external,
+                    loadingSeason = meta.loadingS,
+                    seasonDetails = meta.seasonD,
+                    collectionMovies = meta.collectionM,
+                    errorMsg = meta.errorMsg,
+                    traktComments = meta.traktComments,
+                    localMovies = localMovies,
+                    folders = folders
+                )
             }
         }
     }
@@ -237,7 +154,7 @@ class MovieDetailViewModel @Inject constructor(
             val response = repository.fetchMovieDetails(id, isTv)
             
             // Trigger extra ratings fetch if we have IMDB ID
-            _externalRatings.update { it.copy(certification = extractCertification(response, isTv)) }
+            _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
             val imdbId = response.externalIds?.imdbId
             fetchExternalRatings(imdbId, id)
 
@@ -245,7 +162,7 @@ class MovieDetailViewModel @Inject constructor(
             viewModelScope.launch {
                 val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
                 if (localMovie != null) {
-                    val freshMovie = mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                    val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
                     val updatedMovie = localMovie.copy(
                         genres = freshMovie.genres ?: localMovie.genres,
                         runtime = freshMovie.runtime ?: localMovie.runtime,
@@ -331,41 +248,6 @@ class MovieDetailViewModel @Inject constructor(
                 }
             }
         }
-    }
-    private fun mapResponseToMovie(response: MovieDetailResponse, type: String): Movie {
-        val effectiveRuntime = if (type == "tv") {
-            response.episodeRunTime?.firstOrNull() ?: response.runtime
-        } else {
-            response.runtime
-        }
-        
-        return Movie(
-            id = response.id,
-            mediaType = type,
-            imdbId = response.externalIds?.imdbId,
-            title = response.title,
-            name = response.name,
-            posterPath = response.posterPath,
-            backdropPath = response.backdropPath,
-            voteAverage = response.voteAverage,
-            voteCount = response.voteCount,
-            overview = response.overview,
-            releaseDate = response.releaseDate,
-            firstAirDate = response.firstAirDate,
-            runtime = effectiveRuntime,
-            episodeRunTime = response.episodeRunTime,
-            revenue = response.revenue,
-            budget = response.budget,
-            tagline = response.tagline,
-            genres = response.genres,
-            genreIds = response.genres?.map { it.id },
-            numberOfSeasons = response.numberOfSeasons,
-            numberOfEpisodes = response.numberOfEpisodes,
-            streamingProviderIds = response.watchProviders?.results?.get("IT")?.flatrate?.map { it.providerId },
-            seasons = response.seasons,
-            nextEpisodeAirDate = response.nextEpisodeToAir?.airDate,
-            nextEpisodeString = response.nextEpisodeToAir?.let { "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}" }
-        )
     }
 
 
@@ -736,6 +618,7 @@ class MovieDetailViewModel @Inject constructor(
             }
         }
     }
+
 }
 
 private data class MetadataState(

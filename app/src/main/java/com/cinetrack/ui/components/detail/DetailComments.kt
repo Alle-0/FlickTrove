@@ -106,7 +106,7 @@ private fun CommentCard(
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.03f))
             .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
-            .clickable { isExpanded = !isExpanded }
+            .bounceClick(scaleDown = 0.98f) { isExpanded = !isExpanded }
             .padding(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {

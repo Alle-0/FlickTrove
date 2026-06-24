@@ -61,6 +61,7 @@ fun DetailHeader(
     movie: Movie,
     ratings: ExternalRatings,
     accentColor: Color,
+    matchPercentage: Int? = null,
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -136,7 +137,32 @@ fun DetailHeader(
                         ),
                         color = Color.White.copy(alpha = 0.5f),
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    )
+                }
+            }
+
+            if (matchPercentage != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            containerColor = accentColor.copy(alpha = 0.15f),
+                            blurRadius = 16.dp
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${matchPercentage}% Match",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = accentColor
                     )
                 }
             }
@@ -192,7 +218,7 @@ fun DetailHeader(
                         
                         Box(
                             modifier = Modifier
-                                .padding(horizontal = 12.dp)
+                                .padding(horizontal = 10.dp)
                                 .size(4.dp)
                                 .background(Color.White.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape)
                         )

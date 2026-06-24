@@ -1088,7 +1088,7 @@ fun MediaTimeCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .then(if (onLongestItemClick != null) Modifier.clickable { onLongestItemClick() } else Modifier)
+                        .then(if (onLongestItemClick != null) Modifier.bounceClick { onLongestItemClick() } else Modifier)
                         .padding(vertical = 4.dp)
                 ) {
                     if (longestPosterPath != null) {
@@ -2072,17 +2072,14 @@ fun WrappedBannerPill(
                 // Draw the content normally on screen
                 drawContent()
                 
-                // Record content for sharing with 3x scale for high quality
-                val scaleFactor = 3f
+                // Record content for sharing at native screen density for maximum crispness
                 graphicsLayer.record(
                     size = androidx.compose.ui.unit.IntSize(
-                        (size.width * scaleFactor).toInt(), 
-                        (size.height * scaleFactor).toInt()
+                        size.width.toInt(), 
+                        size.height.toInt()
                     )
                 ) {
-                    scale(scaleFactor, scaleFactor, pivot = Offset.Zero) {
-                        this@drawWithContent.drawContent()
-                    }
+                    this@drawWithContent.drawContent()
                 }
             }
             .graphicsLayer {
@@ -2229,11 +2226,11 @@ fun WrappedBannerPill(
                     
                     // Two Main Stats Row - Genere + Tempo
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", ImageVector.vectorResource(id = R.drawable.ic_bacchetta), Modifier.weight(1f))
-                        WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, ImageVector.vectorResource(id = R.drawable.ic_clock), Modifier.weight(1f))
+                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", ImageVector.vectorResource(id = R.drawable.ic_bacchetta), Modifier.weight(1f).fillMaxHeight())
+                        WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, ImageVector.vectorResource(id = R.drawable.ic_clock), Modifier.weight(1f).fillMaxHeight())
                     }
                     
                     Spacer(Modifier.height(20.dp))
@@ -2328,12 +2325,12 @@ fun WrappedBannerPill(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            WrappedSmallStat("FILM", stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciack), Modifier.weight(1f))
-                            WrappedSmallStat("SERIE", stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1f))
-                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(2f))
+                            WrappedSmallStat("FILM", stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciack), Modifier.weight(1f).fillMaxHeight())
+                            WrappedSmallStat("SERIE", stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1.1f).fillMaxHeight())
+                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(1.9f).fillMaxHeight())
                         }
                     }
 
@@ -2456,26 +2453,30 @@ private fun WrappedMainStat(label: String, value: String, icon: ImageVector, mod
             .clip(RoundedCornerShape(18.dp))
             .background(Color.White.copy(alpha = 0.12f))
             .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
-            .padding(16.dp)
+            .padding(horizontal = 12.dp, vertical = 14.dp)
     ) {
-        Column {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxHeight()
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(14.dp)
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(6.dp))
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
                         color = Color.White.copy(alpha = 0.6f),
-                        letterSpacing = 1.5.sp,
-                        fontSize = 10.sp
+                        letterSpacing = 0.5.sp,
+                        fontSize = 9.sp,
+                        lineHeight = 11.sp
                     ),
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -2486,7 +2487,8 @@ private fun WrappedMainStat(label: String, value: String, icon: ImageVector, mod
                     fontWeight = FontWeight.Black,
                     color = Color.White,
                     fontSize = 16.sp,
-                    letterSpacing = (-0.5).sp
+                    letterSpacing = (-0.5).sp,
+                    lineHeight = 18.sp
                 ),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -2502,7 +2504,7 @@ private fun WrappedSmallStat(label: String, value: String, icon: ImageVector, mo
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.08f))
             .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
-            .padding(12.dp)
+            .padding(horizontal = 10.dp, vertical = 12.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2518,26 +2520,27 @@ private fun WrappedSmallStat(label: String, value: String, icon: ImageVector, mo
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
                         color = Color.White.copy(alpha = 0.5f),
-                        letterSpacing = 1.sp,
-                        fontSize = 8.sp
+                        letterSpacing = 0.5.sp,
+                        fontSize = 9.sp,
+                        lineHeight = 11.sp
                     ),
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Black,
                     color = Color.White,
                     fontSize = when {
-                        value.length > 25 -> 9.sp
-                        value.length > 18 -> 10.sp
-                        value.length > 12 -> 11.sp
-                        else -> 13.sp
+                        value.length > 25 -> 10.sp
+                        value.length > 18 -> 11.sp
+                        value.length > 12 -> 12.sp
+                        else -> 14.sp
                     },
-                    lineHeight = 12.sp
+                    lineHeight = 14.sp
                 ),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

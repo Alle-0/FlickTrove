@@ -114,11 +114,19 @@ class MainScreen : Screen {
                 val uri = intent.data
                 val action = intent.action
                 if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
-                    if (uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")) {
+                    val isCustomScheme = uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")
+                    val isWebScheme = uri != null && (uri.scheme == "http" || uri.scheme == "https") && uri.host?.contains("flicktrove.com") == true
+
+                    if (isCustomScheme || isWebScheme) {
                         val segments = uri.pathSegments
-                        if (segments.size >= 2) {
-                            val type = segments[0]
-                            val id = segments[1].toLongOrNull()
+                        
+                        // For flicktrove://media/movie/123, segments are ["movie", "123"]
+                        // For https://flicktrove.com/media/movie/123, segments are ["media", "movie", "123"]
+                        val startIndex = if (isWebScheme && segments.isNotEmpty() && (segments[0] == "media" || segments[0] == "detail")) 1 else 0
+                        
+                        if (segments.size >= startIndex + 2) {
+                            val type = segments[startIndex]
+                            val id = segments[startIndex + 1].toLongOrNull()
                             if (id != null) {
                                 if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
                                 else rootNavigator.push(MovieDetailScreen(id, type))
