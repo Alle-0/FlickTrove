@@ -44,12 +44,17 @@ object NetworkModule {
         val tmdbAuthInterceptor = okhttp3.Interceptor { chain ->
             val original = chain.request()
             if (original.url.host.contains("themoviedb.org")) {
-                val language = kotlinx.coroutines.runBlocking { 
+                val rawLanguage = kotlinx.coroutines.runBlocking { 
                     preferenceRepository.userPreferencesFlow.first().contentLanguage 
+                }
+                val resolvedLanguage = if (rawLanguage == "system") {
+                    java.util.Locale.getDefault().language
+                } else {
+                    rawLanguage
                 }
                 val url = original.url.newBuilder()
                     .addQueryParameter("api_key", Keys.getTmdbKey())
-                    .setQueryParameter("language", language)
+                    .setQueryParameter("language", resolvedLanguage)
                     .build()
                 val request = original.newBuilder().url(url).build()
                 chain.proceed(request)
