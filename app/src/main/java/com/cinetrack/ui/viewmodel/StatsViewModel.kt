@@ -66,7 +66,8 @@ data class CalculatedStats(
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
-    private val repository: MovieRepository
+    private val repository: MovieRepository,
+    private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository
 ) : ViewModel() {
 
     private val _timeRange = MutableStateFlow<TimeRange>(
@@ -75,8 +76,9 @@ class StatsViewModel @Inject constructor(
 
     val uiState: StateFlow<StatsUiState> = combine(
         repository.getLocalMoviesFlow(),
-        _timeRange
-    ) { movies, range ->
+        _timeRange,
+        preferenceRepository.userPreferencesFlow.map { it.contentLanguage }.distinctUntilChanged()
+    ) { movies, range, contentLanguage ->
         val watchedMovies = movies.filter { it.watched }
         // Build the list of years from watchedAt only — never releaseDate.
         // This ensures the year picker shows years when the user actually watched things.
@@ -109,9 +111,11 @@ class StatsViewModel @Inject constructor(
             !watchedDate.isNullOrBlank() && watchedDate.startsWith(currentYear.toString())
         }
 
+        val lang = if (contentLanguage == "system") java.util.Locale.getDefault().language else contentLanguage
+
         StatsUiState(
-            stats = calculateStats(filteredMovies, movies),
-            currentYearStats = calculateStats(currentYearMovies, movies),
+            stats = calculateStats(filteredMovies, movies, lang),
+            currentYearStats = calculateStats(currentYearMovies, movies, lang),
             timeRange = range,
             availableYears = years.toImmutableList(),
             moviesInSelectedRange = filteredMovies.toImmutableList(),
@@ -139,7 +143,7 @@ class StatsViewModel @Inject constructor(
         }
     }
 
-    private fun calculateStats(movies: List<Movie>, allMovies: List<Movie>): CalculatedStats {
+    private fun calculateStats(movies: List<Movie>, allMovies: List<Movie>, language: String): CalculatedStats {
         val watched = movies.filter { it.watched }
         val watchedMovies = watched.filter { it.mediaType != "tv" }
         val watchedTV = watched.filter { it.mediaType == "tv" }
@@ -171,9 +175,11 @@ class StatsViewModel @Inject constructor(
 
         // Genres
         val genreCounts = mutableMapOf<String, Int>()
+        val otherLabel = if (language.lowercase().startsWith("it")) "Altro" else "Other"
         watched.forEach { m ->
             m.genreIds?.forEach { id ->
-                val genreName = GenreConstants.ALL_GENRES.find { it.id == id.toLong() }?.name ?: "Altro"
+                val defaultName = GenreConstants.ALL_GENRES.find { it.id == id.toLong() }?.name ?: otherLabel
+                val genreName = GenreConstants.getLocalizedName(id.toLong(), language, defaultName)
                 genreCounts[genreName] = (genreCounts[genreName] ?: 0) + 1
             }
         }

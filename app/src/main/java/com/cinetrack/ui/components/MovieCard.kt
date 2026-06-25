@@ -57,6 +57,7 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.Movie
+import com.cinetrack.data.getLocalizedText
 import com.cinetrack.ui.assets.CustomIcons
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.*
@@ -525,7 +526,7 @@ fun MovieCard(
                 ) {
                     badges.filter { it.text !in disabledBadges }.forEach { badge ->
                         MovieCardBadge(
-                            text = badge.text, 
+                            text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
                             hazeState = hazeState, 
                             isLarge = isLarge

@@ -3,6 +3,7 @@ package com.cinetrack.ui.components.detail
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import kotlinx.coroutines.delay
 import androidx.compose.animation.*
@@ -219,12 +220,12 @@ fun DetailActions(
     
     val label = when {
         !movie.isReleased -> {
-            if (displayWatchState != WatchState.NONE) "RICORDA ATTIVO"
-            else "RICORDAMI"
+            if (displayWatchState != WatchState.NONE) stringResource(R.string.action_reminder_active)
+            else stringResource(R.string.action_remind_me)
         }
-        displayWatchState == WatchState.NONE -> if (movie.mediaType == "tv") "DA VEDERE" else "DA GUARDARE"
-        displayWatchState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "SEGNA COME VISTO"
-        displayWatchState == WatchState.WATCHED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "VISTO"
+        displayWatchState == WatchState.NONE -> if (movie.mediaType == "tv") stringResource(R.string.action_to_watch_tv) else stringResource(R.string.action_to_watch_movie)
+        displayWatchState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_mark_as_watched)
+        displayWatchState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
         else -> ""
     }
 
@@ -385,12 +386,12 @@ fun DetailActions(
                     ) { targetState ->
                         val targetLabel = when {
                             !movie.isReleased -> {
-                                if (targetState != WatchState.NONE) "RICORDA ATTIVO"
-                                else "RICORDAMI"
+                                if (targetState != WatchState.NONE) stringResource(R.string.action_reminder_active)
+                                else stringResource(R.string.action_remind_me)
                             }
-                            targetState == WatchState.NONE -> if (movie.mediaType == "tv") "DA VEDERE" else "DA GUARDARE"
-                            targetState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "SEGNA COME VISTO"
-                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") "SELEZIONA PUNTATE" else "VISTO"
+                            targetState == WatchState.NONE -> if (movie.mediaType == "tv") stringResource(R.string.action_to_watch_tv) else stringResource(R.string.action_to_watch_movie)
+                            targetState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_mark_as_watched)
+                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
                             else -> ""
                         }
 
@@ -413,7 +414,7 @@ fun DetailActions(
                             if (movie.mediaType == "tv" && targetState != WatchState.NONE && movie.isReleased) {
                                 val percentage = (animatedProgress * 100).toInt()
                                 Text(
-                                    text = if (percentage == 100) "COMPLETATA" else "$percentage% VISTO",
+                                    text = if (percentage == 100) stringResource(R.string.action_completed) else stringResource(R.string.action_percent_watched, percentage),
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp

@@ -47,6 +47,7 @@ class MovieDetailViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val translationManager: TranslationManager,
     private val detailUiStateMapper: DetailUiStateMapper,
+    private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -92,6 +93,10 @@ class MovieDetailViewModel @Inject constructor(
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
+
+    val useMovieLogo: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.useMovieLogo }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val uiState: StateFlow<DetailUiState> = buildUiState()
         .stateIn(
@@ -400,14 +405,14 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
-            val actionLabel = when {
-                updated == null -> "rimosso"
-                updated.watched -> "segnato come visto"
-                updated.favorite -> "aggiunto a Da Vedere"
-                updated.reminder -> "promemoria impostato"
-                else -> "aggiornato"
+            val actionMsgRes = when {
+                updated == null -> R.string.msg_action_removed
+                updated.watched -> R.string.msg_action_watched
+                updated.favorite -> R.string.msg_action_favorite
+                updated.reminder -> R.string.msg_action_reminder
+                else -> R.string.msg_action_updated
             }
-            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
+            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                 repository.saveMovie(previousState)
             }
         }
@@ -426,14 +431,14 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
-            val actionLabel = when {
-                updated == null -> "rimosso"
-                updated.watched -> "segnato come visto"
-                updated.favorite -> "aggiunto a Da Vedere"
-                updated.reminder -> "promemoria impostato"
-                else -> "aggiornato"
+            val actionMsgRes = when {
+                updated == null -> R.string.msg_action_removed
+                updated.watched -> R.string.msg_action_watched
+                updated.favorite -> R.string.msg_action_favorite
+                updated.reminder -> R.string.msg_action_reminder
+                else -> R.string.msg_action_updated
             }
-            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
+            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                 repository.saveMovie(previousState)
             }
         }
@@ -453,14 +458,14 @@ class MovieDetailViewModel @Inject constructor(
 
             cycleMovieStatusUseCase(current)
             val updated = repository.getMovie(movie.id, movie.mediaType)
-            val actionLabel = when {
-                updated == null -> "rimosso"
-                updated.watched -> "segnato come visto"
-                updated.favorite -> "aggiunto a Da Vedere"
-                updated.reminder -> "promemoria impostato"
-                else -> "aggiornato"
+            val actionMsgRes = when {
+                updated == null -> R.string.msg_action_removed
+                updated.watched -> R.string.msg_action_watched
+                updated.favorite -> R.string.msg_action_favorite
+                updated.reminder -> R.string.msg_action_reminder
+                else -> R.string.msg_action_updated
             }
-            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
+            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                 repository.saveMovie(previousState)
             }
         }
@@ -490,12 +495,13 @@ class MovieDetailViewModel @Inject constructor(
             }
             repository.saveMovie(updated)
 
-            val message = when (watchState) {
-                WatchState.NONE -> "\"$title\" rimosso dalla lista"
-                WatchState.BOOKMARKED -> "\"$title\" aggiunto a Da Vedere"
-                WatchState.WATCHED -> "\"$title\" segnato come Visto"
+            val actionMsgRes = when (watchState) {
+                WatchState.NONE -> R.string.msg_action_removed
+                WatchState.BOOKMARKED -> if (previousMovie.isReleased) R.string.msg_action_favorite else R.string.msg_action_reminder
+                WatchState.WATCHED -> R.string.msg_action_watched
             }
-            actionFeedbackManager.emit(UiText.DynamicString(message)) {
+            
+            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, listOf(title))) {
                 repository.saveMovie(previousMovie)
             }
         }

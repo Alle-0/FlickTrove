@@ -52,12 +52,15 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         if (contentLanguage == "system") {
             Pair(baseContext, baseContext.resources.configuration)
         } else {
-            val locale = java.util.Locale(contentLanguage)
+            val locale = java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
             java.util.Locale.setDefault(locale)
             val config = android.content.res.Configuration(baseContext.resources.configuration)
             config.setLocale(locale)
-            val newContext = baseContext.createConfigurationContext(config)
-            Pair(newContext, config)
+            val configContext = baseContext.createConfigurationContext(config)
+            val wrappedContext = object : android.content.ContextWrapper(baseContext) {
+                override fun getResources() = configContext.resources
+            }
+            Pair(wrappedContext, config)
         }
     }
 

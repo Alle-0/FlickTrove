@@ -9,15 +9,17 @@ interface TMDBService {
     @GET("movie/{id}")
     suspend fun getMovieDetails(
         @Path("id") id: Long,
-        @Query("language") language: String = "it-IT",
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords"
+
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords,images",
+        @Query("include_image_language") includeImageLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     @GET("tv/{id}")
     suspend fun getTVDetails(
         @Path("id") id: Long,
-        @Query("language") language: String = "it-IT",
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords"
+
+        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords,images",
+        @Query("include_image_language") includeImageLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     @GET("movie/{id}/reviews")
@@ -37,21 +39,21 @@ interface TMDBService {
     @GET("movie/{id}/recommendations")
     suspend fun getMovieRecommendations(
         @Path("id") id: Long,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("tv/{id}/recommendations")
     suspend fun getTVRecommendations(
         @Path("id") id: Long,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("search/movie")
     suspend fun searchMovie(
         @Query("query") query: String,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1,
         @Query("year") year: String? = null
     ): SearchResponse
@@ -59,27 +61,26 @@ interface TMDBService {
     @GET("search/tv")
     suspend fun searchTV(
         @Query("query") query: String,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("search/multi")
     suspend fun searchMulti(
         @Query("query") query: String,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): MultiSearchResponse
 
     @GET("person/{id}?append_to_response=combined_credits")
     suspend fun getPersonDetails(
-        @Path("id") id: Long,
-        @Query("language") language: String = "it-IT"
+        @Path("id") id: Long
     ): Person
 
     @GET("search/person")
     suspend fun searchPeople(
         @Query("query") query: String,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): PersonSearchResponse
 
@@ -92,96 +93,96 @@ interface TMDBService {
     @GET("discover/movie")
     suspend fun getMoviesByGenre(
         @Query("with_genres") genreId: Long,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("discover/tv")
     suspend fun getTVShowsByGenre(
         @Query("with_genres") genreId: Long,
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("discover/movie")
     suspend fun discoverMovies(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1,
         @retrofit2.http.QueryMap options: Map<String, String> = emptyMap()
     ): SearchResponse
 
     @GET("discover/tv")
     suspend fun discoverTV(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1,
         @retrofit2.http.QueryMap options: Map<String, String> = emptyMap()
     ): SearchResponse
 
     @GET("movie/popular")
     suspend fun getPopularMovies(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("movie/now_playing")
     suspend fun getNowPlayingMovies(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1,
         @Query("region") region: String = "IT"
     ): SearchResponse
 
     @GET("movie/upcoming")
     suspend fun getUpcomingMovies(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1,
         @Query("region") region: String = "IT"
     ): SearchResponse
 
     @GET("tv/popular")
     suspend fun getPopularTV(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("tv/airing_today")
     suspend fun getAiringTodayTV(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("tv/on_the_air")
     suspend fun getOnTheAirTV(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("trending/all/week")
     suspend fun getTrendingAll(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("trending/movie/week")
     suspend fun getTrendingMovies(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("trending/tv/week")
     suspend fun getTrendingTV(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): SearchResponse
 
     @GET("trending/person/week")
     suspend fun getTrendingPeople(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): PersonSearchResponse
 
     @GET("person/popular")
     suspend fun getPopularPeople(
-        @Query("language") language: String = "it-IT",
+
         @Query("page") page: Int = 1
     ): PersonSearchResponse
 
@@ -189,19 +190,19 @@ interface TMDBService {
     suspend fun getSeasonDetails(
         @Path("id") id: Long,
         @Path("season_number") seasonNumber: Int,
-        @Query("language") language: String = "it-IT"
+
     ): Season
 
     @GET("collection/{id}")
     suspend fun getCollectionDetails(
         @Path("id") id: Long,
-        @Query("language") language: String = "it-IT"
+
     ): CollectionResponse
 
     @GET("find/{external_id}")
     suspend fun findByExternalId(
         @Path("external_id") externalId: String,
         @Query("external_source") externalSource: String,
-        @Query("language") language: String = "it-IT"
+
     ): FindResponse
 }

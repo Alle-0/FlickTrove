@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.Movie
+import com.cinetrack.data.getLocalizedText
 import com.cinetrack.ui.utils.bounceClickWithOffset
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.cardRipple
@@ -214,7 +216,7 @@ fun MovieListCard(
                 ) {
                     badges.filter { it.text !in disabledBadges }.forEach { badge ->
                         MovieCardBadge(
-                            text = badge.text, 
+                            text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
                             hazeState = hazeState, 
                             isLarge = false
@@ -247,8 +249,19 @@ fun MovieListCard(
                 val hasRating = displayRating != null && displayRating > 0.0
                 val vote = if (hasRating) String.format("%.1f", displayRating) else ""
                 
-                val genres = movie.genreNamesString ?: movie.genres?.mapNotNull { it.name }?.joinToString(", ")
-                
+                val contextLocale = LocalConfiguration.current.locales[0].language
+                val genres = remember(movie.genreIds, movie.genreNamesString, contextLocale) {
+                    if (!movie.genreIds.isNullOrEmpty()) {
+                        movie.genreIds!!.mapNotNull { id ->
+                            val defaultName = com.cinetrack.data.GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: ""
+                            val localized = com.cinetrack.data.GenreConstants.getLocalizedName(id, contextLocale, defaultName)
+                            localized.takeIf { it.isNotEmpty() }
+                        }.joinToString(", ")
+                    } else {
+                        movie.genreNamesString ?: movie.genres?.mapNotNull { it.name }?.joinToString(", ") ?: ""
+                    }
+                }
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (releaseYear.isNotEmpty()) {
                         Text(
@@ -308,10 +321,10 @@ fun MovieListCard(
                         val isReleased = movie.isReleased
                         if (!isReleased) {
                             if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                            else onMessage("Gestisci il promemoria nella pagina dei dettagli")
+                            else onMessage(context.getString(R.string.card_hint_manage_reminder))
                         } else if (isTv) {
                             if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                            else onMessage("Gestisci gli episodi nella pagina dei dettagli")
+                            else onMessage(context.getString(R.string.card_hint_manage_episodes))
                         } else {
                             // Normal behavior for released movies
                             onAction(movie)

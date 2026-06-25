@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -871,8 +872,20 @@ private fun TinderMovieCard(
                     )
                 }
                 
-                val genres = movie.genreNamesString
-                if (!genres.isNullOrEmpty()) {
+                val contextLocale = LocalConfiguration.current.locales[0].language
+                val genres = remember(movie.genreIds, movie.genreNamesString, contextLocale) {
+                    if (!movie.genreIds.isNullOrEmpty()) {
+                        movie.genreIds!!.mapNotNull { id ->
+                            val defaultName = com.cinetrack.data.GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: ""
+                            val localized = com.cinetrack.data.GenreConstants.getLocalizedName(id, contextLocale, defaultName)
+                            localized.takeIf { it.isNotEmpty() }
+                        }.joinToString(", ")
+                    } else {
+                        movie.genreNamesString ?: movie.genres?.mapNotNull { it.name }?.joinToString(", ") ?: ""
+                    }
+                }
+                
+                if (genres.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = genres.uppercase(),

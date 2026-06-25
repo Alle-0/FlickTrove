@@ -2,6 +2,7 @@ package com.cinetrack.ui.components
 
 import com.cinetrack.R
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
@@ -281,7 +282,7 @@ private fun Header(movie: Movie, onDismiss: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "GESTIONE EPISODI",
+                stringResource(R.string.episodes_sheet_title),
                 color = Color.White.copy(alpha = 0.4f),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Black,
@@ -352,7 +353,7 @@ private fun SeasonSelector(
                 border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
             ) {
                 Text(
-                    if (seasonNum == 0) "SPECIALI" else "STAGIONE $seasonNum",
+                    if (seasonNum == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season_n, seasonNum),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     color = textColor,
                     fontSize = 9.sp,
@@ -390,7 +391,7 @@ private fun BulkAction(
                 Spacer(modifier = Modifier.width(6.dp))
             }
             Text(
-                if (isAllWatched) "STAGIONE COMPLETATA" else "SEGNA STAGIONE COME VISTA",
+                if (isAllWatched) stringResource(R.string.episodes_season_completed) else stringResource(R.string.episodes_mark_season_watched),
                 color = if (isAllWatched) Color.Black else Color.White,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Black,
@@ -426,7 +427,7 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
                 .weight(1f)
                 .padding(horizontal = 16.dp)) {
                 Text(
-                    "EPISODIO ${episode.episodeNumber}",
+                    stringResource(R.string.episodes_episode_n, episode.episodeNumber),
                     color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Black,

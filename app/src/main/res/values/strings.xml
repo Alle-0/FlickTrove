@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FlickTrove_Kotlin</string>
+    <string name="app_name">FlickTrove</string>
 
     <!-- Shortcut Strings -->
     <string name="shortcut_search_short">Search</string>
@@ -40,6 +40,9 @@
     <string name="main_exit_confirm">Exit</string>
     <string name="main_surprise_me_not_found">No movies found for these criteria!</string>
 
+    <!-- Undo Toast -->
+    <string name="action_undo">UNDO</string>
+
     <!-- FoldersScreen -->
     <string name="folders_tab_title">Folders</string>
     <string name="folders_empty_message">You haven\'t created any folders yet</string>
@@ -66,6 +69,17 @@
     <string name="discover_empty_category">No content found in this category</string>
 
     <!-- StatsScreen -->
+    <string name="detail_trailers_title">TRAILERS &amp; CLIPS</string>
+    <string name="detail_no_trailers">No videos available</string>
+    <string name="detail_add_subgenres">+ Subgenres</string>
+    <string name="detail_hide_subgenres">- Hide</string>
+    <string name="detail_streaming">STREAMING</string>
+    <string name="detail_rent_buy">RENT OR BUY</string>
+    <string name="detail_season">Season</string>
+    <string name="detail_seasons">Seasons</string>
+    <string name="action_share_title">Share movie</string>
+    <string name="action_share_body">Watch on FlickTrove: %s</string>
+    <string name="action_done">DONE</string>
     <string name="stats_tab_title">Stats</string>
     <string name="stats_no_data">No stats available</string>
     <string name="stats_all_time">All Time Stats</string>
@@ -99,6 +113,13 @@
     <string name="stats_1_movie">1 movie</string>
     <string name="stats_n_movies">%d movies</string>
     <string name="stats_wrapped">%d WRAPPED</string>
+    <string name="stats_filter_all">All</string>
+    <string name="quality_low">Low</string>
+    <string name="quality_medium">Medium</string>
+    <string name="quality_high">High</string>
+    <string name="quality_low_desc">Low (Data Saver)</string>
+    <string name="quality_medium_desc">Medium (Balanced)</string>
+    <string name="quality_high_desc">High (Best Quality)</string>
     <string name="stats_titles_watched">TITLES WATCHED</string>
     <string name="stats_top_genre">TOP GENRE</string>
     <string name="stats_total_time_wrapped">TOTAL TIME</string>
@@ -140,6 +161,8 @@
     <string name="settings_layout_toggle_desc">Shows a button to change the number of columns in Home</string>
     <string name="settings_split_home">Split Home Releases</string>
     <string name="settings_split_home_desc">Separates released titles from upcoming ones in Home</string>
+    <string name="settings_use_movie_logo">Use Official Logos</string>
+    <string name="settings_use_movie_logo_desc">In details, shows the original title logo instead of text, when available.</string>
     <string name="settings_language">App Language</string>
     <string name="settings_language_desc">Choose the language for the interface and content</string>
     <string name="settings_language_system">System</string>
@@ -422,7 +445,7 @@
     <string name="surprise_any">It doesn\'t matter</string>
     <string name="surprise_q_mood">What mood are you looking for?</string>
     <string name="surprise_mood_laugh">I want to laugh</string>
-    <string name="surprise_mood_tension">I want tension</string>
+    <string name="surprise_mood_tension">I want to tension</string>
     <string name="surprise_mood_emotion">I want to be moved</string>
     <string name="surprise_mood_escape">Mental trip</string>
     <string name="surprise_mood_any">Surprise me</string>
@@ -526,6 +549,12 @@
     <string name="filter_reset">RESET</string>
     <string name="filter_show_all">SHOW ALL</string>
     <string name="filter_apply">APPLY FILTERS</string>
+    <string name="filter_sort_by">SORT BY</string>
+    <string name="filter_active_subgenres">ACTIVE SUBGENRES</string>
+    <string name="filter_genres">GENRES</string>
+    <string name="filter_platforms">PLATFORMS</string>
+    <string name="filter_period">PERIOD</string>
+    <string name="filter_selected_subgenre">SELECTED SUBGENRE</string>
     <string name="card_quick_rate">Quick rate</string>
     <string name="card_quick_note">Quick note</string>
     <string name="card_folders">Folders</string>
@@ -617,4 +646,121 @@
     <string name="msg_item_added_to_folder">\"%1$s\" added to %2$s</string>
     <string name="card_hint_manage_reminder">Manage the reminder on the detail page</string>
     <string name="card_hint_manage_episodes">Manage episodes on the detail page</string>
+    <!-- Drawer -->
+    <string name="drawer_movies">Movies</string>
+    <string name="drawer_movies_popular">Popular Movies</string>
+    <string name="drawer_movies_now_playing">Now Playing</string>
+    <string name="drawer_movies_upcoming">Upcoming Movies</string>
+    <string name="drawer_tv">TV Series</string>
+    <string name="drawer_tv_popular">Popular Series</string>
+    <string name="drawer_tv_airing">Airing Today</string>
+    <string name="drawer_tv_upcoming">On The Air</string>
+    <string name="drawer_custom">Custom</string>
+    <string name="drawer_custom_recommendations">Recommended for you</string>
+    <string name="drawer_custom_surprise">Surprise me</string>
+    <string name="drawer_custom_folders">My folders</string>
+    <string name="drawer_general">General</string>
+    <string name="drawer_general_settings">Settings</string>
+
+    <!-- Episodes -->
+    <string name="episodes_sheet_title">MANAGE EPISODES</string>
+    <string name="episodes_specials">SPECIALS</string>
+    <string name="episodes_season_n">SEASON %d</string>
+    <string name="episodes_season_completed">SEASON COMPLETED</string>
+    
+    <!-- Detail Actions -->
+    <string name="action_reminder_active">REMINDER ACTIVE</string>
+    <string name="action_remind_me">REMIND ME</string>
+    <string name="action_to_watch_tv">TO WATCH</string>
+    <string name="action_to_watch_movie">TO WATCH</string>
+    <string name="action_select_episodes">SELECT EPISODES</string>
+    <string name="action_mark_as_watched">MARK AS WATCHED</string>
+    <string name="action_watched">WATCHED</string>
+    <string name="action_completed">COMPLETED</string>
+    <string name="action_percent_watched">%1$d%% WATCHED</string>
+    
+    <!-- Action Feedback Labels -->
+    <string name="action_label_removed">removed</string>
+    <string name="action_label_marked_watched">marked as watched</string>
+    <string name="action_label_added_to_watch">added to To Watch</string>
+    <string name="action_label_reminder_set">reminder set</string>
+    <string name="action_label_updated">updated</string>
+    
+    <!-- Personal Zone Actions -->
+    <string name="personal_zone_rate">RATE</string>
+    <string name="personal_zone_note">NOTE</string>
+    <string name="personal_zone_empty">EMPTY</string>
+    <string name="personal_zone_text_audio">TEXT/AUDIO</string>
+    <string name="personal_zone_text">TEXT</string>
+    <string name="personal_zone_audio">AUDIO</string>
+    <string name="personal_record_voice">RECORD VOICE</string>
+    <string name="personal_recording">RECORDING...</string>
+    <string name="personal_note_placeholder">Add a personal note...</string>
+    <string name="episodes_mark_season_watched">MARK SEASON AS WATCHED</string>
+    <string name="episodes_episode_n">EPISODE %d</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_rating_drag">DRAG TO RATE</string>
+    <string name="dialog_rating_prev">PREV. %.1f</string>
+    <string name="dialog_rating_save">SAVE RATING</string>
+    <string name="dialog_rating_remove">REMOVE RATING</string>
+    <string name="dialog_note_title">PERSONAL NOTE</string>
+    <string name="dialog_note_placeholder">Write or dictate a note...</string>
+
+    <!-- Rating Explanations -->
+    <string name="rating_g_label">GENERAL AUDIENCES</string>
+    <string name="rating_g_desc">All ages admitted. Nothing that would offend parents for viewing by children.</string>
+    
+    <string name="rating_pg_label">PARENTAL GUIDANCE SUGGESTED</string>
+    <string name="rating_pg_desc">Some material may not be suitable for children. Parents urged to give "parental guidance".</string>
+    
+    <string name="rating_pg13_label">PARENTS STRONGLY CAUTIONED</string>
+    <string name="rating_pg13_desc">Some material may be inappropriate for children under 13.</string>
+    
+    <string name="rating_r_label">RESTRICTED</string>
+    <string name="rating_r_desc">Under 17 requires accompanying parent or adult guardian.</string>
+    
+    <string name="rating_nc17_label">ADULTS ONLY</string>
+    <string name="rating_nc17_desc">No one 17 and under admitted.</string>
+    
+    <string name="rating_tv14_label">PARENTS STRONGLY CAUTIONED</string>
+    <string name="rating_tv14_desc">This program contains some material that many parents would find unsuitable for children under 14 years of age.</string>
+    
+    <string name="rating_tvma_label">MATURE AUDIENCE ONLY</string>
+    <string name="rating_tvma_desc">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17.</string>
+
+    <!-- Bottom Bar -->
+    <string name="bottom_bar_to_watch">TO WATCH</string>
+    <string name="bottom_bar_watched">WATCHED</string>
+    <string name="bottom_bar_stats">STATS</string>
+
+    <!-- Technical Info -->
+    <string name="detail_tech_release_date">RELEASE DATE</string>
+    <string name="detail_tech_budget">BUDGET</string>
+    <string name="detail_tech_language">LANGUAGE</string>
+    <string name="detail_tech_revenue">REVENUE</string>
+    <string name="detail_tech_production">PRODUCTION</string>
+    <string name="detail_tech_country">COUNTRY</string>
+
+    <!-- Quick Actions -->
+    <string name="quick_action_folders">Folders</string>
+    <string name="quick_action_delete">Delete</string>
+
+    <!-- Filter Modal -->
+    <string name="filter_sort_watched_at">Watched Date</string>
+    <string name="filter_sort_added_at">Recently Added</string>
+    <string name="filter_sort_release_date">Release Date</string>
+    <string name="filter_sort_title">Alphabetical</string>
+    <string name="filter_sort_personal_rating">Personal Rating</string>
+    <string name="filter_sort_runtime">Total Runtime</string>
+    <string name="filter_dir_desc">Descending</string>
+    <string name="filter_dir_asc">Ascending</string>
+
+    <!-- Action Messages -->
+    <string name="msg_action_removed">\"%1$s\" removed</string>
+    <string name="msg_action_watched">\"%1$s\" marked as watched</string>
+    <string name="msg_action_favorite">\"%1$s\" added to To Watch</string>
+    <string name="msg_action_reminder">\"%1$s\" reminder set</string>
+    <string name="msg_action_updated">\"%1$s\" updated</string>
+
 </resources>

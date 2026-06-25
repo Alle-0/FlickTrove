@@ -84,7 +84,7 @@ fun QuickActionBottomSheet(
             HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
 
             QuickActionItem(
-                label = "Cartelle",
+                label = stringResource(R.string.quick_action_folders),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                 iconColor = Color(0xFF6366F1),
                 onClick = {
@@ -96,7 +96,7 @@ fun QuickActionBottomSheet(
             HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
 
             QuickActionItem(
-                label = "Elimina",
+                label = stringResource(R.string.quick_action_delete),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                 iconColor = Color(0xFFFF4444),
                 labelColor = Color(0xFFFF4444),

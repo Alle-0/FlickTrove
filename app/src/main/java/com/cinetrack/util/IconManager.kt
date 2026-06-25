@@ -76,6 +76,23 @@ object IconManager {
                 )
             }
         }
+        // Clear tasks from Recent Apps to prevent black screen when user taps old instance
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        try {
+            for (appTask in activityManager.appTasks) {
+                if (appTask.taskInfo.baseIntent?.component?.packageName == context.packageName) {
+                    appTask.finishAndRemoveTask()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("IconManager", "Error clearing tasks", e)
+        }
+
+        // Slight delay to allow OS to remove task, then kill process
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            android.os.Process.killProcess(android.os.Process.myPid())
+            System.exit(0)
+        }, 300)
     }
 
     private val presetColors = mapOf(

@@ -63,6 +63,7 @@ fun DetailHeader(
     ratings: ExternalRatings,
     accentColor: Color,
     matchPercentage: Int? = null,
+    logoPath: String? = null,
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -113,20 +114,33 @@ fun DetailHeader(
     ) {
         // Title & Tagline
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = movie.displayName.ifEmpty { "-" },
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Black,
-                    lineHeight = 44.sp,
-                    letterSpacing = (-1.5).sp
-                ),
-                color = Color.White,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp)
-            )
+            if (logoPath != null) {
+                coil.compose.AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w500$logoPath",
+                    contentDescription = movie.displayName,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f) // Takes up to 60% of width
+                        .heightIn(max = 100.dp) // Max height to avoid huge logos
+                        .padding(bottom = 8.dp),
+                    alignment = Alignment.CenterStart
+                )
+            } else {
+                Text(
+                    text = movie.displayName.ifEmpty { "-" },
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Black,
+                        lineHeight = 44.sp,
+                        letterSpacing = (-1.5).sp
+                    ),
+                    color = Color.White,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp)
+                )
+            }
 
             movie.tagline?.let {
                 if (it.isNotEmpty()) {
@@ -225,7 +239,7 @@ fun DetailHeader(
                         )
 
                         val runtime = movie.numberOfSeasons?.let { 
-                            if (it > 0) "$it Stagion${if (it > 1) "i" else "e"}" else null 
+                            if (it > 0) "$it ${if (it > 1) stringResource(R.string.detail_seasons) else stringResource(R.string.detail_season)}" else null 
                         } ?: movie.runtime?.let {
                             if (it > 0) {
                                 val h = it / 60

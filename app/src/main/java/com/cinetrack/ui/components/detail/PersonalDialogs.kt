@@ -85,7 +85,7 @@ fun RatingPickerBox(
         ) {
             Column {
                 Text(
-                    "SPOSTA PER VALUTARE",
+                    stringResource(R.string.dialog_rating_drag),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.5f),
                     letterSpacing = 2.sp,
@@ -104,7 +104,7 @@ fun RatingPickerBox(
                             }
                     ) {
                         Text(
-                            String.format("PREC. %.1f", currentRating),
+                            stringResource(R.string.dialog_rating_prev, currentRating),
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                             color = accentColor,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -204,7 +204,7 @@ fun RatingPickerBox(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    if (rating > 0) "SALVA VALUTAZIONE" else "RIMUOVI VOTO",
+                    if (rating > 0) stringResource(R.string.dialog_rating_save) else stringResource(R.string.dialog_rating_remove),
                     color = if (rating > 0) Color.Black else Color.White,
                     fontWeight = FontWeight.Black,
                     fontSize = 13.sp
@@ -290,7 +290,7 @@ fun NoteEditorBox(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "NOTA PERSONALE",
+                stringResource(R.string.dialog_note_title),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.5f),
                 letterSpacing = 2.sp,
@@ -335,7 +335,7 @@ fun NoteEditorBox(
                 decorationBox = { innerTextField ->
                     if (note.isEmpty()) {
                         Text(
-                            "Scrivi o detta una nota...",
+                            stringResource(R.string.dialog_note_placeholder),
                             color = Color.White.copy(alpha = 0.2f),
                             fontSize = 15.sp
                         )
@@ -490,7 +490,7 @@ fun NoteEditorBox(
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = if (isRecording) "REGISTRANDO..." else "REGISTRA VOCE",
+                                text = if (isRecording) stringResource(R.string.personal_recording) else stringResource(R.string.personal_record_voice),
                                 color = if (isRecording) Color(0xFFFF3B30) else Color.White.copy(alpha = 0.8f),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold

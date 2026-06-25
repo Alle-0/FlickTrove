@@ -27,19 +27,19 @@ import com.cinetrack.ui.theme.NeonTeal
 
 private data class RatingInfo(
     val code: String,
-    val label: String,
-    val description: String,
+    val labelRes: Int,
+    val descriptionRes: Int,
     val color: Color
 )
 
 private val RATING_DATA = listOf(
-    RatingInfo("G", "PER TUTTI", "Film adatto a tutte le età. Non contiene scene o linguaggi che possano offendere i genitori o i bambini.", Color(0xFF4CAF50)),
-    RatingInfo("PG", "CONSIGLIATA SUPERVISIONE", "Alcune scene potrebbero non essere adatte ai bambini. Si consiglia la presenza di un genitore per spiegare eventuali temi.", Color(0xFFFFC107)),
-    RatingInfo("PG-13", "SCONSIGLIATO SOTTO I 13", "Alcuni contenuti potrebbero essere inappropriati per minori di 13 anni. Richiede cautela da parte dei genitori.", Color(0xFFFF9800)),
-    RatingInfo("R", "VIETATO AI MINORI (V.M. 17)", "Richiede l'accompagnamento di un adulto. Contiene temi maturi, linguaggio forte, violenza o nudità.", Color(0xFFF44336)),
-    RatingInfo("NC-17", "RIGOROSAMENTE ADULTI", "Contenuto esclusivamente per un pubblico adulto. Assolutamente vietato l'ingresso ai minori.", Color(0xFFB71C1C)),
-    RatingInfo("TV-14", "SCONSIGLIATO SOTTO I 14", "Questo programma contiene materiale che molti genitori potrebbero trovare inappropriato per bambini sotto i 14 anni.", Color(0xFFFF7043)),
-    RatingInfo("TV-MA", "CONTENUTO PER ADULTI", "Programma specificamente progettato per essere visionato da adulti e potrebbe essere inappropriato per minori di 17 anni.", Color(0xFFD32F2F))
+    RatingInfo("G", R.string.rating_g_label, R.string.rating_g_desc, Color(0xFF4CAF50)),
+    RatingInfo("PG", R.string.rating_pg_label, R.string.rating_pg_desc, Color(0xFFFFC107)),
+    RatingInfo("PG-13", R.string.rating_pg13_label, R.string.rating_pg13_desc, Color(0xFFFF9800)),
+    RatingInfo("R", R.string.rating_r_label, R.string.rating_r_desc, Color(0xFFF44336)),
+    RatingInfo("NC-17", R.string.rating_nc17_label, R.string.rating_nc17_desc, Color(0xFFB71C1C)),
+    RatingInfo("TV-14", R.string.rating_tv14_label, R.string.rating_tv14_desc, Color(0xFFFF7043)),
+    RatingInfo("TV-MA", R.string.rating_tvma_label, R.string.rating_tvma_desc, Color(0xFFD32F2F))
 )
 
 /**
@@ -177,7 +177,7 @@ private fun RatingEntry(rating: RatingInfo) {
         // Description Column
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = rating.label,
+                text = stringResource(rating.labelRes),
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -185,7 +185,7 @@ private fun RatingEntry(rating: RatingInfo) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = rating.description,
+                text = stringResource(rating.descriptionRes),
                 color = Color.White.copy(alpha = 0.5f),
                 fontSize = 12.sp,
                 lineHeight = 17.sp,

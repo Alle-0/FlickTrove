@@ -167,6 +167,7 @@ fun MovieDetailScreenContent(
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
+    val useMovieLogo by viewModel.useMovieLogo.collectAsStateWithLifecycle()
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -403,6 +404,7 @@ fun MovieDetailScreenContent(
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
                                         matchPercentage = state.matchPercentage,
+                                        logoPath = if (useMovieLogo) state.details?.images?.logos?.firstOrNull()?.filePath else null,
                                         hazeState = backdropHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true }

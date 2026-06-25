@@ -101,13 +101,17 @@ class SettingsViewModel @Inject constructor(
         .map { it.showAppEntryAnimation }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val useMovieLogo: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.useMovieLogo }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val appTheme: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.appTheme }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
 
     val contentLanguage: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.contentLanguage }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "it-IT")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
 
     val imageQuality: StateFlow<com.cinetrack.util.ImageQuality> = settingsRepository.imageQuality
         .map { com.cinetrack.util.ImageQuality.valueOf(it) }
@@ -240,9 +244,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.updateImageQuality(quality.name)
             val desc = when(quality) {
-                com.cinetrack.util.ImageQuality.LOW -> "Bassa (Risparmio Dati)"
-                com.cinetrack.util.ImageQuality.MEDIUM -> "Media"
-                com.cinetrack.util.ImageQuality.HIGH -> "Alta (HD)"
+                com.cinetrack.util.ImageQuality.LOW -> com.cinetrack.ui.utils.UiText.StringResource(R.string.quality_low_desc)
+                com.cinetrack.util.ImageQuality.MEDIUM -> com.cinetrack.ui.utils.UiText.StringResource(R.string.quality_medium_desc)
+                com.cinetrack.util.ImageQuality.HIGH -> com.cinetrack.ui.utils.UiText.StringResource(R.string.quality_high_desc)
             }
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_img_quality, desc))
         }
@@ -258,6 +262,13 @@ class SettingsViewModel @Inject constructor(
                 else -> "Personalizzato"
             }
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_text_size, desc))
+        }
+    }
+
+    fun toggleUseMovieLogo(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateUseMovieLogo(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }
 

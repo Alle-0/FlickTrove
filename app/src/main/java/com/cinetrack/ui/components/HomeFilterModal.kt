@@ -344,7 +344,7 @@ fun HomeFilterModal(
                         ) {
                             // --- SORT SECTION ---
                             ExpandableSection(
-                                title = "ORDINA PER",
+                                title = stringResource(R.string.filter_sort_by),
                                 isExpanded = expandedSection == "sort",
                                 onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
                             ) {
@@ -354,13 +354,13 @@ fun HomeFilterModal(
                                 ) {
                                     val sortOptions = buildList {
                                         if (isVisti) {
-                                            add(FilterOption("watched_at", "Data di visione"))
+                                            add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
                                         }
-                                        add(FilterOption("added_at", "Aggiunti di recente"))
-                                        add(FilterOption("release_date", "Data di uscita"))
-                                        add(FilterOption("title", "Titolo alfabetico"))
-                                        add(FilterOption("personal_rating", "Voto personale"))
-                                        add(FilterOption("runtime", "Durata totale"))
+                                        add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
+                                        add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                        add(FilterOption("title", stringResource(R.string.filter_sort_title)))
+                                        add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
+                                        add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
                                     }
 
                                     sortOptions.forEach { option ->
@@ -379,7 +379,7 @@ fun HomeFilterModal(
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         DirectionChip(
-                                            label = "Decrescente",
+                                            label = stringResource(R.string.filter_dir_desc),
                                             isSelected = localSortConfig.sortDirection == "desc",
                                             icon = ImageVector.vectorResource(id = R.drawable.ic_right),
                                             iconRotation = 90f,
@@ -387,7 +387,7 @@ fun HomeFilterModal(
                                             onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
                                         )
                                         DirectionChip(
-                                            label = "Crescente",
+                                            label = stringResource(R.string.filter_dir_asc),
                                             isSelected = localSortConfig.sortDirection == "asc",
                                             icon = ImageVector.vectorResource(id = R.drawable.ic_right),
                                             iconRotation = -90f,
@@ -401,7 +401,7 @@ fun HomeFilterModal(
                             // --- ACTIVE KEYWORDS SECTION ---
                             if (localSortConfig.selectedKeywords.isNotEmpty()) {
                                 ExpandableSection(
-                                    title = "SOTTOGENERI ATTIVI",
+                                    title = stringResource(R.string.filter_active_subgenres),
                                     isExpanded = expandedSection == "keywords" || expandedSection == null,
                                     badgeCount = localSortConfig.selectedKeywords.size,
                                     onToggle = { expandedSection = if (expandedSection == "keywords") null else "keywords" }
@@ -417,7 +417,7 @@ fun HomeFilterModal(
                                             
                                             val suggestedName = suggestedFilters.find { it.id == keywordId }?.name?.uppercase()
                                             
-                                            val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: "SOTTOGENERE SELEZIONATO"
+                                            val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: stringResource(R.string.filter_selected_subgenre)
                                                 
                                             FilterChip(
                                                 label = keywordName,
@@ -433,7 +433,7 @@ fun HomeFilterModal(
 
                             // --- GENRES SECTION ---
                             ExpandableSection(
-                                title = "GENERI",
+                                title = stringResource(R.string.filter_genres),
                                 isExpanded = expandedSection == "genres",
                                 badgeCount = localSortConfig.selectedGenres.size,
                                 onToggle = { expandedSection = if (expandedSection == "genres") null else "genres" }
@@ -455,8 +455,10 @@ fun HomeFilterModal(
 
                                     displayedGenres.forEach { genre ->
                                         val isSelected = genre.id in localSortConfig.selectedGenres
+                                        val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
+                                        val localizedName = GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name)
                                         FilterChip(
-                                            label = genre.name.uppercase(),
+                                            label = localizedName.uppercase(),
                                             isSelected = isSelected,
                                             onClick = {
                                                 val newList = if (isSelected) localSortConfig.selectedGenres - genre.id
@@ -496,7 +498,7 @@ fun HomeFilterModal(
 
                             // --- PLATFORMS SECTION ---
                             ExpandableSection(
-                                title = "PIATTAFORME",
+                                title = stringResource(R.string.filter_platforms),
                                 isExpanded = expandedSection == "platforms",
                                 badgeCount = localSortConfig.selectedProviders.size,
                                 onToggle = { expandedSection = if (expandedSection == "platforms") null else "platforms" }
@@ -525,7 +527,7 @@ fun HomeFilterModal(
 
                             // --- PERIOD SECTION ---
                             ExpandableSection(
-                                title = "PERIODO",
+                                title = stringResource(R.string.filter_period),
                                 isExpanded = expandedSection == "period",
                                 badgeCount = localSortConfig.selectedDecades.size,
                                 onToggle = { expandedSection = if (expandedSection == "period") null else "period" }

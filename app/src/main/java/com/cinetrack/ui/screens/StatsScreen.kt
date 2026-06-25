@@ -3047,7 +3047,7 @@ private fun YearSelectionButton(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = when (currentRange) {
-                    is com.cinetrack.ui.viewmodel.TimeRange.AllTime -> "Tutto"
+                    is com.cinetrack.ui.viewmodel.TimeRange.AllTime -> stringResource(R.string.stats_filter_all)
                     is com.cinetrack.ui.viewmodel.TimeRange.Year -> currentRange.year.toString()
                 },
                 style = MaterialTheme.typography.labelLarge,

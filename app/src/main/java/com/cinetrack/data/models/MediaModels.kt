@@ -87,11 +87,12 @@ data class UserPreferences(
     val vibrationEnabled: Boolean = true,
     val accentColor: String = "Teal",
     val appTheme: String = "System", // System, Light, Dark, Amoled
-    val contentLanguage: String = "it-IT",
+    val contentLanguage: String = "system",
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
     val showSplitReleasesHome: Boolean = true,
     val showAppEntryAnimation: Boolean = true,
+    val useMovieLogo: Boolean = true,
     val lastSyncTimestamp: Long = 0L
 )
 

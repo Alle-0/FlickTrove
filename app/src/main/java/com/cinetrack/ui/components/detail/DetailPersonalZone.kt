@@ -85,7 +85,7 @@ fun DetailPersonalZone(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             PersonalAction(
-                label = "VALUTA",
+                label = stringResource(R.string.personal_zone_rate),
                 value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
                 icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                 accentColor = accentColor,
@@ -95,14 +95,14 @@ fun DetailPersonalZone(
             )
             val hasText = !movie.personalNote.isNullOrBlank()
             val noteValueText = when {
-                hasText && hasAudio -> "TESTO/AUDIO"
-                hasText -> "TESTO"
-                hasAudio -> "AUDIO"
-                else -> "VUOTA"
+                hasText && hasAudio -> stringResource(R.string.personal_zone_text_audio)
+                hasText -> stringResource(R.string.personal_zone_text)
+                hasAudio -> stringResource(R.string.personal_zone_audio)
+                else -> stringResource(R.string.personal_zone_empty)
             }
             
             PersonalAction(
-                label = "NOTA",
+                label = stringResource(R.string.personal_zone_note),
                 value = noteValueText,
                 icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                 accentColor = accentColor,

@@ -39,6 +39,7 @@ class PreferenceRepository @Inject constructor(
         val CONTENT_LANGUAGE = stringPreferencesKey("content_language")
         val SHOW_SPLIT_RELEASES_HOME = booleanPreferencesKey("show_split_releases_home")
         val SHOW_APP_ENTRY_ANIMATION = booleanPreferencesKey("show_app_entry_animation")
+        val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
     }
 
@@ -69,11 +70,12 @@ class PreferenceRepository @Inject constructor(
                 vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true,
                 accentColor = preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal",
                 appTheme = preferences[PreferencesKeys.APP_THEME] ?: "System",
-                contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "it-IT",
+                contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "system",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
+                useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
             )
         }
@@ -162,6 +164,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateUseMovieLogo(use: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.USE_MOVIE_LOGO] = use
+        }
+    }
+
     suspend fun updateAll(prefs: UserPreferences) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_SORT] = json.encodeToString(prefs.homeSort)
@@ -182,6 +190,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
             preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = prefs.showSplitReleasesHome
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = prefs.showAppEntryAnimation
+            preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
         }
     }

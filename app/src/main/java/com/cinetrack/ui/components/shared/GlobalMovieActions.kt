@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.shared
 
 import androidx.compose.material3.MaterialTheme
+import com.cinetrack.R
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
@@ -47,10 +48,11 @@ fun GlobalMovieActions(
                 val url = "https://flicktrove.com/media/$shareType/${m.id}"
                 val sendIntent: android.content.Intent = android.content.Intent().apply {
                     action = android.content.Intent.ACTION_SEND
-                    putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\nGuarda su FlickTrove: $url")
+                    val body = context.getString(R.string.action_share_body, url)
+                    putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\n$body")
                     type = "text/plain"
                 }
-                val shareIntent = android.content.Intent.createChooser(sendIntent, null)
+                val shareIntent = android.content.Intent.createChooser(sendIntent, context.getString(R.string.action_share_title))
                 context.startActivity(shareIntent)
                 manager.closeAll()
             },

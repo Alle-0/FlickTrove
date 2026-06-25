@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -90,7 +91,7 @@ fun GlassyBottomBar(
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
                 animatedIconRes = R.drawable.ic_segnalibro_anim,
-                label = "DA VEDERE",
+                label = stringResource(R.string.bottom_bar_to_watch),
                 isSelected = selectedRoute == "index",
                 enabled = !isDimmed,
                 onClick = { onNavigate("index") },
@@ -99,7 +100,7 @@ fun GlassyBottomBar(
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_tick_pieno),
                 animatedIconRes = R.drawable.ic_tick_pieno_anim,
-                label = "VISTI",
+                label = stringResource(R.string.bottom_bar_watched),
                 isSelected = selectedRoute == "visti",
                 enabled = !isDimmed,
                 onClick = { onNavigate("visti") },
@@ -108,7 +109,7 @@ fun GlassyBottomBar(
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
                 animatedIconRes = R.drawable.ic_stat_anim,
-                label = "STATISTICHE",
+                label = stringResource(R.string.bottom_bar_stats),
                 isSelected = selectedRoute == "stats",
                 enabled = !isDimmed,
                 onClick = { onNavigate("stats") },

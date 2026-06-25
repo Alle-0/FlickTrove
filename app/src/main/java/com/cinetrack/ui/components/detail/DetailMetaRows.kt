@@ -150,12 +150,12 @@ fun DetailMetaRows(
             )
 
             if (streaming.isNotEmpty()) {
-                ProviderRow(label = "IN STREAMING", providers = streaming, accentColor = accentColor, onProviderClick = onProviderClick)
+                ProviderRow(label = stringResource(R.string.detail_streaming), providers = streaming, accentColor = accentColor, onProviderClick = onProviderClick)
             }
 
             if (buyAndRent.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
-                ProviderRow(label = "NOLEGGIO O ACQUISTO", providers = buyAndRent, accentColor = accentColor, onProviderClick = onProviderClick)
+                ProviderRow(label = stringResource(R.string.detail_rent_buy), providers = buyAndRent, accentColor = accentColor, onProviderClick = onProviderClick)
             }
         }
     }
@@ -271,7 +271,7 @@ fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "+ Sottogeneri",
+                text = stringResource(R.string.detail_add_subgenres),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -302,7 +302,7 @@ fun KeywordCollapsePill(accentColor: Color, onClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "- Nascondi",
+                text = stringResource(R.string.detail_hide_subgenres),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,

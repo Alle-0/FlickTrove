@@ -284,6 +284,7 @@ fun SettingsScreenContent(
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val showAppEntryAnimation by settingsViewModel.showAppEntryAnimation.collectAsStateWithLifecycle()
+    val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
 
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
@@ -532,6 +533,25 @@ fun SettingsScreenContent(
                                 }
                             )
                             SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_clapperboard_play),
+                                title = stringResource(R.string.settings_use_movie_logo),
+                                description = stringResource(R.string.settings_use_movie_logo_desc),
+                                trailing = {
+                                    FlickTroveSwitch(
+                                        checked = useMovieLogo,
+                                        onCheckedChange = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            settingsViewModel.toggleUseMovieLogo(it) 
+                                        },
+                                        accentColor = currentAccentColor
+                                    )
+                                },
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    settingsViewModel.toggleUseMovieLogo(!useMovieLogo)
+                                }
+                            )
+                            SettingsItem(
                                 icon = Icons.Rounded.Language,
                                 title = stringResource(R.string.settings_language),
                                 description = stringResource(R.string.settings_language_desc),
@@ -548,23 +568,25 @@ fun SettingsScreenContent(
                                             Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it")
                                         )
                                         options.forEach { (value, label, isSelected) ->
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(RoundedCornerShape(12.dp))
-                                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                                    .bounceClick { 
-                                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                                        settingsViewModel.updateContentLanguage(value)
-                                                    }
-                                                    .padding(vertical = 10.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    text = label,
-                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                                                )
+                                            key(value) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .clip(RoundedCornerShape(12.dp))
+                                                        .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                                        .bounceClick { 
+                                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                            settingsViewModel.updateContentLanguage(value)
+                                                        }
+                                                        .padding(vertical = 10.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(
+                                                        text = label,
+                                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                        color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -842,9 +864,9 @@ fun SettingsScreenContent(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         val options = listOf(
-                                            Triple(com.cinetrack.util.ImageQuality.LOW, "Bassa", imageQuality == com.cinetrack.util.ImageQuality.LOW),
-                                            Triple(com.cinetrack.util.ImageQuality.MEDIUM, "Media", imageQuality == com.cinetrack.util.ImageQuality.MEDIUM),
-                                            Triple(com.cinetrack.util.ImageQuality.HIGH, "Alta", imageQuality == com.cinetrack.util.ImageQuality.HIGH)
+                                            Triple(com.cinetrack.util.ImageQuality.LOW, stringResource(R.string.quality_low), imageQuality == com.cinetrack.util.ImageQuality.LOW),
+                                            Triple(com.cinetrack.util.ImageQuality.MEDIUM, stringResource(R.string.quality_medium), imageQuality == com.cinetrack.util.ImageQuality.MEDIUM),
+                                            Triple(com.cinetrack.util.ImageQuality.HIGH, stringResource(R.string.quality_high), imageQuality == com.cinetrack.util.ImageQuality.HIGH)
                                         )
                                         options.forEach { (value, label, isSelected) ->
                                             Box(

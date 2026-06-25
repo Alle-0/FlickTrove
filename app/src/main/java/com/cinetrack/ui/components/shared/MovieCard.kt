@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.Movie
+import com.cinetrack.data.getLocalizedText
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.theme.NeonPink
@@ -92,7 +93,7 @@ fun MovieCard(
             ) {
                 val badges = remember(movie) { movie.generateBadges() }
                 badges.forEach { badge ->
-                    TextBadge(text = badge.text, color = Color(badge.colorValue))
+                    TextBadge(text = badge.getLocalizedText(), color = Color(badge.colorValue))
                 }
             }
 

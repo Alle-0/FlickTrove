@@ -114,79 +114,79 @@ fun GlassyDrawer(
                     .fadingEdge(scrollState)
                     .verticalScroll(scrollState)
             ) {
-                SectionHeader("Film")
+                SectionHeader(stringResource(R.string.drawer_movies))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
-                    label = "Film popolari",
+                    label = stringResource(R.string.drawer_movies_popular),
                     isSelected = selectedRoute == "popular_movies",
                     onClick = { onNavigate("popular_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
-                    label = "Adesso al cinema",
+                    label = stringResource(R.string.drawer_movies_now_playing),
                     isSelected = selectedRoute == "now_playing_movies",
                     onClick = { onNavigate("now_playing_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                    label = "Film in uscita",
+                    label = stringResource(R.string.drawer_movies_upcoming),
                     isSelected = selectedRoute == "upcoming_movies",
                     onClick = { onNavigate("upcoming_movies") },
                     accentColor = accentColor
                 )
                 
-                SectionHeader("Serie TV")
+                SectionHeader(stringResource(R.string.drawer_tv))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                    label = "Serie popolari",
+                    label = stringResource(R.string.drawer_tv_popular),
                     isSelected = selectedRoute == "popular_tv",
                     onClick = { onNavigate("popular_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                    label = "Serie ora in streaming",
+                    label = stringResource(R.string.drawer_tv_airing),
                     isSelected = selectedRoute == "airing_today_tv",
                     onClick = { onNavigate("airing_today_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                    label = "Serie in arrivo",
+                    label = stringResource(R.string.drawer_tv_upcoming),
                     isSelected = selectedRoute == "on_the_air_tv",
                     onClick = { onNavigate("on_the_air_tv") },
                     accentColor = accentColor
                 )
 
-                SectionHeader("Personalizzato")
+                SectionHeader(stringResource(R.string.drawer_custom))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                    label = "Consigliati per te",
+                    label = stringResource(R.string.drawer_custom_recommendations),
                     isSelected = selectedRoute == "recommendations",
                     onClick = { onNavigate("recommendations") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
-                    label = "Sorprendimi",
+                    label = stringResource(R.string.drawer_custom_surprise),
                     isSelected = selectedRoute == "surprise_me",
                     onClick = { onNavigate("surprise_me") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
-                    label = "Le mie cartelle",
+                    label = stringResource(R.string.drawer_custom_folders),
                     isSelected = selectedRoute == "my_folders",
                     onClick = { onNavigate("my_folders") },
                     accentColor = accentColor
                 )
 
-                SectionHeader("Generale")
+                SectionHeader(stringResource(R.string.drawer_general))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                    label = "Impostazioni",
+                    label = stringResource(R.string.drawer_general_settings),
                     isSelected = selectedRoute == "settings",
                     onClick = { onNavigate("settings") },
                     accentColor = accentColor

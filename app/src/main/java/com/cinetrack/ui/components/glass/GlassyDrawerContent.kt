@@ -82,24 +82,24 @@ fun GlassyDrawerContent(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 20.dp)
             ) {
-                DrawerSection(title = "Cinema")
+                DrawerSection(title = stringResource(R.string.drawer_movies))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
-                    label = "Film più visti",
+                    label = stringResource(R.string.drawer_movies_popular),
                     isActive = activeRoute == "trending_movies",
                     onClick = { onNavigate("discover", "trending_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.Movie,
-                    label = "Adesso al cinema",
+                    label = stringResource(R.string.drawer_movies_now_playing),
                     isActive = activeRoute == "now_playing_movies",
                     onClick = { onNavigate("discover", "now_playing_movies") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.Event,
-                    label = "Film in uscita",
+                    label = stringResource(R.string.drawer_movies_upcoming),
                     isActive = activeRoute == "upcoming_movies",
                     onClick = { onNavigate("discover", "upcoming_movies") },
                     accentColor = accentColor
@@ -107,24 +107,24 @@ fun GlassyDrawerContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                DrawerSection(title = "Serie TV")
+                DrawerSection(title = stringResource(R.string.drawer_tv))
                 DrawerItem(
                     icon = Icons.Rounded.Tv,
-                    label = "Serie più viste",
+                    label = stringResource(R.string.drawer_tv_popular),
                     isActive = activeRoute == "trending_tv",
                     onClick = { onNavigate("discover", "trending_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.Monitor,
-                    label = "Serie ora in streaming",
+                    label = stringResource(R.string.drawer_tv_airing),
                     isActive = activeRoute == "on_the_air_tv",
                     onClick = { onNavigate("discover", "on_the_air_tv") },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.Event,
-                    label = "Serie in arrivo",
+                    label = stringResource(R.string.drawer_tv_upcoming),
                     isActive = activeRoute == "airing_today_tv",
                     onClick = { onNavigate("discover", "airing_today_tv") },
                     accentColor = accentColor
@@ -132,24 +132,24 @@ fun GlassyDrawerContent(
                 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                DrawerSection(title = "Personalizzato")
+                DrawerSection(title = stringResource(R.string.drawer_custom))
                 DrawerItem(
                     icon = Icons.Rounded.AutoAwesome,
-                    label = "Consigliati per Te",
+                    label = stringResource(R.string.drawer_custom_recommendations),
                     isActive = activeRoute == "recommendations",
                     onClick = { onNavigate("recommendations", null) },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.AutoAwesome,
-                    label = "Sorprendimi",
+                    label = stringResource(R.string.drawer_custom_surprise),
                     isActive = activeRoute == "surprise",
                     onClick = { onNavigate("surprise", null) },
                     accentColor = accentColor
                 )
                 DrawerItem(
                     icon = Icons.Rounded.FolderSpecial,
-                    label = "Le Mie Cartelle",
+                    label = stringResource(R.string.drawer_custom_folders),
                     isActive = activeRoute == "folders",
                     onClick = { onNavigate("folders", null) },
                     accentColor = accentColor
@@ -157,10 +157,10 @@ fun GlassyDrawerContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                DrawerSection(title = "Applicazione")
+                DrawerSection(title = stringResource(R.string.drawer_general))
                 DrawerItem(
                     icon = Icons.Rounded.Settings,
-                    label = "Impostazioni",
+                    label = stringResource(R.string.drawer_general_settings),
                     isActive = activeRoute == "settings",
                     onClick = { onNavigate("settings", null) },
                     accentColor = accentColor

@@ -150,7 +150,8 @@ data class MovieDetailResponse(
     @SerialName("release_dates") val releaseDates: ReleaseDatesResponse? = null,
     @SerialName("content_ratings") val contentRatings: ContentRatingsResponse? = null,
     @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,
-    val keywords: KeywordsResponse? = null
+    val keywords: KeywordsResponse? = null,
+    val images: ImagesResponse? = null
 )
 
 @Serializable
@@ -294,4 +295,16 @@ data class KeywordsResponse(
 data class Keyword(
     val id: Long,
     val name: String
+)
+
+@Serializable
+data class ImageItem(
+    @SerialName("file_path") val filePath: String
+)
+
+@Serializable
+data class ImagesResponse(
+    val logos: List<ImageItem>? = null,
+    val backdrops: List<ImageItem>? = null,
+    val posters: List<ImageItem>? = null
 )

@@ -119,16 +119,24 @@ class BackupRepository @Inject constructor(
         val result = mutableListOf<String>()
         var current = StringBuilder()
         var inQuotes = false
-        for (i in line.indices) {
+        var i = 0
+        while (i < line.length) {
             val c = line[i]
             if (c == '"') {
-                inQuotes = !inQuotes
+                if (inQuotes && i + 1 < line.length && line[i + 1] == '"') {
+                    // Escaped quote
+                    current.append('"')
+                    i++ // Skip the second quote
+                } else {
+                    inQuotes = !inQuotes
+                }
             } else if (c == ',' && !inQuotes) {
                 result.add(current.toString().trim())
                 current.clear()
             } else {
                 current.append(c)
             }
+            i++
         }
         result.add(current.toString().trim())
         return result
@@ -223,8 +231,8 @@ class BackupRepository @Inject constructor(
                     favoriteDao.importIgnore(results)
                     count += results.size
                 }
-                // Delay to prevent hitting API rate limits aggressively
-                kotlinx.coroutines.delay(100)
+                // Delay to prevent hitting API rate limits aggressively (400ms is safe for 50 req/sec limits when processing 20 items concurrently)
+                kotlinx.coroutines.delay(400)
             }
         }
         count

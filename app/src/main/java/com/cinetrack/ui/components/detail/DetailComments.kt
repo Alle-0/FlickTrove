@@ -139,10 +139,12 @@ private fun CommentCard(
                         Spacer(modifier = Modifier.width(8.dp))
                     } else {
                         val hasTranslation = translationState?.translatedText != null
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
-                            contentDescription = "Traduci",
-                            tint = if (hasTranslation && !showOriginal) accentColor else Color.White.copy(alpha = 0.5f),
+                        val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
+                        if (currentLanguage != "en") {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
+                                contentDescription = "Traduci",
+                                tint = if (hasTranslation && !showOriginal) accentColor else Color.White.copy(alpha = 0.5f),
                             modifier = Modifier
                                 .size(16.dp)
                                 .bounceClick(scaleDown = 0.9f) {
@@ -152,8 +154,9 @@ private fun CommentCard(
                                         onTranslateRequest()
                                     }
                                 }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
                     }
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),

@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
@@ -133,7 +134,7 @@ fun UndoToast(
                                     .padding(horizontal = 10.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = "ANNULLA",
+                                    text = stringResource(com.cinetrack.R.string.action_undo),
                                     color = accent,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.ExtraBold,

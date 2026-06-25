@@ -108,15 +108,15 @@ class FavoritesViewModel @Inject constructor(
                 cycleMovieStatusUseCase(current)
                 
                 val updated = movieRepository.getMovie(movie.id, movie.mediaType)
-                val actionLabel = when {
-                    updated == null -> "rimosso"
-                    updated.watched -> "segnato come visto"
-                    updated.favorite -> "aggiunto a Da Vedere"
-                    updated.reminder -> "promemoria impostato"
-                    else -> "aggiornato"
+                val actionMsgRes = when {
+                    updated == null -> R.string.msg_action_removed
+                    updated.watched -> R.string.msg_action_watched
+                    updated.favorite -> R.string.msg_action_favorite
+                    updated.reminder -> R.string.msg_action_reminder
+                    else -> R.string.msg_action_updated
                 }
                 
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
+                actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
@@ -146,15 +146,15 @@ class FavoritesViewModel @Inject constructor(
                 cycleMovieStatusUseCase(current)
                 
                 val updated = movieRepository.getMovie(movie.id, movie.mediaType)
-                val actionLabel = when {
-                    updated == null -> "rimosso"
-                    updated.watched -> "segnato come visto"
-                    updated.favorite -> "aggiunto a Da Vedere"
-                    updated.reminder -> "promemoria impostato"
-                    else -> "aggiornato"
+                val actionMsgRes = when {
+                    updated == null -> R.string.msg_action_removed
+                    updated.watched -> R.string.msg_action_watched
+                    updated.favorite -> R.string.msg_action_favorite
+                    updated.reminder -> R.string.msg_action_reminder
+                    else -> R.string.msg_action_updated
                 }
                 
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
+                actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                     movieRepository.saveMovie(previousState)
                 }
             } finally {

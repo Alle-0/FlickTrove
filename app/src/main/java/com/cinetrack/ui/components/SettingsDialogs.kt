@@ -82,9 +82,9 @@ fun ImageQualitySelectionDialog(
     onSelect: (ImageQuality) -> Unit
 ) {
     val options = listOf(
-        ImageQuality.LOW to "Bassa (Risparmio Dati)",
-        ImageQuality.MEDIUM to "Media (Bilanciata)",
-        ImageQuality.HIGH to "Alta (Miglior Qualità)"
+        ImageQuality.LOW to stringResource(R.string.quality_low_desc),
+        ImageQuality.MEDIUM to stringResource(R.string.quality_medium_desc),
+        ImageQuality.HIGH to stringResource(R.string.quality_high_desc)
     )
     
     Dialog(

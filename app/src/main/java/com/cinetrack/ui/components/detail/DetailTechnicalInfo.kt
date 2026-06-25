@@ -61,14 +61,14 @@ fun DetailTechnicalInfo(
             // Row 1: Release Date & Budget
             Row(modifier = Modifier.fillMaxWidth()) {
                 TechnicalItem(
-                    label = "DATA USCITA",
+                    label = stringResource(R.string.detail_tech_release_date),
                     value = details.releaseDate ?: details.firstAirDate ?: "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
-                    label = "BUDGET",
+                    label = stringResource(R.string.detail_tech_budget),
                     value = if (details.budget != null && details.budget > 0) "${formatter.format(details.budget)} USD" else "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_dollar),
                     accentColor = accentColor,
@@ -79,14 +79,14 @@ fun DetailTechnicalInfo(
             // Row 2: Language & Revenue
             Row(modifier = Modifier.fillMaxWidth()) {
                 TechnicalItem(
-                    label = "LINGUA",
+                    label = stringResource(R.string.detail_tech_language),
                     value = details.originalLanguage?.uppercase(Locale.getDefault()) ?: "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
-                    label = "INCASSI",
+                    label = stringResource(R.string.detail_tech_revenue),
                     value = if (details.revenue != null && details.revenue > 0) "${formatter.format(details.revenue)} USD" else "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_world),
                     accentColor = accentColor,
@@ -97,14 +97,14 @@ fun DetailTechnicalInfo(
             // Row 3: Production & Country
             Row(modifier = Modifier.fillMaxWidth()) {
                 TechnicalItem(
-                    label = "PRODUZIONE",
+                    label = stringResource(R.string.detail_tech_production),
                     value = details.productionCompanies?.firstOrNull()?.name ?: "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_edifici),
                     accentColor = accentColor,
                     modifier = Modifier.weight(1f)
                 )
                 TechnicalItem(
-                    label = "PAESE",
+                    label = stringResource(R.string.detail_tech_country),
                     value = details.productionCountries?.firstOrNull()?.name ?: "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_partenone),
                     accentColor = accentColor,
