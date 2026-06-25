@@ -551,34 +551,6 @@ enum class MovieBadge(val text: String, val colorValue: Long) {
 
 @androidx.compose.runtime.Composable
 fun MovieBadge.getLocalizedText(): String {
-    val language = androidx.compose.ui.platform.LocalConfiguration.current.locales.get(0)?.language ?: "en"
-    if (language.lowercase().startsWith("it")) {
-        return when(this) {
-            MovieBadge.NEW -> "NUOVO"
-            MovieBadge.MASTERPIECE -> "CAPOLAVORO"
-            MovieBadge.BEST -> "TOP"
-            MovieBadge.HOT -> "IN TENDENZA"
-            MovieBadge.WOW -> "SORPRESA"
-            MovieBadge.HIDDEN_GEM -> "PERLA NASCOSTA"
-            MovieBadge.DIVISIVE -> "CONTROVERSO"
-            MovieBadge.BLOCKBUSTER -> "BLOCKBUSTER"
-            MovieBadge.INDIE -> "INDIE"
-            MovieBadge.VINTAGE -> "VINTAGE"
-            MovieBadge.CLASSIC -> "CLASSICO"
-            MovieBadge.CULT -> "CULT"
-            MovieBadge.EPIC -> "EPICO"
-            MovieBadge.QUICK -> "VELOCE"
-            MovieBadge.BINGE -> "MARATONA"
-            MovieBadge.SNACK -> "SNACK"
-            MovieBadge.HORROR -> "HORROR"
-            MovieBadge.THRILLER -> "THRILLER"
-            MovieBadge.ANIMAZIONE -> "ANIMAZIONE"
-            MovieBadge.SCI_FI -> "FANTASCIENZA"
-            MovieBadge.COMEDY -> "COMMEDIA"
-            MovieBadge.DOCU -> "DOCUMENTARIO"
-            MovieBadge.FAMILY -> "FAMIGLIA"
-        }
-    }
     return this.text
 }
 
