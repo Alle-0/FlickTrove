@@ -115,8 +115,9 @@ fun DetailHeader(
         // Title & Tagline
         Column(modifier = Modifier.fillMaxWidth()) {
             if (logoPath != null) {
+                val imageUrl = com.cinetrack.util.buildTmdbImageUrl(logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
                 coil.compose.AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500$logoPath",
+                    model = imageUrl,
                     contentDescription = movie.displayName,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier

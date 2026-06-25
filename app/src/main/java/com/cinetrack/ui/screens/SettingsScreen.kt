@@ -533,7 +533,7 @@ fun SettingsScreenContent(
                                 }
                             )
                             SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_clapperboard_play),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                 title = stringResource(R.string.settings_use_movie_logo),
                                 description = stringResource(R.string.settings_use_movie_logo_desc),
                                 trailing = {
