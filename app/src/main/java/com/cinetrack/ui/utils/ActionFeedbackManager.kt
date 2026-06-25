@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class UndoAction(
-    val message: String,
+    val message: UiText,
     val undoFn: (suspend () -> Unit)?
 )
 
@@ -27,8 +27,8 @@ class ActionFeedbackManager @Inject constructor() {
     )
     val events: SharedFlow<UndoAction> = _events.asSharedFlow()
 
-    fun emit(message: String, undoFn: (suspend () -> Unit)? = null) {
+    fun emit(message: UiText, undoFn: (suspend () -> Unit)? = null) {
         val success = _events.tryEmit(UndoAction(message, undoFn))
-        android.util.Log.d("ActionFeedbackManager", "Emitted toast: '$message', success: $success")
+        android.util.Log.d("ActionFeedbackManager", "Emitted toast, success: $success")
     }
 }

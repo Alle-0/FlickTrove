@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -92,7 +94,7 @@ class SearchViewModel @Inject constructor(
     }
     private var currentPage = 1
     
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
     
@@ -583,7 +585,7 @@ class SearchViewModel @Inject constructor(
                     else -> "aggiornato"
                 }
                 
-                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                     android.util.Log.d("SearchViewModel", "toggleFavorite: UNDO clicked for $title")
                     repository.saveMovie(previousState)
                 }
@@ -599,7 +601,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteMovie(movie)
-                actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
                     try {
                         repository.saveMovie(movie)
                     } catch (e: Exception) {
@@ -607,7 +609,7 @@ class SearchViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante la rimozione")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
             }
         }
     }
@@ -639,7 +641,7 @@ class SearchViewModel @Inject constructor(
                 val current = local ?: movie
                 repository.saveMovie(current.copy(personalRating = rating))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
         }
     }
@@ -651,7 +653,7 @@ class SearchViewModel @Inject constructor(
                 val current = local ?: movie
                 repository.saveMovie(current.copy(personalNote = note))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
         }
     }
@@ -667,7 +669,7 @@ class SearchViewModel @Inject constructor(
                 }
                 repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento cartella")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating_folder))
             }
         }
     }

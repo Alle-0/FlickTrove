@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,7 +59,7 @@ class FolderDetailViewModel @Inject constructor(
         }
     }
 
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
@@ -97,7 +99,7 @@ class FolderDetailViewModel @Inject constructor(
         _folderId.filterNotNull().flatMapLatest { id ->
             repository.getFolderFlow(id).flatMapLatest { folder ->
                 if (folder == null) {
-                    globalErrorHandler.emitError("Cartella non trovata") { initFolder(id) }
+                    globalErrorHandler.emitError(UiText.StringResource(R.string.msg_folder_not_found)) { initFolder(id) }
                     kotlinx.coroutines.flow.flowOf(FolderDetailUiState.Error("Cartella non trovata") as FolderDetailUiState)
                 } else {
                     combine(
@@ -196,7 +198,7 @@ class FolderDetailViewModel @Inject constructor(
                 ))
 
                 val title = movie.title ?: movie.name ?: ""
-                actionFeedbackManager.emit("\"$title\" rimosso dalla cartella") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed_from_folder, title)) {
                     repository.saveFolder(folder)
                 }
             }
@@ -237,8 +239,8 @@ class FolderDetailViewModel @Inject constructor(
             val title = movie.title ?: movie.name ?: ""
             val folderName = targetFolder.name
             actionFeedbackManager.emit(
-                if (isPresent) "\"$title\" rimosso da $folderName" 
-                else "\"$title\" aggiunto a $folderName"
+                if (isPresent) UiText.StringResource(R.string.msg_item_removed_from_folder, title)
+                else UiText.StringResource(R.string.msg_item_added_to_folder, title, folderName)
             ) {
                 repository.saveFolder(targetFolder)
             }
@@ -253,7 +255,7 @@ class FolderDetailViewModel @Inject constructor(
                 _folderId.value?.let { id ->
                     repository.deleteFolder(id)
                 }
-                actionFeedbackManager.emit("Cartella \"${folder.name}\" eliminata") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {
                     repository.saveFolder(folder)
                 }
             }

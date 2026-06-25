@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -87,7 +89,7 @@ class MovieDetailViewModel @Inject constructor(
     private val _extractedColor = MutableStateFlow<Color?>(null)
     val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
 
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
@@ -297,7 +299,7 @@ class MovieDetailViewModel @Inject constructor(
         val title = movie.displayName
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"$title\" eliminato") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_deleted, title)) {
                 repository.saveMovie(movie)
             }
         }
@@ -340,7 +342,7 @@ class MovieDetailViewModel @Inject constructor(
         )
         viewModelScope.launch {
             repository.saveFolder(newFolder)
-            actionFeedbackManager.emit("Cartella \"$name\" creata con questo elemento")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_created_with_item, name))
         }
     }
 
@@ -379,7 +381,7 @@ class MovieDetailViewModel @Inject constructor(
         val title = movie.displayName
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"$title\" eliminato") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_deleted, title)) {
                 repository.saveMovie(movie)
             }
         }
@@ -405,7 +407,7 @@ class MovieDetailViewModel @Inject constructor(
                 updated.reminder -> "promemoria impostato"
                 else -> "aggiornato"
             }
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
+            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
                 repository.saveMovie(previousState)
             }
         }
@@ -431,7 +433,7 @@ class MovieDetailViewModel @Inject constructor(
                 updated.reminder -> "promemoria impostato"
                 else -> "aggiornato"
             }
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
+            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
                 repository.saveMovie(previousState)
             }
         }
@@ -458,7 +460,7 @@ class MovieDetailViewModel @Inject constructor(
                 updated.reminder -> "promemoria impostato"
                 else -> "aggiornato"
             }
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
+            actionFeedbackManager.emit(UiText.DynamicString("\"$title\" $actionLabel")) {
                 repository.saveMovie(previousState)
             }
         }
@@ -493,7 +495,7 @@ class MovieDetailViewModel @Inject constructor(
                 WatchState.BOOKMARKED -> "\"$title\" aggiunto a Da Vedere"
                 WatchState.WATCHED -> "\"$title\" segnato come Visto"
             }
-            actionFeedbackManager.emit(message) {
+            actionFeedbackManager.emit(UiText.DynamicString(message)) {
                 repository.saveMovie(previousMovie)
             }
         }
@@ -587,10 +589,11 @@ class MovieDetailViewModel @Inject constructor(
                     _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = translated)) }
                 } else {
                     _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
+                    emitMessage(UiText.StringResource(R.string.msg_error_translating))
                 }
             } else {
                 _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
-                emitMessage("Errore nel download del modello lingua italiana.")
+                emitMessage(UiText.StringResource(R.string.msg_error_lang_model))
             }
         }
     }

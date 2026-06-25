@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class ErrorEvent(
-    val message: String,
+    val message: UiText,
     val retryFn: (suspend () -> Unit)? = null,
     val id: String = java.util.UUID.randomUUID().toString()
 )
@@ -27,8 +27,8 @@ class GlobalErrorHandler @Inject constructor() {
     )
     val errors: SharedFlow<ErrorEvent> = _errors.asSharedFlow()
 
-    fun emitError(message: String, retryFn: (suspend () -> Unit)? = null) {
+    fun emitError(message: UiText, retryFn: (suspend () -> Unit)? = null) {
         val success = _errors.tryEmit(ErrorEvent(message, retryFn))
-        android.util.Log.e("GlobalErrorHandler", "Emitted error: '$message', success: $success")
+        android.util.Log.e("GlobalErrorHandler", "Emitted error, success: $success")
     }
 }

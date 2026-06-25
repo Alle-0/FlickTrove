@@ -608,6 +608,8 @@ fun MovieCard(
                     }
                 }
 
+                val hintReminder = stringResource(R.string.card_hint_manage_reminder)
+                val hintEpisodes = stringResource(R.string.card_hint_manage_episodes)
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -629,12 +631,12 @@ fun MovieCard(
                             if (!isReleased) {
                                 if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                                 else if (showActionHint) {
-                                    onMessage("Gestisci il promemoria nella pagina dei dettagli")
+                                    onMessage(hintReminder)
                                 }
                             } else if (isTv) {
                                 if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                                 else if (showActionHint) {
-                                    onMessage("Gestisci gli episodi nella pagina dei dettagli")
+                                    onMessage(hintEpisodes)
                                 }
                             } else {
                                 // Normal behavior for released movies

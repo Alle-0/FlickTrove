@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -166,21 +168,21 @@ class RecommendationsViewModel @Inject constructor(
                 else -> "aggiornato"
             }
             
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                 repository.saveMovie(previousState)
                 onUndo?.invoke()
             }
         }
     }
 
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
     fun deleteMovie(movie: Movie) {
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
                 repository.saveMovie(movie)
             }
         }

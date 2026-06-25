@@ -338,7 +338,7 @@ fun PersonDetailScreenContent(
                                             onPress = { onMovieClick(m) },
                                             onAction = { viewModel.toggleFavorite(m) },
                                             onLongPress = actionsState.onLongPress,
-                                            onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                         )
                                     }
                                 }
@@ -425,7 +425,7 @@ fun PersonDetailScreenContent(
                                                     onPress = { onMovieClick(movie) },
                                                     onAction = { viewModel.toggleFavorite(movie) },
                                                     onLongPress = actionsState.onLongPress,
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             } else {
                                                 MovieCard(
@@ -444,7 +444,7 @@ fun PersonDetailScreenContent(
                                                     onPress = { onMovieClick(movie) },
                                                     onAction = { viewModel.toggleFavorite(movie) },
                                                     onLongPress = actionsState.onLongPress,
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             }
                                         }

@@ -15,14 +15,16 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.FirebaseNetworkException
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
     object Anonymous : AuthState
-    data class Loading(val message: String? = null, val progress: Float? = null) : AuthState
+    data class Loading(val message: UiText? = null, val progress: Float? = null) : AuthState
     object Authenticated : AuthState
-    data class Success(val message: String) : AuthState
-    data class Error(val message: String) : AuthState
+    data class Success(val message: UiText) : AuthState
+    data class Error(val message: UiText) : AuthState
 }
 
 @HiltViewModel
@@ -60,16 +62,16 @@ class AuthViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         if (emailValidatorUseCase.containsOffensiveWords(email)) {
-            _processState.update { AuthState.Error("L'email contiene parole non consentite") }
+            _processState.update { AuthState.Error(UiText.StringResource(R.string.msg_auth_offensive_email)) }
             return
         }
 
         if (email.isBlank() || password.isBlank()) {
-            _processState.update { AuthState.Error("Email e password sono obbligatorie") }
+            _processState.update { AuthState.Error(UiText.StringResource(R.string.msg_auth_fields_required)) }
             return
         }
 
-        _processState.update { AuthState.Loading("Accesso in corso...") }
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_logging_in)) }
         
         viewModelScope.launch {
             val currentUser = auth.currentUser
@@ -81,9 +83,9 @@ class AuthViewModel @Inject constructor(
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
                     viewModelScope.launch {
-                        _processState.update { AuthState.Loading("Sincronizzazione account in corso...", null) }
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                         movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
                         }
                         _processState.update { null }
                     }
@@ -96,16 +98,16 @@ class AuthViewModel @Inject constructor(
 
     fun signUp(email: String, password: String) {
         if (emailValidatorUseCase.containsOffensiveWords(email)) {
-            _processState.update { AuthState.Error("L'email contiene parole non consentite") }
+            _processState.update { AuthState.Error(UiText.StringResource(R.string.msg_auth_offensive_email)) }
             return
         }
 
         if (email.isBlank() || password.isBlank()) {
-            _processState.update { AuthState.Error("Email e password sono obbligatorie") }
+            _processState.update { AuthState.Error(UiText.StringResource(R.string.msg_auth_fields_required)) }
             return
         }
 
-        _processState.update { AuthState.Loading("Creazione account...") }
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_creating_account)) }
         
         val currentUser = auth.currentUser
         if (currentUser != null && currentUser.isAnonymous) {
@@ -131,7 +133,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun loginGuest() {
-        _processState.update { AuthState.Loading("Accesso Ospite...") }
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_guest_access)) }
         auth.signInAnonymously()
             .addOnSuccessListener {
                 _processState.update { AuthState.Anonymous }
@@ -160,7 +162,7 @@ class AuthViewModel @Inject constructor(
             return
         }
 
-        _processState.update { AuthState.Loading("Eliminazione account...") }
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_deleting)) }
         
         user.delete()
             .addOnSuccessListener {
@@ -178,13 +180,13 @@ class AuthViewModel @Inject constructor(
 
     fun resetPassword(email: String) {
         if (email.isBlank()) {
-            _processState.update { AuthState.Error("Inserisci l'email per il ripristino") }
+            _processState.update { AuthState.Error(UiText.StringResource(R.string.msg_auth_enter_email_reset)) }
             return
         }
-        _processState.update { AuthState.Loading("Invio email di ripristino...") }
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_sending_reset)) }
         auth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
-                _processState.update { AuthState.Success("Email di ripristino inviata con successo") }
+                _processState.update { AuthState.Success(UiText.StringResource(R.string.msg_auth_email_sent)) }
             }
             .addOnFailureListener { exception ->
                 _processState.update { AuthState.Error(getErrorMessage(exception)) }
@@ -197,18 +199,18 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun getErrorMessage(exception: Exception): String {
+    private fun getErrorMessage(exception: Exception): UiText {
         val msg = exception.message ?: ""
         return when (exception) {
-            is FirebaseAuthInvalidCredentialsException -> "Email o password errati."
-            is FirebaseAuthInvalidUserException -> "Nessun account trovato con questa email."
-            is FirebaseAuthUserCollisionException -> "L'email è già registrata. Effettua l'accesso."
-            is FirebaseNetworkException -> "Nessuna connessione a internet."
-            is FirebaseAuthRecentLoginRequiredException -> "Operazione sensibile. Effettua nuovamente l'accesso."
+            is FirebaseAuthInvalidCredentialsException -> UiText.StringResource(R.string.msg_auth_invalid_credentials)
+            is FirebaseAuthInvalidUserException -> UiText.StringResource(R.string.msg_auth_no_account)
+            is FirebaseAuthUserCollisionException -> UiText.StringResource(R.string.msg_auth_collision)
+            is FirebaseNetworkException -> UiText.StringResource(R.string.msg_auth_no_connection)
+            is FirebaseAuthRecentLoginRequiredException -> UiText.StringResource(R.string.msg_auth_recent_login_required)
             else -> {
-                if (msg.contains("INVALID_LOGIN_CREDENTIALS")) "Email o password errati."
-                else if (msg.contains("TOO_MANY_ATTEMPTS_TRY_LATER")) "Troppi tentativi falliti. Riprova più tardi."
-                else "Errore imprevisto: ${exception.localizedMessage}"
+                if (msg.contains("INVALID_LOGIN_CREDENTIALS")) UiText.StringResource(R.string.msg_auth_invalid_credentials)
+                else if (msg.contains("TOO_MANY_ATTEMPTS_TRY_LATER")) UiText.StringResource(R.string.msg_auth_too_many_attempts)
+                else UiText.StringResource(R.string.msg_auth_unexpected_error, exception.localizedMessage ?: "")
             }
         }
     }

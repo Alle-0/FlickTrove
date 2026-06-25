@@ -105,7 +105,7 @@ fun UndoToast(
                     ) {
                         // Message
                         Text(
-                            text = action.message,
+                            text = action.message.asString(),
                             modifier = Modifier.weight(1f),
                             color = Color.White.copy(alpha = 0.95f),
                             fontSize = 12.sp,

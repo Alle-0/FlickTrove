@@ -242,7 +242,7 @@ fun HomeScreenContent(
                     { m, offset, pos -> actionsState.onLongPress(m, offset, pos) }
                 }
                 val stableOnMessage: (String) -> Unit = remember(viewModel) {
-                    { msg -> viewModel.emitMessage(msg) }
+                    { msg -> viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) }
                 }
 
                 val unreleasedTitle = stringResource(id = R.string.home_unreleased)

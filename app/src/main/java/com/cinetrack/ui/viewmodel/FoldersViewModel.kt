@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.local.entities.FolderEntity
@@ -44,7 +46,7 @@ class FoldersViewModel @Inject constructor(
                 updatedAt = Instant.now().toString()
             )
             repository.saveFolder(newFolder)
-            actionFeedbackManager.emit("Cartella \"$name\" creata")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_created, name))
         }
     }
 
@@ -53,7 +55,7 @@ class FoldersViewModel @Inject constructor(
             val folder = folders.value.find { it.id == folderId }
             if (folder != null) {
                 repository.deleteFolder(folderId)
-                actionFeedbackManager.emit("Cartella \"${folder.name}\" eliminata") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {
                     repository.saveFolder(folder)
                 }
             }

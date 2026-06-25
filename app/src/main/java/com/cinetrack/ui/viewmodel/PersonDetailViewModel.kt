@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -66,7 +68,7 @@ class PersonDetailViewModel @Inject constructor(
         }
     }
 
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
@@ -212,7 +214,7 @@ class PersonDetailViewModel @Inject constructor(
                     else -> "aggiornato"
                 }
                 
-                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                     repository.saveMovie(previousState)
                 }
             } catch (e: Exception) {

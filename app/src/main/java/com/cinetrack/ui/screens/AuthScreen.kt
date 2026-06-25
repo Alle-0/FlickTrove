@@ -90,6 +90,8 @@ fun AuthScreen(
         }
     }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Authenticated, is AuthState.Anonymous -> {
@@ -97,8 +99,12 @@ fun AuthScreen(
                 onLoginSuccess()
             }
             is AuthState.Error -> {
-                showFeedback(state.message, isError = true)
+                showFeedback(state.message.asString(context), isError = true)
                 viewModel.clearError()
+            }
+            is AuthState.Success -> {
+                showFeedback(state.message.asString(context), isError = false)
+                viewModel.resetProcessState()
             }
             else -> {}
         }
@@ -405,7 +411,7 @@ fun AuthScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = loadingState?.message ?: stringResource(R.string.auth_syncing),
+                            text = loadingState?.message?.asString() ?: stringResource(R.string.auth_syncing),
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold

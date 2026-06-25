@@ -447,7 +447,7 @@ fun MovieDetailScreenContent(
                                                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
                                                     context.startActivity(intent)
                                                 } catch (e: Exception) {
-                                                    viewModel.emitMessage(context.getString(R.string.detail_cannot_open_link))
+                                                    viewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.detail_cannot_open_link))
                                                 }
                                             }
                                         }
@@ -520,7 +520,7 @@ fun MovieDetailScreenContent(
                                         onMovieClick = onMovieClick,
                                         onLongPress = actionsState.onLongPress,
                                         onAction = { movie -> viewModel.onEvent(DetailEvent.CycleStatus(movie)) },
-                                        onMessage = { viewModel.emitMessage(it) },
+                                        onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) },
                                         animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))

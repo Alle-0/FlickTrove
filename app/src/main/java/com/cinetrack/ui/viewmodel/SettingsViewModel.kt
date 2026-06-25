@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
@@ -124,7 +126,7 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.updateAccentColor(color)
                 IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
                 movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-                actionFeedbackManager.emit("Colore accento aggiornato")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
             }
         }
     }
@@ -135,7 +137,7 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.updateAccentColor(color)
                 IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
                 movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-                actionFeedbackManager.emit("Colore accento aggiornato")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
             }
         }
     }
@@ -145,7 +147,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleFolderBookmarks(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "visibili" else "nascosti"
-            actionFeedbackManager.emit("Segnalibri cartelle $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_folder_bookmarks, status))
         }
     }
 
@@ -154,7 +156,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleBadges(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "visibili" else "nascosti"
-            actionFeedbackManager.emit("Badge $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_badge, status))
         }
     }
 
@@ -162,7 +164,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateShowLayoutToggle(enabled)
             val status = if (enabled) "visibile" else "nascosto"
-            actionFeedbackManager.emit("Pulsante layout $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, status))
         }
     }
 
@@ -171,7 +173,7 @@ class SettingsViewModel @Inject constructor(
             preferenceRepository.updateShowSplitReleasesHome(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit("Divisione uscite $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_releases_split, status))
         }
     }
 
@@ -180,7 +182,7 @@ class SettingsViewModel @Inject constructor(
             preferenceRepository.updateShowAppEntryAnimation(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit("Animazione logo $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_logo_anim, status))
         }
     }
 
@@ -202,7 +204,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleNotifications(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivate" else "disattivate"
-            actionFeedbackManager.emit("Notifiche $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, status))
         }
     }
 
@@ -211,7 +213,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleVibration(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attiva" else "disattiva"
-            actionFeedbackManager.emit("Vibrazione $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_vibration, status))
         }
     }
 
@@ -221,7 +223,7 @@ class SettingsViewModel @Inject constructor(
             IconManager.updateAppIcon(context, accentColor.value, enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit("Icona App Dinamica $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dynamic_icon, status))
         }
     }
 
@@ -230,7 +232,7 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleAdvancedVisualEffects(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val status = if (enabled) "attivati" else "disattivati"
-            actionFeedbackManager.emit("Effetti visivi avanzati $status")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_visual_fx, status))
         }
     }
 
@@ -242,7 +244,7 @@ class SettingsViewModel @Inject constructor(
                 com.cinetrack.util.ImageQuality.MEDIUM -> "Media"
                 com.cinetrack.util.ImageQuality.HIGH -> "Alta (HD)"
             }
-            actionFeedbackManager.emit("Qualità immagini: $desc")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_img_quality, desc))
         }
     }
 
@@ -255,7 +257,7 @@ class SettingsViewModel @Inject constructor(
                 1.2f -> "Grande"
                 else -> "Personalizzato"
             }
-            actionFeedbackManager.emit("Dimensione testo: $desc")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_text_size, desc))
         }
     }
 
@@ -263,7 +265,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateAppTheme(theme)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            actionFeedbackManager.emit("Tema impostato su $theme")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_theme, theme))
         }
     }
 
@@ -271,7 +273,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateContentLanguage(language)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            actionFeedbackManager.emit("Lingua impostata: $language")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_language, language))
         }
     }
 
@@ -280,7 +282,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             context.imageLoader.diskCache?.clear()
             context.imageLoader.memoryCache?.clear()
-            actionFeedbackManager.emit("Cache immagini svuotata")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_cache_cleared))
         }
     }
 
@@ -292,7 +294,7 @@ class SettingsViewModel @Inject constructor(
             
             if (currentTime - lastTime < twelveHoursInMillis) {
                 val hoursRemaining = ((twelveHoursInMillis - (currentTime - lastTime)) / (1000 * 60 * 60)).toInt()
-                actionFeedbackManager.emit("Puoi inviare un altro feedback tra circa $hoursRemaining ore")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_feedback_wait, hoursRemaining))
                 return@launch
             }
 
@@ -310,13 +312,13 @@ class SettingsViewModel @Inject constructor(
                 val result = feedbackRepository.sendFeedback(feedback)
                 if (result.isSuccess) {
                     settingsRepository.updateLastFeedbackTimestamp(currentTime)
-                    actionFeedbackManager.emit("Grazie per il tuo feedback!")
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_feedback_thanks))
                     onSuccess()
                 } else {
-                    actionFeedbackManager.emit("Errore nell'invio del feedback. Riprova più tardi.")
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_feedback_error))
                 }
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore di connessione durante l'invio")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_connection_error))
             } finally {
                 _isFeedbackLoading.value = false
             }
@@ -328,7 +330,7 @@ class SettingsViewModel @Inject constructor(
         return try {
             backupRepository.exportData()
         } catch (e: Exception) {
-            actionFeedbackManager.emit("Errore durante l'esportazione")
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_export_error))
             null
         } finally {
             _isBackupLoading.value = false
@@ -340,9 +342,9 @@ class SettingsViewModel @Inject constructor(
             _isBackupLoading.value = true
             try {
                 backupRepository.importDataStream(json.byteInputStream())
-                actionFeedbackManager.emit("Dati ripristinati con successo")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_success))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante il ripristino: file non valido")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
             } finally {
                 _isBackupLoading.value = false
             }
@@ -359,9 +361,9 @@ class SettingsViewModel @Inject constructor(
                 } else {
                     backupRepository.migrateCsvStream(fileContent.byteInputStream())
                 }
-                actionFeedbackManager.emit("Importati $count elementi con successo")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante la migrazione: verifica il formato")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
             } finally {
                 _isBackupLoading.value = false
             }

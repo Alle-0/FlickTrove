@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -114,7 +116,7 @@ class FavoritesViewModel @Inject constructor(
                     else -> "aggiornato"
                 }
                 
-                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
@@ -152,7 +154,7 @@ class FavoritesViewModel @Inject constructor(
                     else -> "aggiornato"
                 }
                 
-                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                     movieRepository.saveMovie(previousState)
                 }
             } finally {

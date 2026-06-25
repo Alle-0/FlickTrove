@@ -479,7 +479,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             } else {
                                                 MovieCard(
@@ -503,7 +503,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             }
                                         }
@@ -552,7 +552,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             } else {
                                                 MovieCard(
@@ -576,7 +576,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             }
                                         }
@@ -673,7 +673,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             } else {
                                                 MovieCard(
@@ -697,7 +697,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             }
                                         }
@@ -730,7 +730,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             } else {
                                                 MovieCard(
@@ -754,7 +754,7 @@ fun SearchScreenContent(
                                                     onLongPress = { m, pressOffset, cardPos ->
                                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                                     },
-                                                    onMessage = { viewModel.emitMessage(it) }
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                                 )
                                             }
                                         }

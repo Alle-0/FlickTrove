@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -55,7 +57,7 @@ class HomeViewModel @Inject constructor(
     val tvGridState = LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
     
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
@@ -86,7 +88,7 @@ class HomeViewModel @Inject constructor(
                 preferenceRepository.updateHomeSort(config)
                 repository.savePreferencesRemote(uiState.value.preferences.copy(homeSort = config))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante il salvataggio")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_saving))
             }
         }
     }
@@ -98,7 +100,7 @@ class HomeViewModel @Inject constructor(
                 preferenceRepository.updateGridColumns(columns)
                 repository.savePreferencesRemote(updated)
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante il salvataggio")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_saving))
             }
         }
     }
@@ -127,7 +129,7 @@ class HomeViewModel @Inject constructor(
                     else -> "aggiornato"
                 }
                 
-                actionFeedbackManager.emit("\"$title\" $actionLabel") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                     try {
                         repository.saveMovie(previousState)
                     } catch (e: Exception) {
@@ -135,7 +137,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
         }
     }
@@ -144,7 +146,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 repository.deleteMovie(movie)
-                actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
                     try {
                         repository.saveMovie(movie)
                     } catch (e: Exception) {
@@ -152,7 +154,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante la rimozione")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
             }
         }
     }
@@ -164,7 +166,7 @@ class HomeViewModel @Inject constructor(
                 val current = local ?: movie
                 repository.saveMovie(current.copy(personalRating = rating))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
         }
     }
@@ -176,7 +178,7 @@ class HomeViewModel @Inject constructor(
                 val current = local ?: movie
                 repository.saveMovie(current.copy(personalNote = note))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
         }
     }
@@ -192,7 +194,7 @@ class HomeViewModel @Inject constructor(
                 }
                 repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
             } catch (e: Exception) {
-                actionFeedbackManager.emit("Errore durante l'aggiornamento cartella")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating_folder))
             }
         }
     }

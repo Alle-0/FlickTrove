@@ -219,7 +219,7 @@ fun FolderDetailScreenContent(
 
                             val handlePress: (Movie) -> Unit = remember { { m -> currentOnMovieClick(m) } }
                             val handleLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember { { m, p, c -> currentOnLongPress(m, p, c) } }
-                            val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(msg) } }
+                            val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) } }
 
                             LazyVerticalGrid(
                                 state = lazyGridState,

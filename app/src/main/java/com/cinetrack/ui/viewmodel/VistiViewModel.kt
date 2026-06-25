@@ -1,5 +1,7 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.R
+import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -50,7 +52,7 @@ class VistiViewModel @Inject constructor(
     val tvGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
     
-    fun emitMessage(message: String) {
+    fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
 
@@ -112,7 +114,7 @@ class VistiViewModel @Inject constructor(
                 else -> "aggiornato"
             }
 
-            actionFeedbackManager.emit("\"$title\" $actionLabel") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_added_action, title, actionLabel)) {
                 repository.saveMovie(previousState)
             }
         }
@@ -121,7 +123,7 @@ class VistiViewModel @Inject constructor(
     fun deleteMovie(movie: Movie) {
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit("\"${movie.title ?: movie.name}\" rimosso") {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
                 repository.saveMovie(movie)
             }
         }

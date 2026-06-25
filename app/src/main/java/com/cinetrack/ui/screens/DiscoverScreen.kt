@@ -264,7 +264,7 @@ fun DiscoverScreenContent(
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },
                                     onLongPress = actionsState.onLongPress,
-                                    onMessage = { viewModel.emitMessage(it) }
+                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                 )
                             } else {
                                 MovieCard(
@@ -282,7 +282,7 @@ fun DiscoverScreenContent(
                                     onPress = { onMovieClick(movie) },
                                     onAction = { viewModel.toggleFavorite(movie) },
                                     onLongPress = actionsState.onLongPress,
-                                    onMessage = { viewModel.emitMessage(it) }
+                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                 )
                             }
                         }
