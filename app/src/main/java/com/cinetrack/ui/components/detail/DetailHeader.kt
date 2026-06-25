@@ -1,6 +1,7 @@
 @file:OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -435,7 +436,7 @@ fun RatingPill(
 
         // Help Text - Moved further down
         Text(
-            text = "TOCCA PER ALTRO",
+            text = stringResource(R.string.detail_tap_for_more),
             fontSize = 7.sp,
             lineHeight = 7.sp,
             fontWeight = FontWeight.Black,

@@ -1,10 +1,12 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.foundation.background
+
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -83,7 +85,7 @@ fun DeleteFolderDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "Elimina Cartella?",
+                    text = stringResource(R.string.folder_delete_title),
                     color = Color.White,
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                     textAlign = TextAlign.Center
@@ -93,11 +95,11 @@ fun DeleteFolderDialog(
 
                 Text(
                     text = buildAnnotatedString {
-                        append("Sei sicuro di voler eliminare ")
+                        append(stringResource(R.string.folder_delete_confirm_prefix))
                         withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
                             append("\"$folderName\"")
                         }
-                        append("? Questa azione è irreversibile.")
+                        append(stringResource(R.string.folder_delete_confirm_suffix))
                     },
                     color = Color.White.copy(alpha = 0.6f),
                     style = MaterialTheme.typography.bodyMedium,
@@ -129,7 +131,7 @@ fun DeleteFolderDialog(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("ELIMINA CARTELLA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                        Text(stringResource(R.string.folder_delete_action), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
                     }
 
                     // Cancel
@@ -141,7 +143,7 @@ fun DeleteFolderDialog(
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Text(
-                            text = "ANNULLA",
+                            text = stringResource(R.string.action_cancel).uppercase(),
                             color = Color.White.copy(alpha = 0.4f),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )

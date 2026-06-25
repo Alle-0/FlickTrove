@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -181,7 +182,7 @@ fun PersonDetailScreenContent(
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                         ) {
-                            Text("RIPROVA", color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                            Text(stringResource(R.string.detail_retry), color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                         }
                     }
                 }
@@ -272,7 +273,7 @@ fun PersonDetailScreenContent(
                                 )
                                 if (bio.length > 200) {
                                     Text(
-                                        text = if (uiState.showFullBio) "LEGGI MENO" else "LEGGI TUTTO",
+                                        text = if (uiState.showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
                                         color = Color.White,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Black,
@@ -280,7 +281,7 @@ fun PersonDetailScreenContent(
                                     )
                                 }
                             } ?: Text(
-                                text = "Nessuna biografia disponibile.",
+                                text = stringResource(R.string.person_no_bio),
                                 color = Color.White.copy(alpha = 0.7f),
                                 fontSize = 16.sp,
                                 lineHeight = 26.sp
@@ -290,12 +291,12 @@ fun PersonDetailScreenContent(
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), "DATA DI NASCITA", p.birthday ?: "N/D")
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_partenone), "LUOGO DI NASCITA", p.placeOfBirth ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_birthday), p.birthday ?: stringResource(R.string.person_nd))
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_partenone), stringResource(R.string.person_birth_place), p.placeOfBirth ?: stringResource(R.string.person_nd))
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_documento), "CONOSCIUTO PER", p.knownForDepartment ?: "N/D")
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), "POPOLARITÀ", p.popularity?.let { "%.1f".format(it) } ?: "N/D")
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_documento), stringResource(R.string.person_known_for), p.knownForDepartment ?: stringResource(R.string.person_nd))
+                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_popularity), p.popularity?.let { "%.1f".format(it) } ?: stringResource(R.string.person_nd))
                                 }
                             }
                         }
@@ -312,7 +313,7 @@ fun PersonDetailScreenContent(
                                     .take(10)
                             }
                             if (knownFor.isNotEmpty()) {
-                                Text("Punti Forti", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
+                                Text(stringResource(R.string.person_highlights), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
                                 Spacer(modifier = Modifier.height(16.dp))
                                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     itemsIndexed(
@@ -344,7 +345,7 @@ fun PersonDetailScreenContent(
                                 Spacer(modifier = Modifier.height(40.dp))
                             }
 
-                            Text("Filmografia", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
+                            Text(stringResource(R.string.person_filmography), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
 
                             val castMovies = remember(p.combinedCredits) {
                                 p.combinedCredits?.cast?.filter { it.mediaType == "movie" }
@@ -377,10 +378,10 @@ fun PersonDetailScreenContent(
                                     .horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                if (castMovies.isNotEmpty()) CategoryPill("Cast - Film (${castMovies.size})", uiState.activeTab == "cast_movie", hazeState = localHazeState) { viewModel.onTabChanged("cast_movie") }
-                                if (castTV.isNotEmpty()) CategoryPill("Cast - Serie (${castTV.size})", uiState.activeTab == "cast_tv", hazeState = localHazeState) { viewModel.onTabChanged("cast_tv") }
-                                if (crewMovies.isNotEmpty()) CategoryPill("Regia - Film (${crewMovies.size})", uiState.activeTab == "crew_movie", hazeState = localHazeState) { viewModel.onTabChanged("crew_movie") }
-                                if (crewTV.isNotEmpty()) CategoryPill("Regia - Serie (${crewTV.size})", uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
+                                if (castMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_movie_format, castMovies.size), uiState.activeTab == "cast_movie", hazeState = localHazeState) { viewModel.onTabChanged("cast_movie") }
+                                if (castTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_tv_format, castTV.size), uiState.activeTab == "cast_tv", hazeState = localHazeState) { viewModel.onTabChanged("cast_tv") }
+                                if (crewMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_movie_format, crewMovies.size), uiState.activeTab == "crew_movie", hazeState = localHazeState) { viewModel.onTabChanged("crew_movie") }
+                                if (crewTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_tv_format, crewTV.size), uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
                             }
 
                             val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
@@ -495,7 +496,7 @@ fun PersonDetailScreenContent(
             ) {
                 Icon(
                     ImageVector.vectorResource(id = R.drawable.ic_left),
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.detail_content_desc_back),
                     tint = Color.White,
                     modifier = Modifier
                         .size(20.dp)
@@ -505,7 +506,7 @@ fun PersonDetailScreenContent(
                         }
                 )
             }
-            // Home FAB — visible from the 3rd consecutive detail screen onwards
+            // Home FAB â€” visible from the 3rd consecutive detail screen onwards
             val homeButtonVisible = detailStackDepth >= 3
             val homeButtonAlpha by animateFloatAsState(
                 targetValue = if (homeButtonVisible) 1f else 0f,
@@ -537,7 +538,7 @@ fun PersonDetailScreenContent(
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                        contentDescription = "Torna alla schermata principale",
+                        contentDescription = stringResource(R.string.detail_content_desc_home),
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )

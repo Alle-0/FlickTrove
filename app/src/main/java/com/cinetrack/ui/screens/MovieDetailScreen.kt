@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -329,7 +330,7 @@ fun MovieDetailScreenContent(
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         Text(
-                            text = "Qualcosa è andato storto",
+                            text = stringResource(R.string.detail_error_title),
                             style = MaterialTheme.typography.titleLarge,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
@@ -338,7 +339,7 @@ fun MovieDetailScreenContent(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
-                            text = errorState?.message ?: "Errore sconosciuto",
+                            text = errorState?.message ?: stringResource(R.string.detail_error_unknown),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.6f),
                             textAlign = TextAlign.Center,
@@ -359,14 +360,14 @@ fun MovieDetailScreenContent(
                                 .padding(horizontal = 32.dp)
                                 .bounceClick { viewModel.onEvent(DetailEvent.Refresh) }
                         ) {
-                            Text("RIPROVA", fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                            Text(stringResource(R.string.detail_retry), fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                         }
 
                         TextButton(
                             onClick = onBackClick,
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
-                            Text("Torna indietro", color = Color.White.copy(alpha = 0.5f))
+                            Text(stringResource(R.string.detail_go_back), color = Color.White.copy(alpha = 0.5f))
                         }
                     }
                 }
@@ -446,7 +447,7 @@ fun MovieDetailScreenContent(
                                                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
                                                     context.startActivity(intent)
                                                 } catch (e: Exception) {
-                                                    viewModel.emitMessage("Impossibile aprire il link")
+                                                    viewModel.emitMessage(context.getString(R.string.detail_cannot_open_link))
                                                 }
                                             }
                                         }
@@ -455,7 +456,7 @@ fun MovieDetailScreenContent(
                                     Spacer(modifier = Modifier.height(40.dp))
 
                                     DetailInfo(
-                                        overview = activeMovie.overview ?: "Nessuna trama disponibile.",
+                                        overview = activeMovie.overview ?: stringResource(R.string.detail_no_overview),
                                         accentColor = accentColor
                                     )
 
@@ -756,7 +757,7 @@ fun MovieDetailScreenContent(
                             }
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.detail_content_desc_back),
                                 tint = Color.White,
                                 modifier = Modifier
                                     .size(20.dp)
@@ -802,7 +803,7 @@ fun MovieDetailScreenContent(
                             ) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                                    contentDescription = "Torna alla schermata principale",
+                                    contentDescription = stringResource(R.string.detail_content_desc_home),
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -849,7 +850,7 @@ fun MovieDetailScreenContent(
                             // Modal Title: Visible when expanding/expanded
                             if (modalExpansionProgress > 0.01f) {
                                 Text(
-                                    text = "Gestisci Cartelle",
+                                    text = stringResource(R.string.detail_manage_folders),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -906,7 +907,7 @@ fun MovieDetailScreenContent(
                                                                 val sendIntent: android.content.Intent = android.content.Intent().apply {
                                                                     action = android.content.Intent.ACTION_SEND
                                                                     val link = "https://flicktrove.com/detail/${successState.movieEntry.mediaType}/${successState.movieEntry.id}"
-                                                                    putExtra(android.content.Intent.EXTRA_TEXT, "Dai un'occhiata a ${successState.movieEntry.displayName} su FlickTrove!\n\n$link")
+                                                                    putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.detail_share_text, successState.movieEntry.displayName, link))
                                                                     if (fileUri != null) {
                                                                         putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
                                                                         type = "image/jpeg"
@@ -940,7 +941,7 @@ fun MovieDetailScreenContent(
                                 }
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_share),
-                                    contentDescription = "Share",
+                                    contentDescription = stringResource(R.string.detail_content_desc_share),
                                     tint = Color.White,
                                     modifier = Modifier
                                         .offset(x = (-1.5).dp)
@@ -986,7 +987,7 @@ fun MovieDetailScreenContent(
                             }
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
-                                contentDescription = "Folder",
+                                contentDescription = stringResource(R.string.detail_content_desc_folder),
                                 modifier = Modifier
                                     .size(24.dp)
                                     .graphicsLayer(alpha = 0.99f)
@@ -1084,7 +1085,7 @@ fun MovieDetailScreenContent(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            "Legenda Rating",
+                            stringResource(R.string.detail_rating_legend_title),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = Color.White
                         )
@@ -1103,36 +1104,36 @@ fun MovieDetailScreenContent(
 
                     // Film (MPAA)
                     Text(
-                        "🎬  Film (USA / MPAA)",
+                        stringResource(R.string.detail_rating_movies_usa),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.White.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        RatingLegendItem("G", Color(0xFF4CAF50), "Per tutti (General Audiences).")
-                        RatingLegendItem("PG", Color(0xFF8BC34A), "Si consiglia la presenza dei genitori.")
-                        RatingLegendItem("PG-13", Color(0xFFFF9800), "Sconsigliato ai minori di 13 anni.")
-                        RatingLegendItem("R", Color(0xFFF44336), "Vietato ai minori di 17 anni non accompagnati.")
-                        RatingLegendItem("NC-17", Color(0xFFD32F2F), "Vietato ai minori di 18 anni.")
-                        RatingLegendItem("NR", Color(0xFF9E9E9E), "Non classificato (Not Rated).")
+                        RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_g))
+                        RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
+                        RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
+                        RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
+                        RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
+                        RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Serie TV (TV Parental Guidelines)
                     Text(
-                        "📺  Serie TV (USA / TV Parental Guidelines)",
+                        stringResource(R.string.detail_rating_tv_usa),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.White.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        RatingLegendItem("TV-Y", Color(0xFF4CAF50), "Per tutti i bambini.")
-                        RatingLegendItem("TV-Y7", Color(0xFF8BC34A), "Per bambini dai 7 anni in su.")
-                        RatingLegendItem("TV-G", Color(0xFF66BB6A), "Per tutto il pubblico.")
-                        RatingLegendItem("TV-PG", Color(0xFFFF9800), "Supervisione genitoriale consigliata.")
-                        RatingLegendItem("TV-14", Color(0xFFF44336), "Sconsigliato ai minori di 14 anni.")
-                        RatingLegendItem("TV-MA", Color(0xFFD32F2F), "Solo per adulti (18+).")
+                        RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
+                        RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
+                        RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
+                        RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
+                        RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
+                        RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
                     }
                                      }
 
@@ -1146,7 +1147,7 @@ fun MovieDetailScreenContent(
                             containerColor = Color.White.copy(alpha = 0.15f)
                         )
                     ) {
-                        Text("Chiudi", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1173,7 +1174,7 @@ fun MovieDetailScreenContent(
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = "Chiudi",
+                    contentDescription = stringResource(R.string.settings_close),
                     tint = Color.White.copy(alpha = 0.65f),
                     modifier = Modifier
                         .size(18.dp)
@@ -1188,14 +1189,14 @@ fun MovieDetailScreenContent(
                 modifier = Modifier.size(48.dp).padding(bottom = 16.dp)
             )
             Text(
-                "Traduci commento",
+                stringResource(R.string.detail_translate_comment),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "Il modello di traduzione (circa 30MB) potrebbe non essere presente. Vuoi consentire il download anche su rete dati cellulare?",
+                stringResource(R.string.detail_translate_download_prompt),
                 color = Color.White.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -1218,7 +1219,7 @@ fun MovieDetailScreenContent(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Sì, usa rete", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.detail_translate_yes_cellular), fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -1232,14 +1233,14 @@ fun MovieDetailScreenContent(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("No, solo Wi-Fi")
+                    Text(stringResource(R.string.detail_translate_no_wifi))
                 }
 
                 TextButton(
                     onClick = { viewModel.dismissTranslationPrompt() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Non ora", color = Color.White.copy(alpha = 0.65f))
+                    Text(stringResource(R.string.detail_translate_not_now), color = Color.White.copy(alpha = 0.65f))
                 }
             }
         }

@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.BorderStroke
@@ -393,13 +394,13 @@ fun SearchScreenContent(
                             )
                             Spacer(modifier = Modifier.height(24.dp))
                             Text(
-                                text = "Qualcosa è andato storto",
+                                text = stringResource(R.string.error_state_title),
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = uiState.errorMessage ?: "Impossibile caricare i dati. Controlla la tua connessione e riprova.",
+                                text = uiState.errorMessage ?: stringResource(R.string.search_error_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -413,7 +414,7 @@ fun SearchScreenContent(
                             ) {
                                 Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("RIPROVA")
+                                Text(stringResource(R.string.detail_retry))
                             }
                         }
                     } else {                        LazyVerticalGrid(
@@ -440,7 +441,7 @@ fun SearchScreenContent(
                                     item(span = { GridItemSpan(12) }) {
                                         Column {
                                             Text(
-                                                text = "Tendenze del momento",
+                                                text = stringResource(R.string.search_trending_now),
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontSize = 20.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -513,7 +514,7 @@ fun SearchScreenContent(
                                     item(span = { GridItemSpan(12) }) {
                                         Column {
                                             Text(
-                                                text = "Tendenze del momento",
+                                                text = stringResource(R.string.search_trending_now),
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontSize = 20.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -586,7 +587,7 @@ fun SearchScreenContent(
                                     item(span = { GridItemSpan(12) }) {
                                         Column {
                                             Text(
-                                                text = "Tendenze del momento",
+                                                text = stringResource(R.string.search_trending_now),
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontSize = 20.sp,
                                                 fontWeight = FontWeight.Bold,
@@ -620,10 +621,10 @@ fun SearchScreenContent(
                                         ) {
                                             Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                                             Spacer(modifier = Modifier.height(16.dp))
-                                            Text(text = "Nessun risultato", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                            Text(text = stringResource(R.string.search_no_results), color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Text(
-                                                text = if (uiState.query.length in 1..2) "Nessun risultato trovato.\nDigita almeno 3 lettere" else "Nessun risultato trovato.\nProva a semplificare la ricerca", 
+                                                text = if (uiState.query.length in 1..2) stringResource(R.string.search_no_results_short) else stringResource(R.string.search_no_results_simplify), 
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), 
                                                 fontSize = 14.sp, 
                                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -812,7 +813,7 @@ fun SearchScreenContent(
                                 Box(modifier = Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { onExitRequest.value?.invoke() }, contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = "Torna indietro", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
+                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -820,7 +821,7 @@ fun SearchScreenContent(
                                  Box(modifier = Modifier.fillMaxSize()
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape))
                                      Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 14.dp)) {
-                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = stringResource(R.string.search_content_desc), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
                                         Spacer(modifier = Modifier.width(10.dp))
                                     val primaryColor = MaterialTheme.colorScheme.primary
                                     CompositionLocalProvider(LocalTextSelectionColors provides TextSelectionColors(handleColor = primaryColor, backgroundColor = primaryColor.copy(alpha = 0.4f))) {
@@ -843,16 +844,16 @@ fun SearchScreenContent(
                                                         val placeholderText = when {
                                                             uiState.sortConfig.selectedGenres.isNotEmpty() -> {
                                                                 val gid = uiState.sortConfig.selectedGenres.first()
-                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: initialGenreName ?: "Genere"
-                                                                "Genere: $name"
+                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: initialGenreName ?: stringResource(R.string.search_fallback_genre)
+                                                                stringResource(R.string.search_active_genre_format, name)
                                                             }
                                                             uiState.sortConfig.selectedKeywords.isNotEmpty() -> {
                                                                 val kid = uiState.sortConfig.selectedKeywords.first()
                                                                 val dictName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries.firstOrNull { it.value == kid }?.key?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
-                                                                val name = uiState.suggestedFilters.find { it.id == kid }?.name ?: dictName ?: initialKeywordName ?: "Selezionato"
-                                                                "Tema: $name"
+                                                                val name = uiState.suggestedFilters.find { it.id == kid }?.name ?: dictName ?: initialKeywordName ?: stringResource(R.string.search_fallback_keyword)
+                                                                stringResource(R.string.search_active_keyword_format, name)
                                                             }
-                                                            else -> "Cerca film, serie, persone..."
+                                                            else -> stringResource(R.string.search_placeholder)
                                                         }
                                                         val hasActiveFilter = uiState.sortConfig.selectedGenres.isNotEmpty() || uiState.sortConfig.selectedKeywords.isNotEmpty()
                                                         Text(
@@ -869,7 +870,7 @@ fun SearchScreenContent(
                                         )
                                     }
                                     if (uiState.query.isNotEmpty()) {
-                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Pulisci", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(14.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
+                                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = stringResource(R.string.search_content_desc_clear), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), modifier = Modifier.size(14.dp).bounceClick(scaleDown = 0.8f) { viewModel.onQueryChanged("") })
                                     }
                                 }
                             }
@@ -891,7 +892,7 @@ fun SearchScreenContent(
                                     ) {
                                         Icon(
                                             imageVector = layoutToggleIcon(uiState.preferences.gridColumns),
-                                            contentDescription = "Cambia Layout",
+                                            contentDescription = stringResource(R.string.search_content_desc_layout),
                                             tint = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.size(20.dp)
                                         )
@@ -908,7 +909,7 @@ fun SearchScreenContent(
                                      .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                                     .then(if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape) else Modifier))
                                 Box(modifier = Modifier.fillMaxSize().bounceClick { keyboardController?.hide(); focusManager.clearFocus(); isFilterVisible = true }, contentAlignment = Alignment.Center) {
-                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri), contentDescription = "Filtri", tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
+                                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.folder_detail_filters), tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -916,7 +917,7 @@ fun SearchScreenContent(
                         if (uiState.sortConfig.selectedKeywords.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Nota: il filtro parola chiave viene ignorato nella ricerca testuale.",
+                                text = stringResource(R.string.search_keyword_filter_warning),
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 modifier = Modifier.padding(horizontal = 24.dp),
                                 fontSize = 10.sp,
@@ -934,9 +935,9 @@ fun SearchScreenContent(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("RECENTI", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Text(stringResource(R.string.search_recent), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                                 Text(
-                                    text = "CANCELLA TUTTO",
+                                    text = stringResource(R.string.search_clear_all),
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
@@ -965,7 +966,7 @@ fun SearchScreenContent(
                                             CompositionLocalProvider(androidx.compose.material3.LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
                                                 Icon(
                                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                                    contentDescription = "Rimuovi ricerca",
+                                                    contentDescription = stringResource(R.string.search_remove_recent),
                                                     modifier = Modifier
                                                         .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) }
                                                         .size(18.dp)
@@ -994,11 +995,11 @@ fun SearchScreenContent(
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("GENERI E TEMI SUGGERITI", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Text(stringResource(R.string.search_suggested), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = if (uiState.preferences.isSearchSuggestionsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = if (uiState.preferences.isSearchSuggestionsExpanded) "Comprimi" else "Espandi",
+                                    contentDescription = if (uiState.preferences.isSearchSuggestionsExpanded) stringResource(R.string.search_collapse) else stringResource(R.string.search_expand),
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -1136,9 +1137,9 @@ fun SearchScreenContent(
                                     )
                                     
                                     Row(modifier = Modifier.fillMaxSize()) {
-                                        CategoryTab("FILM", uiState.category == "movie") { viewModel.onCategoryChanged("movie") }
-                                        CategoryTab("SERIE TV", uiState.category == "tv") { viewModel.onCategoryChanged("tv") }
-                                        CategoryTab("PERSONE", uiState.category == "person") { viewModel.onCategoryChanged("person") }
+                                        CategoryTab(stringResource(R.string.folder_detail_tab_movies), uiState.category == "movie") { viewModel.onCategoryChanged("movie") }
+                                        CategoryTab(stringResource(R.string.folder_detail_tab_tv), uiState.category == "tv") { viewModel.onCategoryChanged("tv") }
+                                        CategoryTab(stringResource(R.string.search_tab_persons), uiState.category == "person") { viewModel.onCategoryChanged("person") }
                                     }
                                 }
                                  }

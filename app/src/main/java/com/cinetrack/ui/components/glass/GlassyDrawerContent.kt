@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.glass
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,8 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.util.NotificationHelper
 import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.ui.res.vectorResource
-import com.cinetrack.R
-
 /**
  * A premium glassmorphic drawer content component.
  */
@@ -64,7 +64,7 @@ fun GlassyDrawerContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Menu",
+                    text = stringResource(R.string.drawer_menu),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold

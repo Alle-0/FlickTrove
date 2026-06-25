@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
@@ -314,7 +315,7 @@ fun MovieActionsPopup(
                         
                         Spacer(modifier = Modifier.height(4.dp))
                         MovieMenuItem(
-                            text = "Voto rapido",
+                            text = stringResource(R.string.card_quick_rate),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                             iconColor = HazeStyles.AccentYellow,
                             modifier = Modifier.animateEnterExit(
@@ -323,7 +324,7 @@ fun MovieActionsPopup(
                             onClick = { onDismiss(); onQuickVote(movie) }
                         )
                         MovieMenuItem(
-                            text = "Nota rapida",
+                            text = stringResource(R.string.card_quick_note),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                             iconColor = Color(0xFF60A5FA),
                             modifier = Modifier.animateEnterExit(
@@ -332,7 +333,7 @@ fun MovieActionsPopup(
                             onClick = { onDismiss(); onQuickNote(movie) }
                         )
                         MovieMenuItem(
-                            text = "Cartelle",
+                            text = stringResource(R.string.card_folders),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                             iconColor = Color(0xFF34D399),
                             modifier = Modifier.animateEnterExit(
@@ -341,7 +342,7 @@ fun MovieActionsPopup(
                             onClick = { onDismiss(); onFolders(movie) }
                         )
                         MovieMenuItem(
-                            text = "Condividi",
+                            text = stringResource(R.string.card_share),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             iconColor = Color(0xFF818CF8),
                             modifier = Modifier.animateEnterExit(
@@ -361,7 +362,7 @@ fun MovieActionsPopup(
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         MovieMenuItem(
-                            text = "Elimina",
+                            text = stringResource(R.string.card_delete),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                             iconColor = Color(0xFFE57373),
                             isDestructive = true,

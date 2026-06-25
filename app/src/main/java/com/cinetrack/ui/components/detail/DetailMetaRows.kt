@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -138,7 +140,7 @@ fun DetailMetaRows(
         // Watch Providers
         if (streaming.isNotEmpty() || buyAndRent.isNotEmpty()) {
             Text(
-                text = "DOVE GUARDARE",
+                text = stringResource(R.string.detail_where_to_watch),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp

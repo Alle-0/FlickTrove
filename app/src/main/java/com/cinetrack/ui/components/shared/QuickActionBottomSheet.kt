@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
@@ -50,7 +52,7 @@ fun QuickActionBottomSheet(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Azioni rapide",
+                    text = stringResource(R.string.quick_action_title),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.4f)
                 )
@@ -58,7 +60,7 @@ fun QuickActionBottomSheet(
 
             // Action Items
             QuickActionItem(
-                label = "Voto rapido",
+                label = stringResource(R.string.quick_action_rating),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                 iconColor = accentColor,
                 onClick = {
@@ -70,7 +72,7 @@ fun QuickActionBottomSheet(
             HorizontalDivider(color = Color.White.copy(alpha = 0.05f), thickness = 1.dp)
 
             QuickActionItem(
-                label = "Nota rapida",
+                label = stringResource(R.string.quick_action_note),
                 icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                 iconColor = Color.White,
                 onClick = {

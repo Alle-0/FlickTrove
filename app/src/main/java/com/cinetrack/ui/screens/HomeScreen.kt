@@ -3,6 +3,7 @@ package com.cinetrack.ui.screens
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
@@ -74,10 +75,11 @@ object HomeTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(id = R.string.home_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 0u,
-                    title = "Home",
+                    title = title,
                     icon = null
                 )
             }
@@ -228,7 +230,7 @@ fun HomeScreenContent(
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
                     Text(
-                        text = if (uiState.searchQuery.isEmpty()) "La tua lista è vuota" else "Nessun risultato",
+                        text = if (uiState.searchQuery.isEmpty()) stringResource(id = R.string.home_empty_list) else stringResource(id = R.string.home_no_results),
                         color = Color.White.copy(alpha = 0.5f),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -243,6 +245,7 @@ fun HomeScreenContent(
                     { msg -> viewModel.emitMessage(msg) }
                 }
 
+                val unreleasedTitle = stringResource(id = R.string.home_unreleased)
                 LazyVerticalGrid(
                     state = currentGridState,
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -259,7 +262,7 @@ fun HomeScreenContent(
                     val sections = if (uiState.preferences.showSplitReleasesHome) {
                         listOf(
                             "" to uiState.releasedMovies,
-                            "Non ancora usciti" to uiState.unreleasedMovies
+                            unreleasedTitle to uiState.unreleasedMovies
                         ).filter { it.second.isNotEmpty() }
                     } else {
                         listOf("" to uiState.movies)
@@ -367,7 +370,7 @@ fun HomeScreenContent(
                             .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                     )
                     
-                    val options = listOf("FILM", "SERIE TV")
+                    val options = listOf(stringResource(id = R.string.home_tab_movies), stringResource(id = R.string.home_tab_tv_series))
                     val selectedIndex = if (uiState.activeTab == "movie") 0 else 1
                     
                     CategoryTabSelector(
@@ -420,7 +423,7 @@ fun HomeScreenContent(
                             ) {
                                 Icon(
                                     imageVector = layoutToggleIcon(columns),
-                                    contentDescription = "Cambia Layout",
+                                    contentDescription = stringResource(id = R.string.home_cd_change_layout),
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -461,7 +464,7 @@ fun HomeScreenContent(
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                contentDescription = "Filtri",
+                                contentDescription = stringResource(id = R.string.home_cd_filters),
                                 tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
                                 modifier = Modifier.size(18.dp)
                             )

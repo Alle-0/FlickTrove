@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,8 +34,6 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.res.vectorResource
-import com.cinetrack.R
-
 @Composable
 fun GlassyDrawer(
     hazeState: HazeState,
@@ -89,7 +89,7 @@ fun GlassyDrawer(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Menu",
+                    text = stringResource(R.string.drawer_menu),
                     style = MaterialTheme.typography.titleLarge.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold,

@@ -3,6 +3,7 @@ package com.cinetrack.ui.screens
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
@@ -76,10 +77,11 @@ object FoldersTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(id = R.string.folders_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 3u,
-                    title = "Folders",
+                    title = title,
                     icon = null
                 )
             }
@@ -147,7 +149,7 @@ fun FoldersScreenContent(
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            text = "Non hai ancora creato cartelle",
+                            text = stringResource(R.string.folders_empty_message),
                             color = Color.White.copy(alpha = 0.4f),
                             style = MaterialTheme.typography.bodyLarge
                         )
@@ -164,7 +166,7 @@ fun FoldersScreenContent(
                             Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "CREA LA PRIMA", 
+                                stringResource(R.string.folders_create_first), 
                                 color = Color.White, 
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                             )
@@ -286,7 +288,7 @@ fun FoldersScreenContent(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text("Rinomina Cartella", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        Text(stringResource(R.string.folders_rename), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
                     Row(
                         modifier = Modifier
@@ -301,7 +303,7 @@ fun FoldersScreenContent(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text("Cambia Colore", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        Text(stringResource(R.string.folders_change_color), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
                     Row(
                         modifier = Modifier
@@ -315,7 +317,7 @@ fun FoldersScreenContent(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text("Elimina Cartella", color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        Text(stringResource(R.string.folders_delete), color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
                 }
             }
@@ -429,7 +431,7 @@ fun NewFolderCard(onClick: () -> Unit) {
         Spacer(Modifier.width(16.dp))
         
         Text(
-            "Nuova Cartella",
+            stringResource(R.string.folders_new_folder),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = (-0.3).sp
@@ -492,7 +494,7 @@ fun FolderCreateDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Nuova Cartella",
+                            text = stringResource(R.string.folders_new_folder),
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                             color = Color.White
                         )
@@ -513,7 +515,7 @@ fun FolderCreateDialog(
                     value = name,
                     onValueChange = { if (it.length <= 25) name = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Nome cartella", color = Color.White.copy(alpha = 0.3f)) },
+                    placeholder = { Text(stringResource(R.string.folders_name_placeholder), color = Color.White.copy(alpha = 0.3f)) },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
@@ -548,7 +550,7 @@ fun FolderCreateDialog(
                         disabledContentColor = Color.Black.copy(alpha = 0.5f)
                     )
                 ) {
-                    Text("CREA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                    Text(stringResource(R.string.folders_create_button), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                 }
                 }
             }

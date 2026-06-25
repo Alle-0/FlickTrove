@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,7 +56,7 @@ fun DetailComments(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "COMMENTI MIGLIORI",
+            text = stringResource(R.string.detail_top_comments),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp

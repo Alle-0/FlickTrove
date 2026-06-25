@@ -62,6 +62,7 @@ import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
@@ -108,10 +109,11 @@ object SettingsTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(id = R.string.settings_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 6u,
-                    title = "Settings",
+                    title = title,
                     icon = null
                 )
             }
@@ -436,13 +438,13 @@ fun SettingsScreenContent(
                     // Section: Interfaccia e Layout
                     item {
                         SettingsSection(
-                            title = "Interfaccia e Layout",
+                            title = stringResource(R.string.settings_ui_layout),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
-                                title = "Segnalibri cartelle",
-                                description = "Mostra un nastro colorato sulle card per indicare l'appartenenza alle cartelle.",
+                                title = stringResource(R.string.settings_folder_bookmarks),
+                                description = stringResource(R.string.settings_folder_bookmarks_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = showFolderBookmarks,
@@ -460,8 +462,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
-                                title = "Badge informativi",
-                                description = "Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.",
+                                title = stringResource(R.string.settings_badges),
+                                description = stringResource(R.string.settings_badges_desc),
                                 trailing = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         IconButton(onClick = { 
@@ -493,8 +495,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
-                                title = "Pulsante Layout",
-                                description = "Mostra il pulsante per cambiare il numero di colonne in Home",
+                                title = stringResource(R.string.settings_layout_toggle),
+                                description = stringResource(R.string.settings_layout_toggle_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = showLayoutToggle,
@@ -512,8 +514,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_strisce),
-                                title = "Divisione uscite Home",
-                                description = "Separa i titoli già usciti da quelli in arrivo nella Home",
+                                title = stringResource(R.string.settings_split_home),
+                                description = stringResource(R.string.settings_split_home_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = showSplitReleasesHome,
@@ -529,19 +531,58 @@ fun SettingsScreenContent(
                                     settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
                                 }
                             )
+                            SettingsItem(
+                                icon = Icons.Rounded.Language,
+                                title = stringResource(R.string.settings_language),
+                                description = stringResource(R.string.settings_language_desc),
+                                trailing = { },
+                                onClick = { },
+                                customContent = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val options = listOf(
+                                            Triple("system", stringResource(R.string.settings_language_system), contentLanguage == "system"),
+                                            Triple("en", stringResource(R.string.settings_language_en), contentLanguage == "en"),
+                                            Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it")
+                                        )
+                                        options.forEach { (value, label, isSelected) ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(12.dp))
+                                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                                    .bounceClick { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                        settingsViewModel.updateContentLanguage(value)
+                                                    }
+                                                    .padding(vertical = 10.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
 
                     // Section: Estetica
                     item {
                         SettingsSection(
-                            title = "Estetica",
+                            title = stringResource(R.string.settings_aesthetics),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_palette)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_palette),
-                                title = "Colore accento",
-                                description = "Personalizza l'aspetto dell'app",
+                                title = stringResource(R.string.settings_accent_color),
+                                description = stringResource(R.string.settings_accent_color_desc),
                                 trailing = {
                                     // Stunning Premium Circular Accent Selector with outer glow ring
                                     Box(
@@ -581,8 +622,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_magia),
-                                title = "Icona App Dinamica",
-                                description = "Cambia l'icona dell'app nella schermata home per adattarla al colore accento",
+                                title = stringResource(R.string.settings_dynamic_icon),
+                                description = stringResource(R.string.settings_dynamic_icon_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = dynamicAppIconEnabled,
@@ -600,8 +641,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle), // reuse sparkle or use play
-                                title = "Animazione Iniziale",
-                                description = "Mostra l'animazione del logo all'apertura dell'app",
+                                title = stringResource(R.string.settings_entry_animation),
+                                description = stringResource(R.string.settings_entry_animation_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = showAppEntryAnimation,
@@ -619,8 +660,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
-                                title = "Sfondo AMOLED",
-                                description = "Usa il nero assoluto invece del grigio scuro",
+                                title = stringResource(R.string.settings_amoled_bg),
+                                description = stringResource(R.string.settings_amoled_bg_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = appTheme == "AMOLED",
@@ -642,13 +683,13 @@ fun SettingsScreenContent(
                     // Section: Accessibilità
                     item {
                         SettingsSection(
-                            title = "Accessibilità",
+                            title = stringResource(R.string.settings_accessibility),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_accessibilita)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_maiuscolo),
-                                title = "Dimensione testo titoli",
-                                description = "Ingrandisce o riduce i testi principali",
+                                title = stringResource(R.string.settings_title_size),
+                                description = stringResource(R.string.settings_title_size_desc),
                                 trailing = { },
                                 onClick = { },
                                 customContent = {
@@ -657,9 +698,9 @@ fun SettingsScreenContent(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         val options = listOf(
-                                            Triple(0.8f, "Piccolo", titleTextSizeMultiplier == 0.8f),
-                                            Triple(1.0f, "Medio", titleTextSizeMultiplier == 1.0f),
-                                            Triple(1.2f, "Grande", titleTextSizeMultiplier == 1.2f)
+                                            Triple(0.8f, stringResource(R.string.settings_size_small), titleTextSizeMultiplier == 0.8f),
+                                            Triple(1.0f, stringResource(R.string.settings_size_medium), titleTextSizeMultiplier == 1.0f),
+                                            Triple(1.2f, stringResource(R.string.settings_size_large), titleTextSizeMultiplier == 1.2f)
                                         )
                                         options.forEach { (value, label, isSelected) ->
                                             Box(
@@ -686,8 +727,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                                title = "Effetti visivi avanzati",
-                                description = "Abilita sfocature e animazioni complesse",
+                                title = stringResource(R.string.settings_visual_effects),
+                                description = stringResource(R.string.settings_visual_effects_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = advancedVisualEffectsEnabled,
@@ -709,13 +750,13 @@ fun SettingsScreenContent(
                     // Section: Notifiche e Vibrazione
                     item {
                         SettingsSection(
-                            title = "Notifiche e Vibrazione",
+                            title = stringResource(R.string.settings_notifications_vibration),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_bell_piena)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
-                                title = "Attiva Notifiche",
-                                description = "Ricevi un avviso il giorno dell'uscita dei film o delle serie che segui.",
+                                title = stringResource(R.string.settings_enable_notifications),
+                                description = stringResource(R.string.settings_enable_notifications_desc),
                                 trailing = {
                                     FlickTroveSwitch(
                                         checked = notificationsEnabled,
@@ -756,8 +797,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_vibra),
-                                title = "Feedback aptico",
-                                description = "Vibrazione alle azioni dell'interfaccia",
+                                title = stringResource(R.string.settings_haptic_feedback),
+                                description = stringResource(R.string.settings_haptic_feedback_desc),
                                 trailing = {
                                     Switch(
                                         checked = vibrationEnabled,
@@ -786,13 +827,13 @@ fun SettingsScreenContent(
                     // Section: Archiviazione e Rete
                     item {
                         SettingsSection(
-                            title = "Immagini",
+                            title = stringResource(R.string.settings_images),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_image)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_hd),
-                                title = "Qualità Immagini",
-                                description = "Gestisci consumo dati",
+                                title = stringResource(R.string.settings_image_quality),
+                                description = stringResource(R.string.settings_image_quality_desc),
                                 trailing = { },
                                 onClick = { },
                                 customContent = {
@@ -830,8 +871,8 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
-                                title = "Svuota Cache Immagini",
-                                description = "$cacheSizeString • Libera spazio occupato da poster e backdrop",
+                                title = stringResource(R.string.settings_clear_cache),
+                                description = stringResource(R.string.settings_clear_cache_desc, cacheSizeString),
                                 tint = Color(0xFFFFA000),
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -844,14 +885,14 @@ fun SettingsScreenContent(
                     // Section: Sincronizzazione e Backup
                     item {
                         SettingsSection(
-                            title = "Sincronizzazione e Backup",
+                            title = stringResource(R.string.settings_sync_backup),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
-                            footerText = "Lo Smart Merge unirà i dati proteggendo sempre i tuoi voti e note locali."
+                            footerText = stringResource(R.string.settings_smart_merge)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
-                                title = "Migrazione Esterna",
-                                description = "Trakt, Letterboxd, IMDb",
+                                title = stringResource(R.string.settings_external_migration),
+                                description = stringResource(R.string.settings_external_migration_desc),
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                     showExternalMigrationDialog = true 
@@ -861,7 +902,7 @@ fun SettingsScreenContent(
                              // Grouped Backup Card
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
-                                title = "Backup Dispositivo FlickTrove",
+                                title = stringResource(R.string.settings_device_backup),
                                 onClick = {},
                                 trailing = { }, // No arrow
                                 customContent = {
@@ -885,7 +926,7 @@ fun SettingsScreenContent(
                                         ) {
                                             Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Esporta", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text(stringResource(R.string.settings_export), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
                                         }
                                         
                                         // Ripristina
@@ -904,7 +945,7 @@ fun SettingsScreenContent(
                                         ) {
                                             Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Ripristina", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text(stringResource(R.string.settings_restore), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
                                         }
                                     }
                                 }
@@ -918,13 +959,13 @@ fun SettingsScreenContent(
                         val email = user?.email ?: "Ospite"
                         
                         SettingsSection(
-                            title = "Account",
+                            title = stringResource(R.string.settings_account),
                             subtitle = email,
                             icon = ImageVector.vectorResource(id = R.drawable.ic_persona)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_exit),
-                                title = if (!isGuest) "Esci" else "Accedi",
+                                title = if (!isGuest) stringResource(R.string.settings_dialog_logout_title) else stringResource(R.string.settings_login),
                                 tint = if (!isGuest) Color.White else currentAccentColor,
                                 onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -939,7 +980,7 @@ fun SettingsScreenContent(
                             if (!isGuest && user != null) {
                                 SettingsItem(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                                    title = "Elimina Account",
+                                    title = stringResource(R.string.settings_delete_account),
                                     tint = Color(0xFFFF5252),
                                     borderColor = Color(0xFFFF5252),
                                     onClick = { 
@@ -954,13 +995,13 @@ fun SettingsScreenContent(
                     // Section: Supporto
                     item {
                         SettingsSection(
-                            title = "Supporto e Informazioni",
+                            title = stringResource(R.string.settings_support_info),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_question_mark_pieno)
                         ) {
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_comment),
-                                title = "Invia Feedback",
-                                description = "Segnala bug o suggerisci nuove funzioni",
+                                title = stringResource(R.string.settings_send_feedback),
+                                description = stringResource(R.string.settings_send_feedback_desc),
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                     showFeedbackDialog = true 
@@ -968,7 +1009,7 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
-                                title = "Termini di Servizio",
+                                title = stringResource(R.string.settings_terms_service),
                                 isExternal = true,
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
@@ -977,7 +1018,7 @@ fun SettingsScreenContent(
                             )
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_scudo_privacy),
-                                title = "Informativa sulla Privacy",
+                                title = stringResource(R.string.settings_privacy_policy),
                                 isExternal = true,
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
@@ -996,15 +1037,15 @@ fun SettingsScreenContent(
                             ) {
                                 AttributionRow(
                                     brand = "TMDB",
-                                    text = "Questo prodotto utilizza l'API di TMDB ma non è approvato o certificato da TMDB."
+                                    text = stringResource(R.string.settings_tmdb_notice)
                                 )
                                 AttributionRow(
                                     brand = "OMDb API",
-                                    text = "Dati addizionali e rating forniti da OMDb API."
+                                    text = stringResource(R.string.settings_omdb_notice)
                                 )
                                 AttributionRow(
                                     brand = "Trakt.tv",
-                                    text = "Sincronizzazione e statistiche alimentate da Trakt.tv."
+                                    text = stringResource(R.string.settings_trakt_notice)
                                 )
                             }
                         }
@@ -1018,7 +1059,7 @@ fun SettingsScreenContent(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "FlickTrove v3.1.3",
+                                text = stringResource(R.string.settings_app_version),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 0.5.sp
@@ -1028,7 +1069,7 @@ fun SettingsScreenContent(
                             Spacer(modifier = Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Sviluppato con ",
+                                    text = stringResource(R.string.settings_made_with),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = OnSurfaceMuted
                                 )
@@ -1039,7 +1080,7 @@ fun SettingsScreenContent(
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Text(
-                                    text = " per amanti del cinema",
+                                    text = stringResource(R.string.settings_for_lovers),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = OnSurfaceMuted
                                 )
@@ -1109,13 +1150,13 @@ fun SettingsScreenContent(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            "Elimina Account",
+                            stringResource(R.string.settings_dialog_delete_account_title),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            "Sei sicuro di voler procedere? Tutti i tuoi film salvati, valutazioni e cartelle verranno rimossi permanentemente dal cloud.",
+                            stringResource(R.string.settings_dialog_delete_account_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1129,7 +1170,7 @@ fun SettingsScreenContent(
                                 onClick = { showDeleteDialog = false },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Annulla", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                             }
                             Button(
                                 onClick = {
@@ -1144,7 +1185,7 @@ fun SettingsScreenContent(
                                     containerColor = Color(0xFFFF5252)
                                 )
                             ) {
-                                Text("Sì, Elimina", fontWeight = FontWeight.Bold, color = Color.White)
+                                Text(stringResource(R.string.settings_yes_delete), fontWeight = FontWeight.Bold, color = Color.White)
                             }
                         }
                     }
@@ -1186,13 +1227,13 @@ fun SettingsScreenContent(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            "Svuota Cache",
+                            stringResource(R.string.settings_dialog_clear_cache_title),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            "Tutti i poster e i loghi scaricati verranno rimossi. Dovranno essere ricaricati all'apertura successiva.",
+                            stringResource(R.string.settings_dialog_clear_cache_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1206,7 +1247,7 @@ fun SettingsScreenContent(
                                 onClick = { showCacheConfirm = false },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Annulla", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                             }
                             Button(
                                 onClick = {
@@ -1220,7 +1261,7 @@ fun SettingsScreenContent(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
-                                Text("Conferma", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.settings_confirm), fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1295,28 +1336,28 @@ fun SettingsScreenContent(
                                 .verticalFadingEdges(legendScrollState, 16.dp, 16.dp)
                                 .verticalScroll(legendScrollState)
                         ) {
-                            renderBadge("NEW", NeonPink, "Prossimamente o Nuovi episodi rilasciati")
-                            renderBadge("MASTERPIECE", Color(0xFFFFD700), "Capolavoro assoluto (media ≥8.8, >2000 voti)")
-                            renderBadge("BEST", Color(0xFF00E5FF), "Media voto eccezionale (≥8.5, >300 voti)")
-                            renderBadge("HOT", HazeStyles.AccentYellow, "Molto popolare (voto > 3000 su TMDB)")
-                            renderBadge("WOW", NeonTeal, "Ottimo gradimento (media ≥8.0, >1000 voti)")
-                            renderBadge("HIDDEN GEM", Color(0xFF00E676), "Perla Nascosta (media ≥7.5, <500 voti)")
-                            renderBadge("CULT", Color(0xFF9C27B0), "Titolo iconico ('90 - '10, media ≥8.0)")
-                            renderBadge("CLASSIC", Color(0xFF8D6E63), "Classico del passato (< 1990, media ≥7.0)")
-                            renderBadge("EPIC", Color(0xFFFF5722), "Lunga durata, colossale (> 160 min)")
-                            renderBadge("BINGE", Color(0xFF00BCD4), "Ideale per abbuffate (Serie lunga, >50 ep.)")
-                            renderBadge("SCI-FI", Color(0xFF2962FF), "Genere Fantascienza")
-                            renderBadge("COMEDY", Color(0xFFFFEA00), "Commedia apprezzata (media ≥7.0)")
-                            renderBadge("HORROR", Color(0xFFE53935), "Genere Horror")
-                            renderBadge("ANIMAZIONE", Color(0xFFFF9800), "Genere Animazione")
-                            renderBadge("BLOCKBUSTER", Color(0xFF6200EA), "Incassi stellari (> 500 mln $)")
-                            renderBadge("INDIE", Color(0xFFAED581), "Basso budget, alta qualità (budget < 5 mln, media ≥7.0)")
-                            renderBadge("QUICK", Color(0xFFC6FF00), "Breve ma intenso (Film < 90 min)")
-                            renderBadge("SNACK", Color(0xFFC6FF00), "Episodi brevi (Serie TV < 25 min)")
-                            renderBadge("DIVISIVE", Color(0xFFFF9800), "O si ama o si odia (media 5.0 - 6.5, >1000 voti)")
-                            renderBadge("VINTAGE", Color(0xFFBCAAA4), "Classico d'altri tempi (< 1970)")
-                            renderBadge("DOCU", Color(0xFF9E9E9E), "Documentari")
-                            renderBadge("FAMILY", Color(0xFF81D4FA), "Ideale per la famiglia")
+                            renderBadge(stringResource(R.string.settings_badge_new), NeonPink, stringResource(R.string.settings_badge_new_desc))
+                            renderBadge(stringResource(R.string.settings_badge_masterpiece), Color(0xFFFFD700), stringResource(R.string.settings_badge_masterpiece_desc))
+                            renderBadge(stringResource(R.string.settings_badge_best), Color(0xFF00E5FF), stringResource(R.string.settings_badge_best_desc))
+                            renderBadge(stringResource(R.string.settings_badge_hot), HazeStyles.AccentYellow, stringResource(R.string.settings_badge_hot_desc))
+                            renderBadge(stringResource(R.string.settings_badge_wow), NeonTeal, stringResource(R.string.settings_badge_wow_desc))
+                            renderBadge(stringResource(R.string.settings_badge_hidden_gem), Color(0xFF00E676), stringResource(R.string.settings_badge_hidden_gem_desc))
+                            renderBadge(stringResource(R.string.settings_badge_cult), Color(0xFF9C27B0), stringResource(R.string.settings_badge_cult_desc))
+                            renderBadge(stringResource(R.string.settings_badge_classic), Color(0xFF8D6E63), stringResource(R.string.settings_badge_classic_desc))
+                            renderBadge(stringResource(R.string.settings_badge_epic), Color(0xFFFF5722), stringResource(R.string.settings_badge_epic_desc))
+                            renderBadge(stringResource(R.string.settings_badge_binge), Color(0xFF00BCD4), stringResource(R.string.settings_badge_binge_desc))
+                            renderBadge(stringResource(R.string.settings_badge_scifi), Color(0xFF2962FF), stringResource(R.string.settings_badge_scifi_desc))
+                            renderBadge(stringResource(R.string.settings_badge_comedy), Color(0xFFFFEA00), stringResource(R.string.settings_badge_comedy_desc))
+                            renderBadge(stringResource(R.string.settings_badge_horror), Color(0xFFE53935), stringResource(R.string.settings_badge_horror_desc))
+                            renderBadge(stringResource(R.string.settings_badge_animation), Color(0xFFFF9800), stringResource(R.string.settings_badge_animation_desc))
+                            renderBadge(stringResource(R.string.settings_badge_blockbuster), Color(0xFF6200EA), stringResource(R.string.settings_badge_blockbuster_desc))
+                            renderBadge(stringResource(R.string.settings_badge_indie), Color(0xFFAED581), stringResource(R.string.settings_badge_indie_desc))
+                            renderBadge(stringResource(R.string.settings_badge_quick), Color(0xFFC6FF00), stringResource(R.string.settings_badge_quick_desc))
+                            renderBadge(stringResource(R.string.settings_badge_snack), Color(0xFFC6FF00), stringResource(R.string.settings_badge_snack_desc))
+                            renderBadge(stringResource(R.string.settings_badge_divisive), Color(0xFFFF9800), stringResource(R.string.settings_badge_divisive_desc))
+                            renderBadge(stringResource(R.string.settings_badge_vintage), Color(0xFFBCAAA4), stringResource(R.string.settings_badge_vintage_desc))
+                            renderBadge(stringResource(R.string.settings_badge_docu), Color(0xFF9E9E9E), stringResource(R.string.settings_badge_docu_desc))
+                            renderBadge(stringResource(R.string.settings_badge_family), Color(0xFF81D4FA), stringResource(R.string.settings_badge_family_desc))
                         }
                         
                         Spacer(modifier = Modifier.height(32.dp))
@@ -1328,7 +1369,7 @@ fun SettingsScreenContent(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Ho capito", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.settings_got_it), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1369,13 +1410,13 @@ fun SettingsScreenContent(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            "Esci",
+                            stringResource(R.string.settings_dialog_logout_title),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            "Sei sicuro di voler uscire dal tuo account? Dovrai effettuare nuovamente l'accesso per sincronizzare i tuoi dati.",
+                            stringResource(R.string.settings_dialog_logout_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1389,7 +1430,7 @@ fun SettingsScreenContent(
                                 onClick = { showLogoutConfirm = false },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Annulla", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                             }
                             Button(
                                 onClick = {
@@ -1403,7 +1444,7 @@ fun SettingsScreenContent(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
-                                Text("Sì, Esci", fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.settings_yes_logout), fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1519,7 +1560,7 @@ fun SettingsScreenContent(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Elaborazione in corso...",
+                        stringResource(R.string.settings_processing),
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -1566,13 +1607,13 @@ fun BackupDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    "Backup e Ripristino",
+                    stringResource(R.string.settings_backup_restore_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "Esporta una copia dei tuoi dati (preferiti, cartelle e impostazioni) o ripristina da un file precedentemente salvato.",
+                    stringResource(R.string.settings_backup_restore_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1597,7 +1638,7 @@ fun BackupDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.FileUpload, null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Esporta Backup", fontWeight = FontWeight.Bold, color = Color.Black)
+                        Text(stringResource(R.string.settings_export_backup), fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                 }
                 
@@ -1617,14 +1658,14 @@ fun BackupDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.FileDownload, null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ripristina Backup", fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(stringResource(R.string.settings_restore_backup), fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text("Chiudi", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -1666,13 +1707,13 @@ fun ExternalMigrationDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    "Migrazione Esterna",
+                    stringResource(R.string.settings_external_migration_dialog_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "Puoi importare la tua lista film caricando il file JSON esportato da Trakt.tv, o i file CSV di Letterboxd (es. watched.csv) e IMDb (es. watchlist.csv). I film verranno aggiunti ai tuoi preferiti.",
+                    stringResource(R.string.settings_external_migration_dialog_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1693,14 +1734,14 @@ fun ExternalMigrationDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Seleziona file (JSON o CSV)", fontWeight = FontWeight.Bold, color = Color.Black)
+                        Text(stringResource(R.string.settings_select_file), fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text("Chiudi", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -1752,7 +1793,7 @@ fun FeedbackDialog(
             ) {
                 // Header (Fixed)
                 Text(
-                    "Invia Feedback",
+                    stringResource(R.string.settings_feedback_title),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.5).sp
@@ -1761,7 +1802,7 @@ fun FeedbackDialog(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    "Aiutaci a migliorare FlickTrove",
+                    stringResource(R.string.settings_feedback_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnSurfaceMuted
                 )
@@ -1814,16 +1855,16 @@ fun FeedbackDialog(
                     GlassyTextField(
                         value = title,
                         onValueChange = { if (it.length <= 50) title = it },
-                        label = "Oggetto",
-                        placeholder = "Es. Suggerimento, Bug...",
+                        label = stringResource(R.string.settings_feedback_subject_label),
+                        placeholder = stringResource(R.string.settings_feedback_subject_placeholder),
                         singleLine = true
                     )
 
                     GlassyTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = "Email (opzionale)",
-                        placeholder = "Per poterti rispondere",
+                        label = stringResource(R.string.settings_feedback_email_label),
+                        placeholder = stringResource(R.string.settings_feedback_email_placeholder),
                         singleLine = true
                     )
 
@@ -1831,8 +1872,8 @@ fun FeedbackDialog(
                         GlassyTextField(
                             value = description,
                             onValueChange = { if (it.length <= 500) description = it },
-                            label = "Descrizione",
-                            placeholder = "Raccontaci i dettagli...",
+                            label = stringResource(R.string.settings_feedback_desc_label),
+                            placeholder = stringResource(R.string.settings_feedback_desc_placeholder),
                             minHeight = 120.dp
                         )
                         Text(
@@ -1875,7 +1916,7 @@ fun FeedbackDialog(
                         )
                     } else {
                         Text(
-                            text = "Invia Messaggio",
+                            text = stringResource(R.string.settings_send_message),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = if (isEnabled) Color.Black else Color.White.copy(alpha = 0.2f)
@@ -1892,7 +1933,7 @@ fun FeedbackDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "Chiudi",
+                        stringResource(R.string.settings_close),
                         color = Color.White.copy(alpha = 0.5f)
                     )
                 }
@@ -2000,7 +2041,7 @@ fun ColorSelectionDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Colore Interfaccia",
+                        text = stringResource(R.string.settings_interface_color),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                         color = Color.White
                     )
@@ -2085,7 +2126,7 @@ fun ColorSelectionDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Add,
-                                    contentDescription = "Colore personalizzato",
+                                    contentDescription = stringResource(R.string.settings_custom),
                                     tint = if (customSelected) Color.White else Color.White.copy(alpha = 0.5f),
                                     modifier = Modifier.size(24.dp)
                                 )
@@ -2094,7 +2135,7 @@ fun ColorSelectionDialog(
                             Spacer(modifier = Modifier.height(4.dp))
                             
                             Text(
-                                text = "Custom",
+                                text = stringResource(R.string.settings_custom),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = if (customSelected) FontWeight.Bold else FontWeight.Normal,
                                     fontSize = 10.sp
@@ -2229,7 +2270,7 @@ fun ColorSelectionDialog(
                         )
                     ) {
                         Text(
-                            text = "Conferma",
+                            text = stringResource(R.string.settings_confirm),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -2240,7 +2281,7 @@ fun ColorSelectionDialog(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Chiudi", color = Color.White.copy(alpha = 0.5f))
+                        Text(stringResource(R.string.settings_close), color = Color.White.copy(alpha = 0.5f))
                     }
                 }
             }

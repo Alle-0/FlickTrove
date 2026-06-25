@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -143,7 +145,7 @@ fun QuickNoteModal(
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "NOTA RAPIDA",
+                        text = stringResource(R.string.quick_note_title),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White.copy(alpha = 0.4f),
@@ -161,7 +163,7 @@ fun QuickNoteModal(
                     .heightIn(min = 140.dp),
                 placeholder = {
                     Text(
-                        "Aggiungi una nota o recensione...",
+                        stringResource(R.string.quick_note_hint),
                         color = Color.White.copy(alpha = 0.3f)
                     )
                 },
@@ -211,7 +213,7 @@ fun QuickNoteModal(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Mic,
-                        contentDescription = "Detta nota",
+                        contentDescription = stringResource(R.string.quick_note_dictate),
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
@@ -242,7 +244,7 @@ fun QuickNoteModal(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Rounded.Stop else Icons.Rounded.PlayArrow,
-                                    contentDescription = if (isPlaying) "Ferma audio" else "Riproduci audio",
+                                    contentDescription = if (isPlaying) stringResource(R.string.quick_note_stop_audio) else stringResource(R.string.quick_note_play_audio),
                                     tint = accentColor,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -257,7 +259,7 @@ fun QuickNoteModal(
                                 } else if (isPlaying) {
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "In ascolto",
+                                        text = stringResource(R.string.quick_note_listening),
                                         color = accentColor,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
@@ -295,7 +297,7 @@ fun QuickNoteModal(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Delete,
-                                contentDescription = "Elimina audio",
+                                contentDescription = stringResource(R.string.quick_note_delete_audio),
                                 tint = Color.White.copy(alpha = 0.6f),
                                 modifier = Modifier
                                     .size(18.dp)
@@ -331,7 +333,7 @@ fun QuickNoteModal(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Registrazione in corso...",
+                                        text = stringResource(R.string.quick_note_recording),
                                         color = Color.Red,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
@@ -358,7 +360,7 @@ fun QuickNoteModal(
                         ) {
                             Icon(
                                 imageVector = if (isRecording) Icons.Rounded.Stop else Icons.Rounded.MicOff,
-                                contentDescription = if (isRecording) "Ferma registrazione" else "Registra audio",
+                                contentDescription = if (isRecording) stringResource(R.string.quick_note_stop_recording) else stringResource(R.string.quick_note_record_audio),
                                 tint = Color.White,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -383,7 +385,7 @@ fun QuickNoteModal(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Annulla",
+                        text = stringResource(R.string.action_cancel),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -406,7 +408,7 @@ fun QuickNoteModal(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Salva",
+                        text = stringResource(R.string.action_save),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Black
                         ),

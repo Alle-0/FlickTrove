@@ -1,10 +1,10 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,14 +33,14 @@ fun ImportBottomSheet(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_ricarica), null, tint = Color.White)
                     Spacer(Modifier.width(8.dp))
-                    Text("Importa Biblioteca", color = Color.White, fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.import_library_title), color = Color.White, fontWeight = FontWeight.Black)
                 }
                 Spacer(Modifier.height(24.dp))
                 if (state is ImportState.Select) {
                     Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_lista), null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Carica CSV")
+                        Text(stringResource(R.string.import_csv_button))
                     }
                 }
             }

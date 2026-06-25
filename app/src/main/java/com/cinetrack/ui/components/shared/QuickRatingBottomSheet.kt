@@ -1,4 +1,6 @@
-package com.cinetrack.ui.components.shared
+package com.cinetrack.ui.components.shared
+
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -69,7 +71,7 @@ fun QuickRatingModal(
                 modifier = Modifier.padding(top = 2.dp, bottom = 20.dp)
             ) {
                 Text(
-                    text = "VOTO RAPIDO",
+                    text = stringResource(R.string.quick_rating_title),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -79,7 +81,7 @@ fun QuickRatingModal(
                 )
                 if (initialRating > 0.0 && currentRating != initialRating) {
                     Text(
-                        text = "  •  PRECEDENTE: %.1f".format(initialRating),
+                        text = stringResource(R.string.quick_rating_previous, initialRating),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -143,7 +145,7 @@ fun QuickRatingModal(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Annulla",
+                        text = stringResource(R.string.action_cancel),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -166,7 +168,7 @@ fun QuickRatingModal(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Salva",
+                        text = stringResource(R.string.action_save),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Black
                         ),

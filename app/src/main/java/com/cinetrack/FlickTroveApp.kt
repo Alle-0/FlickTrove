@@ -45,7 +45,21 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val undoViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.UndoViewModel>()
     val errorViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.GlobalErrorViewModel>()
 
-    val context = LocalContext.current
+    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
+
+    val baseContext = LocalContext.current
+    val (context, localizedConfig) = remember(baseContext, contentLanguage) {
+        if (contentLanguage == "system") {
+            Pair(baseContext, baseContext.resources.configuration)
+        } else {
+            val locale = java.util.Locale(contentLanguage)
+            java.util.Locale.setDefault(locale)
+            val config = android.content.res.Configuration(baseContext.resources.configuration)
+            config.setLocale(locale)
+            val newContext = baseContext.createConfigurationContext(config)
+            Pair(newContext, config)
+        }
+    }
 
     // Ask for POST_NOTIFICATIONS at startup if user has it enabled but hasn't granted yet
     val startupNotifLauncher = rememberLauncherForActivityResult(
@@ -80,7 +94,11 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         }
     }
 
-    FlickTrove_KotlinTheme(themeSetting = appTheme, accentColor = accentColor) {
+    androidx.compose.runtime.CompositionLocalProvider(
+        LocalContext provides context,
+        androidx.compose.ui.platform.LocalConfiguration provides localizedConfig
+    ) {
+        FlickTrove_KotlinTheme(themeSetting = appTheme, accentColor = accentColor) {
         val movieActionsManager = remember { MovieActionsManager() }
         val globalHazeState = remember { dev.chrisbanes.haze.HazeState() }
         
@@ -246,6 +264,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                         modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)
                     )
                 }
+            }
             }
         }
     }

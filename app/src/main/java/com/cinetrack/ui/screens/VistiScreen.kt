@@ -1,5 +1,7 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -71,10 +73,11 @@ object VistiTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(R.string.library_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 2u,
-                    title = "Library",
+                    title = title,
                     icon = null
                 )
             }
@@ -211,7 +214,7 @@ fun VistiScreenContent(
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
                     Text(
-                        text = if (uiState.searchQuery.isEmpty()) "Non hai ancora visto nulla" else "Nessun risultato",
+                        text = if (uiState.searchQuery.isEmpty()) stringResource(R.string.library_empty_seen) else stringResource(R.string.search_no_results),
                         color = Color.White.copy(alpha = 0.5f),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -320,7 +323,7 @@ fun VistiScreenContent(
                     )
                     
                     // Content Layer (Always sharp)
-                    val options = listOf("FILM", "SERIE TV")
+                    val options = listOf(stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))
                     val selectedIndex = if (uiState.activeTab == "movie") 0 else {
                         if (uiState.activeTab == "tv") 1 else 0
                     }
@@ -368,7 +371,7 @@ fun VistiScreenContent(
                         ) {
                             Icon(
                                 imageVector = layoutToggleIcon(columns),
-                                contentDescription = "Cambia Colonne",
+                                contentDescription = stringResource(R.string.folder_detail_change_columns),
                                 tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -409,7 +412,7 @@ fun VistiScreenContent(
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                        contentDescription = "Filtri",
+                        contentDescription = stringResource(R.string.folder_detail_filters),
                         tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
                         modifier = Modifier.size(18.dp)
                     )

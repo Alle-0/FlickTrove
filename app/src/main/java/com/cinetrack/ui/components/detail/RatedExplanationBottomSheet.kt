@@ -1,10 +1,12 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.foundation.background
+
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -77,7 +79,7 @@ fun RatedExplanationBottomSheet(
                 Spacer(modifier = Modifier.width(12.dp))
                 
                 Text(
-                    text = "Guida alle Classificazioni",
+                    text = stringResource(R.string.rated_guide_title),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -107,7 +109,7 @@ fun RatedExplanationBottomSheet(
             ) {
                 item {
                     Text(
-                        text = "I dati provengono dal sistema MPAA (USA), lo standard internazionale per la classificazione dei film.",
+                        text = stringResource(R.string.rated_guide_source),
                         color = Color.White.copy(alpha = 0.4f),
                         fontSize = 13.sp,
                         lineHeight = 18.sp,
@@ -131,7 +133,7 @@ fun RatedExplanationBottomSheet(
                         HorizontalDivider(color = Color.White.copy(alpha = 0.05f))
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            text = "FlickTrove visualizza queste informazioni per aiutarti a scegliere il film giusto per la tua serata.",
+                            text = stringResource(R.string.rated_guide_help),
                             color = Color.White.copy(alpha = 0.3f),
                             fontSize = 11.sp,
                             textAlign = TextAlign.Center,

@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -63,7 +65,7 @@ fun DetailCast(
             }
 
             Text(
-                text = "REGIA",
+                text = stringResource(R.string.detail_director),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp
@@ -104,7 +106,7 @@ fun DetailCast(
             }
 
             Text(
-                text = "CAST",
+                text = stringResource(R.string.detail_cast),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp

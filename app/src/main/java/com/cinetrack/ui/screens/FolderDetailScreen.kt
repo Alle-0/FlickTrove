@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -173,7 +174,7 @@ fun FolderDetailScreenContent(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = Icons.Rounded.ErrorOutline,
-                                contentDescription = "Errore",
+                                contentDescription = stringResource(R.string.folder_detail_error),
                                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                                 modifier = Modifier.size(48.dp)
                             )
@@ -250,7 +251,7 @@ fun FolderDetailScreenContent(
                                                 )
                                                 Spacer(Modifier.height(16.dp))
                                                 Text(
-                                                    text = "Questa cartella è vuota",
+                                                    text = stringResource(R.string.folder_detail_empty),
                                                     color = Color.White.copy(alpha = 0.4f),
                                                     style = MaterialTheme.typography.bodyLarge
                                                 )
@@ -370,7 +371,7 @@ fun FolderDetailScreenContent(
                                             .hazeGlass(state = internalHazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                                     )
                                     
-                                    val options = listOf("TUTTI", "FILM", "SERIE TV")
+                                    val options = listOf(stringResource(R.string.folder_detail_tab_all), stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))
                                     val counts = listOf(state.movieCount + state.tvCount, state.movieCount, state.tvCount)
                                     val selectedIndex = when(state.activeTab) { "movie" -> 1; "tv" -> 2; else -> 0 }
                                     
@@ -415,7 +416,7 @@ fun FolderDetailScreenContent(
                                             val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
                                             Icon(
                                                 imageVector = layoutToggleIcon(columns),
-                                                contentDescription = "Cambia Colonne",
+                                                contentDescription = stringResource(R.string.folder_detail_change_columns),
                                                 tint = Color.White,
                                                 modifier = Modifier.size(18.dp)
                                             )
@@ -454,7 +455,7 @@ fun FolderDetailScreenContent(
                                     ) {
                                         Icon(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                            contentDescription = "Filtri",
+                                            contentDescription = stringResource(R.string.folder_detail_filters),
                                             tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
                                             modifier = Modifier.size(20.dp)
                                         )

@@ -1,5 +1,6 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
@@ -139,7 +140,7 @@ fun AuthScreen(
                         letterSpacing = (-3).sp
                     )
                     Text(
-                        text = "YOUR CINEMATIC ARCHIVE",
+                        text = stringResource(R.string.auth_subtitle),
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -163,20 +164,20 @@ fun AuthScreen(
                     PremiumTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = "Email",
+                        label = stringResource(R.string.auth_email),
                         icon = androidx.compose.material.icons.Icons.Default.Email,
                         isError = !isEmailValid && email.isNotEmpty(),
-                        errorText = if (!isEmailValid && email.isNotEmpty()) "Email non valida" else null,
+                        errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
                         enabled = authState !is AuthState.Loading
                     )
 
                     PremiumTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = "Password",
+                        label = stringResource(R.string.auth_password),
                         icon = androidx.compose.material.icons.Icons.Default.Lock,
                         isError = !isPasswordValid && password.isNotEmpty(),
-                        errorText = if (!isPasswordValid && password.isNotEmpty()) "Minimo 6 caratteri" else null,
+                        errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
                         isPassword = true,
                         enabled = authState !is AuthState.Loading
                     )
@@ -197,7 +198,7 @@ fun AuthScreen(
                                 .padding(vertical = 4.dp, horizontal = 4.dp)
                         ) {
                             Text(
-                                "Password dimenticata?",
+                                stringResource(R.string.auth_forgot_password),
                                 color = Color.White.copy(alpha = 0.4f),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
@@ -235,7 +236,7 @@ fun AuthScreen(
                         )
                     } else {
                         Text(
-                            text = if (isLogin) "Accedi" else "Crea Account",
+                            text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
                             color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
@@ -257,8 +258,8 @@ fun AuthScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isLogin) "Non hai un account? Registrati"
-                               else "Hai già un account? Accedi",
+                        text = if (isLogin) stringResource(R.string.auth_switch_to_register)
+                               else stringResource(R.string.auth_switch_to_login),
                         color = Color.White.copy(alpha = 0.85f),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
@@ -283,7 +284,7 @@ fun AuthScreen(
                             )
                     )
                     Text(
-                        "OPPURE",
+                        stringResource(R.string.auth_or),
                         modifier = Modifier.padding(horizontal = 20.dp),
                         color = Color.White.copy(alpha = 0.5f),
                         fontSize = 10.sp,
@@ -318,7 +319,7 @@ fun AuthScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Continua come Ospite",
+                        stringResource(R.string.auth_guest_continue),
                         color = Color.White.copy(alpha = 0.5f),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -330,19 +331,19 @@ fun AuthScreen(
                 // ── Legal Disclaimer ──────────────────────────────────────────
                 Text(
                     text = buildAnnotatedString {
-                        append("Continuando, accetti i nostri ")
+                        append(stringResource(R.string.auth_terms_prefix))
                         pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/TERMS_OF_SERVICE.md"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
-                            append("Termini di Servizio")
+                            append(stringResource(R.string.auth_terms_link))
                         }
                         pop()
-                        append(" e la ")
+                        append(stringResource(R.string.auth_terms_and))
                         pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/PRIVACY_POLICY.md"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
-                            append("Privacy Policy")
+                            append(stringResource(R.string.auth_privacy_link))
                         }
                         pop()
-                        append(".")
+                        append(stringResource(R.string.auth_terms_suffix))
                     },
                     style = TextStyle(
                         color = Color.White.copy(alpha = 0.75f),
@@ -358,10 +359,10 @@ fun AuthScreen(
             visible = showGuestWarning,
             onDismiss = { showGuestWarning = false },
             onConfirm = { viewModel.loginGuest() },
-            title = "Modalità Ospite",
-            message = "I tuoi dati verranno salvati solo su questo dispositivo. Se disinstalli l'app o pulisci la cache, i dati andranno persi definitivamente.",
-            confirmLabel = "Accedi come Ospite",
-            cancelLabel = "Torna indietro",
+            title = stringResource(R.string.auth_guest_dialog_title),
+            message = stringResource(R.string.auth_guest_dialog_desc),
+            confirmLabel = stringResource(R.string.auth_guest_dialog_confirm),
+            cancelLabel = stringResource(R.string.auth_guest_dialog_cancel),
             type = ConfirmType.WARNING,
             hazeState = hazeState
         )
@@ -404,7 +405,7 @@ fun AuthScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = loadingState?.message ?: "Sync in corso...",
+                            text = loadingState?.message ?: stringResource(R.string.auth_syncing),
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold

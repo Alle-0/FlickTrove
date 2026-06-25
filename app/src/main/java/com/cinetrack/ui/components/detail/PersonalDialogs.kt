@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -411,7 +412,7 @@ fun NoteEditorBox(
                                 } else if (isPlaying) {
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "In ascolto",
+                                        text = stringResource(R.string.personal_listening),
                                         color = accentColor,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium
@@ -502,7 +503,7 @@ fun NoteEditorBox(
             // Warning text for audio
             if (hasAudio) {
                 Text(
-                    text = "L'audio è salvato solo in locale e non verrà sincronizzato.",
+                    text = stringResource(R.string.personal_audio_local_only),
                     color = Color.White.copy(alpha = 0.3f),
                     fontSize = 9.sp,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
@@ -544,7 +545,7 @@ fun NoteEditorBox(
                     .background(accentColor),
                 contentAlignment = Alignment.Center
             ) {
-                Text("SALVA NOTA", color = Color.Black, fontWeight = FontWeight.Black, fontSize = 13.sp)
+                Text(stringResource(R.string.personal_save_note), color = Color.Black, fontWeight = FontWeight.Black, fontSize = 13.sp)
             }
         }
     }

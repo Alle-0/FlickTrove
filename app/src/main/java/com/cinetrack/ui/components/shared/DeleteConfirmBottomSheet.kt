@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -79,7 +81,7 @@ fun DeleteConfirmBottomSheet(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "Elimina Cartella?",
+                    text = stringResource(R.string.folder_delete_title),
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
@@ -90,11 +92,11 @@ fun DeleteConfirmBottomSheet(
 
                 Text(
                     text = buildAnnotatedString {
-                        append("Sei sicuro di voler eliminare la cartella ")
+                        append(stringResource(R.string.folder_delete_confirm_prefix_2))
                         withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
                             append("\"$folderName\"")
                         }
-                        append("?")
+                        append(stringResource(R.string.folder_delete_confirm_suffix))
                     },
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 16.sp,
@@ -105,7 +107,7 @@ fun DeleteConfirmBottomSheet(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "QUESTA AZIONE È IRREVERSIBILE E RIMUOVERÀ SOLO L'ORGANIZZAZIONE, NON I CONTENUTI SALVATI.",
+                    text = stringResource(R.string.folder_delete_warning_long),
                     color = Color.White.copy(alpha = 0.3f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -135,7 +137,7 @@ fun DeleteConfirmBottomSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "ANNULLA",
+                                text = stringResource(R.string.folder_delete_cancel),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
@@ -188,7 +190,7 @@ fun DeleteConfirmBottomSheet(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "ELIMINA",
+                                text = stringResource(R.string.folder_delete_short),
                                 color = Color.White,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 14.sp,

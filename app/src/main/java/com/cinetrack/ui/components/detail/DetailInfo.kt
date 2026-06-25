@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -39,7 +41,7 @@ fun DetailInfo(
             .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
         Text(
-            text = "TRAMA",
+            text = stringResource(R.string.detail_plot),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp

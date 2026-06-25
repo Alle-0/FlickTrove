@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -158,7 +159,7 @@ private fun FolderListContent(
         ) {
             Column {
                 Text(
-                    text = "Le Mie Cartelle",
+                    text = stringResource(R.string.folder_picker_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = (-0.5).sp
@@ -166,7 +167,7 @@ private fun FolderListContent(
                     color = Color.White
                 )
                 Text(
-                    text = "Organizza i tuoi film",
+                    text = stringResource(R.string.folder_picker_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.4f)
                 )
@@ -198,7 +199,7 @@ private fun FolderListContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Nessuna cartella trovata",
+                    text = stringResource(R.string.folder_picker_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.3f)
                 )
@@ -300,7 +301,7 @@ private fun FolderListContent(
         ) {
             Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("NUOVA CARTELLA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+            Text(stringResource(R.string.folder_picker_new), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
         }
     }
 }
@@ -349,7 +350,7 @@ private fun FolderItem(
                     maxLines = 1
                 )
             Text(
-                text = "${folder.itemIds.size} elementi",
+                text = stringResource(R.string.folder_item_count, folder.itemIds.size),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.4f)
             )
@@ -401,7 +402,7 @@ private fun FolderCreateForm(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Nuova Cartella",
+                    text = stringResource(R.string.folder_new_name),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                     color = Color.White
                 )
@@ -426,7 +427,7 @@ private fun FolderCreateForm(
                 value = name,
                 onValueChange = { if (it.length <= 25) name = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Nome", color = Color.White.copy(alpha = 0.4f)) },
+                label = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.4f)) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
@@ -460,7 +461,7 @@ private fun FolderCreateForm(
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("ANNULLA", color = Color.White.copy(alpha = 0.5f))
+                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.5f))
             }
             
             Button(
@@ -473,7 +474,7 @@ private fun FolderCreateForm(
                     contentColor = Color.Black
                 )
             ) {
-                Text("CREA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                Text(stringResource(R.string.folder_picker_new).uppercase(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
             }
         }
     }

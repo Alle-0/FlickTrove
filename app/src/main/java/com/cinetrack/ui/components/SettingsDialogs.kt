@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -108,7 +110,7 @@ fun ImageQualitySelectionDialog(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "Qualità Immagini",
+                        text = stringResource(R.string.settings_quality),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White
                     )
@@ -151,7 +153,7 @@ fun ImageQualitySelectionDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("ANNULLA", color = Color.White.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.action_cancel), color = Color.White.copy(alpha = 0.7f))
                     }
                 }
             }
@@ -235,7 +237,7 @@ fun <T> GenericSelectionDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("ANNULLA", color = Color.White.copy(alpha = 0.7f))
+                        Text(stringResource(R.string.action_cancel), color = Color.White.copy(alpha = 0.7f))
                     }
                 }
             }

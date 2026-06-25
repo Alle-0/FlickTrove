@@ -1,5 +1,9 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
+
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -32,8 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import com.cinetrack.R
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -227,7 +229,7 @@ fun UpdatesScreen(
                                             modifier = Modifier.fillParentMaxSize(), 
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text("Nessun promemoria", color = Color.White.copy(alpha = 0.3f))
+                                            Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
                                         }
                                     }
                                 } else {
@@ -235,7 +237,7 @@ fun UpdatesScreen(
                                         androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                                             UpdateCard(
                                                 movie = movie,
-                                                label = "In Arrivo: ${movie.releaseDate ?: movie.firstAirDate}",
+                                                label = stringResource(R.string.updates_arriving_prefix, movie.releaseDate ?: movie.firstAirDate ?: ""),
                                                 iconRes = R.drawable.ic_bell_piena,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 onAction = { /* Optional: toggle reminder */ },
@@ -283,7 +285,7 @@ fun UpdatesScreen(
                                     if (newEpisodes.isNotEmpty()) {
                                         item { 
                                             SectionHeader(
-                                                text = "Nuovi Episodi",
+                                                text = stringResource(R.string.updates_new_episodes),
                                                 action = {
                                                     val markInteractionSource = remember { MutableInteractionSource() }
                                                     val markIsPressed by markInteractionSource.collectIsPressedAsState()
@@ -304,7 +306,7 @@ fun UpdatesScreen(
                                                             .padding(horizontal = 14.dp, vertical = 8.dp)
                                                     ) {
                                                         Text(
-                                                            "SEGNA TUTTI", 
+                                                            stringResource(R.string.updates_mark_all), 
                                                             color = MaterialTheme.colorScheme.primary, 
                                                             fontSize = 10.sp, 
                                                             fontWeight = FontWeight.Black,
@@ -318,7 +320,7 @@ fun UpdatesScreen(
                                             androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                                                 UpdateCard(
                                                     movie = movie,
-                                                    label = "${movie.newEpisodesFound} nuovi episodi",
+                                                    label = stringResource(R.string.updates_new_episodes_count, movie.newEpisodesFound ?: 0),
                                                     iconRes = R.drawable.ic_tick_card,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     onAction = { viewModel.clearUpdate(movie.id, movie.mediaType) },
@@ -331,7 +333,7 @@ fun UpdatesScreen(
                                     if (releasedRecently.isNotEmpty()) {
                                         item { 
                                             SectionHeader(
-                                                text = "Usciti Oggi!",
+                                                text = stringResource(R.string.updates_out_today),
                                                 action = {
                                                     val markInteractionSource = remember { MutableInteractionSource() }
                                                     val markIsPressed by markInteractionSource.collectIsPressedAsState()
@@ -352,7 +354,7 @@ fun UpdatesScreen(
                                                             .padding(horizontal = 14.dp, vertical = 8.dp)
                                                     ) {
                                                         Text(
-                                                            "SEGNA TUTTI", 
+                                                            stringResource(R.string.updates_mark_all), 
                                                             color = MaterialTheme.colorScheme.primary, 
                                                             fontSize = 10.sp, 
                                                             fontWeight = FontWeight.Black,
@@ -366,7 +368,7 @@ fun UpdatesScreen(
                                             androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                                                 UpdateCard(
                                                     movie = movie,
-                                                    label = "Disponibile ora",
+                                                    label = stringResource(R.string.updates_available_now),
                                                     iconRes = R.drawable.ic_tick_card,
                                                     color = MaterialTheme.colorScheme.primary,
                                                     onAction = { viewModel.clearMigrated(movie.id, movie.mediaType) },
@@ -437,7 +439,7 @@ fun UpdatesScreen(
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.detail_content_desc_back),
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -445,7 +447,7 @@ fun UpdatesScreen(
                     }
 
                     // Title with Animation
-                    val titleText = if (pagerState.currentPage == 1) "Promemoria" else "Notifiche"
+                    val titleText = if (pagerState.currentPage == 1) stringResource(R.string.updates_tab_reminders) else stringResource(R.string.updates_tab_notifications)
                     AnimatedContent(
                         targetState = titleText,
                         transitionSpec = {
@@ -526,13 +528,13 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
             
             Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 Text(
-                    text = "I tuoi Promemoria",
+                    text = stringResource(R.string.updates_your_reminders),
                     color = Color.White,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "$count in attesa",
+                    text = stringResource(R.string.updates_waiting_count, count),
                     color = Color.White.copy(alpha = 0.4f),
                     fontSize = 14.sp
                 )
@@ -572,7 +574,7 @@ fun EmptyNotificationsState() {
         }
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Nessuna notifica recente.",
+            text = stringResource(R.string.updates_no_notifications),
             color = Color.White.copy(alpha = 0.2f),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium

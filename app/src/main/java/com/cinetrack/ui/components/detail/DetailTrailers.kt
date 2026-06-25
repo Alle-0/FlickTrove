@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -66,7 +67,7 @@ fun DetailTrailers(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "TRAILER UFFICIALI",
+                text = stringResource(R.string.detail_official_trailers),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp
@@ -85,7 +86,7 @@ fun DetailTrailers(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = "SCORRI",
+                            text = stringResource(R.string.detail_swipe),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Black,
                                 fontSize = 8.sp,
@@ -179,7 +180,7 @@ fun TrailerThumbnail(videoId: String, accentColor: Color) {
 
             // "TRAILER UFFICIALE" text
             Text(
-                text = "TRAILER UFFICIALE",
+                text = stringResource(R.string.detail_official_trailer),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Black,
                     fontSize = 11.sp,

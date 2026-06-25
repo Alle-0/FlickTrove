@@ -2,6 +2,7 @@ package com.cinetrack.ui.screens
 
 import com.cinetrack.R
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
@@ -204,10 +205,11 @@ object StatsTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(id = R.string.stats_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 4u,
-                    title = "Stats",
+                    title = title,
                     icon = null
                 )
             }
@@ -309,7 +311,7 @@ fun StatsScreenContent(
                         when {
                             statsData == null -> {
                                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Text("Nessuna statistica disponibile", color = Color.White.copy(alpha = 0.5f))
+                                    Text(stringResource(R.string.stats_no_data), color = Color.White.copy(alpha = 0.5f))
                                 }
                             }
                             else -> {
@@ -333,8 +335,8 @@ fun StatsScreenContent(
                                     ) {
                                         Text(
                                             text = when (val range = uiState.timeRange) {
-                                                is TimeRange.AllTime -> "Tutte le Statistiche"
-                                                is TimeRange.Year -> "Statistiche ${range.year}"
+                                                is TimeRange.AllTime -> stringResource(R.string.stats_all_time)
+                                                is TimeRange.Year -> stringResource(R.string.stats_year_prefix, range.year)
                                             },
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.Bold,
@@ -356,6 +358,7 @@ fun StatsScreenContent(
                                     val shouldShowWrapped = safeStats != null && (safeStats.moviesWatched > 0 || safeStats.tvWatched > 0)
 
                                     if (shouldShowWrapped) {
+                                        val yearTitle = stringResource(R.string.stats_wrapped, selectedYear)
                                         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                             WrappedBannerPill(
                                                 stats = safeStats,
@@ -363,7 +366,6 @@ fun StatsScreenContent(
                                                 graphicsLayer = graphicsLayer,
                                                 isSharing = isSharingStats,
                                                 onShare = {
-                                                    val yearTitle = "$selectedYear WRAPPED"
                                                     isSharingStats = true
                                                     scope.launch(kotlinx.coroutines.Dispatchers.Main) {
                                                         try {
@@ -393,7 +395,7 @@ fun StatsScreenContent(
                                         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                             Box(modifier = Modifier.fillMaxWidth().statsCard()) {
                                                 Column(modifier = Modifier.padding(vertical = 16.dp)) {
-                                                    val sectionTitle = "VISTI NEL $selectedYear"
+                                                    val sectionTitle = stringResource(R.string.stats_watched_in_year, selectedYear)
                                                     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                                         StatsSectionHeader(
                                                             icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
@@ -439,15 +441,15 @@ fun StatsScreenContent(
                             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                 StatsSectionHeader(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
-                                    title = "I TUOI FILM",
+                                    title = stringResource(R.string.stats_your_movies),
                                     count = null
                                 )
                                 // Single pill: DA VEDERE | VISTI
                                 DualStatPill(
-                                    leftLabel = "DA VEDERE",
+                                    leftLabel = stringResource(R.string.stats_to_watch),
                                     leftValue = stats.moviesToWatch,
                                     leftIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
-                                    rightLabel = "VISTI",
+                                    rightLabel = stringResource(R.string.stats_watched),
                                     rightValue = stats.moviesWatched,
                                     rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                     accentColor = MaterialTheme.colorScheme.primary
@@ -457,9 +459,9 @@ fun StatsScreenContent(
 
                                 // Combined card: tempo totale + film più lungo
                                 MediaTimeCard(
-                                    timeLabel = "Tempo speso:",
+                                    timeLabel = stringResource(R.string.stats_time_spent),
                                     time = stats.movieTimeFormatted,
-                                    longestLabel = "FILM PIÙ LUNGO",
+                                    longestLabel = stringResource(R.string.stats_longest_movie),
                                     longestTitle = stats.longestMovie?.title ?: stats.longestMovie?.name,
                                     longestDurationMinutes = stats.longestMovieMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
@@ -476,34 +478,34 @@ fun StatsScreenContent(
                             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                 StatsSectionHeader(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                                    title = "SERIE TV",
+                                    title = stringResource(R.string.stats_tv_series),
                                     count = null
                                 )
                                 // Single pill: DA VEDERE | COMPLETATE
                                 DualStatPill(
-                                    leftLabel = "DA VEDERE",
+                                    leftLabel = stringResource(R.string.stats_to_watch),
                                     leftValue = stats.tvToWatch,
                                     leftIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
-                                    rightLabel = "COMPLETATE",
+                                    rightLabel = stringResource(R.string.stats_completed),
                                     rightValue = stats.tvWatched,
                                     rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                     accentColor = MaterialTheme.colorScheme.primary,
-                                    rightSuffix = if (stats.totalEpisodes > 0) "${stats.totalEpisodes} ep" else null
+                                    rightSuffix = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null
                                 )
 
                                 Spacer(Modifier.height(10.dp))
 
                                 MediaTimeCard(
-                                    timeLabel = "Tempo speso:",
+                                    timeLabel = stringResource(R.string.stats_time_spent),
                                     time = stats.tvTimeFormatted,
-                                    longestLabel = "SERIE PIÙ LUNGA",
+                                    longestLabel = stringResource(R.string.stats_longest_tv),
                                     longestTitle = stats.longestTV?.title ?: stats.longestTV?.name,
                                     longestDurationMinutes = stats.longestTVMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
                                     sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                                     longestSuffix = stats.longestTV?.let {
                                         val eps = it.watchedEpisodes?.values?.sumOf { s -> s.size } ?: 0
-                                        if (eps > 0) "• $eps episodi" else null
+                                        if (eps > 0) stringResource(R.string.stats_episodes_long, eps) else null
                                     },
                                     longestPosterPath = stats.longestTV?.posterPath,
                                     onLongestItemClick = {
@@ -518,7 +520,7 @@ fun StatsScreenContent(
                                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
-                                        title = "I TUOI MITI (CAST)",
+                                        title = stringResource(R.string.stats_top_cast),
                                         count = null
                                     )
                                 }
@@ -536,7 +538,7 @@ fun StatsScreenContent(
                                 Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
-                                        title = "TOP REGISTI",
+                                        title = stringResource(R.string.stats_top_directors),
                                         count = null
                                     )
                                 }
@@ -556,7 +558,7 @@ fun StatsScreenContent(
                                     var genreExpanded by rememberSaveable { mutableStateOf(false) }
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
-                                        title = "DISTRIBUZIONE GENERI",
+                                        title = stringResource(R.string.stats_genre_distribution),
                                         count = null
                                     )
                                     GenreDistributionSection(
@@ -571,7 +573,7 @@ fun StatsScreenContent(
                                 if (stats.decadeCounts.isNotEmpty()) {
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                                        title = "LE TUE DECADI D'ORO",
+                                        title = stringResource(R.string.stats_top_decades),
                                         count = null
                                     )
                                     DecadesSection(decadeCounts = stats.decadeCounts)
@@ -581,7 +583,7 @@ fun StatsScreenContent(
                                 // ── Distribuzione Voti ────────────────────────────────────
                                 StatsSectionHeader(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_star),
-                                    title = "DISTRIBUZIONE VOTI",
+                                    title = stringResource(R.string.stats_rating_distribution),
                                     count = null
                                 )
                                 RatingHistogram(distribution = stats.ratingDistribution)
@@ -658,14 +660,14 @@ fun StatsScreenContent(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "Generazione Card...",
+                            text = stringResource(R.string.stats_generating_card),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Stiamo creando la tua immagine da condividere",
+                            text = stringResource(R.string.stats_generating_card_desc),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             color = Color.White.copy(alpha = 0.6f)
@@ -702,9 +704,9 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
     val h = (animatedMinutes % 1440) / 60
     val m = animatedMinutes % 60
     val timeFormatted = when {
-        d > 0 -> "${d}g ${h}h ${m}m"
-        h > 0 -> "${h}h ${m}m"
-        else -> "${m}m"
+        d > 0 -> stringResource(R.string.stats_dhm, d, h, m)
+        h > 0 -> stringResource(R.string.stats_hm, h, m)
+        else -> stringResource(R.string.stats_m, m)
     }
 
     Box(
@@ -725,27 +727,28 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        "TEMPO TOTALE TRASCORSO",
+                        stringResource(R.string.stats_total_time),
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.5.sp
                     )
                 }
                 
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val days = totalMinutes / 1440
+                val hours = (totalMinutes % 1440) / 60
+                val minutes = totalMinutes % 60
+                val time = when {
+                    days > 0 -> stringResource(R.string.stats_dhm, days, hours, minutes)
+                    hours > 0 -> stringResource(R.string.stats_hm, hours, minutes)
+                    else -> stringResource(R.string.stats_m, minutes)
+                }
+                val shareText = stringResource(R.string.stats_share_text, time)
+
                 IconButton(
                     onClick = {
-                        val days = totalMinutes / 1440
-                        val hours = (totalMinutes % 1440) / 60
-                        val minutes = totalMinutes % 60
-                        val time = when {
-                            days > 0 -> "${days}g ${hours}h ${minutes}m"
-                            hours > 0 -> "${hours}h ${minutes}m"
-                            else -> "${minutes}m"
-                        }
-                        val text = "🏆 Il mio tempo totale su FlickTrove: $time di cinema e serie TV!\nScarica l'app per tracciare i tuoi progressi."
                         val sendIntent = android.content.Intent().apply {
                             action = android.content.Intent.ACTION_SEND
-                            putExtra(android.content.Intent.EXTRA_TEXT, text)
+                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
                             type = "text/plain"
                         }
                         context.startActivity(android.content.Intent.createChooser(sendIntent, null))
@@ -767,7 +770,7 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "DI VISIONE COMBINATA",
+                stringResource(R.string.stats_total_time_combined),
                 color = Color.White.copy(alpha = 0.25f),
                 fontSize = 8.5.sp,
                 fontWeight = FontWeight.Bold,
@@ -1331,13 +1334,14 @@ fun GenreDistributionSection(
     
     val totalCount = genreCounts.sumOf { it.second }
     
-    val processedGenres = remember(genreCounts) {
+    val otherGenreLabel = stringResource(R.string.stats_genre_other)
+    val processedGenres = remember(genreCounts, otherGenreLabel) {
         if (genreCounts.size <= 8) {
             genreCounts
         } else {
             val mainGenres = genreCounts.take(7)
             val othersCount = genreCounts.drop(7).sumOf { it.second }
-            mainGenres + Pair("ALTRO", othersCount)
+            mainGenres + Pair(otherGenreLabel, othersCount)
         }
     }
     
@@ -1636,8 +1640,8 @@ fun GenreDistributionSection(
                     ) {
                         val genreName = selectedGenreName
                         if (genreName != null) {
-                            val count = if (genreName == "ALTRO") {
-                                processedGenres.firstOrNull { it.first == "ALTRO" }?.second ?: 0
+                            val count = if (genreName == stringResource(R.string.stats_genre_other)) {
+                                processedGenres.firstOrNull { it.first == stringResource(R.string.stats_genre_other) }?.second ?: 0
                             } else {
                                 genreCounts.firstOrNull { it.first == genreName }?.second ?: 0
                             }
@@ -1669,7 +1673,7 @@ fun GenreDistributionSection(
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = if (count == 1) "TITOLO" else "TITOLI",
+                                text = if (count == 1) stringResource(R.string.stats_title_singular) else stringResource(R.string.stats_title_plural),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = countColor.copy(alpha = 0.7f),
@@ -1679,7 +1683,7 @@ fun GenreDistributionSection(
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "$percentageText DEL TOTALE",
+                                text = stringResource(R.string.stats_of_total, percentageText),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White.copy(alpha = 0.4f),
@@ -1688,7 +1692,7 @@ fun GenreDistributionSection(
                             )
                         } else {
                             Text(
-                                text = "GENERI",
+                                text = stringResource(R.string.stats_genres),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Black,
                                     color = Color.White.copy(alpha = 0.5f),
@@ -1705,7 +1709,7 @@ fun GenreDistributionSection(
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "VISTI",
+                                text = stringResource(R.string.stats_watched),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White.copy(alpha = 0.5f),
@@ -1715,7 +1719,7 @@ fun GenreDistributionSection(
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "TOCCA UNA FETTA",
+                                text = stringResource(R.string.stats_tap_slice),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
@@ -1850,7 +1854,7 @@ fun GenreDistributionSection(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = if (expanded) "VEDI MENO" else "VEDI TUTTI",
+                                text = if (expanded) stringResource(R.string.stats_see_less) else stringResource(R.string.stats_see_all),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.ExtraBold
@@ -1961,7 +1965,7 @@ fun DecadesSection(decadeCounts: List<Pair<String, Int>>) {
                                         softWrap = false
                                     )
                                     Text(
-                                        text = if (count == 1) "1 film" else "$count film",
+                                        text = if (count == 1) stringResource(R.string.stats_1_movie) else stringResource(R.string.stats_n_movies, count),
                                         color = Color.White.copy(alpha = 0.7f),
                                         fontSize = 7.sp,
                                         fontWeight = FontWeight.Bold,
@@ -2160,7 +2164,7 @@ fun WrappedBannerPill(
                 Column {
 
                     Text(
-                        text = "$year WRAPPED",
+                        text = stringResource(R.string.stats_wrapped, year),
                         style = (if (expanded) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineSmall).copy(
                             fontWeight = FontWeight.Black,
                             color = Color.White,
@@ -2211,7 +2215,7 @@ fun WrappedBannerPill(
                             )
                         )
                         Text(
-                            text = "TITOLI VISTI",
+                            text = stringResource(R.string.stats_titles_watched),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Black,
                                 color = Color.White.copy(alpha = 0.6f),
@@ -2229,8 +2233,8 @@ fun WrappedBannerPill(
                         modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        WrappedMainStat("GENERE TOP", stats.topGenre ?: "---", ImageVector.vectorResource(id = R.drawable.ic_bacchetta), Modifier.weight(1f).fillMaxHeight())
-                        WrappedMainStat("TEMPO TOTALE", stats.totalTimeFormatted, ImageVector.vectorResource(id = R.drawable.ic_clock), Modifier.weight(1f).fillMaxHeight())
+                        WrappedMainStat(stringResource(R.string.stats_top_genre), stats.topGenre ?: "---", ImageVector.vectorResource(id = R.drawable.ic_bacchetta), Modifier.weight(1f).fillMaxHeight())
+                        WrappedMainStat(stringResource(R.string.stats_total_time_wrapped), stats.totalTimeFormatted, ImageVector.vectorResource(id = R.drawable.ic_clock), Modifier.weight(1f).fillMaxHeight())
                     }
                     
                     Spacer(Modifier.height(20.dp))
@@ -2287,7 +2291,7 @@ fun WrappedBannerPill(
                                 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "2026 STAR",
+                                        text = stringResource(R.string.stats_year_star, year),
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             fontWeight = FontWeight.Black,
                                             color = Color.White.copy(alpha = 0.5f),
@@ -2328,9 +2332,9 @@ fun WrappedBannerPill(
                             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            WrappedSmallStat("FILM", stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciack), Modifier.weight(1f).fillMaxHeight())
-                            WrappedSmallStat("SERIE", stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1.1f).fillMaxHeight())
-                            WrappedSmallStat("REGISTA TOP", stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(1.9f).fillMaxHeight())
+                            WrappedSmallStat(stringResource(R.string.stats_movies), stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciack), Modifier.weight(1f).fillMaxHeight())
+                            WrappedSmallStat(stringResource(R.string.stats_series), stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1.1f).fillMaxHeight())
+                            WrappedSmallStat(stringResource(R.string.stats_top_directors), stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(1.9f).fillMaxHeight())
                         }
                     }
 
@@ -2363,7 +2367,7 @@ fun WrappedBannerPill(
                             )
                         }
                         Text(
-                            text = "THE CINEPHILE'S LEGACY",
+                            text = stringResource(R.string.stats_cinephile_legacy),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Light,
                                 color = Color.White.copy(alpha = 0.5f),
@@ -2394,7 +2398,7 @@ fun WrappedBannerPill(
                             ) {
                                 Icon(ImageVector.vectorResource(id = R.drawable.ic_sparkle), null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(10.dp))
-                                Text("CONDIVIDI LA TUA CARD", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                                Text(stringResource(R.string.stats_share_card), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
                             }
                         }
                     }
@@ -2433,11 +2437,11 @@ private fun shareBitmap(context: android.content.Context, bitmap: android.graphi
             type = "image/png"
             putExtra(android.content.Intent.EXTRA_STREAM, contentUri)
             putExtra(android.content.Intent.EXTRA_SUBJECT, title)
-            putExtra(android.content.Intent.EXTRA_TEXT, "Guarda il mio $title su FlickTrove! 🍿")
+            putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.stats_share_text, title))
             addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         
-        val chooser = android.content.Intent.createChooser(intent, "Condividi il tuo Wrapped")
+        val chooser = android.content.Intent.createChooser(intent, context.getString(R.string.stats_share_chooser_title))
         chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(chooser)
     } catch (e: Exception) {
@@ -2794,7 +2798,7 @@ fun RatingHistogram(distribution: ImmutableList<Int>) {
                                             softWrap = false
                                         )
                                         Text(
-                                            text = if (count == 1) "1 film" else "$count film",
+                                            text = if (count == 1) stringResource(R.string.stats_one_movie) else stringResource(R.string.stats_many_movies, count),
                                             color = Color.White.copy(alpha = 0.7f),
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
@@ -3136,9 +3140,9 @@ fun YearSelectionModal(
                         .fillMaxWidth()
                         .padding(24.dp)
                 ) {
-                    Text("PERIODO", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.stats_period), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(24.dp))
-                    ModalItem("Tutte le statistiche", false, {})
+                    ModalItem(stringResource(R.string.stats_all_time), false, {})
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                     Column {
                         availableYears.forEach { year ->
@@ -3207,7 +3211,7 @@ fun YearSelectionModal(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "PERIODO",
+                                text = stringResource(R.string.stats_period),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 3.sp,
@@ -3226,7 +3230,7 @@ fun YearSelectionModal(
                             val isAllTime = currentRange is TimeRange.AllTime
                             
                             ModalItem(
-                                label = "Tutte le statistiche",
+                                label = stringResource(R.string.stats_all_stats),
                                 isSelected = isAllTime,
                                 onClick = { 
                                     onAllTimeSelected()
@@ -3269,7 +3273,7 @@ fun YearSelectionModal(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "CHIUDI",
+                                stringResource(R.string.settings_close).uppercase(),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Black,
                                 color = Color.White.copy(alpha = 0.7f),
@@ -3320,31 +3324,31 @@ fun ModalItem(
 // ── Helper Share Function ───────────────────────────────────────────
 fun shareStats(context: android.content.Context, stats: CalculatedStats, title: String) {
     val message = buildString {
-        append("🎬 $title su FlickTrove!\n\n")
-        append("📊 Ho guardato ${stats.moviesWatched} film e ${stats.tvWatched} serie TV.\n")
-        append("⏳ Tempo totale: ${stats.totalTimeFormatted}\n")
+        append(context.getString(R.string.stats_share_line_1, title))
+        append(context.getString(R.string.stats_share_line_2, stats.moviesWatched, stats.tvWatched))
+        append(context.getString(R.string.stats_share_line_3, stats.totalTimeFormatted))
         
         val topGenre = stats.genreCounts.firstOrNull()?.first
         if (topGenre != null) {
-            append("🎭 Genere preferito: $topGenre\n")
+            append(context.getString(R.string.stats_share_line_genre, topGenre))
         }
         
         val topActor = stats.topCast.firstOrNull()?.name
         if (topActor != null) {
-            append("⭐ Star preferita: $topActor\n")
+            append(context.getString(R.string.stats_share_line_actor, topActor))
         }
 
         val topDirector = stats.topDirectors.firstOrNull()?.name
         if (topDirector != null) {
-            append("🎥 Regista preferito: $topDirector\n")
+            append(context.getString(R.string.stats_share_line_director, topDirector))
         }
 
         val topDecade = stats.decadeCounts.maxByOrNull { it.second }?.first
         if (topDecade != null) {
-            append("📅 Decade d'oro: $topDecade\n")
+            append(context.getString(R.string.stats_share_line_decade, topDecade))
         }
 
-        append("\nTraccia il tuo viaggio cinematografico su FlickTrove! 🍿")
+        append(context.getString(R.string.stats_share_line_outro))
     }
 
     val sendIntent = android.content.Intent().apply {
@@ -3352,7 +3356,7 @@ fun shareStats(context: android.content.Context, stats: CalculatedStats, title: 
         putExtra(android.content.Intent.EXTRA_TEXT, message)
         type = "text/plain"
     }
-    val chooser = android.content.Intent.createChooser(sendIntent, "Condividi le tue statistiche")
+    val chooser = android.content.Intent.createChooser(sendIntent, context.getString(R.string.stats_share_title_msg))
     chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(chooser)
 }

@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,7 +35,7 @@ fun ErrorState(message: String, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Ops! Qualcosa è andato storto",
+            text = stringResource(R.string.error_state_title),
             color = Color.White,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,

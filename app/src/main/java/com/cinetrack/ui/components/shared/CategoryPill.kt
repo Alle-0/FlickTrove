@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -110,7 +111,7 @@ fun CategoryPill(
             // Tab Buttons
             Row(modifier = Modifier.fillMaxSize()) {
                 TabButton(
-                    text = "FILM",
+                    text = stringResource(R.string.category_movies),
                     count = movieCount,
                     isActive = activeTab == "movie",
                     accentColor = accentColor,
@@ -121,7 +122,7 @@ fun CategoryPill(
                     }
                 )
                 TabButton(
-                    text = "SERIE TV",
+                    text = stringResource(R.string.category_tv),
                     count = tvCount,
                     isActive = activeTab == "tv",
                     accentColor = accentColor,

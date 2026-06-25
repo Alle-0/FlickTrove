@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -62,7 +63,7 @@ fun FolderColorPicker(
     
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Colore",
+            text = stringResource(R.string.color_picker_title),
             style = MaterialTheme.typography.labelMedium,
             color = Color.White.copy(alpha = 0.4f),
             modifier = Modifier.padding(bottom = 8.dp)

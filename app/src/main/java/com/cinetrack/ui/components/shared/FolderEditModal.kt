@@ -1,10 +1,12 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.foundation.background
+
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -87,7 +89,7 @@ fun FolderEditDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (editMode == FolderEditMode.NAME) "Rinomina Cartella" else "Cambia Colore",
+                            text = if (editMode == FolderEditMode.NAME) stringResource(R.string.folder_edit_rename) else stringResource(R.string.folder_edit_color),
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                             color = Color.White
                         )
@@ -109,7 +111,7 @@ fun FolderEditDialog(
                             value = name,
                             onValueChange = { if (it.length <= 25) name = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Nome cartella", color = Color.White.copy(alpha = 0.3f)) },
+                            placeholder = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.3f)) },
                             shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
@@ -145,7 +147,7 @@ fun FolderEditDialog(
                             disabledContentColor = Color.Black.copy(alpha = 0.5f)
                         )
                     ) {
-                        Text("SALVA", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                        Text(stringResource(R.string.action_save).uppercase(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                     }
                 }
             }

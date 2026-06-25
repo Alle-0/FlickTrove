@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -78,7 +79,7 @@ fun QuickFolderModal(
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "CARTELLE",
+                        text = stringResource(R.string.quick_folders).uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White.copy(alpha = 0.4f),
@@ -115,7 +116,7 @@ fun QuickFolderModal(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Nessuna cartella creata",
+                                    text = stringResource(R.string.quick_no_folders),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = Color.White.copy(alpha = 0.3f)
                                 )

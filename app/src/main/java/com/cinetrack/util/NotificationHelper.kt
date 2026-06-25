@@ -111,13 +111,13 @@ object NotificationHelper {
         val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setLargeIcon(largeIcon)
-            .setContentTitle("Nuova uscita: $mediaLabel")
-            .setContentText("\"$movieTitle\" è disponibile!")
+            .setContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+            .setContentText(context.getString(R.string.notif_new_release_body, movieTitle))
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(bodyText)
-                    .setBigContentTitle("Nuova uscita: $mediaLabel")
-                    .setSummaryText("FlickTrove · Promemoria Uscite")
+                    .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
             )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ACCENT_COLOR)
@@ -162,18 +162,18 @@ object NotificationHelper {
         )
 
         val largeIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
-        val bodyText = "L'episodio $episodeString di \"$showTitle\" esce oggi!"
+        val bodyText = context.getString(R.string.notif_new_episode_body, episodeString, showTitle)
 
         val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setLargeIcon(largeIcon)
-            .setContentTitle("Nuova uscita: Episodio $episodeString")
+            .setContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
             .setContentText(bodyText)
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(bodyText)
-                    .setBigContentTitle("Nuova uscita: Episodio $episodeString")
-                    .setSummaryText("FlickTrove · Promemoria Uscite")
+                    .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
             )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ACCENT_COLOR)
@@ -213,20 +213,22 @@ object NotificationHelper {
 
         val largeIcon = getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
 
-        val episodeWord = if (newEpisodesCount == 1) "episodio" else "episodi"
-        val bodyText = "$newEpisodesCount nuov${if (newEpisodesCount == 1) "o" else "i"} $episodeWord " +
-            "disponibil${if (newEpisodesCount == 1) "e" else "i"} per \"$showTitle\"."
+        val bodyText = if (newEpisodesCount == 1) {
+            context.getString(R.string.notif_new_episodes_body_single, showTitle)
+        } else {
+            context.getString(R.string.notif_new_episodes_body_plural, newEpisodesCount, showTitle)
+        }
 
         val notification = NotificationCompat.Builder(context, EPISODES_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setLargeIcon(largeIcon)
-            .setContentTitle("Nuovi episodi disponibili")
+            .setContentTitle(context.getString(R.string.notif_new_episodes_title))
             .setContentText(bodyText)
             .setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(bodyText)
-                    .setBigContentTitle("Nuovi episodi disponibili")
-                    .setSummaryText("FlickTrove · Aggiornamento Serie")
+                    .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                    .setSummaryText(context.getString(R.string.notif_update_summary))
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setColor(ACCENT_COLOR)

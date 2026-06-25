@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.cinetrack.R
 
@@ -266,7 +267,7 @@ fun HomeFilterModal(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "FILTRI",
+                                text = stringResource(R.string.filter_title),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 3.sp,
@@ -303,7 +304,7 @@ fun HomeFilterModal(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "RESET",
+                                            text = stringResource(R.string.filter_reset),
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = MaterialTheme.colorScheme.primary,
@@ -482,7 +483,7 @@ fun HomeFilterModal(
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = "MOSTRA TUTTI",
+                                                    text = stringResource(R.string.filter_show_all),
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.ExtraBold,
                                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -568,7 +569,7 @@ fun HomeFilterModal(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "APPLICA FILTRI",
+                                text = stringResource(R.string.filter_apply),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.onPrimary,

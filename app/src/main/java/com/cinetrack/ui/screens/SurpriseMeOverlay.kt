@@ -1,5 +1,8 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -22,7 +25,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import com.cinetrack.R
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,14 +103,14 @@ fun SurpriseMeOverlay(
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.1f))
                     ) {
-                        Icon(ImageVector.vectorResource(R.drawable.ic_left), contentDescription = "Indietro", tint = Color.White, modifier = Modifier.size(18.dp))
+                        Icon(ImageVector.vectorResource(R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                 } else {
                     Spacer(modifier = Modifier.size(36.dp))
                 }
 
                 Text(
-                    text = "Sorprendimi",
+                    text = stringResource(R.string.surprise_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -123,7 +125,7 @@ fun SurpriseMeOverlay(
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
                 ) {
-                    Icon(ImageVector.vectorResource(R.drawable.ic_x), contentDescription = "Close", tint = Color.White, modifier = Modifier.size(18.dp))
+                    Icon(ImageVector.vectorResource(R.drawable.ic_x), contentDescription = stringResource(R.string.surprise_close), tint = Color.White, modifier = Modifier.size(18.dp))
                 }
             }
 
@@ -232,15 +234,15 @@ private fun ChoiceStep(onRandomClick: () -> Unit, onEmotionalClick: () -> Unit) 
         modifier = Modifier.fillMaxWidth()
     ) {
         OptionGridCard(
-            title = "Casuale",
-            description = "Film a caso",
+            title = stringResource(R.string.surprise_mode_random),
+            description = stringResource(R.string.surprise_mode_random_desc),
             icon = ImageVector.vectorResource(R.drawable.ic_dice),
             onClick = onRandomClick,
             modifier = Modifier.weight(1f)
         )
         OptionGridCard(
-            title = "Emotivo",
-            description = "Il match perfetto",
+            title = stringResource(R.string.surprise_mode_emotional),
+            description = stringResource(R.string.surprise_mode_emotional_desc),
             icon = ImageVector.vectorResource(R.drawable.ic_sparkle),
             onClick = onEmotionalClick,
             modifier = Modifier.weight(1f)
@@ -251,12 +253,12 @@ private fun ChoiceStep(onRandomClick: () -> Unit, onEmotionalClick: () -> Unit) 
 @Composable
 private fun TimeStep(onSelect: (SurpriseTime) -> Unit) {
     WizardStep(
-        title = "Quanto tempo hai?",
+        title = stringResource(R.string.surprise_q_time),
         options = listOf(
-            WizardOption("Meno di 1h 40m", Icons.Rounded.Timer, { onSelect(SurpriseTime.SHORT) }),
-            WizardOption("Normale (~2h)", ImageVector.vectorResource(R.drawable.ic_clock), { onSelect(SurpriseTime.MEDIUM) }),
-            WizardOption("Tutta la serata", Icons.Rounded.HourglassFull, { onSelect(SurpriseTime.LONG) }),
-            WizardOption("Non importa", ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseTime.ANY) })
+            WizardOption(stringResource(R.string.surprise_time_short), Icons.Rounded.Timer, { onSelect(SurpriseTime.SHORT) }),
+            WizardOption(stringResource(R.string.surprise_time_medium), ImageVector.vectorResource(R.drawable.ic_clock), { onSelect(SurpriseTime.MEDIUM) }),
+            WizardOption(stringResource(R.string.surprise_time_long), Icons.Rounded.HourglassFull, { onSelect(SurpriseTime.LONG) }),
+            WizardOption(stringResource(R.string.surprise_any), ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseTime.ANY) })
         )
     )
 }
@@ -264,13 +266,13 @@ private fun TimeStep(onSelect: (SurpriseTime) -> Unit) {
 @Composable
 private fun MoodStep(onSelect: (SurpriseMood) -> Unit) {
     WizardStep(
-        title = "Che mood cerchi?",
+        title = stringResource(R.string.surprise_q_mood),
         options = listOf(
-            WizardOption("Voglio ridere", Icons.Rounded.SentimentSatisfiedAlt, { onSelect(SurpriseMood.LAUGH) }),
-            WizardOption("Voglio tensione", Icons.Rounded.Bolt, { onSelect(SurpriseMood.TENSION) }),
-            WizardOption("Voglio emozionarmi", Icons.Rounded.WaterDrop, { onSelect(SurpriseMood.EMOTION) }),
-            WizardOption("Viaggio mentale", Icons.Rounded.RocketLaunch, { onSelect(SurpriseMood.ESCAPE) }),
-            WizardOption("Fai tu", ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseMood.ANY) })
+            WizardOption(stringResource(R.string.surprise_mood_laugh), Icons.Rounded.SentimentSatisfiedAlt, { onSelect(SurpriseMood.LAUGH) }),
+            WizardOption(stringResource(R.string.surprise_mood_tension), Icons.Rounded.Bolt, { onSelect(SurpriseMood.TENSION) }),
+            WizardOption(stringResource(R.string.surprise_mood_emotion), Icons.Rounded.WaterDrop, { onSelect(SurpriseMood.EMOTION) }),
+            WizardOption(stringResource(R.string.surprise_mood_escape), Icons.Rounded.RocketLaunch, { onSelect(SurpriseMood.ESCAPE) }),
+            WizardOption(stringResource(R.string.surprise_mood_any), ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseMood.ANY) })
         )
     )
 }
@@ -278,12 +280,12 @@ private fun MoodStep(onSelect: (SurpriseMood) -> Unit) {
 @Composable
 private fun CompanyStep(onSelect: (SurpriseCompany) -> Unit) {
     WizardStep(
-        title = "Con chi lo guardi?",
+        title = stringResource(R.string.surprise_q_company),
         options = listOf(
-            WizardOption("Da solo", ImageVector.vectorResource(R.drawable.ic_persona), { onSelect(SurpriseCompany.ALONE) }),
-            WizardOption("In coppia", Icons.Rounded.Favorite, { onSelect(SurpriseCompany.COUPLE) }),
-            WizardOption("Con amici", ImageVector.vectorResource(R.drawable.ic_people), { onSelect(SurpriseCompany.FRIENDS) }),
-            WizardOption("In famiglia", ImageVector.vectorResource(R.drawable.ic_home), { onSelect(SurpriseCompany.FAMILY) })
+            WizardOption(stringResource(R.string.surprise_company_alone), ImageVector.vectorResource(R.drawable.ic_persona), { onSelect(SurpriseCompany.ALONE) }),
+            WizardOption(stringResource(R.string.surprise_company_couple), Icons.Rounded.Favorite, { onSelect(SurpriseCompany.COUPLE) }),
+            WizardOption(stringResource(R.string.surprise_company_friends), ImageVector.vectorResource(R.drawable.ic_people), { onSelect(SurpriseCompany.FRIENDS) }),
+            WizardOption(stringResource(R.string.surprise_company_family), ImageVector.vectorResource(R.drawable.ic_home), { onSelect(SurpriseCompany.FAMILY) })
         )
     )
 }
@@ -338,7 +340,7 @@ private fun LoadingStep() {
         Spacer(modifier = Modifier.height(32.dp))
         
         Text(
-            "Cerco il match perfetto...", 
+            stringResource(R.string.surprise_loading_1), 
             color = Color.White.copy(alpha = 0.9f), 
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,

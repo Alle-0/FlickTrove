@@ -3,6 +3,7 @@ package com.cinetrack.ui.screens
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -57,10 +58,11 @@ object DiscoverTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(id = R.string.discover_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 1u,
-                    title = "Discover",
+                    title = title,
                     icon = null
                 )
             }
@@ -150,19 +152,20 @@ fun DiscoverScreenContent(
         screenWidth - (padding * 2)
     }
 
+    val defaultGenre = stringResource(R.string.discover_title_genre)
     val title = if (uiState.type == "genre") {
-        uiState.genreName ?: "Genere"
+        uiState.genreName ?: defaultGenre
     } else {
         when (uiState.type) {
-            "popular_movies" -> "Film Popolari"
-            "now_playing_movies" -> "Al Cinema"
-            "upcoming_movies" -> "Prossimamente"
-            "popular_tv" -> "Serie TV Popolari"
-            "airing_today_tv" -> "In Onda Oggi"
-            "on_the_air_tv" -> "In Arrivo"
-            "trending_movies" -> "Trending Film"
-            "trending_tv" -> "Trending Serie TV"
-            else -> "Scopri"
+            "popular_movies" -> stringResource(R.string.discover_title_popular_movies)
+            "now_playing_movies" -> stringResource(R.string.discover_title_now_playing_movies)
+            "upcoming_movies" -> stringResource(R.string.discover_title_upcoming_movies)
+            "popular_tv" -> stringResource(R.string.discover_title_popular_tv)
+            "airing_today_tv" -> stringResource(R.string.discover_title_airing_today_tv)
+            "on_the_air_tv" -> stringResource(R.string.discover_title_on_the_air_tv)
+            "trending_movies" -> stringResource(R.string.discover_title_trending_movies)
+            "trending_tv" -> stringResource(R.string.discover_title_trending_tv)
+            else -> stringResource(R.string.discover_title_default)
         }
     }
 
@@ -226,7 +229,7 @@ fun DiscoverScreenContent(
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = "Nessun contenuto trovato in questa categoria",
+                                        text = stringResource(R.string.discover_empty_category),
                                         color = Color.White.copy(alpha = 0.5f),
                                         style = MaterialTheme.typography.bodyLarge
                                     )

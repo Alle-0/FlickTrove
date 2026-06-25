@@ -1,10 +1,10 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,7 +35,7 @@ fun GuestWarningBottomSheet(
     FlickTroveBottomSheet(onDismissRequest = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth().padding(28.dp)) {
             Text(
-                text = "Modalità Ospite",
+                text = stringResource(R.string.guest_warning_title),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
@@ -49,12 +49,12 @@ fun GuestWarningBottomSheet(
                 Row {
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_tick_pieno), null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(16.dp))
-                    Text("Dati salvati solo localmente.", color = Color.White)
+                    Text(stringResource(R.string.guest_warning_local_only), color = Color.White)
                 }
                 Row {
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_error), null, tint = ErrorRed)
                     Spacer(Modifier.width(16.dp))
-                    Text("Rischio perdita dati se disinstalli l'app.", color = Color.White)
+                    Text(stringResource(R.string.guest_warning_data_loss), color = Color.White)
                 }
             }
 
@@ -69,7 +69,7 @@ fun GuestWarningBottomSheet(
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Accetto e Continua", color = Color.Black, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.guest_warning_accept), color = Color.Black, fontWeight = FontWeight.Black)
             }
         }
     }

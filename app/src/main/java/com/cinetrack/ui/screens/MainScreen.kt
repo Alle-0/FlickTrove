@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.zIndex
@@ -230,15 +231,15 @@ class MainScreen : Screen {
 
                     // Top Bar Layer
                     val title = when (currentTab) {
-                        is HomeTab -> "FlickTrove"
-                        is VistiTab -> "La tua Lista"
-                        is DiscoverTab -> "Scopri"
-                        is RecommendationsTab -> "Consigliati per te"
-                        is StatsTab -> "Statistiche"
-                        is FoldersTab -> "Le mie cartelle"
-                        is SettingsTab -> "Impostazioni"
+                        is HomeTab -> stringResource(R.string.app_name)
+                        is VistiTab -> stringResource(R.string.main_tab_visti)
+                        is DiscoverTab -> stringResource(R.string.main_tab_discover)
+                        is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
+                        is StatsTab -> stringResource(R.string.main_tab_stats)
+                        is FoldersTab -> stringResource(R.string.main_tab_folders)
+                        is SettingsTab -> stringResource(R.string.main_tab_settings)
                         is FolderDetailTab -> currentTab.folderName
-                        else -> "FlickTrove"
+                        else -> stringResource(R.string.app_name)
                     }
 
                     Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
@@ -316,7 +317,7 @@ class MainScreen : Screen {
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
-                                contentDescription = "Cerca",
+                                contentDescription = stringResource(R.string.main_cd_search),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -371,7 +372,7 @@ class MainScreen : Screen {
                                     ) {
                                         Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Rinomina Cartella", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                                        Text(stringResource(R.string.main_folder_rename), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                     }
                                     Row(
                                         modifier = Modifier
@@ -386,7 +387,7 @@ class MainScreen : Screen {
                                     ) {
                                         Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Cambia Colore", color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                                        Text(stringResource(R.string.main_folder_change_color), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                     }
                                     Row(
                                         modifier = Modifier
@@ -400,7 +401,7 @@ class MainScreen : Screen {
                                     ) {
                                         Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Elimina Cartella", color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                                        Text(stringResource(R.string.main_folder_delete), color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                                     }
                                 }
                             }
@@ -497,14 +498,14 @@ class MainScreen : Screen {
                             hazeState = globalHazeState
                         ) {
                             Text(
-                                text = "Esci da FlickTrove?",
+                                text = stringResource(R.string.main_exit_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                             Text(
-                                text = "Sei sicuro di voler uscire dall'applicazione?",
+                                text = stringResource(R.string.main_exit_body),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.7f),
                                 textAlign = TextAlign.Center,
@@ -519,7 +520,7 @@ class MainScreen : Screen {
                                         .bounceClick { showExitConfirmation = false },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("Annulla", color = Color.White)
+                                    Text(stringResource(R.string.main_exit_cancel), color = Color.White)
                                 }
                                 Box(
                                     modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
@@ -527,7 +528,7 @@ class MainScreen : Screen {
                                         .bounceClick { showExitConfirmation = false; (context as? ComponentActivity)?.finish() },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("Esci", color = Color.Black, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.main_exit_confirm), color = Color.Black, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -558,7 +559,7 @@ class MainScreen : Screen {
                                     if (movie != null) {
                                         rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
                                     } else {
-                                        android.widget.Toast.makeText(context, "Nessun film trovato per questi criteri!", android.widget.Toast.LENGTH_SHORT).show()
+                                        android.widget.Toast.makeText(context, context.getString(R.string.main_surprise_me_not_found), android.widget.Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 onClose = { showSurpriseMeOverlay = false }

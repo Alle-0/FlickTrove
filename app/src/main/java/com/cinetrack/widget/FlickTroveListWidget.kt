@@ -1,5 +1,7 @@
 package com.cinetrack.widget
 
+import androidx.glance.LocalContext
+import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -49,7 +51,6 @@ import androidx.glance.ColorFilter
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.cinetrack.MainActivity
-import com.cinetrack.R
 import com.cinetrack.data.Movie
 import com.cinetrack.data.local.database.FlickTroveDatabase
 
@@ -128,7 +129,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Nessun titolo in uscita!",
+                        text = LocalContext.current.getString(R.string.widget_no_releases),
                         style = TextStyle(color = androidx.glance.color.ColorProvider(day = Color.DarkGray, night = Color.LightGray), fontSize = 14.sp)
                     )
                 }
@@ -150,7 +151,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
                         Spacer(modifier = GlanceModifier.width(8.dp))
                         
                         Text(
-                            text = "PROSSIMAMENTE",
+                            text = LocalContext.current.getString(R.string.widget_coming_soon),
                             style = TextStyle(
                                 color = androidx.glance.color.ColorProvider(day = Color(0xFF333333), night = Color.White),
                                 fontSize = 13.sp,
@@ -217,7 +218,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
                                         )
                                     } else {
                                         Text(
-                                            text = "No Img",
+                                            text = LocalContext.current.getString(R.string.widget_no_img),
                                             style = TextStyle(color = androidx.glance.color.ColorProvider(day = Color.Gray, night = Color.Gray), fontSize = 10.sp)
                                         )
                                     }

@@ -1,5 +1,7 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -89,10 +91,11 @@ object RecommendationsTab : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            return remember {
+            val title = stringResource(R.string.recommendations_tab_title)
+            return remember(title) {
                 TabOptions(
                     index = 5u,
-                    title = "Recommendations",
+                    title = title,
                     icon = null
                 )
             }
@@ -417,7 +420,7 @@ fun RecommendationsScreenContent(
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text(
-                                    "Non abbiamo ancora abbastanza dati per consigliarti qualcosa.",
+                                    stringResource(R.string.recommendations_empty_1),
                                     color = Color.White.copy(alpha = 0.6f),
                                     fontSize = 16.sp,
                                     textAlign = TextAlign.Center,
@@ -425,7 +428,7 @@ fun RecommendationsScreenContent(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    "Aggiungi film ai preferiti e dai dei voti per iniziare!",
+                                    stringResource(R.string.recommendations_empty_2),
                                     color = Color.White.copy(alpha = 0.4f),
                                     fontSize = 14.sp,
                                     textAlign = TextAlign.Center
@@ -521,7 +524,7 @@ fun RecommendationsScreenContent(
                         .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                 )
 
-                val options = listOf("FILM", "SERIE TV")
+                val options = listOf(stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))
                 val selectedIndex = if (uiState.mediaType == "movie") 0 else 1
 
                 CategoryTabSelector(
@@ -557,7 +560,7 @@ fun RecommendationsScreenContent(
                         ) {
                             Icon(
                                 imageVector = layoutToggleIcon(uiState.preferences.gridColumns),
-                                contentDescription = "Cambia Colonne",
+                                contentDescription = stringResource(R.string.folder_detail_change_columns),
                                 tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -587,7 +590,7 @@ fun RecommendationsScreenContent(
                     ) {
                         Icon(
                             imageVector = if (isTinderMode) ImageVector.vectorResource(id = R.drawable.ic_grid) else ImageVector.vectorResource(id = R.drawable.ic_temi),
-                            contentDescription = "Tinder Mode",
+                            contentDescription = stringResource(R.string.recommendations_tinder_mode),
                             tint = Color.White,
                             modifier = Modifier.size(18.dp)
                         )
@@ -747,7 +750,7 @@ private fun TinderMovieCard(
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = "AGGIUNGI",
+                            text = stringResource(R.string.recommendations_add),
                             color = Color(0xFF22C55E),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -787,7 +790,7 @@ private fun TinderMovieCard(
                             .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = "PASSA",
+                            text = stringResource(R.string.recommendations_pass),
                             color = Color(0xFFEF4444),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -821,7 +824,7 @@ private fun TinderMovieCard(
                     .graphicsLayer { }
             ) {
                 Text(
-                    text = movie.title ?: movie.name ?: "Senza titolo",
+                    text = movie.title ?: movie.name ?: stringResource(R.string.recommendations_no_title),
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -860,7 +863,7 @@ private fun TinderMovieCard(
                         fontSize = 12.sp
                     )
                     
-                    val year = movie.releaseYear ?: movie.releaseDate?.take(4) ?: movie.firstAirDate?.take(4) ?: "N/D"
+                    val year = movie.releaseYear ?: movie.releaseDate?.take(4) ?: movie.firstAirDate?.take(4) ?: stringResource(R.string.recommendations_na)
                     Text(
                         text = year,
                         color = Color.White.copy(alpha = 0.8f),
@@ -923,7 +926,7 @@ private fun TinderControls(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                contentDescription = "Passa",
+                contentDescription = stringResource(R.string.recommendations_desc_pass),
                 tint = Color(0xFFEF4444),
                 modifier = Modifier.size(26.dp)
             )
@@ -940,7 +943,7 @@ private fun TinderControls(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_documento),
-                contentDescription = "Info",
+                contentDescription = stringResource(R.string.recommendations_desc_info),
                 tint = Color(0xFF3B82F6),
                 modifier = Modifier.size(22.dp)
             )
@@ -957,7 +960,7 @@ private fun TinderControls(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
-                contentDescription = "Preferiti",
+                contentDescription = stringResource(R.string.recommendations_desc_favorite),
                 tint = Color(0xFF22C55E),
                 modifier = Modifier.size(24.dp)
             )
@@ -1025,7 +1028,7 @@ private fun TinderEmptyState(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Text(
-                    text = "Consigli completati!",
+                    text = stringResource(R.string.recommendations_completed_title),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -1035,7 +1038,7 @@ private fun TinderEmptyState(
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Hai visto tutte le raccomandazioni del momento. Prova a passare da FILM a SERIE TV o a ricaricare per trovarne di nuovi!",
+                    text = stringResource(R.string.recommendations_completed_desc),
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
@@ -1059,7 +1062,7 @@ private fun TinderEmptyState(
                         }
                 ) {
                     Text(
-                        text = "Ricarica",
+                        text = stringResource(R.string.recommendations_reload),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )

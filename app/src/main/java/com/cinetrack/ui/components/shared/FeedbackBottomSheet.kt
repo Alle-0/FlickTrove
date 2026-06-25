@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
@@ -20,10 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-enum class FeedbackType(val label: String, val iconRes: Int) {
-    BUG("Bug", R.drawable.ic_error),
-    IDEA("Idea", R.drawable.ic_documento),
-    OTHER("Altro", R.drawable.ic_documento)
+enum class FeedbackType(@androidx.annotation.StringRes val labelRes: Int, val iconRes: Int) {
+    BUG(R.string.feedback_type_bug, R.drawable.ic_error),
+    IDEA(R.string.feedback_type_idea, R.drawable.ic_documento),
+    OTHER(R.string.feedback_type_other, R.drawable.ic_documento)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +52,7 @@ fun FeedbackBottomSheet(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(ImageVector.vectorResource(id = R.drawable.ic_documento), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
                 Text(
-                    text = "Invia Feedback",
+                    text = stringResource(R.string.feedback_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                     color = Color.White
                 )
@@ -91,7 +93,7 @@ fun FeedbackBottomSheet(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = type.label,
+                                text = stringResource(type.labelRes),
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                 color = if (isSelected) Color.White else Color.White.copy(alpha = 0.4f)
                             )
@@ -106,7 +108,7 @@ fun FeedbackBottomSheet(
                 value = message,
                 onValueChange = { if (it.length <= 500) message = it },
                 modifier = Modifier.fillMaxWidth().height(180.dp),
-                placeholder = { Text("Messaggio...", color = Color.White.copy(alpha = 0.2f)) },
+                placeholder = { Text(stringResource(R.string.feedback_hint), color = Color.White.copy(alpha = 0.2f)) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.White.copy(alpha = 0.15f),
                     unfocusedBorderColor = Color.White.copy(alpha = 0.08f),
@@ -138,7 +140,7 @@ fun FeedbackBottomSheet(
                 if (isSubmitting) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                 } else {
-                    Text("Invia", fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.feedback_submit), fontWeight = FontWeight.Black)
                 }
             }
         }

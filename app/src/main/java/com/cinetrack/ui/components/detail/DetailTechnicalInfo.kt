@@ -1,10 +1,13 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+
+import androidx.compose.ui.res.stringResource
+
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,7 +41,7 @@ fun DetailTechnicalInfo(
             .padding(bottom = 32.dp)
     ) {
         Text(
-            text = "DETTAGLI TECNICI",
+            text = stringResource(R.string.detail_technical_info),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp

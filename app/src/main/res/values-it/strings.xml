@@ -1,0 +1,559 @@
+<resources>
+    <string name="app_name">FlickTrove_Kotlin</string>
+
+    <!-- Shortcut Strings -->
+    <string name="shortcut_search_short">Cerca</string>
+    <string name="shortcut_search_long">Cerca Titolo</string>
+    <string name="shortcut_visti_short">Visti</string>
+    <string name="shortcut_visti_long">Apri Visti</string>
+    <string name="shortcut_movie_short">Film in uscita</string>
+    <string name="shortcut_movie_long">Film in uscita</string>
+    <string name="shortcut_tv_short">Serie in arrivo</string>
+    <string name="shortcut_tv_long">Serie in arrivo</string>
+    <string name="widget_name">In uscita &amp; Cerca</string>
+    <string name="widget_list_name">Prossimamente (Lista)</string>
+
+    <!-- HomeScreen -->
+    <string name="home_tab_title">Home</string>
+    <string name="home_empty_list">La tua lista ÃƒÂ¨ vuota</string>
+    <string name="home_no_results">Nessun risultato</string>
+    <string name="home_unreleased">In arrivo</string>
+    <string name="home_tab_movies">FILM</string>
+    <string name="home_tab_tv_series">SERIE TV</string>
+    <string name="home_cd_change_layout">Cambia Layout</string>
+    <string name="home_cd_filters">Filtri</string>
+
+    <!-- MainScreen -->
+    <string name="main_tab_visti">La tua Lista</string>
+    <string name="main_tab_discover">Scopri</string>
+    <string name="main_tab_recommendations">Consigliati per te</string>
+    <string name="main_tab_stats">Statistiche</string>
+    <string name="main_tab_folders">Le mie cartelle</string>
+    <string name="main_tab_settings">Impostazioni</string>
+    <string name="main_cd_search">Cerca</string>
+    <string name="main_folder_rename">Rinomina Cartella</string>
+    <string name="main_folder_change_color">Cambia Colore</string>
+    <string name="main_folder_delete">Elimina Cartella</string>
+    <string name="main_exit_title">Esci da FlickTrove?</string>
+    <string name="main_exit_body">Sei sicuro di voler uscire dall\'applicazione?</string>
+    <string name="main_exit_cancel">Annulla</string>
+    <string name="main_exit_confirm">Esci</string>
+    <string name="main_surprise_me_not_found">Nessun film trovato per questi criteri!</string>
+
+    <!-- FoldersScreen -->
+    <string name="folders_tab_title">Cartelle</string>
+    <string name="folders_empty_message">Non hai ancora creato cartelle</string>
+    <string name="folders_create_first">CREA LA PRIMA</string>
+    <string name="folders_rename">Rinomina Cartella</string>
+    <string name="folders_change_color">Cambia Colore</string>
+    <string name="folders_delete">Elimina Cartella</string>
+    <string name="folders_new_folder">Nuova Cartella</string>
+    <string name="folders_name_placeholder">Nome cartella</string>
+    <string name="folders_create_button">CREA</string>
+
+    <!-- DiscoverScreen -->
+    <string name="discover_tab_title">Scopri</string>
+    <string name="discover_title_genre">Genere</string>
+    <string name="discover_title_popular_movies">Film Popolari</string>
+    <string name="discover_title_now_playing_movies">Al Cinema</string>
+    <string name="discover_title_upcoming_movies">Prossimamente</string>
+    <string name="discover_title_popular_tv">Serie TV Popolari</string>
+    <string name="discover_title_airing_today_tv">In Onda Oggi</string>
+    <string name="discover_title_on_the_air_tv">In Arrivo</string>
+    <string name="discover_title_trending_movies">Trending Film</string>
+    <string name="discover_title_trending_tv">Trending Serie TV</string>
+    <string name="discover_title_default">Scopri</string>
+    <string name="discover_empty_category">Nessun contenuto trovato in questa categoria</string>
+
+    <!-- StatsScreen -->
+    <string name="stats_tab_title">Statistiche</string>
+    <string name="stats_no_data">Nessuna statistica disponibile</string>
+    <string name="stats_all_time">Tutte le Statistiche</string>
+    <string name="stats_year_prefix">Statistiche %d</string>
+    <string name="stats_watched_in_year">VISTI NEL %d</string>
+    <string name="stats_your_movies">I TUOI FILM</string>
+    <string name="stats_to_watch">DA VEDERE</string>
+    <string name="stats_watched">VISTI</string>
+    <string name="stats_time_spent">Tempo speso:</string>
+    <string name="stats_longest_movie">FILM PIÃƒâ„¢ LUNGO</string>
+    <string name="stats_tv_series">SERIE TV</string>
+    <string name="stats_completed">COMPLETATE</string>
+    <string name="stats_longest_tv">SERIE PIÃƒâ„¢ LUNGA</string>
+    <string name="stats_top_cast">I TUOI MITI (CAST)</string>
+    <string name="stats_top_directors">TOP REGISTI</string>
+    <string name="stats_genre_distribution">DISTRIBUZIONE GENERI</string>
+    <string name="stats_top_decades">LE TUE DECADI D\'ORO</string>
+    <string name="stats_rating_distribution">DISTRIBUZIONE VOTI</string>
+    <string name="stats_generating_card">Generazione Card...</string>
+    <string name="stats_generating_card_desc">Stiamo creando la tua immagine da condividere</string>
+    <string name="stats_total_time">TEMPO TOTALE TRASCORSO</string>
+    <string name="stats_total_time_combined">DI VISIONE COMBINATA</string>
+    <string name="stats_share_text">Ã°Å¸â€  Il mio tempo totale su FlickTrove: %s di cinema e serie TV!\nScarica l\'app per tracciare i tuoi progressi.</string>
+    <string name="stats_title_singular">TITOLO</string>
+    <string name="stats_title_plural">TITOLI</string>
+    <string name="stats_of_total">%s DEL TOTALE</string>
+    <string name="stats_genres">GENERI</string>
+    <string name="stats_tap_slice">TOCCA UNA FETTA</string>
+    <string name="stats_see_less">VEDI MENO</string>
+    <string name="stats_see_all">VEDI TUTTI</string>
+    <string name="stats_1_movie">1 film</string>
+    <string name="stats_n_movies">%d film</string>
+    <string name="stats_wrapped">%d WRAPPED</string>
+    <string name="stats_titles_watched">TITOLI VISTI</string>
+    <string name="stats_top_genre">GENERE TOP</string>
+    <string name="stats_total_time_wrapped">TEMPO TOTALE</string>
+    <string name="stats_year_star">%d STAR</string>
+    <string name="stats_movies">FILM</string>
+    <string name="stats_series">SERIE</string>
+    <string name="stats_share_card">CONDIVIDI LA TUA CARD</string>
+    <string name="stats_period">PERIODO</string>
+    <string name="stats_share_chooser_title">Condividi il tuo Wrapped</string>
+    <string name="stats_genre_other">ALTRO</string>
+    <string name="stats_all_stats">Tutte le statistiche</string>
+    <string name="stats_episodes_short">%1$d ep</string>
+    <string name="stats_episodes_long">• %1$d episodi</string>
+    <string name="stats_dhm">%1$dg %2$dh %3$dm</string>
+    <string name="stats_hm">%1$dh %2$dm</string>
+    <string name="stats_m">%1$dm</string>
+    <string name="stats_cinephile_legacy">THE CINEPHILE\'S LEGACY</string>
+    <string name="stats_one_movie">1 film</string>
+    <string name="stats_many_movies">%1$d film</string>
+    <string name="stats_share_title_msg">Condividi le tue statistiche</string>
+    <string name="stats_share_line_1">🎬 %1$s su FlickTrove!\n\n</string>
+    <string name="stats_share_line_2">📊 Ho guardato %1$d film e %2$d serie TV.\n</string>
+    <string name="stats_share_line_3">⏳ Tempo totale: %1$s\n</string>
+    <string name="stats_share_line_genre">🎭 Genere preferito: %1$s\n</string>
+    <string name="stats_share_line_actor">⭐ Star preferita: %1$s\n</string>
+    <string name="stats_share_line_director">🎥 Regista preferito: %1$s\n</string>
+    <string name="stats_share_line_decade">📅 Decade d\'oro: %1$s\n</string>
+    <string name="stats_share_line_outro">\nTraccia il tuo viaggio cinematografico su FlickTrove! 🍿</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings_tab_title">Impostazioni</string>
+    <!-- Interface and Layout -->
+    <string name="settings_ui_layout">Interfaccia e Layout</string>
+    <string name="settings_folder_bookmarks">Segnalibri cartelle</string>
+    <string name="settings_folder_bookmarks_desc">Mostra un nastro colorato sulle card per indicare l\'appartenenza alle cartelle.</string>
+    <string name="settings_badges">Badge informativi</string>
+    <string name="settings_badges_desc">Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.</string>
+    <string name="settings_layout_toggle">Pulsante Layout</string>
+    <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
+    <string name="settings_split_home">Divisione uscite Home</string>
+    <string name="settings_split_home_desc">Separa i titoli giÃƒÂ  usciti da quelli in arrivo nella Home</string>
+    <string name="settings_language">Lingua dell\'app</string>
+    <string name="settings_language_desc">Scegli la lingua per l\'interfaccia e i contenuti</string>
+    <string name="settings_language_system">Sistema</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_it">Italiano</string>
+    <!-- Aesthetics -->
+    <string name="settings_aesthetics">Estetica</string>
+    <string name="settings_accent_color">Colore accento</string>
+    <string name="settings_accent_color_desc">Personalizza l\'aspetto dell\'app</string>
+    <string name="settings_dynamic_icon">Icona App Dinamica</string>
+    <string name="settings_dynamic_icon_desc">Cambia l\'icona dell\'app nella schermata home per adattarla al colore accento</string>
+    <string name="settings_entry_animation">Animazione Iniziale</string>
+    <string name="settings_entry_animation_desc">Mostra l\'animazione del logo all\'apertura dell\'app</string>
+    <string name="settings_amoled_bg">Sfondo AMOLED</string>
+    <string name="settings_amoled_bg_desc">Usa il nero assoluto invece del grigio scuro</string>
+    <!-- Accessibility -->
+    <string name="settings_accessibility">AccessibilitÃƒÂ </string>
+    <string name="settings_title_size">Dimensione testo titoli</string>
+    <string name="settings_title_size_desc">Ingrandisce o riduce i testi principali</string>
+    <string name="settings_size_small">Piccolo</string>
+    <string name="settings_size_medium">Medio</string>
+    <string name="settings_size_large">Grande</string>
+    <string name="settings_visual_effects">Effetti visivi avanzati</string>
+    <string name="settings_visual_effects_desc">Abilita sfocature e animazioni complesse</string>
+    <!-- Notifications and Vibration -->
+    <string name="settings_notifications_vibration">Notifiche e Vibrazione</string>
+    <string name="settings_enable_notifications">Attiva Notifiche</string>
+    <string name="settings_enable_notifications_desc">Ricevi un avviso il giorno dell\'uscita dei film o delle serie che segui.</string>
+    <string name="settings_haptic_feedback">Feedback aptico</string>
+    <string name="settings_haptic_feedback_desc">Vibrazione alle azioni dell\'interfaccia</string>
+    <!-- Images -->
+    <string name="settings_images">Immagini</string>
+    <string name="settings_image_quality">QualitÃƒÂ  Immagini</string>
+    <string name="settings_image_quality_desc">Gestisci consumo dati</string>
+    <string name="settings_clear_cache">Svuota Cache Immagini</string>
+    <string name="settings_clear_cache_desc">%1$s   Libera spazio occupato da poster e backdrop</string>
+    <!-- Sync and Backup -->
+    <string name="settings_sync_backup">Sincronizzazione e Backup</string>
+    <string name="settings_smart_merge">Lo Smart Merge unirÃƒÂ  i dati proteggendo sempre i tuoi voti e note locali.</string>
+    <string name="settings_external_migration">Migrazione Esterna</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb</string>
+    <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
+    <string name="settings_export">Esporta</string>
+    <string name="settings_restore">Ripristina</string>
+    <!-- Account -->
+    <string name="settings_account">Account</string>
+    <string name="settings_delete_account">Elimina Account</string>
+    <!-- Support and Info -->
+    <string name="settings_support_info">Supporto e Informazioni</string>
+    <string name="settings_send_feedback">Invia Feedback</string>
+    <string name="settings_send_feedback_desc">Segnala bug o suggerisci nuove funzioni</string>
+    <string name="settings_terms_service">Termini di Servizio</string>
+    <string name="settings_privacy_policy">Informativa sulla Privacy</string>
+    <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non ÃƒÂ¨ approvato o certificato da TMDB.</string>
+    <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
+    <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
+    <string name="settings_app_version">FlickTrove v3.1.3</string>
+    <string name="settings_made_with">Sviluppato con </string>
+    <string name="settings_for_lovers"> per amanti del cinema</string>
+    <!-- Dialog buttons -->
+    <string name="settings_cancel">Annulla</string>
+    <string name="settings_yes_delete">SÃƒÂ¬, Elimina</string>
+    <string name="settings_confirm">Conferma</string>
+    <string name="settings_got_it">Ho capito</string>
+    <string name="settings_yes_logout">SÃƒÂ¬, Esci</string>
+    <string name="settings_close">Chiudi</string>
+    <!-- Backup dialog -->
+    <string name="settings_export_backup">Esporta Backup</string>
+    <string name="settings_restore_backup">Ripristina Backup</string>
+    <string name="settings_select_file">Seleziona file (JSON o CSV)</string>
+    <!-- Feedback dialog -->
+    <string name="settings_send_message">Invia Messaggio</string>
+    <!-- Color Dialog -->
+    <string name="settings_interface_color">Colore Interfaccia</string>
+    <string name="settings_custom">Custom</string>
+    <!-- Feedback form -->
+    <string name="settings_feedback_title">Invia Feedback</string>
+    <string name="settings_feedback_subtitle">Aiutaci a migliorare FlickTrove</string>
+    <string name="settings_feedback_subject_label">Oggetto</string>
+    <string name="settings_feedback_subject_placeholder">Es. Suggerimento, Bug...</string>
+    <string name="settings_feedback_email_label">Email (opzionale)</string>
+    <string name="settings_feedback_email_placeholder">Per poterti rispondere</string>
+    <string name="settings_feedback_desc_label">Descrizione</string>
+    <string name="settings_feedback_desc_placeholder">Raccontaci i dettagli...</string>
+    <!-- Dialogs -->
+    <string name="settings_dialog_delete_account_title">Elimina Account</string>
+    <string name="settings_dialog_delete_account_desc">Sei sicuro di voler procedere? Tutti i tuoi film salvati, valutazioni e cartelle verranno rimossi permanentemente dal cloud.</string>
+    <string name="settings_dialog_clear_cache_title">Svuota Cache</string>
+    <string name="settings_dialog_clear_cache_desc">Tutti i poster e i loghi scaricati verranno rimossi. Dovranno essere ricaricati all\'apertura successiva.</string>
+    <string name="settings_dialog_logout_title">Esci</string>
+    <string name="settings_dialog_logout_desc">Sei sicuro di voler uscire dal tuo account? Dovrai effettuare nuovamente l\'accesso per sincronizzare i tuoi dati.</string>
+    <string name="settings_login">Accedi</string>
+    <!-- Badges -->
+    <string name="settings_badge_new">NEW</string>
+    <string name="settings_badge_new_desc">Prossimamente o Nuovi episodi rilasciati</string>
+    <string name="settings_badge_masterpiece">MASTERPIECE</string>
+    <string name="settings_badge_masterpiece_desc">Capolavoro assoluto (media =8.8, &gt;2000 voti)</string>
+    <string name="settings_badge_best">BEST</string>
+    <string name="settings_badge_best_desc">Media voto eccezionale (=8.5, &gt;300 voti)</string>
+    <string name="settings_badge_hot">HOT</string>
+    <string name="settings_badge_hot_desc">Molto popolare (voto &gt; 3000 su TMDB)</string>
+    <string name="settings_badge_wow">WOW</string>
+    <string name="settings_badge_wow_desc">Ottimo gradimento (media =8.0, &gt;1000 voti)</string>
+    <string name="settings_badge_hidden_gem">HIDDEN GEM</string>
+    <string name="settings_badge_hidden_gem_desc">Perla Nascosta (media =7.5, &lt;500 voti)</string>
+    <string name="settings_badge_cult">CULT</string>
+    <string name="settings_badge_cult_desc">Titolo iconico (\'90 - \'10, media =8.0)</string>
+    <string name="settings_badge_classic">CLASSIC</string>
+    <string name="settings_badge_classic_desc">Classico del passato (&lt; 1990, media =7.0)</string>
+    <string name="settings_badge_epic">EPIC</string>
+    <string name="settings_badge_epic_desc">Lunga durata, colossale (&gt; 160 min)</string>
+    <string name="settings_badge_binge">BINGE</string>
+    <string name="settings_badge_binge_desc">Ideale per abbuffate (Serie lunga, &gt;50 ep.)</string>
+    <string name="settings_badge_scifi">SCI-FI</string>
+    <string name="settings_badge_scifi_desc">Genere Fantascienza</string>
+    <string name="settings_badge_comedy">COMEDY</string>
+    <string name="settings_badge_comedy_desc">Commedia apprezzata (media =7.0)</string>
+    <string name="settings_badge_horror">HORROR</string>
+    <string name="settings_badge_horror_desc">Genere Horror</string>
+    <string name="settings_badge_animation">ANIMAZIONE</string>
+    <string name="settings_badge_animation_desc">Genere Animazione</string>
+    <string name="settings_badge_blockbuster">BLOCKBUSTER</string>
+    <string name="settings_badge_blockbuster_desc">Incassi stellari (&gt; 500 mln $)</string>
+    <string name="settings_badge_indie">INDIE</string>
+    <string name="settings_badge_indie_desc">Basso budget, alta qualitÃ  (budget &lt; 5 mln, media =7.0)</string>
+    <string name="settings_badge_quick">QUICK</string>
+    <string name="settings_badge_quick_desc">Breve ma intenso (Film &lt; 90 min)</string>
+    <string name="settings_badge_snack">SNACK</string>
+    <string name="settings_badge_snack_desc">Episodi brevi (Serie TV &lt; 25 min)</string>
+    <string name="settings_badge_divisive">DIVISIVE</string>
+    <string name="settings_badge_divisive_desc">O si ama o si odia (media 5.0 - 6.5, &gt;1000 voti)</string>
+    <string name="settings_badge_vintage">VINTAGE</string>
+    <string name="settings_badge_vintage_desc">Classico d\'altri tempi (&lt; 1970)</string>
+    <string name="settings_badge_docu">DOCU</string>
+    <string name="settings_badge_docu_desc">Documentari</string>
+    <string name="settings_badge_family">FAMILY</string>
+    <string name="settings_badge_family_desc">Ideale per la famiglia</string>
+    <!-- Backup and Migration -->
+    <string name="settings_processing">Elaborazione in corso...</string>
+    <string name="settings_backup_restore_title">Backup e Ripristino</string>
+    <string name="settings_backup_restore_desc">Esporta una copia dei tuoi dati (preferiti, cartelle e impostazioni) o ripristina da un file precedentemente salvato.</string>
+    <string name="settings_external_migration_dialog_title">Migrazione Esterna</string>
+    <string name="settings_external_migration_dialog_desc">Puoi importare la tua lista film caricando il file JSON esportato da Trakt.tv, o i file CSV di Letterboxd (es. watched.csv) e IMDb (es. watchlist.csv). I film verranno aggiunti ai tuoi preferiti.</string>
+
+    <!-- Movie Detail Strings -->
+    <string name="detail_error_title">Qualcosa è andato storto</string>
+    <string name="detail_error_unknown">Errore sconosciuto</string>
+    <string name="detail_retry">RIPROVA</string>
+    <string name="detail_go_back">Torna indietro</string>
+    <string name="detail_cannot_open_link">Impossibile aprire il link</string>
+    <string name="detail_no_overview">Nessuna trama disponibile.</string>
+    <string name="detail_content_desc_home">Torna alla schermata principale</string>
+    <string name="detail_manage_folders">Gestisci Cartelle</string>
+    <string name="detail_share_text">Dai un\'occhiata a %1$s su FlickTrove!\n\n%2$s</string>
+    <string name="detail_content_desc_share">Condividi</string>
+    <string name="detail_content_desc_folder">Cartella</string>
+    <string name="detail_content_desc_back">Indietro</string>
+    <string name="detail_rating_legend_title">Legenda Rating</string>
+    <string name="detail_rating_movies_usa">?? Film (USA / MPAA)</string>
+    <string name="detail_rating_g">Per tutti (General Audiences).</string>
+    <string name="detail_rating_pg">Si consiglia la presenza dei genitori.</string>
+    <string name="detail_rating_pg13">Sconsigliato ai minori di 13 anni.</string>
+    <string name="detail_rating_r">Vietato ai minori di 17 anni non accompagnati.</string>
+    <string name="detail_rating_nc17">Vietato ai minori di 18 anni.</string>
+    <string name="detail_rating_nr">Non classificato (Not Rated).</string>
+    <string name="detail_rating_tv_usa">?? Serie TV (USA / TV Parental Guidelines)</string>
+    <string name="detail_rating_tvy">Per tutti i bambini.</string>
+    <string name="detail_rating_tvy7">Per bambini dai 7 anni in su.</string>
+    <string name="detail_rating_tvg">Per tutto il pubblico.</string>
+    <string name="detail_rating_tvpg">Supervisione genitoriale consigliata.</string>
+    <string name="detail_rating_tv14">Sconsigliato ai minori di 14 anni.</string>
+    <string name="detail_rating_tvma">Solo per adulti (18+).</string>
+    <string name="detail_translate_comment">Traduci commento</string>
+    <string name="detail_translate_download_prompt">Il modello di traduzione (circa 30MB) potrebbe non essere presente. Vuoi consentire il download anche su rete dati cellulare?</string>
+    <string name="detail_translate_yes_cellular">Sì, usa rete</string>
+    <string name="detail_translate_no_wifi">No, solo Wi-Fi</string>
+    <string name="detail_translate_not_now">Non ora</string>
+
+    <!-- Person Detail Strings -->
+    <string name="person_read_less">LEGGI MENO</string>
+    <string name="person_read_more">LEGGI TUTTO</string>
+    <string name="person_no_bio">Nessuna biografia disponibile.</string>
+    <string name="person_birthday">DATA DI NASCITA</string>
+    <string name="person_birth_place">LUOGO DI NASCITA</string>
+    <string name="person_known_for">CONOSCIUTO PER</string>
+    <string name="person_popularity">POPOLARIT�</string>
+    <string name="person_nd">N/D</string>
+    <string name="person_highlights">Punti Forti</string>
+    <string name="person_filmography">Filmografia</string>
+    <string name="person_cast_movie_format">Cast - Film (%d)</string>
+    <string name="person_cast_tv_format">Cast - Serie (%d)</string>
+    <string name="person_crew_movie_format">Regia - Film (%d)</string>
+    <string name="person_crew_tv_format">Regia - Serie (%d)</string>
+
+    <!-- Folder Detail Strings -->
+    <string name="folder_detail_error">Errore</string>
+    <string name="folder_detail_empty">Questa cartella � vuota</string>
+    <string name="folder_detail_tab_all">TUTTI</string>
+    <string name="folder_detail_tab_movies">FILM</string>
+    <string name="folder_detail_tab_tv">SERIE TV</string>
+    <string name="folder_detail_change_columns">Cambia Colonne</string>
+    <string name="folder_detail_filters">Filtri</string>
+
+    <!-- Search Strings -->
+    <string name="search_error_message">Impossibile caricare i dati. Controlla la tua connessione e riprova.</string>
+    <string name="search_trending_now">Tendenze del momento</string>
+    <string name="search_no_results">Nessun risultato</string>
+    <string name="search_no_results_short">Nessun risultato trovato.\nDigita almeno 3 lettere</string>
+    <string name="search_no_results_simplify">Nessun risultato trovato.\nProva a semplificare la ricerca</string>
+    <string name="search_content_desc">Cerca</string>
+    <string name="search_fallback_genre">Genere</string>
+    <string name="search_active_genre_format">Genere: %1$s</string>
+    <string name="search_fallback_keyword">Selezionato</string>
+    <string name="search_active_keyword_format">Tema: %1$s</string>
+    <string name="search_placeholder">Cerca film, serie, persone...</string>
+    <string name="search_content_desc_clear">Pulisci</string>
+    <string name="search_content_desc_layout">Cambia Layout</string>
+    <string name="search_keyword_filter_warning">Nota: il filtro parola chiave viene ignorato nella ricerca testuale.</string>
+    <string name="search_recent">RECENTI</string>
+    <string name="search_clear_all">CANCELLA TUTTO</string>
+    <string name="search_remove_recent">Rimuovi ricerca</string>
+    <string name="search_suggested">GENERI E TEMI SUGGERITI</string>
+    <string name="search_collapse">Comprimi</string>
+    <string name="search_expand">Espandi</string>
+    <string name="search_tab_persons">PERSONE</string>
+
+    <!-- Recommendations & Library Strings -->
+    <string name="library_tab_title">Libreria</string>
+    <string name="library_empty_seen">Non hai ancora visto nulla</string>
+    <string name="recommendations_tab_title">Consigli</string>
+    <string name="recommendations_empty_1">Non abbiamo ancora abbastanza dati per consigliarti qualcosa.</string>
+    <string name="recommendations_empty_2">Aggiungi film ai preferiti e dai dei voti per iniziare!</string>
+    <string name="recommendations_tinder_mode">Modalit� Swipe</string>
+    <string name="recommendations_add">AGGIUNGI</string>
+    <string name="recommendations_pass">PASSA</string>
+    <string name="recommendations_no_title">Senza titolo</string>
+    <string name="recommendations_na">N/D</string>
+    <string name="recommendations_desc_pass">Passa</string>
+    <string name="recommendations_desc_info">Info</string>
+    <string name="recommendations_desc_favorite">Preferiti</string>
+    <string name="recommendations_completed_title">Consigli completati!</string>
+    <string name="recommendations_completed_desc">Hai visto tutte le raccomandazioni del momento. Prova a passare da FILM a SERIE TV o a ricaricare per trovarne di nuovi!</string>
+    <string name="recommendations_reload">Ricarica</string>
+
+    <!-- Auth Strings -->
+    <string name="auth_subtitle">IL TUO ARCHIVIO CINEMATOGRAFICO</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_error_email_invalid">Email non valida</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_error_password_length">Minimo 6 caratteri</string>
+    <string name="auth_forgot_password">Password dimenticata?</string>
+    <string name="auth_login">Accedi</string>
+    <string name="auth_create_account">Crea Account</string>
+    <string name="auth_switch_to_register">Non hai un account? Registrati</string>
+    <string name="auth_switch_to_login">Hai già un account? Accedi</string>
+    <string name="auth_or">OPPURE</string>
+    <string name="auth_guest_continue">Continua come Ospite</string>
+    <string name="auth_terms_prefix">Continuando, accetti i nostri </string>
+    <string name="auth_terms_link">Termini di Servizio</string>
+    <string name="auth_terms_and"> e la </string>
+    <string name="auth_privacy_link">Privacy Policy</string>
+    <string name="auth_terms_suffix">.</string>
+    <string name="auth_guest_dialog_title">Modalità Ospite</string>
+    <string name="auth_guest_dialog_desc">I tuoi dati verranno salvati solo su questo dispositivo. Se disinstalli l\'app o pulisci la cache, i dati andranno persi definitivamente.</string>
+    <string name="auth_guest_dialog_confirm">Accedi come Ospite</string>
+    <string name="auth_guest_dialog_cancel">Torna indietro</string>
+    <string name="auth_syncing">Sync in corso...</string>
+
+    <!-- Surprise Me Strings -->
+    <string name="surprise_title">Sorprendimi</string>
+    <string name="surprise_close">Chiudi</string>
+    <string name="surprise_mode_random">Casuale</string>
+    <string name="surprise_mode_random_desc">Film a caso</string>
+    <string name="surprise_mode_emotional">Emotivo</string>
+    <string name="surprise_mode_emotional_desc">Il match perfetto</string>
+    <string name="surprise_q_time">Quanto tempo hai?</string>
+    <string name="surprise_time_short">Meno di 1h 40m</string>
+    <string name="surprise_time_medium">Normale (~2h)</string>
+    <string name="surprise_time_long">Tutta la serata</string>
+    <string name="surprise_any">Non importa</string>
+    <string name="surprise_q_mood">Che mood cerchi?</string>
+    <string name="surprise_mood_laugh">Voglio ridere</string>
+    <string name="surprise_mood_tension">Voglio tensione</string>
+    <string name="surprise_mood_emotion">Voglio emozionarmi</string>
+    <string name="surprise_mood_escape">Viaggio mentale</string>
+    <string name="surprise_mood_any">Fai tu</string>
+    <string name="surprise_q_company">Con chi lo guardi?</string>
+    <string name="surprise_company_alone">Da solo</string>
+    <string name="surprise_company_couple">In coppia</string>
+    <string name="surprise_company_friends">Con amici</string>
+    <string name="surprise_company_family">In famiglia</string>
+    <string name="surprise_loading_1">Cerco il match perfetto...</string>
+
+    <!-- Updates Strings -->
+    <string name="updates_no_reminders">Nessun promemoria</string>
+    <string name="updates_arriving_prefix">In Arrivo: %1$s</string>
+    <string name="updates_new_episodes">Nuovi Episodi</string>
+    <string name="updates_mark_all">SEGNA TUTTI</string>
+    <string name="updates_new_episodes_count">%1$d nuovi episodi</string>
+    <string name="updates_out_today">Usciti Oggi!</string>
+    <string name="updates_available_now">Disponibile ora</string>
+    <string name="updates_tab_reminders">Promemoria</string>
+    <string name="updates_tab_notifications">Notifiche</string>
+    <string name="updates_your_reminders">I tuoi Promemoria</string>
+    <string name="updates_waiting_count">%1$d in attesa</string>
+    <string name="updates_no_notifications">Nessuna notifica recente.</string>
+
+    <!-- Notifications & Widgets -->
+    <string name="notif_reminder_summary">FlickTrove · Promemoria Uscite</string>
+    <string name="notif_update_summary">FlickTrove · Aggiornamento Serie</string>
+    <string name="notif_new_release_title">Nuova uscita: %1$s</string>
+    <string name="notif_new_release_body">\"%1$s\" è disponibile!</string>
+    <string name="notif_new_episode_title">Nuova uscita: Episodio %1$s</string>
+    <string name="notif_new_episode_body">L\'episodio %1$s di \"%2$s\" esce oggi!</string>
+    <string name="notif_new_episodes_title">Nuovi episodi disponibili</string>
+    <string name="notif_new_episodes_body_single">1 nuovo episodio disponibile per \"%1$s\".</string>
+    <string name="notif_new_episodes_body_plural">%1$d nuovi episodi disponibili per \"%2$s\".</string>
+    <string name="widget_nothing_to_see">Niente da vedere!</string>
+    <string name="widget_coming_soon">PROSSIMAMENTE</string>
+    <string name="widget_release_date_prefix">In uscita il: %1$s</string>
+    <string name="widget_no_releases">Nessun titolo in uscita!</string>
+    <string name="widget_no_img">No Img</string>
+
+    <!-- Quick Actions Strings -->
+    <string name="quick_action_title">Azioni rapide</string>
+    <string name="quick_action_rating">Voto rapido</string>
+    <string name="quick_action_note">Nota rapida</string>
+    <string name="quick_folders">CARTELLE</string>
+    <string name="quick_no_folders">Nessuna cartella creata</string>
+    <string name="quick_rating_title">VOTO RAPIDO</string>
+    <string name="quick_rating_previous">  •  PRECEDENTE: %1$.1f</string>
+    <string name="quick_note_title">NOTA RAPIDA</string>
+    <string name="quick_note_hint">Aggiungi una nota o recensione...</string>
+    <string name="quick_note_dictate">Detta nota</string>
+    <string name="quick_note_stop_audio">Ferma audio</string>
+    <string name="quick_note_play_audio">Riproduci audio</string>
+    <string name="quick_note_listening">In ascolto</string>
+    <string name="quick_note_delete_audio">Elimina audio</string>
+    <string name="quick_note_recording">Registrazione in corso...</string>
+    <string name="quick_note_stop_recording">Ferma registrazione</string>
+    <string name="quick_note_record_audio">Registra audio</string>
+
+    <!-- Folder Modals Strings -->
+    <string name="folder_picker_title">Le Mie Cartelle</string>
+    <string name="folder_picker_subtitle">Organizza i tuoi film</string>
+    <string name="folder_picker_empty">Nessuna cartella trovata</string>
+    <string name="folder_picker_new">NUOVA CARTELLA</string>
+    <string name="folder_item_count">%1$d elementi</string>
+    <string name="folder_new_name">Nuova Cartella</string>
+    <string name="folder_edit_rename">Rinomina Cartella</string>
+    <string name="folder_edit_color">Cambia Colore</string>
+    <string name="folder_edit_name_hint">Nome cartella</string>
+    <string name="folder_delete_title">Elimina Cartella?</string>
+    <string name="folder_delete_confirm_prefix">Sei sicuro di voler eliminare </string>
+    <string name="folder_delete_confirm_prefix_2">Sei sicuro di voler eliminare la cartella </string>
+    <string name="folder_delete_confirm_suffix">\? Questa azione è irreversibile.</string>
+    <string name="folder_delete_action">ELIMINA CARTELLA</string>
+    <string name="folder_delete_warning_long">QUESTA AZIONE È IRREVERSIBILE E RIMUOVERÀ SOLO L\'ORGANIZZAZIONE, NON I CONTENUTI SALVATI.</string>
+    <string name="folder_delete_cancel">ANNULLA</string>
+    <string name="folder_delete_short">ELIMINA</string>
+
+    <!-- System Modals Strings -->
+    <string name="guest_warning_title">Modalità Ospite</string>
+    <string name="guest_warning_local_only">Dati salvati solo localmente.</string>
+    <string name="guest_warning_data_loss">Rischio perdita dati se disinstalli l\'app.</string>
+    <string name="guest_warning_accept">Accetto e Continua</string>
+    <string name="import_library_title">Importa Biblioteca</string>
+    <string name="import_csv_button">Carica CSV</string>
+    <string name="feedback_title">Invia Feedback</string>
+    <string name="feedback_hint">Messaggio...</string>
+    <string name="feedback_submit">Invia</string>
+    <string name="feedback_type_bug">Bug</string>
+    <string name="feedback_type_idea">Idea</string>
+    <string name="feedback_type_other">Altro</string>
+    <string name="error_state_title">Ops! Qualcosa è andato storto</string>
+    <string name="error_state_retry">Riprova</string>
+
+    <!-- Global & Modals Strings -->
+    <string name="action_cancel">ANNULLA</string>
+    <string name="action_retry">RIPROVA</string>
+    <string name="action_save">SALVA</string>
+    <string name="settings_quality">Qualità Immagini</string>
+    <string name="filter_title">FILTRI</string>
+    <string name="filter_reset">RESET</string>
+    <string name="filter_show_all">MOSTRA TUTTI</string>
+    <string name="filter_apply">APPLICA FILTRI</string>
+    <string name="card_quick_rate">Voto rapido</string>
+    <string name="card_quick_note">Nota rapida</string>
+    <string name="card_folders">Cartelle</string>
+    <string name="card_share">Condividi</string>
+    <string name="card_delete">Elimina</string>
+    <string name="color_picker_title">Colore</string>
+    <string name="category_movies">FILM</string>
+    <string name="category_tv">SERIE TV</string>
+    <string name="drawer_menu">Menu</string>
+
+    <!-- Detail Components Strings -->
+    <string name="detail_director">REGIA</string>
+    <string name="detail_cast">CAST</string>
+    <string name="detail_top_comments">COMMENTI MIGLIORI</string>
+    <string name="detail_plot">TRAMA</string>
+    <string name="detail_where_to_watch">DOVE GUARDARE</string>
+    <string name="detail_collection">COLLEZIONE</string>
+    <string name="detail_recommendations">CONSIGLIATI</string>
+    <string name="detail_technical_info">DETTAGLI TECNICI</string>
+    <string name="detail_official_trailers">TRAILER UFFICIALI</string>
+    <string name="detail_official_trailer">TRAILER UFFICIALE</string>
+    <string name="detail_swipe">SCORRI</string>
+    <string name="detail_personal_zone">ZONA PERSONALE</string>
+    <string name="detail_tap_for_more">TOCCA PER ALTRO</string>
+    <string name="personal_listening">In ascolto</string>
+    <string name="personal_audio_local_only">L\'audio è salvato solo in locale e non verrà sincronizzato.</string>
+    <string name="personal_save_note">SALVA NOTA</string>
+    <string name="rated_guide_title">Guida alle Classificazioni</string>
+    <string name="rated_guide_source">I dati provengono dal sistema MPAA (USA), lo standard internazionale per la classificazione dei film.</string>
+    <string name="rated_guide_help">FlickTrove visualizza queste informazioni per aiutarti a scegliere il film giusto per la tua serata.</string>
+</resources>

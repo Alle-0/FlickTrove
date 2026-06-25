@@ -1,5 +1,7 @@
 package com.cinetrack.widget
 
+import androidx.glance.LocalContext
+import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -47,7 +49,6 @@ import androidx.glance.ColorFilter
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.cinetrack.MainActivity
-import com.cinetrack.R
 import com.cinetrack.data.Movie
 import com.cinetrack.data.local.database.FlickTroveDatabase
 
@@ -131,7 +132,7 @@ class FlickTroveWidget : GlanceAppWidget() {
             if (moviesToWatch.isEmpty()) {
                 Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Niente da vedere!",
+                        text = LocalContext.current.getString(R.string.widget_nothing_to_see),
                         style = TextStyle(color = androidx.glance.color.ColorProvider(day = Color.LightGray, night = Color.LightGray), fontSize = 14.sp)
                     )
                 }
@@ -178,7 +179,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                         val date = movie.releaseDate ?: movie.firstAirDate
                         if (!date.isNullOrEmpty()) {
                             Text(
-                                text = "In uscita il: $date",
+                                text = LocalContext.current.getString(R.string.widget_release_date_prefix, date),
                                 style = TextStyle(
                                     color = androidx.glance.color.ColorProvider(day = Color(0xFFAAAAAA), night = Color(0xFFAAAAAA)),
                                     fontSize = 12.sp,

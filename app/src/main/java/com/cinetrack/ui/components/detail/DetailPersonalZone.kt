@@ -1,9 +1,12 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.stringResource
+
+import androidx.compose.foundation.background
+
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,7 +71,7 @@ fun DetailPersonalZone(
             .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
     ) {
         Text(
-            text = "ZONA PERSONALE",
+            text = stringResource(R.string.detail_personal_zone),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp

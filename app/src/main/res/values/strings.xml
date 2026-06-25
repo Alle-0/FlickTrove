@@ -1,15 +1,559 @@
 <resources>
     <string name="app_name">FlickTrove_Kotlin</string>
-    
+
     <!-- Shortcut Strings -->
-    <string name="shortcut_search_short">Cerca</string>
-    <string name="shortcut_search_long">Cerca Titolo</string>
-    <string name="shortcut_visti_short">Visti</string>
-    <string name="shortcut_visti_long">Apri Visti</string>
-    <string name="shortcut_movie_short">Film in uscita</string>
-    <string name="shortcut_movie_long">Film in uscita</string>
-    <string name="shortcut_tv_short">Serie in arrivo</string>
-    <string name="shortcut_tv_long">Serie in arrivo</string>
-    <string name="widget_name">In uscita &amp; Cerca</string>
-    <string name="widget_list_name">Prossimamente (Lista)</string>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search Title</string>
+    <string name="shortcut_visti_short">Your List</string>
+    <string name="shortcut_visti_long">Open Your List</string>
+    <string name="shortcut_movie_short">Upcoming Movies</string>
+    <string name="shortcut_movie_long">Upcoming Movies</string>
+    <string name="shortcut_tv_short">Upcoming Series</string>
+    <string name="shortcut_tv_long">Upcoming Series</string>
+    <string name="widget_name">Upcoming &amp; Search</string>
+    <string name="widget_list_name">Coming Soon (List)</string>
+
+    <!-- HomeScreen -->
+    <string name="home_tab_title">Home</string>
+    <string name="home_empty_list">Your list is empty</string>
+    <string name="home_no_results">No results</string>
+    <string name="home_unreleased">Unreleased</string>
+    <string name="home_tab_movies">MOVIES</string>
+    <string name="home_tab_tv_series">TV SERIES</string>
+    <string name="home_cd_change_layout">Change Layout</string>
+    <string name="home_cd_filters">Filters</string>
+
+    <!-- MainScreen -->
+    <string name="main_tab_visti">Your List</string>
+    <string name="main_tab_discover">Discover</string>
+    <string name="main_tab_recommendations">Recommended for you</string>
+    <string name="main_tab_stats">Statistics</string>
+    <string name="main_tab_folders">My folders</string>
+    <string name="main_tab_settings">Settings</string>
+    <string name="main_cd_search">Search</string>
+    <string name="main_folder_rename">Rename Folder</string>
+    <string name="main_folder_change_color">Change Color</string>
+    <string name="main_folder_delete">Delete Folder</string>
+    <string name="main_exit_title">Exit FlickTrove?</string>
+    <string name="main_exit_body">Are you sure you want to exit the app?</string>
+    <string name="main_exit_cancel">Cancel</string>
+    <string name="main_exit_confirm">Exit</string>
+    <string name="main_surprise_me_not_found">No movies found for these criteria!</string>
+
+    <!-- FoldersScreen -->
+    <string name="folders_tab_title">Folders</string>
+    <string name="folders_empty_message">You haven\'t created any folders yet</string>
+    <string name="folders_create_first">CREATE FIRST FOLDER</string>
+    <string name="folders_rename">Rename Folder</string>
+    <string name="folders_change_color">Change Color</string>
+    <string name="folders_delete">Delete Folder</string>
+    <string name="folders_new_folder">New Folder</string>
+    <string name="folders_name_placeholder">Folder name</string>
+    <string name="folders_create_button">CREATE</string>
+
+    <!-- DiscoverScreen -->
+    <string name="discover_tab_title">Discover</string>
+    <string name="discover_title_genre">Genre</string>
+    <string name="discover_title_popular_movies">Popular Movies</string>
+    <string name="discover_title_now_playing_movies">Now Playing</string>
+    <string name="discover_title_upcoming_movies">Upcoming</string>
+    <string name="discover_title_popular_tv">Popular TV Series</string>
+    <string name="discover_title_airing_today_tv">Airing Today</string>
+    <string name="discover_title_on_the_air_tv">On The Air</string>
+    <string name="discover_title_trending_movies">Trending Movies</string>
+    <string name="discover_title_trending_tv">Trending TV Series</string>
+    <string name="discover_title_default">Discover</string>
+    <string name="discover_empty_category">No content found in this category</string>
+
+    <!-- StatsScreen -->
+    <string name="stats_tab_title">Stats</string>
+    <string name="stats_no_data">No stats available</string>
+    <string name="stats_all_time">All Time Stats</string>
+    <string name="stats_year_prefix">Stats %d</string>
+    <string name="stats_watched_in_year">WATCHED IN %d</string>
+    <string name="stats_your_movies">YOUR MOVIES</string>
+    <string name="stats_to_watch">TO WATCH</string>
+    <string name="stats_watched">WATCHED</string>
+    <string name="stats_time_spent">Time spent:</string>
+    <string name="stats_longest_movie">LONGEST MOVIE</string>
+    <string name="stats_tv_series">TV SERIES</string>
+    <string name="stats_completed">COMPLETED</string>
+    <string name="stats_longest_tv">LONGEST SERIES</string>
+    <string name="stats_top_cast">YOUR IDOLS (CAST)</string>
+    <string name="stats_top_directors">TOP DIRECTORS</string>
+    <string name="stats_genre_distribution">GENRE DISTRIBUTION</string>
+    <string name="stats_top_decades">YOUR GOLDEN DECADES</string>
+    <string name="stats_rating_distribution">RATING DISTRIBUTION</string>
+    <string name="stats_generating_card">Generating Card...</string>
+    <string name="stats_generating_card_desc">We are creating your image to share</string>
+    <string name="stats_total_time">TOTAL TIME SPENT</string>
+    <string name="stats_total_time_combined">COMBINED VIEWING</string>
+    <string name="stats_share_text">🏆 My total time on FlickTrove: %s of movies and TV series!\nDownload the app to track your progress.</string>
+    <string name="stats_title_singular">TITLE</string>
+    <string name="stats_title_plural">TITLES</string>
+    <string name="stats_of_total">%s OF TOTAL</string>
+    <string name="stats_genres">GENRES</string>
+    <string name="stats_tap_slice">TAP A SLICE</string>
+    <string name="stats_see_less">SEE LESS</string>
+    <string name="stats_see_all">SEE ALL</string>
+    <string name="stats_1_movie">1 movie</string>
+    <string name="stats_n_movies">%d movies</string>
+    <string name="stats_wrapped">%d WRAPPED</string>
+    <string name="stats_titles_watched">TITLES WATCHED</string>
+    <string name="stats_top_genre">TOP GENRE</string>
+    <string name="stats_total_time_wrapped">TOTAL TIME</string>
+    <string name="stats_year_star">%d STAR</string>
+    <string name="stats_movies">MOVIES</string>
+    <string name="stats_series">SERIES</string>
+    <string name="stats_share_card">SHARE YOUR CARD</string>
+    <string name="stats_period">PERIOD</string>
+    <string name="stats_share_chooser_title">Share your Wrapped</string>
+    <string name="stats_genre_other">OTHER</string>
+    <string name="stats_all_stats">All Stats</string>
+    <string name="stats_episodes_short">%1$d ep</string>
+    <string name="stats_episodes_long">• %1$d episodes</string>
+    <string name="stats_dhm">%1$dd %2$dh %3$dm</string>
+    <string name="stats_hm">%1$dh %2$dm</string>
+    <string name="stats_m">%1$dm</string>
+    <string name="stats_cinephile_legacy">THE CINEPHILE\'S LEGACY</string>
+    <string name="stats_one_movie">1 movie</string>
+    <string name="stats_many_movies">%1$d movies</string>
+    <string name="stats_share_title_msg">Share your stats</string>
+    <string name="stats_share_line_1">🎬 %1$s on FlickTrove!\n\n</string>
+    <string name="stats_share_line_2">📊 I watched %1$d movies and %2$d TV shows.\n</string>
+    <string name="stats_share_line_3">⏳ Total time: %1$s\n</string>
+    <string name="stats_share_line_genre">🎭 Top genre: %1$s\n</string>
+    <string name="stats_share_line_actor">⭐ Top star: %1$s\n</string>
+    <string name="stats_share_line_director">🎥 Top director: %1$s\n</string>
+    <string name="stats_share_line_decade">📅 Golden decade: %1$s\n</string>
+    <string name="stats_share_line_outro">\nTrack your cinematic journey on FlickTrove! 🍿</string>
+
+    <!-- SettingsScreen -->
+    <string name="settings_tab_title">Settings</string>
+    <!-- Interface and Layout -->
+    <string name="settings_ui_layout">Interface and Layout</string>
+    <string name="settings_folder_bookmarks">Folder Bookmarks</string>
+    <string name="settings_folder_bookmarks_desc">Shows a colored ribbon on cards to indicate folder membership.</string>
+    <string name="settings_badges">Info Badges</string>
+    <string name="settings_badges_desc">Shows colored badges with indicators like NEW, HOT, BEST, etc.</string>
+    <string name="settings_layout_toggle">Layout Button</string>
+    <string name="settings_layout_toggle_desc">Shows a button to change the number of columns in Home</string>
+    <string name="settings_split_home">Split Home Releases</string>
+    <string name="settings_split_home_desc">Separates released titles from upcoming ones in Home</string>
+    <string name="settings_language">App Language</string>
+    <string name="settings_language_desc">Choose the language for the interface and content</string>
+    <string name="settings_language_system">System</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_it">Italiano</string>
+    <!-- Aesthetics -->
+    <string name="settings_aesthetics">Aesthetics</string>
+    <string name="settings_accent_color">Accent Color</string>
+    <string name="settings_accent_color_desc">Customize the look of the app</string>
+    <string name="settings_dynamic_icon">Dynamic App Icon</string>
+    <string name="settings_dynamic_icon_desc">Changes the app icon on the home screen to match the accent color</string>
+    <string name="settings_entry_animation">Entry Animation</string>
+    <string name="settings_entry_animation_desc">Shows the logo animation when opening the app</string>
+    <string name="settings_amoled_bg">AMOLED Background</string>
+    <string name="settings_amoled_bg_desc">Uses pitch black instead of dark gray</string>
+    <!-- Accessibility -->
+    <string name="settings_accessibility">Accessibility</string>
+    <string name="settings_title_size">Title text size</string>
+    <string name="settings_title_size_desc">Enlarges or reduces main texts</string>
+    <string name="settings_size_small">Small</string>
+    <string name="settings_size_medium">Medium</string>
+    <string name="settings_size_large">Large</string>
+    <string name="settings_visual_effects">Advanced visual effects</string>
+    <string name="settings_visual_effects_desc">Enables complex blurs and animations</string>
+    <!-- Notifications and Vibration -->
+    <string name="settings_notifications_vibration">Notifications and Vibration</string>
+    <string name="settings_enable_notifications">Enable Notifications</string>
+    <string name="settings_enable_notifications_desc">Get notified on the release day of the movies or series you follow.</string>
+    <string name="settings_haptic_feedback">Haptic feedback</string>
+    <string name="settings_haptic_feedback_desc">Vibrates on interface actions</string>
+    <!-- Images -->
+    <string name="settings_images">Images</string>
+    <string name="settings_image_quality">Image Quality</string>
+    <string name="settings_image_quality_desc">Manage data usage</string>
+    <string name="settings_clear_cache">Clear Image Cache</string>
+    <string name="settings_clear_cache_desc">%1$s   Frees up space used by posters and backdrops</string>
+    <!-- Sync and Backup -->
+    <string name="settings_sync_backup">Sync and Backup</string>
+    <string name="settings_smart_merge">Smart Merge will combine data while always protecting your local ratings and notes.</string>
+    <string name="settings_external_migration">External Migration</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb</string>
+    <string name="settings_device_backup">FlickTrove Device Backup</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_restore">Restore</string>
+    <!-- Account -->
+    <string name="settings_account">Account</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <!-- Support and Info -->
+    <string name="settings_support_info">Support and Info</string>
+    <string name="settings_send_feedback">Send Feedback</string>
+    <string name="settings_send_feedback_desc">Report bugs or suggest new features</string>
+    <string name="settings_terms_service">Terms of Service</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+    <string name="settings_omdb_notice">Additional data and ratings provided by OMDb API.</string>
+    <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
+    <string name="settings_app_version">FlickTrove v3.1.3</string>
+    <string name="settings_made_with">Developed with </string>
+    <string name="settings_for_lovers"> for movie lovers</string>
+    <!-- Dialog buttons -->
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_yes_delete">Yes, Delete</string>
+    <string name="settings_confirm">Confirm</string>
+    <string name="settings_got_it">Got it</string>
+    <string name="settings_yes_logout">Yes, Logout</string>
+    <string name="settings_close">Close</string>
+    <!-- Backup dialog -->
+    <string name="settings_export_backup">Export Backup</string>
+    <string name="settings_restore_backup">Restore Backup</string>
+    <string name="settings_select_file">Select file (JSON or CSV)</string>
+    <!-- Feedback dialog -->
+    <string name="settings_send_message">Send Message</string>
+    <!-- Color Dialog -->
+    <string name="settings_interface_color">Interface Color</string>
+    <string name="settings_custom">Custom</string>
+    <!-- Feedback form -->
+    <string name="settings_feedback_title">Send Feedback</string>
+    <string name="settings_feedback_subtitle">Help us improve FlickTrove</string>
+    <string name="settings_feedback_subject_label">Subject</string>
+    <string name="settings_feedback_subject_placeholder">e.g. Suggestion, Bug...</string>
+    <string name="settings_feedback_email_label">Email (optional)</string>
+    <string name="settings_feedback_email_placeholder">So we can reply</string>
+    <string name="settings_feedback_desc_label">Description</string>
+    <string name="settings_feedback_desc_placeholder">Tell us the details...</string>
+    <!-- Dialogs -->
+    <string name="settings_dialog_delete_account_title">Delete Account</string>
+    <string name="settings_dialog_delete_account_desc">Are you sure you want to proceed? All your saved movies, ratings, and folders will be permanently removed from the cloud.</string>
+    <string name="settings_dialog_clear_cache_title">Clear Cache</string>
+    <string name="settings_dialog_clear_cache_desc">All downloaded posters and logos will be removed. They will need to be reloaded on the next startup.</string>
+    <string name="settings_dialog_logout_title">Logout</string>
+    <string name="settings_dialog_logout_desc">Are you sure you want to log out? You will need to log in again to sync your data.</string>
+    <string name="settings_login">Login</string>
+    <!-- Badges -->
+    <string name="settings_badge_new">NEW</string>
+    <string name="settings_badge_new_desc">Coming soon or New episodes released</string>
+    <string name="settings_badge_masterpiece">MASTERPIECE</string>
+    <string name="settings_badge_masterpiece_desc">Absolute masterpiece (avg =8.8, &gt;2000 votes)</string>
+    <string name="settings_badge_best">BEST</string>
+    <string name="settings_badge_best_desc">Exceptional average rating (=8.5, &gt;300 votes)</string>
+    <string name="settings_badge_hot">HOT</string>
+    <string name="settings_badge_hot_desc">Very popular (votes &gt; 3000 on TMDB)</string>
+    <string name="settings_badge_wow">WOW</string>
+    <string name="settings_badge_wow_desc">Excellent reception (avg =8.0, &gt;1000 votes)</string>
+    <string name="settings_badge_hidden_gem">HIDDEN GEM</string>
+    <string name="settings_badge_hidden_gem_desc">Hidden Gem (avg =7.5, &lt;500 votes)</string>
+    <string name="settings_badge_cult">CULT</string>
+    <string name="settings_badge_cult_desc">Iconic title (\'90 - \'10, avg =8.0)</string>
+    <string name="settings_badge_classic">CLASSIC</string>
+    <string name="settings_badge_classic_desc">Classic from the past (&lt; 1990, avg =7.0)</string>
+    <string name="settings_badge_epic">EPIC</string>
+    <string name="settings_badge_epic_desc">Long duration, colossal (&gt; 160 min)</string>
+    <string name="settings_badge_binge">BINGE</string>
+    <string name="settings_badge_binge_desc">Ideal for binge-watching (Long series, &gt;50 ep.)</string>
+    <string name="settings_badge_scifi">SCI-FI</string>
+    <string name="settings_badge_scifi_desc">Sci-Fi Genre</string>
+    <string name="settings_badge_comedy">COMEDY</string>
+    <string name="settings_badge_comedy_desc">Appreciated comedy (avg =7.0)</string>
+    <string name="settings_badge_horror">HORROR</string>
+    <string name="settings_badge_horror_desc">Horror Genre</string>
+    <string name="settings_badge_animation">ANIMATION</string>
+    <string name="settings_badge_animation_desc">Animation Genre</string>
+    <string name="settings_badge_blockbuster">BLOCKBUSTER</string>
+    <string name="settings_badge_blockbuster_desc">Stellar box office (&gt; 500 mln $)</string>
+    <string name="settings_badge_indie">INDIE</string>
+    <string name="settings_badge_indie_desc">Low budget, high quality (budget &lt; 5 mln, avg =7.0)</string>
+    <string name="settings_badge_quick">QUICK</string>
+    <string name="settings_badge_quick_desc">Short but intense (Movie &lt; 90 min)</string>
+    <string name="settings_badge_snack">SNACK</string>
+    <string name="settings_badge_snack_desc">Short episodes (TV Series &lt; 25 min)</string>
+    <string name="settings_badge_divisive">DIVISIVE</string>
+    <string name="settings_badge_divisive_desc">Love it or hate it (avg 5.0 - 6.5, &gt;1000 votes)</string>
+    <string name="settings_badge_vintage">VINTAGE</string>
+    <string name="settings_badge_vintage_desc">Classic of other times (&lt; 1970)</string>
+    <string name="settings_badge_docu">DOCU</string>
+    <string name="settings_badge_docu_desc">Documentaries</string>
+    <string name="settings_badge_family">FAMILY</string>
+    <string name="settings_badge_family_desc">Ideal for the family</string>
+    <!-- Backup and Migration -->
+    <string name="settings_processing">Processing...</string>
+    <string name="settings_backup_restore_title">Backup and Restore</string>
+    <string name="settings_backup_restore_desc">Export a copy of your data (favorites, folders, and settings) or restore from a previously saved file.</string>
+    <string name="settings_external_migration_dialog_title">External Migration</string>
+    <string name="settings_external_migration_dialog_desc">You can import your movie list by uploading the JSON file exported from Trakt.tv, or the CSV files from Letterboxd (e.g. watched.csv) and IMDb (e.g. watchlist.csv). The movies will be added to your favorites.</string>
+
+    <!-- Movie Detail Strings -->
+    <string name="detail_error_title">Something went wrong</string>
+    <string name="detail_error_unknown">Unknown error</string>
+    <string name="detail_retry">RETRY</string>
+    <string name="detail_go_back">Go back</string>
+    <string name="detail_cannot_open_link">Cannot open link</string>
+    <string name="detail_no_overview">No overview available.</string>
+    <string name="detail_content_desc_home">Return to main screen</string>
+    <string name="detail_manage_folders">Manage Folders</string>
+    <string name="detail_share_text">Check out %1$s on FlickTrove!\n\n%2$s</string>
+    <string name="detail_content_desc_share">Share</string>
+    <string name="detail_content_desc_folder">Folder</string>
+    <string name="detail_content_desc_back">Back</string>
+    <string name="detail_rating_legend_title">Rating Legend</string>
+    <string name="detail_rating_movies_usa">?? Movies (USA / MPAA)</string>
+    <string name="detail_rating_g">General Audiences.</string>
+    <string name="detail_rating_pg">Parental Guidance Suggested.</string>
+    <string name="detail_rating_pg13">Parents Strongly Cautioned (Under 13).</string>
+    <string name="detail_rating_r">Restricted (Under 17 requires parent).</string>
+    <string name="detail_rating_nc17">No One 17 and Under Admitted.</string>
+    <string name="detail_rating_nr">Not Rated.</string>
+    <string name="detail_rating_tv_usa">?? TV Shows (USA / TV Guidelines)</string>
+    <string name="detail_rating_tvy">All Children.</string>
+    <string name="detail_rating_tvy7">Directed to Older Children (7+).</string>
+    <string name="detail_rating_tvg">General Audience.</string>
+    <string name="detail_rating_tvpg">Parental Guidance Suggested.</string>
+    <string name="detail_rating_tv14">Parents Strongly Cautioned (Under 14).</string>
+    <string name="detail_rating_tvma">Mature Audience Only.</string>
+    <string name="detail_translate_comment">Translate review</string>
+    <string name="detail_translate_download_prompt">The translation model (about 30MB) might not be downloaded yet. Allow downloading over cellular data?</string>
+    <string name="detail_translate_yes_cellular">Yes, use cellular</string>
+    <string name="detail_translate_no_wifi">No, Wi-Fi only</string>
+    <string name="detail_translate_not_now">Not now</string>
+
+    <!-- Person Detail Strings -->
+    <string name="person_read_less">READ LESS</string>
+    <string name="person_read_more">READ MORE</string>
+    <string name="person_no_bio">No biography available.</string>
+    <string name="person_birthday">BIRTHDAY</string>
+    <string name="person_birth_place">PLACE OF BIRTH</string>
+    <string name="person_known_for">KNOWN FOR</string>
+    <string name="person_popularity">POPULARITY</string>
+    <string name="person_nd">N/A</string>
+    <string name="person_highlights">Highlights</string>
+    <string name="person_filmography">Filmography</string>
+    <string name="person_cast_movie_format">Cast - Movies (%d)</string>
+    <string name="person_cast_tv_format">Cast - TV (%d)</string>
+    <string name="person_crew_movie_format">Crew - Movies (%d)</string>
+    <string name="person_crew_tv_format">Crew - TV (%d)</string>
+
+    <!-- Folder Detail Strings -->
+    <string name="folder_detail_error">Error</string>
+    <string name="folder_detail_empty">This folder is empty</string>
+    <string name="folder_detail_tab_all">ALL</string>
+    <string name="folder_detail_tab_movies">MOVIES</string>
+    <string name="folder_detail_tab_tv">TV SHOWS</string>
+    <string name="folder_detail_change_columns">Change Columns</string>
+    <string name="folder_detail_filters">Filters</string>
+
+    <!-- Search Strings -->
+    <string name="search_error_message">Unable to load data. Check your connection and try again.</string>
+    <string name="search_trending_now">Trending Now</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_no_results_short">No results found.\nType at least 3 characters</string>
+    <string name="search_no_results_simplify">No results found.\nTry simplifying your search</string>
+    <string name="search_content_desc">Search</string>
+    <string name="search_fallback_genre">Genre</string>
+    <string name="search_active_genre_format">Genre: %1</string>
+    <string name="search_fallback_keyword">Selected</string>
+    <string name="search_active_keyword_format">Theme: %1</string>
+    <string name="search_placeholder">Search movies, TV shows, people...</string>
+    <string name="search_content_desc_clear">Clear</string>
+    <string name="search_content_desc_layout">Change Layout</string>
+    <string name="search_keyword_filter_warning">Note: the keyword filter is ignored in text search.</string>
+    <string name="search_recent">RECENT</string>
+    <string name="search_clear_all">CLEAR ALL</string>
+    <string name="search_remove_recent">Remove search</string>
+    <string name="search_suggested">SUGGESTED GENRES AND THEMES</string>
+    <string name="search_collapse">Collapse</string>
+    <string name="search_expand">Expand</string>
+    <string name="search_tab_persons">PEOPLE</string>
+
+    <!-- Recommendations & Library Strings -->
+    <string name="library_tab_title">Library</string>
+    <string name="library_empty_seen">You haven\'t watched anything yet</string>
+    <string name="recommendations_tab_title">Recommendations</string>
+    <string name="recommendations_empty_1">We don\'t have enough data to recommend anything yet.</string>
+    <string name="recommendations_empty_2">Add movies to your favorites and rate them to get started!</string>
+    <string name="recommendations_tinder_mode">Swipe Mode</string>
+    <string name="recommendations_add">ADD</string>
+    <string name="recommendations_pass">PASS</string>
+    <string name="recommendations_no_title">Untitled</string>
+    <string name="recommendations_na">N/A</string>
+    <string name="recommendations_desc_pass">Pass</string>
+    <string name="recommendations_desc_info">Info</string>
+    <string name="recommendations_desc_favorite">Favorites</string>
+    <string name="recommendations_completed_title">Recommendations completed!</string>
+    <string name="recommendations_completed_desc">You\'ve seen all current recommendations. Try switching from MOVIES to TV SHOWS or reload to find new ones!</string>
+    <string name="recommendations_reload">Reload</string>
+
+    <!-- Auth Strings -->
+    <string name="auth_subtitle">YOUR CINEMATIC ARCHIVE</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_error_email_invalid">Invalid email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_error_password_length">Minimum 6 characters</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_login">Log In</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_switch_to_register">Don\'t have an account? Sign Up</string>
+    <string name="auth_switch_to_login">Already have an account? Log In</string>
+    <string name="auth_or">OR</string>
+    <string name="auth_guest_continue">Continue as Guest</string>
+    <string name="auth_terms_prefix">By continuing, you agree to our </string>
+    <string name="auth_terms_link">Terms of Service</string>
+    <string name="auth_terms_and"> and </string>
+    <string name="auth_privacy_link">Privacy Policy</string>
+    <string name="auth_terms_suffix">.</string>
+    <string name="auth_guest_dialog_title">Guest Mode</string>
+    <string name="auth_guest_dialog_desc">Your data will only be saved on this device. If you uninstall the app or clear the cache, your data will be permanently lost.</string>
+    <string name="auth_guest_dialog_confirm">Log in as Guest</string>
+    <string name="auth_guest_dialog_cancel">Go back</string>
+    <string name="auth_syncing">Syncing...</string>
+
+    <!-- Surprise Me Strings -->
+    <string name="surprise_title">Surprise me</string>
+    <string name="surprise_close">Close</string>
+    <string name="surprise_mode_random">Random</string>
+    <string name="surprise_mode_random_desc">Random movie</string>
+    <string name="surprise_mode_emotional">Emotional</string>
+    <string name="surprise_mode_emotional_desc">The perfect match</string>
+    <string name="surprise_q_time">How much time do you have?</string>
+    <string name="surprise_time_short">Less than 1h 40m</string>
+    <string name="surprise_time_medium">Normal (~2h)</string>
+    <string name="surprise_time_long">The whole evening</string>
+    <string name="surprise_any">It doesn\'t matter</string>
+    <string name="surprise_q_mood">What mood are you looking for?</string>
+    <string name="surprise_mood_laugh">I want to laugh</string>
+    <string name="surprise_mood_tension">I want tension</string>
+    <string name="surprise_mood_emotion">I want to be moved</string>
+    <string name="surprise_mood_escape">Mental trip</string>
+    <string name="surprise_mood_any">Surprise me</string>
+    <string name="surprise_q_company">Who are you watching with?</string>
+    <string name="surprise_company_alone">Alone</string>
+    <string name="surprise_company_couple">As a couple</string>
+    <string name="surprise_company_friends">With friends</string>
+    <string name="surprise_company_family">With family</string>
+    <string name="surprise_loading_1">Looking for the perfect match...</string>
+
+    <!-- Updates Strings -->
+    <string name="updates_no_reminders">No reminders</string>
+    <string name="updates_arriving_prefix">Arriving: %1$s</string>
+    <string name="updates_new_episodes">New Episodes</string>
+    <string name="updates_mark_all">MARK ALL</string>
+    <string name="updates_new_episodes_count">%1$d new episodes</string>
+    <string name="updates_out_today">Out Today!</string>
+    <string name="updates_available_now">Available now</string>
+    <string name="updates_tab_reminders">Reminders</string>
+    <string name="updates_tab_notifications">Notifications</string>
+    <string name="updates_your_reminders">Your Reminders</string>
+    <string name="updates_waiting_count">%1$d pending</string>
+    <string name="updates_no_notifications">No recent notifications.</string>
+
+    <!-- Notifications & Widgets -->
+    <string name="notif_reminder_summary">FlickTrove · Release Reminders</string>
+    <string name="notif_update_summary">FlickTrove · Series Update</string>
+    <string name="notif_new_release_title">New release: %1$s</string>
+    <string name="notif_new_release_body">\"%1$s\" is now available!</string>
+    <string name="notif_new_episode_title">New release: Episode %1$s</string>
+    <string name="notif_new_episode_body">Episode %1$s of \"%2$s\" is out today!</string>
+    <string name="notif_new_episodes_title">New episodes available</string>
+    <string name="notif_new_episodes_body_single">1 new episode available for \"%1$s\".</string>
+    <string name="notif_new_episodes_body_plural">%1$d new episodes available for \"%2$s\".</string>
+    <string name="widget_nothing_to_see">Nothing to see!</string>
+    <string name="widget_coming_soon">COMING SOON</string>
+    <string name="widget_release_date_prefix">Releasing on: %1$s</string>
+    <string name="widget_no_releases">No upcoming titles!</string>
+    <string name="widget_no_img">No Img</string>
+
+    <!-- Quick Actions Strings -->
+    <string name="quick_action_title">Quick Actions</string>
+    <string name="quick_action_rating">Quick Rating</string>
+    <string name="quick_action_note">Quick Note</string>
+    <string name="quick_folders">FOLDERS</string>
+    <string name="quick_no_folders">No folders created</string>
+    <string name="quick_rating_title">QUICK RATING</string>
+    <string name="quick_rating_previous">  •  PREVIOUS: %1$.1f</string>
+    <string name="quick_note_title">QUICK NOTE</string>
+    <string name="quick_note_hint">Add a note or review...</string>
+    <string name="quick_note_dictate">Dictate note</string>
+    <string name="quick_note_stop_audio">Stop audio</string>
+    <string name="quick_note_play_audio">Play audio</string>
+    <string name="quick_note_listening">Listening</string>
+    <string name="quick_note_delete_audio">Delete audio</string>
+    <string name="quick_note_recording">Recording in progress...</string>
+    <string name="quick_note_stop_recording">Stop recording</string>
+    <string name="quick_note_record_audio">Record audio</string>
+
+    <!-- Folder Modals Strings -->
+    <string name="folder_picker_title">My Folders</string>
+    <string name="folder_picker_subtitle">Organize your movies</string>
+    <string name="folder_picker_empty">No folders found</string>
+    <string name="folder_picker_new">NEW FOLDER</string>
+    <string name="folder_item_count">%1$d items</string>
+    <string name="folder_new_name">New Folder</string>
+    <string name="folder_edit_rename">Rename Folder</string>
+    <string name="folder_edit_color">Change Color</string>
+    <string name="folder_edit_name_hint">Folder name</string>
+    <string name="folder_delete_title">Delete Folder?</string>
+    <string name="folder_delete_confirm_prefix">Are you sure you want to delete </string>
+    <string name="folder_delete_confirm_prefix_2">Are you sure you want to delete the folder </string>
+    <string name="folder_delete_confirm_suffix">\? This action cannot be undone.</string>
+    <string name="folder_delete_action">DELETE FOLDER</string>
+    <string name="folder_delete_warning_long">THIS ACTION IS IRREVERSIBLE AND WILL ONLY REMOVE THE ORGANIZATION, NOT THE SAVED CONTENT.</string>
+    <string name="folder_delete_cancel">CANCEL</string>
+    <string name="folder_delete_short">DELETE</string>
+
+    <!-- System Modals Strings -->
+    <string name="guest_warning_title">Guest Mode</string>
+    <string name="guest_warning_local_only">Data is saved locally only.</string>
+    <string name="guest_warning_data_loss">Risk of data loss if you uninstall the app.</string>
+    <string name="guest_warning_accept">Accept and Continue</string>
+    <string name="import_library_title">Import Library</string>
+    <string name="import_csv_button">Upload CSV</string>
+    <string name="feedback_title">Send Feedback</string>
+    <string name="feedback_hint">Message...</string>
+    <string name="feedback_submit">Submit</string>
+    <string name="feedback_type_bug">Bug</string>
+    <string name="feedback_type_idea">Idea</string>
+    <string name="feedback_type_other">Other</string>
+    <string name="error_state_title">Oops! Something went wrong</string>
+    <string name="error_state_retry">Retry</string>
+
+    <!-- Global & Modals Strings -->
+    <string name="action_cancel">CANCEL</string>
+    <string name="action_retry">RETRY</string>
+    <string name="action_save">SAVE</string>
+    <string name="settings_quality">Image Quality</string>
+    <string name="filter_title">FILTERS</string>
+    <string name="filter_reset">RESET</string>
+    <string name="filter_show_all">SHOW ALL</string>
+    <string name="filter_apply">APPLY FILTERS</string>
+    <string name="card_quick_rate">Quick rate</string>
+    <string name="card_quick_note">Quick note</string>
+    <string name="card_folders">Folders</string>
+    <string name="card_share">Share</string>
+    <string name="card_delete">Delete</string>
+    <string name="color_picker_title">Color</string>
+    <string name="category_movies">MOVIES</string>
+    <string name="category_tv">TV SHOWS</string>
+    <string name="drawer_menu">Menu</string>
+
+    <!-- Detail Components Strings -->
+    <string name="detail_director">DIRECTOR</string>
+    <string name="detail_cast">CAST</string>
+    <string name="detail_top_comments">TOP COMMENTS</string>
+    <string name="detail_plot">PLOT</string>
+    <string name="detail_where_to_watch">WHERE TO WATCH</string>
+    <string name="detail_collection">COLLECTION</string>
+    <string name="detail_recommendations">RECOMMENDED</string>
+    <string name="detail_technical_info">TECHNICAL DETAILS</string>
+    <string name="detail_official_trailers">OFFICIAL TRAILERS</string>
+    <string name="detail_official_trailer">OFFICIAL TRAILER</string>
+    <string name="detail_swipe">SWIPE</string>
+    <string name="detail_personal_zone">PERSONAL ZONE</string>
+    <string name="detail_tap_for_more">TAP FOR MORE</string>
+    <string name="personal_listening">Listening</string>
+    <string name="personal_audio_local_only">Audio is saved locally and will not be synced.</string>
+    <string name="personal_save_note">SAVE NOTE</string>
+    <string name="rated_guide_title">Ratings Guide</string>
+    <string name="rated_guide_source">Data is sourced from the MPAA (USA), the international standard for film classification.</string>
+    <string name="rated_guide_help">FlickTrove displays this information to help you choose the right movie for your evening.</string>
 </resources>
