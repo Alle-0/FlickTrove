@@ -769,4 +769,10 @@
     <string name="msg_action_updated">\"%1$s\" aggiornato</string>
 
     <!-- Detail Actions -->
+    
+    <!-- Episodes -->
+    <string name="episodes_info_desc">Informazioni Episodio</string>
+    <string name="detail_release_date">Data di uscita</string>
+    <string name="detail_rating">Valutazione</string>
+
 </resources>

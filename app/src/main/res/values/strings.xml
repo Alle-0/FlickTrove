@@ -769,5 +769,9 @@
     <string name="msg_action_favorite">\"%1$s\" added to To Watch</string>
     <string name="msg_action_reminder">\"%1$s\" reminder set</string>
     <string name="msg_action_updated">\"%1$s\" updated</string>
+    <!-- Episodes -->
+    <string name="episodes_info_desc">Episode Information</string>
+    <string name="detail_release_date">Release Date</string>
+    <string name="detail_rating">Rating</string>
 
 </resources>

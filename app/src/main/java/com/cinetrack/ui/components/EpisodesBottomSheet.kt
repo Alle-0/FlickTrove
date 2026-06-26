@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,6 +105,8 @@ fun EpisodesBottomSheet(
     var localWatchedEpisodes by remember(movie.watchedEpisodes) { 
         mutableStateOf(movie.watchedEpisodes ?: emptyMap()) 
     }
+    
+    var selectedEpisodeForInfo by remember { mutableStateOf<Episode?>(null) }
 
     val scope = rememberCoroutineScope()
     val dismissAndSync: () -> Unit = {
@@ -155,6 +159,13 @@ fun EpisodesBottomSheet(
                 return Offset.Zero
             }
         }
+    }
+
+    if (selectedEpisodeForInfo != null) {
+        EpisodeInfoModal(
+            episode = selectedEpisodeForInfo!!,
+            onDismiss = { selectedEpisodeForInfo = null }
+        )
     }
 
     ModalBottomSheet(
@@ -262,7 +273,8 @@ fun EpisodesBottomSheet(
                                     currentWatched.add(episode.episodeNumber)
                                 }
                                 localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to currentWatched)
-                            }
+                            },
+                            onInfoClick = { selectedEpisodeForInfo = episode }
                         )
                     }
                 }
@@ -402,7 +414,7 @@ private fun BulkAction(
 }
 
 @Composable
-private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Unit) {
+private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Unit, onInfoClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -442,6 +454,18 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            
+            IconButton(
+                onClick = onInfoClick,
+                modifier = Modifier.size(28.dp).padding(end = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.episodes_info_desc),
+                    tint = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
             Surface(
                 modifier = Modifier.size(28.dp),
@@ -463,4 +487,77 @@ private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, c
     val watched = localWatchedEpisodes[currentSeasonNumber.toString()] ?: emptyList()
     val total = seasonData.episodes?.size ?: 0
     return total > 0 && watched.size >= total
+}
+
+@Composable
+private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.ok), color = PrimaryTeal)
+            }
+        },
+        title = {
+            Text(
+                text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (!episode.stillPath.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .padding(bottom = 12.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
+                if (!episode.airDate.isNullOrEmpty()) {
+                    Text(
+                        text = "${stringResource(R.string.detail_release_date)}: ${episode.airDate}",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+                
+                if (episode.voteAverage != null && episode.voteAverage > 0.0) {
+                    Text(
+                        text = "${stringResource(R.string.detail_rating)}: ${String.format("%.1f", episode.voteAverage)}/10",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
+                
+                if (!episode.overview.isNullOrEmpty()) {
+                    Text(
+                        text = episode.overview,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.detail_no_overview),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    )
+                }
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        shape = RoundedCornerShape(24.dp)
+    )
 }
