@@ -946,7 +946,7 @@ fun MovieDetailScreenContent(
                                     contentDescription = stringResource(R.string.detail_content_desc_share),
                                     tint = Color.White,
                                     modifier = Modifier
-                                        .offset(x = 0.5.dp)
+                                        .offset(x = (-1).dp)
                                         .size(15.dp)
                                         .graphicsLayer {
                                             scaleX = shareIconScale
