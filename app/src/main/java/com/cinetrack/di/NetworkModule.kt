@@ -3,6 +3,7 @@ package com.cinetrack.di
 import com.cinetrack.data.api.OmdbService
 import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.api.TMDBService
+import com.cinetrack.data.api.NewsService
 import com.cinetrack.utils.Keys
 import dagger.Module
 import dagger.Provides
@@ -106,6 +107,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("news_retrofit")
+    fun provideNewsRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://localhost/") // overridden by @Url
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     fun provideTMDBService(@Named("tmdb_retrofit") retrofit: Retrofit): TMDBService = retrofit.create(TMDBService::class.java)
 
     @Provides
@@ -115,6 +126,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideTraktService(@Named("trakt_retrofit") retrofit: Retrofit): TraktService = retrofit.create(TraktService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNewsService(@Named("news_retrofit") retrofit: Retrofit): NewsService = retrofit.create(NewsService::class.java)
 
     @Provides
     @Named("tmdb_api_key")

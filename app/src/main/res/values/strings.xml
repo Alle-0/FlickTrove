@@ -659,6 +659,7 @@
     <string name="drawer_custom_recommendations">Recommended for you</string>
     <string name="drawer_custom_surprise">Surprise me</string>
     <string name="drawer_custom_folders">My folders</string>
+    <string name="drawer_custom_news">News</string>
     <string name="drawer_general">General</string>
     <string name="drawer_general_settings">Settings</string>
 
@@ -698,6 +699,12 @@
     <string name="personal_note_placeholder">Add a personal note...</string>
     <string name="episodes_mark_season_watched">MARK SEASON AS WATCHED</string>
     <string name="episodes_episode_n">EPISODE %d</string>
+
+    <!-- News Section -->
+    <string name="news_tab_title">Latest News</string>
+    <string name="news_empty">No news available at the moment.</string>
+    <string name="news_read_more">Read more</string>
+    <string name="news_external_link">External link</string>
 
     <!-- Dialogs -->
     <string name="dialog_rating_drag">DRAG TO RATE</string>

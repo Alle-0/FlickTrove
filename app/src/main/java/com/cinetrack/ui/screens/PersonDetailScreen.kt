@@ -264,27 +264,55 @@ fun PersonDetailScreenContent(
                             )
 
                             p.biography?.let { bio ->
-                                Text(
-                                    text = bio,
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    fontSize = 16.sp,
-                                    lineHeight = 26.sp,
-                                    maxLines = if (uiState.showFullBio) Int.MAX_VALUE else 4
-                                )
-                                if (bio.length > 200) {
-                                    Text(
-                                        text = if (uiState.showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
-                                        color = Color.White,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Black,
-                                        modifier = Modifier.padding(top = 16.dp).clickable { viewModel.toggleBio() }
-                                    )
+                                Column(
+                                    modifier = Modifier
+                                        .bounceClick(scaleDown = 0.99f) { viewModel.toggleBio() }
+                                ) {
+                                    androidx.compose.animation.AnimatedContent(
+                                        targetState = uiState.showFullBio,
+                                        transitionSpec = {
+                                            androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(350)) togetherWith
+                                                    androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(350)) using
+                                                    androidx.compose.animation.SizeTransform(clip = true) { _, _ ->
+                                                        androidx.compose.animation.core.spring(
+                                                            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                                                            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                                                        )
+                                                    }
+                                        },
+                                        label = "BioExpansion"
+                                    ) { targetExpanded ->
+                                        Text(
+                                            text = bio,
+                                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                                                lineHeight = 20.sp,
+                                                letterSpacing = 0.2.sp,
+                                                fontSize = 14.sp
+                                            ),
+                                            color = Color.White.copy(alpha = 0.7f),
+                                            maxLines = if (targetExpanded) Int.MAX_VALUE else 4,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    if (bio.length > 200) {
+                                        Text(
+                                            text = if (uiState.showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
+                                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color.White,
+                                            modifier = Modifier.padding(top = 12.dp)
+                                        )
+                                    }
                                 }
                             } ?: Text(
                                 text = stringResource(R.string.person_no_bio),
-                                color = Color.White.copy(alpha = 0.7f),
-                                fontSize = 16.sp,
-                                lineHeight = 26.sp
+                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                                    lineHeight = 20.sp,
+                                    letterSpacing = 0.2.sp,
+                                    fontSize = 14.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.7f)
                             )
 
                             Spacer(modifier = Modifier.height(30.dp))

@@ -659,6 +659,7 @@
     <string name="drawer_custom_recommendations">Consigliati per te</string>
     <string name="drawer_custom_surprise">Sorprendimi</string>
     <string name="drawer_custom_folders">Le mie cartelle</string>
+    <string name="drawer_custom_news">Ultime Notizie</string>
     <string name="drawer_general">Generale</string>
     <string name="drawer_general_settings">Impostazioni</string>
 
@@ -667,6 +668,12 @@
     <string name="episodes_specials">SPECIALI</string>
     <string name="episodes_season_n">STAGIONE %d</string>
     <string name="episodes_season_completed">STAGIONE COMPLETATA</string>
+
+    <!-- News Section -->
+    <string name="news_tab_title">Ultime Notizie</string>
+    <string name="news_empty">Nessuna notizia disponibile al momento.</string>
+    <string name="news_read_more">Carica altro</string>
+    <string name="news_external_link">Link esterno</string>
 
     <!-- Detail Actions -->
     <string name="action_reminder_active">RICORDA ATTIVO</string>

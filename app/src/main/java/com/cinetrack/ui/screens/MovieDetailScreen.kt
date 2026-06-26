@@ -149,8 +149,8 @@ fun MovieDetailScreenContent(
     onBackClick: () -> Unit = {},
     onMovieClick: (Movie) -> Unit = {},
     onPersonClick: (Long, String?) -> Unit = { _, _ -> },
-    onGenreClick: (Long, String, Offset) -> Unit = { _, _, _ -> },
-    onKeywordClick: (Long, String, Offset) -> Unit = { _, _, _ -> },
+    onGenreClick: (Long, String?, Offset) -> Unit = { _, _, _ -> },
+    onKeywordClick: (Long, String?, Offset) -> Unit = { _, _, _ -> },
     detailStackDepth: Int = 1,
     onHomeClick: () -> Unit = {}
 ) {
@@ -868,7 +868,7 @@ fun MovieDetailScreenContent(
 
                         // Right side actions (Share + Folder)
                         Row(
-                            modifier = Modifier.align(Alignment.CenterEnd),
+                            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
@@ -946,7 +946,7 @@ fun MovieDetailScreenContent(
                                     contentDescription = stringResource(R.string.detail_content_desc_share),
                                     tint = Color.White,
                                     modifier = Modifier
-                                        .offset(x = (-1.5).dp)
+                                        .offset(x = 0.5.dp)
                                         .size(15.dp)
                                         .graphicsLayer {
                                             scaleX = shareIconScale

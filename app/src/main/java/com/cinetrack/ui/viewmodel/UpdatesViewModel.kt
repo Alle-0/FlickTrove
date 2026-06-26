@@ -11,6 +11,9 @@ import javax.inject.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
@@ -30,9 +33,13 @@ class UpdatesViewModel @Inject constructor(
                 .sortedByDescending { it.clientUpdatedAt }
             UpdatesUiState(movies = updateList.toImmutableList(), isLoading = false)
         }
+        .flowOn(Dispatchers.Default)
+        .catch { e ->
+            emit(UpdatesUiState(isLoading = false))
+        }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Lazily,
             initialValue = UpdatesUiState()
         )
 

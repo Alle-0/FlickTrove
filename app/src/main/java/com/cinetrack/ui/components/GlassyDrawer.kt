@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.RotateRight
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -180,6 +181,13 @@ fun GlassyDrawer(
                     label = stringResource(R.string.drawer_custom_folders),
                     isSelected = selectedRoute == "my_folders",
                     onClick = { onNavigate("my_folders") },
+                    accentColor = accentColor
+                )
+                DrawerItem(
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
+                    label = stringResource(R.string.drawer_custom_news),
+                    isSelected = selectedRoute == "news",
+                    onClick = { onNavigate("news") },
                     accentColor = accentColor
                 )
 

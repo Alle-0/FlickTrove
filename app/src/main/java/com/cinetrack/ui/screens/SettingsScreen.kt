@@ -552,7 +552,7 @@ fun SettingsScreenContent(
                                 }
                             )
                             SettingsItem(
-                                icon = Icons.Rounded.Language,
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_world),
                                 title = stringResource(R.string.settings_language),
                                 description = stringResource(R.string.settings_language_desc),
                                 trailing = { },

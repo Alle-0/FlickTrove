@@ -522,13 +522,21 @@ class MovieRepository @Inject constructor(
     suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = "IT").results
 
     suspend fun getUpcomingMovies(page: Int = 1): List<Movie> {
+        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+        val resolvedLanguage = if (rawLanguage == "system") {
+            java.util.Locale.getDefault().language
+        } else {
+            rawLanguage
+        }
+        val region = if (resolvedLanguage == "it") "IT" else "US"
+
         val today = java.time.LocalDate.now()
         return tmdbService.discoverMovies(
             page = page,
             options = mapOf(
-                "primary_release_date.gte" to today.toString(),
+                "release_date.gte" to today.toString(),
                 "with_release_type" to "2|3",
-                "region" to "IT",
+                "region" to region,
                 "sort_by" to "popularity.desc"
             )
         ).results

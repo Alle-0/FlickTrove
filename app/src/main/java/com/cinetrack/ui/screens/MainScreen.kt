@@ -188,6 +188,7 @@ class MainScreen : Screen {
                             is FoldersTab -> "my_folders"
                             is StatsTab -> "stats"
                             is SettingsTab -> "settings"
+                            is NewsTab -> "news"
                             else -> null
                         },
                         onClose = { scope.launch { drawerState.close() } },
@@ -204,6 +205,7 @@ class MainScreen : Screen {
                                         DiscoverTab.requestedType = routeStr
                                         tabNavigator.current = DiscoverTab
                                     }
+                                    "news" -> tabNavigator.current = NewsTab
                                     "surprise_me" -> {
                                         showSurpriseMeOverlay = true
                                     }
@@ -238,6 +240,7 @@ class MainScreen : Screen {
                         is StatsTab -> stringResource(R.string.main_tab_stats)
                         is FoldersTab -> stringResource(R.string.main_tab_folders)
                         is SettingsTab -> stringResource(R.string.main_tab_settings)
+                        is NewsTab -> stringResource(R.string.news_tab_title)
                         is FolderDetailTab -> currentTab.folderName
                         else -> stringResource(R.string.app_name)
                     }
@@ -250,14 +253,14 @@ class MainScreen : Screen {
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                             indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             // hasActiveFilters = TODO
                         )
                     }
 
                     // Bottom Bar Layer
-                    val isPrimaryTab = currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is DiscoverTab || currentTab is FoldersTab || currentTab is FolderDetailTab || currentTab is SettingsTab || currentTab is RecommendationsTab
+                    val isPrimaryTab = currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is DiscoverTab || currentTab is FoldersTab || currentTab is FolderDetailTab || currentTab is SettingsTab || currentTab is RecommendationsTab || currentTab is NewsTab
                     if (isPrimaryTab) {
                         Box(modifier = Modifier.align(Alignment.BottomCenter).zIndex(50f)) {
                             GlassyBottomBar(
@@ -280,7 +283,7 @@ class MainScreen : Screen {
                     }
 
                     // Search FAB
-                    if (isPrimaryTab) {
+                    if (isPrimaryTab && currentTab !is SettingsTab) {
                         val searchFabHaze = contentHazeState
                         val fabCenter = remember { arrayOf<androidx.compose.ui.geometry.Offset?>(null) }
                         Box(
