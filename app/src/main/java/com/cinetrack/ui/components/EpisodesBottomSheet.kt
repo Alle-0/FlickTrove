@@ -438,13 +438,31 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
             Column(modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 16.dp)) {
-                Text(
-                    stringResource(R.string.episodes_episode_n, episode.episodeNumber),
-                    color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.5.sp
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.episodes_episode_n, episode.episodeNumber),
+                        color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .clickable { onInfoClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.episodes_info_desc),
+                            tint = Color.White.copy(alpha = 0.5f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     episode.name,
                     color = if (isWatched) Color.White.copy(alpha = 0.6f) else Color.White,
@@ -452,18 +470,6 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
                     fontWeight = FontWeight.ExtraBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
-                )
-            }
-            
-            IconButton(
-                onClick = onInfoClick,
-                modifier = Modifier.size(28.dp).padding(end = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = stringResource(R.string.episodes_info_desc),
-                    tint = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
                 )
             }
 
@@ -495,7 +501,7 @@ private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.ok), color = PrimaryTeal)
+                Text(stringResource(R.string.settings_close), color = PrimaryTeal)
             }
         },
         title = {
