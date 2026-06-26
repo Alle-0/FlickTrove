@@ -868,7 +868,7 @@ fun MovieDetailScreenContent(
 
                         // Right side actions (Share + Folder)
                         Row(
-                            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp),
+                            modifier = Modifier.align(Alignment.CenterEnd),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Share Button
