@@ -374,9 +374,9 @@
     <string name="search_no_results_simplify">No results found.\nTry simplifying your search</string>
     <string name="search_content_desc">Search</string>
     <string name="search_fallback_genre">Genre</string>
-    <string name="search_active_genre_format">Genre: %1</string>
+    <string name="search_active_genre_format">Genre: %1$s</string>
     <string name="search_fallback_keyword">Selected</string>
-    <string name="search_active_keyword_format">Theme: %1</string>
+    <string name="search_active_keyword_format">Theme: %1$s</string>
     <string name="search_placeholder">Search movies, TV shows, people...</string>
     <string name="search_content_desc_clear">Clear</string>
     <string name="search_content_desc_layout">Change Layout</string>
