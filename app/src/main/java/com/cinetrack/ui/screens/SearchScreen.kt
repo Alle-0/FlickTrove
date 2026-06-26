@@ -849,7 +849,7 @@ fun SearchScreenContent(
                                                             }
                                                             uiState.sortConfig.selectedKeywords.isNotEmpty() -> {
                                                                 val kid = uiState.sortConfig.selectedKeywords.first()
-                                                                val dictName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries.firstOrNull { it.value == kid }?.key?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
+                                                                val dictName = com.cinetrack.data.KeywordDictionary.getLocalizedKeywordName(kid, uiState.preferences.contentLanguage)?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }
                                                                 val name = uiState.suggestedFilters.find { it.id == kid }?.name ?: dictName ?: initialKeywordName ?: stringResource(R.string.search_fallback_keyword)
                                                                 stringResource(R.string.search_active_keyword_format, name)
                                                             }

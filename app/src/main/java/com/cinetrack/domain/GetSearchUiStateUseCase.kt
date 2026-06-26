@@ -75,7 +75,7 @@ class GetSearchUiStateUseCase @Inject constructor() {
 
         val lowerQuery = query.lowercase()
         val availableGenres = if (category == "movie") com.cinetrack.data.GenreConstants.MOVIE_GENRES else com.cinetrack.data.GenreConstants.TV_GENRES
-        val keywordToGenre = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds
+        val keywordToGenre = com.cinetrack.data.KeywordDictionary.getDictionaryForLanguage(currentState.preferences.contentLanguage)
 
         val dynamicKeywords = rawDynamicKeywords.filter { it.isKeyword }
             

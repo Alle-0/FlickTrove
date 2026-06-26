@@ -412,8 +412,8 @@ fun HomeFilterModal(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         localSortConfig.selectedKeywords.forEach { keywordId ->
-                                            val dictName = com.cinetrack.data.KeywordDictionary.italianToTmdbKeywordIds.entries
-                                                .firstOrNull { it.value == keywordId }?.key?.uppercase()
+                                            val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
+                                            val dictName = com.cinetrack.data.KeywordDictionary.getLocalizedKeywordName(keywordId, currentLanguage)?.uppercase()
                                             
                                             val suggestedName = suggestedFilters.find { it.id == keywordId }?.name?.uppercase()
                                             
