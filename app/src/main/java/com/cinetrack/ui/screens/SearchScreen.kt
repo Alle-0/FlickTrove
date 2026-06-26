@@ -844,7 +844,7 @@ fun SearchScreenContent(
                                                         val placeholderText = when {
                                                             uiState.sortConfig.selectedGenres.isNotEmpty() -> {
                                                                 val gid = uiState.sortConfig.selectedGenres.first()
-                                                                val name = com.cinetrack.data.GenreConstants.MOVIE_GENRES.find { it.id == gid }?.name ?: com.cinetrack.data.GenreConstants.TV_GENRES.find { it.id == gid }?.name ?: initialGenreName ?: stringResource(R.string.search_fallback_genre)
+                                                                val name = uiState.suggestedFilters.find { it.id == gid && !it.isKeyword }?.name ?: initialGenreName ?: stringResource(R.string.search_fallback_genre)
                                                                 stringResource(R.string.search_active_genre_format, name)
                                                             }
                                                             uiState.sortConfig.selectedKeywords.isNotEmpty() -> {

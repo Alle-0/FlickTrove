@@ -85,14 +85,16 @@ class GetSearchUiStateUseCase @Inject constructor() {
         sortConfig.selectedGenres.forEach { selectedId ->
             val genre = availableGenres.find { it.id == selectedId }
             if (genre != null) {
-                suggestedFilters.add(FilterPill(genre.id, genre.name, isKeyword = false))
+                val locName = com.cinetrack.data.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
+                suggestedFilters.add(FilterPill(genre.id, locName, isKeyword = false))
             }
         }
 
         if (query.length >= 2) {
-            availableGenres.filter { it.name.lowercase().contains(lowerQuery) }.forEach { genre ->
+            availableGenres.filter { it.name.lowercase().contains(lowerQuery) || com.cinetrack.data.GenreConstants.getLocalizedName(it.id, "en", it.name).lowercase().contains(lowerQuery) }.forEach { genre ->
                 if (!suggestedFilters.any { it.id == genre.id }) {
-                    suggestedFilters.add(FilterPill(genre.id, genre.name, isKeyword = false))
+                    val locName = com.cinetrack.data.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
+                    suggestedFilters.add(FilterPill(genre.id, locName, isKeyword = false))
                 }
             }
             keywordToGenre.forEach { (keyword, keywordId) ->
