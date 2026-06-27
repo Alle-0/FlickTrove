@@ -448,7 +448,9 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .bounceClick { onToggle() },
+            .bounceClick(
+                onLongClick = { onInfoClick() }
+            ) { onToggle() },
         color = if (isWatched) Color(0xFF00E676).copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f),
         shape = RoundedCornerShape(20.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, if (isWatched) Color(0xFF00E676).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f))
@@ -468,30 +470,13 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
             Column(modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(R.string.episodes_episode_n, episode.episodeNumber),
-                        color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .clickable { onInfoClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(R.string.episodes_info_desc),
-                            tint = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                Text(
+                    stringResource(R.string.episodes_episode_n, episode.episodeNumber),
+                    color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.5.sp
+                )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     episode.name,
@@ -501,6 +486,7 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
             }
 
             Surface(
