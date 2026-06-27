@@ -33,6 +33,8 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.core.Animatable
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun CategoryButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
@@ -68,6 +70,7 @@ fun CategoryTabSelector(
     modifier: Modifier = Modifier
 ) {
     val tabHeight = 36.dp
+    val haptic = LocalHapticFeedback.current
 
     BoxWithConstraints(
         modifier = modifier
@@ -78,6 +81,7 @@ fun CategoryTabSelector(
         val tabWidth = androidx.compose.ui.unit.min(120.dp, calculatedWidth)
         val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
         
+        var dragOffset by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
         val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
 
         androidx.compose.runtime.LaunchedEffect(selectedIndex, tabWidthPx) {
@@ -87,10 +91,13 @@ fun CategoryTabSelector(
             )
         }
 
+        val maxOffset = tabWidthPx * (options.size - 1)
+        val currentIndicatorOffset = (offsetAnimatable.value + dragOffset).coerceIn(0f, maxOffset)
+
         // Sliding Highlighter
         Surface(
             modifier = Modifier
-                .offset { androidx.compose.ui.unit.IntOffset(offsetAnimatable.value.roundToInt(), 0) }
+                .offset { androidx.compose.ui.unit.IntOffset(currentIndicatorOffset.roundToInt(), 0) }
                 .padding(4.dp)
                 .width(tabWidth - 8.dp)
                 .height(tabHeight - 8.dp),
@@ -99,7 +106,27 @@ fun CategoryTabSelector(
         ) {}
 
         // Content
-        Row(modifier = Modifier.width(tabWidth * options.size).fillMaxHeight()) {
+        Row(modifier = Modifier
+            .width(tabWidth * options.size)
+            .fillMaxHeight()
+            .pointerInput(selectedIndex, tabWidthPx) {
+                detectHorizontalDragGestures(
+                    onDragEnd = {
+                        val currentPos = selectedIndex * tabWidthPx + dragOffset
+                        val targetIndex = (currentPos / tabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                        if (targetIndex != selectedIndex) {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onOptionClick(targetIndex)
+                        }
+                        dragOffset = 0f
+                    },
+                    onDragCancel = { dragOffset = 0f }
+                ) { change, dragAmount ->
+                    change.consume()
+                    dragOffset += dragAmount
+                }
+            }
+        ) {
             options.forEachIndexed { index, title ->
                 val isSelected = index == selectedIndex
                 val textColor by animateColorAsState(

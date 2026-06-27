@@ -487,7 +487,6 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            }
 
             Surface(
                 modifier = Modifier.size(28.dp),
