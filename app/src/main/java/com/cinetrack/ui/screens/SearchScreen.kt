@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
-import com.cinetrack.ui.assets.CustomIcons
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.runtime.*

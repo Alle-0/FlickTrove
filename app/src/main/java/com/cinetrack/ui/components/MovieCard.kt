@@ -58,7 +58,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.Movie
 import com.cinetrack.data.getLocalizedText
-import com.cinetrack.ui.assets.CustomIcons
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.*
 import com.cinetrack.ui.components.glass.hazeGlass
