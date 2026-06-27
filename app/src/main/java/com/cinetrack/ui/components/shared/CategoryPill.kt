@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -114,7 +115,7 @@ fun CategoryPill(
                     }
                 }
                 .pointerInput(activeTab, itemWidthPx) {
-                    androidx.compose.foundation.gestures.detectTapGestures { offset ->
+                    detectTapGestures { offset ->
                         if (offset.x < itemWidthPx) {
                             if (activeTab != "movie") {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
