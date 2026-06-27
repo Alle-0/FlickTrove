@@ -76,7 +76,7 @@ fun GlassyDrawer(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
                 .padding(start = 10.dp)
                 .padding(top = 12.dp, bottom = 8.dp)
         ) {
@@ -219,14 +219,14 @@ private fun DrawerItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 0.dp)
+            .padding(horizontal = 12.dp, vertical = 1.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
             .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent)
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Vertical neon bar for selected item
@@ -281,7 +281,7 @@ private fun SectionHeader(title: String) {
             letterSpacing = 1.sp,
             fontSize = 11.sp
         ),
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, bottom = 4.dp)
+        modifier = Modifier.padding(start = 24.dp, top = 20.dp, bottom = 4.dp)
     )
 }
 

@@ -5,6 +5,8 @@ import com.cinetrack.R
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -78,22 +80,65 @@ fun CategoryPill(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Main Tab Switcher
+        var dragOffset by remember { mutableStateOf(0f) }
+        val itemWidthPx = if (containerSize.width > 0) containerSize.width / 2f else 0f
+        val itemWidth = with(density) { itemWidthPx.toDp() }
+
         Box(
             modifier = Modifier
                 .weight(1f)
                 .height(54.dp)
                 .glassmorphic(RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius)
                 .onGloballyPositioned { containerSize = it.size }
+                .pointerInput(activeTab, itemWidthPx) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = { 
+                            if (activeTab == "movie" && dragOffset > itemWidthPx / 3f) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onTabChange("tv")
+                            } else if (activeTab == "tv" && dragOffset < -itemWidthPx / 3f) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onTabChange("movie")
+                            }
+                            dragOffset = 0f
+                        },
+                        onDragCancel = { dragOffset = 0f }
+                    ) { change, dragAmount ->
+                        change.consume()
+                        dragOffset += dragAmount
+                        if (activeTab == "movie") {
+                            dragOffset = dragOffset.coerceIn(0f, itemWidthPx)
+                        } else {
+                            dragOffset = dragOffset.coerceIn(-itemWidthPx, 0f)
+                        }
+                    }
+                }
+                .pointerInput(activeTab, itemWidthPx) {
+                    androidx.compose.foundation.gestures.detectTapGestures { offset ->
+                        if (offset.x < itemWidthPx) {
+                            if (activeTab != "movie") {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onTabChange("movie")
+                            }
+                        } else {
+                            if (activeTab != "tv") {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onTabChange("tv")
+                            }
+                        }
+                    }
+                }
         ) {
-            val itemWidth = if (containerSize.width > 0) {
-                with(density) { (containerSize.width / 2).toDp() }
-            } else 0.dp
-
-            val indicatorOffset by animateDpAsState(
-                targetValue = if (activeTab == "tv") itemWidth else 0.dp,
+            val targetPx = if (activeTab == "tv") itemWidthPx else 0f
+            
+            val animatedOffsetPx by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = targetPx,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
-                label = "pillIndicator"
+                label = "pillIndicatorAnim"
             )
+
+            val currentOffsetPx = (animatedOffsetPx + dragOffset).coerceIn(0f, itemWidthPx)
+            val indicatorOffset = with(density) { currentOffsetPx.toDp() }
 
             // Animated Indicator
             if (itemWidth > 6.dp) {
@@ -115,22 +160,14 @@ fun CategoryPill(
                     count = movieCount,
                     isActive = activeTab == "movie",
                     accentColor = accentColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onTabChange("movie")
-                    }
+                    modifier = Modifier.weight(1f)
                 )
                 TabButton(
                     text = stringResource(R.string.category_tv),
                     count = tvCount,
                     isActive = activeTab == "tv",
                     accentColor = accentColor,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onTabChange("tv")
-                    }
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -177,7 +214,6 @@ private fun TabButton(
     count: Int?,
     isActive: Boolean,
     accentColor: Color,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val textColor by animateColorAsState(
@@ -188,8 +224,7 @@ private fun TabButton(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick),
+            .clip(RoundedCornerShape(50)),
         contentAlignment = Alignment.Center
     ) {
         Row(

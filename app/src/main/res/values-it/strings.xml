@@ -746,6 +746,17 @@
     <string name="detail_tech_revenue">INCASSI</string>
     <string name="detail_tech_production">PRODUZIONE</string>
     <string name="detail_tech_country">PAESE</string>
+    <string name="detail_tech_original_title">TITOLO ORIGINALE</string>
+    <string name="detail_tech_status">STATO</string>
+    <string name="status_returning_series">In corso</string>
+    <string name="status_planned">Pianificato</string>
+    <string name="status_in_production">In produzione</string>
+    <string name="status_ended">Concluso</string>
+    <string name="status_canceled">Cancellato</string>
+    <string name="status_pilot">Pilota</string>
+    <string name="status_rumored">Rumors</string>
+    <string name="status_post_production">Post-produzione</string>
+    <string name="status_released">Rilasciato</string>
 
     <!-- Quick Actions -->
     <string name="quick_action_folders">Cartelle</string>

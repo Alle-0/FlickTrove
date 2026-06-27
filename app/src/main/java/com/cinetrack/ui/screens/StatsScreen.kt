@@ -3124,6 +3124,11 @@ fun YearSelectionModal(
                 .fillMaxSize()
                 .zIndex(200f)
                 .graphicsLayer(alpha = alpha)
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
+                )
         ) {
             // --- GHOST MEASUREMENT LAYER ---
             Box(

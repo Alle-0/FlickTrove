@@ -748,6 +748,17 @@
     <string name="detail_tech_revenue">REVENUE</string>
     <string name="detail_tech_production">PRODUCTION</string>
     <string name="detail_tech_country">COUNTRY</string>
+    <string name="detail_tech_original_title">ORIGINAL TITLE</string>
+    <string name="detail_tech_status">STATUS</string>
+    <string name="status_returning_series">Returning Series</string>
+    <string name="status_planned">Planned</string>
+    <string name="status_in_production">In Production</string>
+    <string name="status_ended">Ended</string>
+    <string name="status_canceled">Canceled</string>
+    <string name="status_pilot">Pilot</string>
+    <string name="status_rumored">Rumored</string>
+    <string name="status_post_production">Post Production</string>
+    <string name="status_released">Released</string>
 
     <!-- Quick Actions -->
     <string name="quick_action_folders">Folders</string>

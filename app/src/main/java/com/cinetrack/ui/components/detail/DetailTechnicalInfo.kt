@@ -58,6 +58,39 @@ fun DetailTechnicalInfo(
         Column(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            if (!details.originalTitle.isNullOrBlank() || !details.originalName.isNullOrBlank() || !details.status.isNullOrBlank()) {
+                val originalTitle = details.originalTitle ?: details.originalName ?: "—"
+                val rawStatus = details.status ?: "—"
+                val status = when (rawStatus) {
+                    "Returning Series" -> stringResource(R.string.status_returning_series)
+                    "Planned" -> stringResource(R.string.status_planned)
+                    "In Production" -> stringResource(R.string.status_in_production)
+                    "Ended" -> stringResource(R.string.status_ended)
+                    "Canceled", "Cancelled" -> stringResource(R.string.status_canceled)
+                    "Pilot" -> stringResource(R.string.status_pilot)
+                    "Rumored" -> stringResource(R.string.status_rumored)
+                    "Post Production" -> stringResource(R.string.status_post_production)
+                    "Released" -> stringResource(R.string.status_released)
+                    else -> rawStatus
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    TechnicalItem(
+                        label = stringResource(R.string.detail_tech_original_title),
+                        value = originalTitle,
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
+                        accentColor = accentColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TechnicalItem(
+                        label = stringResource(R.string.detail_tech_status),
+                        value = status,
+                        icon = Icons.Rounded.Info,
+                        accentColor = accentColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
             // Row 1: Release Date & Budget
             Row(modifier = Modifier.fillMaxWidth()) {
                 TechnicalItem(

@@ -244,12 +244,24 @@ class RecommendationsViewModel @Inject constructor(
                     favorites.filter { it.mediaType == "tv" }
                 }
 
-                // Pick the top 3 best movies based on their personal rating (descending), 
-                // falling back to when they were watched or added
-                val topItems = matchingFavs.sortedWith(
+                // Base recommendations on movies the user actually liked.
+                val goodCandidates = matchingFavs.filter { movie ->
+                    (movie.personalRating ?: 0.0) >= 7.0 ||
+                    (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
+                }
+
+                // If not enough good candidates, fallback to anything they watched or added
+                val pool = if (goodCandidates.size >= 3) goodCandidates else matchingFavs
+
+                // Sort the pool to find the absolute best seeds
+                val topPool = pool.sortedWith(
                     compareByDescending<Movie> { it.personalRating ?: 0.0 }
-                        .thenByDescending { it.watchedAt ?: it.clientUpdatedAt.toString() }
-                ).take(3)
+                        .thenByDescending { it.watchedAt ?: "" }
+                        .thenByDescending { it.voteAverage ?: 0.0 }
+                ).take(20)
+
+                // Take 3 random seeds from the top 20 to keep recommendations fresh
+                val topItems = topPool.shuffled().take(3)
                 
                 currentTopSourceIds = topItems.map { it.id }
             }
