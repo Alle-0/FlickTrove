@@ -78,7 +78,7 @@ fun GlassyDrawer(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(start = 10.dp)
-                .padding(top = 24.dp, bottom = 12.dp)
+                .padding(top = 12.dp, bottom = 8.dp)
         ) {
 
 
@@ -219,14 +219,14 @@ private fun DrawerItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .padding(horizontal = 12.dp, vertical = 0.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
             .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent)
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Vertical neon bar for selected item
@@ -247,7 +247,7 @@ private fun DrawerItem(
 
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(32.dp)
                 .clip(CircleShape)
                 .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)),
             contentAlignment = Alignment.Center
@@ -256,7 +256,7 @@ private fun DrawerItem(
                 imageVector = icon,
                 contentDescription = label,
                 tint = accentColor,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
         Spacer(modifier = Modifier.width(14.dp))
@@ -281,7 +281,7 @@ private fun SectionHeader(title: String) {
             letterSpacing = 1.sp,
             fontSize = 11.sp
         ),
-        modifier = Modifier.padding(start = 24.dp, top = 22.dp, bottom = 4.dp)
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, bottom = 4.dp)
     )
 }
 
@@ -301,28 +301,31 @@ fun Modifier.fadingEdge(scrollState: androidx.compose.foundation.ScrollState): M
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.Transparent,
-                        Color.Black
+                        Color.Black,
+                        Color.Transparent
                     ),
                     startY = 0f,
                     endY = edgeHeight
                 ),
+                size = androidx.compose.ui.geometry.Size(size.width, edgeHeight),
                 alpha = topFadingEdgeStrength,
-                blendMode = BlendMode.DstIn
+                blendMode = BlendMode.DstOut
             )
         }
         if (bottomFadingEdgeStrength > 0f) {
             drawRect(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.Black,
-                        Color.Transparent
+                        Color.Transparent,
+                        Color.Black
                     ),
                     startY = size.height - edgeHeight,
                     endY = size.height
                 ),
+                topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - edgeHeight),
+                size = androidx.compose.ui.geometry.Size(size.width, edgeHeight),
                 alpha = bottomFadingEdgeStrength,
-                blendMode = BlendMode.DstIn
+                blendMode = BlendMode.DstOut
             )
         }
     }

@@ -204,44 +204,44 @@ class HomeViewModel @Inject constructor(
         return when (sort.sortType) {
             "release_date" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { it.releaseDate ?: it.firstAirDate ?: "" }
+                    movies.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { it.releaseDate ?: it.firstAirDate ?: "" }
+                    movies.sortedWith(compareBy<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "title" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { it.title ?: it.name ?: "" }
+                    movies.sortedWith(compareByDescending<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { it.title ?: it.name ?: "" }
+                    movies.sortedWith(compareBy<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "added_at", "created_at" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { it.clientUpdatedAt }
+                    movies.sortedWith(compareByDescending<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { it.clientUpdatedAt }
+                    movies.sortedWith(compareBy<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "vote_average" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { it.voteAverage ?: 0.0 }
+                    movies.sortedWith(compareByDescending<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { it.voteAverage ?: 0.0 }
+                    movies.sortedWith(compareBy<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "personal_rating" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { it.personalRating ?: 0.0 }
+                    movies.sortedWith(compareByDescending<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { it.personalRating ?: 0.0 }
+                    movies.sortedWith(compareBy<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "runtime" -> {
                 if (isDesc) {
-                    movies.sortedByDescending { getMovieDuration(it) }
+                    movies.sortedWith(compareByDescending<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedBy { getMovieDuration(it) }
+                    movies.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             else -> movies

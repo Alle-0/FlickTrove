@@ -50,6 +50,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.ColorFilter
 import coil.imageLoader
 import coil.request.ImageRequest
+import kotlinx.coroutines.flow.first
+import com.cinetrack.di.dataStore
 import com.cinetrack.MainActivity
 import com.cinetrack.data.Movie
 import com.cinetrack.data.local.database.FlickTroveDatabase
@@ -57,8 +59,22 @@ import com.cinetrack.data.local.database.FlickTroveDatabase
 class FlickTroveListWidget : GlanceAppWidget() {
     
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val prefRepo = com.cinetrack.data.repository.PreferenceRepository(context.dataStore)
+        val language = prefRepo.userPreferencesFlow.first().contentLanguage
+        
+        val localizedContext = if (language != "system") {
+            val locale = java.util.Locale.forLanguageTag(language.replace("_", "-"))
+            val config = android.content.res.Configuration(context.resources.configuration)
+            config.setLocale(locale)
+            context.createConfigurationContext(config)
+        } else {
+            context
+        }
+
         provideContent {
-            ListMovieWidgetContent(context)
+            androidx.compose.runtime.CompositionLocalProvider(androidx.glance.LocalContext provides localizedContext) {
+                ListMovieWidgetContent(localizedContext)
+            }
         }
     }
 

@@ -24,6 +24,9 @@ fun FlickTroveBottomSheet(
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val config = androidx.compose.ui.platform.LocalConfiguration.current
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -37,8 +40,12 @@ fun FlickTroveBottomSheet(
         },
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
-        // The Surface below provides the glassmorphic background
-        Surface(
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.ui.platform.LocalContext provides context,
+            androidx.compose.ui.platform.LocalConfiguration provides config
+        ) {
+            // The Surface below provides the glassmorphic background
+            Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .glassmorphic(
@@ -54,6 +61,7 @@ fun FlickTroveBottomSheet(
                     .padding(bottom = 24.dp) // Bottom spacing for aesthetics
             ) {
                 content()
+            }
             }
         }
     }

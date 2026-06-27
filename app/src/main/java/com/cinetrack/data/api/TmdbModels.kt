@@ -168,7 +168,8 @@ data class ReleaseDateResult(
 @Serializable
 data class ReleaseDateItem(
     val certification: String,
-    val type: Int? = null
+    val type: Int? = null,
+    @SerialName("release_date") val releaseDate: String? = null
 )
 
 @Serializable
@@ -299,7 +300,8 @@ data class Keyword(
 
 @Serializable
 data class ImageItem(
-    @SerialName("file_path") val filePath: String
+    @SerialName("file_path") val filePath: String,
+    @SerialName("iso_639_1") val iso6391: String? = null
 )
 
 @Serializable

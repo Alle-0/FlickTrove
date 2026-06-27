@@ -17,9 +17,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +57,7 @@ import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsCompat
 import com.cinetrack.ui.utils.bounceClick
@@ -120,7 +127,7 @@ fun EpisodesBottomSheet(
         }
     }
 
-    val context = LocalContext.current
+    val contextForWindow = LocalContext.current
     val view = LocalView.current
     DisposableEffect(view) {
         var parent = view.parent
@@ -128,7 +135,7 @@ fun EpisodesBottomSheet(
             parent = parent.parent
         }
         val dialogWindow = (parent as? DialogWindowProvider)?.window
-        val activityWindow = (context as? Activity)?.window
+        val activityWindow = (contextForWindow as? Activity)?.window
         
         val windows = listOfNotNull(dialogWindow, activityWindow)
         windows.forEach { window ->
@@ -161,11 +168,19 @@ fun EpisodesBottomSheet(
         }
     }
 
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+
     if (selectedEpisodeForInfo != null) {
-        EpisodeInfoModal(
-            episode = selectedEpisodeForInfo!!,
-            onDismiss = { selectedEpisodeForInfo = null }
-        )
+        CompositionLocalProvider(
+            LocalContext provides context,
+            LocalConfiguration provides config
+        ) {
+            EpisodeInfoModal(
+                episode = selectedEpisodeForInfo!!,
+                onDismiss = { selectedEpisodeForInfo = null }
+            )
+        }
     }
 
     ModalBottomSheet(
@@ -176,8 +191,12 @@ fun EpisodesBottomSheet(
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         contentWindowInsets = { WindowInsets(0) }
     ) {
-        Box(
-            modifier = Modifier
+        CompositionLocalProvider(
+            LocalContext provides context,
+            LocalConfiguration provides config
+        ) {
+            Box(
+                modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
                 .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
@@ -202,43 +221,53 @@ fun EpisodesBottomSheet(
                     )
                 }
 
-            // Header
-            Header(movie, dismissAndSync)
-
-            // Season Selector
-            val seasons = successState?.details?.seasons?.mapNotNull { it.seasonNumber } ?: (1..(movie.numberOfSeasons ?: 1)).toList()
-            val completedSeasons = seasons.filter { seasonNum ->
-                val watchedCount = localWatchedEpisodes[seasonNum.toString()]?.size ?: 0
-                val totalCount = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }?.episodeCount ?: 0
-                totalCount > 0 && watchedCount >= totalCount
-            }.toSet()
-
-            SeasonSelector(
-                seasons = seasons,
-                selectedSeason = selectedSeasonNumber,
-                completedSeasons = completedSeasons,
-                onSeasonSelected = { selectedSeasonNumber = it }
-            )
-
-            // Bulk Action
             val currentSeasonData = seasonDetails[selectedSeasonNumber]
-            if (currentSeasonData != null) {
-                val allEps = currentSeasonData.episodes?.map { it.episodeNumber } ?: emptyList<Int>()
-                BulkAction(
-                    isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
-                    onToggle = { 
-                        val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
-                        val nextWatched = if (currentWatched.size >= allEps.size) {
-                            emptyList()
-                        } else {
-                            allEps
-                        }
-                        localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
-                    },
-                    onLongClick = {
-                        localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to allEps)
+
+            // Non-draggable content area
+            Column(
+                modifier = Modifier.pointerInput(Unit) {
+                    detectVerticalDragGestures { change, _ -> 
+                        change.consume() 
                     }
+                }
+            ) {
+                // Header
+                Header(movie, dismissAndSync)
+
+                // Season Selector
+                val seasons = successState?.details?.seasons?.mapNotNull { it.seasonNumber } ?: (1..(movie.numberOfSeasons ?: 1)).toList()
+                val completedSeasons = seasons.filter { seasonNum ->
+                    val watchedCount = localWatchedEpisodes[seasonNum.toString()]?.size ?: 0
+                    val totalCount = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }?.episodeCount ?: 0
+                    totalCount > 0 && watchedCount >= totalCount
+                }.toSet()
+
+                SeasonSelector(
+                    seasons = seasons,
+                    selectedSeason = selectedSeasonNumber,
+                    completedSeasons = completedSeasons,
+                    onSeasonSelected = { selectedSeasonNumber = it }
                 )
+
+                // Bulk Action
+                if (currentSeasonData != null) {
+                    val allEps = currentSeasonData.episodes?.map { it.episodeNumber } ?: emptyList<Int>()
+                    BulkAction(
+                        isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
+                        onToggle = { 
+                            val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
+                            val nextWatched = if (currentWatched.size >= allEps.size) {
+                                emptyList()
+                            } else {
+                                allEps
+                            }
+                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
+                        },
+                        onLongClick = {
+                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to allEps)
+                        }
+                    )
+                }
             }
 
             // Episode List
@@ -281,6 +310,7 @@ fun EpisodesBottomSheet(
             }
         }
         }
+    }
     }
 }
 
@@ -495,75 +525,149 @@ private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, c
     return total > 0 && watched.size >= total
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.settings_close), color = PrimaryTeal)
-            }
-        },
-        title = {
-            Text(
-                text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-        },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = Color(0xFF1A1A1C), // Sfondo scuro e monocolore
+            shadowElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                // Titolo
+                Text(
+                    text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    lineHeight = 24.sp
+                )
+
+                // Immagine (se presente)
                 if (!episode.stillPath.isNullOrEmpty()) {
                     AsyncImage(
                         model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(140.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .padding(bottom = 12.dp),
+                            .padding(bottom = 16.dp)
+                            .height(160.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.05f)),
                         contentScale = ContentScale.Crop
                     )
                 }
                 
-                if (!episode.airDate.isNullOrEmpty()) {
-                    Text(
-                        text = "${stringResource(R.string.detail_release_date)}: ${episode.airDate}",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
+                // Pillole (Data e Voto)
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (!episode.airDate.isNullOrEmpty()) {
+                        Surface(
+                            color = Color.White.copy(alpha = 0.08f),
+                            shape = CircleShape
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DateRange,
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = episode.airDate,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White.copy(alpha = 0.9f)
+                                )
+                            }
+                        }
+                    }
+
+                    if (episode.voteAverage != null && episode.voteAverage > 0.0) {
+                        Surface(
+                            color = Color(0xFF00E676).copy(alpha = 0.15f),
+                            shape = CircleShape
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFF00E676),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = String.format(java.util.Locale.US, "%.1f", episode.voteAverage),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF00E676)
+                                )
+                            }
+                        }
+                    }
                 }
-                
-                if (episode.voteAverage != null && episode.voteAverage > 0.0) {
-                    Text(
-                        text = "${stringResource(R.string.detail_rating)}: ${String.format("%.1f", episode.voteAverage)}/10",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                }
-                
+
+                // Trama
                 if (!episode.overview.isNullOrEmpty()) {
                     Text(
                         text = episode.overview,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = Color.White.copy(alpha = 0.7f),
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(bottom = 24.dp)
                     )
                 } else {
                     Text(
                         text = stringResource(R.string.detail_no_overview),
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        modifier = Modifier.padding(bottom = 24.dp)
                     )
                 }
+
+                // Bottone di chiusura
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_close).uppercase(),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
             }
-        },
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        shape = RoundedCornerShape(24.dp)
-    )
+        }
+    }
 }

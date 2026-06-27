@@ -404,7 +404,14 @@ fun MovieDetailScreenContent(
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
                                         matchPercentage = state.matchPercentage,
-                                        logoPath = if (useMovieLogo) state.details?.images?.logos?.firstOrNull()?.filePath else null,
+                                        logoPath = if (useMovieLogo) {
+                                            val currentLang = java.util.Locale.getDefault().language
+                                            val logos = state.details?.images?.logos
+                                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
+                                                ?: logos?.firstOrNull { it.iso6391 == "en" } 
+                                                ?: logos?.firstOrNull()
+                                            bestLogo?.filePath
+                                        } else null,
                                         hazeState = backdropHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true }

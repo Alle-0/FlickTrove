@@ -45,6 +45,9 @@ import coil.compose.AsyncImage
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.ui.assets.CustomIcons
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import kotlinx.coroutines.launch
@@ -237,7 +240,7 @@ fun UpdatesScreen(
                                         androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                                             UpdateCard(
                                                 movie = movie,
-                                                label = stringResource(R.string.updates_arriving_prefix, movie.releaseDate ?: movie.firstAirDate ?: ""),
+                                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(movie.releaseDate ?: movie.firstAirDate)),
                                                 iconRes = R.drawable.ic_bell_piena,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 onAction = { /* Optional: toggle reminder */ },
@@ -690,5 +693,16 @@ fun UpdateCard(
                 Icon(imageVector = ImageVector.vectorResource(id = iconRes), contentDescription = null, tint = color.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
             }
         }
+    }
+}
+
+fun formatReleaseDate(dateStr: String?): String {
+    if (dateStr.isNullOrEmpty() || dateStr.length < 10) return dateStr ?: ""
+    return try {
+        val dateObj = java.time.LocalDate.parse(dateStr.take(10))
+        val formatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+        dateObj.format(formatter)
+    } catch (e: Exception) {
+        dateStr
     }
 }

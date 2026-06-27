@@ -3,6 +3,8 @@ package com.cinetrack.data.mapper
 import com.cinetrack.data.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 
+import java.util.Locale
+
 object MovieMapper {
     fun mapResponseToMovie(response: MovieDetailResponse, type: String): Movie {
         val effectiveRuntime = if (type == "tv") {
@@ -11,6 +13,17 @@ object MovieMapper {
             response.runtime
         }
         
+        val region = if (Locale.getDefault().language == "it") "IT" else "US"
+        
+        val regionalReleaseDate = if (type == "movie") {
+            val regionalReleases = response.releaseDates?.results?.find { it.iso31661 == region }?.releaseDates
+            regionalReleases?.find { it.type == 3 }?.releaseDate?.take(10)
+                ?: regionalReleases?.firstOrNull()?.releaseDate?.take(10)
+                ?: response.releaseDate
+        } else {
+            response.releaseDate
+        }
+
         return Movie(
             id = response.id,
             mediaType = type,
@@ -22,7 +35,7 @@ object MovieMapper {
             voteAverage = response.voteAverage,
             voteCount = response.voteCount,
             overview = response.overview,
-            releaseDate = response.releaseDate,
+            releaseDate = regionalReleaseDate,
             firstAirDate = response.firstAirDate,
             runtime = effectiveRuntime,
             episodeRunTime = response.episodeRunTime,

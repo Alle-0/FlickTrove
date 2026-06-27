@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flick_trove_prefs")
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "flick_trove_prefs")
 
 @Module
 @InstallIn(SingletonComponent::class)

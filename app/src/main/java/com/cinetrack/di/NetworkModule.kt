@@ -53,10 +53,16 @@ object NetworkModule {
                 } else {
                     rawLanguage
                 }
-                val url = original.url.newBuilder()
+                val urlBuilder = original.url.newBuilder()
                     .addQueryParameter("api_key", Keys.getTmdbKey())
                     .setQueryParameter("language", resolvedLanguage)
-                    .build()
+
+                if (original.url.queryParameter("include_image_language") != null) {
+                    val imageLanguage = "$resolvedLanguage,en,null"
+                    urlBuilder.setQueryParameter("include_image_language", imageLanguage)
+                }
+                
+                val url = urlBuilder.build()
                 val request = original.newBuilder().url(url).build()
                 chain.proceed(request)
             } else {

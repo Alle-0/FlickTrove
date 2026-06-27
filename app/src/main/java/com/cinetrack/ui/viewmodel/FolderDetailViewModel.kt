@@ -163,13 +163,13 @@ class FolderDetailViewModel @Inject constructor(
         }
 
         return when (sort.sortType) {
-            "watched_at" -> if (isDesc) filtered.sortedByDescending { it.watchedAt } else filtered.sortedBy { it.watchedAt }
-            "release_date" -> if (isDesc) filtered.sortedByDescending { it.releaseDate ?: it.firstAirDate ?: "" } else filtered.sortedBy { it.releaseDate ?: it.firstAirDate ?: "" }
-            "title" -> if (isDesc) filtered.sortedByDescending { it.title ?: it.name ?: "" } else filtered.sortedBy { it.title ?: it.name ?: "" }
-            "added_at", "created_at" -> if (isDesc) filtered.sortedByDescending { it.clientUpdatedAt } else filtered.sortedBy { it.clientUpdatedAt }
-            "vote_average" -> if (isDesc) filtered.sortedByDescending { it.voteAverage ?: 0.0 } else filtered.sortedBy { it.voteAverage ?: 0.0 }
-            "personal_rating" -> if (isDesc) filtered.sortedByDescending { it.personalRating ?: 0.0 } else filtered.sortedBy { it.personalRating ?: 0.0 }
-            "runtime" -> if (isDesc) filtered.sortedByDescending { getMovieDuration(it) } else filtered.sortedBy { getMovieDuration(it) }
+            "watched_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "release_date" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "title" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "added_at", "created_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "vote_average" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "personal_rating" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "runtime" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             else -> filtered
         }
     }
