@@ -163,6 +163,12 @@ fun RecommendationsScreenContent(
             viewModel.loadNextPage()
         }
     }
+
+    LaunchedEffect(uiState.isLoading) {
+        if (uiState.isLoading && !uiState.isNextPageLoading) {
+            topCardIndex = 0
+        }
+    }
     
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -556,7 +562,7 @@ fun RecommendationsScreenContent(
                                     val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
                                     viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
                                 }
-                                .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)), CircleShape),
+                                .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -584,7 +590,7 @@ fun RecommendationsScreenContent(
                                 isTinderMode = !isTinderMode
                             }
                             .border(
-                                BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                                BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
                                 CircleShape
                             ),
                         contentAlignment = Alignment.Center

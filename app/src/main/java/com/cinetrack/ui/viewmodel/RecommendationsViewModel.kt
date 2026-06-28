@@ -260,8 +260,12 @@ class RecommendationsViewModel @Inject constructor(
                         .thenByDescending { it.voteAverage ?: 0.0 }
                 ).take(20)
 
-                // Take 3 random seeds from the top 20 to keep recommendations fresh
-                val topItems = topPool.shuffled().take(3)
+                // To ensure variety, pick 1 seed from the absolute Top 20, and 2 random seeds from the rest of the good pool
+                val seed1 = topPool.randomOrNull()
+                val remainingPool = pool.filter { it.id != seed1?.id }
+                val otherSeeds = remainingPool.shuffled().take(2)
+
+                val topItems = listOfNotNull(seed1) + otherSeeds
                 
                 currentTopSourceIds = topItems.map { it.id }
             }

@@ -655,7 +655,8 @@
     <string name="drawer_tv_popular">Popular Series</string>
     <string name="drawer_tv_airing">Airing Today</string>
     <string name="drawer_tv_upcoming">On The Air</string>
-    <string name="drawer_custom">Custom</string>
+    <string name="drawer_custom">Your content</string>
+    <string name="drawer_discover">Magazine</string>
     <string name="drawer_custom_recommendations">Recommended for you</string>
     <string name="drawer_custom_surprise">Surprise me</string>
     <string name="drawer_custom_folders">My folders</string>
@@ -782,7 +783,9 @@
     <string name="msg_action_updated">\"%1$s\" updated</string>
     <!-- Episodes -->
     <string name="episodes_info_desc">Episode Information</string>
+    <string name="episodes_long_press_info">Long press an episode for more info</string>
     <string name="detail_release_date">Release Date</string>
     <string name="detail_rating">Rating</string>
-
+    <!-- Icon Update -->
+    <string name="icon_updated_restart">Icon updated. Restarting...</string>
 </resources>

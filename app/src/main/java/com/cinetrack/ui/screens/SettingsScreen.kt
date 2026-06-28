@@ -177,9 +177,13 @@ object SettingsTab : Tab {
                 )
                 
                 // 7. Cleanup
+                val finalColor = pendingReveal!!.first
                 capturedImage = null
                 isScreenshotReady = false
                 settingsViewModel.clearPendingReveal()
+                
+                // 8. Update Icon AFTER animation and cleanup
+                settingsViewModel.applyPendingIcon(finalColor)
             }
         }
 
@@ -576,7 +580,15 @@ fun SettingsScreenContent(
                                                         .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
                                                         .bounceClick { 
                                                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                                            settingsViewModel.updateContentLanguage(value)
+                                                            if (contentLanguage != value) {
+                                                                settingsViewModel.updateContentLanguage(value) {
+                                                                    var actContext = context
+                                                                    while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
+                                                                        actContext = actContext.baseContext
+                                                                    }
+                                                                    (actContext as? android.app.Activity)?.recreate()
+                                                                }
+                                                            }
                                                         }
                                                         .padding(vertical = 10.dp),
                                                     contentAlignment = Alignment.Center

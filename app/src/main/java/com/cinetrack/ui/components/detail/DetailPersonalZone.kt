@@ -87,6 +87,8 @@ fun DetailPersonalZone(
             PersonalAction(
                 label = stringResource(R.string.personal_zone_rate),
                 value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
+                hasValue = (expandedAction == "rate" || previewRating > 0),
+                isRateAction = true,
                 icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                 accentColor = accentColor,
                 isActive = expandedAction == "rate",
@@ -104,6 +106,8 @@ fun DetailPersonalZone(
             PersonalAction(
                 label = stringResource(R.string.personal_zone_note),
                 value = noteValueText,
+                hasValue = hasText || hasAudio,
+                isRateAction = false,
                 icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                 accentColor = accentColor,
                 isActive = expandedAction == "note",
@@ -167,6 +171,8 @@ fun DetailPersonalZone(
 private fun PersonalAction(
     label: String,
     value: String,
+    hasValue: Boolean,
+    isRateAction: Boolean,
     icon: ImageVector,
     accentColor: Color,
     isActive: Boolean,
@@ -181,8 +187,6 @@ private fun PersonalAction(
                         else spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
         label = "ActionScale"
     )
-
-    val hasValue = value != "—" && value != "VUOTA"
     
     Box(
         modifier = modifier
@@ -254,14 +258,14 @@ private fun PersonalAction(
                 Text(
                     text = value,
                     fontSize = when {
-                        hasValue && label == "VALUTA" -> 34.sp
+                        hasValue && isRateAction -> 34.sp
                         hasValue -> 18.sp
                         else -> 14.sp
                     },
                     fontWeight = FontWeight.Black,
                     color = if (hasValue) accentColor else Color.White.copy(alpha = 0.6f),
                     lineHeight = when {
-                        hasValue && label == "VALUTA" -> 34.sp
+                        hasValue && isRateAction -> 34.sp
                         hasValue -> 18.sp
                         else -> 14.sp
                     }

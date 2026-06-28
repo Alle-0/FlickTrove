@@ -173,12 +173,13 @@ private fun FolderListContent(
                 )
             }
             
-            IconButton(
-                onClick = onClose,
+            Box(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.1f))
+                    .bounceClick { onClose() },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
@@ -288,20 +289,19 @@ private fun FolderListContent(
         
         Spacer(Modifier.height(20.dp))
         
-        Button(
-            onClick = onNewFolder,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
-            )
+                .height(52.dp)
+                .bounceClick { onNewFolder() }
+                .background(Color.White, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.folder_picker_new), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.Black, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.folder_picker_new), color = Color.Black, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+            }
         }
     }
 }
@@ -406,12 +406,13 @@ private fun FolderCreateForm(
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                     color = Color.White
                 )
-                IconButton(
-                    onClick = onCancel,
+                Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
+                        .bounceClick { onCancel() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
@@ -456,25 +457,40 @@ private fun FolderCreateForm(
                 .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            TextButton(
-                onClick = onCancel,
-                modifier = Modifier.weight(1f).height(52.dp),
-                shape = RoundedCornerShape(16.dp)
+            Box(
+                modifier = Modifier
+                    .weight(0.8f)
+                    .height(52.dp)
+                    .bounceClick { onCancel() }
+                    .clip(RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.5f))
+                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.5f), maxLines = 1)
             }
             
-            Button(
-                onClick = { onCreate(name, selectedColor) },
-                enabled = name.isNotBlank(),
-                modifier = Modifier.weight(1f).height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                )
+            val isEnabled = name.isNotBlank()
+            Box(
+                modifier = Modifier
+                    .weight(1.2f)
+                    .height(52.dp)
+                    .then(
+                        if (isEnabled) Modifier.bounceClick { onCreate(name, selectedColor) }
+                        else Modifier
+                    )
+                    .background(
+                        if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f), 
+                        RoundedCornerShape(16.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.folder_picker_new).uppercase(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                Text(
+                    text = stringResource(R.string.folder_picker_new).uppercase(),
+                    color = if (isEnabled) Color.Black else Color.Black.copy(alpha = 0.5f),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
         }
     }

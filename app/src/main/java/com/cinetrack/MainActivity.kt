@@ -140,4 +140,11 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         deepLinkIntent.value = intent
     }
+
+    override fun onStop() {
+        super.onStop()
+        val colorName = settingsViewModel.accentColor.value
+        val isDynamic = settingsViewModel.dynamicAppIconEnabled.value
+        com.cinetrack.util.IconManager.updateAppIcon(applicationContext, colorName, isDynamic)
+    }
 }

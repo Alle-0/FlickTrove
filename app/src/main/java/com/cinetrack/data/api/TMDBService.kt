@@ -10,16 +10,16 @@ interface TMDBService {
     suspend fun getMovieDetails(
         @Path("id") id: Long,
 
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords,images",
-        @Query("include_image_language") includeImageLanguage: String = "it,en,null"
+        @Query(value = "append_to_response", encoded = true) appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords,images",
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     @GET("tv/{id}")
     suspend fun getTVDetails(
         @Path("id") id: Long,
 
-        @Query("append_to_response") appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords,images",
-        @Query("include_image_language") includeImageLanguage: String = "it,en,null"
+        @Query(value = "append_to_response", encoded = true) appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords,images",
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     @GET("movie/{id}/reviews")

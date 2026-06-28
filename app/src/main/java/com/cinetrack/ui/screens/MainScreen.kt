@@ -245,6 +245,17 @@ class MainScreen : Screen {
                         else -> stringResource(R.string.app_name)
                     }
 
+                    val context = LocalContext.current
+                    var currentContext = context
+                    while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+                        currentContext = currentContext.baseContext
+                    }
+                    val activity = currentContext as? androidx.activity.ComponentActivity
+
+                    val recommendationsViewModel: com.cinetrack.ui.viewmodel.RecommendationsViewModel? = if (currentTab is RecommendationsTab && activity != null) {
+                        androidx.hilt.navigation.compose.hiltViewModel(activity)
+                    } else null
+
                     Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
                         GlassyTopBar(
                             title = title,
@@ -253,7 +264,8 @@ class MainScreen : Screen {
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                             indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                            onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                            onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             // hasActiveFilters = TODO
                         )

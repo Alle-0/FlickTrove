@@ -163,6 +163,13 @@ fun GlassyDrawer(
 
                 SectionHeader(stringResource(R.string.drawer_custom))
                 DrawerItem(
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
+                    label = stringResource(R.string.drawer_custom_folders),
+                    isSelected = selectedRoute == "my_folders",
+                    onClick = { onNavigate("my_folders") },
+                    accentColor = accentColor
+                )
+                DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                     label = stringResource(R.string.drawer_custom_recommendations),
                     isSelected = selectedRoute == "recommendations",
@@ -176,13 +183,8 @@ fun GlassyDrawer(
                     onClick = { onNavigate("surprise_me") },
                     accentColor = accentColor
                 )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
-                    label = stringResource(R.string.drawer_custom_folders),
-                    isSelected = selectedRoute == "my_folders",
-                    onClick = { onNavigate("my_folders") },
-                    accentColor = accentColor
-                )
+
+                SectionHeader(stringResource(R.string.drawer_discover))
                 DrawerItem(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
                     label = stringResource(R.string.drawer_custom_news),

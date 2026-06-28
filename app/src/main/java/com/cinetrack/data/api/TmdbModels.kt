@@ -163,13 +163,13 @@ data class ReleaseDatesResponse(
 
 @Serializable
 data class ReleaseDateResult(
-    @SerialName("iso_3166_1") val iso31661: String,
-    @SerialName("release_dates") val releaseDates: List<ReleaseDateItem>
+    @SerialName("iso_3166_1") val iso31661: String = "",
+    @SerialName("release_dates") val releaseDates: List<ReleaseDateItem> = emptyList()
 )
 
 @Serializable
 data class ReleaseDateItem(
-    val certification: String,
+    val certification: String = "",
     val type: Int? = null,
     @SerialName("release_date") val releaseDate: String? = null
 )
@@ -181,30 +181,30 @@ data class ContentRatingsResponse(
 
 @Serializable
 data class ContentRatingResult(
-    @SerialName("iso_3166_1") val iso31661: String,
-    val rating: String
+    @SerialName("iso_3166_1") val iso31661: String = "",
+    val rating: String = ""
 )
 
 @Serializable
 data class ProductionCompany(
-    val id: Long,
-    val name: String,
+    val id: Long = 0L,
+    val name: String = "",
     @SerialName("logo_path") val logoPath: String? = null,
     @SerialName("origin_country") val originCountry: String? = null
 )
 
 @Serializable
 data class ProductionCountry(
-    @SerialName("iso_3166_1") val iso31661: String,
-    val name: String
+    @SerialName("iso_3166_1") val iso31661: String = "",
+    val name: String = ""
 )
 
 @Serializable
 @Stable
 data class Provider(
-    @SerialName("provider_id") val providerId: Long,
-    @SerialName("provider_name") val providerName: String,
-    @SerialName("logo_path") val logoPath: String?
+    @SerialName("provider_id") val providerId: Long = 0L,
+    @SerialName("provider_name") val providerName: String = "",
+    @SerialName("logo_path") val logoPath: String? = null
 )
 
 @Serializable
@@ -222,16 +222,16 @@ data class WatchProvidersResponse(
 
 @Serializable
 data class Collection(
-    val id: Long,
-    val name: String,
+    val id: Long = 0L,
+    val name: String = "",
     @SerialName("poster_path") val posterPath: String? = null,
     @SerialName("backdrop_path") val backdropPath: String? = null
 )
 
 @Serializable
 data class CollectionResponse(
-    val id: Long,
-    val name: String,
+    val id: Long = 0L,
+    val name: String = "",
     val overview: String? = null,
     @SerialName("poster_path") val posterPath: String? = null,
     @SerialName("backdrop_path") val backdropPath: String? = null,
@@ -242,41 +242,41 @@ data class CollectionResponse(
 
 @Serializable
 data class CreditsResponse(
-    val cast: List<CastMember>,
-    val crew: List<CrewMember>
+    val cast: List<CastMember> = emptyList(),
+    val crew: List<CrewMember> = emptyList()
 )
 
 @Serializable
 @Stable
 data class CastMember(
-    val id: Long,
-    val name: String,
-    val character: String?,
-    @SerialName("profile_path") val profilePath: String?
+    val id: Long = 0L,
+    val name: String = "",
+    val character: String? = null,
+    @SerialName("profile_path") val profilePath: String? = null
 )
 
 @Serializable
 @Stable
 data class CrewMember(
-    val id: Long,
-    val name: String,
-    val job: String,
-    @SerialName("profile_path") val profilePath: String?
+    val id: Long = 0L,
+    val name: String = "",
+    val job: String = "",
+    @SerialName("profile_path") val profilePath: String? = null
 )
 
 @Serializable
 data class VideoResponse(
-    val results: List<Video>
+    val results: List<Video> = emptyList()
 )
 
 @Serializable
 @Stable
 data class Video(
-    val id: String,
-    val key: String,
-    val name: String,
-    val site: String,
-    val type: String
+    val id: String = "",
+    val key: String = "",
+    val name: String = "",
+    val site: String = "",
+    val type: String = ""
 )
 
 @Serializable

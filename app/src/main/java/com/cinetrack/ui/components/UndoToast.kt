@@ -12,6 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.abs
+import kotlin.math.sign
+import kotlin.math.roundToInt
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -46,6 +52,8 @@ fun UndoToast(
     var currentAction by remember { mutableStateOf<com.cinetrack.ui.utils.UndoAction?>(null) }
     var isVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+    val offsetY = remember { Animatable(0f) }
 
     // Collect events from the manager
     LaunchedEffect(actionFeedbackManager) {
@@ -58,6 +66,8 @@ fun UndoToast(
     // Auto-dismiss timer: restarted whenever isVisible becomes true
     LaunchedEffect(isVisible, currentAction) {
         if (isVisible) {
+            offsetX.snapTo(0f)
+            offsetY.snapTo(0f)
             delay(TOAST_DURATION_MS)
             isVisible = false
         }
@@ -88,6 +98,33 @@ fun UndoToast(
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .width(320.dp)
                     .zIndex(20000f) // Ensure internal layering
+                    .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragEnd = {
+                                scope.launch {
+                                    if (abs(offsetX.value) > 150f || abs(offsetY.value) > 150f) {
+                                        val targetX = if (abs(offsetX.value) > 150f) sign(offsetX.value) * 1000f else offsetX.value
+                                        val targetY = if (abs(offsetY.value) > 150f) sign(offsetY.value) * 1000f else offsetY.value
+                                        launch { offsetX.animateTo(targetX, tween(200)) }
+                                        launch { offsetY.animateTo(targetY, tween(200)) }
+                                        delay(150)
+                                        isVisible = false
+                                    } else {
+                                        launch { offsetX.animateTo(0f, spring()) }
+                                        launch { offsetY.animateTo(0f, spring()) }
+                                    }
+                                }
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    offsetX.snapTo(offsetX.value + dragAmount.x)
+                                    offsetY.snapTo(offsetY.value + dragAmount.y)
+                                }
+                            }
+                        )
+                    }
             ) {
                 // Blur Background with Haze - Modern Pill Design
                 Box(

@@ -163,8 +163,18 @@ fun NewsScreenContent(
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Button(onClick = { setVisibleItems(visibleItems + 5) }) {
-                                            Text(stringResource(R.string.news_read_more))
+                                        Box(
+                                            modifier = Modifier
+                                                .bounceClick { setVisibleItems(visibleItems + 5) }
+                                                .background(MaterialTheme.colorScheme.primary, androidx.compose.foundation.shape.RoundedCornerShape(50))
+                                                .padding(horizontal = 24.dp, vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.news_read_more),
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
                                         }
                                     }
                                 }
@@ -179,14 +189,13 @@ fun NewsScreenContent(
 
 @Composable
 fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
-    val cardHazeState = remember { HazeState() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
+            .bounceClick { onClick() }
             .clip(RoundedCornerShape(24.dp))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
-            .bounceClick { onClick() }
     ) {
         item.imageUrl?.let { imgUrl ->
             AsyncImage(
@@ -196,7 +205,6 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(24.dp))
-                    .haze(state = cardHazeState)
             )
         }
         
@@ -204,9 +212,8 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(12.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .hazeChild(state = cardHazeState, shape = RoundedCornerShape(8.dp))
-                .background(Color.Black.copy(alpha = 0.3f))
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {

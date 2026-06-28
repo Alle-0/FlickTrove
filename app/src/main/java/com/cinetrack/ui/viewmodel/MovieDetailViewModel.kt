@@ -217,7 +217,7 @@ class MovieDetailViewModel @Inject constructor(
             _metadata.value = response
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            _error.value = ErrorMapper.map(e.message)
+            _error.value = e.stackTraceToString()
         } finally {
             val timeTaken = System.currentTimeMillis() - startTime
             if (timeTaken < 600L) {

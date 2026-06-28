@@ -268,6 +268,15 @@ fun EpisodesBottomSheet(
                         }
                     )
                 }
+
+                // Instruction text
+                Text(
+                    text = stringResource(R.string.episodes_long_press_info),
+                    modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp),
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
             // Episode List

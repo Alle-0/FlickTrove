@@ -135,6 +135,13 @@ fun GlassyDrawerContent(
 
                 DrawerSection(title = stringResource(R.string.drawer_custom))
                 DrawerItem(
+                    icon = Icons.Rounded.FolderSpecial,
+                    label = stringResource(R.string.drawer_custom_folders),
+                    isActive = activeRoute == "folders",
+                    onClick = { onNavigate("folders", null) },
+                    accentColor = accentColor
+                )
+                DrawerItem(
                     icon = Icons.Rounded.AutoAwesome,
                     label = stringResource(R.string.drawer_custom_recommendations),
                     isActive = activeRoute == "recommendations",
@@ -148,13 +155,10 @@ fun GlassyDrawerContent(
                     onClick = { onNavigate("surprise", null) },
                     accentColor = accentColor
                 )
-                DrawerItem(
-                    icon = Icons.Rounded.FolderSpecial,
-                    label = stringResource(R.string.drawer_custom_folders),
-                    isActive = activeRoute == "folders",
-                    onClick = { onNavigate("folders", null) },
-                    accentColor = accentColor
-                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                DrawerSection(title = stringResource(R.string.drawer_discover))
                 DrawerItem(
                     icon = Icons.AutoMirrored.Rounded.Article,
                     label = stringResource(R.string.drawer_custom_news),

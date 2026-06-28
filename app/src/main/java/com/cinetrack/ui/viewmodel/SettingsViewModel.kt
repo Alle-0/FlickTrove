@@ -139,10 +139,15 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _pendingReveal.value?.let { (color, _) ->
                 settingsRepository.updateAccentColor(color)
-                IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
                 movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
             }
+        }
+    }
+
+    fun applyPendingIcon(color: androidx.compose.ui.graphics.Color) {
+        viewModelScope.launch {
+            IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
         }
     }
 
@@ -280,11 +285,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateContentLanguage(language: String) {
+    fun updateContentLanguage(language: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             preferenceRepository.updateContentLanguage(language)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_language, language))
+            onSuccess()
         }
     }
 

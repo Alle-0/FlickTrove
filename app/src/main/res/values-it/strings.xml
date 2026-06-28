@@ -655,7 +655,8 @@
     <string name="drawer_tv_popular">Serie popolari</string>
     <string name="drawer_tv_airing">Serie ora in streaming</string>
     <string name="drawer_tv_upcoming">Serie in arrivo</string>
-    <string name="drawer_custom">Personalizzato</string>
+    <string name="drawer_custom">I tuoi contenuti</string>
+    <string name="drawer_discover">Magazine</string>
     <string name="drawer_custom_recommendations">Consigliati per te</string>
     <string name="drawer_custom_surprise">Sorprendimi</string>
     <string name="drawer_custom_folders">Le mie cartelle</string>
@@ -783,7 +784,9 @@
     
     <!-- Episodes -->
     <string name="episodes_info_desc">Informazioni Episodio</string>
+    <string name="episodes_long_press_info">Tieni premuto un episodio per più info</string>
     <string name="detail_release_date">Data di uscita</string>
     <string name="detail_rating">Valutazione</string>
-
+    <!-- Icon Update -->
+    <string name="icon_updated_restart">L\'icona è stata aggiornata. Riavvio in corso...</string>
 </resources>

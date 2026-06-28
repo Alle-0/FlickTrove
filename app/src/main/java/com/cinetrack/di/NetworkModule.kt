@@ -51,7 +51,7 @@ object NetworkModule {
                 val resolvedLanguage = if (rawLanguage == "system") {
                     java.util.Locale.getDefault().language
                 } else {
-                    rawLanguage
+                    rawLanguage.substringBefore("-")
                 }
                 val urlBuilder = original.url.newBuilder()
                     .addQueryParameter("api_key", Keys.getTmdbKey())
@@ -59,7 +59,7 @@ object NetworkModule {
 
                 if (original.url.queryParameter("include_image_language") != null) {
                     val imageLanguage = "$resolvedLanguage,en,null"
-                    urlBuilder.setQueryParameter("include_image_language", imageLanguage)
+                    urlBuilder.setEncodedQueryParameter("include_image_language", imageLanguage)
                 }
                 
                 val url = urlBuilder.build()

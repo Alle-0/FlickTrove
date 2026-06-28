@@ -82,7 +82,7 @@ fun CategoryTabSelector(
         val tabWidth = androidx.compose.ui.unit.min(120.dp, calculatedWidth)
         val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
         
-        var dragOffset by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+        val coroutineScope = rememberCoroutineScope()
         val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
 
         androidx.compose.runtime.LaunchedEffect(selectedIndex, tabWidthPx) {
@@ -93,7 +93,7 @@ fun CategoryTabSelector(
         }
 
         val maxOffset = tabWidthPx * (options.size - 1)
-        val currentIndicatorOffset = (offsetAnimatable.value + dragOffset).coerceIn(0f, maxOffset)
+        val currentIndicatorOffset = offsetAnimatable.value.coerceIn(0f, maxOffset)
 
         // Sliding Highlighter
         Surface(
@@ -113,18 +113,35 @@ fun CategoryTabSelector(
             .pointerInput(selectedIndex, tabWidthPx) {
                 detectHorizontalDragGestures(
                     onDragEnd = {
-                        val currentPos = selectedIndex * tabWidthPx + dragOffset
+                        val currentPos = offsetAnimatable.value
                         val targetIndex = (currentPos / tabWidthPx).roundToInt().coerceIn(0, options.size - 1)
                         if (targetIndex != selectedIndex) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             onOptionClick(targetIndex)
+                        } else {
+                            coroutineScope.launch {
+                                offsetAnimatable.animateTo(
+                                    targetValue = selectedIndex * tabWidthPx,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                                )
+                            }
                         }
-                        dragOffset = 0f
                     },
-                    onDragCancel = { dragOffset = 0f }
+                    onDragCancel = { 
+                        coroutineScope.launch {
+                            offsetAnimatable.animateTo(
+                                targetValue = selectedIndex * tabWidthPx,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                            )
+                        }
+                    }
                 ) { change, dragAmount ->
                     change.consume()
-                    dragOffset += dragAmount
+                    coroutineScope.launch {
+                        offsetAnimatable.snapTo(
+                            (offsetAnimatable.value + dragAmount).coerceIn(0f, maxOffset)
+                        )
+                    }
                 }
             }
         ) {

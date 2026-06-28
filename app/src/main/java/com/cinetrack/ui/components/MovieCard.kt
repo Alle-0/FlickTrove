@@ -67,7 +67,6 @@ import androidx.compose.foundation.shape.GenericShape
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 
 // --- Constants & Shapes ---
 
@@ -523,7 +522,7 @@ fun MovieCard(
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    badges.filter { it.text !in disabledBadges }.forEach { badge ->
+                    badges.filter { it.text !in disabledBadges }.take(1).forEach { badge ->
                         MovieCardBadge(
                             text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
@@ -735,8 +734,8 @@ fun MovieCard(
 fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null, isLarge: Boolean = false) {
     Box(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.2f), RoundedCornerShape(50))
             .border(0.5.dp, color.copy(alpha = 0.8f), RoundedCornerShape(50))
             .padding(horizontal = if (isLarge) 8.dp else 6.dp, vertical = if (isLarge) 4.dp else 2.5.dp),
         contentAlignment = Alignment.Center

@@ -58,6 +58,7 @@ fun GlassyTopBar(
     onBackPress: (() -> Unit)? = null,
     onFilterClick: ((Offset) -> Unit)? = null,
     onUpdatesClick: ((Offset) -> Unit)? = null,
+    onRefreshClick: (() -> Unit)? = null,
     hasActiveFilters: Boolean = false,
     isSyncing: Boolean = false,
     isDimmed: Boolean = false,
@@ -264,6 +265,25 @@ fun GlassyTopBar(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
                             contentDescription = "Filtri",
                             tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                if (onRefreshClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = onRefreshClick
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                            contentDescription = "Ricarica",
+                            tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
                     }

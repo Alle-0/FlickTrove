@@ -40,25 +40,6 @@ object IconManager {
             return
         }
 
-        // Schedule an app restart because changing the component setting will kill the app
-        val restartIntent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
-            component = ComponentName(context, activeAlias)
-            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-        val pendingIntent = android.app.PendingIntent.getActivity(
-            context,
-            1234,
-            restartIntent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-        alarmManager.set(
-            android.app.AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 1500, // 1.5 second delay
-            pendingIntent
-        )
-
         // Enable the active alias
         packageManager.setComponentEnabledSetting(
             ComponentName(context, activeAlias),
@@ -76,23 +57,16 @@ object IconManager {
                 )
             }
         }
-        // Clear tasks from Recent Apps to prevent black screen when user taps old instance
-        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-        try {
-            for (appTask in activityManager.appTasks) {
-                if (appTask.taskInfo.baseIntent?.component?.packageName == context.packageName) {
-                    appTask.finishAndRemoveTask()
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("IconManager", "Error clearing tasks", e)
-        }
 
-        // Slight delay to allow OS to remove task, then kill process
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            android.os.Process.killProcess(android.os.Process.myPid())
-            System.exit(0)
-        }, 300)
+        // Restart the app to prevent the black screen issue from Recents
+        android.widget.Toast.makeText(context, context.getString(com.cinetrack.R.string.icon_updated_restart), android.widget.Toast.LENGTH_SHORT).show()
+        val intent = android.content.Intent(context, com.cinetrack.MainActivity::class.java).apply {
+            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            action = android.content.Intent.ACTION_MAIN
+            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+        }
+        context.startActivity(intent)
+        kotlin.system.exitProcess(0)
     }
 
     private val presetColors = mapOf(
