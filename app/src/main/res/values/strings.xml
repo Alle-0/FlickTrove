@@ -647,6 +647,7 @@
     <string name="card_hint_manage_reminder">Manage the reminder on the detail page</string>
     <string name="card_hint_manage_episodes">Manage episodes on the detail page</string>
     <!-- Drawer -->
+    <string name="drawer_back_to_main">Main Menu</string>
     <string name="drawer_movies">Movies</string>
     <string name="drawer_movies_popular">Popular Movies</string>
     <string name="drawer_movies_now_playing">Now Playing</string>

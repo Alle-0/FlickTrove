@@ -50,39 +50,40 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val baseContext = LocalContext.current
 
     LaunchedEffect(baseContext, contentLanguage) {
-        if (contentLanguage != "system") {
-            val locale = java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
-            java.util.Locale.setDefault(locale)
-            var currentContext = baseContext
-            while (currentContext is android.content.ContextWrapper && currentContext !is android.app.Activity) {
-                currentContext = currentContext.baseContext
-            }
-            val config = android.content.res.Configuration(currentContext.resources.configuration)
-            config.setLocale(locale)
-            @Suppress("DEPRECATION")
-            currentContext.resources.updateConfiguration(config, currentContext.resources.displayMetrics)
-            
-            val appConfig = android.content.res.Configuration(baseContext.applicationContext.resources.configuration)
-            appConfig.setLocale(locale)
-            @Suppress("DEPRECATION")
-            baseContext.applicationContext.resources.updateConfiguration(appConfig, baseContext.applicationContext.resources.displayMetrics)
+        val locale = if (contentLanguage == "system") {
+            android.content.res.Resources.getSystem().configuration.locales.get(0)
+        } else {
+            java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
         }
+        java.util.Locale.setDefault(locale)
+        var currentContext = baseContext
+        while (currentContext is android.content.ContextWrapper && currentContext !is android.app.Activity) {
+            currentContext = currentContext.baseContext
+        }
+        val config = android.content.res.Configuration(currentContext.resources.configuration)
+        config.setLocale(locale)
+        @Suppress("DEPRECATION")
+        currentContext.resources.updateConfiguration(config, currentContext.resources.displayMetrics)
+        
+        val appConfig = android.content.res.Configuration(baseContext.applicationContext.resources.configuration)
+        appConfig.setLocale(locale)
+        @Suppress("DEPRECATION")
+        baseContext.applicationContext.resources.updateConfiguration(appConfig, baseContext.applicationContext.resources.displayMetrics)
     }
 
     val (context, localizedConfig) = remember(baseContext, contentLanguage) {
-        if (contentLanguage == "system") {
-            Pair(baseContext, baseContext.resources.configuration)
+        val locale = if (contentLanguage == "system") {
+            android.content.res.Resources.getSystem().configuration.locales.get(0)
         } else {
-            val locale = java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
-            java.util.Locale.setDefault(locale)
-            val config = android.content.res.Configuration(baseContext.resources.configuration)
-            config.setLocale(locale)
-            val configContext = baseContext.createConfigurationContext(config)
-            val wrappedContext = object : android.content.ContextWrapper(baseContext) {
-                override fun getResources() = configContext.resources
-            }
-            Pair(wrappedContext, config)
+            java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
         }
+        val config = android.content.res.Configuration(baseContext.resources.configuration)
+        config.setLocale(locale)
+        val configContext = baseContext.createConfigurationContext(config)
+        val wrappedContext = object : android.content.ContextWrapper(baseContext) {
+            override fun getResources() = configContext.resources
+        }
+        Pair(wrappedContext, config)
     }
 
     // Ask for POST_NOTIFICATIONS at startup if user has it enabled but hasn't granted yet

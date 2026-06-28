@@ -384,6 +384,7 @@ private fun FolderCreateForm(
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
 
+    val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier.fillMaxSize()
@@ -394,6 +395,9 @@ private fun FolderCreateForm(
                 .verticalFadingEdges(scrollState, 24.dp, 24.dp)
                 .premiumScrollbar(scrollState)
                 .verticalScroll(scrollState)
+                .pointerInput(Unit) {
+                    detectTapGestures { focusManager.clearFocus() }
+                }
                 .padding(24.dp)
         ) {
             Row(

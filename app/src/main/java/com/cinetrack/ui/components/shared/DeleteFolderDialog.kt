@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,10 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.ui.theme.ErrorRed
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
+import androidx.compose.animation.*
 
 @Composable
 fun DeleteFolderDialog(
@@ -43,110 +42,128 @@ fun DeleteFolderDialog(
     hazeState: HazeState? = null
 ) {
     val haptic = LocalHapticFeedback.current
+    var isDismissing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isDismissing) {
+        if (isDismissing) {
+            kotlinx.coroutines.delay(250)
+            onDismiss()
+        }
+    }
 
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { isDismissing = true },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.4f))
-                .clickable(enabled = true, onClick = onDismiss),
+                .clickable(enabled = true, onClick = { isDismissing = true }),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .width(340.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
-                    .clickable(enabled = false) { }
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            var isVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) { isVisible = true }
+            LaunchedEffect(isDismissing) { if (isDismissing) isVisible = false }
+
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn() + scaleIn(initialScale = 0.9f),
+                exit = fadeOut() + scaleOut(targetScale = 0.9f)
             ) {
-                // Destructive icon
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(
-                            color = ErrorRed.copy(alpha = 0.1f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_error_pieno),
-                        contentDescription = null,
-                        tint = ErrorRed,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = stringResource(R.string.folder_delete_title),
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = buildAnnotatedString {
-                        append(stringResource(R.string.folder_delete_confirm_prefix))
-                        withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                            append("\"$folderName\"")
-                        }
-                        append(stringResource(R.string.folder_delete_confirm_suffix))
-                    },
-                    color = Color.White.copy(alpha = 0.6f),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .width(340.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .clickable(enabled = false) { }
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Delete - high priority
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onConfirm()
-                        },
+                    // Destructive icon
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ErrorRed,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                            .size(64.dp)
+                            .background(
+                                color = ErrorRed.copy(alpha = 0.1f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.folder_delete_action), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_error_pieno),
+                            contentDescription = null,
+                            tint = ErrorRed,
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
 
-                    // Cancel
-                    TextButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = stringResource(R.string.folder_delete_title),
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = buildAnnotatedString {
+                            append(stringResource(R.string.folder_delete_confirm_prefix))
+                            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+                                append("\"$folderName\"")
+                            }
+                            append(stringResource(R.string.folder_delete_confirm_suffix))
+                        },
+                        color = Color.White.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.action_cancel).uppercase(),
-                            color = Color.White.copy(alpha = 0.4f),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                        )
+                        // Delete - high priority
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onConfirm()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ErrorRed,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.folder_delete_action), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                        }
+
+                        // Cancel
+                        TextButton(
+                            onClick = { isDismissing = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.action_cancel).uppercase(),
+                                color = Color.White.copy(alpha = 0.4f),
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
                     }
                 }
             }

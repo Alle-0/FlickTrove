@@ -450,8 +450,17 @@ fun FolderCreateDialog(
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
     val focusManager = LocalFocusManager.current
+    var isDismissing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isDismissing) {
+        if (isDismissing) {
+            kotlinx.coroutines.delay(250)
+            onDismiss()
+        }
+    }
+
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { isDismissing = true },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
@@ -461,13 +470,14 @@ fun FolderCreateDialog(
                 .pointerInput(Unit) {
                     detectTapGestures { 
                         focusManager.clearFocus()
-                        onDismiss()
+                        isDismissing = true
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
             var isVisible by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) { isVisible = true }
+            LaunchedEffect(isDismissing) { if (isDismissing) isVisible = false }
             
             androidx.compose.animation.AnimatedVisibility(
                 visible = isVisible,
@@ -503,7 +513,7 @@ fun FolderCreateDialog(
                                 .size(32.dp)
                                 .clip(RoundedCornerShape(50))
                                 .background(Color.White.copy(alpha = 0.1f))
-                                .bounceClick { onDismiss() },
+                                .bounceClick { isDismissing = true },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
@@ -513,7 +523,7 @@ fun FolderCreateDialog(
                 
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { if (it.length <= 25) name = it },
+                    onValueChange = { if (it.length <= 40) name = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text(stringResource(R.string.folders_name_placeholder), color = Color.White.copy(alpha = 0.3f)) },
                     shape = RoundedCornerShape(16.dp),
@@ -525,6 +535,14 @@ fun FolderCreateDialog(
                         cursorColor = Color.White
                     ),
                     singleLine = true
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${name.length}/40",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (name.length >= 35) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.End
                 )
                 
                 Spacer(Modifier.height(24.dp))

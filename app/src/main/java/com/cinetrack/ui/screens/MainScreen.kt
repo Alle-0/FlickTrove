@@ -81,6 +81,20 @@ class MainScreen : Screen {
         val undoViewModel: UndoViewModel = getViewModel()
         val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
         
+        var currentContextForSettings = LocalContext.current
+        while (currentContextForSettings is android.content.ContextWrapper && currentContextForSettings !is androidx.activity.ComponentActivity) {
+            currentContextForSettings = currentContextForSettings.baseContext
+        }
+        val activityForSettings = currentContextForSettings as? androidx.activity.ComponentActivity
+
+        val settingsViewModel = if (activityForSettings != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activityForSettings)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        }
+        val isSettingsDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
+        
+
         // Hoisted Modals State
         var isFilterModalVisible by remember { mutableStateOf(false) }
         var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
@@ -260,6 +274,8 @@ class MainScreen : Screen {
                         GlassyTopBar(
                             title = title,
                             hazeState = contentHazeState,
+                            isDimmed = isSettingsDialogOpen,
+                            onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
                             onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
@@ -277,6 +293,8 @@ class MainScreen : Screen {
                         Box(modifier = Modifier.align(Alignment.BottomCenter).zIndex(50f)) {
                             GlassyBottomBar(
                                 hazeState = contentHazeState,
+                                isDimmed = isSettingsDialogOpen,
+                                onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                 selectedRoute = when (currentTab) {
                                     is HomeTab -> "index"
                                     is VistiTab -> "visti"
@@ -544,6 +562,86 @@ class MainScreen : Screen {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(stringResource(R.string.main_exit_confirm), color = Color.Black, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    if (showFolderEditDialog && currentTab is FolderDetailTab) {
+                        val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel = getViewModel()
+                        val folderId = currentTab.folderId
+                        val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
+                        val folder = folderFlow.value.find { it.id == folderId }
+                        if (folder != null) {
+                            com.cinetrack.ui.components.shared.FolderEditDialog(
+                                initialName = folder.name,
+                                initialColor = folder.color ?: "#FFFFFF",
+                                editMode = folderEditMode,
+                                hazeState = globalHazeState,
+                                onDismiss = { showFolderEditDialog = false },
+                                onSave = { newName, newColor ->
+                                    foldersViewModel.updateFolder(folder.copy(name = newName, color = newColor))
+                                    showFolderEditDialog = false
+                                    // Aggiorna il tab con il nuovo nome/colore
+                                    val tab = currentTab as FolderDetailTab
+                                    tabNavigator.current = FolderDetailTab(
+                                        folderId = tab.folderId,
+                                        folderName = if (folderEditMode == com.cinetrack.ui.components.shared.FolderEditMode.NAME) newName else tab.folderName,
+                                        folderColor = if (folderEditMode == com.cinetrack.ui.components.shared.FolderEditMode.COLOR) newColor else tab.folderColor
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    if (showFolderDeleteConfirm && currentTab is FolderDetailTab) {
+                        val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel = getViewModel()
+                        val folderId = currentTab.folderId
+                        val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
+                        val folder = folderFlow.value.find { it.id == folderId }
+                        
+                        if (folder != null) {
+                            com.cinetrack.ui.components.shared.FlickTroveModal(
+                                isVisible = true,
+                                onDismissRequest = { showFolderDeleteConfirm = false },
+                                hazeState = globalHazeState
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.folder_delete_title),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.folder_delete_confirm_prefix_2) + "\"${folder.name}\"" + stringResource(R.string.folder_delete_confirm_suffix),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(bottom = 24.dp)
+                                )
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Box(
+                                        modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
+                                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
+                                            .background(Color.White.copy(alpha = 0.05f))
+                                            .bounceClick { showFolderDeleteConfirm = false },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(stringResource(R.string.folder_delete_cancel), color = Color.White)
+                                    }
+                                    Box(
+                                        modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
+                                            .background(Color(0xFFFF3B30))
+                                            .bounceClick { 
+                                                showFolderDeleteConfirm = false
+                                                foldersViewModel.deleteFolder(folderId)
+                                                tabNavigator.current = FoldersTab
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(stringResource(R.string.folder_delete_short), color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }

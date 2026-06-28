@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.rounded.RotateRight
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.res.vectorResource
+import com.cinetrack.ui.utils.bounceClick
 @Composable
 fun GlassyDrawer(
     hazeState: HazeState,
@@ -81,6 +83,8 @@ fun GlassyDrawer(
         ) {
 
 
+            var currentMenu by remember { mutableStateOf("MAIN") }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,14 +93,45 @@ fun GlassyDrawer(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.drawer_menu),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                )
+                androidx.compose.animation.AnimatedContent(
+                    targetState = currentMenu,
+                    label = "DrawerTitleTransition"
+                ) { menuState ->
+                    if (menuState == "MAIN") {
+                        Text(
+                            text = stringResource(R.string.drawer_menu),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            )
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                                .bounceClick { currentMenu = "MAIN" }
+                                .padding(vertical = 4.dp, horizontal = 8.dp)
+                                .offset(x = (-8).dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                                contentDescription = "Back",
+                                tint = accentColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.drawer_back_to_main),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    color = accentColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                    }
+                }
                 IconButton(onClick = onClose) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
@@ -106,103 +141,140 @@ fun GlassyDrawer(
                     )
                 }
             }
-
             val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 20.dp)
-                    .fadingEdge(scrollState)
-                    .verticalScroll(scrollState)
-            ) {
-                SectionHeader(stringResource(R.string.drawer_movies))
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
-                    label = stringResource(R.string.drawer_movies_popular),
-                    isSelected = selectedRoute == "popular_movies",
-                    onClick = { onNavigate("popular_movies") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
-                    label = stringResource(R.string.drawer_movies_now_playing),
-                    isSelected = selectedRoute == "now_playing_movies",
-                    onClick = { onNavigate("now_playing_movies") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                    label = stringResource(R.string.drawer_movies_upcoming),
-                    isSelected = selectedRoute == "upcoming_movies",
-                    onClick = { onNavigate("upcoming_movies") },
-                    accentColor = accentColor
-                )
-                
-                SectionHeader(stringResource(R.string.drawer_tv))
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                    label = stringResource(R.string.drawer_tv_popular),
-                    isSelected = selectedRoute == "popular_tv",
-                    onClick = { onNavigate("popular_tv") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                    label = stringResource(R.string.drawer_tv_airing),
-                    isSelected = selectedRoute == "airing_today_tv",
-                    onClick = { onNavigate("airing_today_tv") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                    label = stringResource(R.string.drawer_tv_upcoming),
-                    isSelected = selectedRoute == "on_the_air_tv",
-                    onClick = { onNavigate("on_the_air_tv") },
-                    accentColor = accentColor
-                )
 
-                SectionHeader(stringResource(R.string.drawer_custom))
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
-                    label = stringResource(R.string.drawer_custom_folders),
-                    isSelected = selectedRoute == "my_folders",
-                    onClick = { onNavigate("my_folders") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                    label = stringResource(R.string.drawer_custom_recommendations),
-                    isSelected = selectedRoute == "recommendations",
-                    onClick = { onNavigate("recommendations") },
-                    accentColor = accentColor
-                )
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
-                    label = stringResource(R.string.drawer_custom_surprise),
-                    isSelected = selectedRoute == "surprise_me",
-                    onClick = { onNavigate("surprise_me") },
-                    accentColor = accentColor
-                )
+            androidx.compose.animation.AnimatedContent(
+                targetState = currentMenu,
+                label = "DrawerMenuTransition",
+                transitionSpec = {
+                    if (targetState != "MAIN") {
+                        (androidx.compose.animation.slideInHorizontally { width -> width } + androidx.compose.animation.fadeIn()).togetherWith(
+                        (androidx.compose.animation.slideOutHorizontally { width -> -width } + androidx.compose.animation.fadeOut()))
+                    } else {
+                        (androidx.compose.animation.slideInHorizontally { width -> -width } + androidx.compose.animation.fadeIn()).togetherWith(
+                        (androidx.compose.animation.slideOutHorizontally { width -> width } + androidx.compose.animation.fadeOut()))
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) { menuState ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(bottom = 20.dp)
+                        .fadingEdge(scrollState)
+                        .verticalScroll(scrollState)
+                ) {
+                    when (menuState) {
+                        "MAIN" -> {
+                            SectionHeader(stringResource(R.string.discover_tab_title))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                label = stringResource(R.string.drawer_movies),
+                                isSelected = false,
+                                onClick = { currentMenu = "FILM" },
+                                accentColor = accentColor,
+                                trailingIcon = ImageVector.vectorResource(id = R.drawable.ic_right)
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+                                label = stringResource(R.string.drawer_tv),
+                                isSelected = false,
+                                onClick = { currentMenu = "SERIE_TV" },
+                                accentColor = accentColor,
+                                trailingIcon = ImageVector.vectorResource(id = R.drawable.ic_right)
+                            )
 
-                SectionHeader(stringResource(R.string.drawer_discover))
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
-                    label = stringResource(R.string.drawer_custom_news),
-                    isSelected = selectedRoute == "news",
-                    onClick = { onNavigate("news") },
-                    accentColor = accentColor
-                )
+                            SectionHeader(stringResource(R.string.drawer_custom))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
+                                label = stringResource(R.string.drawer_custom_folders),
+                                isSelected = selectedRoute == "my_folders",
+                                onClick = { onNavigate("my_folders") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                label = stringResource(R.string.drawer_custom_recommendations),
+                                isSelected = selectedRoute == "recommendations",
+                                onClick = { onNavigate("recommendations") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
+                                label = stringResource(R.string.drawer_custom_surprise),
+                                isSelected = selectedRoute == "surprise_me",
+                                onClick = { onNavigate("surprise_me") },
+                                accentColor = accentColor
+                            )
 
-                SectionHeader(stringResource(R.string.drawer_general))
-                DrawerItem(
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                    label = stringResource(R.string.drawer_general_settings),
-                    isSelected = selectedRoute == "settings",
-                    onClick = { onNavigate("settings") },
-                    accentColor = accentColor
-                )
-                
+                            SectionHeader(stringResource(R.string.drawer_discover))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
+                                label = stringResource(R.string.drawer_custom_news),
+                                isSelected = selectedRoute == "news",
+                                onClick = { onNavigate("news") },
+                                accentColor = accentColor
+                            )
 
+                            SectionHeader(stringResource(R.string.drawer_general))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                                label = stringResource(R.string.drawer_general_settings),
+                                isSelected = selectedRoute == "settings",
+                                onClick = { onNavigate("settings") },
+                                accentColor = accentColor
+                            )
+                        }
+                        "FILM" -> {
+                            SectionHeader(stringResource(R.string.drawer_movies))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_inflation),
+                                label = stringResource(R.string.drawer_movies_popular),
+                                isSelected = selectedRoute == "popular_movies",
+                                onClick = { onNavigate("popular_movies") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                label = stringResource(R.string.drawer_movies_now_playing),
+                                isSelected = selectedRoute == "now_playing_movies",
+                                onClick = { onNavigate("now_playing_movies") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                                label = stringResource(R.string.drawer_movies_upcoming),
+                                isSelected = selectedRoute == "upcoming_movies",
+                                onClick = { onNavigate("upcoming_movies") },
+                                accentColor = accentColor
+                            )
+                        }
+                        "SERIE_TV" -> {
+                            SectionHeader(stringResource(R.string.drawer_tv))
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+                                label = stringResource(R.string.drawer_tv_popular),
+                                isSelected = selectedRoute == "popular_tv",
+                                onClick = { onNavigate("popular_tv") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+                                label = stringResource(R.string.drawer_tv_airing),
+                                isSelected = selectedRoute == "airing_today_tv",
+                                onClick = { onNavigate("airing_today_tv") },
+                                accentColor = accentColor
+                            )
+                            DrawerItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                                label = stringResource(R.string.drawer_tv_upcoming),
+                                isSelected = selectedRoute == "on_the_air_tv",
+                                onClick = { onNavigate("on_the_air_tv") },
+                                accentColor = accentColor
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -214,7 +286,8 @@ private fun DrawerItem(
     label: String,
     onClick: () -> Unit,
     accentColor: Color,
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    trailingIcon: ImageVector? = null
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -264,12 +337,21 @@ private fun DrawerItem(
         Spacer(modifier = Modifier.width(14.dp))
         Text(
             text = label,
+            modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f),
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 fontSize = 14.sp
             )
         )
+        if (trailingIcon != null) {
+            Icon(
+                imageVector = trailingIcon,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 

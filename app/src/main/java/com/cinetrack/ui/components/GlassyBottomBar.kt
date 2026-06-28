@@ -47,17 +47,20 @@ import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 
 @Composable
 fun GlassyBottomBar(
     hazeState: HazeState,
     selectedRoute: String?,
     onNavigate: (String) -> Unit,
-    isDimmed: Boolean = false
+    isDimmed: Boolean = false,
+    onDimmedAreaClick: (() -> Unit)? = null
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
     val animatedDimAlpha by animateFloatAsState(
-        targetValue = if (isDimmed) 0.6f else 0f,
+        targetValue = if (isDimmed) 0.7f else 0f,
         animationSpec = tween(durationMillis = 300),
         label = "BottomBarDimAlpha"
     )
@@ -123,6 +126,11 @@ fun GlassyBottomBar(
                 modifier = Modifier
                     .matchParentSize()
                     .background(Color.Black.copy(alpha = animatedDimAlpha), CircleShape)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            onDimmedAreaClick?.invoke()
+                        }
+                    }
             )
         }
     }

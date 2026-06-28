@@ -49,6 +49,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.utils.NetworkMonitor
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 
 @Composable
 fun GlassyTopBar(
@@ -62,6 +64,7 @@ fun GlassyTopBar(
     hasActiveFilters: Boolean = false,
     isSyncing: Boolean = false,
     isDimmed: Boolean = false,
+    onDimmedAreaClick: (() -> Unit)? = null,
     notificationCount: Int = 0,
     onDeleteClick: (() -> Unit)? = null, // Deprecated, use onFolderOptionsClick
     onFolderOptionsClick: ((Offset) -> Unit)? = null,
@@ -75,7 +78,7 @@ fun GlassyTopBar(
     val connectionState by networkMonitor.connectionState.collectAsStateWithLifecycle(initialValue = com.cinetrack.utils.ConnectionState.ONLINE)
 
     val animatedDimAlpha by animateFloatAsState(
-        targetValue = if (isDimmed) 0.6f else 0f,
+        targetValue = if (isDimmed) 0.7f else 0f,
         animationSpec = tween(durationMillis = 300),
         label = "TopBarDimAlpha"
     )
@@ -384,6 +387,11 @@ fun GlassyTopBar(
                 modifier = Modifier
                     .matchParentSize()
                     .background(Color.Black.copy(alpha = animatedDimAlpha), RoundedCornerShape(50))
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            onDimmedAreaClick?.invoke()
+                        }
+                    }
             )
         }
     }

@@ -27,6 +27,8 @@ import com.cinetrack.data.models.UserPreferences
 import com.cinetrack.util.IconManager
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -63,6 +65,13 @@ class SettingsViewModel @Inject constructor(
 
     fun setAnyDialogOpen(isOpen: Boolean) {
         _isAnyDialogOpen.value = isOpen
+    }
+
+    private val _closeDialogsEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val closeDialogsEvent = _closeDialogsEvent.asSharedFlow()
+
+    fun triggerCloseDialogs() {
+        _closeDialogsEvent.tryEmit(Unit)
     }
 
     val accentColor: StateFlow<String> = settingsRepository.accentColor
@@ -145,9 +154,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun applyPendingIcon(color: androidx.compose.ui.graphics.Color) {
+    fun applyPendingIcon(colorName: String) {
         viewModelScope.launch {
-            IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
+            IconManager.updateAppIcon(context, colorName, dynamicAppIconEnabled.value)
         }
     }
 

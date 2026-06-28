@@ -121,8 +121,22 @@ object SettingsTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = androidx.hilt.navigation.compose.hiltViewModel<AuthViewModel>()
-        val settingsViewModel = androidx.hilt.navigation.compose.hiltViewModel<SettingsViewModel>()
+        var currentContext = androidx.compose.ui.platform.LocalContext.current
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<AuthViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<AuthViewModel>()
+        }
+        val settingsViewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<SettingsViewModel>(activity)
+        } else {
+            androidx.hilt.navigation.compose.hiltViewModel<SettingsViewModel>()
+        }
         
         val paddingValues = LocalAppPadding.current
         val hazeState = com.cinetrack.ui.LocalHazeState.current
@@ -339,13 +353,27 @@ fun SettingsScreenContent(
     }
 
     val settingsDimAlpha by animateFloatAsState(
-        targetValue = if (anyDialogVisible) 0.45f else 0f,
+        targetValue = if (anyDialogVisible) 0.7f else 0f,
         animationSpec = tween(200),
         label = "settingsDimAlpha"
     )
 
     LaunchedEffect(anyDialogVisible) {
         settingsViewModel.setAnyDialogOpen(anyDialogVisible)
+    }
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.closeDialogsEvent.collect {
+            focusManager.clearFocus()
+            showDeleteDialog = false
+            showColorDialog = false
+            showFeedbackDialog = false
+            showBadgesInfoDialog = false
+            showCacheConfirm = false
+            showLogoutConfirm = false
+            showBackupDialog = false
+            showExternalMigrationDialog = false
+        }
     }
 
     // File Pickers
@@ -1794,7 +1822,7 @@ fun FeedbackDialog(
     var title by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(initialEmail) }
     var description by remember { mutableStateOf("") }
-    var rating by remember { mutableStateOf(5) }
+    var rating by remember { mutableStateOf(3) }
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
 
@@ -1823,7 +1851,7 @@ fun FeedbackDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(28.dp)
-                    .heightIn(max = 500.dp)
+                    .heightIn(max = 640.dp)
             ) {
                 // Header (Fixed)
                 Text(
