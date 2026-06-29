@@ -10,63 +10,63 @@
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
 </p>
 
-**Traccia film, serie TV e attori con uno stile mozzafiato.**
+**Track movies, TV shows, and actors with breathtaking style.**
 
-*FlickTrove è un'esperienza visiva premium. Un'app Android moderna costruita interamente con Jetpack Compose, caratterizzata da un'interfaccia glassmorphica unica, palette di colori dinamiche e animazioni fluide ad alta frequenza.*
+*FlickTrove is a premium visual experience. A modern Android app built entirely with Jetpack Compose, featuring a unique glassmorphic interface, dynamic color palettes, and fluid high-refresh-rate animations.*
 
 </div>
 
 ---
 
 <details open>
-  <summary><b>📖 Indice</b></summary>
+  <summary><b>📖 Table of Contents</b></summary>
   <ol>
-    <li><a href="#-il-progetto">🎯 Il Progetto</a></li>
-    <li><a href="#-features-principali">✨ Features Principali</a></li>
-    <li><a href="#-screenshot-ui">📱 Screenshot UI</a></li>
-    <li><a href="#-architettura-e-tecnologia">🛠 Architettura e Tecnologia</a></li>
+    <li><a href="#-the-project">🎯 The Project</a></li>
+    <li><a href="#-key-features">✨ Key Features</a></li>
+    <li><a href="#-ui-screenshots">📱 UI Screenshots</a></li>
+    <li><a href="#-architecture--technology">🛠 Architecture & Technology</a></li>
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
-    <li><a href="#%EF%B8%8F-nota-per-sviluppatori">⚠️ Nota per Sviluppatori</a></li>
-    <li><a href="#-utilizzo">🚀 Utilizzo</a></li>
-    <li><a href="#-licenza">📄 Licenza</a></li>
-    <li><a href="#-contatti--ringraziamenti">📫 Contatti & Ringraziamenti</a></li>
+    <li><a href="#%EF%B8%8F-developer-note">⚠️ Developer Note</a></li>
+    <li><a href="#-usage">🚀 Usage</a></li>
+    <li><a href="#-license">📄 License</a></li>
+    <li><a href="#-contacts--credits">📫 Contacts & Credits</a></li>
   </ol>
 </details>
 
 ---
 
-## 🎯 Il Progetto
+## 🎯 The Project
 
-**Qual è la motivazione dietro FlickTrove?**
-Ci sono moltissime app per tracciare film e serie TV, ma spesso mancano di cura per i dettagli visivi o risultano poco fluide. L'obiettivo di FlickTrove è quello di fornire agli appassionati non solo uno strumento utile e funzionale, ma un'esperienza premium, reattiva e piacevole da usare, sfruttando al massimo le moderne tecnologie Android. 
+**What is the motivation behind FlickTrove?**
+There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies. 
 
-Il progetto risolve il bisogno di avere una libreria personale elegante, sincronizzata in cloud, e con notifiche tempestive per le nuove uscite.
-
----
-
-## ✨ Features Principali
-
-FlickTrove non è solo un tracker, ma una libreria personale costruita su misura per gli appassionati:
-
-- 🔍 **Ricerca Completa**: Accedi all'intero catalogo TMDB. Trova film, serie TV, e scopri i dettagli biografici e la filmografia degli attori.
-- 📁 **Organizzazione Custom**: Crea cartelle personalizzate. Assegna nomi, colori dinamici tramite Color Wheel e organizza le tue visioni come preferisci.
-- 🔔 **Notifiche Intelligenti**: Non perdere mai un'uscita. Ricevi avvisi puntuali quando un titolo o l'episodio di una serie TV che stai aspettando viene rilasciato.
-- 📊 **Statistiche Avanzate**: Monitora il tuo tempo di visione, analizza i generi che preferisci e guarda quanto tempo della tua vita hai dedicato al cinema e alle serie TV.
-- 🎬 **Gestione Episodica**: Segna quali episodi hai già visto. Filtra per stagioni e resta sempre al passo con le tue serie preferite.
-- ☁️ **Sincronizzazione**: Supporto nativo a Firebase per il salvataggio dei dati (account & backup).
-- 📴 **Offline-First**: Accedi alla tua libreria personale e salva le tue preferenze anche senza connessione internet, grazie al solido caching locale (Room DB).
-- 🌍 **Localizzazione**: Architettura multi-lingua nativa per un'esperienza internazionale (attualmente Italiano e Inglese).
+This project solves the need for an elegant personal library, cloud-synchronized, with timely notifications for new releases.
 
 ---
 
-## 📱 Screenshot UI
+## ✨ Key Features
+
+FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
+
+- 🔍 **Comprehensive Search**: Access the entire TMDB catalog. Find movies, TV shows, and explore biographical details and filmographies of actors.
+- 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
+- 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
+- 📊 **Advanced Statistics**: Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema and TV series.
+- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
+- ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
+- 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
+- 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
+
+---
+
+## 📱 UI Screenshots
 
 <div align="center">
   <table>
     <tr>
       <td align="center"><b>Home & Blur Effect</b></td>
-      <td align="center"><b>Ricerca & Colori Dinamici</b></td>
-      <td align="center"><b>Dettaglio Film</b></td>
+      <td align="center"><b>Search & Dynamic Colors</b></td>
+      <td align="center"><b>Movie Details</b></td>
     </tr>
     <tr>
       <td><img src="https://via.placeholder.com/250x500/1e1e24/4285F4?text=Screen+1" width="250"/></td>
@@ -75,82 +75,82 @@ FlickTrove non è solo un tracker, ma una libreria personale costruita su misura
     </tr>
   </table>
   <br>
-  <i>(Sostituisci questi link placeholder con screenshot reali della tua app!)</i>
+  <i>(Replace these placeholder links with real screenshots of your app!)</i>
 </div>
 
 ---
 
-## 🛠 Architettura e Tecnologia
+## 🛠 Architecture & Technology
 
-Dietro un'interfaccia splendida c'è un motore solido e scalabile. Abbiamo utilizzato le best practice dello sviluppo Android moderno.
+Behind a gorgeous interface lies a solid and scalable engine. We used the best practices of modern Android development.
 
-| Categoria | Stack / Libreria |
+| Category | Stack / Library |
 | :--- | :--- |
-| **Linguaggio** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin"> |
-| **Architettura** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=flat-square&logo=android&logoColor=white" alt="MVVM"> |
+| **Language** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin"> |
+| **Architecture** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=flat-square&logo=android&logoColor=white" alt="MVVM"> |
 | **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=flat-square&logo=materialdesign&logoColor=black" alt="Material 3"> |
 | **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=flat-square&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=flat-square&logo=square&logoColor=white" alt="OkHttp"> |
-| **Database Locale** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=flat-square&logo=sqlite&logoColor=white" alt="Room"> |
+| **Local Database** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=flat-square&logo=sqlite&logoColor=white" alt="Room"> |
 | **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=flat-square&logo=google&logoColor=white" alt="Hilt"> |
-| **Immagini & Colori** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=flat-square&logo=android&logoColor=white" alt="Coil"> (Caricamento & Estrattore Colori Dinamico) |
+| **Images & Colors** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=flat-square&logo=android&logoColor=white" alt="Coil"> (Loading & Dynamic Color Extraction) |
 | **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase"> |
 
 <details>
-<summary><b>Approfondimento Tecnico</b></summary>
+<summary><b>Technical Deep Dive</b></summary>
 <br>
-FlickTrove adotta i più moderni pattern Android: Kotlin Coroutines e Flow per la gestione reattiva dei dati. Hilt semplifica le dipendenze rendendo il codice testabile e modulare. La navigazione avviene tramite il Compose Navigation framework integrato nativamente per evitare la frammentazione.
+FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled via the natively integrated Compose Navigation framework to avoid fragmentation.
 </details>
 
 ---
 
 ## 🎨 Design & UI
 
-Il design è il vero fiore all'occhiello di FlickTrove.
+Design is the true crown jewel of FlickTrove.
 
-- 🪟 **Glassmorphism Integrale**: Utilizziamo un motore di blur custom (tramite la libreria *Haze*) per sfocare i contenuti sotto pannelli, drawer e top bar in tempo reale a 60/120fps.
-- 🌈 **Dynamic Theming**: I colori predominanti di locandine e sfondi vengono estratti dinamicamente da Coil per tematizzare l'intera schermata (gradienti, bottoni e accenti).
-- ✨ **Animazioni Premium**: Micro-interazioni, feedback aptico personalizzato e bounce-click effect rendono l'app incredibilmente reattiva e "viva" sotto le dita.
-
----
-
-## ⚠️ Nota per Sviluppatori
-
-Per ragioni di sicurezza, i file di configurazione del backend (come il `google-services.json` di Firebase) e le chiavi API private (TMDB, OMDB, Trakt) sono stati esclusi da questa repository. 
-
-Pertanto, il progetto non può essere clonato e compilato "out-of-the-box". Il codice sorgente è esposto pubblicamente **unicamente a scopo di revisione e portfolio** per mostrare le competenze tecniche, l'architettura e le best practice adottate nello sviluppo dell'app.
+- 🪟 **Full Glassmorphism**: We use a custom blur engine to blur the content under panels, drawers, and top bars in real time at 60/120fps.
+- 🌈 **Dynamic Theming**: The predominant colors of movie posters and backgrounds are dynamically extracted by Coil to theme the entire screen (gradients, buttons, and accents).
+- ✨ **Premium Animations**: Micro-interactions, custom haptic feedback, and bounce-click effects make the app incredibly responsive and "alive" under your fingers.
 
 ---
 
-## 🚀 Utilizzo
+## ⚠️ Developer Note
 
-Una volta avviata l'app:
-1. Accedi o crea un account (i dati verranno salvati su Firebase).
-2. Usa la barra di ricerca per trovare il tuo primo film o serie TV.
-3. Clicca su "Aggiungi a libreria" e seleziona in quale cartella inserirlo.
-4. *(Opzionale)* Vai alla tab "Statistiche" per monitorare il tuo tempo di visione.
+For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository. 
+
+Therefore, the project cannot be cloned and compiled "out-of-the-box". The source code is publicly exposed **solely for portfolio and review purposes**, to showcase the technical skills, architecture, and best practices adopted in the development of the app.
 
 ---
 
-## 📄 Licenza
+## 🚀 Usage
 
-Copyright © 2026 Alessandro Basile. Tutti i diritti riservati.
-
-Questo repository è pubblico esclusivamente a scopo di portfolio e consultazione. Non è consentita la riproduzione, copia, modifica o ridistribuzione del codice, né l'utilizzo per scopi commerciali o non commerciali, senza l'esplicita autorizzazione scritta dell'autore. Consulta il file `TERMS_OF_SERVICE.md` per ulteriori dettagli.
+Once the app is launched:
+1. Log in or create an account (data will be securely saved on Firebase).
+2. Use the search bar to find your first movie or TV show.
+3. Click "Add to library" and select which folder to put it in.
+4. *(Optional)* Go to the "Stats" tab to monitor your watch time.
 
 ---
 
-## 📫 Contatti & Ringraziamenti
+## 📄 License
 
-**Contatti:**
+Copyright © 2026 Alessandro Basile. All rights reserved.
+
+This repository is public exclusively for portfolio and consultation purposes. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+
+---
+
+## 📫 Contacts & Credits
+
+**Contacts:**
 * Alessandro Basile - alessandrobasile909@gmail.com
-* Link al progetto: [https://github.com/Alle-0/FlickTrove_Kotlin](https://github.com/Alle-0/FlickTrove_Kotlin)
+* Project Link: [https://github.com/Alle-0/FlickTrove_Kotlin](https://github.com/Alle-0/FlickTrove_Kotlin)
 
-**Ringraziamenti & Risorse Utili:**
-* [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - Per i dati su film e serie TV
-* [Shields.io](https://shields.io) - Per i badge README
+**Credits & Useful Resources:**
+* [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
+* [Shields.io](https://shields.io) - For README badges
 
 <br>
 
 <div align="center">
-  <i>Sviluppato con passione per i maniaci del cinema e delle serie TV.</i>
+  <i>Developed with passion for movie and TV show maniacs.</i>
 </div>

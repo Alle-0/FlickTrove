@@ -1,23 +1,23 @@
-# Termini di Servizio (ToS)
+# Terms of Service (ToS)
 
-**Ultimo aggiornamento:** 26 Maggio 2026
+**Last Updated:** May 26, 2026
 
-Benvenuto in **FlickTrove**. Ti preghiamo di leggere attentamente i seguenti Termini di Servizio prima di utilizzare la nostra applicazione.
+Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
-### 1. Accettazione dei Termini
-L'utilizzo dell'applicazione "FlickTrove" (da qui in avanti "App") è subordinato all'accettazione e al rispetto dei presenti Termini di Servizio. L'App è destinata a utenti di età uguale o superiore a 13 anni (o all'età minima per prestare il consenso digitale richiesta dalla tua legislazione locale). Accedendo e utilizzando l'App, dichiari e garantisci di soddisfare tale requisito di età e di accettare integralmente, senza riserve, le presenti condizioni.
+### 1. Acceptance of Terms
+The use of the "FlickTrove" application (hereinafter referred to as the "App") is subject to the acceptance of and compliance with these Terms of Service. The App is intended for users who are 13 years of age or older (or the minimum age required to provide digital consent under your local legislation). By accessing and using the App, you declare and warrant that you meet this age requirement and fully accept these conditions without reservation.
 
-### 2. Proprietà Intellettuale
-Tutto il codice sorgente, l'interfaccia utente (UI), la grafica, le animazioni, il design e i contenuti originali dell'applicazione sono di proprietà esclusiva dello sviluppatore, fatta eccezione per eventuali librerie di terze parti o asset distribuiti con relative licenze open-source (ampiamente citate nell'app). 
-È severamente vietata la riproduzione, la copia, la modifica, il reverse engineering o la ridistribuzione non autorizzata, per scopi commerciali e non commerciali, senza l'esplicito consenso scritto dello sviluppatore. I dati sui film e le serie TV (incluse le locandine) sono di proprietà dei legittimi detentori di copyright e vengono forniti tramite le API di TMDB in base ai loro termini di utilizzo.
+### 2. Intellectual Property
+All source code, user interface (UI), graphics, animations, design, and original content of the application are the exclusive property of the developer, except for any third-party libraries or assets distributed with their respective open-source licenses (widely credited within the app).
+Any unauthorized reproduction, copying, modification, reverse engineering, or redistribution, for commercial or non-commercial purposes, is strictly prohibited without the explicit written consent of the developer. Data regarding movies and TV shows (including posters) are the property of their rightful copyright holders and are provided via the TMDB APIs in accordance with their terms of use.
 
-### 3. Limitazione di Responsabilità
-FlickTrove è fornita "così com'è" (*as is*) e "come disponibile". Lo sviluppatore non fornisce alcuna garanzia, esplicita o implicita, riguardo al funzionamento continuo, all'assenza di bug, difetti, errori informatici o interruzioni del servizio. 
-Nella misura massima consentita dalla legge applicabile, lo sviluppatore declina ogni responsabilità per eventuali danni diretti, indiretti, accidentali o consequenziali derivanti dall'utilizzo o dall'impossibilità di utilizzare l'App. Questo include, a titolo esemplificativo, la perdita di dati (come liste di film, recensioni, preferenze dell'account), crash del dispositivo, disservizi temporanei o accessi non autorizzati.
+### 3. Limitation of Liability
+FlickTrove is provided on an "as is" and "as available" basis. The developer makes no warranties, express or implied, regarding continuous operation, absence of bugs, defects, software errors, or service interruptions.
+To the maximum extent permitted by applicable law, the developer disclaims any liability for any direct, indirect, incidental, or consequential damages arising from the use of or the inability to use the App. This includes, but is not limited to, the loss of data (such as movie lists, reviews, account preferences), device crashes, temporary outages, or unauthorized access.
 
-### 4. Sospensione dell'Account e del Servizio
-Lo sviluppatore si riserva il diritto insindacabile e senza alcun obbligo di preavviso di modificare, sospendere o interrompere, in tutto o in parte, le funzionalità dell'App, i servizi cloud ad essa collegati o i server ospitanti. 
-In caso di abusi, violazioni dei presenti Termini, uso improprio delle API di terze parti, spam o comportamenti ritenuti dannosi per l'infrastruttura, lo sviluppatore si riserva il diritto di limitare, sospendere o terminare definitivamente l'accesso dell'utente all'App e cancellare l'account.
+### 4. Suspension of Account and Service
+The developer reserves the unchallengeable right, without any obligation of prior notice, to modify, suspend, or discontinue, in whole or in part, the features of the App, the cloud services connected to it, or the hosting servers.
+In the event of abuse, violation of these Terms, improper use of third-party APIs, spam, or behaviors deemed harmful to the infrastructure, the developer reserves the right to limit, suspend, or permanently terminate the user's access to the App and delete their account.
 
-### 5. Legge Applicabile e Foro Competente
-I presenti Termini di Servizio sono regolati e interpretati in conformità con la legislazione della Repubblica Italiana e il diritto dell'Unione Europea. Qualsiasi controversia inerente l'interpretazione, l'esecuzione o la risoluzione dei presenti Termini sarà sottoposta alla giurisdizione esclusiva dei tribunali italiani (o del foro competente secondo le normative vigenti a tutela del consumatore in Europa).
+### 5. Governing Law and Jurisdiction
+These Terms of Service are governed by and construed in accordance with the laws of the Italian Republic and European Union law. Any dispute concerning the interpretation, execution, or termination of these Terms shall be subject to the exclusive jurisdiction of the Italian courts (or the competent court according to the current consumer protection regulations in Europe).
