@@ -1,18 +1,18 @@
 <div align="center">
 
-<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="120" height="120" />
-
-# 🎬 FlickTrove
+<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="60" height="60" />
+<img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=300&section=header&text=FlickTrove&fontSize=100&fontAlignY=45&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
+  <img src="https://img.shields.io/badge/Firebase-Integrated-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase">
 </p>
 
-**Track movies, TV shows, and actors with breathtaking style.**
-
-*FlickTrove is a premium visual experience. A modern Android app built entirely with Jetpack Compose, featuring a unique glassmorphic interface, dynamic color palettes, and fluid high-refresh-rate animations.*
+> **Track movies, TV shows, and actors with breathtaking style.**
+> 
+> *FlickTrove is a premium visual experience for Android, featuring a unique glassmorphic interface, dynamic color palettes, and fluid animations.*
 
 </div>
 
@@ -38,7 +38,7 @@
 ## 🎯 The Project
 
 **What is the motivation behind FlickTrove?**
-There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies. 
+There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies.
 
 This project solves the need for an elegant personal library, cloud-synchronized, with timely notifications for new releases.
 
@@ -94,14 +94,14 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 
 | Category | Stack / Library |
 | :--- | :--- |
-| **Language** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin"> |
-| **Architecture** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=flat-square&logo=android&logoColor=white" alt="MVVM"> |
-| **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=flat-square&logo=materialdesign&logoColor=black" alt="Material 3"> |
-| **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=flat-square&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=flat-square&logo=square&logoColor=white" alt="OkHttp"> |
-| **Local Database** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=flat-square&logo=sqlite&logoColor=white" alt="Room"> |
-| **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=flat-square&logo=google&logoColor=white" alt="Hilt"> |
-| **Images & Colors** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=flat-square&logo=android&logoColor=white" alt="Coil"> (Loading & Dynamic Color Extraction) |
-| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase"> |
+| **Language** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"> |
+| **Architecture** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="MVVM"> |
+| **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=for-the-badge&logo=materialdesign&logoColor=black" alt="Material 3"> |
+| **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=for-the-badge&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=for-the-badge&logo=square&logoColor=white" alt="OkHttp"> |
+| **Local Database** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room"> |
+| **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=for-the-badge&logo=google&logoColor=white" alt="Hilt"> |
+| **Images & Colors** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> (Loading & Dynamic Color Extraction) |
+| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> |
 
 <details>
 <summary><b>Technical Deep Dive</b></summary>
@@ -121,20 +121,21 @@ Design is the true crown jewel of FlickTrove.
 
 ---
 
-## ⚠️ Developer Note
+## ⚠️ Note
 
-For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository. 
+For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
 
-Therefore, the project cannot be cloned and compiled "out-of-the-box". The source code is publicly exposed **solely for portfolio and review purposes**, to showcase the technical skills, architecture, and best practices adopted in the development of the app.
+Therefore, the project cannot be cloned and compiled "out-of-the-box". The source code is publicly exposed **just for reference and sharing**, rather than as a plug-and-play application.
 
 ---
 
 ## 🚀 Usage
 
 Once the app is launched:
+
 1. Log in or create an account (data will be securely saved on Firebase).
 2. Use the search bar to find your first movie or TV show.
-3. Click "Add to library" and select which folder to put it in.
+3. Click "To watch" and select which folder to put it in.
 4. *(Optional)* Go to the "Stats" tab to monitor your watch time.
 
 ---
@@ -143,19 +144,19 @@ Once the app is launched:
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
-This repository is public exclusively for portfolio and consultation purposes. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+This repository is public for reference and sharing. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
 
 ---
 
 ## 📫 Contacts & Credits
 
-**Contacts:**
-* Alessandro Basile - alessandrobasile909@gmail.com
-* Project Link: [https://github.com/Alle-0/FlickTrove_Kotlin](https://github.com/Alle-0/FlickTrove_Kotlin)
+**Developed by:**
+- 👨‍💻 **Alessandro Basile** - <alessandrobasile909@gmail.com>
+- 🔗 **Project Link:** [FlickTrove_Kotlin on GitHub](https://github.com/Alle-0/FlickTrove_Kotlin)
 
 **Credits & Useful Resources:**
-* [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
-* [Shields.io](https://shields.io) - For README badges
+- 🎬 [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
+- 🛡️ [Shields.io](https://shields.io) - For README badges
 
 <br>
 
