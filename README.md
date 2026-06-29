@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="60" height="60" />
+<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="80" height="80" />
 <img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=200&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 > **Track movies, TV shows, and actors with breathtaking style.**
-> 
+>
 > *FlickTrove is a premium visual experience for Android, featuring a unique glassmorphic interface, dynamic color palettes, and fluid animations.*
 
 </div>
@@ -65,34 +65,23 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
   <table>
     <tr>
       <td align="center"><b>Home & Blur Effect</b></td>
-      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
       <td align="center"><b>Recommendations</b></td>
-      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
-      <td><img src="assets/screenshot_home.png?v=2" width="250"/></td>
-      <td></td>
-      <td><img src="assets/screenshot_explore.png" width="250"/></td>
-      <td></td>
-      <td><img src="assets/screenshot_dune.png" width="250"/></td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_home.png?v=2" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_explore.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_dune.png" width="240"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
-      <td colspan="5"><br><br></td>
+      <td align="center"><br><b>Advanced Statistics</b></td>
+      <td align="center"><br><b>Custom Folders</b></td>
+      <td align="center"><br><b>Deep Details</b></td>
     </tr>
     <tr>
-      <td align="center"><b>Advanced Statistics</b></td>
-      <td></td>
-      <td align="center"><b>Custom Folders</b></td>
-      <td></td>
-      <td align="center"><b>Deep Details</b></td>
-    </tr>
-    <tr>
-      <td><img src="assets/screenshot_stats.png?v=2" width="250"/></td>
-      <td></td>
-      <td><img src="assets/screenshot_folders.png" width="250"/></td>
-      <td></td>
-      <td><img src="assets/screenshot_detail.png?v=2" width="250"/></td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_stats.png?v=2" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_folders.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_detail.png?v=2" width="240"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>
@@ -162,10 +151,12 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 ## 📫 Contacts & Credits
 
 **Developed by:**
+
 - 👨‍💻 **Alessandro Basile** - <alessandrobasile909@gmail.com>
 - 🔗 **Project Link:** [FlickTrove_Kotlin on GitHub](https://github.com/Alle-0/FlickTrove_Kotlin)
 
 **Credits & Useful Resources:**
+
 - 🎬 [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
 - 🛡️ [Shields.io](https://shields.io) - For README badges
 
