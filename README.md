@@ -54,6 +54,8 @@ FlickTrove non è solo un tracker, ma una libreria personale costruita su misura
 - 📊 **Statistiche Avanzate**: Monitora il tuo tempo di visione, analizza i generi che preferisci e guarda quanto tempo della tua vita hai dedicato al cinema e alle serie TV.
 - 🎬 **Gestione Episodica**: Segna quali episodi hai già visto. Filtra per stagioni e resta sempre al passo con le tue serie preferite.
 - ☁️ **Sincronizzazione**: Supporto nativo a Firebase per il salvataggio dei dati (account & backup).
+- 📴 **Offline-First**: Accedi alla tua libreria personale e salva le tue preferenze anche senza connessione internet, grazie al solido caching locale (Room DB).
+- 🌍 **Localizzazione**: Architettura multi-lingua nativa per un'esperienza internazionale (attualmente Italiano e Inglese).
 
 ---
 
