@@ -6,7 +6,6 @@
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="License">
 </p>
 
 **Traccia film, serie TV e attori con uno stile mozzafiato.**
@@ -26,7 +25,6 @@
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
     <li><a href="#%EF%B8%8F-installazione--setup">⚙️ Installazione & Setup</a></li>
     <li><a href="#-utilizzo">🚀 Utilizzo</a></li>
-    <li><a href="#-come-contribuire">🤝 Come Contribuire</a></li>
     <li><a href="#-licenza">📄 Licenza</a></li>
     <li><a href="#-contatti--ringraziamenti">📫 Contatti & Ringraziamenti</a></li>
   </ol>
@@ -126,34 +124,20 @@ Una volta avviata l'app:
 3. Clicca su "Aggiungi a libreria" e seleziona in quale cartella inserirlo.
 4. *(Opzionale)* Vai alla tab "Statistiche" per monitorare il tuo tempo di visione.
 
-*Includi qui alcuni screenshot dell'app per far capire subito all'utente come si presenta l'interfaccia visiva!*
-
----
-
-## 🤝 Come Contribuire
-
-I contributi sono ciò che rende la community open source un posto fantastico per imparare, trarre ispirazione e creare. Ogni contributo tu voglia dare è **molto apprezzato**.
-
-1. Esegui un Fork del progetto
-2. Crea il tuo Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Fai il Commit dei tuoi cambiamenti (`git commit -m 'Aggiungi qualche AmazingFeature'`)
-4. Fai il Push sul Branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
-
-Se trovi dei bug o hai suggerimenti, sentiti libero di aprire una **Issue**.
-
 ---
 
 ## 📄 Licenza
 
-Distribuito sotto la licenza Apache 2.0. Vedi `LICENSE` per maggiori informazioni.
+Copyright © 2026 Alessandro Basile. Tutti i diritti riservati.
+
+Questo repository è pubblico esclusivamente a scopo di portfolio e consultazione. Non è consentita la riproduzione, copia, modifica o ridistribuzione del codice, né l'utilizzo per scopi commerciali o non commerciali, senza l'esplicita autorizzazione scritta dell'autore. Consulta il file `TERMS_OF_SERVICE.md` per ulteriori dettagli.
 
 ---
 
 ## 📫 Contatti & Ringraziamenti
 
 **Contatti:**
-* Alle-0 - alle0.github@example.com
+* Alessandro Basile - alessandrobasile909@gmail.com
 * Link al progetto: [https://github.com/Alle-0/FlickTrove_Kotlin](https://github.com/Alle-0/FlickTrove_Kotlin)
 
 **Ringraziamenti & Risorse Utili:**
