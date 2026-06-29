@@ -24,7 +24,7 @@
     <li><a href="#-the-project">🎯 The Project</a></li>
     <li><a href="#-key-features">✨ Key Features</a></li>
     <li><a href="#-ui-screenshots">📱 UI Screenshots</a></li>
-    <li><a href="#-architecture--technology">🛠 Architecture & Technology</a></li>
+    <li><a href="#%EF%B8%8F-architecture--technology">🛠️ Architecture & Technology</a></li>
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
     <li><a href="#%EF%B8%8F-developer-note">⚠️ Developer Note</a></li>
     <li><a href="#-usage">🚀 Usage</a></li>
@@ -88,7 +88,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 
 ---
 
-## 🛠 Architecture & Technology
+## 🛠️ Architecture & Technology
 
 Behind a gorgeous interface lies a solid and scalable engine. We used the best practices of modern Android development.
 
