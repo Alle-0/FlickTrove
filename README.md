@@ -56,6 +56,10 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
+- 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
+- 📅 **Release Calendar**: A dedicated visual calendar to track upcoming episodes and theatrical releases.
+- 🔄 **Data Import/Export**: Migrate your historical watch data from other platforms seamlessly.
+- 🏆 **Gamification & Badges**: Earn unique badges and unlock levels based on your watching habits.
 
 ---
 
@@ -142,19 +146,12 @@ Once the app is launched:
 
 ## 🗺️ Future Roadmap
 
-FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social and advanced experience:
+FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
-### Social Features
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Shared Reviews:** Write custom reviews and rate movies, sharing your thoughts with the community.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
-
-### Advanced Tracking
-- [ ] **Streaming Providers ("Where to Watch"):** Integration with JustWatch to see exactly on which platform a movie or show is available in your country.
-- [ ] **Release Calendar:** A dedicated visual calendar to track upcoming episodes and movie theatrical releases.
-- [ ] **Data Import/Export:** Ability to migrate your historical watch data from Trakt, Letterboxd, or CSV files.
-- [ ] **Gamification & Badges:** Earn unique badges and unlock levels based on your watching habits and statistics.
 
 ---
 
