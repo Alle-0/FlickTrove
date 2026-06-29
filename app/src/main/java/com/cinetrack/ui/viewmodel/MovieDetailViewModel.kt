@@ -501,7 +501,7 @@ class MovieDetailViewModel @Inject constructor(
                 WatchState.WATCHED -> R.string.msg_action_watched
             }
             
-            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, listOf(title))) {
+            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
                 repository.saveMovie(previousMovie)
             }
         }
