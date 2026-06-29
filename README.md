@@ -1,7 +1,7 @@
 <div align="center">
 
-<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="80" height="80" />
-<img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=200&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
+<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="100" height="100" />
+<img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=180&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
