@@ -143,7 +143,6 @@ Questo repository è pubblico esclusivamente a scopo di portfolio e consultazion
 
 **Ringraziamenti & Risorse Utili:**
 * [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - Per i dati su film e serie TV
-* [Haze](https://github.com/chrisbanes/haze) - Per gli incredibili effetti glassmorphici
 * [Shields.io](https://shields.io) - Per i badge README
 
 <br>
