@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://via.placeholder.com/150/1e1e24/4285F4?text=LOGO+QUI" width="120" height="120" style="border-radius:24px"/>
+<img src="figma_exports_svg_v2/ciak.svg" alt="FlickTrove Logo" width="120" height="120" />
 
 # 🎬 FlickTrove
 
