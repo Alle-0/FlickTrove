@@ -118,13 +118,12 @@ fun GlassyTopBar(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 56.dp), // Leaves space for the 32dp buttons + padding on the sides
                 contentAlignment = Alignment.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.widthIn(max = 220.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     if (indicatorColor != null) {
                         Box(
@@ -156,7 +155,8 @@ fun GlassyTopBar(
                             textAlign = TextAlign.Center
                         ),
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                 }
             }
