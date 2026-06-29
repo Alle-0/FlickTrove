@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="figma_exports_svg_v2/ciak.svg" alt="FlickTrove Logo" width="120" height="120" />
+<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="120" height="120" />
 
 # 🎬 FlickTrove
 
