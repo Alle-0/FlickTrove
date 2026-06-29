@@ -84,14 +84,14 @@ Dietro un'interfaccia splendida c'è un motore solido e scalabile. Abbiamo utili
 
 | Categoria | Stack / Libreria |
 | :--- | :--- |
-| **Linguaggio** | 100% Kotlin |
-| **Architettura** | MVVM (Model-View-ViewModel) |
-| **UI Framework** | Jetpack Compose + Material Design 3 |
-| **Networking** | Retrofit 2 + OkHttp |
-| **Database Locale** | Room (SQLite Object Mapping) |
-| **Dependency Injection** | Dagger Hilt |
-| **Immagini & Colori** | Coil (Caricamento e Color Extraction) |
-| **Backend & Auth** | Firebase (Auth, Analytics, Firestore) |
+| **Linguaggio** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin"> |
+| **Architettura** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=flat-square&logo=android&logoColor=white" alt="MVVM"> |
+| **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=flat-square&logo=materialdesign&logoColor=black" alt="Material 3"> |
+| **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=flat-square&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=flat-square&logo=square&logoColor=white" alt="OkHttp"> |
+| **Database Locale** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=flat-square&logo=sqlite&logoColor=white" alt="Room"> |
+| **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=flat-square&logo=google&logoColor=white" alt="Hilt"> |
+| **Immagini & Colori** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=flat-square&logo=android&logoColor=white" alt="Coil"> (Caricamento & Estrattore Colori Dinamico) |
+| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase"> |
 
 <details>
 <summary><b>Approfondimento Tecnico</b></summary>
