@@ -24,7 +24,7 @@
     <li><a href="#-screenshot-ui">📱 Screenshot UI</a></li>
     <li><a href="#-architettura-e-tecnologia">🛠 Architettura e Tecnologia</a></li>
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
-    <li><a href="#%EF%B8%8F-installazione--setup">⚙️ Installazione & Setup</a></li>
+    <li><a href="#%EF%B8%8F-nota-per-sviluppatori">⚠️ Nota per Sviluppatori</a></li>
     <li><a href="#-utilizzo">🚀 Utilizzo</a></li>
     <li><a href="#-licenza">📄 Licenza</a></li>
     <li><a href="#-contatti--ringraziamenti">📫 Contatti & Ringraziamenti</a></li>
@@ -109,32 +109,11 @@ Il design è il vero fiore all'occhiello di FlickTrove.
 
 ---
 
-## ⚙️ Installazione & Setup
+## ⚠️ Nota per Sviluppatori
 
-Per compilare FlickTrove localmente avrai bisogno di una chiave API fornita da **The Movie Database (TMDB)**.
+Per ragioni di sicurezza, i file di configurazione del backend (come il `google-services.json` di Firebase) e le chiavi API private (TMDB, OMDB, Trakt) sono stati esclusi da questa repository. 
 
-### Prerequisiti
-- [Android Studio](https://developer.android.com/studio) (versione recente)
-- JDK 17+
-
-### Passaggi
-
-1. **Ottieni la chiave API:**
-   Registrati su [TheMovieDB.org](https://www.themoviedb.org/documentation/api) e richiedi una API Key per sviluppatori (è gratis!).
-
-2. **Clona la repository:**
-   ```bash
-   git clone https://github.com/Alle-0/FlickTrove_Kotlin.git
-   ```
-
-3. **Configura il progetto:**
-   Apri il progetto, e nel file `local.properties` (se non esiste, crealo nella root del progetto), aggiungi questa riga:
-   ```properties
-   TMDB_API_KEY="INSERISCI_QUI_LA_TUA_CHIAVE"
-   ```
-
-4. **Compila e Avvia:**
-   Attendi la sincronizzazione di Gradle in Android Studio, seleziona il tuo dispositivo fisico o emulatore e clicca su **Run** (▶️).
+Pertanto, il progetto non può essere clonato e compilato "out-of-the-box". Il codice sorgente è esposto pubblicamente **unicamente a scopo di revisione e portfolio** per mostrare le competenze tecniche, l'architettura e le best practice adottate nello sviluppo dell'app.
 
 ---
 
