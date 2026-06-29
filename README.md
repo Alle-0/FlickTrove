@@ -69,9 +69,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><b>Movie Details</b></td>
     </tr>
     <tr>
-      <td><img src="assets/screenshot_home.png" width="250"/></td>
-      <td><img src="assets/screenshot_stats.png" width="250"/></td>
-      <td><img src="assets/screenshot_detail.png" width="250"/></td>
+      <td><img src="assets/screenshot_home.png?v=2" width="250"/></td>
+      <td><img src="assets/screenshot_stats.png?v=2" width="250"/></td>
+      <td><img src="assets/screenshot_detail.png?v=2" width="250"/></td>
     </tr>
   </table>
 </div>
