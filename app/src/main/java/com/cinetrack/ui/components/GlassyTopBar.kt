@@ -123,7 +123,8 @@ fun GlassyTopBar(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.widthIn(max = 220.dp)
                 ) {
                     if (indicatorColor != null) {
                         Box(

@@ -430,7 +430,7 @@ private fun FolderCreateForm(
             
             OutlinedTextField(
                 value = name,
-                onValueChange = { if (it.length <= 25) name = it },
+                onValueChange = { if (it.length <= 40) name = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.4f)) },
                 shape = RoundedCornerShape(16.dp),
@@ -442,6 +442,14 @@ private fun FolderCreateForm(
                     cursorColor = Color.White
                 ),
                 singleLine = true
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "${name.length}/40",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (name.length >= 35) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
             
             Spacer(Modifier.height(20.dp))
