@@ -1,7 +1,7 @@
 <div align="center">
 
 <img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="60" height="60" />
-<img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=300&section=header&text=FlickTrove&fontSize=100&fontAlignY=45&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=200&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
@@ -65,22 +65,33 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
   <table>
     <tr>
       <td align="center"><b>Home & Blur Effect</b></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
       <td align="center"><b>Recommendations</b></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
       <td><img src="assets/screenshot_home.png?v=2" width="250"/></td>
+      <td></td>
       <td><img src="assets/screenshot_explore.png" width="250"/></td>
+      <td></td>
       <td><img src="assets/screenshot_dune.png" width="250"/></td>
     </tr>
     <tr>
+      <td colspan="5"><br><br></td>
+    </tr>
+    <tr>
       <td align="center"><b>Advanced Statistics</b></td>
+      <td></td>
       <td align="center"><b>Custom Folders</b></td>
+      <td></td>
       <td align="center"><b>Deep Details</b></td>
     </tr>
     <tr>
       <td><img src="assets/screenshot_stats.png?v=2" width="250"/></td>
+      <td></td>
       <td><img src="assets/screenshot_folders.png" width="250"/></td>
+      <td></td>
       <td><img src="assets/screenshot_detail.png?v=2" width="250"/></td>
     </tr>
   </table>
