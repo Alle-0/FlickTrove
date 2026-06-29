@@ -915,7 +915,7 @@ fun MovieDetailScreenContent(
                                                             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                                                                 val sendIntent: android.content.Intent = android.content.Intent().apply {
                                                                     action = android.content.Intent.ACTION_SEND
-                                                                    val link = "https://flicktrove.com/detail/${successState.movieEntry.mediaType}/${successState.movieEntry.id}"
+                                                                    val link = "flicktrove://detail/${successState.movieEntry.mediaType}/${successState.movieEntry.id}"
                                                                     putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.detail_share_text, successState.movieEntry.displayName, link))
                                                                     if (fileUri != null) {
                                                                         putExtra(android.content.Intent.EXTRA_STREAM, fileUri)

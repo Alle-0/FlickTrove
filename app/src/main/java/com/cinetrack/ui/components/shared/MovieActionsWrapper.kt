@@ -69,7 +69,7 @@ fun MovieActionsWrapper(
             onShare = { m ->
                 val shareTitle = m.title ?: m.name ?: ""
                 val shareType = if (m.mediaType == "tv") "tv" else "movie"
-                val url = "https://flicktrove.com/media/$shareType/${m.id}"
+                val url = "flicktrove://media/$shareType/${m.id}"
                 val sendIntent: android.content.Intent = android.content.Intent().apply {
                     action = android.content.Intent.ACTION_SEND
                     putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\nGuarda su FlickTrove: $url")

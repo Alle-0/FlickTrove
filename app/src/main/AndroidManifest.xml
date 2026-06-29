@@ -23,23 +23,12 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.App.Starting">
 
-            <!-- Deep linking intent filter remains in the main activity -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="flicktrove" android:host="media" />
-            </intent-filter>
-
-            <!-- App Links (Verified Web URLs) per condividere su WhatsApp e social -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-                <data android:host="flicktrove.com" />
-                <data android:host="www.flicktrove.com" />
+                <data android:scheme="flicktrove" android:host="detail" />
             </intent-filter>
 
             <meta-data
