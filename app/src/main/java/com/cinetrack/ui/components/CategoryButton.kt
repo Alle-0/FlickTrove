@@ -178,17 +178,20 @@ fun CategoryTabSelector(
                             text = title.uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                            color = textColor
+                            letterSpacing = 0.5.sp,
+                            color = textColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
                         
                         if (counts != null && counts.size > index) {
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             
                             // Number in a circle/badge
                             Box(
                                 modifier = Modifier
-                                    .size(20.dp)
+                                    .size(18.dp)
                                     .background(
                                         color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.1f),
                                         shape = CircleShape
