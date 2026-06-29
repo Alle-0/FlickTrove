@@ -142,12 +142,19 @@ Once the app is launched:
 
 ## 🗺️ Future Roadmap
 
-FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
+FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social and advanced experience:
 
+### Social Features
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Shared Reviews:** Write custom reviews and rate movies, sharing your thoughts with the community.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
+
+### Advanced Tracking
+- [ ] **Streaming Providers ("Where to Watch"):** Integration with JustWatch to see exactly on which platform a movie or show is available in your country.
+- [ ] **Release Calendar:** A dedicated visual calendar to track upcoming episodes and movie theatrical releases.
+- [ ] **Data Import/Export:** Ability to migrate your historical watch data from Trakt, Letterboxd, or CSV files.
+- [ ] **Gamification & Badges:** Earn unique badges and unlock levels based on your watching habits and statistics.
 
 ---
 
