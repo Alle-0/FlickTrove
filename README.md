@@ -65,17 +65,15 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
   <table>
     <tr>
       <td align="center"><b>Home & Blur Effect</b></td>
-      <td align="center"><b>Search & Dynamic Colors</b></td>
+      <td align="center"><b>Advanced Statistics</b></td>
       <td align="center"><b>Movie Details</b></td>
     </tr>
     <tr>
-      <td><img src="https://via.placeholder.com/250x500/1e1e24/4285F4?text=Screen+1" width="250"/></td>
-      <td><img src="https://via.placeholder.com/250x500/1e1e24/3DDC84?text=Screen+2" width="250"/></td>
-      <td><img src="https://via.placeholder.com/250x500/1e1e24/7F52FF?text=Screen+3" width="250"/></td>
+      <td><img src="assets/screenshot_home.png" width="250"/></td>
+      <td><img src="assets/screenshot_stats.png" width="250"/></td>
+      <td><img src="assets/screenshot_detail.png" width="250"/></td>
     </tr>
   </table>
-  <br>
-  <i>(Replace these placeholder links with real screenshots of your app!)</i>
 </div>
 
 ---
