@@ -57,7 +57,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
-- 📅 **Release Calendar**: A dedicated visual calendar to track upcoming episodes and theatrical releases.
+- 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
 - 🔄 **Data Import/Export**: Migrate your historical watch data from other platforms seamlessly.
 - 🏆 **Gamification & Badges**: Earn unique badges and unlock levels based on your watching habits.
 
