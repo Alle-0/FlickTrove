@@ -21,6 +21,7 @@
   <ol>
     <li><a href="#-il-progetto">🎯 Il Progetto</a></li>
     <li><a href="#-features-principali">✨ Features Principali</a></li>
+    <li><a href="#-screenshot-ui">📱 Screenshot UI</a></li>
     <li><a href="#-architettura-e-tecnologia">🛠 Architettura e Tecnologia</a></li>
     <li><a href="#-design--ui">🎨 Design & UI</a></li>
     <li><a href="#%EF%B8%8F-installazione--setup">⚙️ Installazione & Setup</a></li>
@@ -51,6 +52,27 @@ FlickTrove non è solo un tracker, ma una libreria personale costruita su misura
 - 📊 **Statistiche Avanzate**: Monitora il tuo tempo di visione, analizza i generi che preferisci e guarda quanto tempo della tua vita hai dedicato al cinema e alle serie TV.
 - 🎬 **Gestione Episodica**: Segna quali episodi hai già visto. Filtra per stagioni e resta sempre al passo con le tue serie preferite.
 - ☁️ **Sincronizzazione**: Supporto nativo a Firebase per il salvataggio dei dati (account & backup).
+
+---
+
+## 📱 Screenshot UI
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><b>Home & Blur Effect</b></td>
+      <td align="center"><b>Ricerca & Colori Dinamici</b></td>
+      <td align="center"><b>Dettaglio Film</b></td>
+    </tr>
+    <tr>
+      <td><img src="https://via.placeholder.com/250x500/1e1e24/4285F4?text=Screen+1" width="250"/></td>
+      <td><img src="https://via.placeholder.com/250x500/1e1e24/3DDC84?text=Screen+2" width="250"/></td>
+      <td><img src="https://via.placeholder.com/250x500/1e1e24/7F52FF?text=Screen+3" width="250"/></td>
+    </tr>
+  </table>
+  <br>
+  <i>(Sostituisci questi link placeholder con screenshot reali della tua app!)</i>
+</div>
 
 ---
 
