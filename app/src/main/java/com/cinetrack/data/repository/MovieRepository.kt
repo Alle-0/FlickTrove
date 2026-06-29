@@ -28,6 +28,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.workDataOf
+import androidx.work.WorkManager
+import androidx.work.BackoffPolicy
+import java.util.concurrent.TimeUnit
+import com.cinetrack.worker.TraktInstantWriteWorker
 
 @Singleton
 class MovieRepository @Inject constructor(
@@ -43,7 +51,8 @@ class MovieRepository @Inject constructor(
     @Named("tmdb_api_key") private val apiKey: String,
     @Named("omdb_api_key") private val omdbApiKey: String,
     @Named("trakt_api_key") private val traktApiKey: String,
-    private val widgetNotifier: com.cinetrack.domain.WidgetNotifier
+    private val widgetNotifier: com.cinetrack.domain.WidgetNotifier,
+    @ApplicationContext private val context: Context
 ) {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -61,12 +70,30 @@ class MovieRepository @Inject constructor(
 
     suspend fun getUpcomingMoviesForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getUpcomingMoviesForUpdate(limit)
 
-    suspend fun saveMovie(movie: Movie) {
+    suspend fun saveMovie(movie: Movie, syncToTrakt: Boolean = true) {
+        val oldMovie = favoriteDao.getById(movie.id, movie.mediaType)
+
         // 1. Update Room immediately
         favoriteDao.insert(movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()))
         
         // Notify Widget of changes
         widgetNotifier.notifyWidgetUpdated()
+
+        // Enqueue Instant Write to Trakt via WorkManager
+        if (syncToTrakt && oldMovie != null && oldMovie.watched != movie.watched) {
+            val action = if (movie.watched) TraktInstantWriteWorker.ACTION_MARK_WATCHED else TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
+            val workData = workDataOf(
+                TraktInstantWriteWorker.KEY_ACTION to action,
+                TraktInstantWriteWorker.KEY_MEDIA_TYPE to movie.mediaType,
+                TraktInstantWriteWorker.KEY_TMDB_ID to movie.id,
+                TraktInstantWriteWorker.KEY_IMDB_ID to movie.imdbId
+            )
+            val workRequest = OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                .setInputData(workData)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+                .build()
+            WorkManager.getInstance(context).enqueue(workRequest)
+        }
         
         // 2. Fire-and-forget to Firebase (SDK handles persistence/retry)
         repositoryScope.launch {

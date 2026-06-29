@@ -4,6 +4,8 @@ import com.cinetrack.data.api.OmdbService
 import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.api.TMDBService
 import com.cinetrack.data.api.NewsService
+import com.cinetrack.data.api.TraktAuthInterceptor
+import com.cinetrack.data.api.TraktAuthenticator
 import com.cinetrack.utils.Keys
 import dagger.Module
 import dagger.Provides
@@ -101,8 +103,22 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("trakt_okhttp")
+    fun provideTraktOkHttpClient(
+        okHttpClient: OkHttpClient,
+        traktAuthInterceptor: TraktAuthInterceptor,
+        traktAuthenticator: TraktAuthenticator
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptor(traktAuthInterceptor)
+            .authenticator(traktAuthenticator)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @Named("trakt_retrofit")
-    fun provideTraktRetrofit(json: Json, okHttpClient: OkHttpClient): Retrofit {
+    fun provideTraktRetrofit(json: Json, @Named("trakt_okhttp") okHttpClient: OkHttpClient): Retrofit {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
             .baseUrl("https://api.trakt.tv/")

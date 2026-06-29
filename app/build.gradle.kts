@@ -33,11 +33,13 @@ android {
         val tmdbKey = localProps.getProperty("TMDB_API_KEY", "")
         val omdbKey = localProps.getProperty("OMDB_API_KEY", "")
         val traktKey = localProps.getProperty("TRAKT_API_KEY", "")
+        val traktSecret = localProps.getProperty("TRAKT_CLIENT_SECRET", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
         buildConfigField("String", "OMDB_API_KEY", "\"$omdbKey\"")
         buildConfigField("String", "TRAKT_API_KEY", "\"$traktKey\"")
+        buildConfigField("String", "TRAKT_CLIENT_SECRET", "\"$traktSecret\"")
     }
 
     signingConfigs {
@@ -141,6 +143,9 @@ dependencies {
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
     implementation(libs.androidx.work.runtime)
+
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     debugImplementation(libs.androidx.ui.tooling)
     "baselineProfile"(project(":baselineprofile"))

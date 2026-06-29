@@ -37,6 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val feedbackRepository: FeedbackRepository,
     private val backupRepository: BackupRepository,
     private val movieRepository: MovieRepository,
+    private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
     @ApplicationContext private val context: Context
@@ -62,6 +63,25 @@ class SettingsViewModel @Inject constructor(
 
     private val _isFeedbackLoading = MutableStateFlow(false)
     val isFeedbackLoading = _isFeedbackLoading.asStateFlow()
+
+    val isTraktLoggedIn: StateFlow<Boolean> = traktAuthRepository.isLoggedIn
+
+    fun disconnectTrakt() {
+        traktAuthRepository.clearAuth()
+        viewModelScope.launch {
+            actionFeedbackManager.emit(UiText.DynamicString("Disconnesso da Trakt"))
+        }
+    }
+
+    fun syncTraktNow() {
+        if (!isTraktLoggedIn.value) return
+        viewModelScope.launch {
+            val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
+                .build() // No constraints for forced manual sync
+            androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+            actionFeedbackManager.emit(UiText.DynamicString("Sincronizzazione manuale avviata"))
+        }
+    }
 
     fun setAnyDialogOpen(isOpen: Boolean) {
         _isAnyDialogOpen.value = isOpen

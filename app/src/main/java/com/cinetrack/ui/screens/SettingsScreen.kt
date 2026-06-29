@@ -961,6 +961,81 @@ fun SettingsScreenContent(
                                 }
                             )
                             
+                            // Trakt Sync Card
+                            val isTraktLoggedIn by settingsViewModel.isTraktLoggedIn.collectAsStateWithLifecycle()
+                            SettingsItem(
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                                title = "Trakt.tv",
+                                onClick = {},
+                                trailing = { },
+                                customContent = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        if (isTraktLoggedIn) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .background(Color.White.copy(alpha = 0.05f))
+                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .clickable { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                        settingsViewModel.syncTraktNow()
+                                                    }
+                                                    .padding(vertical = 8.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Icon(ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud), null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text("Sincronizza Ora", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                            }
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .background(Color.White.copy(alpha = 0.05f))
+                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .clickable { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                        settingsViewModel.disconnectTrakt()
+                                                    }
+                                                    .padding(vertical = 8.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Icon(Icons.Rounded.Close, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text("Disconnetti", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                            }
+                                        } else {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .background(Color.White.copy(alpha = 0.05f))
+                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .clickable { 
+                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                        val clientId = com.cinetrack.utils.Keys.getTraktClientId()
+                                                        val intent = android.content.Intent(
+                                                            android.content.Intent.ACTION_VIEW,
+                                                            android.net.Uri.parse("https://trakt.tv/oauth/authorize?response_type=code&client_id=\$clientId&redirect_uri=flicktrove://auth")
+                                                        )
+                                                        context.startActivity(intent)
+                                                    }
+                                                    .padding(vertical = 8.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Icon(Icons.Rounded.Link, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text("Connetti a Trakt", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+
                              // Grouped Backup Card
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
@@ -1067,6 +1142,17 @@ fun SettingsScreenContent(
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                     showFeedbackDialog = true 
+                                }
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.Favorite,
+                                title = "Buy me a Coffee ☕",
+                                description = "Support the developer with a donation",
+                                isExternal = true,
+                                tint = Color(0xFFFFA000),
+                                onClick = { 
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    uriHandler.openUri("https://paypal.me/AlessandroBasile0") 
                                 }
                             )
                             SettingsItem(

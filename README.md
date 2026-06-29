@@ -59,7 +59,6 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
 - 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
 - 🔄 **Data Import/Export**: Migrate your historical watch data from other platforms seamlessly.
-- 🏆 **Gamification & Badges**: Earn unique badges and unlock levels based on your watching habits.
 
 ---
 

@@ -53,6 +53,17 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
                 .setConstraints(localConstraints)
                 .build()
             
+            // --- Trakt Sync Worker (24h) ---
+            val traktSyncConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)
+                .build()
+
+            val traktSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>(
+                24, java.util.concurrent.TimeUnit.HOURS
+            )
+            .setConstraints(traktSyncConstraints)
+            .build()
+            
             workManager.cancelUniqueWork("ReminderMigration")
             
             workManager.enqueueUniquePeriodicWork(
@@ -68,9 +79,15 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
             )
 
             workManager.enqueueUniquePeriodicWork(
-                "ReleaseReminder",
+                "release_reminder_work",
                 androidx.work.ExistingPeriodicWorkPolicy.KEEP,
                 releaseReminderRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "trakt_sync_work",
+                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                traktSyncRequest
             )
 
             // Refresh the home-screen widget daily so upcoming release dates
