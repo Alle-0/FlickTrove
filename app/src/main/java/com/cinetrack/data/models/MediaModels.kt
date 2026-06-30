@@ -93,6 +93,7 @@ data class UserPreferences(
     val showSplitReleasesHome: Boolean = true,
     val showAppEntryAnimation: Boolean = true,
     val useMovieLogo: Boolean = true,
-    val lastSyncTimestamp: Long = 0L
+    val lastSyncTimestamp: Long = 0L,
+    val defaultStartTab: String = "home"
 )
 

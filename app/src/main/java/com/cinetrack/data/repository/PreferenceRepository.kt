@@ -41,6 +41,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_APP_ENTRY_ANIMATION = booleanPreferencesKey("show_app_entry_animation")
         val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
+        val DEFAULT_START_TAB = stringPreferencesKey("default_start_tab")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -76,7 +77,8 @@ class PreferenceRepository @Inject constructor(
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
-                lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L
+                lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
+                defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home"
             )
         }
 
@@ -170,6 +172,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateDefaultStartTab(tab: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DEFAULT_START_TAB] = tab
+        }
+    }
+
     suspend fun updateAll(prefs: UserPreferences) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_SORT] = json.encodeToString(prefs.homeSort)
@@ -192,6 +200,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = prefs.showAppEntryAnimation
             preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
+            preferences[PreferencesKeys.DEFAULT_START_TAB] = prefs.defaultStartTab
         }
     }
 

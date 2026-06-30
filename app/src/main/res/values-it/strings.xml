@@ -161,11 +161,17 @@
     <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
     <string name="settings_split_home">Divisione uscite Home</string>
     <string name="settings_split_home_desc">Separa i titoli già usciti da quelli in arrivo nella Home</string>
-    <string name="settings_language">Lingua dell\'app</string>
-    <string name="settings_language_desc">Scegli la lingua per l\'interfaccia e i contenuti</string>
+    <string name="settings_language">Lingua dell\'App</string>
+    <string name="settings_language_desc">Le modifiche richiederanno un riavvio</string>
     <string name="settings_language_system">Sistema</string>
-    <string name="settings_language_en">English</string>
-    <string name="settings_language_it">Italiano</string>
+    <string name="settings_language_en">EN</string>
+    <string name="settings_language_it">IT</string>
+    
+    <string name="settings_default_start_tab">Schermata Iniziale</string>
+    <string name="settings_default_start_tab_desc">Scegli quale schermata vedere all\'avvio</string>
+    <string name="settings_default_start_home">Da Guardare</string>
+    <string name="settings_default_start_visti">Visti</string>
+
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Estetica</string>
     <string name="settings_accent_color">Colore accento</string>

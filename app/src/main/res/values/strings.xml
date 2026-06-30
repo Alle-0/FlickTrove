@@ -164,10 +164,16 @@
     <string name="settings_use_movie_logo">Use Official Logos</string>
     <string name="settings_use_movie_logo_desc">In details, shows the original title logo instead of text, when available.</string>
     <string name="settings_language">App Language</string>
-    <string name="settings_language_desc">Choose the language for the interface and content</string>
+    <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>
-    <string name="settings_language_en">English</string>
-    <string name="settings_language_it">Italiano</string>
+    <string name="settings_language_en">EN</string>
+    <string name="settings_language_it">IT</string>
+
+    <string name="settings_default_start_tab">Start Screen</string>
+    <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
+    <string name="settings_default_start_home">To Watch</string>
+    <string name="settings_default_start_visti">Watched</string>
+    
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Aesthetics</string>
     <string name="settings_accent_color">Accent Color</string>

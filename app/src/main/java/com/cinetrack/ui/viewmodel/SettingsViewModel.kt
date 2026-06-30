@@ -147,6 +147,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.appTheme }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
 
+    val defaultStartTab: StateFlow<String> = preferenceRepository.userPreferencesFlow
+        .map { it.defaultStartTab }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "home")
+
     val contentLanguage: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.contentLanguage }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
@@ -312,6 +316,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateUseMovieLogo(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun setDefaultStartTab(tab: String) {
+        viewModelScope.launch {
+            preferenceRepository.updateDefaultStartTab(tab)
         }
     }
 

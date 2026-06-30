@@ -68,7 +68,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
 
-class MainScreen : Screen {
+class MainScreen(val initialTabStr: String? = null) : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
@@ -121,7 +121,9 @@ class MainScreen : Screen {
         val deepLinkIntent = LocalDeepLinkIntent.current
         val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
-        TabNavigator(HomeTab) { tabNavigator ->
+        val initialTab = if (initialTabStr == "visti") com.cinetrack.ui.navigation.VistiTab else com.cinetrack.ui.navigation.HomeTab
+
+        TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
 
             LaunchedEffect(deepLinkIntent.value) {

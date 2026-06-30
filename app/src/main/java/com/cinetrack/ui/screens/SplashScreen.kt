@@ -31,6 +31,7 @@ class SplashScreen : Screen {
         
         val authState by authViewModel.authState.collectAsStateWithLifecycle()
         val showAppEntryAnimation by settingsViewModel.showAppEntryAnimation.collectAsStateWithLifecycle()
+        val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
         
         var animationFinished by remember { mutableStateOf(false) }
 
@@ -38,7 +39,7 @@ class SplashScreen : Screen {
             if (animationFinished || !showAppEntryAnimation) {
                 when (authState) {
                     is AuthState.Authenticated, is AuthState.Anonymous -> {
-                        navigator.replaceAll(MainScreen())
+                        navigator.replaceAll(MainScreen(defaultStartTab))
                     }
                     is AuthState.Unauthenticated, is AuthState.Error -> {
                         navigator.replaceAll(LoginScreen())
