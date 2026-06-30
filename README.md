@@ -167,7 +167,7 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 **Developed by:**
 
 - 👨‍💻 **Alessandro Basile** - <alessandrobasile909@gmail.com>
-- 🔗 **Project Link:** [FlickTrove_Kotlin on GitHub](https://github.com/Alle-0/FlickTrove_Kotlin)
+- 🔗 **Project Link:** [FlickTrove on GitHub](https://github.com/Alle-0/FlickTrove)
 
 **Credits & Useful Resources:**
 

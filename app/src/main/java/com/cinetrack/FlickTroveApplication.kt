@@ -9,7 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltAndroidApp
-class FlickTrove_KotlinApp : Application(), Configuration.Provider {
+class FlickTroveApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -24,7 +24,7 @@ class FlickTrove_KotlinApp : Application(), Configuration.Provider {
         NotificationHelper.createNotificationChannels(this)
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val workManager = androidx.work.WorkManager.getInstance(this@FlickTrove_KotlinApp)
+            val workManager = androidx.work.WorkManager.getInstance(this@FlickTroveApplication)
             
             val networkConstraints = androidx.work.Constraints.Builder()
                 .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.ui.Alignment
@@ -111,7 +112,7 @@ fun UpdatesScreen(
     var hasRevealed by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     val revealAmount = remember(hasRevealed) { Animatable(if (hasRevealed) 1f else 0f) }
     var isClosing by remember { mutableStateOf(false) }
-    var isCalendarView by remember { mutableStateOf(false) }
+    var isCalendarView by rememberSaveable { mutableStateOf(false) }
     var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
     var showMonthPicker by remember { mutableStateOf(false) }
 

@@ -974,7 +974,7 @@ fun SettingsScreenContent(
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = com.cinetrack.R.drawable.ic_trakt_logo),
                                 title = "Trakt.tv",
-                                tint = Color(0xFFED1C24),
+                                iconTint = Color.Unspecified,
                                 onClick = {},
                                 trailing = {
                                     if (isTraktLoggedIn) {
@@ -1007,14 +1007,14 @@ fun SettingsScreenContent(
                                             Box(
                                                 modifier = Modifier
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color(0xFFED1C24).copy(alpha = 0.15f))
+                                                    .background(Color.White.copy(alpha = 0.1f))
                                                     .clickable { 
                                                         if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                                         settingsViewModel.disconnectTrakt()
                                                     }
                                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                                             ) {
-                                                Icon(Icons.Rounded.Close, contentDescription = "Disconnect Trakt", tint = Color(0xFFED1C24), modifier = Modifier.size(18.dp))
+                                                Icon(Icons.Rounded.Close, contentDescription = "Disconnect Trakt", tint = Color.White, modifier = Modifier.size(18.dp))
                                             }
                                         }
                                     } else {
@@ -1022,7 +1022,7 @@ fun SettingsScreenContent(
                                         Box(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(8.dp))
-                                                .background(Color(0xFFED1C24).copy(alpha = 0.15f))
+                                                .background(Color.White.copy(alpha = 0.1f))
                                                 .clickable { 
                                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                                     val clientId = com.cinetrack.utils.Keys.getTraktClientId()
@@ -1034,7 +1034,7 @@ fun SettingsScreenContent(
                                                 }
                                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                                         ) {
-                                            Text(stringResource(R.string.trakt_connect), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color(0xFFED1C24))
+                                            Text(stringResource(R.string.trakt_connect), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color.White)
                                         }
                                     }
                                 },
@@ -1203,7 +1203,7 @@ fun SettingsScreenContent(
                                 isExternal = true,
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/TERMS_OF_SERVICE.md") 
+                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/TERMS_OF_SERVICE.md") 
                                 }
                             )
                             SettingsItem(
@@ -1212,7 +1212,7 @@ fun SettingsScreenContent(
                                 isExternal = true,
                                 onClick = { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove_Kotlin/main/PRIVACY_POLICY.md") 
+                                    uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/PRIVACY_POLICY.md") 
                                 }
                             )
                             
@@ -2601,10 +2601,12 @@ fun SettingsItem(
     isExternal: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
     customContent: @Composable (ColumnScope.() -> Unit)? = null,
+    iconTint: Color? = null,
     onClick: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     val itemThemeColor = borderColor ?: tint
+    val finalIconTint = iconTint ?: itemThemeColor
     
     Box(
         modifier = Modifier
@@ -2639,7 +2641,7 @@ fun SettingsItem(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = itemThemeColor,
+                        tint = finalIconTint,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -2721,7 +2723,7 @@ fun AttributionRow(
                     when (brand) {
                         "TMDB" -> Color(0xFF032541)
                         "OMDb API" -> Color(0xFFF5C518)
-                        "Trakt.tv" -> Color(0xFFED1C24)
+                        "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
                         else -> Color.White.copy(alpha = 0.05f)
                     }
                 )

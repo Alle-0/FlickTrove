@@ -123,7 +123,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         LocalContext provides context,
         androidx.compose.ui.platform.LocalConfiguration provides localizedConfig
     ) {
-        FlickTrove_KotlinTheme(themeSetting = appTheme, accentColor = accentColor) {
+        FlickTroveTheme(themeSetting = appTheme, accentColor = accentColor) {
         val movieActionsManager = remember { MovieActionsManager() }
         val globalHazeState = remember { dev.chrisbanes.haze.HazeState() }
         

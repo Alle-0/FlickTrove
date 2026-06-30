@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FlickTrove_Kotlin"
+rootProject.name = "FlickTrove"
 include(":app")
 include(":baselineprofile")

@@ -10,7 +10,7 @@ import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.components.detail.*
-import com.cinetrack.ui.theme.FlickTrove_KotlinTheme
+import com.cinetrack.ui.theme.FlickTroveTheme
 import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.Video
 import com.cinetrack.domain.UpdateEpisodesUseCase

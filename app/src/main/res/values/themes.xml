@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.FlickTrove_Kotlin" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.FlickTrove" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/black</item>
         <item name="android:windowBackground">@color/black</item>
     </style>
@@ -8,30 +8,30 @@
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
-        <item name="postSplashScreenTheme">@style/Theme.FlickTrove_Kotlin</item>
+        <item name="postSplashScreenTheme">@style/Theme.FlickTrove</item>
     </style>
 
     <style name="Theme.App.Starting.Pink" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_pink</item>
-        <item name="postSplashScreenTheme">@style/Theme.FlickTrove_Kotlin</item>
+        <item name="postSplashScreenTheme">@style/Theme.FlickTrove</item>
     </style>
 
     <style name="Theme.App.Starting.Purple" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_purple</item>
-        <item name="postSplashScreenTheme">@style/Theme.FlickTrove_Kotlin</item>
+        <item name="postSplashScreenTheme">@style/Theme.FlickTrove</item>
     </style>
 
     <style name="Theme.App.Starting.Amber" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_amber</item>
-        <item name="postSplashScreenTheme">@style/Theme.FlickTrove_Kotlin</item>
+        <item name="postSplashScreenTheme">@style/Theme.FlickTrove</item>
     </style>
 
     <style name="Theme.App.Starting.Blue" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_blue</item>
-        <item name="postSplashScreenTheme">@style/Theme.FlickTrove_Kotlin</item>
+        <item name="postSplashScreenTheme">@style/Theme.FlickTrove</item>
     </style>
 </resources>

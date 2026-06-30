@@ -56,7 +56,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun FlickTrove_KotlinTheme(
+fun FlickTroveTheme(
     themeSetting: String = "System",
     accentColor: Color = NeonTeal,
     content: @Composable () -> Unit
