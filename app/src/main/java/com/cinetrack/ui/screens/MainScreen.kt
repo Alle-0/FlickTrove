@@ -81,14 +81,14 @@ class MainScreen : Screen {
         val undoViewModel: UndoViewModel = getViewModel()
         val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
         
-        var currentContextForSettings = LocalContext.current
-        while (currentContextForSettings is android.content.ContextWrapper && currentContextForSettings !is androidx.activity.ComponentActivity) {
-            currentContextForSettings = currentContextForSettings.baseContext
+        var currentContext = LocalContext.current
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
         }
-        val activityForSettings = currentContextForSettings as? androidx.activity.ComponentActivity
+        val activity = currentContext as? androidx.activity.ComponentActivity
 
-        val settingsViewModel = if (activityForSettings != null) {
-            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activityForSettings)
+        val settingsViewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
         } else {
             androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
@@ -267,6 +267,14 @@ class MainScreen : Screen {
                     } else null
 
                     Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
+                        val discoverHasActiveFilters = if (currentTab is DiscoverTab && activity != null) {
+                            val discoverVm = androidx.hilt.navigation.compose.hiltViewModel<DiscoverViewModel>(activity)
+                            val discoverUiStateForBar by discoverVm.uiState.collectAsStateWithLifecycle()
+                            discoverUiStateForBar.sortConfig.selectedGenres.isNotEmpty() ||
+                                discoverUiStateForBar.sortConfig.selectedProviders.isNotEmpty() ||
+                                discoverUiStateForBar.sortConfig.selectedDecades.isNotEmpty()
+                        } else false
+
                         GlassyTopBar(
                             title = title,
                             hazeState = contentHazeState,
@@ -279,7 +287,7 @@ class MainScreen : Screen {
                             onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                             onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
-                            // hasActiveFilters = TODO
+                            hasActiveFilters = discoverHasActiveFilters
                         )
                     }
 
@@ -440,7 +448,11 @@ class MainScreen : Screen {
                     // Modals — wrapped in key(currentTab) to reset composable state safely on tab change
                     key(currentTab) {
                         if (currentTab is HomeTab) {
-                            val homeViewModel: HomeViewModel = getViewModel()
+                            val homeViewModel = if (activity != null) {
+                                androidx.hilt.navigation.compose.hiltViewModel<HomeViewModel>(activity)
+                            } else {
+                                getViewModel()
+                            }
                             val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
                             Box(modifier = Modifier.zIndex(70000f)) {
                                 HomeFilterModal(
@@ -448,12 +460,16 @@ class MainScreen : Screen {
                                     sortConfig = homeUiState.sortConfig,
                                     hazeState = globalHazeState,
                                     triggerBounds = filterButtonBounds,
-                                    onSortConfigChanged = { homeViewModel.updateSortConfig(it) },
+                                    onSortConfigChanged = { homeViewModel.updateSortConfig(it); isFilterModalVisible = false },
                                     onDismissRequest = { isFilterModalVisible = false }
                                 )
                             }
                         } else if (currentTab is VistiTab) {
-                            val vistiViewModel: VistiViewModel = getViewModel()
+                            val vistiViewModel = if (activity != null) {
+                                androidx.hilt.navigation.compose.hiltViewModel<VistiViewModel>(activity)
+                            } else {
+                                getViewModel()
+                            }
                             val vistiUiState by vistiViewModel.uiState.collectAsStateWithLifecycle()
                             Box(modifier = Modifier.zIndex(70000f)) {
                                 HomeFilterModal(
@@ -468,7 +484,11 @@ class MainScreen : Screen {
                                 )
                             }
                         } else if (currentTab is DiscoverTab) {
-                            val discoverViewModel: DiscoverViewModel = getViewModel()
+                            val discoverViewModel = if (activity != null) {
+                                androidx.hilt.navigation.compose.hiltViewModel<DiscoverViewModel>(activity)
+                            } else {
+                                getViewModel()
+                            }
                             val discoverUiState by discoverViewModel.uiState.collectAsStateWithLifecycle()
                             Box(modifier = Modifier.zIndex(70000f)) {
                                 HomeFilterModal(
@@ -476,12 +496,17 @@ class MainScreen : Screen {
                                     sortConfig = discoverUiState.sortConfig,
                                     hazeState = globalHazeState,
                                     triggerBounds = filterButtonBounds,
-                                    onSortConfigChanged = { discoverViewModel.updateSortConfig(it) },
+                                    showSortBy = false,
+                                    onSortConfigChanged = { discoverViewModel.updateSortConfig(it); isFilterModalVisible = false },
                                     onDismissRequest = { isFilterModalVisible = false }
                                 )
                             }
                         } else if (currentTab is StatsTab) {
-                            val statsViewModel: StatsViewModel = getViewModel()
+                            val statsViewModel = if (activity != null) {
+                                androidx.hilt.navigation.compose.hiltViewModel<StatsViewModel>(activity)
+                            } else {
+                                getViewModel()
+                            }
                             val statsUiState by statsViewModel.uiState.collectAsStateWithLifecycle()
                             Box(modifier = Modifier.zIndex(70000f)) {
                                 YearSelectionModal(

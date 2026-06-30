@@ -109,8 +109,28 @@ class MovieRepository @Inject constructor(
         }
     }
 
-
-
+    suspend fun saveMoviesBulk(movies: List<Movie>) {
+        if (movies.isEmpty()) return
+        
+        val updatedMovies = movies.map { 
+            it.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()) 
+        }
+        
+        favoriteDao.insertAll(updatedMovies)
+        widgetNotifier.notifyWidgetUpdated()
+        
+        repositoryScope.launch {
+            try {
+                // Firebase bulk update isn't strictly defined, so we can run them concurrently
+                updatedMovies.forEach { movie ->
+                    firebaseRemoteDataSource.setMovie(movie)
+                }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Firebase bulk sync failed", e)
+            }
+        }
+    }
     suspend fun deleteMovie(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
         
@@ -589,6 +609,40 @@ class MovieRepository @Inject constructor(
     suspend fun getTrendingTV(page: Int = 1): List<Movie> = tmdbService.getTrendingTV(page = page).results
     suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(page = page).results
     suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
+
+    suspend fun discoverMoviesWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {
+        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+        val resolvedLanguage = if (rawLanguage == "system") {
+            java.util.Locale.getDefault().language
+        } else {
+            rawLanguage
+        }
+        val region = if (resolvedLanguage == "it") "IT" else "US"
+
+        val finalOptions = options.toMutableMap()
+        finalOptions.putIfAbsent("language", resolvedLanguage)
+        finalOptions.putIfAbsent("region", region)
+        finalOptions.putIfAbsent("watch_region", region)
+
+        return tmdbService.discoverMovies(page = page, options = finalOptions).results.map { it.copy(mediaType = "movie") }
+    }
+
+    suspend fun discoverTVWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {
+        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+        val resolvedLanguage = if (rawLanguage == "system") {
+            java.util.Locale.getDefault().language
+        } else {
+            rawLanguage
+        }
+        val region = if (resolvedLanguage == "it") "IT" else "US"
+
+        val finalOptions = options.toMutableMap()
+        finalOptions.putIfAbsent("language", resolvedLanguage)
+        finalOptions.putIfAbsent("watch_region", region)
+
+        return tmdbService.discoverTV(page = page, options = finalOptions).results.map { it.copy(mediaType = "tv") }
+    }
+
 
     suspend fun fetchOmdbRatings(imdbId: String): ExtraRatings {
         return try {

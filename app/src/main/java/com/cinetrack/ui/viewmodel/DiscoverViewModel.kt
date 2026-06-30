@@ -63,6 +63,7 @@ class DiscoverViewModel @Inject constructor(
     private val _currentPage = MutableStateFlow(1)
     private val _isEndReached = MutableStateFlow(false)
     private val _sortConfig = MutableStateFlow(SortConfig())
+    private var currentFetchJob: kotlinx.coroutines.Job? = null
     
     val lazyGridState = LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
@@ -123,7 +124,8 @@ class DiscoverViewModel @Inject constructor(
     private fun fetchMovies(isNextPage: Boolean = false) {
         if (_isEndReached.value && isNextPage) return
         
-        viewModelScope.launch {
+        currentFetchJob?.cancel()
+        currentFetchJob = viewModelScope.launch {
             if (isNextPage) {
                 _isNextPageLoading.value = true
             } else {
@@ -134,11 +136,80 @@ class DiscoverViewModel @Inject constructor(
 
             try {
                 val pageToFetch = if (isNextPage) _currentPage.value + 1 else 1
-                val currentGenreId = genreId
-                val fetchedResults = if (currentGenreId != null) {
-                    // Fetch by genre if provided in route
-                    repository.getMoviesByGenre(currentGenreId, page = pageToFetch).map { it.copy(mediaType = "movie") }
+                val config = _sortConfig.value
+                val hasCustomFilters = config.selectedGenres.isNotEmpty() || config.selectedProviders.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "created_at"
+
+                val fetchedResults = if (hasCustomFilters || genreId != null) {
+                    val options = mutableMapOf<String, String>()
+                    val isTvType = type.contains("tv")
+                    val today = java.time.LocalDate.now().toString()
+                    val oneMonthAgo = java.time.LocalDate.now().minusMonths(1).toString()
+
+                    // 1. Base Type Params
+                    when (type) {
+                        "now_playing_movies", "now_playing" -> {
+                            options["with_release_type"] = "2|3"
+                            options["release_date.gte"] = oneMonthAgo
+                            options["release_date.lte"] = today
+                        }
+                        "upcoming_movies", "upcoming" -> {
+                            options["with_release_type"] = "2|3"
+                            options["release_date.gte"] = today
+                        }
+                        "airing_today_tv" -> {
+                            options["air_date.gte"] = today
+                            options["air_date.lte"] = today
+                        }
+                        "on_the_air_tv", "streaming_tv" -> {
+                            options["first_air_date.gte"] = today
+                        }
+                    }
+
+                    // 2. Sort By Mapping
+                    val tmdbSortBy = when (config.sortType) {
+                        "release_date", "added_at", "watched_at" -> if (isTvType) "first_air_date" else "primary_release_date"
+                        "vote_average", "personal_rating" -> "vote_average"
+                        "title" -> "original_title"
+                        "runtime" -> "revenue" // closest proxy if sorting by length isn't ideal
+                        else -> "popularity"
+                    }
+                    options["sort_by"] = "$tmdbSortBy.${config.sortDirection}"
+
+                    // 3. Genres
+                    val combinedGenres = (config.selectedGenres + listOfNotNull(genreId)).distinct()
+                    if (combinedGenres.isNotEmpty()) {
+                        options["with_genres"] = combinedGenres.joinToString(",")
+                    }
+
+                    // 4. Providers
+                    if (config.selectedProviders.isNotEmpty()) {
+                        options["with_watch_providers"] = config.selectedProviders.joinToString("|")
+                    }
+
+                    // 5. Decades
+                    if (config.selectedDecades.isNotEmpty()) {
+                        val minDecade = config.selectedDecades.mapNotNull { it.replace("s", "").toIntOrNull() }.minOrNull()
+                        val maxDecade = config.selectedDecades.mapNotNull { it.replace("s", "").toIntOrNull() }.maxOrNull()
+                        if (minDecade != null && maxDecade != null) {
+                            val startDate = "$minDecade-01-01"
+                            val endDate = "${maxDecade + 9}-12-31"
+                            if (isTvType) {
+                                options["first_air_date.gte"] = startDate
+                                options["first_air_date.lte"] = endDate
+                            } else {
+                                options["primary_release_date.gte"] = startDate
+                                options["primary_release_date.lte"] = endDate
+                            }
+                        }
+                    }
+
+                    if (isTvType) {
+                        repository.discoverTVWithParams(page = pageToFetch, options = options)
+                    } else {
+                        repository.discoverMoviesWithParams(page = pageToFetch, options = options)
+                    }
                 } else {
+                    // Fallback to specific endpoints when no custom filters
                     when (type) {
                         "popular_movies", "popular" -> repository.getPopularMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }
                         "now_playing_movies", "now_playing" -> repository.getNowPlayingMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }
@@ -146,7 +217,7 @@ class DiscoverViewModel @Inject constructor(
                         "popular_tv" -> repository.getPopularTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         "airing_today_tv" -> repository.getAiringTodayTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         "on_the_air_tv", "streaming_tv" -> repository.getOnTheAirTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
-                        "trending_all" -> repository.getTrendingAll(page = pageToFetch) // Uses its own mapping logic
+                        "trending_all" -> repository.getTrendingAll(page = pageToFetch) 
                         "trending_movies", "trending" -> repository.getTrendingMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }
                         "trending_tv" -> repository.getTrendingTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         else -> repository.getPopularMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }
@@ -163,6 +234,8 @@ class DiscoverViewModel @Inject constructor(
                         _movies.value = fetchedResults
                     }
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Ignore cancellation
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isEndReached.value = true // Prevent infinite loops on error
@@ -262,6 +335,10 @@ class DiscoverViewModel @Inject constructor(
 
     fun updateSortConfig(config: SortConfig) {
         _sortConfig.value = config
+        _movies.value = emptyList()
+        _currentPage.value = 1
+        _isEndReached.value = false
+        fetchMovies(isNextPage = false)
     }
 
     fun updateGridColumns(columns: Int) {

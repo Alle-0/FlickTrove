@@ -469,7 +469,12 @@
     <string name="updates_your_reminders">I tuoi Promemoria</string>
     <string name="updates_waiting_count">%1$d in attesa</string>
     <string name="updates_no_notifications">Nessuna notifica recente.</string>
-
+    <string name="updates_calendar_reminder_date">Promemoria del %1$s</string>
+    <string name="updates_calendar_select_day">Seleziona un giorno evidenziato dal calendario</string>
+    <string name="updates_calendar_prev_month">Mese precedente</string>
+    <string name="updates_calendar_change_date">Cambia data</string>
+    <string name="updates_calendar_prev_year">Anno precedente</string>
+    <string name="updates_calendar_next_year">Anno successivo</string>
     <!-- Notifications & Widgets -->
     <string name="notif_reminder_summary">FlickTrove · Promemoria Uscite</string>
     <string name="notif_update_summary">FlickTrove · Aggiornamento Serie</string>
@@ -789,5 +794,30 @@
     <string name="detail_release_date">Data di uscita</string>
     <string name="detail_rating">Valutazione</string>
     <!-- Icon Update -->
-    <string name="icon_updated_restart">L\'icona è stata aggiornata. Riavvio in corso...</string>
+    <string name="icon_updated_restart">L\'icona è stata aggiornata. Riavvio in corso...</string>    <!-- Trakt Sync -->
+    <string name="trakt_sync_now">Sincronizza Ora</string>
+    <string name="trakt_disconnect">Disconnetti</string>
+    <string name="trakt_connect">Connetti a Trakt</string>
+    <string name="trakt_syncing_progress">Sincronizzazione in corso: %1$d / %2$d</string>
+    <string name="trakt_sync_prep">Preparazione Sincronizzazione...</string>
+    <string name="trakt_sync_title">Sincronizzazione Trakt</string>
+    <string name="trakt_sync_prep_desc">Preparazione in corso...</string>
+    <string name="trakt_sync_progress_desc">Importazione della tua libreria: %1$d / %2$d</string>
+    <string name="trakt_sync_channel_desc">Notifiche per l\'importazione profonda da Trakt.tv</string>
+    <string name="trakt_manual_sync_started">Sincronizzazione manuale avviata</string>
+    <string name="trakt_disconnected">Disconnesso da Trakt</string>
+
+    <string name="status_visible">visibile</string>
+    <string name="status_hidden">nascosto</string>
+    <string name="status_visible_plural">visibili</string>
+    <string name="status_hidden_plural">nascosti</string>
+    <string name="status_enabled_f">attivata</string>
+    <string name="status_disabled_f">disattivata</string>
+    <string name="status_active_f">attiva</string>
+    <string name="status_inactive_f">disattiva</string>
+    <string name="status_enabled_plural_f">attivate</string>
+    <string name="status_disabled_plural_f">disattivate</string>
+    <string name="status_enabled_plural_m">attivati</string>
+    <string name="status_disabled_plural_m">disattivati</string>
+
 </resources>

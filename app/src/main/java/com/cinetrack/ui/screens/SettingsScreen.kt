@@ -280,6 +280,14 @@ fun SettingsScreenContent(
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        // Procediamo comunque alla sincronizzazione. Se il permesso è negato su Android 14+, 
+        // WorkManager non mostrerà la notifica, ma potremo gestirlo o il worker continuerà senza di essa
+        settingsViewModel.syncTraktNow()
+    }
     
     // State from SettingsViewModel
     val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
@@ -298,6 +306,7 @@ fun SettingsScreenContent(
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
@@ -322,7 +331,6 @@ fun SettingsScreenContent(
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     // Runtime permission launcher for notifications (Android 13+)
@@ -964,73 +972,107 @@ fun SettingsScreenContent(
                             // Trakt Sync Card
                             val isTraktLoggedIn by settingsViewModel.isTraktLoggedIn.collectAsStateWithLifecycle()
                             SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                                icon = ImageVector.vectorResource(id = com.cinetrack.R.drawable.ic_trakt_logo),
                                 title = "Trakt.tv",
+                                tint = Color(0xFFED1C24),
                                 onClick = {},
-                                trailing = { },
-                                customContent = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        if (isTraktLoggedIn) {
-                                            Column(
+                                trailing = {
+                                    if (isTraktLoggedIn) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Sync Button
+                                            Box(
                                                 modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(RoundedCornerShape(16.dp))
-                                                    .background(Color.White.copy(alpha = 0.05f))
-                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(Color.White.copy(alpha = 0.1f))
                                                     .clickable { 
                                                         if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                        settingsViewModel.syncTraktNow()
+                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                                            if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                                                                settingsViewModel.syncTraktNow()
+                                                            } else {
+                                                                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                                            }
+                                                        } else {
+                                                            settingsViewModel.syncTraktNow()
+                                                        }
                                                     }
-                                                    .padding(vertical = 8.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
                                             ) {
-                                                Icon(ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud), null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text("Sincronizza Ora", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                                Icon(ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud), contentDescription = "Sync Trakt", tint = Color.White, modifier = Modifier.size(18.dp))
                                             }
-                                            Column(
+                                            // Disconnect Button
+                                            Box(
                                                 modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(RoundedCornerShape(16.dp))
-                                                    .background(Color.White.copy(alpha = 0.05f))
-                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(Color(0xFFED1C24).copy(alpha = 0.15f))
                                                     .clickable { 
                                                         if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                                         settingsViewModel.disconnectTrakt()
                                                     }
-                                                    .padding(vertical = 8.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
                                             ) {
-                                                Icon(Icons.Rounded.Close, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text("Disconnetti", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                                Icon(Icons.Rounded.Close, contentDescription = "Disconnect Trakt", tint = Color(0xFFED1C24), modifier = Modifier.size(18.dp))
                                             }
+                                        }
+                                    } else {
+                                        // Connect Button
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(Color(0xFFED1C24).copy(alpha = 0.15f))
+                                                .clickable { 
+                                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                    val clientId = com.cinetrack.utils.Keys.getTraktClientId()
+                                                    val intent = android.content.Intent(
+                                                        android.content.Intent.ACTION_VIEW,
+                                                        android.net.Uri.parse("https://trakt.tv/oauth/authorize?response_type=code&client_id=$clientId&redirect_uri=flicktrove://auth")
+                                                    )
+                                                    context.startActivity(intent)
+                                                }
+                                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                        ) {
+                                            Text(stringResource(R.string.trakt_connect), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color(0xFFED1C24))
+                                        }
+                                    }
+                                },
+                                customContent = {
+                                    if (syncWorkInfo != null && syncWorkInfo!!.state == androidx.work.WorkInfo.State.RUNNING) {
+                                        val progressData = syncWorkInfo!!.progress
+                                        val current = progressData.getInt("current", 0)
+                                        val total = progressData.getInt("total", 0)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        if (total > 0) {
+                                            androidx.compose.material3.Text(
+                                                text = stringResource(R.string.trakt_syncing_progress, current, total),
+                                                color = Color.White.copy(alpha = 0.7f),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            androidx.compose.material3.LinearProgressIndicator(
+                                                progress = { current.toFloat() / total.toFloat() },
+                                                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                                                color = currentAccentColor,
+                                                trackColor = Color.White.copy(alpha = 0.1f)
+                                            )
                                         } else {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(16.dp))
-                                                    .background(Color.White.copy(alpha = 0.05f))
-                                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                                    .clickable { 
-                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                        val clientId = com.cinetrack.utils.Keys.getTraktClientId()
-                                                        val intent = android.content.Intent(
-                                                            android.content.Intent.ACTION_VIEW,
-                                                            android.net.Uri.parse("https://trakt.tv/oauth/authorize?response_type=code&client_id=\$clientId&redirect_uri=flicktrove://auth")
-                                                        )
-                                                        context.startActivity(intent)
-                                                    }
-                                                    .padding(vertical = 8.dp),
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                Icon(Icons.Rounded.Link, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text("Connetti a Trakt", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
-                                            }
+                                            androidx.compose.material3.Text(
+                                                text = stringResource(R.string.trakt_sync_prep),
+                                                color = Color.White.copy(alpha = 0.7f),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            androidx.compose.material3.LinearProgressIndicator(
+                                                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                                                color = currentAccentColor,
+                                                trackColor = Color.White.copy(alpha = 0.1f)
+                                            )
                                         }
                                     }
                                 }

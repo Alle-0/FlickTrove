@@ -469,7 +469,12 @@
     <string name="updates_your_reminders">Your Reminders</string>
     <string name="updates_waiting_count">%1$d pending</string>
     <string name="updates_no_notifications">No recent notifications.</string>
-
+    <string name="updates_calendar_reminder_date">Reminders for %1$s</string>
+    <string name="updates_calendar_select_day">Select a highlighted day on the calendar</string>
+    <string name="updates_calendar_prev_month">Previous month</string>
+    <string name="updates_calendar_change_date">Change date</string>
+    <string name="updates_calendar_prev_year">Previous year</string>
+    <string name="updates_calendar_next_year">Next year</string>
     <!-- Notifications & Widgets -->
     <string name="notif_reminder_summary">FlickTrove · Release Reminders</string>
     <string name="notif_update_summary">FlickTrove · Series Update</string>
@@ -788,5 +793,30 @@
     <string name="detail_release_date">Release Date</string>
     <string name="detail_rating">Rating</string>
     <!-- Icon Update -->
-    <string name="icon_updated_restart">Icon updated. Restarting...</string>
+    <string name="icon_updated_restart">Icon updated. Restarting...</string>    <!-- Trakt Sync -->
+    <string name="trakt_sync_now">Sync Now</string>
+    <string name="trakt_disconnect">Disconnect</string>
+    <string name="trakt_connect">Connect to Trakt</string>
+    <string name="trakt_syncing_progress">Syncing in progress: %1$d / %2$d</string>
+    <string name="trakt_sync_prep">Preparing Sync...</string>
+    <string name="trakt_sync_title">Trakt Sync</string>
+    <string name="trakt_sync_prep_desc">Preparation in progress...</string>
+    <string name="trakt_sync_progress_desc">Importing your library: %1$d / %2$d</string>
+    <string name="trakt_sync_channel_desc">Notifications for Trakt.tv deep import</string>
+    <string name="trakt_manual_sync_started">Manual synchronization started</string>
+    <string name="trakt_disconnected">Disconnected from Trakt</string>
+
+    <string name="status_visible">visible</string>
+    <string name="status_hidden">hidden</string>
+    <string name="status_visible_plural">visible</string>
+    <string name="status_hidden_plural">hidden</string>
+    <string name="status_enabled_f">enabled</string>
+    <string name="status_disabled_f">disabled</string>
+    <string name="status_active_f">active</string>
+    <string name="status_inactive_f">inactive</string>
+    <string name="status_enabled_plural_f">enabled</string>
+    <string name="status_disabled_plural_f">disabled</string>
+    <string name="status_enabled_plural_m">enabled</string>
+    <string name="status_disabled_plural_m">disabled</string>
+
 </resources>

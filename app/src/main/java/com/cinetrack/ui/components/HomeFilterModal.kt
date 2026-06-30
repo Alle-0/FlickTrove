@@ -75,6 +75,7 @@ fun HomeFilterModal(
     hazeState: HazeState?,
     triggerBounds: Rect? = null,
     category: String = "movie",
+    showSortBy: Boolean = true,
     suggestedFilters: List<com.cinetrack.ui.viewmodel.FilterPill> = emptyList(),
     initialKeywordName: String? = null,
     onSortConfigChanged: (SortConfig) -> Unit,
@@ -343,57 +344,59 @@ fun HomeFilterModal(
                                 .padding(bottom = 12.dp)
                         ) {
                             // --- SORT SECTION ---
-                            ExpandableSection(
-                                title = stringResource(R.string.filter_sort_by),
-                                isExpanded = expandedSection == "sort",
-                                onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                            if (showSortBy) {
+                                ExpandableSection(
+                                    title = stringResource(R.string.filter_sort_by),
+                                    isExpanded = expandedSection == "sort",
+                                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
                                 ) {
-                                    val sortOptions = buildList {
-                                        if (isVisti) {
-                                            add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
-                                        }
-                                        add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
-                                        add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                        add(FilterOption("title", stringResource(R.string.filter_sort_title)))
-                                        add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
-                                        add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
-                                    }
-
-                                    sortOptions.forEach { option ->
-                                        SortOptionItem(
-                                            label = option.label,
-                                            isSelected = localSortConfig.sortType == option.id,
-                                            onClick = { localSortConfig = localSortConfig.copy(sortType = option.id) }
-                                        )
-                                    }
-                                    
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    Column(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        DirectionChip(
-                                            label = stringResource(R.string.filter_dir_desc),
-                                            isSelected = localSortConfig.sortDirection == "desc",
-                                            icon = ImageVector.vectorResource(id = R.drawable.ic_right),
-                                            iconRotation = 90f,
-                                            modifier = Modifier.weight(1f),
-                                            onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
-                                        )
-                                        DirectionChip(
-                                            label = stringResource(R.string.filter_dir_asc),
-                                            isSelected = localSortConfig.sortDirection == "asc",
-                                            icon = ImageVector.vectorResource(id = R.drawable.ic_right),
-                                            iconRotation = -90f,
-                                            modifier = Modifier.weight(1f),
-                                            onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
-                                        )
+                                        val sortOptions = buildList {
+                                            if (isVisti) {
+                                                add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
+                                            }
+                                            add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
+                                            add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                            add(FilterOption("title", stringResource(R.string.filter_sort_title)))
+                                            add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
+                                            add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
+                                        }
+
+                                        sortOptions.forEach { option ->
+                                            SortOptionItem(
+                                                label = option.label,
+                                                isSelected = localSortConfig.sortType == option.id,
+                                                onClick = { localSortConfig = localSortConfig.copy(sortType = option.id) }
+                                            )
+                                        }
+                                        
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            DirectionChip(
+                                                label = stringResource(R.string.filter_dir_desc),
+                                                isSelected = localSortConfig.sortDirection == "desc",
+                                                icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                                iconRotation = 90f,
+                                                modifier = Modifier.weight(1f),
+                                                onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
+                                            )
+                                            DirectionChip(
+                                                label = stringResource(R.string.filter_dir_asc),
+                                                isSelected = localSortConfig.sortDirection == "asc",
+                                                icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                                iconRotation = -90f,
+                                                modifier = Modifier.weight(1f),
+                                                onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
+                                            )
+                                        }
                                     }
                                 }
                             }

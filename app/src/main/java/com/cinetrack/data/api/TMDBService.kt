@@ -22,6 +22,19 @@ interface TMDBService {
         @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
+    // Lightweight fetch for Trakt Sync
+    @GET("movie/{id}")
+    suspend fun getMovieBasicDetails(
+        @Path("id") id: Long,
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
+    ): MovieDetailResponse
+
+    @GET("tv/{id}")
+    suspend fun getTVBasicDetails(
+        @Path("id") id: Long,
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
+    ): MovieDetailResponse
+
     @GET("movie/{id}/reviews")
     suspend fun getMovieReviews(
         @Path("id") id: Long,

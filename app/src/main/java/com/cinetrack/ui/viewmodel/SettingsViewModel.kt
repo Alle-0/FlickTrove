@@ -69,17 +69,26 @@ class SettingsViewModel @Inject constructor(
     fun disconnectTrakt() {
         traktAuthRepository.clearAuth()
         viewModelScope.launch {
-            actionFeedbackManager.emit(UiText.DynamicString("Disconnesso da Trakt"))
+            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_disconnected)))
         }
     }
+
+    val syncWorkInfo = androidx.work.WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkFlow("TraktManualSync")
+        .map { it.firstOrNull() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun syncTraktNow() {
         if (!isTraktLoggedIn.value) return
         viewModelScope.launch {
             val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
                 .build() // No constraints for forced manual sync
-            androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
-            actionFeedbackManager.emit(UiText.DynamicString("Sincronizzazione manuale avviata"))
+            androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                "TraktManualSync",
+                androidx.work.ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_manual_sync_started)))
         }
     }
 
@@ -184,8 +193,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleFolderBookmarks(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "visibili" else "nascosti"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_folder_bookmarks, status))
+            val statusRes = if (enabled) R.string.status_visible_plural else R.string.status_hidden_plural
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_folder_bookmarks, context.getString(statusRes)))
         }
     }
 
@@ -193,16 +202,16 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleBadges(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "visibili" else "nascosti"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_badge, status))
+            val statusRes = if (enabled) R.string.status_visible_plural else R.string.status_hidden_plural
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_badge, context.getString(statusRes)))
         }
     }
 
     fun toggleLayoutToggle(enabled: Boolean) {
         viewModelScope.launch {
             preferenceRepository.updateShowLayoutToggle(enabled)
-            val status = if (enabled) "visibile" else "nascosto"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, status))
+            val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, context.getString(statusRes)))
         }
     }
 
@@ -210,8 +219,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateShowSplitReleasesHome(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_releases_split, status))
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_releases_split, context.getString(statusRes)))
         }
     }
 
@@ -219,8 +228,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateShowAppEntryAnimation(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_logo_anim, status))
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_logo_anim, context.getString(statusRes)))
         }
     }
 
@@ -241,8 +250,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleNotifications(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attivate" else "disattivate"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, status))
+            val statusRes = if (enabled) R.string.status_enabled_plural_f else R.string.status_disabled_plural_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, context.getString(statusRes)))
         }
     }
 
@@ -250,8 +259,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleVibration(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attiva" else "disattiva"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_vibration, status))
+            val statusRes = if (enabled) R.string.status_active_f else R.string.status_inactive_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_vibration, context.getString(statusRes)))
         }
     }
 
@@ -260,8 +269,8 @@ class SettingsViewModel @Inject constructor(
             settingsRepository.toggleDynamicAppIcon(enabled)
             IconManager.updateAppIcon(context, accentColor.value, enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attivata" else "disattivata"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dynamic_icon, status))
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dynamic_icon, context.getString(statusRes)))
         }
     }
 
@@ -269,8 +278,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.toggleAdvancedVisualEffects(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val status = if (enabled) "attivati" else "disattivati"
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_visual_fx, status))
+            val statusRes = if (enabled) R.string.status_enabled_plural_m else R.string.status_disabled_plural_m
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_visual_fx, context.getString(statusRes)))
         }
     }
 

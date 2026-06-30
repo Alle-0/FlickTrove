@@ -50,44 +50,44 @@ interface TraktService {
     ): TraktSyncResponse
 
     @retrofit2.http.GET("sync/history")
-    suspend fun getHistory(): List<TraktHistoryItem>
+    suspend fun getHistory(@retrofit2.http.Query("page") page: Int = 1, @retrofit2.http.Query("limit") limit: Int = 10000): retrofit2.Response<List<TraktHistoryItem>>
 
     @retrofit2.http.GET("sync/watchlist")
-    suspend fun getWatchlist(): List<TraktWatchlistItem>
+    suspend fun getWatchlist(@retrofit2.http.Query("limit") limit: Int = 10000): List<TraktWatchlistItem>
 }
 
 @Serializable
 data class TraktHistoryItem(
-    val id: Long,
-    val watched_at: String,
-    val action: String,
-    val type: String, // "movie" or "show"
-    val movie: TraktMovieItem?,
-    val show: TraktShowItem?
+    val id: Long = 0,
+    val watched_at: String? = null,
+    val action: String? = null,
+    val type: String? = null, // "movie" or "show"
+    val movie: TraktMovieItem? = null,
+    val show: TraktShowItem? = null
 )
 
 @Serializable
 data class TraktWatchlistItem(
-    val rank: Int,
-    val id: Long,
-    val listed_at: String,
-    val type: String, // "movie" or "show"
-    val movie: TraktMovieItem?,
-    val show: TraktShowItem?
+    val rank: Int = 0,
+    val id: Long = 0,
+    val listed_at: String? = null,
+    val type: String? = null, // "movie" or "show"
+    val movie: TraktMovieItem? = null,
+    val show: TraktShowItem? = null
 )
 
 @Serializable
 data class TraktMovieItem(
-    val title: String,
-    val year: Int,
-    val ids: TraktSyncIds
+    val title: String? = null,
+    val year: Int? = null,
+    val ids: TraktSyncIds? = null
 )
 
 @Serializable
 data class TraktShowItem(
-    val title: String,
-    val year: Int,
-    val ids: TraktSyncIds
+    val title: String? = null,
+    val year: Int? = null,
+    val ids: TraktSyncIds? = null
 )
 
 @Serializable
@@ -126,13 +126,13 @@ data class TraktLastActivitiesResponse(
 
 @Serializable
 data class TraktActivityItem(
-    val watched_at: String,
-    val collected_at: String,
-    val rated_at: String,
-    val watchlisted_at: String,
-    val commented_at: String,
-    val paused_at: String,
-    val hidden_at: String
+    val watched_at: String? = null,
+    val collected_at: String? = null,
+    val rated_at: String? = null,
+    val watchlisted_at: String? = null,
+    val commented_at: String? = null,
+    val paused_at: String? = null,
+    val hidden_at: String? = null
 )
 
 @Serializable
@@ -166,29 +166,32 @@ data class TraktSyncIds(
 
 @Serializable
 data class TraktSyncResponse(
-    val added: TraktSyncStats,
-    val existing: TraktSyncStats,
-    val not_found: TraktSyncNotFound
+    val added: TraktSyncStats? = null,
+    val existing: TraktSyncStats? = null,
+    val deleted: TraktSyncStats? = null,
+    val not_found: TraktSyncNotFound? = null
 )
 
 @Serializable
 data class TraktSyncStats(
-    val movies: Int,
-    val episodes: Int,
-    val shows: Int
+    val movies: Int = 0,
+    val episodes: Int = 0,
+    val shows: Int = 0,
+    val seasons: Int = 0
 )
 
 @Serializable
 data class TraktSyncNotFound(
-    val movies: List<TraktSyncMovie>,
-    val shows: List<TraktSyncShow>,
-    val episodes: List<TraktSyncEpisode>
+    val movies: List<TraktSyncMovie> = emptyList(),
+    val shows: List<TraktSyncShow> = emptyList(),
+    val episodes: List<TraktSyncEpisode> = emptyList(),
+    val seasons: List<TraktSyncShow> = emptyList() // Using Show model for ids just in case
 )
 
 @Serializable
 data class TraktRatingResponse(
-    val rating: Double?,
-    val votes: Int,
+    val rating: Double? = null,
+    val votes: Int = 0,
     val distribution: Map<String, Int>? = null
 )
 
