@@ -207,6 +207,8 @@
     <string name="settings_device_backup">FlickTrove Device Backup</string>
     <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
     <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
+    <string name="settings_dialog_deep_sync_title">Attenzione: Sync Intensivo</string>
+    <string name="settings_dialog_deep_sync_desc">Questa operazione scaricherà in background i dati mancanti per tutti i vecchi film salvati. Richiede una connessione attiva ed esegue molte operazioni sul cloud.\n\nEseguila SOLO se noti che ai tuoi vecchi salvataggi mancano informazioni essenziali come cast o durata.\n\nSei sicuro di voler procedere?</string>
     <string name="settings_export">Export</string>
     <string name="settings_restore">Restore</string>
     <!-- Account -->

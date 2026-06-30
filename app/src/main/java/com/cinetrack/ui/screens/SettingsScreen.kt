@@ -329,6 +329,7 @@ fun SettingsScreenContent(
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
+    var showDeepSyncConfirm by remember { mutableStateOf(false) }
 
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 90.dp
     var showLogoutConfirm by remember { mutableStateOf(false) }
@@ -348,7 +349,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           false
+                           showDeepSyncConfirm || false
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -1083,8 +1084,10 @@ fun SettingsScreenContent(
                                     title = stringResource(R.string.settings_sync_missing_details),
                                     description = stringResource(R.string.settings_sync_missing_details_desc),
                                     onClick = {
-                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                        settingsViewModel.syncLibraryDetails()
+                                        if (libraryDetailsSyncWorkInfo?.state != androidx.work.WorkInfo.State.RUNNING) {
+                                            if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                            showDeepSyncConfirm = true
+                                        }
                                     },
                                     customContent = {
                                         if (libraryDetailsSyncWorkInfo != null && libraryDetailsSyncWorkInfo!!.state == androidx.work.WorkInfo.State.RUNNING) {
@@ -1256,7 +1259,7 @@ fun SettingsScreenContent(
                                     Icons.Rounded.Favorite,
                                     null,
                                     tint = Color(0xFFFF5252),
-                                    modifier = Modifier.size(12.dp)
+                                    modifier = Modifier.padding(horizontal = 4.dp).size(12.dp)
                                 )
                                 Text(
                                     text = stringResource(R.string.settings_for_lovers),
