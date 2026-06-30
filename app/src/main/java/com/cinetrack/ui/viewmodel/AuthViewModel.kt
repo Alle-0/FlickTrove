@@ -34,6 +34,26 @@ class AuthViewModel @Inject constructor(
     private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase
 ) : ViewModel() {
 
+    init {
+        checkAutoSync()
+    }
+
+    private fun checkAutoSync() {
+        val user = auth.currentUser
+        if (user != null && !user.isAnonymous) {
+            viewModelScope.launch {
+                val movies = movieRepository.getLocalMovies()
+                if (movies.isEmpty()) {
+                    _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                    movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                        _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                    }
+                    _processState.update { null }
+                }
+            }
+        }
+    }
+
     private val _processState = MutableStateFlow<AuthState?>(null)
     val processState: StateFlow<AuthState?> = _processState
 

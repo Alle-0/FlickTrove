@@ -121,7 +121,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val deepLinkIntent = LocalDeepLinkIntent.current
         val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
 
-        val initialTab = if (initialTabStr == "visti") com.cinetrack.ui.navigation.VistiTab else com.cinetrack.ui.navigation.HomeTab
+        val initialTab = if (initialTabStr == "visti") VistiTab else HomeTab
 
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current

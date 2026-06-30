@@ -481,7 +481,7 @@ fun SettingsScreenContent(
                         start = 16.dp,
                         end = 16.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                  ) {
                     // Section: Interfaccia e Layout
                     item {
@@ -648,7 +648,7 @@ fun SettingsScreenContent(
                                 }
                             )
                             SettingsItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_popcorn),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                 title = stringResource(R.string.settings_default_start_tab),
                                 description = stringResource(R.string.settings_default_start_tab_desc),
                                 trailing = { },
@@ -1257,7 +1257,7 @@ fun SettingsScreenContent(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 4.dp),
+                                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 AttributionRow(
@@ -2679,7 +2679,7 @@ fun SettingsSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 content()
                 
@@ -2730,7 +2730,7 @@ fun SettingsItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(vertical = 6.dp, horizontal = 4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
