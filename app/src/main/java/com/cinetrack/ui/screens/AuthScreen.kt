@@ -7,6 +7,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.animation.*
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.hilt.getViewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.ui.components.CinematicBackground
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -78,6 +80,7 @@ fun AuthScreen(
     val hazeState = remember { HazeState() }
     val scope = rememberCoroutineScope()
     var showGuestWarning by remember { mutableStateOf(false) }
+    val navigator = LocalNavigator.current
 
     // In-app feedback instead of Toast
     var feedback by remember { mutableStateOf<FeedbackMessage?>(null) }
@@ -92,12 +95,20 @@ fun AuthScreen(
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
+    val processState by viewModel.processState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(authState, processState) {
+        if (authState is AuthState.Authenticated) {
+            viewModel.resetProcessState()
+            onLoginSuccess()
+        } else if (processState is AuthState.Anonymous) {
+            viewModel.resetProcessState()
+            onLoginSuccess()
+        }
+    }
+
     LaunchedEffect(authState) {
         when (val state = authState) {
-            is AuthState.Authenticated, is AuthState.Anonymous -> {
-                viewModel.resetProcessState()
-                onLoginSuccess()
-            }
             is AuthState.Error -> {
                 showFeedback(state.message.asString(context), isError = true)
                 viewModel.clearError()
@@ -214,6 +225,45 @@ fun AuthScreen(
 
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // ── Info for Guest Users ──────────────────────────────────────
+                val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
+                
+                AnimatedVisibility(
+                    visible = isGuestUser,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                            .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                            .padding(12.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = if (isLogin) 
+                                    stringResource(R.string.auth_guest_login_warning) 
+                                else 
+                                    stringResource(R.string.auth_guest_signup_info),
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // ── Main Action Button ────────────────────────────────────────
@@ -309,13 +359,17 @@ fun AuthScreen(
                     )
                 }
 
-                // ── Guest Button ──────────────────────────────────────────────
+                // ── Guest / Cancel Button ──────────────────────────────────────────────
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
                         .bounceClick(scaleDown = 0.96f) {
-                            showGuestWarning = true
+                            if (isGuestUser) {
+                                navigator?.pop()
+                            } else {
+                                showGuestWarning = true
+                            }
                         }
                         .border(
                             width = 1.dp,
@@ -325,7 +379,7 @@ fun AuthScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        stringResource(R.string.auth_guest_continue),
+                        if (isGuestUser) stringResource(R.string.auth_guest_dialog_cancel) else stringResource(R.string.auth_guest_continue),
                         color = Color.White.copy(alpha = 0.5f),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -337,13 +391,13 @@ fun AuthScreen(
                 // ── Legal Disclaimer ──────────────────────────────────────────
                 Text(
                     text = buildAnnotatedString {
-                        append(stringResource(R.string.auth_terms_prefix))
+                        append(stringResource(R.string.auth_terms_prefix) + " ")
                         pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/TERMS_OF_SERVICE.md"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
                             append(stringResource(R.string.auth_terms_link))
                         }
                         pop()
-                        append(stringResource(R.string.auth_terms_and))
+                        append(" " + stringResource(R.string.auth_terms_and) + " ")
                         pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/PRIVACY_POLICY.md"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
                             append(stringResource(R.string.auth_privacy_link))
@@ -369,7 +423,7 @@ fun AuthScreen(
             message = stringResource(R.string.auth_guest_dialog_desc),
             confirmLabel = stringResource(R.string.auth_guest_dialog_confirm),
             cancelLabel = stringResource(R.string.auth_guest_dialog_cancel),
-            type = ConfirmType.WARNING,
+            type = ConfirmType.INFO,
             hazeState = hazeState
         )
 

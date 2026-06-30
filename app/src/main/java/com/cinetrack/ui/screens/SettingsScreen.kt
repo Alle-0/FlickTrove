@@ -259,6 +259,9 @@ object SettingsTab : Tab {
                     scrollState = scrollState,
                     onLoggedOut = {
                         navigator.replaceAll(com.cinetrack.ui.screens.LoginScreen())
+                    },
+                    onLoginClick = {
+                        navigator.push(com.cinetrack.ui.screens.LoginScreen())
                     }
                 )
             }
@@ -273,7 +276,8 @@ fun SettingsScreenContent(
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
     scrollState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    onLoggedOut: () -> Unit
+    onLoggedOut: () -> Unit,
+    onLoginClick: () -> Unit
 ) {
     val activeHazeState = hazeState ?: remember { HazeState() }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
@@ -963,9 +967,9 @@ fun SettingsScreenContent(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                                 title = stringResource(R.string.settings_external_migration),
                                 description = stringResource(R.string.settings_external_migration_desc),
-                                onClick = { 
+                                onClick = {
                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                    showExternalMigrationDialog = true 
+                                    showExternalMigrationDialog = true
                                 }
                             )
                             
@@ -977,53 +981,38 @@ fun SettingsScreenContent(
                                 iconTint = Color.Unspecified,
                                 onClick = {},
                                 trailing = {
-                                    if (isTraktLoggedIn) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            // Sync Button
-                                            Box(
-                                                modifier = Modifier
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color.White.copy(alpha = 0.1f))
-                                                    .clickable { 
-                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                                                            if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                                                                settingsViewModel.syncTraktNow()
-                                                            } else {
-                                                                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                                                            }
-                                                        } else {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (isTraktLoggedIn) {
+                                            SettingsActionButton(
+                                                icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                                                onClick = {
+                                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                                                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                                                             settingsViewModel.syncTraktNow()
+                                                        } else {
+                                                            permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                                                         }
+                                                    } else {
+                                                        settingsViewModel.syncTraktNow()
                                                     }
-                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                                            ) {
-                                                Icon(ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud), contentDescription = "Sync Trakt", tint = Color.White, modifier = Modifier.size(18.dp))
-                                            }
-                                            // Disconnect Button
-                                            Box(
-                                                modifier = Modifier
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color.White.copy(alpha = 0.1f))
-                                                    .clickable { 
-                                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                        settingsViewModel.disconnectTrakt()
-                                                    }
-                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                                            ) {
-                                                Icon(Icons.Rounded.Close, contentDescription = "Disconnect Trakt", tint = Color.White, modifier = Modifier.size(18.dp))
-                                            }
-                                        }
-                                    } else {
-                                        // Connect Button
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .background(Color.White.copy(alpha = 0.1f))
-                                                .clickable { 
+                                                }
+                                            )
+                                            SettingsActionButton(
+                                                icon = Icons.Rounded.Close,
+                                                tint = Color(0xFFFF5252),
+                                                onClick = {
+                                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                                    settingsViewModel.disconnectTrakt()
+                                                }
+                                            )
+                                        } else {
+                                            SettingsActionButton(
+                                                text = stringResource(R.string.trakt_connect),
+                                                onClick = {
                                                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                                     val clientId = com.cinetrack.utils.Keys.getTraktClientId()
                                                     val intent = android.content.Intent(
@@ -1032,9 +1021,7 @@ fun SettingsScreenContent(
                                                     )
                                                     context.startActivity(intent)
                                                 }
-                                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                                        ) {
-                                            Text(stringResource(R.string.trakt_connect), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                                            )
                                         }
                                     }
                                 },
@@ -1082,51 +1069,9 @@ fun SettingsScreenContent(
                             SettingsItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                                 title = stringResource(R.string.settings_device_backup),
-                                onClick = {},
-                                trailing = { }, // No arrow
-                                customContent = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        // Esporta
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clip(RoundedCornerShape(16.dp))
-                                                .background(Color.White.copy(alpha = 0.05f))
-                                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                                .clickable { 
-                                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                    exportLauncher.launch("FlickTrove_Backup_${System.currentTimeMillis()}.json")
-                                                }
-                                                .padding(vertical = 8.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(stringResource(R.string.settings_export), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
-                                        }
-                                        
-                                        // Ripristina
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clip(RoundedCornerShape(16.dp))
-                                                .background(Color.White.copy(alpha = 0.05f))
-                                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                                .clickable { 
-                                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                                    importLauncher.launch(arrayOf("application/json"))
-                                                }
-                                                .padding(vertical = 8.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Text(stringResource(R.string.settings_restore), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = Color.White)
-                                        }
-                                    }
+                                onClick = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                    showBackupDialog = true
                                 }
                             )
                         }
@@ -1135,7 +1080,7 @@ fun SettingsScreenContent(
                     // Section: Account
                     item {
                         val isGuest = user?.isAnonymous == true
-                        val email = user?.email ?: "Ospite"
+                        val email = user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.settings_guest)
                         
                         SettingsSection(
                             title = stringResource(R.string.settings_account),
@@ -1151,7 +1096,7 @@ fun SettingsScreenContent(
                                     if (!isGuest) {
                                         showLogoutConfirm = true
                                     } else {
-                                        onLoggedOut()
+                                        onLoginClick()
                                     }
                                 }
                             )
@@ -1366,7 +1311,7 @@ fun SettingsScreenContent(
                                 onClick = {
                                     showDeleteDialog = false
                                     viewModel.deleteAccount { success ->
-                                        if (success) onLoggedOut()
+                                        // Navigation handled by LaunchedEffect(authState)
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
@@ -1626,7 +1571,6 @@ fun SettingsScreenContent(
                                 onClick = {
                                     showLogoutConfirm = false
                                     viewModel.logout()
-                                    onLoggedOut()
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(16.dp),
@@ -2833,5 +2777,31 @@ fun BadgeLegendItem(
             ),
             modifier = Modifier.scale(0.85f)
         )
+    }
+}
+
+@Composable
+fun SettingsActionButton(
+    text: String? = null,
+    icon: ImageVector? = null,
+    tint: Color = Color.White,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.1f))
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(icon, null, tint = tint, modifier = Modifier.size(16.dp))
+            if (text != null) Spacer(modifier = Modifier.width(6.dp))
+        }
+        if (text != null) {
+            Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = tint)
+        }
     }
 }

@@ -426,9 +426,11 @@
     <string name="auth_privacy_link">Privacy Policy</string>
     <string name="auth_terms_suffix">.</string>
     <string name="auth_guest_dialog_title">Modalità Ospite</string>
-    <string name="auth_guest_dialog_desc">I tuoi dati verranno salvati solo su questo dispositivo. Se disinstalli l\'app o pulisci la cache, i dati andranno persi definitivamente.</string>
-    <string name="auth_guest_dialog_confirm">Accedi come Ospite</string>
-    <string name="auth_guest_dialog_cancel">Torna indietro</string>
+    <string name="auth_guest_dialog_desc">Continuando come ospite, i tuoi dati verranno salvati solo in locale su questo dispositivo. Se disinstalli l\'app o ne elimini i dati, tutto verrà perso.</string>
+    <string name="auth_guest_dialog_confirm">Accetta e Continua</string>
+    <string name="auth_guest_dialog_cancel">Annulla</string>
+    <string name="auth_guest_login_warning">Accedendo a un account esistente, i tuoi attuali dati ospite verranno sostituiti con i dati di quell\'account.</string>
+    <string name="auth_guest_signup_info">Creando un nuovo account, tutti i tuoi attuali dati ospite verranno salvati permanentemente e trasferiti al nuovo account.</string>
     <string name="auth_syncing">Sync in corso...</string>
 
     <!-- Surprise Me Strings -->

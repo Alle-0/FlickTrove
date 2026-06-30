@@ -35,6 +35,7 @@ class AuthViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _processState = MutableStateFlow<AuthState?>(null)
+    val processState: StateFlow<AuthState?> = _processState
 
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {
@@ -115,7 +116,13 @@ class AuthViewModel @Inject constructor(
             val credential = EmailAuthProvider.getCredential(email, password)
             currentUser.linkWithCredential(credential)
                 .addOnSuccessListener {
-                    _processState.update { null }
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        }
+                        _processState.update { AuthState.Authenticated }
+                    }
                 }
                 .addOnFailureListener { exception ->
                     _processState.update { AuthState.Error(getErrorMessage(exception)) }
@@ -124,7 +131,13 @@ class AuthViewModel @Inject constructor(
             // Normal sign up
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
-                    _processState.update { null }
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        }
+                        _processState.update { null }
+                    }
                 }
                 .addOnFailureListener { exception ->
                     _processState.update { AuthState.Error(getErrorMessage(exception)) }

@@ -24,6 +24,15 @@ object MovieMapper {
             response.releaseDate
         }
 
+        val topCast = response.credits?.cast?.take(15)?.distinctBy { it.id }?.map { 
+            com.cinetrack.data.models.PersonData(id = it.id, name = it.name, profilePath = it.profilePath) 
+        }
+
+        val directors = response.credits?.crew?.filter { it.job == "Director" }?.distinctBy { it.id }?.map {
+            com.cinetrack.data.models.PersonData(id = it.id, name = it.name, profilePath = it.profilePath)
+        }
+        val mainDirector = directors?.firstOrNull()
+
         return Movie(
             id = response.id,
             mediaType = type,
@@ -49,7 +58,12 @@ object MovieMapper {
             streamingProviderIds = response.watchProviders?.results?.get("IT")?.flatrate?.map { it.providerId },
             seasons = response.seasons,
             nextEpisodeAirDate = response.nextEpisodeToAir?.airDate,
-            nextEpisodeString = response.nextEpisodeToAir?.let { "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}" }
+            nextEpisodeString = response.nextEpisodeToAir?.let { "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}" },
+            topCastData = topCast,
+            directorData = directors,
+            directorId = mainDirector?.id,
+            directorName = mainDirector?.name,
+            directorProfilePath = mainDirector?.profilePath
         )
     }
 

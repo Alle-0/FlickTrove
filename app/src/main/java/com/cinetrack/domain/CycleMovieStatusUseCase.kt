@@ -78,6 +78,8 @@ class CycleMovieStatusUseCase @Inject constructor(
         if (updated != movie) {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Saving updated movie")
             repository.saveMovie(updated)
+            // Trigger background fetch for missing metadata (runtime, cast) using partial update to avoid race conditions
+            repository.fetchMissingDetailsAsync(updated)
         } else {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: No changes to save")
         }

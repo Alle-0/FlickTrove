@@ -194,7 +194,12 @@ class MovieDetailViewModel @Inject constructor(
                         nextEpisodeString = freshMovie.nextEpisodeString ?: localMovie.nextEpisodeString,
                         releaseYear = freshMovie.releaseYear ?: localMovie.releaseYear,
                         status = freshMovie.status ?: localMovie.status,
-                        imdbId = freshMovie.imdbId ?: localMovie.imdbId
+                        imdbId = freshMovie.imdbId ?: localMovie.imdbId,
+                        topCastData = freshMovie.topCastData ?: localMovie.topCastData,
+                        directorData = freshMovie.directorData ?: localMovie.directorData,
+                        directorId = freshMovie.directorId ?: localMovie.directorId,
+                        directorName = freshMovie.directorName ?: localMovie.directorName,
+                        directorProfilePath = freshMovie.directorProfilePath ?: localMovie.directorProfilePath
                     )
                     repository.saveMovie(updatedMovie)
                 }

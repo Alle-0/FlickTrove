@@ -209,6 +209,7 @@
     <string name="settings_restore">Restore</string>
     <!-- Account -->
     <string name="settings_account">Account</string>
+    <string name="settings_guest">Guest</string>
     <string name="settings_delete_account">Delete Account</string>
     <!-- Support and Info -->
     <string name="settings_support_info">Support and Info</string>
@@ -305,6 +306,7 @@
     <string name="settings_backup_restore_title">Backup and Restore</string>
     <string name="settings_backup_restore_desc">Export a copy of your data (favorites, folders, and settings) or restore from a previously saved file.</string>
     <string name="settings_external_migration_dialog_title">External Migration</string>
+    <string name="settings_start_migration">Start Migration</string>
     <string name="settings_external_migration_dialog_desc">You can import your movie list by uploading the JSON file exported from Trakt.tv, or the CSV files from Letterboxd (e.g. watched.csv) and IMDb (e.g. watchlist.csv). The movies will be added to your favorites.</string>
 
     <!-- Movie Detail Strings -->
@@ -426,9 +428,11 @@
     <string name="auth_privacy_link">Privacy Policy</string>
     <string name="auth_terms_suffix">.</string>
     <string name="auth_guest_dialog_title">Guest Mode</string>
-    <string name="auth_guest_dialog_desc">Your data will only be saved on this device. If you uninstall the app or clear the cache, your data will be permanently lost.</string>
-    <string name="auth_guest_dialog_confirm">Log in as Guest</string>
-    <string name="auth_guest_dialog_cancel">Go back</string>
+    <string name="auth_guest_dialog_desc">By continuing as a guest, your data will only be saved locally on this device. If you uninstall the app or clear its data, everything will be lost.</string>
+    <string name="auth_guest_dialog_confirm">Accept and Continue</string>
+    <string name="auth_guest_dialog_cancel">Cancel</string>
+    <string name="auth_guest_login_warning">Logging into an existing account will replace your current guest data with the data from that account.</string>
+    <string name="auth_guest_signup_info">Creating a new account will permanently save and transfer all your current guest data to it.</string>
     <string name="auth_syncing">Syncing...</string>
 
     <!-- Surprise Me Strings -->

@@ -12,6 +12,37 @@ interface FavoriteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(movies: List<Movie>)
 
+    @Query("""
+        UPDATE favorites 
+        SET runtime = :runtime, 
+            episode_run_time = :episodeRunTime, 
+            genres = :genres, 
+            top_cast_data = :topCastData, 
+            director_data = :directorData, 
+            director_id = :directorId, 
+            director_name = :directorName, 
+            director_profile_path = :directorProfilePath,
+            seasons = :seasons,
+            number_of_seasons = :numberOfSeasons,
+            number_of_episodes = :numberOfEpisodes
+        WHERE id = :id AND media_type = :mediaType
+    """)
+    suspend fun updateMetadata(
+        id: Long, 
+        mediaType: String,
+        runtime: Int?,
+        episodeRunTime: List<Int>?,
+        genres: List<com.cinetrack.data.Genre>?,
+        topCastData: List<com.cinetrack.data.models.PersonData>?,
+        directorData: List<com.cinetrack.data.models.PersonData>?,
+        directorId: Long?,
+        directorName: String?,
+        directorProfilePath: String?,
+        seasons: List<com.cinetrack.data.models.Season>?,
+        numberOfSeasons: Int?,
+        numberOfEpisodes: Int?
+    )
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun importIgnore(movies: List<Movie>)
 
@@ -21,10 +52,10 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete'")
     fun getAllFlow(): Flow<List<Movie>>
 
-    @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType LIMIT 1")
+    @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType AND sync_status != 'pending_delete' LIMIT 1")
     suspend fun getById(id: Long, mediaType: String): Movie?
 
-    @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType LIMIT 1")
+    @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType AND sync_status != 'pending_delete' LIMIT 1")
     fun getByIdFlow(id: Long, mediaType: String): Flow<Movie?>
 
     @Query("DELETE FROM favorites WHERE id = :id AND media_type = :mediaType")
@@ -47,7 +78,7 @@ interface FavoriteDao {
     @Query("UPDATE favorites SET sync_status = :status WHERE id = :id AND media_type = :mediaType")
     suspend fun updateSyncStatus(id: Long, mediaType: String, status: String)
 
-    @Query("SELECT * FROM favorites WHERE media_type || '_' || id IN (:compositeIds)")
+    @Query("SELECT * FROM favorites WHERE (media_type || '_' || id IN (:compositeIds)) AND sync_status != 'pending_delete'")
     fun getByCompositeIds(compositeIds: List<String>): Flow<List<Movie>>
 
     @Query("DELETE FROM favorites")

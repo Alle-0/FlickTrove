@@ -34,6 +34,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 
+private val initialSystemLocale = java.util.Locale.getDefault()
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: SettingsViewModel) {
@@ -51,7 +53,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
 
     LaunchedEffect(baseContext, contentLanguage) {
         val locale = if (contentLanguage == "system") {
-            android.content.res.Resources.getSystem().configuration.locales.get(0)
+            initialSystemLocale
         } else {
             java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
         }
@@ -73,7 +75,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
 
     val (context, localizedConfig) = remember(baseContext, contentLanguage) {
         val locale = if (contentLanguage == "system") {
-            android.content.res.Resources.getSystem().configuration.locales.get(0)
+            initialSystemLocale
         } else {
             java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
         }

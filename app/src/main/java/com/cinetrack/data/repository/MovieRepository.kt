@@ -109,6 +109,47 @@ class MovieRepository @Inject constructor(
         }
     }
 
+    fun fetchMissingDetailsAsync(movie: Movie) {
+        if (movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty()) {
+            repositoryScope.launch {
+                try {
+                    val isTv = movie.mediaType == "tv"
+                    val response = fetchMovieDetails(movie.id, isTv)
+                    val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                    
+                    favoriteDao.updateMetadata(
+                        id = movie.id,
+                        mediaType = movie.mediaType,
+                        runtime = freshMovie.runtime,
+                        episodeRunTime = freshMovie.episodeRunTime,
+                        genres = freshMovie.genres,
+                        topCastData = freshMovie.topCastData,
+                        directorData = freshMovie.directorData,
+                        directorId = freshMovie.directorId,
+                        directorName = freshMovie.directorName,
+                        directorProfilePath = freshMovie.directorProfilePath,
+                        seasons = freshMovie.seasons,
+                        numberOfSeasons = freshMovie.numberOfSeasons,
+                        numberOfEpisodes = freshMovie.numberOfEpisodes
+                    )
+                    
+                    // Fetch updated movie from DB to sync to Firebase
+                    val localMovie = favoriteDao.getById(movie.id, movie.mediaType)
+                    if (localMovie != null) {
+                        try {
+                            firebaseRemoteDataSource.setMovie(localMovie)
+                        } catch (e: Exception) {
+                            if (e is CancellationException) throw e
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    android.util.Log.e("MovieRepository", "Failed to fetch missing details in background for ${movie.id}", e)
+                }
+            }
+        }
+    }
+
     suspend fun saveMoviesBulk(movies: List<Movie>) {
         if (movies.isEmpty()) return
         
