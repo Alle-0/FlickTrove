@@ -205,6 +205,8 @@
     <string name="settings_external_migration">External Migration</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
+    <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
+    <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
     <string name="settings_export">Export</string>
     <string name="settings_restore">Restore</string>
     <!-- Account -->

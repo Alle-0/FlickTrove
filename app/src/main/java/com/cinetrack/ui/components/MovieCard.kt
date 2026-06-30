@@ -395,6 +395,7 @@ fun MovieCard(
     folderColors: List<Color> = emptyList(),
     showFolderBookmarks: Boolean = true,
     showBadges: Boolean = true,
+    showAdvancedBadges: Boolean = false,
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
     hasAnimatedSet: MutableSet<String>? = null,
@@ -513,7 +514,7 @@ fun MovieCard(
             if (showBadges) {
                 val isLarge = cardWidth > 150.dp
                 val disabledBadges = com.cinetrack.LocalDisabledBadges.current
-                val badges = remember(movie) { movie.generateBadges() }
+                val badges = remember(movie, showAdvancedBadges) { movie.generateBadges(showAdvancedBadges) }
                 
                 androidx.compose.foundation.layout.Column(
                     modifier = Modifier

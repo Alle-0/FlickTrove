@@ -311,6 +311,7 @@ fun SettingsScreenContent(
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
+    val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
@@ -1074,6 +1075,49 @@ fun SettingsScreenContent(
                                     showBackupDialog = true
                                 }
                             )
+
+                            // Deep Details Sync
+                            if (user?.isAnonymous != true) {
+                                SettingsItem(
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_cloud),
+                                    title = stringResource(R.string.settings_sync_missing_details),
+                                    description = stringResource(R.string.settings_sync_missing_details_desc),
+                                    onClick = {
+                                        if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                        settingsViewModel.syncLibraryDetails()
+                                    },
+                                    customContent = {
+                                        if (libraryDetailsSyncWorkInfo != null && libraryDetailsSyncWorkInfo!!.state == androidx.work.WorkInfo.State.RUNNING) {
+                                            val progressData = libraryDetailsSyncWorkInfo!!.progress
+                                            val current = progressData.getInt("current", 0)
+                                            val total = progressData.getInt("total", 0)
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            if (total > 0) {
+                                                androidx.compose.material3.Text(
+                                                    text = "$current / $total",
+                                                    color = Color.White.copy(alpha = 0.7f),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                                )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                androidx.compose.material3.LinearProgressIndicator(
+                                                    progress = { current.toFloat() / total.toFloat() },
+                                                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                                                    color = currentAccentColor,
+                                                    trackColor = Color.White.copy(alpha = 0.1f)
+                                                )
+                                            } else {
+                                                androidx.compose.material3.LinearProgressIndicator(
+                                                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                                                    color = currentAccentColor,
+                                                    trackColor = Color.White.copy(alpha = 0.1f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -1734,7 +1778,7 @@ fun BackupDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Icon(
-                    Icons.Rounded.Backup,
+                    ImageVector.vectorResource(id = R.drawable.ic_cloud),
                     null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)
@@ -1770,7 +1814,7 @@ fun BackupDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.FileUpload, null, tint = Color.Black)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.settings_export_backup), fontWeight = FontWeight.Bold, color = Color.Black)
                     }
@@ -1790,7 +1834,7 @@ fun BackupDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.FileDownload, null, tint = Color.White)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.settings_restore_backup), fontWeight = FontWeight.Bold, color = Color.White)
                     }

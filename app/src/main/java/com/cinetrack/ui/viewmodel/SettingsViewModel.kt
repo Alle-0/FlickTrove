@@ -341,6 +341,23 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val libraryDetailsSyncWorkInfo = androidx.work.WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkFlow("LibraryDetailsSyncWorker")
+        .map { it.firstOrNull() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun syncLibraryDetails() {
+        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.LibraryDetailsSyncWorker>().build()
+        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+            "LibraryDetailsSyncWorker",
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+        viewModelScope.launch {
+            actionFeedbackManager.emit(UiText.DynamicString("Sincronizzazione dettagli avviata in background"))
+        }
+    }
+
     fun sendFeedback(title: String, description: String, rating: Int, email: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             val lastTime = settingsRepository.lastFeedbackTimestamp.first()

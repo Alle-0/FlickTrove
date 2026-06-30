@@ -278,6 +278,7 @@ fun FolderDetailScreenContent(
                                                 folderColors = currentFolderColors,
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
                                                 showBadges = preferences.showBadges,
+                                                showAdvancedBadges = true,
                                                 hazeState = internalHazeState,
                                                 hasAnimatedSet = viewModel.animatedMovieIds,
                                                 staggerIndex = index,
@@ -301,7 +302,10 @@ fun FolderDetailScreenContent(
                                                 progress = movie.progress?.toFloat() ?: 0f,
                                                 folderColors = currentFolderColors,
                                                 showFolderBookmarks = preferences.showFolderBookmarks,
-                                                hasAnimatedSet = viewModel.animatedMovieIds
+                                                showBadges = preferences.showBadges,
+                                                showAdvancedBadges = true,
+                                                hasAnimatedSet = viewModel.animatedMovieIds,
+                                                hazeState = internalHazeState
                                             )
                                         }
                                     }

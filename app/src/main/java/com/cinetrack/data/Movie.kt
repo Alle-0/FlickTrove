@@ -554,7 +554,7 @@ fun MovieBadge.getLocalizedText(): String {
     return this.text
 }
 
-fun Movie.generateBadges(): List<MovieBadge> {
+fun Movie.generateBadges(showAdvancedBadges: Boolean = false): List<MovieBadge> {
     val badges = mutableListOf<MovieBadge>()
     val voteAvg = voteAverage ?: 0.0
     val votes = voteCount ?: 0
@@ -570,21 +570,23 @@ fun Movie.generateBadges(): List<MovieBadge> {
     
     if (votes > 1000 && voteAvg >= 5.0 && voteAvg <= 6.5) badges.add(MovieBadge.DIVISIVE)
     
-    val rev = revenue ?: 0L
-    if (rev > 500_000_000L) badges.add(MovieBadge.BLOCKBUSTER)
-    else if ((budget ?: 0L) in 1L..5_000_000L && voteAvg >= 7.0) badges.add(MovieBadge.INDIE)
-
     val rYear = releaseYear?.toIntOrNull() ?: releaseDate?.take(4)?.toIntOrNull() ?: firstAirDate?.take(4)?.toIntOrNull() ?: 9999
     if (rYear < 1970) badges.add(MovieBadge.VINTAGE)
     else if (rYear < 1990 && voteAvg >= 7.0) badges.add(MovieBadge.CLASSIC)
     else if (rYear in 1990..2010 && voteAvg >= 8.0) badges.add(MovieBadge.CULT)
 
-    val rt = runtime ?: 0
-    if (rt > 160) badges.add(MovieBadge.EPIC)
-    else if (mediaType != "tv" && rt in 1..89) badges.add(MovieBadge.QUICK)
+    if (showAdvancedBadges) {
+        val rev = revenue ?: 0L
+        if (rev > 500_000_000L) badges.add(MovieBadge.BLOCKBUSTER)
+        else if ((budget ?: 0L) in 1L..5_000_000L && voteAvg >= 7.0) badges.add(MovieBadge.INDIE)
 
-    if ((numberOfSeasons ?: 0) >= 5 || (numberOfEpisodes ?: 0) > 50) badges.add(MovieBadge.BINGE)
-    else if (mediaType == "tv" && (episodeRunTime?.firstOrNull() ?: 0) in 1..25) badges.add(MovieBadge.SNACK)
+        val rt = runtime ?: 0
+        if (rt > 160) badges.add(MovieBadge.EPIC)
+        else if (mediaType != "tv" && rt in 1..89) badges.add(MovieBadge.QUICK)
+
+        if ((numberOfSeasons ?: 0) >= 5 || (numberOfEpisodes ?: 0) > 50) badges.add(MovieBadge.BINGE)
+        else if (mediaType == "tv" && (episodeRunTime?.firstOrNull() ?: 0) in 1..25) badges.add(MovieBadge.SNACK)
+    }
 
     val genresStr = genreNamesString ?: ""
     val hasGenre = { name: String -> 
