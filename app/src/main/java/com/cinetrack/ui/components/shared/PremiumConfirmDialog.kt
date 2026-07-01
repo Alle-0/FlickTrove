@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 
 @Composable
 fun PremiumConfirmDialog(
@@ -53,7 +54,7 @@ fun PremiumConfirmDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f))
+                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
                 .clickable(enabled = true, onClick = onDismiss),
             contentAlignment = Alignment.Center
         ) {

@@ -38,7 +38,7 @@ fun DetailSkeleton(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(520.dp)
+                    .height(480.dp)
                     .shimmerEffect()
             )
 

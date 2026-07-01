@@ -37,7 +37,8 @@ class ReminderWorker @AssistedInject constructor(
                             context = context,
                             movieTitle = item.displayName,
                             movieId = item.id,
-                            mediaType = item.mediaType
+                            mediaType = item.mediaType,
+                            posterPath = item.posterPath
                         )
                         val updated = item.copy(
                             favorite = true,
@@ -57,7 +58,8 @@ class ReminderWorker @AssistedInject constructor(
                             context = context,
                             movieTitle = item.displayName,
                             movieId = item.id,
-                            mediaType = item.mediaType
+                            mediaType = item.mediaType,
+                            posterPath = item.posterPath
                         )
                         val updated = item.copy(
                             migratedAt = today,
@@ -71,7 +73,8 @@ class ReminderWorker @AssistedInject constructor(
                             context = context,
                             showTitle = item.displayName,
                             showId = item.id,
-                            episodeString = epString
+                            episodeString = epString,
+                            posterPath = item.posterPath
                         )
                         val updated = item.copy(
                             migratedAt = today,

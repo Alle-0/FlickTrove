@@ -14,6 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.ui.components.shared.ImagePlaceholder
 
 /**
@@ -35,16 +39,31 @@ fun DetailBackdrop(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(520.dp)
+            .height(480.dp)
             .background(backgroundColor)
     ) {
         if (path != null) {
-            AsyncImage(
-                model = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
+            val context = LocalContext.current
+            Crossfade(
+                targetState = imageUrl,
+                animationSpec = tween(durationMillis = 700),
+                label = "BackdropCrossfade"
+            ) { targetUrl ->
+                val request = remember(targetUrl) {
+                    ImageRequest.Builder(context)
+                        .data(targetUrl)
+                        .crossfade(true)
+                        .crossfade(700)
+                        .build()
+                }
+                AsyncImage(
+                    model = request,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         } else {
             ImagePlaceholder(
                 isBackdrop = true,

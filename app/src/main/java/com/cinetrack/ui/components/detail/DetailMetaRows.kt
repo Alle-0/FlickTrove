@@ -137,25 +137,38 @@ fun DetailMetaRows(
             }
         }
 
-        // Watch Providers
+        // Watch Providers (Compact stacked layout)
         if (streaming.isNotEmpty() || buyAndRent.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.detail_where_to_watch),
                 style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Black,
-                    letterSpacing = 3.sp
+                    letterSpacing = 2.sp
                 ),
                 color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 10.dp)
             )
 
             if (streaming.isNotEmpty()) {
-                ProviderRow(label = stringResource(R.string.detail_streaming), providers = streaming, accentColor = accentColor, onProviderClick = onProviderClick)
+                ProviderRow(
+                    label = stringResource(R.string.detail_streaming),
+                    providers = streaming,
+                    accentColor = accentColor,
+                    onProviderClick = onProviderClick
+                )
             }
 
             if (buyAndRent.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                ProviderRow(label = stringResource(R.string.detail_rent_buy), providers = buyAndRent, accentColor = accentColor, onProviderClick = onProviderClick)
+                if (streaming.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                ProviderRow(
+                    label = stringResource(R.string.detail_rent_buy),
+                    providers = buyAndRent,
+                    accentColor = accentColor,
+                    onProviderClick = onProviderClick
+                )
             }
         }
     }
@@ -208,14 +221,14 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 8.sp,
                 fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp
+                letterSpacing = 1.5.sp
             ),
-            color = Color.White.copy(alpha = 0.2f),
-            modifier = Modifier.padding(bottom = 8.dp)
+            color = Color.White.copy(alpha = 0.25f),
+            modifier = Modifier.padding(bottom = 5.dp)
         )
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(end = 24.dp), // To allow scroll past edge
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -229,19 +242,19 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
 @Composable
 fun ProviderLogo(provider: Provider, accentColor: Color, onClick: (Provider) -> Unit) {
     // logoBaseUrl is no longer needed
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(8.dp)
     
     Box(
         modifier = Modifier
             .bounceClick { onClick(provider) }
-            .size(38.dp)
+            .size(32.dp)
             .border(
                 width = 0.5.dp,
                 color = accentColor.copy(alpha = 0.3f),
                 shape = shape
             )
-            .padding(2.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .padding(1.5.dp)
+            .clip(RoundedCornerShape(6.dp))
             .background(Color.Black.copy(alpha = 0.3f))
     ) {
         AsyncImage(

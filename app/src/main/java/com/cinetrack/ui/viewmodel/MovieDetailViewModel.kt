@@ -38,6 +38,9 @@ import kotlinx.collections.immutable.toImmutableMap
 import java.util.UUID
 import java.time.Instant
 import com.cinetrack.ui.navigation.DetailRoute
+import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
 
 @HiltViewModel
 class MovieDetailViewModel @Inject constructor(
@@ -283,6 +286,19 @@ class MovieDetailViewModel @Inject constructor(
             DetailEvent.DeleteMovie -> deleteMovie()
             is DetailEvent.ToggleFolderMembership -> toggleFolderMembership(event.folder)
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
+            is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
+        }
+    }
+
+    private fun updateCustomCover(newPath: String?) {
+        viewModelScope.launch {
+            val local = repository.getMovie(movieId, mediaType) ?: return@launch
+            repository.saveMovie(local.copy(customBackdropPath = newPath))
+            // Re-extract the dominant color from the new cover or fallback to poster/backdrop
+            val targetPath = newPath ?: local.posterPath ?: local.backdropPath
+            val imageType = if (newPath != null || local.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
+            val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
+            if (imageUrl != null) fetchAccentColor(imageUrl, local, forceReload = true)
         }
     }
 
@@ -609,8 +625,8 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    fun fetchAccentColor(imageUrl: String, movie: Movie) {
-        if (movie.accentColor == null && (movie.posterPath != null || movie.backdropPath != null)) {
+    fun fetchAccentColor(imageUrl: String, movie: Movie, forceReload: Boolean = false) {
+        if (forceReload || (movie.accentColor == null && _extractedColor.value == null && (movie.posterPath != null || movie.backdropPath != null))) {
             viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
                 val loader = Coil.imageLoader(context)
                 val request = ImageRequest.Builder(context)

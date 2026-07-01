@@ -26,7 +26,7 @@ import com.cinetrack.data.local.entities.SearchHistoryEntity
         MovieDetailCacheEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -49,6 +49,12 @@ abstract class FlickTroveDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE favorites ADD COLUMN custom_backdrop_path TEXT")
+            }
+        }
+
         fun getInstance(context: Context): FlickTroveDatabase {
             return instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
@@ -56,7 +62,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
                 .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }

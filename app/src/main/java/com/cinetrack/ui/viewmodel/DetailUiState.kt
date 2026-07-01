@@ -76,6 +76,7 @@ sealed class DetailEvent {
     data class SyncWatchedEpisodes(val episodes: Map<String, List<Int>>) : DetailEvent()
     data class ToggleFolderMembership(val folder: FolderEntity) : DetailEvent()
     data class CreateFolder(val name: String, val color: String) : DetailEvent()
+    data class UpdateCustomCover(val newPath: String?) : DetailEvent()
 }
 
 

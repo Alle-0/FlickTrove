@@ -59,6 +59,11 @@ data class Movie(
     @set:PropertyName("backdrop_path")
     @ColumnInfo(name = "backdrop_path") var backdropPath: String? = null,
     
+    @SerialName("custom_backdrop_path")
+    @get:PropertyName("custom_backdrop_path")
+    @set:PropertyName("custom_backdrop_path")
+    @ColumnInfo(name = "custom_backdrop_path") var customBackdropPath: String? = null,
+    
     @SerialName("vote_average")
     @get:Exclude
     @set:Exclude

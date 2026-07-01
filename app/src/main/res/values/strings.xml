@@ -492,8 +492,10 @@
     <!-- Notifications & Widgets -->
     <string name="notif_reminder_summary">FlickTrove · Release Reminders</string>
     <string name="notif_update_summary">FlickTrove · Series Update</string>
+    <string name="notif_media_movie">Movie</string>
+    <string name="notif_media_tv">TV Series</string>
     <string name="notif_new_release_title">New release: %1$s</string>
-    <string name="notif_new_release_body">\"%1$s\" is now available!</string>
+    <string name="notif_new_release_body">\"%1$s\" is now available! Tap to discover more.</string>
     <string name="notif_new_episode_title">New release: Episode %1$s</string>
     <string name="notif_new_episode_body">Episode %1$s of \"%2$s\" is out today!</string>
     <string name="notif_new_episodes_title">New episodes available</string>
@@ -598,6 +600,10 @@
     <string name="detail_swipe">SWIPE</string>
     <string name="detail_personal_zone">PERSONAL ZONE</string>
     <string name="detail_tap_for_more">TAP FOR MORE</string>
+    <string name="detail_tap_for_less">TAP FOR LESS</string>
+    <string name="detail_select_cover">Select Cover</string>
+    <string name="detail_no_alternative_covers">No alternative covers available.</string>
+    <string name="detail_cover_default">Default</string>
     <string name="personal_listening">Listening</string>
     <string name="personal_audio_local_only">Audio is saved locally and will not be synced.</string>
     <string name="personal_save_note">SAVE NOTE</string>

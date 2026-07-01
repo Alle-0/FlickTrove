@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.ui.theme.ErrorRed
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.*
@@ -58,7 +59,7 @@ fun DeleteFolderDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f))
+                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
                 .clickable(enabled = true, onClick = { isDismissing = true }),
             contentAlignment = Alignment.Center
         ) {

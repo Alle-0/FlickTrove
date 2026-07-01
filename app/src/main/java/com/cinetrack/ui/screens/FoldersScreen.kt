@@ -42,6 +42,7 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.components.shared.FolderColorPicker
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeStyle
@@ -466,7 +467,7 @@ fun FolderCreateDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
                 .pointerInput(Unit) {
                     detectTapGestures { 
                         focusManager.clearFocus()

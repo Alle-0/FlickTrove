@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -71,7 +72,7 @@ fun FlickTroveModal(
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(100f)
-                    .background(Color.Black.copy(alpha = 0.7f * modalAlpha))
+                    .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * modalAlpha))
                     .bounceClick(scaleDown = 1f) { isClosing = true }
                     .graphicsLayer { alpha = modalAlpha },
                 contentAlignment = Alignment.Center

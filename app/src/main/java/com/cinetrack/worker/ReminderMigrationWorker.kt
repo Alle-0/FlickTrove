@@ -64,7 +64,8 @@ class ReminderMigrationWorker(
                         context = applicationContext,
                         movieTitle = movie.title ?: movie.name ?: "Contenuto rilasciato",
                         movieId = movie.id,
-                        mediaType = movie.mediaType
+                        mediaType = movie.mediaType,
+                        posterPath = movie.posterPath
                     )
                 }
                 

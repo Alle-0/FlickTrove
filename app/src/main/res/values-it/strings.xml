@@ -486,8 +486,10 @@
     <!-- Notifications & Widgets -->
     <string name="notif_reminder_summary">FlickTrove · Promemoria Uscite</string>
     <string name="notif_update_summary">FlickTrove · Aggiornamento Serie</string>
+    <string name="notif_media_movie">Film</string>
+    <string name="notif_media_tv">Serie TV</string>
     <string name="notif_new_release_title">Nuova uscita: %1$s</string>
-    <string name="notif_new_release_body">\"%1$s\" è disponibile!</string>
+    <string name="notif_new_release_body">\"%1$s\" è ora disponibile! Aprilo per scoprire di più.</string>
     <string name="notif_new_episode_title">Nuova uscita: Episodio %1$s</string>
     <string name="notif_new_episode_body">L\'episodio %1$s di \"%2$s\" esce oggi!</string>
     <string name="notif_new_episodes_title">Nuovi episodi disponibili</string>
@@ -592,6 +594,10 @@
     <string name="detail_swipe">SCORRI</string>
     <string name="detail_personal_zone">ZONA PERSONALE</string>
     <string name="detail_tap_for_more">TOCCA PER ALTRO</string>
+    <string name="detail_tap_for_less">TOCCA PER MENO</string>
+    <string name="detail_select_cover">Seleziona Copertina</string>
+    <string name="detail_no_alternative_covers">Nessuna copertina alternativa disponibile.</string>
+    <string name="detail_cover_default">Default</string>
     <string name="personal_listening">In ascolto</string>
     <string name="personal_audio_local_only">L\'audio è salvato solo in locale e non verrà sincronizzato.</string>
     <string name="personal_save_note">SALVA NOTA</string>

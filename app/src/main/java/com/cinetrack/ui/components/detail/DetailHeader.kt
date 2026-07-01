@@ -36,8 +36,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.composed
+import coil.request.ImageRequest
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.viewmodel.ExternalRatings
 import androidx.compose.foundation.BorderStroke
@@ -116,8 +118,16 @@ fun DetailHeader(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (logoPath != null) {
                 val imageUrl = com.cinetrack.util.buildTmdbImageUrl(logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
+                val context = LocalContext.current
+                val request = remember(imageUrl) {
+                    ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .crossfade(500)
+                        .build()
+                }
                 coil.compose.AsyncImage(
-                    model = imageUrl,
+                    model = request,
                     contentDescription = movie.displayName,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -451,15 +461,13 @@ fun RatingPill(
 
         // Help Text - Moved further down
         Text(
-            text = stringResource(R.string.detail_tap_for_more),
+            text = if (expansion > 0.5f) stringResource(R.string.detail_tap_for_less) else stringResource(R.string.detail_tap_for_more),
             fontSize = 7.sp,
             lineHeight = 7.sp,
             fontWeight = FontWeight.Black,
             color = Color.Black.copy(alpha = 0.4f),
             modifier = Modifier
                 .graphicsLayer {
-                    // Slightly faster fade to avoid ghosting during expansion
-                    alpha = (1f - expansion * 2.5f).coerceIn(0f, 1f)
                     // Precise offset
                     val startOffset = 11.dp.toPx()
                     translationY = startOffset

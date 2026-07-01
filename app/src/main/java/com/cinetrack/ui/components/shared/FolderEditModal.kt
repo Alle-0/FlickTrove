@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.premiumScrollbar
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.*
@@ -66,7 +67,7 @@ fun FolderEditDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
                 .pointerInput(Unit) {
                     detectTapGestures { 
                         focusManager.clearFocus()

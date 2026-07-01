@@ -18,6 +18,7 @@ object HazeStyles {
     const val NoiseFactorLow = 0.02f
     
     // Overlay Constants
+    const val ModalScrimAlpha = 0.35f
     const val GlassBorderAlphaTop = 0.30f
     const val GlassBorderAlphaActive = 0.50f
     val GlassBorderColor = Color(0xFF666666)
@@ -27,7 +28,6 @@ object HazeStyles {
     val GlassColor = Color(0xFF010103)
     val GlassBlurRadius = 16.dp
     val SmallGlassBlurRadius = 8.dp
-    val MicroGlassBlurRadius = 4.dp
 
     /**
      * Unified haze style for all glassmorphism effects in the app.
@@ -37,23 +37,6 @@ object HazeStyles {
         blurRadius = GlassBlurRadius,
         tint = GlassColor.copy(alpha = GlassAlpha),
         noiseFactor = NoiseFactorDefault
-    )
-
-    /**
-     * Premium light variant for specific UI surfaces.
-     */
-    val PremiumLight = HazeStyle(
-        blurRadius = GlassBlurRadius,
-        tint = Color.White.copy(alpha = 0.60f),
-        noiseFactor = NoiseFactorLow
-    )
-
-    /**
-     * Specialized style for smaller components like pills or cards.
-     */
-    val SmallPremiumDark = PremiumDark.copy(
-        blurRadius = SmallGlassBlurRadius,
-        noiseFactor = NoiseFactorLow
     )
 
     /**

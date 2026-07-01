@@ -11,6 +11,7 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,6 +59,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.lerp
 import com.cinetrack.ui.components.shared.FolderPickerModalContent
 import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.Movie
 import com.cinetrack.ui.components.*
@@ -164,6 +173,7 @@ fun MovieDetailScreenContent(
     var showEpisodesSheet by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
     var showRatingInfoDialog by remember { mutableStateOf(false) }
+    var showCoverSelectionSheet by remember { mutableStateOf(false) }
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
@@ -186,6 +196,8 @@ fun MovieDetailScreenContent(
             showFolderPicker = false
         } else if (showEpisodesSheet) {
             showEpisodesSheet = false
+        } else if (showCoverSelectionSheet) {
+            showCoverSelectionSheet = false
         } else {
             onBackClick()
         }
@@ -197,7 +209,9 @@ fun MovieDetailScreenContent(
         val currentState = uiState
         if (currentState is DetailUiState.Success) {
             val movie = currentState.movieEntry
-            val imageUrl = buildTmdbImageUrl(movie.posterPath ?: movie.backdropPath, ImageType.POSTER, currentImageQuality)
+            val targetPath = movie.customBackdropPath ?: movie.posterPath ?: movie.backdropPath
+            val imageType = if (movie.customBackdropPath != null || movie.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
+            val imageUrl = buildTmdbImageUrl(targetPath, imageType, currentImageQuality)
             if (imageUrl != null) {
                 viewModel.fetchAccentColor(imageUrl, movie)
             }
@@ -376,7 +390,12 @@ fun MovieDetailScreenContent(
                     val state = cachedSuccess
                     if (state != null) {
                         val activeMovie = state.movieEntry
-                        val accentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
+                        val targetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
+                        val accentColor by animateColorAsState(
+                            targetValue = targetAccentColor,
+                            animationSpec = tween(800),
+                            label = "AccentColorAnimation"
+                        )
                         
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(
@@ -386,12 +405,19 @@ fun MovieDetailScreenContent(
                                     .verticalScroll(scrollState)
                             ) {
                                 DetailBackdrop(
-                                    backdropPath = activeMovie.backdropPath,
+                                    backdropPath = activeMovie.customBackdropPath ?: activeMovie.backdropPath,
                                     posterPath = activeMovie.posterPath,
                                     accentColor = accentColor,
                                     backgroundColor = animatedBgColor,
                                     modifier = Modifier
                                         .haze(backdropHazeState, style = HazeStyles.PremiumDark)
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(
+                                                onLongPress = {
+                                                    showCoverSelectionSheet = true
+                                                }
+                                            )
+                                        }
                                 )
 
                                 Column(
@@ -462,7 +488,7 @@ fun MovieDetailScreenContent(
                                         }
                                     )
 
-                                    Spacer(modifier = Modifier.height(40.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
                                     DetailInfo(
                                         overview = activeMovie.overview ?: stringResource(R.string.detail_no_overview),
@@ -1058,7 +1084,7 @@ fun MovieDetailScreenContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f * (blurAlpha / 0.85f)))
+                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * (blurAlpha / 0.85f)))
                 .clickable { showRatingInfoDialog = false },
             contentAlignment = Alignment.Center
         ) {
@@ -1251,6 +1277,148 @@ fun MovieDetailScreenContent(
                 ) {
                     Text(stringResource(R.string.detail_translate_not_now), color = Color.White.copy(alpha = 0.65f))
                 }
+            }
+        }
+    }
+
+    com.cinetrack.ui.components.shared.FlickTroveModal(
+        isVisible = showCoverSelectionSheet && cachedSuccess != null,
+        onDismissRequest = { showCoverSelectionSheet = false },
+        hazeState = localHazeState
+    ) {
+        val backdrops = cachedSuccess?.details?.images?.backdrops ?: emptyList()
+        val configuration = LocalConfiguration.current
+        val dynamicCoverRatio = remember(configuration.screenWidthDp) {
+            (configuration.screenWidthDp.toFloat() / 480f).coerceIn(0.6f, 1.5f)
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.detail_select_cover),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                textAlign = TextAlign.Center
+            )
+            
+            val defaultImg = cachedSuccess?.movieEntry?.backdropPath ?: cachedSuccess?.movieEntry?.posterPath
+            if (backdrops.isEmpty() && defaultImg == null) {
+                Text(
+                    text = stringResource(R.string.detail_no_alternative_covers), 
+                    color = Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                val gridState = rememberLazyGridState()
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    state = gridState,
+                    contentPadding = PaddingValues(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp).premiumScrollbar(gridState, paddingEnd = 6f)
+                ) {
+                    if (defaultImg != null) {
+                        item {
+                            val isDefaultSelected = cachedSuccess?.movieEntry?.customBackdropPath == null
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(dynamicCoverRatio)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.White.copy(alpha = 0.1f))
+                                    .border(
+                                        width = if (isDefaultSelected) 2.dp else 0.dp,
+                                        color = if (isDefaultSelected) globalAccentColor else Color.Transparent,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .clickable {
+                                        viewModel.onEvent(DetailEvent.UpdateCustomCover(null))
+                                        showCoverSelectionSheet = false
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                val imageUrl = buildTmdbImageUrl(defaultImg, ImageType.BACKDROP, currentImageQuality)
+                                val context = LocalContext.current
+                                val request = remember(imageUrl) {
+                                    ImageRequest.Builder(context)
+                                        .data(imageUrl)
+                                        .crossfade(true)
+                                        .crossfade(400)
+                                        .build()
+                                }
+                                AsyncImage(
+                                    model = request,
+                                    contentDescription = stringResource(R.string.detail_cover_default),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize().alpha(0.7f)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
+                                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.detail_cover_default),
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    items(backdrops) { imageItem ->
+                        val isSelected = imageItem.filePath == cachedSuccess?.movieEntry?.customBackdropPath
+                        val imageUrl = buildTmdbImageUrl(imageItem.filePath, ImageType.BACKDROP, currentImageQuality)
+                        val context = LocalContext.current
+                        val request = remember(imageUrl) {
+                            ImageRequest.Builder(context)
+                                .data(imageUrl)
+                                .crossfade(true)
+                                .crossfade(400)
+                                .build()
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(dynamicCoverRatio)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(
+                                    width = if (isSelected) 2.dp else 0.dp,
+                                    color = if (isSelected) globalAccentColor else Color.Transparent,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable {
+                                    viewModel.onEvent(DetailEvent.UpdateCustomCover(imageItem.filePath))
+                                    showCoverSelectionSheet = false
+                                }
+                        ) {
+                            AsyncImage(
+                                model = request,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { showCoverSelectionSheet = false },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White.copy(alpha = 0.15f)
+                )
+            ) {
+                Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }
