@@ -53,9 +53,10 @@ import com.cinetrack.ui.components.GlassyBottomBar
 import com.cinetrack.ui.components.GlassyDrawer
 import com.cinetrack.ui.components.GlassyTopBar
 import com.cinetrack.ui.components.HomeFilterModal
-
+import com.cinetrack.ui.components.stats.YearSelectionModal
 import com.cinetrack.ui.components.UndoToast
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.main.MainFolderOptionsMenu
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.DiscoverViewModel
 import com.cinetrack.ui.viewmodel.FolderDetailViewModel
@@ -367,84 +368,20 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                     // --- FOLDER OPTIONS MODAL ---
                     if (showFolderOptions && currentTab is FolderDetailTab) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .zIndex(2000f)
-                                .pointerInput(Unit) { detectTapGestures { showFolderOptions = false } }
-                        ) {
-                            val density = LocalDensity.current
-                            val offsetX = with(density) { folderOptionsOffset.x.toDp() }
-                            val offsetY = with(density) { folderOptionsOffset.y.toDp() }
-                            
-                            var isMenuVisible by remember { mutableStateOf(false) }
-                            LaunchedEffect(Unit) { isMenuVisible = true }
-                            
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = isMenuVisible,
-                                enter = fadeIn() + slideInVertically(
-                                    initialOffsetY = { -it / 4 },
-                                    animationSpec = tween(250, easing = EaseOutCirc)
-                                ),
-                                exit = fadeOut() + slideOutVertically(
-                                    targetOffsetY = { -it / 4 },
-                                    animationSpec = tween(200, easing = EaseInCirc)
-                                ),
-                                modifier = Modifier.absoluteOffset(x = offsetX - 200.dp + 32.dp, y = offsetY + 8.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .width(200.dp)
-                                        .clip(RoundedCornerShape(24.dp))
-                                        .hazeGlass(state = contentHazeState, shape = RoundedCornerShape(24.dp))
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick { 
-                                                showFolderOptions = false
-                                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME
-                                                showFolderEditDialog = true 
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(12.dp))
-                                        Text(stringResource(R.string.main_folder_rename), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick { 
-                                                showFolderOptions = false
-                                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.COLOR
-                                                showFolderEditDialog = true 
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(12.dp))
-                                        Text(stringResource(R.string.main_folder_change_color), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick { 
-                                                showFolderOptions = false
-                                                showFolderDeleteConfirm = true 
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(12.dp))
-                                        Text(stringResource(R.string.main_folder_delete), color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
-                                    }
-                                }
-                            }
-                        }
+                        MainFolderOptionsMenu(
+                            offset = folderOptionsOffset,
+                            hazeState = contentHazeState,
+                            onDismiss = { showFolderOptions = false },
+                            onRename = {
+                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME
+                                showFolderEditDialog = true
+                            },
+                            onChangeColor = {
+                                folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.COLOR
+                                showFolderEditDialog = true
+                            },
+                            onDelete = { showFolderDeleteConfirm = true }
+                        )
                     }
 
                     // Modals — wrapped in key(currentTab) to reset composable state safely on tab change

@@ -60,6 +60,7 @@ class SearchViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val tmdbService: TMDBService,
+    private val networkMonitor: com.cinetrack.utils.NetworkMonitor,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
@@ -100,8 +101,15 @@ class SearchViewModel @Inject constructor(
     
     private var searchJob: Job? = null
     private var keywordSearchJob: Job? = null
+    private var isOnline: Boolean = true
     
     init {
+        viewModelScope.launch {
+            networkMonitor.isOnline.collect { online ->
+                isOnline = online
+            }
+        }
+
         // Initial fetch for trending or discovery
         performSearch()
  
@@ -225,6 +233,13 @@ class SearchViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                if (!isOnline) {
+                    rawResults = performLocalSearch(query, category)
+                    applyStateFilters()
+                    _uiState.update { it.copy(isEndReached = true) }
+                    return@launch
+                }
+
                 var page = 1
                 var accumulatedResults = emptyList<TMDBSearchResult>()
                 var reachedEnd = false
@@ -319,14 +334,32 @@ class SearchViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                _uiState.update { it.copy(isEndReached = true) }
-                _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
+                if (!isOnline) {
+                    rawResults = performLocalSearch(query, category)
+                    applyStateFilters()
+                    _uiState.update { it.copy(isEndReached = true) }
+                } else {
+                    _uiState.update { it.copy(isEndReached = true) }
+                    _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
+                }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
-    
+
+    private suspend fun performLocalSearch(query: String, category: String): List<TMDBSearchResult> {
+        if (query.isBlank()) return emptyList()
+        val mediaType = if (category == "person") "" else category
+        val results = repository.searchLocalMovies(query, mediaType)
+        return results.map { localMovie ->
+            when (localMovie.mediaType) {
+                "tv" -> localMovie.toTvResultInternal()
+                else -> localMovie.toMovieResultInternal()
+            }
+        }
+    }
+
     private fun buildTmdbOptions(config: SortConfig, category: String): Map<String, String> {
         val options = mutableMapOf<String, String>()
         if (config.selectedGenres.isNotEmpty()) options["with_genres"] = config.selectedGenres.joinToString("|")

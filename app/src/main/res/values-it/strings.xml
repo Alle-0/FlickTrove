@@ -401,7 +401,7 @@
     <string name="recommendations_tab_title">Consigli</string>
     <string name="recommendations_empty_1">Non abbiamo ancora abbastanza dati per consigliarti qualcosa.</string>
     <string name="recommendations_empty_2">Aggiungi film ai preferiti e dai dei voti per iniziare!</string>
-    <string name="recommendations_tinder_mode">Modalit Swipe</string>
+    <string name="recommendations_flick_mode">Modalit Swipe</string>
     <string name="recommendations_add">AGGIUNGI</string>
     <string name="recommendations_pass">PASSA</string>
     <string name="recommendations_no_title">Senza titolo</string>
@@ -598,6 +598,11 @@
     <string name="detail_select_cover">Seleziona Copertina</string>
     <string name="detail_no_alternative_covers">Nessuna copertina alternativa disponibile.</string>
     <string name="detail_cover_default">Default</string>
+    <string name="detail_custom_cover_badge">Copertina personalizzata</string>
+    <string name="detail_change_cover_btn">Cambia copertina</string>
+    <string name="detail_cover_selected_badge">IN USO</string>
+    <string name="detail_cover_updated_msg">✨ Copertina aggiornata con successo!</string>
+    <string name="detail_cover_reset_msg">🔄 Copertina ripristinata a quella predefinita</string>
     <string name="personal_listening">In ascolto</string>
     <string name="personal_audio_local_only">L\'audio è salvato solo in locale e non verrà sincronizzato.</string>
     <string name="personal_save_note">SALVA NOTA</string>

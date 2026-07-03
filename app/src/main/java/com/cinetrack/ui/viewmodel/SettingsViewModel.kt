@@ -303,10 +303,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.updateTitleTextSizeMultiplier(multiplier)
             val desc = when(multiplier) {
-                0.8f -> "Piccolo"
-                1.0f -> "Predefinito"
-                1.2f -> "Grande"
-                else -> "Personalizzato"
+                0.8f -> UiText.StringResource(R.string.settings_size_small)
+                1.0f -> UiText.StringResource(R.string.settings_size_medium)
+                1.2f -> UiText.StringResource(R.string.settings_size_large)
+                else -> UiText.StringResource(R.string.settings_custom)
             }
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_text_size, desc))
         }

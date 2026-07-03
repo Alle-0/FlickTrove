@@ -20,8 +20,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import kotlinx.coroutines.flow.filter
+import kotlin.math.abs
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,7 +108,23 @@ fun DetailTrailers(
             }
         }
 
+        val listState = rememberLazyListState()
+
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.isScrollInProgress }
+                .filter { !it }
+                .collect {
+                    val visibleItems = listState.layoutInfo.visibleItemsInfo
+                    if (visibleItems.isEmpty()) return@collect
+                    val targetItem = visibleItems.minByOrNull { abs(it.offset) } ?: return@collect
+                    if (targetItem.index != listState.firstVisibleItemIndex || targetItem.offset != listState.firstVisibleItemScrollOffset) {
+                        listState.animateScrollToItem(targetItem.index)
+                    }
+                }
+        }
+
         LazyRow(
+            state = listState,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 24.dp),
             modifier = Modifier.fillMaxWidth()
@@ -246,12 +265,7 @@ fun YouTubePlayer(videoId: String) {
                             callback?.onCustomViewHidden()
                             return
                         }
-                        var context = ctx
-                        while (context is android.content.ContextWrapper) {
-                            if (context is android.app.Activity) break
-                            context = context.baseContext
-                        }
-                        val activity = context as? android.app.Activity ?: return
+                        val activity = ctx.findActivity() ?: return
                         val decorView = activity.window.decorView as android.widget.FrameLayout
                         
                         view?.setBackgroundColor(android.graphics.Color.BLACK)
@@ -269,12 +283,7 @@ fun YouTubePlayer(videoId: String) {
 
                     override fun onHideCustomView() {
                         if (customView == null) return
-                        var context = ctx
-                        while (context is android.content.ContextWrapper) {
-                            if (context is android.app.Activity) break
-                            context = context.baseContext
-                        }
-                        val activity = context as? android.app.Activity ?: return
+                        val activity = ctx.findActivity() ?: return
                         val decorView = activity.window.decorView as android.widget.FrameLayout
                         decorView.removeView(customView)
                         customView = null
@@ -321,4 +330,14 @@ fun YouTubePlayer(videoId: String) {
             webView.destroy()
         }
     )
+}
+
+private fun android.content.Context.findActivity(): android.app.Activity? {
+    var current: android.content.Context = this
+    while (current is android.content.ContextWrapper) {
+        val wrapper = current as android.content.ContextWrapper
+        if (wrapper is android.app.Activity) return wrapper
+        current = wrapper.baseContext
+    }
+    return null
 }

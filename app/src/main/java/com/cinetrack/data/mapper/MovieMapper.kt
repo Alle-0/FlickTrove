@@ -1,6 +1,7 @@
 package com.cinetrack.data.mapper
 
 import com.cinetrack.data.Movie
+import com.cinetrack.data.api.ExternalIds
 import com.cinetrack.data.api.MovieDetailResponse
 
 import java.util.Locale
@@ -64,6 +65,32 @@ object MovieMapper {
             directorId = mainDirector?.id,
             directorName = mainDirector?.name,
             directorProfilePath = mainDirector?.profilePath
+        )
+    }
+
+    fun mapMovieToResponse(movie: Movie): MovieDetailResponse {
+        return MovieDetailResponse(
+            id = movie.id,
+            title = movie.title,
+            name = movie.name,
+            posterPath = movie.posterPath,
+            backdropPath = movie.backdropPath,
+            voteAverage = movie.voteAverage,
+            voteCount = movie.voteCount,
+            overview = movie.overview,
+            releaseDate = movie.releaseDate,
+            firstAirDate = movie.firstAirDate,
+            runtime = movie.runtime,
+            episodeRunTime = movie.episodeRunTime,
+            genres = movie.genres,
+            status = movie.status,
+            tagline = movie.tagline,
+            revenue = movie.revenue,
+            budget = movie.budget,
+            numberOfSeasons = movie.numberOfSeasons,
+            numberOfEpisodes = movie.numberOfEpisodes,
+            seasons = movie.seasons,
+            externalIds = ExternalIds(imdbId = movie.imdbId)
         )
     }
 

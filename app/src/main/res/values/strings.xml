@@ -407,7 +407,7 @@
     <string name="recommendations_tab_title">Recommendations</string>
     <string name="recommendations_empty_1">We don\'t have enough data to recommend anything yet.</string>
     <string name="recommendations_empty_2">Add movies to your favorites and rate them to get started!</string>
-    <string name="recommendations_tinder_mode">Swipe Mode</string>
+    <string name="recommendations_flick_mode">Swipe Mode</string>
     <string name="recommendations_add">ADD</string>
     <string name="recommendations_pass">PASS</string>
     <string name="recommendations_no_title">Untitled</string>
@@ -604,6 +604,11 @@
     <string name="detail_select_cover">Select Cover</string>
     <string name="detail_no_alternative_covers">No alternative covers available.</string>
     <string name="detail_cover_default">Default</string>
+    <string name="detail_custom_cover_badge">Custom Cover</string>
+    <string name="detail_change_cover_btn">Change Cover</string>
+    <string name="detail_cover_selected_badge">IN USE</string>
+    <string name="detail_cover_updated_msg">✨ Cover updated successfully!</string>
+    <string name="detail_cover_reset_msg">🔄 Cover reset to default</string>
     <string name="personal_listening">Listening</string>
     <string name="personal_audio_local_only">Audio is saved locally and will not be synced.</string>
     <string name="personal_save_note">SAVE NOTE</string>

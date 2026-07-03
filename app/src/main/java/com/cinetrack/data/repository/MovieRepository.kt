@@ -62,6 +62,23 @@ class MovieRepository @Inject constructor(
     
     fun getLocalMoviesFlow(): Flow<List<Movie>> = favoriteDao.getAllFlow()
 
+    suspend fun searchLocalMovies(query: String, mediaType: String = ""): List<Movie> {
+        val normalized = query.trim().lowercase()
+        if (normalized.isEmpty()) return emptyList()
+
+        val escaped = "%${normalized.replace("'", "''")}%"
+        val results = favoriteDao.searchLocalMovies(escaped, mediaType)
+
+        if (results.isNotEmpty()) return results
+
+        return favoriteDao.getAll()
+            .filter { mediaType.isEmpty() || it.mediaType == mediaType }
+            .map { movie -> movie to com.cinetrack.ui.utils.FuzzySearch.score(normalized, movie.title ?: movie.name ?: "") }
+            .filter { it.second >= 0.45 }
+            .sortedByDescending { it.second }
+            .map { it.first }
+    }
+
     fun getMovieFlow(id: Long, mediaType: String): Flow<Movie?> = favoriteDao.getByIdFlow(id, mediaType)
 
     suspend fun getMovie(id: Long, mediaType: String): Movie? = favoriteDao.getById(id, mediaType)

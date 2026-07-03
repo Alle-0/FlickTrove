@@ -2,7 +2,6 @@ package com.cinetrack.ui.viewmodel
 
 import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.Movie
@@ -51,8 +50,7 @@ class MovieDetailViewModel @Inject constructor(
     private val translationManager: TranslationManager,
     private val detailUiStateMapper: DetailUiStateMapper,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
-    @ApplicationContext private val context: Context,
-    savedStateHandle: SavedStateHandle
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     var movieId: Long = 0L
@@ -225,7 +223,12 @@ class MovieDetailViewModel @Inject constructor(
             _metadata.value = response
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            _error.value = e.stackTraceToString()
+            val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
+            if (localMovie != null) {
+                _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
+            } else {
+                _error.value = e.stackTraceToString()
+            }
         } finally {
             val timeTaken = System.currentTimeMillis() - startTime
             if (timeTaken < 600L) {
@@ -246,7 +249,7 @@ class MovieDetailViewModel @Inject constructor(
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; emptyList() }
 
-                _traktComments.value = commentsResult ?: emptyList()
+                _traktComments.value = commentsResult
 
                 _externalRatings.update {  
                     it.copy(
@@ -299,6 +302,8 @@ class MovieDetailViewModel @Inject constructor(
             val imageType = if (newPath != null || local.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
             if (imageUrl != null) fetchAccentColor(imageUrl, local, forceReload = true)
+            val msgRes = if (newPath != null) R.string.detail_cover_updated_msg else R.string.detail_cover_reset_msg
+            actionFeedbackManager.emit(UiText.StringResource(msgRes))
         }
     }
 

@@ -52,6 +52,14 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete'")
     fun getAllFlow(): Flow<List<Movie>>
 
+    @Query(
+        "SELECT * FROM favorites " +
+        "WHERE sync_status != 'pending_delete' " +
+        "AND (:mediaType = '' OR media_type = :mediaType) " +
+        "AND (title LIKE :query OR name LIKE :query OR overview LIKE :query)"
+    )
+    suspend fun searchLocalMovies(query: String, mediaType: String = ""): List<Movie>
+
     @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType AND sync_status != 'pending_delete' LIMIT 1")
     suspend fun getById(id: Long, mediaType: String): Movie?
 

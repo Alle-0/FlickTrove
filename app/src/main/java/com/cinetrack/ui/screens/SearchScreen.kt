@@ -60,6 +60,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.foundation.BorderStroke
 
 import com.cinetrack.ui.components.HomeFilterModal
+import com.cinetrack.ui.components.search.*
 import com.cinetrack.ui.theme.PremiumBackground
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.layoutToggleIcon
@@ -436,172 +437,52 @@ fun SearchScreenContent(
                             
                             if (showEmptySearch) {
 
-                                if (uiState.category == "movie" && uiState.trendingMovies.isNotEmpty()) {
-                                    item(span = { GridItemSpan(12) }) {
-                                        Column {
-                                            Text(
-                                                text = stringResource(R.string.search_trending_now),
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                                            )
-                                        }
-                                    }
-                                    itemsIndexed(items = uiState.trendingMovies.take(6), key = { _, item -> "trending_movie_${item.id}" }, span = { _, _ -> GridItemSpan(movieSpan) }) { index, item ->
-                                        if (item is TMDBSearchResult.MovieResult) {
-                                            val baseMovie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
-                                            val movie = movieStatus ?: baseMovie
-                                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                                    it.toComposeColor()
-                                                } ?: emptyList()
-                                            }
-                                            if (columns == 1) {
-                                                com.cinetrack.ui.components.MovieListCard(
-                                                    movie = movie,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            } else {
-                                                MovieCard(
-                                                    movie = movie,
-                                                    cardWidth = cardWidth,
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    animatedVisibilityScope = animatedVisibilityScope,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            }
-                                        }
-                                    }
+                                if (uiState.category == "movie") {
+                                    searchTrendingMoviesSection(
+                                        trendingMovies = uiState.trendingMovies,
+                                        favorites = uiState.favorites,
+                                        movieFolderColors = uiState.movieFolderColors,
+                                        preferences = uiState.preferences,
+                                        animatedMovieIds = viewModel.animatedMovieIds,
+                                        columns = columns,
+                                        movieSpan = movieSpan,
+                                        cardWidth = cardWidth,
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                        keyboardController = keyboardController,
+                                        onMovieClick = onMovieClick,
+                                        onToggleFavorite = { viewModel.toggleFavorite(it) },
+                                        onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
+                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                    )
                                 }
 
-                                if (uiState.category == "tv" && uiState.trendingTv.isNotEmpty()) {
-                                    item(span = { GridItemSpan(12) }) {
-                                        Column {
-                                            Text(
-                                                text = stringResource(R.string.search_trending_now),
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                                            )
-                                        }
-                                    }
-                                    itemsIndexed(items = uiState.trendingTv.take(6), key = { _, item -> "trending_tv_${item.id}" }, span = { _, _ -> GridItemSpan(movieSpan) }) { index, item ->
-                                        if (item is TMDBSearchResult.TvResult) {
-                                            val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
-                                            val movie = movieStatus ?: baseMovie
-                                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                                    it.toComposeColor()
-                                                } ?: emptyList()
-                                            }
-                                            if (columns == 1) {
-                                                com.cinetrack.ui.components.MovieListCard(
-                                                    movie = movie,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            } else {
-                                                MovieCard(
-                                                    movie = movie,
-                                                    cardWidth = cardWidth,
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    animatedVisibilityScope = animatedVisibilityScope,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            }
-                                        }
-                                    }
+                                if (uiState.category == "tv") {
+                                    searchTrendingTvSection(
+                                        trendingTv = uiState.trendingTv,
+                                        favorites = uiState.favorites,
+                                        movieFolderColors = uiState.movieFolderColors,
+                                        preferences = uiState.preferences,
+                                        animatedMovieIds = viewModel.animatedMovieIds,
+                                        columns = columns,
+                                        movieSpan = movieSpan,
+                                        cardWidth = cardWidth,
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                        keyboardController = keyboardController,
+                                        onMovieClick = onMovieClick,
+                                        onToggleFavorite = { viewModel.toggleFavorite(it) },
+                                        onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
+                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                    )
                                 }
 
-                                if (uiState.category == "person" && uiState.trendingPeople.isNotEmpty()) {
-                                    item(span = { GridItemSpan(12) }) {
-                                        Column {
-                                            Text(
-                                                text = stringResource(R.string.search_trending_now),
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                                            )
-                                        }
-                                    }
-                                    items(items = uiState.trendingPeople.take(8), key = { "trending_person_${it.id}" }, contentType = { "person_result" }, span = { GridItemSpan(personSpan) }) { item ->
-                                        if (item is TMDBSearchResult.PersonResult) {
-                                            PersonCard(person = PersonSearchResult(id = item.id, name = item.name, profilePath = item.profilePath, knownForDepartment = item.knownForDepartment), width = personCardWidth, onClick = { 
-                                                keyboardController?.hide()
-                                                onPersonClick(item.id) 
-                                            })
-                                        }
-                                    }
+                                if (uiState.category == "person") {
+                                    searchTrendingPeopleSection(
+                                        trendingPeople = uiState.trendingPeople,
+                                        personSpan = personSpan,
+                                        personCardWidth = personCardWidth,
+                                        keyboardController = keyboardController,
+                                        onPersonClick = onPersonClick
+                                    )
                                 }
                             } else {
 
@@ -614,157 +495,30 @@ fun SearchScreenContent(
 
                                 if (uiState.query.isNotEmpty() && !uiState.isLoading && uiState.results.isEmpty()) {
                                     item(span = { GridItemSpan(12) }) {
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth().padding(top = 80.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                            Spacer(modifier = Modifier.height(16.dp))
-                                            Text(text = stringResource(R.string.search_no_results), color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Text(
-                                                text = if (uiState.query.length in 1..2) stringResource(R.string.search_no_results_short) else stringResource(R.string.search_no_results_simplify), 
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), 
-                                                fontSize = 14.sp, 
-                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                            )
-                                        }
+                                        SearchNoResults(queryLength = uiState.query.length)
                                     }
                                 }
 
-                                itemsIndexed(
-                                    items = uiState.results,
-                                    key = { _, item -> when(item) {
-                                        is TMDBSearchResult.MovieResult -> "${item.id}_movie"
-                                        is TMDBSearchResult.TvResult -> "${item.id}_tv"
-                                        is TMDBSearchResult.PersonResult -> "${item.id}_person"
-                                    }},
-                                    span = { _, _ -> if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }
-                                ) { index, item ->
-                                    when(item) {
-                                        is TMDBSearchResult.MovieResult -> {
-                                            val baseMovie = Movie(id = item.id, mediaType = "movie", title = item.title, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, releaseDate = item.releaseDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
-                                            val movie = movieStatus ?: baseMovie
-                                            
-                                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                                    it.toComposeColor()
-                                                } ?: emptyList()
-                                            }
-                                            if (columns == 1) {
-                                                com.cinetrack.ui.components.MovieListCard(
-                                                    movie = movie,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            } else {
-                                                MovieCard(
-                                                    movie = movie,
-                                                    cardWidth = cardWidth,
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    animatedVisibilityScope = animatedVisibilityScope,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            }
-                                        }
-                                        is TMDBSearchResult.TvResult -> {
-                                            val baseMovie = Movie(id = item.id, mediaType = "tv", name = item.name, posterPath = item.posterPath, backdropPath = item.backdropPath, voteAverage = item.voteAverage, firstAirDate = item.firstAirDate, overview = item.overview, genreIds = item.genreIds)
-                                            val movieStatus = uiState.favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
-                                            val movie = movieStatus ?: baseMovie
-                                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                                    it.toComposeColor()
-                                                } ?: emptyList()
-                                            }
-                                            if (columns == 1) {
-                                                com.cinetrack.ui.components.MovieListCard(
-                                                    movie = movie,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            } else {
-                                                MovieCard(
-                                                    movie = movie,
-                                                    cardWidth = cardWidth,
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    animatedVisibilityScope = animatedVisibilityScope,
-                                                    staggerIndex = index,
-                                                    onPress = { 
-                                                        keyboardController?.hide()
-                                                        onMovieClick(movie) 
-                                                    },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = { m, pressOffset, cardPos ->
-                                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                                    },
-                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            }
-                                        }
-                                        is TMDBSearchResult.PersonResult -> {
-                                            PersonCard(person = PersonSearchResult(id = item.id, name = item.name, profilePath = item.profilePath, knownForDepartment = item.knownForDepartment), width = personCardWidth, onClick = { 
-                                                keyboardController?.hide()
-                                                onPersonClick(item.id) 
-                                            })
-                                        }
-                                    }
-                                }
+                                searchResultsGridSection(
+                                    results = uiState.results,
+                                    category = uiState.category,
+                                    favorites = uiState.favorites,
+                                    movieFolderColors = uiState.movieFolderColors,
+                                    preferences = uiState.preferences,
+                                    animatedMovieIds = viewModel.animatedMovieIds,
+                                    columns = columns,
+                                    movieSpan = movieSpan,
+                                    personSpan = personSpan,
+                                    cardWidth = cardWidth,
+                                    personCardWidth = personCardWidth,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    keyboardController = keyboardController,
+                                    onMovieClick = onMovieClick,
+                                    onPersonClick = onPersonClick,
+                                    onToggleFavorite = { viewModel.toggleFavorite(it) },
+                                    onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
+                                    onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                )
 
                                 if (uiState.isNextPageLoading) {
                                     items(if (uiState.category == "person") 4 else columns, contentType = { "skeleton" }, span = { if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }) { 
@@ -928,221 +682,40 @@ fun SearchScreenContent(
                         
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        if (uiState.recentSearches.isNotEmpty() && uiState.query.isEmpty()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(stringResource(R.string.search_recent), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                                Text(
-                                    text = stringResource(R.string.search_clear_all),
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.5.sp,
-                                    modifier = Modifier.bounceClick { viewModel.clearRecentSearches() }.padding(horizontal = 4.dp, vertical = 2.dp)
-                                )
-                            }
+                        SearchRecentSearchesRow(
+                            recentSearches = uiState.recentSearches,
+                            query = uiState.query,
+                            onSearchClick = { viewModel.onQueryChanged(it) },
+                            onClearAll = { viewModel.clearRecentSearches() },
+                            onDeleteSearch = { viewModel.deleteRecentSearch(it) }
+                        )
 
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth()) {
-                                items(uiState.recentSearches, key = { it }, contentType = { "recent_search" }) { search ->
-                                    Box(
-                                        modifier = Modifier
-                                            .height(32.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.08f))
-                                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
-                                            .bounceClick { viewModel.onQueryChanged(search) },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(search, color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            CompositionLocalProvider(androidx.compose.material3.LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
-                                                Icon(
-                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                                    contentDescription = stringResource(R.string.search_remove_recent),
-                                                    modifier = Modifier
-                                                        .bounceClick(scaleDown = 0.8f) { viewModel.deleteRecentSearch(search) }
-                                                        .size(18.dp)
-                                                        .padding(4.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                                )
-                                            }
-                                        }
-                                    }
+                        SearchSuggestedFiltersRow(
+                            suggestedFilters = uiState.suggestedFilters,
+                            query = uiState.query,
+                            isExpanded = uiState.preferences.isSearchSuggestionsExpanded,
+                            onToggleExpanded = { viewModel.toggleSuggestionsExpanded() },
+                            onFilterClick = { filter ->
+                                if (filter.isKeyword) {
+                                    val currentKw = uiState.sortConfig.selectedKeywords
+                                    val newKw = if (currentKw.contains(filter.id)) emptyList() else listOf(filter.id)
+                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = newKw))
+                                } else {
+                                    val currentGenres = uiState.sortConfig.selectedGenres
+                                    val newGenres = if (currentGenres.contains(filter.id)) emptyList() else listOf(filter.id)
+                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = newGenres))
                                 }
-
+                                viewModel.onQueryChanged("")
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-
-                        if (uiState.suggestedFilters.isNotEmpty() && uiState.query.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { 
-                                        viewModel.toggleSuggestionsExpanded()
-                                    }
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(stringResource(R.string.search_suggested), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(
-                                    imageVector = if (uiState.preferences.isSearchSuggestionsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                    contentDescription = if (uiState.preferences.isSearchSuggestionsExpanded) stringResource(R.string.search_collapse) else stringResource(R.string.search_expand),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = uiState.preferences.isSearchSuggestionsExpanded,
-                                enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
-                                exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
-                            ) {
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                                    items(uiState.suggestedFilters, key = { "${it.id}_${it.isKeyword}_${it.name}" }, contentType = { "suggested_filter" }) { filter ->
-                                        Box(
-                                            modifier = Modifier
-                                                .height(32.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
-                                                .bounceClick { 
-                                                    if (filter.isKeyword) {
-                                                        val currentKw = uiState.sortConfig.selectedKeywords
-                                                        val newKw = if (currentKw.contains(filter.id)) emptyList() else listOf(filter.id)
-                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = newKw))
-                                                    } else {
-                                                        val currentGenres = uiState.sortConfig.selectedGenres
-                                                        val newGenres = if (currentGenres.contains(filter.id)) emptyList() else listOf(filter.id)
-                                                        viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = newGenres))
-                                                    }
-                                                    viewModel.onQueryChanged("")
-                                                    keyboardController?.hide()
-                                                    focusManager.clearFocus()
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = filter.name, 
-                                                modifier = Modifier.padding(horizontal = 14.dp), 
-                                                color = MaterialTheme.colorScheme.primary, 
-                                                fontSize = 12.sp, 
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                        )
 
                         // Category Selector (Pillow)
-                        val selectedIndex = when (uiState.category) {
-                            "movie" -> 0
-                            "tv" -> 1
-                            "person" -> 2
-                            else -> 0
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 8.dp)
-                                .height(40.dp)
-                        ) {
-                             Box(modifier = Modifier.fillMaxSize().background(
-                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                                 shape = CircleShape
-                             ))
-                             
-                             BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(4.dp)) {
-                                val tabWidth = maxWidth / 3
-                                val tabWidthPx = with(LocalDensity.current) { tabWidth.toPx() }
-                                
-                                val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
-                                val coroutineScope = rememberCoroutineScope()
-                                
-                                LaunchedEffect(selectedIndex) {
-                                    if (!offsetAnimatable.isRunning) {
-                                        offsetAnimatable.animateTo(
-                                            targetValue = selectedIndex * tabWidthPx,
-                                            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-                                        )
-                                    }
-                                }
-                                // Tab stretch effect
-                                val velocity = offsetAnimatable.velocity
-                                val stretchFactor = 1f + (kotlin.math.abs(velocity) / 4000f).coerceAtMost(0.35f)
-                                val currentOffset = offsetAnimatable.value
-                                val extraWidth = (tabWidth * stretchFactor) - tabWidth
-                                val adjustedOffset = currentOffset - with(LocalDensity.current) { (extraWidth / 2).toPx() }
-                                
-                                Box(modifier = Modifier
-                                    .fillMaxSize()
-                                    .pointerInput(Unit) {
-                                        detectHorizontalDragGestures(
-                                            onDragEnd = {
-                                                coroutineScope.launch {
-                                                    val targetIndex = (offsetAnimatable.value / tabWidthPx).roundToInt().coerceIn(0, 2)
-                                                    val categoryStr = when(targetIndex) {
-                                                        0 -> "movie"
-                                                        1 -> "tv"
-                                                        else -> "person"
-                                                    }
-                                                    viewModel.onCategoryChanged(categoryStr)
-                                                    
-                                                    offsetAnimatable.animateTo(
-                                                        targetValue = targetIndex * tabWidthPx,
-                                                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
-                                                        initialVelocity = offsetAnimatable.velocity
-                                                    )
-                                                }
-                                            },
-                                            onDragCancel = {
-                                                coroutineScope.launch {
-                                                    offsetAnimatable.animateTo(
-                                                        targetValue = selectedIndex * tabWidthPx,
-                                                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-                                                    )
-                                                }
-                                            },
-                                            onHorizontalDrag = { change: androidx.compose.ui.input.pointer.PointerInputChange, dragAmount: Float ->
-                                                change.consume()
-                                                coroutineScope.launch {
-                                                    val newVal = (offsetAnimatable.value + dragAmount).coerceIn(0f, tabWidthPx * 2)
-                                                    offsetAnimatable.snapTo(newVal)
-                                                }
-                                            }
-                                        )
-                                    }
-                                ) {
-                                    Box(modifier = Modifier
-                                        .offset { androidx.compose.ui.unit.IntOffset(adjustedOffset.roundToInt(), 0) }
-                                        .width(tabWidth * stretchFactor)
-                                        .fillMaxHeight()
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-                                    )
-                                    
-                                    Row(modifier = Modifier.fillMaxSize()) {
-                                        CategoryTab(stringResource(R.string.folder_detail_tab_movies), uiState.category == "movie") { viewModel.onCategoryChanged("movie") }
-                                        CategoryTab(stringResource(R.string.folder_detail_tab_tv), uiState.category == "tv") { viewModel.onCategoryChanged("tv") }
-                                        CategoryTab(stringResource(R.string.search_tab_persons), uiState.category == "person") { viewModel.onCategoryChanged("person") }
-                                    }
-                                }
-                                 }
-                             }
+                        SearchCategorySelector(
+                            category = uiState.category,
+                            onCategoryChanged = { viewModel.onCategoryChanged(it) }
+                        )
 
                     }
                 }
@@ -1184,45 +757,4 @@ fun SearchScreenContent(
 
 
 
-@Composable
-fun RowScope.CategoryTab(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (isPressed) 0.92f else 1f, label = "tabScale")
 
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .weight(1f)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(CircleShape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.sp
-        )
-    }
-}
-
-@Composable
-fun TrendingHeader(text: String) {
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 1.2.sp,
-        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-    )
-}
