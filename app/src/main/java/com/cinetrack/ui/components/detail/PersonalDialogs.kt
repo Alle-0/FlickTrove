@@ -226,7 +226,6 @@ fun NoteEditorBox(
     modifier: Modifier = Modifier
 ) {
     var note by remember(currentNote) { mutableStateOf(currentNote ?: "") }
-    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     
     val context = LocalContext.current
     val audioHelper = remember { AudioRecorderHelper(context) }
@@ -283,7 +282,6 @@ fun NoteEditorBox(
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.03f))
             .border(0.5.dp, accentColor.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
-            .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
             .padding(20.dp)
     ) {
         Row(

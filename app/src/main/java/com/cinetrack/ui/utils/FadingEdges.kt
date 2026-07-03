@@ -88,3 +88,39 @@ fun Modifier.verticalFadingEdges(
             )
         }
     }
+
+fun Modifier.verticalFadingEdges(
+    lazyGridState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    topEdgeHeight: Dp = 24.dp,
+    bottomEdgeHeight: Dp = 24.dp
+): Modifier = this
+    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    .drawWithContent {
+        drawContent()
+        val topColors = listOf(Color.Transparent, Color.Black)
+        val bottomColors = listOf(Color.Black, Color.Transparent)
+        
+        val showTop = lazyGridState.canScrollBackward
+        val showBottom = lazyGridState.canScrollForward
+
+        if (showTop && topEdgeHeight > 0.dp) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = topColors,
+                    startY = 0f,
+                    endY = topEdgeHeight.toPx()
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+        if (showBottom && bottomEdgeHeight > 0.dp) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = bottomColors,
+                    startY = size.height - bottomEdgeHeight.toPx(),
+                    endY = size.height
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+    }

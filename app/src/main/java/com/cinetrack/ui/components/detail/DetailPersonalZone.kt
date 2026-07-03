@@ -64,11 +64,14 @@ fun DetailPersonalZone(
         lastActiveAction = expandedAction
     }
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
             .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
+            .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
     ) {
         Text(
             text = stringResource(R.string.detail_personal_zone),

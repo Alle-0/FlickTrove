@@ -32,6 +32,7 @@ import com.cinetrack.data.Movie
 import com.cinetrack.data.api.ImageItem
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
@@ -85,7 +86,9 @@ fun DetailCoverSelectionModal(
                     contentPadding = PaddingValues(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp).premiumScrollbar(gridState, paddingEnd = 6f)
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
+                        .verticalFadingEdges(gridState, topEdgeHeight = 16.dp, bottomEdgeHeight = 16.dp)
+                        .premiumScrollbar(gridState, paddingEnd = 6f)
                 ) {
                     if (defaultImg != null) {
                         item {
