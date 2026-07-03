@@ -302,8 +302,6 @@ class MovieDetailViewModel @Inject constructor(
             val imageType = if (newPath != null || local.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
             if (imageUrl != null) fetchAccentColor(imageUrl, local, forceReload = true)
-            val msgRes = if (newPath != null) R.string.detail_cover_updated_msg else R.string.detail_cover_reset_msg
-            actionFeedbackManager.emit(UiText.StringResource(msgRes))
         }
     }
 

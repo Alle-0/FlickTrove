@@ -494,24 +494,6 @@ fun SettingsScreenContent(
                         )
                     }
 
-                    // Section: Lingua
-                    item {
-                        SettingsLanguageSection(
-                            settingsViewModel = settingsViewModel,
-                            currentAccentColor = currentAccentColor,
-                            vibrationEnabled = vibrationEnabled
-                        )
-                    }
-
-                    // Section: Tab iniziale default
-                    item {
-                        SettingsStartTabSection(
-                            settingsViewModel = settingsViewModel,
-                            currentAccentColor = currentAccentColor,
-                            vibrationEnabled = vibrationEnabled
-                        )
-                    }
-
                     // Section: Estetica
                     item {
                         SettingsAestheticsSection(

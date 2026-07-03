@@ -166,11 +166,11 @@
     <string name="settings_language_system">Sistema</string>
     <string name="settings_language_en">EN</string>
     <string name="settings_language_it">IT</string>
-    
+
     <string name="settings_default_start_tab">Schermata Iniziale</string>
     <string name="settings_default_start_tab_desc">Scegli quale schermata vedere all\'avvio</string>
-    <string name="settings_default_start_home">Da Guardare</string>
-    <string name="settings_default_start_visti">Visti</string>
+    <string name="settings_default_start_home">DA VEDERE</string>
+    <string name="settings_default_start_visti">VISTI</string>
 
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Estetica</string>
@@ -806,7 +806,7 @@
     <string name="msg_action_updated">\"%1$s\" aggiornato</string>
 
     <!-- Detail Actions -->
-    
+
     <!-- Episodes -->
     <string name="episodes_info_desc">Informazioni Episodio</string>
     <string name="episodes_long_press_info">Tieni premuto un episodio per più info</string>

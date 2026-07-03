@@ -171,9 +171,9 @@
 
     <string name="settings_default_start_tab">Start Screen</string>
     <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
-    <string name="settings_default_start_home">To Watch</string>
-    <string name="settings_default_start_visti">Watched</string>
-    
+    <string name="settings_default_start_home">TO WATCH</string>
+    <string name="settings_default_start_visti">WATCHED</string>
+
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Aesthetics</string>
     <string name="settings_accent_color">Accent Color</string>
@@ -700,7 +700,7 @@
     <string name="episodes_specials">SPECIALS</string>
     <string name="episodes_season_n">SEASON %d</string>
     <string name="episodes_season_completed">SEASON COMPLETED</string>
-    
+
     <!-- Detail Actions -->
     <string name="action_reminder_active">REMINDER ACTIVE</string>
     <string name="action_remind_me">REMIND ME</string>
@@ -711,14 +711,14 @@
     <string name="action_watched">WATCHED</string>
     <string name="action_completed">COMPLETED</string>
     <string name="action_percent_watched">%1$d%% WATCHED</string>
-    
+
     <!-- Action Feedback Labels -->
     <string name="action_label_removed">removed</string>
     <string name="action_label_marked_watched">marked as watched</string>
     <string name="action_label_added_to_watch">added to To Watch</string>
     <string name="action_label_reminder_set">reminder set</string>
     <string name="action_label_updated">updated</string>
-    
+
     <!-- Personal Zone Actions -->
     <string name="personal_zone_rate">RATE</string>
     <string name="personal_zone_note">NOTE</string>
@@ -749,22 +749,22 @@
     <!-- Rating Explanations -->
     <string name="rating_g_label">GENERAL AUDIENCES</string>
     <string name="rating_g_desc">All ages admitted. Nothing that would offend parents for viewing by children.</string>
-    
+
     <string name="rating_pg_label">PARENTAL GUIDANCE SUGGESTED</string>
     <string name="rating_pg_desc">Some material may not be suitable for children. Parents urged to give "parental guidance".</string>
-    
+
     <string name="rating_pg13_label">PARENTS STRONGLY CAUTIONED</string>
     <string name="rating_pg13_desc">Some material may be inappropriate for children under 13.</string>
-    
+
     <string name="rating_r_label">RESTRICTED</string>
     <string name="rating_r_desc">Under 17 requires accompanying parent or adult guardian.</string>
-    
+
     <string name="rating_nc17_label">ADULTS ONLY</string>
     <string name="rating_nc17_desc">No one 17 and under admitted.</string>
-    
+
     <string name="rating_tv14_label">PARENTS STRONGLY CAUTIONED</string>
     <string name="rating_tv14_desc">This program contains some material that many parents would find unsuitable for children under 14 years of age.</string>
-    
+
     <string name="rating_tvma_label">MATURE AUDIENCE ONLY</string>
     <string name="rating_tvma_desc">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17.</string>
 

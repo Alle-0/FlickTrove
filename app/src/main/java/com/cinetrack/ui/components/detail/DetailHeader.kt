@@ -52,6 +52,7 @@ import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.LocalAdvancedVisualEffects
 
 /**
  * DetailHeader
@@ -169,27 +170,52 @@ fun DetailHeader(
             }
 
             if (matchPercentage != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            containerColor = accentColor.copy(alpha = 0.15f),
-                            blurRadius = 16.dp
+                val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+                if (advancedEffectsEnabled) {
+                    // Con blur: sfondo traslucido colorato + testo accentColor (blur fornisce contrasto)
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                containerColor = accentColor.copy(alpha = 0.15f),
+                                blurRadius = 16.dp
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${matchPercentage}% Match",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = accentColor
                         )
-                        .padding(horizontal = 6.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "${matchPercentage}% Match",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = accentColor
-                    )
+                    }
+                } else {
+                    // Senza blur: sfondo scuro solido + testo accentColor (contrasto garantito)
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(Color(0xFF1E1A22))
+                            .border(0.5.dp, accentColor.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape)
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${matchPercentage}% Match",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = accentColor
+                        )
+                    }
                 }
             }
         }

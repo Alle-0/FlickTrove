@@ -267,7 +267,7 @@ fun StatsScreenContent(
 
                                     if (shouldShowWrapped) {
                                         val yearTitle = stringResource(R.string.stats_wrapped, selectedYear)
-                                        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                             WrappedBannerPill(
                                                 stats = wrappedStats,
                                                 year = selectedYear,
@@ -300,7 +300,7 @@ fun StatsScreenContent(
 
                                     // ── VISTI QUEST'ANNO (solo se filtro per anno specifico) ────
                                     if (uiState.timeRange is TimeRange.Year && uiState.moviesInSelectedRange.isNotEmpty()) {
-                                        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                             Box(modifier = Modifier.fillMaxWidth().statsCard()) {
                                                 Column(modifier = Modifier.padding(vertical = 16.dp)) {
                                                     val sectionTitle = stringResource(R.string.stats_watched_in_year, selectedYear)
@@ -337,7 +337,7 @@ fun StatsScreenContent(
                                     }
 
                                     // ── Hero: Tempo totale ────────────────────────────────────
-                                    Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                         TotalTimeHeroCard(
                                             totalMinutes = stats.totalMinutes
                                         )
@@ -345,7 +345,7 @@ fun StatsScreenContent(
                                     Spacer(Modifier.height(36.dp))
 
                             // ── I TUOI FILM ───────────────────────────────────────────
-                            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                 StatsSectionHeader(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
                                     title = stringResource(R.string.stats_your_movies),
@@ -382,7 +382,7 @@ fun StatsScreenContent(
                             Spacer(Modifier.height(36.dp))
 
                             // ── SERIE TV ──────────────────────────────────────────────
-                            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                 StatsSectionHeader(
                                     icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
                                     title = stringResource(R.string.stats_tv_series),
@@ -424,7 +424,7 @@ fun StatsScreenContent(
 
                             if (stats.topCast.isNotEmpty()) {
                                 var castExpanded by rememberSaveable { mutableStateOf(false) }
-                                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                         title = stringResource(R.string.stats_top_cast),
@@ -442,7 +442,7 @@ fun StatsScreenContent(
 
                             if (stats.topDirectors.isNotEmpty()) {
                                 var dirExpanded by rememberSaveable { mutableStateOf(false) }
-                                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     StatsSectionHeader(
                                         icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
                                         title = stringResource(R.string.stats_top_directors),
@@ -458,7 +458,7 @@ fun StatsScreenContent(
                                 Spacer(Modifier.height(36.dp))
                             }
 
-                            Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
 
                                 // ── Distribuzione Generi ──────────────────────────────────
                                 if (stats.genreCounts.isNotEmpty()) {

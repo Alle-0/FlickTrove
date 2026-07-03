@@ -45,6 +45,8 @@ fun SettingsUILayoutSection(
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
+    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
+    val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -157,6 +159,99 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleUseMovieLogo(!useMovieLogo)
+            }
+        )
+        // App Language
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_world),
+            title = stringResource(R.string.settings_language),
+            description = stringResource(R.string.settings_language_desc),
+            trailing = { },
+            onClick = { },
+            customContent = {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val options = listOf(
+                        Triple("system", stringResource(R.string.settings_language_system), contentLanguage == "system"),
+                        Triple("en", stringResource(R.string.settings_language_en), contentLanguage == "en"),
+                        Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it")
+                    )
+                    options.forEach { (value, label, isSelected) ->
+                        key(value) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                    .bounceClick { 
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        if (contentLanguage != value) {
+                                            settingsViewModel.updateContentLanguage(value) {
+                                                var actContext = context
+                                                while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
+                                                    actContext = (actContext as android.content.ContextWrapper).baseContext
+                                                }
+                                                (actContext as? android.app.Activity)?.recreate()
+                                            }
+                                        }
+                                    }
+                                    .padding(vertical = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        // Start Screen
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
+            title = stringResource(R.string.settings_default_start_tab),
+            description = stringResource(R.string.settings_default_start_tab_desc),
+            trailing = { },
+            onClick = { },
+            customContent = {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val options = listOf(
+                        Triple("home", stringResource(R.string.settings_default_start_home), defaultStartTab == "home"),
+                        Triple("visti", stringResource(R.string.settings_default_start_visti), defaultStartTab == "visti")
+                    )
+                    options.forEach { (value, label, isSelected) ->
+                        key(value) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
+                                    .bounceClick { 
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        if (defaultStartTab != value) {
+                                            settingsViewModel.setDefaultStartTab(value)
+                                        }
+                                    }
+                                    .padding(vertical = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             }
         )
     }

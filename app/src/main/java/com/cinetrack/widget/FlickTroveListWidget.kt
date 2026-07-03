@@ -257,8 +257,9 @@ class FlickTroveListWidget : GlanceAppWidget() {
                                     if (!dateStr.isNullOrEmpty() && dateStr.length >= 10) {
                                         try {
                                             val dateObj = java.time.LocalDate.parse(dateStr.take(10))
-                                            val monthNames = arrayOf("Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic")
-                                            formattedDate = "${dateObj.dayOfMonth} ${monthNames[dateObj.monthValue - 1]} ${dateObj.year}"
+                                            val locale = context.resources.configuration.locales[0]
+                                            val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+                                            formattedDate = dateObj.format(formatter)
                                         } catch (e: Exception) {}
                                     }
                                     

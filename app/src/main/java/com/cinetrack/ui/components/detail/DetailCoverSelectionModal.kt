@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -134,6 +135,7 @@ fun DetailCoverSelectionModal(
                                     )
                                 }
                                 if (isDefaultSelected) {
+                                    val badgeTextColor = if (accentColor.luminance() > 0.4f) Color.Black else Color.White
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
@@ -144,7 +146,7 @@ fun DetailCoverSelectionModal(
                                         Text(
                                             text = stringResource(R.string.detail_cover_selected_badge),
                                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp),
-                                            color = Color.White
+                                            color = badgeTextColor
                                         )
                                     }
                                 }
@@ -185,6 +187,7 @@ fun DetailCoverSelectionModal(
                                 modifier = Modifier.fillMaxSize()
                             )
                             if (isSelected) {
+                                val badgeTextColor = if (accentColor.luminance() > 0.4f) Color.Black else Color.White
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
@@ -195,7 +198,7 @@ fun DetailCoverSelectionModal(
                                     Text(
                                         text = stringResource(R.string.detail_cover_selected_badge),
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp),
-                                        color = Color.White
+                                        color = badgeTextColor
                                     )
                                 }
                             }
