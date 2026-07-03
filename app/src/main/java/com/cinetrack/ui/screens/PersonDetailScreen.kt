@@ -66,6 +66,8 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -74,6 +76,8 @@ data class PersonDetailScreen(
     val personId: Long,
     val profilePath: String?
 ) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
     @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
@@ -519,15 +523,53 @@ fun PersonDetailScreenContent(
                             blurRadius = HazeStyles.SmallGlassBlurRadius,
                             useOffscreenStrategy = true
                         )
-                        .bounceClick { onHomeClick() },
+                        .bounceClick { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                        contentDescription = stringResource(R.string.detail_content_desc_home),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_left),
+                        contentDescription = stringResource(R.string.detail_content_desc_back),
                         tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
+                }
+
+                val homeButtonVisible = detailStackDepth >= 3
+                val homeButtonAlpha by animateFloatAsState(
+                    targetValue = if (homeButtonVisible) 1f else 0f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                    label = "HomeButtonAlpha"
+                )
+                val homeButtonScale by animateFloatAsState(
+                    targetValue = if (homeButtonVisible) 1f else 0.6f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+                    label = "HomeButtonScale"
+                )
+                if (homeButtonAlpha > 0.01f) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .graphicsLayer {
+                                alpha = homeButtonAlpha
+                                scaleX = homeButtonScale
+                                scaleY = homeButtonScale
+                            }
+                            .hazeGlass(
+                                state = localHazeState,
+                                shape = CircleShape,
+                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                useOffscreenStrategy = true
+                            )
+                            .bounceClick { onHomeClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_home),
+                            contentDescription = stringResource(R.string.detail_content_desc_home),
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
