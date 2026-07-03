@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -247,11 +248,14 @@ fun PersonDetailScreenContent(
                     val filmoRows = remember(filmo, columns) {
                         filmo.chunked(columns)
                     }
+                    val filmographyListState = rememberLazyListState()
 
                     androidx.compose.foundation.lazy.LazyColumn(
+                        state = filmographyListState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .haze(localHazeState, style = HazeStyles.PremiumDark),
+                            .haze(localHazeState, style = HazeStyles.PremiumDark)
+                            .verticalFadingEdges(filmographyListState, topEdgeHeight = 24.dp, bottomEdgeHeight = 24.dp),
                         contentPadding = paddingValues
                     ) {
                         item {
