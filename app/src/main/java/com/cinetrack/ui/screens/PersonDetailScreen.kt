@@ -5,7 +5,6 @@ import com.cinetrack.R
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
-import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -75,7 +74,7 @@ data class PersonDetailScreen(
     val personId: Long,
     val profilePath: String?
 ) : Screen {
-    @OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+    @OptIn(ExperimentalSharedTransitionApi::class)
     @Composable
     override fun Content() {
         val viewModel = getViewModel<PersonDetailViewModel>()
@@ -103,7 +102,7 @@ data class PersonDetailScreen(
     }
 }
 
-@OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PersonDetailScreenContent(
     viewModel: PersonDetailViewModel,
@@ -207,153 +206,249 @@ fun PersonDetailScreenContent(
                     onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
                     onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
                 ) { actionsState ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(viewModel.scrollState)
-                            .haze(localHazeState, style = HazeStyles.PremiumDark)
-                    ) {
-                    // Hero Profile Image
-                    Box(modifier = Modifier.fillMaxWidth().height(480.dp)) {
-                        AsyncImage(
-                            model = buildTmdbImageUrl(p.profilePath, ImageType.PROFILE, LocalImageQuality.current),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                        
-                        // Top Gradient - Unified with MovieDetail
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp + paddingValues.calculateTopPadding())
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(Color.Black.copy(alpha = 0.85f), Color.Transparent)
-                                    )
-                                )
-                        )
-
-                        Box(modifier = Modifier.fillMaxSize().background(
-                            Brush.verticalGradient(listOf(
-                                Color.Transparent, 
-                                Color.Transparent, 
-                                Color(0xFF0A0A0A).copy(alpha = 0.55f),
-                                Color(0xFF0A0A0A)
-                            ))
-                        ))
+                    val castMovies = remember(p.combinedCredits) {
+                        p.combinedCredits?.cast?.filter { it.mediaType == "movie" }
+                            ?.distinctBy { it.id }
+                            ?.sortedByDescending { it.releaseDate ?: "" }
+                            .orEmpty()
+                    }
+                    val castTV = remember(p.combinedCredits) {
+                        p.combinedCredits?.cast?.filter { it.mediaType == "tv" }
+                            ?.distinctBy { it.id }
+                            ?.sortedByDescending { it.firstAirDate ?: "" }
+                            .orEmpty()
+                    }
+                    val crewMovies = remember(p.combinedCredits) {
+                        p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "movie" }
+                            ?.distinctBy { it.id }
+                            ?.sortedByDescending { it.releaseDate ?: "" }
+                            .orEmpty()
+                    }
+                    val crewTV = remember(p.combinedCredits) {
+                        p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "tv" }
+                            ?.distinctBy { it.id }
+                            ?.sortedByDescending { it.firstAirDate ?: "" }
+                            .orEmpty()
                     }
 
-                    Column(modifier = Modifier.offset(y = (-50).dp)) {
-                        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                            Text(
-                                text = p.name,
-                                color = Color.White,
-                                fontSize = 42.sp,
-                                fontWeight = FontWeight.Black,
-                                lineHeight = 46.sp,
-                                textAlign = TextAlign.Start,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Text(
-                                text = p.knownForDepartment ?: "",
-                                color = Color.White.copy(alpha = 0.4f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
+                    val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
+                        when (uiState.activeTab) {
+                            "cast_movie" -> castMovies
+                            "cast_tv" -> castTV
+                            "crew_movie" -> crewMovies
+                            "crew_tv" -> crewTV
+                            else -> castMovies
+                        }
+                    }
+                    val filmoRows = remember(filmo, columns) {
+                        filmo.chunked(columns)
+                    }
 
-                            p.biography?.let { bio ->
-                                Column(
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .haze(localHazeState, style = HazeStyles.PremiumDark),
+                        contentPadding = paddingValues
+                    ) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().height(480.dp)) {
+                                AsyncImage(
+                                    model = buildTmdbImageUrl(p.profilePath, ImageType.PROFILE, LocalImageQuality.current),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                Box(
                                     modifier = Modifier
-                                        .bounceClick(scaleDown = 0.99f) { viewModel.toggleBio() }
-                                ) {
-                                    androidx.compose.animation.AnimatedContent(
-                                        targetState = uiState.showFullBio,
-                                        transitionSpec = {
-                                            androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(350)) togetherWith
-                                                    androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(350)) using
-                                                    androidx.compose.animation.SizeTransform(clip = true) { _, _ ->
-                                                        androidx.compose.animation.core.spring(
-                                                            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                                                            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                                                        )
-                                                    }
-                                        },
-                                        label = "BioExpansion"
-                                    ) { targetExpanded ->
-                                        Text(
-                                            text = bio,
-                                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-                                                lineHeight = 20.sp,
-                                                letterSpacing = 0.2.sp,
-                                                fontSize = 14.sp
-                                            ),
-                                            color = Color.White.copy(alpha = 0.7f),
-                                            maxLines = if (targetExpanded) Int.MAX_VALUE else 4,
-                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        .fillMaxWidth()
+                                        .height(140.dp + paddingValues.calculateTopPadding())
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(Color.Black.copy(alpha = 0.85f), Color.Transparent)
+                                            )
                                         )
-                                    }
-                                    if (bio.length > 200) {
-                                        Text(
-                                            text = if (uiState.showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
-                                            style = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = Color.White,
-                                            modifier = Modifier.padding(top = 12.dp)
+                                )
+
+                                Box(
+                                    modifier = Modifier.fillMaxSize().background(
+                                        Brush.verticalGradient(
+                                            listOf(
+                                                Color.Transparent,
+                                                Color.Transparent,
+                                                Color(0xFF0A0A0A).copy(alpha = 0.55f),
+                                                Color(0xFF0A0A0A)
+                                            )
                                         )
+                                    )
+                                )
+                            }
+                        }
+
+                        item {
+                            Column(modifier = Modifier.offset(y = (-50).dp)) {
+                                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+                                    Text(
+                                        text = p.name,
+                                        color = Color.White,
+                                        fontSize = 42.sp,
+                                        fontWeight = FontWeight.Black,
+                                        lineHeight = 46.sp,
+                                        textAlign = TextAlign.Start,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Text(
+                                        text = p.knownForDepartment ?: "",
+                                        color = Color.White.copy(alpha = 0.4f),
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+
+                                    p.biography?.let { bio ->
+                                        Column(
+                                            modifier = Modifier
+                                                .bounceClick(scaleDown = 0.99f) { viewModel.toggleBio() }
+                                        ) {
+                                            androidx.compose.animation.AnimatedContent(
+                                                targetState = uiState.showFullBio,
+                                                transitionSpec = {
+                                                    androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(350)) togetherWith
+                                                            androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(350)) using
+                                                            androidx.compose.animation.SizeTransform(clip = true) { _, _ ->
+                                                                androidx.compose.animation.core.spring(
+                                                                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                                                                )
+                                                            }
+                                                },
+                                                label = "BioExpansion"
+                                            ) { targetExpanded ->
+                                                Text(
+                                                    text = bio,
+                                                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                                                        lineHeight = 20.sp,
+                                                        letterSpacing = 0.2.sp,
+                                                        fontSize = 14.sp
+                                                    ),
+                                                    color = Color.White.copy(alpha = 0.7f),
+                                                    maxLines = if (targetExpanded) Int.MAX_VALUE else 4,
+                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                )
+                                            }
+                                            if (bio.length > 200) {
+                                                Text(
+                                                    text = if (uiState.showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
+                                                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    color = Color.White,
+                                                    modifier = Modifier.padding(top = 12.dp)
+                                                )
+                                            }
+                                        }
+                                    } ?: Text(
+                                        text = stringResource(R.string.person_no_bio),
+                                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                                            lineHeight = 20.sp,
+                                            letterSpacing = 0.2.sp,
+                                            fontSize = 14.sp
+                                        ),
+                                        color = Color.White.copy(alpha = 0.7f)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(30.dp))
+
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_birthday), p.birthday ?: stringResource(R.string.person_nd))
+                                            PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_partenone), stringResource(R.string.person_birth_place), p.placeOfBirth ?: stringResource(R.string.person_nd))
+                                        }
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_documento), stringResource(R.string.person_known_for), p.knownForDepartment ?: stringResource(R.string.person_nd))
+                                            PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_popularity), p.popularity?.let { "%.1f".format(it) } ?: stringResource(R.string.person_nd))
+                                        }
                                     }
                                 }
-                            } ?: Text(
-                                text = stringResource(R.string.person_no_bio),
-                                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-                                    lineHeight = 20.sp,
-                                    letterSpacing = 0.2.sp,
-                                    fontSize = 14.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.7f)
-                            )
 
-                            Spacer(modifier = Modifier.height(30.dp))
+                                Spacer(modifier = Modifier.height(40.dp))
 
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_birthday), p.birthday ?: stringResource(R.string.person_nd))
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_partenone), stringResource(R.string.person_birth_place), p.placeOfBirth ?: stringResource(R.string.person_nd))
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_documento), stringResource(R.string.person_known_for), p.knownForDepartment ?: stringResource(R.string.person_nd))
-                                    PersonInfoItem(ImageVector.vectorResource(id = R.drawable.ic_star), stringResource(R.string.person_popularity), p.popularity?.let { "%.1f".format(it) } ?: stringResource(R.string.person_nd))
+                                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    val knownFor = remember(p.combinedCredits) {
+                                        val cast = p.combinedCredits?.cast.orEmpty()
+                                        val crew = p.combinedCredits?.crew.orEmpty()
+                                        (cast + crew)
+                                            .sortedByDescending { it.voteCount ?: 0 }
+                                            .distinctBy { it.id.toString() + "_" + it.mediaType }
+                                            .take(10)
+                                    }
+                                    if (knownFor.isNotEmpty()) {
+                                        Text(stringResource(R.string.person_highlights), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            itemsIndexed(
+                                                items = knownFor,
+                                                key = { _, it -> it.id.toString() + "_" + it.mediaType }
+                                            ) { index, m ->
+                                                val movieStatus = favoritesMap["${m.mediaType}_${m.id}"]
+                                                val movie = movieStatus ?: m
+                                                val folderColors = folderColorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = 130.dp,
+                                                    isFavorite = movieStatus?.favorite ?: false,
+                                                    isWatched = movieStatus?.watched ?: false,
+                                                    isReminder = movieStatus?.reminder ?: false,
+                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                                    personalRating = movieStatus?.personalRating,
+                                                    folderColors = folderColors,
+                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                                    animatedVisibilityScope = animatedVisibilityScope,
+                                                    staggerIndex = index,
+                                                    onPress = { onMovieClick(m) },
+                                                    onAction = { viewModel.toggleFavorite(m) },
+                                                    onLongPress = actionsState.onLongPress,
+                                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(40.dp))
+                                    }
+
+                                    Text(stringResource(R.string.person_filmography), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
+
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(vertical = 16.dp)
+                                            .horizontalScroll(rememberScrollState()),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        if (castMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_movie_format, castMovies.size), uiState.activeTab == "cast_movie", hazeState = localHazeState) { viewModel.onTabChanged("cast_movie") }
+                                        if (castTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_tv_format, castTV.size), uiState.activeTab == "cast_tv", hazeState = localHazeState) { viewModel.onTabChanged("cast_tv") }
+                                        if (crewMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_movie_format, crewMovies.size), uiState.activeTab == "crew_movie", hazeState = localHazeState) { viewModel.onTabChanged("crew_movie") }
+                                        if (crewTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_tv_format, crewTV.size), uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
+                                    }
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(40.dp))
-
-                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            val knownFor = remember(p.combinedCredits) {
-                                val cast = p.combinedCredits?.cast.orEmpty()
-                                val crew = p.combinedCredits?.crew.orEmpty()
-                                (cast + crew)
-                                    .sortedByDescending { it.voteCount ?: 0 }
-                                    .distinctBy { it.id.toString() + "_" + it.mediaType }
-                                    .take(10)
-                            }
-                            if (knownFor.isNotEmpty()) {
-                                Text(stringResource(R.string.person_highlights), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
-                                Spacer(modifier = Modifier.height(16.dp))
-                                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    itemsIndexed(
-                                        items = knownFor,
-                                        key = { _, it -> it.id.toString() + "_" + it.mediaType }
-                                    ) { index, m ->
-                                        val movieStatus = favoritesMap["${m.mediaType}_${m.id}"]
-                                        val movie = movieStatus ?: m
-                                        val folderColors = folderColorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                                        MovieCard(
-                                            movie = movie,
-                                            cardWidth = 130.dp,
+                        items(filmoRows) { rowMovies ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = padding, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                rowMovies.forEachIndexed { colIndex, movie ->
+                                val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
+                                val m = movieStatus ?: movie
+                                val staggerIdx = colIndex
+                                val folderColors = folderColorsMap["${m.mediaType}_${m.id}"] ?: emptyList()
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (columns == 1) {
+                                        com.cinetrack.ui.components.MovieListCard(
+                                            movie = m,
+                                            modifier = Modifier.fillMaxWidth(),
                                             isFavorite = movieStatus?.favorite ?: false,
                                             isWatched = movieStatus?.watched ?: false,
                                             isReminder = movieStatus?.reminder ?: false,
@@ -361,134 +456,47 @@ fun PersonDetailScreenContent(
                                             personalRating = movieStatus?.personalRating,
                                             folderColors = folderColors,
                                             showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                            animatedVisibilityScope = animatedVisibilityScope,
-                                            staggerIndex = index,
-                                            onPress = { onMovieClick(m) },
-                                            onAction = { viewModel.toggleFavorite(m) },
+                                            showBadges = uiState.preferences.showBadges,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            hazeState = localHazeState,
+                                            staggerIndex = staggerIdx,
+                                            onPress = { onMovieClick(movie) },
+                                            onAction = { viewModel.toggleFavorite(movie) },
+                                            onLongPress = actionsState.onLongPress,
+                                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                        )
+                                    } else {
+                                        MovieCard(
+                                            movie = m,
+                                            cardWidth = cardWidth,
+                                            isFavorite = movieStatus?.favorite ?: false,
+                                            isWatched = movieStatus?.watched ?: false,
+                                            isReminder = movieStatus?.reminder ?: false,
+                                            progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                            personalRating = movieStatus?.personalRating,
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            animatedVisibilityScope = null,
+                                            staggerIndex = staggerIdx,
+                                            onPress = { onMovieClick(movie) },
+                                            onAction = { viewModel.toggleFavorite(movie) },
                                             onLongPress = actionsState.onLongPress,
                                                     onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                         )
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(40.dp))
                             }
-
-                            Text(stringResource(R.string.person_filmography), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
-
-                            val castMovies = remember(p.combinedCredits) {
-                                p.combinedCredits?.cast?.filter { it.mediaType == "movie" }
-                                    ?.distinctBy { it.id }
-                                    ?.sortedByDescending { it.releaseDate ?: "" }
-                                    .orEmpty()
-                            }
-                            val castTV = remember(p.combinedCredits) {
-                                p.combinedCredits?.cast?.filter { it.mediaType == "tv" }
-                                    ?.distinctBy { it.id }
-                                    ?.sortedByDescending { it.firstAirDate ?: "" }
-                                    .orEmpty()
-                            }
-                            val crewMovies = remember(p.combinedCredits) {
-                                p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "movie" }
-                                    ?.distinctBy { it.id }
-                                    ?.sortedByDescending { it.releaseDate ?: "" }
-                                    .orEmpty()
-                            }
-                            val crewTV = remember(p.combinedCredits) {
-                                p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "tv" }
-                                    ?.distinctBy { it.id }
-                                    ?.sortedByDescending { it.firstAirDate ?: "" }
-                                    .orEmpty()
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .padding(vertical = 16.dp)
-                                    .horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                if (castMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_movie_format, castMovies.size), uiState.activeTab == "cast_movie", hazeState = localHazeState) { viewModel.onTabChanged("cast_movie") }
-                                if (castTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_cast_tv_format, castTV.size), uiState.activeTab == "cast_tv", hazeState = localHazeState) { viewModel.onTabChanged("cast_tv") }
-                                if (crewMovies.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_movie_format, crewMovies.size), uiState.activeTab == "crew_movie", hazeState = localHazeState) { viewModel.onTabChanged("crew_movie") }
-                                if (crewTV.isNotEmpty()) CategoryPill(stringResource(R.string.person_crew_tv_format, crewTV.size), uiState.activeTab == "crew_tv", hazeState = localHazeState) { viewModel.onTabChanged("crew_tv") }
-                            }
-
-                            val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
-                                when (uiState.activeTab) {
-                                    "cast_movie" -> castMovies
-                                    "cast_tv" -> castTV
-                                    "crew_movie" -> crewMovies
-                                    "crew_tv" -> crewTV
-                                    else -> castMovies
-                                }
-                            }
-
-                            filmo.chunked(columns).forEachIndexed { rowIndex, rowMovies ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 6.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    rowMovies.forEachIndexed { colIndex, movie ->
-                                        val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
-                                        val m = movieStatus ?: movie
-                                        val staggerIdx = rowIndex * columns + colIndex
-                                        val folderColors = folderColorsMap["${m.mediaType}_${m.id}"] ?: emptyList()
-                                        Box(modifier = Modifier.weight(1f)) {
-                                            if (columns == 1) {
-                                                com.cinetrack.ui.components.MovieListCard(
-                                                    movie = m,
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    showBadges = uiState.preferences.showBadges,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    hazeState = localHazeState,
-                                                    staggerIndex = staggerIdx,
-                                                    onPress = { onMovieClick(movie) },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = actionsState.onLongPress,
-                                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            } else {
-                                                MovieCard(
-                                                    movie = m,
-                                                    cardWidth = cardWidth,
-                                                    isFavorite = movieStatus?.favorite ?: false,
-                                                    isWatched = movieStatus?.watched ?: false,
-                                                    isReminder = movieStatus?.reminder ?: false,
-                                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                                    personalRating = movieStatus?.personalRating,
-                                                    folderColors = folderColors,
-                                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                                    animatedVisibilityScope = null,
-                                                    staggerIndex = staggerIdx,
-                                                    onPress = { onMovieClick(movie) },
-                                                    onAction = { viewModel.toggleFavorite(movie) },
-                                                    onLongPress = actionsState.onLongPress,
-                                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                                )
-                                            }
-                                        }
-                                    }
-                                    repeat(columns - rowMovies.size) { Spacer(modifier = Modifier.weight(1f)) }
-                                }
-                            }
+                            repeat(columns - rowMovies.size) { Spacer(modifier = Modifier.weight(1f)) }
                         }
+                    }
 
+                    item {
                         Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding() + 16.dp))
                     }
                 }
             }
-            }
         }
-    }
 
         Box(
             modifier = Modifier
@@ -502,59 +510,9 @@ fun PersonDetailScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .hazeGlass(
-                        state = localHazeState,
-                        shape = CircleShape,
-                        blurRadius = HazeStyles.SmallGlassBlurRadius,
-                        useOffscreenStrategy = true
-                    )
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                isBackPressed = true
-                                try { awaitRelease() } finally { isBackPressed = false }
-                            },
-                            onTap = { onBackClick() }
-                        )
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_left),
-                    contentDescription = stringResource(R.string.detail_content_desc_back),
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .graphicsLayer {
-                            scaleX = backIconScale
-                            scaleY = backIconScale
-                        }
-                )
-            }
-            // Home FAB â€” visible from the 3rd consecutive detail screen onwards
-            val homeButtonVisible = detailStackDepth >= 3
-            val homeButtonAlpha by animateFloatAsState(
-                targetValue = if (homeButtonVisible) 1f else 0f,
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                label = "HomeFabAlpha"
-            )
-            val homeButtonScale by animateFloatAsState(
-                targetValue = if (homeButtonVisible) 1f else 0.6f,
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
-                label = "HomeFabScale"
-            )
-            if (homeButtonAlpha > 0.01f) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .graphicsLayer {
-                            alpha = homeButtonAlpha
-                            scaleX = homeButtonScale
-                            scaleY = homeButtonScale
-                        }
+                        .size(44.dp)
                         .hazeGlass(
                             state = localHazeState,
                             shape = CircleShape,
@@ -572,9 +530,10 @@ fun PersonDetailScreenContent(
                     )
                 }
             }
-            } // end Column
         }
     }
+}
+}
 }
 
 @Composable

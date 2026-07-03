@@ -103,6 +103,7 @@ fun MovieMenuItem(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    iconModifier: Modifier = Modifier,
     iconColor: Color = Color.White.copy(alpha = 0.8f),
     isDestructive: Boolean = false
 ) {
@@ -130,7 +131,7 @@ fun MovieMenuItem(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isDestructive) Color(0xFFE57373) else iconColor,
-                modifier = Modifier.size(16.dp)
+                modifier = iconModifier.size(16.dp)
             )
         }
         Text(
@@ -300,7 +301,7 @@ fun MovieActionsPopup(
                                     letterSpacing = 0.2.sp
                                 ),
                                 color = Color.White,
-                                maxLines = 1,
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Spacer(modifier = Modifier.height(3.dp))
@@ -343,6 +344,7 @@ fun MovieActionsPopup(
                         MovieMenuItem(
                             text = stringResource(R.string.card_share),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_share),
+                            iconModifier = Modifier.offset(x = (-1).dp),
                             iconColor = Color(0xFF818CF8),
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 160)) { it / 2 } + fadeIn(tween(300, delayMillis = 160))
