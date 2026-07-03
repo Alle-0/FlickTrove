@@ -258,7 +258,10 @@ fun StatsScreenContent(
                                         )
                                     }
 
-                                    val selectedYear = currentYear
+                                    val selectedYear = when (val range = uiState.timeRange) {
+                                        is TimeRange.Year -> range.year
+                                        is TimeRange.AllTime -> currentYear
+                                    }
                                     val wrappedStats = uiState.currentYearStats
                                     val shouldShowWrapped = wrappedStats != null && (wrappedStats.moviesWatched > 0 || wrappedStats.tvWatched > 0)
 
@@ -295,8 +298,8 @@ fun StatsScreenContent(
                                         Spacer(Modifier.height(36.dp))
                                     }
 
-                                    // ── VISTI QUEST'ANNO ────────────────────────────────────
-                                    if (uiState.moviesInSelectedRange.isNotEmpty()) {
+                                    // ── VISTI QUEST'ANNO (solo se filtro per anno specifico) ────
+                                    if (uiState.timeRange is TimeRange.Year && uiState.moviesInSelectedRange.isNotEmpty()) {
                                         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                                             Box(modifier = Modifier.fillMaxWidth().statsCard()) {
                                                 Column(modifier = Modifier.padding(vertical = 16.dp)) {
