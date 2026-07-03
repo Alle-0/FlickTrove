@@ -389,7 +389,7 @@ class SettingsViewModel @Inject constructor(
                     title = title,
                     description = description,
                     rating = rating,
-                    appVersion = "3.1.3" // Aligning with UI version
+                    appVersion = "3.1.5" // Aligning with UI version
                 )
                 val result = feedbackRepository.sendFeedback(feedback)
                 if (result.isSuccess) {
