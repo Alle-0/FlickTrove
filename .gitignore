@@ -47,3 +47,8 @@ release/
 
 # Kotlin compiler caches
 .kotlin/
+
+# Local backup exports and dumps
+Cinemaniac.json
+*.csv
+*backup*.json
