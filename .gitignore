@@ -34,3 +34,9 @@ local.properties
 .env
 apikey.properties
 secrets.properties
+
+# Compiled binaries and release outputs
+*.apk
+*.aab
+app/release/
+release/
