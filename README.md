@@ -21,21 +21,21 @@
 <details open>
   <summary><b>📖 Table of Contents</b></summary>
   <ol>
-    <li><a href="#-the-project">🎯 The Project</a></li>
-    <li><a href="#-key-features">✨ Key Features</a></li>
-    <li><a href="#-ui-screenshots">📱 UI Screenshots</a></li>
-    <li><a href="#%EF%B8%8F-architecture--technology">🛠️ Architecture & Technology</a></li>
-    <li><a href="#-design--ui">🎨 Design & UI</a></li>
-    <li><a href="#%EF%B8%8F-developer-note">⚠️ Developer Note</a></li>
-    <li><a href="#-usage">🚀 Usage</a></li>
-    <li><a href="#-license">📄 License</a></li>
-    <li><a href="#-contacts--credits">📫 Contacts & Credits</a></li>
+    <li><a href="#the-project"><img src="docs/assets/readme_icons/ciak.svg" width="18" height="18" align="absmiddle" /> The Project</a></li>
+    <li><a href="#key-features"><img src="docs/assets/readme_icons/sparkle.svg" width="18" height="18" align="absmiddle" /> Key Features</a></li>
+    <li><a href="#ui-screenshots"><img src="docs/assets/readme_icons/smartphone_magia.svg" width="18" height="18" align="absmiddle" /> UI Screenshots</a></li>
+    <li><a href="#architecture--technology"><img src="docs/assets/readme_icons/settings.svg" width="18" height="18" align="absmiddle" /> Architecture & Technology</a></li>
+    <li><a href="#design--ui"><img src="docs/assets/readme_icons/palette.svg" width="18" height="18" align="absmiddle" /> Design & UI</a></li>
+    <li><a href="#note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="18" height="18" align="absmiddle" /> Developer Note</a></li>
+    <li><a href="#usage"><img src="docs/assets/readme_icons/play.svg" width="18" height="18" align="absmiddle" /> Usage</a></li>
+    <li><a href="#license"><img src="docs/assets/readme_icons/documento.svg" width="18" height="18" align="absmiddle" /> License</a></li>
+    <li><a href="#contacts--credits"><img src="docs/assets/readme_icons/people.svg" width="18" height="18" align="absmiddle" /> Contacts & Credits</a></li>
   </ol>
 </details>
 
 ---
 
-## 🎯 The Project
+## <img src="docs/assets/readme_icons/ciak.svg" width="24" height="24" align="absmiddle" /> The Project
 
 **What is the motivation behind FlickTrove?**
 There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies.
@@ -44,7 +44,7 @@ This project solves the need for an elegant personal library, cloud-synchronized
 
 ---
 
-## ✨ Key Features
+## <img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features
 
 FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
 
@@ -62,7 +62,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 
 ---
 
-## 📱 UI Screenshots
+## <img src="docs/assets/readme_icons/smartphone_magia.svg" width="24" height="24" align="absmiddle" /> UI Screenshots
 
 <div align="center">
   <table>
@@ -91,7 +91,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 
 ---
 
-## 🛠️ Architecture & Technology
+## <img src="docs/assets/readme_icons/settings.svg" width="24" height="24" align="absmiddle" /> Architecture & Technology
 
 Behind a gorgeous interface lies a solid and scalable engine. We used the best practices of modern Android development.
 
@@ -114,7 +114,7 @@ FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows 
 
 ---
 
-## 🎨 Design & UI
+## <img src="docs/assets/readme_icons/palette.svg" width="24" height="24" align="absmiddle" /> Design & UI
 
 Design is the true crown jewel of FlickTrove.
 
@@ -124,7 +124,7 @@ Design is the true crown jewel of FlickTrove.
 
 ---
 
-## ⚠️ Note
+## <img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note
 
 For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
 
@@ -132,7 +132,7 @@ Therefore, the project cannot be cloned and compiled "out-of-the-box". The sourc
 
 ---
 
-## 🚀 Usage
+## <img src="docs/assets/readme_icons/play.svg" width="24" height="24" align="absmiddle" /> Usage
 
 Once the app is launched:
 
@@ -143,7 +143,7 @@ Once the app is launched:
 
 ---
 
-## 🗺️ Future Roadmap
+## <img src="docs/assets/readme_icons/calendario.svg" width="24" height="24" align="absmiddle" /> Future Roadmap
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
@@ -154,7 +154,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 ---
 
-## 📄 License
+## <img src="docs/assets/readme_icons/documento.svg" width="24" height="24" align="absmiddle" /> License
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
@@ -162,7 +162,7 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 
 ---
 
-## 📫 Contacts & Credits
+## <img src="docs/assets/readme_icons/people.svg" width="24" height="24" align="absmiddle" /> Contacts & Credits
 
 **Developed by:**
 
