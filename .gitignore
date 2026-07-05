@@ -44,3 +44,6 @@ release/
 # Obsolete root image folders (replaced by docs/assets)
 /assets/
 /screenshots/
+
+# Kotlin compiler caches
+.kotlin/
