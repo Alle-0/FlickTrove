@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="figma_exports_svg_v2/Icon.svg" alt="FlickTrove Logo" width="100" height="100" />
+<img src="docs/assets/Icon.svg" alt="FlickTrove Logo" width="100" height="100" />
 <img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=180&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
@@ -72,9 +72,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_home.png?v=2" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_explore.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_dune.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_home.webp" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_explore.webp" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_dune.webp" width="240"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
@@ -82,9 +82,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><br><b>Deep Details</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_stats.png?v=2" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_folders.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="assets/screenshot_detail.png?v=2" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_stats.webp" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_folders.webp" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_detail.webp" width="240"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>

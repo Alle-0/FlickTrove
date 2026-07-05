@@ -40,3 +40,7 @@ secrets.properties
 *.aab
 app/release/
 release/
+
+# Obsolete root image folders (replaced by docs/assets)
+/assets/
+/screenshots/

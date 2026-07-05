@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** May 26, 2026
+**Last Updated:** July 5, 2026
 
 This Privacy Policy describes how the "FlickTrove" application (hereinafter referred to as the "App") collects, uses, protects, and retains user information, in full compliance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679) and current privacy laws regarding the protection of personal data.
 

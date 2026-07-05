@@ -1,6 +1,6 @@
 # Terms of Service (ToS)
 
-**Last Updated:** May 26, 2026
+**Last Updated:** July 5, 2026
 
 Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
