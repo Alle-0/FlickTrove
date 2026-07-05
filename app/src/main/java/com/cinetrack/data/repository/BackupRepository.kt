@@ -15,11 +15,15 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.io.InputStream
 import javax.inject.Inject
@@ -120,14 +124,38 @@ class BackupRepository @Inject constructor(
             // Fallthrough to Universal Smart JSON Array parser
         }
 
-        // 2. Universal Smart JSON Parser (for TVTime, Serializd, MyDramaList, custom exports, etc.)
+        // 2. Universal Smart JSON Parser (for Cinemaniac, TVTime, Serializd, MyDramaList, custom exports, etc.)
         try {
             val element = json.parseToJsonElement(content)
+            
+            // Build rating map if user ratings are stored in a separate array (e.g. Cinemaniac "ratings": [{"id": ..., "r": ...}])
+            val ratingsMap = mutableMapOf<Long, Double>()
+            if (element is JsonObject && element["ratings"] is JsonArray) {
+                (element["ratings"] as JsonArray).forEach { rObj ->
+                    val o = rObj as? JsonObject
+                    val id = o?.get("id")?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                    val r = o?.get("r")?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                        ?: o?.get("rating")?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                    if (id != null && r != null) {
+                        ratingsMap[id] = r
+                    }
+                }
+            }
+
             val array: List<JsonObject> = when (element) {
                 is JsonArray -> element.mapNotNull { it as? JsonObject }
                 is JsonObject -> {
-                    val targetField = element.entries.firstOrNull { it.value is JsonArray }?.value as? JsonArray
-                    targetField?.mapNotNull { it as? JsonObject } ?: listOf(element)
+                    val allObjects = mutableListOf<JsonObject>()
+                    element.entries.forEach { entry ->
+                        // Skip non-media arrays like ratings, settings, categories
+                        if (entry.key != "ratings" && entry.key != "settings" && entry.key != "categories") {
+                            val valArray = entry.value as? JsonArray
+                            if (valArray != null) {
+                                allObjects.addAll(valArray.mapNotNull { it as? JsonObject })
+                            }
+                        }
+                    }
+                    if (allObjects.isNotEmpty()) allObjects else listOf(element)
                 }
                 else -> emptyList()
             }
@@ -135,23 +163,71 @@ class BackupRepository @Inject constructor(
             val chunks = array.chunked(20)
             for (chunk in chunks) {
                 val deferreds = chunk.mapNotNull { obj ->
-                    val tmdbId = obj["tmdb_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
-                        ?: obj["tmdbId"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
-                        ?: obj["tmdb"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
-                        ?: obj["id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
-                    val imdbId = obj["imdb_id"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["imdbId"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["imdb"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["const"]?.jsonPrimitive?.contentOrNull
-                    val title = obj["title"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["name"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["show_name"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["movie_name"]?.jsonPrimitive?.contentOrNull
-                    val year = obj["year"]?.jsonPrimitive?.contentOrNull
-                        ?: obj["release_year"]?.jsonPrimitive?.contentOrNull
-                    val typeStr = obj["type"]?.jsonPrimitive?.contentOrNull
+                    val itemObj = obj["movie"]?.jsonObject
+                        ?: obj["show"]?.jsonObject
+                        ?: obj["item"]?.jsonObject
+                        ?: obj["series"]?.jsonObject
+                        ?: obj
+                    val idsObj = itemObj["ids"]?.jsonObject ?: obj["ids"]?.jsonObject ?: itemObj
+
+                    val tmdbId = idsObj["tmdb_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["tmdbId"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["id_movie"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["movie_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["show_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["tmdb"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: idsObj["id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                    val imdbId = idsObj["imdb_id"]?.jsonPrimitive?.contentOrNull
+                        ?: idsObj["imdbId"]?.jsonPrimitive?.contentOrNull
+                        ?: idsObj["imdb"]?.jsonPrimitive?.contentOrNull
+                        ?: idsObj["const"]?.jsonPrimitive?.contentOrNull
+                    val title = itemObj["title"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["name"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["show_name"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["movie_name"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["show_title"]?.jsonPrimitive?.contentOrNull
+                    val year = itemObj["year"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["release_year"]?.jsonPrimitive?.contentOrNull
+                    val typeStr = itemObj["type"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["media_type"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["type"]?.jsonPrimitive?.contentOrNull
                         ?: obj["media_type"]?.jsonPrimitive?.contentOrNull
                         ?: "movie"
+
+                    val userRating = if (tmdbId != null && ratingsMap.containsKey(tmdbId)) {
+                        ratingsMap[tmdbId]
+                    } else {
+                        obj["personal_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: obj["user_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: obj["my_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: itemObj["personal_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: itemObj["user_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: itemObj["my_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                            ?: if (ratingsMap.isEmpty()) (obj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull() ?: itemObj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()) else null
+                    }
+                    val userNote = obj["personal_note"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["note"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["comment"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["review"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["personal_note"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["note"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["comment"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["review"]?.jsonPrimitive?.contentOrNull
+                    val isSeen = obj["watched"]?.jsonPrimitive?.booleanOrNull == true
+                        || obj["seen"]?.jsonPrimitive?.contentOrNull == "1"
+                        || obj["seen"]?.jsonPrimitive?.intOrNull == 1
+                        || obj["seen"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["watched"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["seen"]?.jsonPrimitive?.contentOrNull == "1"
+                        || itemObj["seen"]?.jsonPrimitive?.intOrNull == 1
+                        || itemObj["seen"]?.jsonPrimitive?.booleanOrNull == true
+                        || true
+                    val isFav = obj["favorite"]?.jsonPrimitive?.booleanOrNull == true
+                        || obj["fav"]?.jsonPrimitive?.booleanOrNull == true
+                        || obj["starred"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["favorite"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["fav"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["starred"]?.jsonPrimitive?.booleanOrNull == true
 
                     async {
                         try {
@@ -164,8 +240,10 @@ class BackupRepository @Inject constructor(
                                         mediaType = mediaType,
                                         title = it.title,
                                         name = it.name,
-                                        watched = true,
-                                        favorite = false,
+                                        watched = isSeen,
+                                        favorite = isFav,
+                                        personalRating = userRating,
+                                        personalNote = userNote,
                                         watchedAt = java.time.Instant.now().toString(),
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
@@ -178,8 +256,10 @@ class BackupRepository @Inject constructor(
                                     mediaType = mediaType,
                                     title = title ?: "Unknown ($tmdbId)",
                                     name = if (mediaType == "tv") title else null,
-                                    watched = true,
-                                    favorite = false,
+                                    watched = isSeen,
+                                    favorite = isFav,
+                                    personalRating = userRating,
+                                    personalNote = userNote,
                                     watchedAt = java.time.Instant.now().toString(),
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
@@ -192,8 +272,10 @@ class BackupRepository @Inject constructor(
                                         mediaType = it.mediaType ?: "movie",
                                         title = it.title,
                                         name = it.name,
-                                        watched = true,
-                                        favorite = false,
+                                        watched = isSeen,
+                                        favorite = isFav,
+                                        personalRating = userRating,
+                                        personalNote = userNote,
                                         watchedAt = java.time.Instant.now().toString(),
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
@@ -256,10 +338,13 @@ class BackupRepository @Inject constructor(
             val lowerHeaders = headers.map { it.trim().lowercase() }
             
             val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst") }
-            val tmdbIdx = lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id") }
-            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "letterboxd uri") }
+            val tmdbIdx = lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid") }
+            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "letterboxd uri", "show_title") }
             val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date", "date", "watched date", "created date") }
             val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media type", "media_type", "item_type", "contenttype") }
+            val ratingIdx = lowerHeaders.indexOfFirst { it in listOf("rating", "your rating", "my rating", "score", "user rating", "rating10", "rating5", "user_rating", "personal_rating") }
+            val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes") }
+            val watchedIdx = lowerHeaders.indexOfFirst { it in listOf("watched", "seen", "status", "watched status", "watched_status") }
             
             val hasKnownHeaders = imdbIdx != -1 || tmdbIdx != -1 || titleIdx != -1
             if (!hasKnownHeaders && headers.none { it.startsWith("tt") }) {
@@ -279,6 +364,12 @@ class BackupRepository @Inject constructor(
                     val titleVal = if (titleIdx != -1 && columns.size > titleIdx) columns[titleIdx] else null
                     val yearVal = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
                     val typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
+                    val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx]?.toDoubleOrNull() else null
+                    val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx] else null
+                    val watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
+                        val w = columns[watchedIdx]?.trim()?.lowercase()
+                        w == "1" || w == "true" || w == "yes" || w == "watched" || w == "completed"
+                    } else true
                     
                     async {
                         try {
@@ -291,8 +382,10 @@ class BackupRepository @Inject constructor(
                                         mediaType = mediaType,
                                         title = it.title,
                                         name = it.name,
-                                        watched = true,
+                                        watched = watchedVal,
                                         favorite = false,
+                                        personalRating = ratingVal,
+                                        personalNote = noteVal,
                                         watchedAt = java.time.Instant.now().toString(),
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
@@ -305,8 +398,10 @@ class BackupRepository @Inject constructor(
                                     mediaType = mediaType,
                                     title = titleVal ?: "Unknown ($tmdbVal)",
                                     name = if (mediaType == "tv") titleVal else null,
-                                    watched = true,
+                                    watched = watchedVal,
                                     favorite = false,
+                                    personalRating = ratingVal,
+                                    personalNote = noteVal,
                                     watchedAt = java.time.Instant.now().toString(),
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
@@ -319,8 +414,10 @@ class BackupRepository @Inject constructor(
                                         mediaType = it.mediaType ?: "movie",
                                         title = it.title,
                                         name = it.name,
-                                        watched = true,
+                                        watched = watchedVal,
                                         favorite = false,
+                                        personalRating = ratingVal,
+                                        personalNote = noteVal,
                                         watchedAt = java.time.Instant.now().toString(),
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
