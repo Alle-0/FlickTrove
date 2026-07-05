@@ -208,8 +208,8 @@
     <!-- Sync and Backup -->
     <string name="settings_sync_backup">Sync and Backup</string>
     <string name="settings_smart_merge">Smart Merge will combine data while always protecting your local ratings and notes.</string>
-    <string name="settings_external_migration">External Migration</string>
-    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb</string>
+    <string name="settings_external_migration">Universal Data Import</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, CSV/JSON</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
     <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
     <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
@@ -315,9 +315,9 @@
     <string name="settings_processing">Processing...</string>
     <string name="settings_backup_restore_title">Backup and Restore</string>
     <string name="settings_backup_restore_desc">Export a copy of your data (favorites, folders, and settings) or restore from a previously saved file.</string>
-    <string name="settings_external_migration_dialog_title">External Migration</string>
-    <string name="settings_start_migration">Start Migration</string>
-    <string name="settings_external_migration_dialog_desc">You can import your movie list by uploading the JSON file exported from Trakt.tv, or the CSV files from Letterboxd (e.g. watched.csv) and IMDb (e.g. watchlist.csv). The movies will be added to your favorites.</string>
+    <string name="settings_external_migration_dialog_title">Universal Data Import</string>
+    <string name="settings_start_migration">Start Import</string>
+    <string name="settings_external_migration_dialog_desc">Import your watch history from any platform or site! You can upload exports from Trakt.tv, Letterboxd, IMDb, TVTime, Serializd, or any custom CSV/JSON file containing titles, IDs, or release years. FlickTrove\'s smart engine will automatically detect format and match your movies and TV shows!</string>
 
     <!-- Movie Detail Strings -->
     <string name="detail_error_title">Something went wrong</string>

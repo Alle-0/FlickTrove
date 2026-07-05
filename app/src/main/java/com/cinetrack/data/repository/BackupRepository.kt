@@ -12,7 +12,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.ExperimentalSerializationApi
 import java.io.InputStream
 import javax.inject.Inject
@@ -83,33 +90,130 @@ class BackupRepository @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun migrateTraktStream(inputStream: InputStream): Int = withContext(Dispatchers.IO) {
-        val items = json.decodeFromStream<List<TraktExportItem>>(inputStream)
+        val content = inputStream.bufferedReader().use { it.readText() }
+        if (content.isBlank()) return@withContext 0
         var count = 0
         
-        val moviesToInsert = items.mapNotNull { item ->
-            val tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: return@mapNotNull null
-            val mediaType = if (item.movie != null) "movie" else "tv"
-            
-            // Create a skeleton movie
-            Movie(
-                id = tmdbId,
-                mediaType = mediaType,
-                title = item.movie?.title ?: item.show?.title,
-                name = item.show?.title,
-                watched = true, // Usually history/watchlist means they are interested/watched
-                favorite = false,
-                watchedAt = item.watchedAt,
-                syncStatus = "pending",
-                clientUpdatedAt = System.currentTimeMillis()
-            )
+        // 1. Try standard Trakt Export format
+        try {
+            val items = json.decodeFromString<List<TraktExportItem>>(content)
+            val moviesToInsert = items.mapNotNull { item ->
+                val tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: return@mapNotNull null
+                val mediaType = if (item.movie != null) "movie" else "tv"
+                Movie(
+                    id = tmdbId,
+                    mediaType = mediaType,
+                    title = item.movie?.title ?: item.show?.title,
+                    name = item.show?.title,
+                    watched = true,
+                    favorite = false,
+                    watchedAt = item.watchedAt ?: java.time.Instant.now().toString(),
+                    syncStatus = "pending",
+                    clientUpdatedAt = System.currentTimeMillis()
+                )
+            }
+            if (moviesToInsert.isNotEmpty()) {
+                favoriteDao.importIgnore(moviesToInsert)
+                return@withContext moviesToInsert.size
+            }
+        } catch (e: Exception) {
+            // Fallthrough to Universal Smart JSON Array parser
         }
-        
-        if (moviesToInsert.isNotEmpty()) {
-            favoriteDao.importIgnore(moviesToInsert)
-            count = moviesToInsert.size
-            
-            // Optional: Trigger background enrichment for these movies
-            // We can do this in the ViewModel or a WorkManager
+
+        // 2. Universal Smart JSON Parser (for TVTime, Serializd, MyDramaList, custom exports, etc.)
+        try {
+            val element = json.parseToJsonElement(content)
+            val array: List<JsonObject> = when (element) {
+                is JsonArray -> element.mapNotNull { it as? JsonObject }
+                is JsonObject -> {
+                    val targetField = element.entries.firstOrNull { it.value is JsonArray }?.value as? JsonArray
+                    targetField?.mapNotNull { it as? JsonObject } ?: listOf(element)
+                }
+                else -> emptyList()
+            }
+
+            val chunks = array.chunked(20)
+            for (chunk in chunks) {
+                val deferreds = chunk.mapNotNull { obj ->
+                    val tmdbId = obj["tmdb_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: obj["tmdbId"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: obj["tmdb"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: obj["id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                    val imdbId = obj["imdb_id"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["imdbId"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["imdb"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["const"]?.jsonPrimitive?.contentOrNull
+                    val title = obj["title"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["name"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["show_name"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["movie_name"]?.jsonPrimitive?.contentOrNull
+                    val year = obj["year"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["release_year"]?.jsonPrimitive?.contentOrNull
+                    val typeStr = obj["type"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["media_type"]?.jsonPrimitive?.contentOrNull
+                        ?: "movie"
+
+                    async {
+                        try {
+                            if (!imdbId.isNullOrBlank() && imdbId.startsWith("tt")) {
+                                val tmdbMovie = movieRepository.findByImdbId(imdbId)
+                                tmdbMovie?.let {
+                                    val mediaType = if (typeStr.contains("tv", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
+                                    Movie(
+                                        id = it.id,
+                                        mediaType = mediaType,
+                                        title = it.title,
+                                        name = it.name,
+                                        watched = true,
+                                        favorite = false,
+                                        watchedAt = java.time.Instant.now().toString(),
+                                        syncStatus = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } else if (tmdbId != null && tmdbId > 0) {
+                                val mediaType = if (typeStr.contains("tv", ignoreCase = true) || typeStr.contains("show", ignoreCase = true)) "tv" else "movie"
+                                Movie(
+                                    id = tmdbId,
+                                    mediaType = mediaType,
+                                    title = title ?: "Unknown ($tmdbId)",
+                                    name = if (mediaType == "tv") title else null,
+                                    watched = true,
+                                    favorite = false,
+                                    watchedAt = java.time.Instant.now().toString(),
+                                    syncStatus = "pending",
+                                    clientUpdatedAt = System.currentTimeMillis()
+                                )
+                            } else if (!title.isNullOrBlank()) {
+                                val tmdbMovie = movieRepository.searchMovieWithYear(title, year)
+                                tmdbMovie?.let {
+                                    Movie(
+                                        id = it.id,
+                                        mediaType = it.mediaType ?: "movie",
+                                        title = it.title,
+                                        name = it.name,
+                                        watched = true,
+                                        favorite = false,
+                                        watchedAt = java.time.Instant.now().toString(),
+                                        syncStatus = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } else null
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }
+                val results = deferreds.awaitAll().filterNotNull()
+                if (results.isNotEmpty()) {
+                    favoriteDao.importIgnore(results)
+                    count += results.size
+                }
+                kotlinx.coroutines.delay(300)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("Migrazione", "Fallito Universal JSON", e)
         }
         
         count
@@ -149,33 +253,66 @@ class BackupRepository @Inject constructor(
             if (!lines.hasNext()) return@withContext 0
             val headerLine = lines.next()
             val headers = parseCsvLine(headerLine)
+            val lowerHeaders = headers.map { it.trim().lowercase() }
             
-            val isLetterboxd = headers.contains("Letterboxd URI")
-            val isImdb = headers.contains("Const")
+            val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst") }
+            val tmdbIdx = lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id") }
+            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "letterboxd uri") }
+            val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date", "date", "watched date", "created date") }
+            val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media type", "media_type", "item_type", "contenttype") }
             
-            if (!isLetterboxd && !isImdb) return@withContext 0
-            
-            val nameIdx = headers.indexOf("Name")
-            val yearIdx = headers.indexOf("Year")
-            val constIdx = headers.indexOf("Const")
-            val titleTypeIdx = headers.indexOf("Title Type")
-            val titleIdx = headers.indexOf("Title")
+            val hasKnownHeaders = imdbIdx != -1 || tmdbIdx != -1 || titleIdx != -1
+            if (!hasKnownHeaders && headers.none { it.startsWith("tt") }) {
+                return@withContext 0
+            }
 
             val dataLines = lines.asSequence()
-            
-            // Use async to fetch external IDs concurrently in chunks to respect API rate limits
             val chunks = dataLines.chunked(20)
             for (chunk in chunks) {
                 val deferreds = chunk.mapNotNull { line ->
                     val columns = parseCsvLine(line)
-                    if (isLetterboxd) {
-                        if (nameIdx == -1 || columns.size <= nameIdx) return@mapNotNull null
-                        val name = columns[nameIdx]
-                        val year = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
-                        
-                        async {
-                            try {
-                                val tmdbMovie = movieRepository.searchMovieWithYear(name, year)
+                    if (columns.isEmpty()) return@mapNotNull null
+                    
+                    val imdbVal = if (imdbIdx != -1 && columns.size > imdbIdx) columns[imdbIdx] 
+                                  else columns.firstOrNull { it.trim().startsWith("tt") }
+                    val tmdbVal = if (tmdbIdx != -1 && columns.size > tmdbIdx) columns[tmdbIdx]?.toLongOrNull() else null
+                    val titleVal = if (titleIdx != -1 && columns.size > titleIdx) columns[titleIdx] else null
+                    val yearVal = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
+                    val typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
+                    
+                    async {
+                        try {
+                            if (!imdbVal.isNullOrBlank() && imdbVal.trim().startsWith("tt")) {
+                                val tmdbMovie = movieRepository.findByImdbId(imdbVal.trim())
+                                tmdbMovie?.let {
+                                    val mediaType = if (typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
+                                    Movie(
+                                        id = it.id,
+                                        mediaType = mediaType,
+                                        title = it.title,
+                                        name = it.name,
+                                        watched = true,
+                                        favorite = false,
+                                        watchedAt = java.time.Instant.now().toString(),
+                                        syncStatus = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } else if (tmdbVal != null && tmdbVal > 0) {
+                                val mediaType = if (typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true)) "tv" else "movie"
+                                Movie(
+                                    id = tmdbVal,
+                                    mediaType = mediaType,
+                                    title = titleVal ?: "Unknown ($tmdbVal)",
+                                    name = if (mediaType == "tv") titleVal else null,
+                                    watched = true,
+                                    favorite = false,
+                                    watchedAt = java.time.Instant.now().toString(),
+                                    syncStatus = "pending",
+                                    clientUpdatedAt = System.currentTimeMillis()
+                                )
+                            } else if (!titleVal.isNullOrBlank()) {
+                                val tmdbMovie = movieRepository.searchMovieWithYear(titleVal.trim(), yearVal?.trim())
                                 tmdbMovie?.let {
                                     Movie(
                                         id = it.id,
@@ -189,40 +326,10 @@ class BackupRepository @Inject constructor(
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
                                 }
-                            } catch (e: Exception) {
-                                android.util.Log.e("Migrazione", "Fallito per $name", e)
-                                null
-                            }
+                            } else null
+                        } catch (e: Exception) {
+                            null
                         }
-                    } else if (isImdb) {
-                        if (constIdx == -1 || columns.size <= constIdx) return@mapNotNull null
-                        val const = columns[constIdx]
-                        val titleType = if (titleTypeIdx != -1 && columns.size > titleTypeIdx) columns[titleTypeIdx] else "movie"
-                        
-                        async {
-                            try {
-                                val tmdbMovie = movieRepository.findByImdbId(const)
-                                tmdbMovie?.let {
-                                    val mediaType = if (titleType.contains("tv", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
-                                    Movie(
-                                        id = it.id,
-                                        mediaType = mediaType,
-                                        title = it.title,
-                                        name = it.name,
-                                        watched = true,
-                                        favorite = false,
-                                        watchedAt = java.time.Instant.now().toString(),
-                                        syncStatus = "pending",
-                                        clientUpdatedAt = System.currentTimeMillis()
-                                    )
-                                }
-                            } catch (e: Exception) {
-                                android.util.Log.e("Migrazione", "Fallito per $const", e)
-                                null
-                            }
-                        }
-                    } else {
-                        null
                     }
                 }
                 
@@ -231,8 +338,7 @@ class BackupRepository @Inject constructor(
                     favoriteDao.importIgnore(results)
                     count += results.size
                 }
-                // Delay to prevent hitting API rate limits aggressively (400ms is safe for 50 req/sec limits when processing 20 items concurrently)
-                kotlinx.coroutines.delay(400)
+                kotlinx.coroutines.delay(350)
             }
         }
         count

@@ -58,7 +58,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
 - 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
-- 🔄 **Data Import/Export**: Migrate your historical watch data from other platforms seamlessly.
+- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
 
 ---
 

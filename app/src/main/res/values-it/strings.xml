@@ -208,8 +208,8 @@
     <!-- Sync and Backup -->
     <string name="settings_sync_backup">Sincronizzazione e Backup</string>
     <string name="settings_smart_merge">Lo Smart Merge unirà i dati proteggendo sempre i tuoi voti e note locali.</string>
-    <string name="settings_external_migration">Migrazione Esterna</string>
-    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb</string>
+    <string name="settings_external_migration">Importazione Universale</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, CSV/JSON</string>
     <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
     <string name="settings_export">Esporta</string>
     <string name="settings_restore">Ripristina</string>
@@ -310,8 +310,8 @@
     <string name="settings_processing">Elaborazione in corso...</string>
     <string name="settings_backup_restore_title">Backup e Ripristino</string>
     <string name="settings_backup_restore_desc">Esporta una copia dei tuoi dati (preferiti, cartelle e impostazioni) o ripristina da un file precedentemente salvato.</string>
-    <string name="settings_external_migration_dialog_title">Migrazione Esterna</string>
-    <string name="settings_external_migration_dialog_desc">Puoi importare la tua lista film caricando il file JSON esportato da Trakt.tv, o i file CSV di Letterboxd (es. watched.csv) e IMDb (es. watchlist.csv). I film verranno aggiunti ai tuoi preferiti.</string>
+    <string name="settings_external_migration_dialog_title">Importazione Universale Dati</string>
+    <string name="settings_external_migration_dialog_desc">Importa il tuo storico da qualsiasi piattaforma o sito! Puoi caricare file da Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o qualsiasi file CSV/JSON personalizzato contenente titoli, ID o anni di uscita. Il motore intelligente di FlickTrove rileverà il formato e abbinerà automaticamente i tuoi film e serie TV!</string>
 
     <!-- Movie Detail Strings -->
     <string name="detail_error_title">Qualcosa è andato storto</string>
