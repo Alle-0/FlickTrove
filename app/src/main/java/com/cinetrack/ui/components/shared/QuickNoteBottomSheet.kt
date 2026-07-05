@@ -128,7 +128,7 @@ fun QuickNoteModal(
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = accentColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -141,7 +141,7 @@ fun QuickNoteModal(
                             letterSpacing = (-0.5).sp
                         ),
                         color = Color.White,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     Text(

@@ -71,6 +71,8 @@ fun DetailHeader(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     onRatingClick: () -> Unit = {},
+    hasAlternativeCovers: Boolean = false,
+    onCoverSelectClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -169,52 +171,103 @@ fun DetailHeader(
                 }
             }
 
-            if (matchPercentage != null) {
+            val showCoverBtn = movie.customBackdropPath != null && onCoverSelectClick != null
+            if (matchPercentage != null || showCoverBtn) {
                 val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
-                if (advancedEffectsEnabled) {
-                    // Con blur: sfondo traslucido colorato + testo accentColor (blur fornisce contrasto)
-                    Box(
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                containerColor = accentColor.copy(alpha = 0.15f),
-                                blurRadius = 16.dp
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${matchPercentage}% Match",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 0.5.sp
-                            ),
-                            color = accentColor
-                        )
+                Row(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (matchPercentage != null) {
+                        if (advancedEffectsEnabled) {
+                            // Con blur: sfondo traslucido colorato + testo accentColor (blur fornisce contrasto)
+                            Box(
+                                modifier = Modifier
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = CircleShape,
+                                        containerColor = accentColor.copy(alpha = 0.15f),
+                                        blurRadius = 16.dp
+                                    )
+                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "${matchPercentage}% Match",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = accentColor
+                                )
+                            }
+                        } else {
+                            // Senza blur: sfondo scuro solido + testo accentColor (contrasto garantito)
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF1E1A22))
+                                    .border(0.5.dp, accentColor.copy(alpha = 0.4f), CircleShape)
+                                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "${matchPercentage}% Match",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = accentColor
+                                )
+                            }
+                        }
                     }
-                } else {
-                    // Senza blur: sfondo scuro solido + testo accentColor (contrasto garantito)
-                    Box(
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(Color(0xFF1E1A22))
-                            .border(0.5.dp, accentColor.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape)
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${matchPercentage}% Match",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 0.5.sp
-                            ),
-                            color = accentColor
-                        )
+
+                    if (showCoverBtn) {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .then(
+                                    if (advancedEffectsEnabled) {
+                                        Modifier
+                                            .hazeGlass(
+                                                state = hazeState,
+                                                shape = CircleShape,
+                                                containerColor = accentColor.copy(alpha = 0.15f),
+                                                blurRadius = 16.dp
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    } else {
+                                        Modifier
+                                            .background(Color(0xFF1E1A22))
+                                            .border(0.5.dp, accentColor.copy(alpha = 0.4f), CircleShape)
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                modifier = Modifier.bounceClick { onCoverSelectClick?.invoke() },
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
+                                    contentDescription = stringResource(R.string.detail_select_cover),
+                                    modifier = Modifier.size(13.dp),
+                                    tint = accentColor
+                                )
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp),
+                                    tint = accentColor
+                                )
+                            }
+                        }
                     }
                 }
             }

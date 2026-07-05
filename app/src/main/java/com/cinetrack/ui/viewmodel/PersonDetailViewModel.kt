@@ -142,18 +142,28 @@ class PersonDetailViewModel @Inject constructor(
                 _error.value = null
 
                 if (_activeTab.value == "cast_movie") {
-                    val directorCredits = person.combinedCredits?.crew
-                        ?.filter { it.job == "Director" }
-                        .orEmpty()
+                    val cast = person.combinedCredits?.cast.orEmpty()
+                    val crew = person.combinedCredits?.crew.orEmpty()
 
-                    val shouldPreferDirectorTab = person.knownForDepartment == "Directing" && directorCredits.isNotEmpty()
+                    val hasCastMovie = cast.any { it.mediaType == "movie" }
+                    val hasCastTv = cast.any { it.mediaType == "tv" }
+                    val hasCrewMovie = crew.any { it.mediaType == "movie" }
+                    val hasCrewTv = crew.any { it.mediaType == "tv" }
 
-                    if (shouldPreferDirectorTab) {
+                    val isPrimarilyCrew = person.knownForDepartment != null &&
+                            person.knownForDepartment != "Acting" &&
+                            (hasCrewMovie || hasCrewTv)
+
+                    if (isPrimarilyCrew || (!hasCastMovie && !hasCastTv)) {
                         _activeTab.value = when {
-                            directorCredits.any { it.mediaType == "movie" } -> "crew_movie"
-                            directorCredits.any { it.mediaType == "tv" } -> "crew_tv"
+                            hasCrewMovie -> "crew_movie"
+                            hasCrewTv -> "crew_tv"
+                            hasCastMovie -> "cast_movie"
+                            hasCastTv -> "cast_tv"
                             else -> _activeTab.value
                         }
+                    } else if (!hasCastMovie && hasCastTv) {
+                        _activeTab.value = "cast_tv"
                     }
                 }
             } catch (e: Exception) {

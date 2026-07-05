@@ -372,7 +372,9 @@ fun MovieDetailScreenContent(
                                         } else null,
                                         hazeState = backdropHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
-                                        onRatingClick = { showRatingInfoDialog = true }
+                                        onRatingClick = { showRatingInfoDialog = true },
+                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
+                                        onCoverSelectClick = { showCoverSelectionSheet = true }
                                     )
 
                                     DetailMetaRows(

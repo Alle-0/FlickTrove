@@ -112,11 +112,15 @@ fun FlickMovieCard(
         ) {
             val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
             if (posterUrl != null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
+                val context = LocalContext.current
+                val imageRequest = remember(posterUrl) {
+                    ImageRequest.Builder(context)
                         .data(posterUrl)
                         .crossfade(false)
-                        .build(),
+                        .build()
+                }
+                AsyncImage(
+                    model = imageRequest,
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

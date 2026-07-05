@@ -15,6 +15,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -161,9 +164,34 @@ fun PersonCard(
                 .size(64.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.05f))
-                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            if (imagePath != null) {
+            val initials = remember(name) {
+                name.split(" ")
+                    .filter { it.isNotBlank() }
+                    .mapNotNull { it.firstOrNull()?.toString() }
+                    .take(2)
+                    .joinToString("")
+                    .uppercase()
+            }
+            if (initials.isNotEmpty()) {
+                Text(
+                    text = initials,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            if (!imagePath.isNullOrBlank()) {
                 AsyncImage(
                     model = buildTmdbImageUrl(imagePath, ImageType.PROFILE, LocalImageQuality.current),
                     contentDescription = name,

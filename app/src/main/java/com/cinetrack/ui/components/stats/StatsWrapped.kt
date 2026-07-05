@@ -267,6 +267,31 @@ fun WrappedBannerPill(
                                         .border(2.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        val initials = remember(topActor.name) {
+                                            topActor.name.split(" ")
+                                                .filter { it.isNotBlank() }
+                                                .mapNotNull { it.firstOrNull()?.toString() }
+                                                .take(2)
+                                                .joinToString("")
+                                                .uppercase()
+                                        }
+                                        if (initials.isNotEmpty()) {
+                                            Text(
+                                                text = initials,
+                                                color = Color.White.copy(alpha = 0.5f),
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.5f),
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
+                                    }
                                     if (!topActor.profilePath.isNullOrEmpty()) {
                                         AsyncImage(
                                             model = buildTmdbImageUrl(topActor.profilePath, ImageType.PROFILE, LocalImageQuality.current),
@@ -274,15 +299,7 @@ fun WrappedBannerPill(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .clip(RoundedCornerShape(50)),
-                                            contentScale = ContentScale.Crop,
-                                            onError = { /* fallback to icon */ }
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
-                                            contentDescription = null,
-                                            tint = Color.White.copy(alpha = 0.5f),
-                                            modifier = Modifier.size(32.dp)
+                                            contentScale = ContentScale.Crop
                                         )
                                     }
                                 }

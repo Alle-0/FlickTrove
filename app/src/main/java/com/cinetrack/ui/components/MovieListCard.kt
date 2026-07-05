@@ -150,14 +150,17 @@ fun MovieListCard(
         ) {
             val bgUrl = buildTmdbImageUrl(movie.backdropPath, ImageType.BACKDROP, LocalImageQuality.current) ?: posterUrl
             if (bgUrl != null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
+                val imageRequest = remember(bgUrl) {
+                    ImageRequest.Builder(context)
                         .data(bgUrl)
                         .crossfade(false)
                         .allowHardware(true)
                         .memoryCacheKey(bgUrl)
                         .diskCacheKey(bgUrl)
-                        .build(),
+                        .build()
+                }
+                AsyncImage(
+                    model = imageRequest,
                     contentDescription = movie.title ?: movie.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

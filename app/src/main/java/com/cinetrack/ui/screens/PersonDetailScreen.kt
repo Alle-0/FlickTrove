@@ -223,13 +223,13 @@ fun PersonDetailScreenContent(
                             .orEmpty()
                     }
                     val crewMovies = remember(p.combinedCredits) {
-                        p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "movie" }
+                        p.combinedCredits?.crew?.filter { it.mediaType == "movie" }
                             ?.distinctBy { it.id }
                             ?.sortedByDescending { it.releaseDate ?: "" }
                             .orEmpty()
                     }
                     val crewTV = remember(p.combinedCredits) {
-                        p.combinedCredits?.crew?.filter { it.job == "Director" && it.mediaType == "tv" }
+                        p.combinedCredits?.crew?.filter { it.mediaType == "tv" }
                             ?.distinctBy { it.id }
                             ?.sortedByDescending { it.firstAirDate ?: "" }
                             .orEmpty()
@@ -237,11 +237,11 @@ fun PersonDetailScreenContent(
 
                     val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
                         when (uiState.activeTab) {
-                            "cast_movie" -> castMovies
-                            "cast_tv" -> castTV
-                            "crew_movie" -> crewMovies
-                            "crew_tv" -> crewTV
-                            else -> castMovies
+                            "cast_movie" -> if (castMovies.isNotEmpty()) castMovies else crewMovies.ifEmpty { castTV.ifEmpty { crewTV } }
+                            "cast_tv" -> if (castTV.isNotEmpty()) castTV else castMovies.ifEmpty { crewTV.ifEmpty { crewMovies } }
+                            "crew_movie" -> if (crewMovies.isNotEmpty()) crewMovies else castMovies.ifEmpty { crewTV.ifEmpty { castTV } }
+                            "crew_tv" -> if (crewTV.isNotEmpty()) crewTV else crewMovies.ifEmpty { castMovies.ifEmpty { castTV } }
+                            else -> castMovies.ifEmpty { crewMovies.ifEmpty { castTV.ifEmpty { crewTV } } }
                         }
                     }
                     val filmoRows = remember(filmo, columns) {
@@ -256,12 +256,64 @@ fun PersonDetailScreenContent(
                     ) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().height(480.dp)) {
-                                AsyncImage(
-                                    model = buildTmdbImageUrl(p.profilePath, ImageType.PROFILE, LocalImageQuality.current),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color(0xFF181820),
+                                                    Color(0xFF101014),
+                                                    Color(0xFF0A0A0A)
+                                                )
+                                            )
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    val initials = remember(p.name) {
+                                        p.name.split(" ")
+                                            .filter { it.isNotBlank() }
+                                            .mapNotNull { it.firstOrNull()?.toString() }
+                                            .take(2)
+                                            .joinToString("")
+                                            .uppercase()
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(y = (-30).dp)
+                                            .size(130.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.04f))
+                                            .border(1.5.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (initials.isNotEmpty()) {
+                                            Text(
+                                                text = initials,
+                                                color = Color.White.copy(alpha = 0.35f),
+                                                fontSize = 44.sp,
+                                                fontWeight = FontWeight.Black,
+                                                letterSpacing = 2.sp
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(64.dp),
+                                                tint = Color.White.copy(alpha = 0.3f)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (!p.profilePath.isNullOrBlank()) {
+                                    AsyncImage(
+                                        model = buildTmdbImageUrl(p.profilePath, ImageType.PROFILE, LocalImageQuality.current),
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
 
                                 Box(
                                     modifier = Modifier
@@ -436,7 +488,10 @@ fun PersonDetailScreenContent(
                             }
                         }
 
-                        items(filmoRows) { rowMovies ->
+                        items(
+                            items = filmoRows,
+                            key = { row -> row.joinToString("_") { "${it.id}_${it.mediaType}" } }
+                        ) { rowMovies ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -151,7 +151,10 @@ fun NewsScreenContent(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(state.news.take(visibleItems)) { item ->
+                            items(
+                                items = state.news.take(visibleItems),
+                                key = { it.link.ifEmpty { it.hashCode().toString() } }
+                            ) { item ->
                                 NewsCard(item = item) {
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
                                     context.startActivity(intent)

@@ -22,6 +22,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 @Composable
 fun CastMemberComponent(id: Int, name: String, character: String, profilePath: String?, onClick: (Int) -> Unit) {
@@ -38,16 +42,38 @@ fun CastMemberComponent(id: Int, name: String, character: String, profilePath: S
             color = Color.White.copy(alpha = 0.05f),
             border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
         ) {
-            if (profilePath != null) {
-                AsyncImage(
-                    model = buildTmdbImageUrl(profilePath, ImageType.PROFILE, LocalImageQuality.current),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize().clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(name.take(1), color = Color.White.copy(alpha = 0.4f), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                val initials = androidx.compose.runtime.remember(name) {
+                    name.split(" ")
+                        .filter { it.isNotBlank() }
+                        .mapNotNull { it.firstOrNull()?.toString() }
+                        .take(2)
+                        .joinToString("")
+                        .uppercase()
+                }
+                if (initials.isNotEmpty()) {
+                    Text(
+                        text = initials,
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.3f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                if (!profilePath.isNullOrBlank()) {
+                    AsyncImage(
+                        model = buildTmdbImageUrl(profilePath, ImageType.PROFILE, LocalImageQuality.current),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
         }

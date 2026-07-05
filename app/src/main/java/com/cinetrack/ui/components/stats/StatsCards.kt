@@ -549,8 +549,20 @@ fun PersonAvatar(
                     .size(avatarSize)
                     .clip(RoundedCornerShape(50))
                     .background(Color.White.copy(alpha = 0.06f))
-                    .border(1.5.dp, accentColor.copy(alpha = 0.5f), RoundedCornerShape(50))
+                    .border(1.5.dp, accentColor.copy(alpha = 0.5f), RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center
             ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = person.name.split(" ")
+                            .mapNotNull { it.firstOrNull()?.toString() }
+                            .take(2)
+                            .joinToString(""),
+                        color = accentColor.copy(alpha = 0.7f),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
                 if (!person.profilePath.isNullOrBlank()) {
                     AsyncImage(
                         model = buildTmdbImageUrl(person.profilePath, ImageType.PROFILE, LocalImageQuality.current),
@@ -558,20 +570,8 @@ fun PersonAvatar(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
-                } else {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = person.name.split(" ")
-                                .mapNotNull { it.firstOrNull()?.toString() }
-                                .take(2)
-                                .joinToString(""),
-                            color = accentColor.copy(alpha = 0.7f),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        }
-                    }
                 }
+            }
             // Badge: teal pill with count, bottom-right
             Box(
                 modifier = Modifier

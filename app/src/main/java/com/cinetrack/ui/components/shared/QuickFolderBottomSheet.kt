@@ -75,7 +75,7 @@ fun QuickFolderModal(
                             letterSpacing = (-0.5).sp
                         ),
                         color = Color.White,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     Text(

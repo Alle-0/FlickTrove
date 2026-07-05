@@ -316,8 +316,10 @@ fun StatsScreenContent(
                                                         contentPadding = PaddingValues(horizontal = 16.dp),
                                                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
                                                     ) {
-                                                        items(uiState.moviesInSelectedRange.size) { index ->
-                                                            val movie = uiState.moviesInSelectedRange[index]
+                                                        items(
+                                                            items = uiState.moviesInSelectedRange,
+                                                            key = { "${it.id}_${it.mediaType}" }
+                                                        ) { movie ->
                                                             com.cinetrack.ui.components.MovieCard(
                                                                 movie = movie,
                                                                 cardWidth = 100.dp,

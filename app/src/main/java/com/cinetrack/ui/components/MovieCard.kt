@@ -479,14 +479,17 @@ fun MovieCard(
         Box(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (posterUrl != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
+                    val imageRequest = remember(posterUrl) {
+                        ImageRequest.Builder(context)
                             .data(posterUrl)
                             .crossfade(false)
                             .allowHardware(true)
                             .memoryCacheKey(posterUrl)
                             .diskCacheKey(posterUrl)
-                            .build(),
+                            .build()
+                    }
+                    AsyncImage(
+                        model = imageRequest,
                         contentDescription = movie.title ?: movie.name,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

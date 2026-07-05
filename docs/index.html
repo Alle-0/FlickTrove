@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlickTrove - The Ultimate Cinema & TV Companion</title>
+  <meta name="description"
+    content="FlickTrove is a premium visual experience for Android, featuring a unique glassmorphic interface, dynamic color palettes, and fluid animations.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/Icon.svg">
+</head>
+
+<body>
+  <!-- Background Glow Orbs -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/Icon.svg" alt="FlickTrove Logo">
+        <span>FlickTrove</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#screenshots">Showcase</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="nav-github-btn">⭐ GitHub</a>
+      </div>
+      <button class="mobile-menu-btn" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Frosted Drawer Menu -->
+  <div class="mobile-drawer">
+    <ul class="mobile-drawer-links">
+      <li><a href="#features" class="drawer-link">Features</a></li>
+      <li><a href="#screenshots" class="drawer-link">Showcase</a></li>
+      <li><a href="#faq" class="drawer-link">FAQ</a></li>
+      <li><a href="privacy.html" class="drawer-link">Privacy Policy</a></li>
+      <li><a href="terms.html" class="drawer-link">Terms of Service</a></li>
+    </ul>
+    <div class="mobile-drawer-cta">
+      <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary">⭐ GitHub Repo</a>
+    </div>
+  </div>
+
+  <!-- Hero Section with Staggered Entrance Animation -->
+  <main>
+    <section class="hero">
+      <div class="hero-badge hero-anim delay-1"><img src="assets/icons/ciak.svg" class="badge-icon" alt="">The Ultimate
+        Cinema & TV Companion</div>
+      <h1 class="hero-anim delay-2">Track movies, TV shows, and actors with <span class="gradient-text">breathtaking
+          style.</span></h1>
+      <p class="hero-anim delay-3">A premium Android personal library crafted for true cinephiles. Built with deep dark
+        glassmorphism, dynamic color wheels, and fluid animations.</p>
+
+      <!-- Hero Stats Banner -->
+      <div class="hero-stats hero-anim delay-4">
+        <div class="stat-item">
+          <div class="stat-value">3+ APIs</div>
+          <div class="stat-label">TMDB, OMDB & Trakt</div>
+        </div>
+      </div>
+
+      <div class="hero-cta hero-anim delay-5">
+        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+            </path>
+          </svg>
+          Explore on GitHub
+        </a>
+        <a href="#features" class="btn-secondary">Explore Features</a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="section-header">
+        <h2>Crafted for <span class="gradient-gold">Cinephiles</span></h2>
+        <p>Everything you need to organize, explore, and track your cinematic life.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/lente.svg" alt="Catalog"></div>
+            <span class="feature-tag">Catalog</span>
+          </div>
+          <h3>TMDB, OMDB & Trakt Engine</h3>
+          <p>Instant access to over 800,000 titles powered by seamless integration with TMDB, OMDB, and Trakt APIs.
+            Explore rich metadata, ratings, trailers, and filmographies.</p>
+        </div>
+
+        <div class="feature-card feature-anim delay-2">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/palette.svg" alt="Design"></div>
+            <span class="feature-tag">Design & UI</span>
+          </div>
+          <h3>Dynamic UI & Color Theming</h3>
+          <p>Experience an interface that breathes with cinema. Predominant colors are dynamically extracted from movie
+            posters to theme gradients, accents, and custom folders in real-time glassmorphism.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/bell_vibra.svg" alt="Alerts"></div>
+            <span class="feature-tag">Alerts</span>
+          </div>
+          <h3>Smart Release Alerts</h3>
+          <p>Never miss a premiere. Receive timely push notifications the exact moment an anticipated movie or TV show
+            episode is released.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/stat.svg" alt="Analytics"></div>
+            <span class="feature-tag">Analytics</span>
+          </div>
+          <h3>Cinematic Watch Stats</h3>
+          <p>Monitor your watch time, analyze your favorite genres, and discover how much of your life you've dedicated
+            to cinema and series.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/tv.svg" alt="Streaming"></div>
+            <span class="feature-tag">Streaming</span>
+          </div>
+          <h3>Where to Watch Guide</h3>
+          <p>Discover exactly where to stream your favorite titles. View legal streaming providers, rental services, and
+            purchase options in your country.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/calendario.svg" alt="Timeline"></div>
+            <span class="feature-tag">Timeline</span>
+          </div>
+          <h3>Updates Feed & News</h3>
+          <p>A dedicated interactive timeline tracking upcoming episode release dates, theatrical debuts, and latest
+            entertainment news.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/lista_+.svg" alt="Progress"></div>
+            <span class="feature-tag">Progress</span>
+          </div>
+          <h3>Season & Episode Tracker</h3>
+          <p>Keep track of every single episode you watch. Filter by seasons, view progress bars, and pick up right
+            where you left off.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/cloud.svg" alt="Sync"></div>
+            <span class="feature-tag">Sync</span>
+          </div>
+          <h3>Real-Time Cloud Sync</h3>
+          <p>Native Firebase integration automatically backs up your personal library and syncs your watchlist across
+            all your Android devices.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-header">
+            <div class="feature-icon"><img src="assets/icons/smartphone.svg" alt="Performance"></div>
+            <span class="feature-tag">Performance</span>
+          </div>
+          <h3>100% Offline-First Room</h3>
+          <p>Your entire library, ratings, and notes are cached locally. Access and edit your watchlist smoothly even in
+            airplane mode.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screenshots Showcase Section (REFINED: Compact & Sleek!) -->
+    <section id="screenshots" class="showcase-section">
+      <div class="section-header">
+        <h2>Visual Excellence in <span class="gradient-text">Every Detail</span></h2>
+        <p>Sleek dark modes, ultra-frosted glass blur effects, and immersive movie banners.<br><span
+            style="font-size: 0.92rem; color: var(--accent-teal); margin-top: 0.5rem; display: inline-block;">💡 Click
+            any screenshot to zoom in high definition</span></p>
+      </div>
+
+      <div class="screenshots-grid">
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_home.png?v=2" alt="Home & Blur Effect" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon" alt=""><span>Home &
+              Blur</span></div>
+        </div>
+
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_explore.png" alt="Recommendations" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
+              alt=""><span>Explore</span></div>
+        </div>
+
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_dune.png" alt="Immersive Details" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
+              alt=""><span>Immersive</span></div>
+        </div>
+
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_stats.png?v=2" alt="Advanced Statistics" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
+              alt=""><span>Statistics</span></div>
+        </div>
+
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_folders.png" alt="Custom Folders" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
+              alt=""><span>Folders</span></div>
+        </div>
+
+        <div class="screenshot-item" title="Click to zoom">
+          <img src="assets/screenshot_detail.png?v=2" alt="Deep Details" loading="lazy">
+          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
+              alt=""><span>Details</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Essential FAQ Section -->
+    <section id="faq" class="faq-section">
+      <div class="section-header">
+        <h2>Essential <span class="gradient-gold">FAQ</span></h2>
+        <p>Quick answers about FlickTrove.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Why choose FlickTrove over other tracking apps?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Unlike traditional tracking apps that feel cluttered and ad-heavy, FlickTrove focuses on speed, privacy, and visual elegance. Built natively for Android with Jetpack Compose, it features dynamic poster color theming, seamless TMDB/OMDB/Trakt integration, and a true offline-first architecture with automatic cloud backup—all completely free and ad-free.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Is FlickTrove 100% free and offline-compatible?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Yes! FlickTrove is a free passion project for cinema lovers. Your data is stored locally in a fast Room
+            database for immediate offline access, and automatically synchronizes with Firebase cloud storage when you
+            go online.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Can I migrate my watchlist from other platforms?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Absolutely! FlickTrove features a seamless import/export tool allowing you to transfer your historical watch
+            data, custom lists, and ratings without losing a single movie or show.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <a href="index.html" class="nav-logo" style="margin-bottom: 1rem;">
+          <img src="assets/Icon.svg" alt="Logo">
+          <span>FlickTrove</span>
+        </a>
+        <p>A premium Android personal library crafted for true cinephiles.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul class="footer-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#screenshots">Showcase</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="https://github.com/Alle-0/FlickTrove_Kotlin">GitHub Repo</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal & Privacy</h4>
+        <ul class="footer-links">
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 FlickTrove. All rights reserved.</p>
+      <p>Built with ❤️</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

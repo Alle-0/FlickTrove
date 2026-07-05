@@ -360,8 +360,8 @@
     <string name="person_filmography">Filmografia</string>
     <string name="person_cast_movie_format">Cast - Film (%d)</string>
     <string name="person_cast_tv_format">Cast - Serie (%d)</string>
-    <string name="person_crew_movie_format">Regia - Film (%d)</string>
-    <string name="person_crew_tv_format">Regia - Serie (%d)</string>
+    <string name="person_crew_movie_format">Crew - Film (%d)</string>
+    <string name="person_crew_tv_format">Crew - Serie (%d)</string>
 
     <!-- Folder Detail Strings -->
     <string name="folder_detail_error">Errore</string>

@@ -156,7 +156,10 @@ fun DetailCoverSelectionModal(
                             }
                         }
                     }
-                    items(backdrops) { imageItem ->
+                    items(
+                        items = backdrops,
+                        key = { it.filePath }
+                    ) { imageItem ->
                         val isSelected = imageItem.filePath == movieEntry?.customBackdropPath
                         val imageUrl = buildTmdbImageUrl(imageItem.filePath, ImageType.BACKDROP, currentImageQuality)
                         val context = LocalContext.current

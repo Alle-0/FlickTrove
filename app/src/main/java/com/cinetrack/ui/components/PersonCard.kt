@@ -23,6 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cinetrack.data.api.PersonSearchResult
+import androidx.compose.foundation.border
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -62,23 +67,40 @@ fun PersonCard(person: PersonSearchResult, modifier: Modifier = Modifier, width:
                 .size(width)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.05f))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            if (person.profilePath != null) {
+            val initials = remember(person.name) {
+                person.name.split(" ")
+                    .filter { it.isNotBlank() }
+                    .mapNotNull { it.firstOrNull()?.toString() }
+                    .take(2)
+                    .joinToString("")
+                    .uppercase()
+            }
+            if (initials.isNotEmpty()) {
+                Text(
+                    text = initials,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            if (!person.profilePath.isNullOrBlank()) {
                 AsyncImage(
                     model = buildTmdbImageUrl(person.profilePath, ImageType.PROFILE, LocalImageQuality.current),
                     contentDescription = person.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-            } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = person.name.firstOrNull()?.toString() ?: "",
-                        color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
         
