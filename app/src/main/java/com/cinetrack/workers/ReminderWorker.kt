@@ -13,15 +13,23 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import com.cinetrack.data.repository.SettingsRepository
+import kotlinx.coroutines.flow.first
+
 @HiltWorker
 class ReminderWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val database: FlickTroveDatabase
+    private val database: FlickTroveDatabase,
+    private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
+            if (!settingsRepository.notificationsEnabled.first()) {
+                return@withContext Result.success()
+            }
+
             val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) // "yyyy-MM-dd"
             
             val favorites = database.favoriteDao().getAll()
