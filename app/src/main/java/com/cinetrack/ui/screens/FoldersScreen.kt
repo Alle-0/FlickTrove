@@ -488,6 +488,11 @@ fun FolderCreateDialog(
             animationSpec = androidx.compose.animation.core.tween(250),
             label = "scrimAlpha"
         )
+        val blurAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isVisible) 1f else 0f,
+            animationSpec = androidx.compose.animation.core.tween(250),
+            label = "blurAlpha"
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -510,7 +515,7 @@ fun FolderCreateDialog(
                     modifier = Modifier
                         .width(320.dp)
                         .clip(RoundedCornerShape(32.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), alpha = blurAlpha)
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         }

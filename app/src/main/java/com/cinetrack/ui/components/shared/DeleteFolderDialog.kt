@@ -69,6 +69,11 @@ fun DeleteFolderDialog(
             animationSpec = androidx.compose.animation.core.tween(250),
             label = "scrimAlpha"
         )
+        val blurAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isVisible) 1f else 0f,
+            animationSpec = androidx.compose.animation.core.tween(250),
+            label = "blurAlpha"
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,7 +91,7 @@ fun DeleteFolderDialog(
                     modifier = Modifier
                         .width(340.dp)
                         .clip(RoundedCornerShape(32.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), alpha = blurAlpha)
                         .clickable(enabled = false) { }
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
