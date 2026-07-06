@@ -48,6 +48,7 @@ import dev.chrisbanes.haze.HazeState
 
 @Composable
 fun MainFolderOptionsMenu(
+    visible: Boolean = true,
     offset: Offset,
     hazeState: HazeState,
     onDismiss: () -> Unit,
@@ -65,11 +66,8 @@ fun MainFolderOptionsMenu(
         val offsetX = with(density) { offset.x.toDp() }
         val offsetY = with(density) { offset.y.toDp() }
 
-        var isMenuVisible by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { isMenuVisible = true }
-
         AnimatedVisibility(
-            visible = isMenuVisible,
+            visible = visible,
             enter = fadeIn() + slideInVertically(
                 initialOffsetY = { -it / 4 },
                 animationSpec = tween(250, easing = androidx.compose.animation.core.EaseOutCirc)

@@ -106,6 +106,7 @@ class DetailUiStateMapper @Inject constructor(
             trailers = (metadata.videos?.results?.let { videos -> 
                 videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
             } ?: emptyList()).toImmutableList(),
+            videos = (metadata.videos?.results?.filter { v -> v.site == "YouTube" || v.site == "Vimeo" } ?: emptyList()).toImmutableList(),
             recommendations = (metadata.recommendations?.results?.take(10)?.map { rec ->
                 localMovies.find { it.id == rec.id && it.mediaType == mediaType } ?: MovieMapper.mapResponseToMovie(
                     MovieDetailResponse(

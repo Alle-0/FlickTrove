@@ -238,6 +238,14 @@ fun SettingsSyncBackupSection(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_cloud),
                 title = stringResource(R.string.settings_sync_missing_details),
                 description = stringResource(R.string.settings_sync_missing_details_desc),
+                trailing = {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
                 onClick = {
                     if (libraryDetailsSyncWorkInfo?.state != WorkInfo.State.RUNNING) {
                         if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)

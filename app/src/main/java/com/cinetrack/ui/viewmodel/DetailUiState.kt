@@ -7,6 +7,7 @@ import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.Provider
 import com.cinetrack.data.models.Season
 import com.cinetrack.data.api.TraktComment
+import com.cinetrack.data.api.Video
 
 import com.cinetrack.data.local.entities.FolderEntity
 
@@ -31,6 +32,7 @@ sealed class DetailUiState {
         val streamingProviders: ImmutableList<Provider>,
         val buyRentProviders: ImmutableList<Provider>,
         val trailers: ImmutableList<String>,
+        val videos: ImmutableList<Video> = persistentListOf(),
         val recommendations: ImmutableList<Movie>,
         val collectionMovies: ImmutableList<Movie> = persistentListOf(),
         val externalRatings: ExternalRatings = ExternalRatings(),

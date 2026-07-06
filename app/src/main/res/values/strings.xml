@@ -157,6 +157,7 @@
     <string name="settings_folder_bookmarks_desc">Shows a colored ribbon on cards to indicate folder membership.</string>
     <string name="settings_badges">Info Badges</string>
     <string name="settings_badges_desc">Shows colored badges with indicators like NEW, HOT, BEST, etc.</string>
+    <string name="settings_badges_meaning">Badge Meaning</string>
     <string name="settings_layout_toggle">Layout Button</string>
     <string name="settings_layout_toggle_desc">Shows a button to change the number of columns in Home</string>
     <string name="settings_split_home">Split Home Releases</string>
@@ -168,12 +169,10 @@
     <string name="settings_language_system">System</string>
     <string name="settings_language_en">EN</string>
     <string name="settings_language_it">IT</string>
-
     <string name="settings_default_start_tab">Start Screen</string>
     <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
     <string name="settings_default_start_home">TO WATCH</string>
     <string name="settings_default_start_visti">WATCHED</string>
-
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Aesthetics</string>
     <string name="settings_accent_color">Accent Color</string>
@@ -211,10 +210,10 @@
     <string name="settings_external_migration">Universal Data Import</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, CSV/JSON</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
-    <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
-    <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
-    <string name="settings_dialog_deep_sync_title">Attenzione: Sync Intensivo</string>
-    <string name="settings_dialog_deep_sync_desc">Questa operazione scaricherà in background i dati mancanti per tutti i vecchi film salvati. Richiede una connessione attiva ed esegue molte operazioni sul cloud.\n\nEseguila SOLO se noti che ai tuoi vecchi salvataggi mancano informazioni essenziali come cast o durata.\n\nSei sicuro di voler procedere?</string>
+    <string name="settings_sync_missing_details">Sync Missing Details</string>
+    <string name="settings_sync_missing_details_desc">Retrieve missing data for older movies in your library. Use only if strictly necessary (intensive background operation).</string>
+    <string name="settings_dialog_deep_sync_title">Warning: Intensive Sync</string>
+    <string name="settings_dialog_deep_sync_desc">This operation will download missing data in the background for all old saved movies. It requires an active internet connection and performs numerous cloud operations.\n\nRun it ONLY if you notice that essential information like cast or runtime is missing from your old saves.\n\nAre you sure you want to proceed?</string>
     <string name="settings_export">Export</string>
     <string name="settings_restore">Restore</string>
     <!-- Account -->
@@ -597,6 +596,29 @@
     <string name="detail_technical_info">TECHNICAL DETAILS</string>
     <string name="detail_official_trailers">OFFICIAL TRAILERS</string>
     <string name="detail_official_trailer">OFFICIAL TRAILER</string>
+    <string name="detail_video_title_teaser">TEASERS &amp; PROMOS</string>
+    <string name="detail_video_title_clip">CLIPS &amp; SET PICKS</string>
+    <string name="detail_video_title_featurette">FEATURETTES &amp; SPECIALS</string>
+    <string name="detail_video_title_bts">BEHIND THE SCENES</string>
+    <string name="detail_video_title_bloopers">BLOOPERS &amp; GAGS</string>
+    <string name="detail_video_title_credits">OPENING CREDITS &amp; TITLES</string>
+    <string name="detail_video_title_recap">RECAPS</string>
+    <string name="detail_video_pill_trailer">TRAILER</string>
+    <string name="detail_video_pill_teaser">TEASER</string>
+    <string name="detail_video_pill_clip">CLIP</string>
+    <string name="detail_video_pill_featurette">FEATURETTE</string>
+    <string name="detail_video_pill_bts">BACKSTAGE</string>
+    <string name="detail_video_pill_bloopers">BLOOPERS</string>
+    <string name="detail_video_pill_credits">CREDITS</string>
+    <string name="detail_video_pill_recap">RECAP</string>
+    <string name="detail_video_menu_trailer">Official Trailers</string>
+    <string name="detail_video_menu_teaser">Teasers &amp; Promos</string>
+    <string name="detail_video_menu_clip">Clips &amp; Set Picks</string>
+    <string name="detail_video_menu_featurette">Featurettes &amp; Specials</string>
+    <string name="detail_video_menu_bts">Behind the Scenes</string>
+    <string name="detail_video_menu_bloopers">Bloopers &amp; Gags</string>
+    <string name="detail_video_menu_credits">Opening Credits &amp; Titles</string>
+    <string name="detail_video_menu_recap">Recaps</string>
     <string name="detail_swipe">SWIPE</string>
     <string name="detail_personal_zone">PERSONAL ZONE</string>
     <string name="detail_tap_for_more">TAP FOR MORE</string>

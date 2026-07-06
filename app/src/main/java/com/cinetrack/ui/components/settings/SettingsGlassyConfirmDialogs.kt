@@ -309,7 +309,7 @@ fun BadgesInfoDialog(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            "Significato Badge",
+                            stringResource(R.string.settings_badges_meaning),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurface
                         )

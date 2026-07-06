@@ -13,6 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+.gitignore
 
 # Android Studio
 .idea/
@@ -49,6 +50,5 @@ release/
 .kotlin/
 
 # Local backup exports and dumps
-Cinemaniac.json
 *.csv
 *backup*.json

@@ -367,20 +367,40 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     }
 
                     // --- FOLDER OPTIONS MODAL ---
-                    if (showFolderOptions && currentTab is FolderDetailTab) {
+                    var rememberedShowFolderOptions by remember { mutableStateOf(false) }
+                    var isFolderMenuVisible by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(showFolderOptions, currentTab) {
+                        if (showFolderOptions && currentTab is FolderDetailTab) {
+                            rememberedShowFolderOptions = true
+                            isFolderMenuVisible = true
+                        } else if (rememberedShowFolderOptions) {
+                            isFolderMenuVisible = false
+                            kotlinx.coroutines.delay(200)
+                            rememberedShowFolderOptions = false
+                        }
+                    }
+
+                    if (rememberedShowFolderOptions) {
                         MainFolderOptionsMenu(
+                            visible = isFolderMenuVisible,
                             offset = folderOptionsOffset,
                             hazeState = contentHazeState,
                             onDismiss = { showFolderOptions = false },
                             onRename = {
+                                showFolderOptions = false
                                 folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME
                                 showFolderEditDialog = true
                             },
                             onChangeColor = {
+                                showFolderOptions = false
                                 folderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.COLOR
                                 showFolderEditDialog = true
                             },
-                            onDelete = { showFolderDeleteConfirm = true }
+                            onDelete = {
+                                showFolderOptions = false
+                                showFolderDeleteConfirm = true
+                            }
                         )
                     }
 

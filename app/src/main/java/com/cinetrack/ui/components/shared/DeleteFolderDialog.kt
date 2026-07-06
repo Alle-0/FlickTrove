@@ -44,11 +44,19 @@ fun DeleteFolderDialog(
 ) {
     val haptic = LocalHapticFeedback.current
     var isDismissing by remember { mutableStateOf(false) }
+    var isVisible by remember { mutableStateOf(false) }
+    var pendingConfirm by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) { isVisible = true }
     LaunchedEffect(isDismissing) {
         if (isDismissing) {
+            isVisible = false
             kotlinx.coroutines.delay(250)
-            onDismiss()
+            if (pendingConfirm) {
+                onConfirm()
+            } else {
+                onDismiss()
+            }
         }
     }
 
@@ -56,27 +64,29 @@ fun DeleteFolderDialog(
         onDismissRequest = { isDismissing = true },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
+        val scrimAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isVisible) HazeStyles.ModalScrimAlpha else 0f,
+            animationSpec = androidx.compose.animation.core.tween(250),
+            label = "scrimAlpha"
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
+                .background(Color.Black.copy(alpha = scrimAlpha))
                 .clickable(enabled = true, onClick = { isDismissing = true }),
             contentAlignment = Alignment.Center
         ) {
-            var isVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) { isVisible = true }
-            LaunchedEffect(isDismissing) { if (isDismissing) isVisible = false }
 
             AnimatedVisibility(
                 visible = isVisible,
-                enter = fadeIn() + scaleIn(initialScale = 0.9f),
-                exit = fadeOut() + scaleOut(targetScale = 0.9f)
+                enter = fadeIn(androidx.compose.animation.core.tween(250)),
+                exit = fadeOut(androidx.compose.animation.core.tween(250))
             ) {
                 Column(
                     modifier = Modifier
                         .width(340.dp)
                         .clip(RoundedCornerShape(32.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
                         .clickable(enabled = false) { }
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -134,7 +144,8 @@ fun DeleteFolderDialog(
                         Button(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onConfirm()
+                                pendingConfirm = true
+                                isDismissing = true
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

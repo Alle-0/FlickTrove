@@ -244,7 +244,21 @@ fun FoldersScreenContent(
         )
     }
 
-    activeMenuFolder?.let { folder ->
+    var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
+    var isMenuVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(activeMenuFolder) {
+        if (activeMenuFolder != null) {
+            rememberedMenuFolder = activeMenuFolder
+            isMenuVisible = true
+        } else if (isMenuVisible) {
+            isMenuVisible = false
+            kotlinx.coroutines.delay(200)
+            rememberedMenuFolder = null
+        }
+    }
+
+    rememberedMenuFolder?.let { folder ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -254,9 +268,6 @@ fun FoldersScreenContent(
             val density = androidx.compose.ui.platform.LocalDensity.current
             val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
             val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
-            
-            var isMenuVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) { isMenuVisible = true }
             
             AnimatedVisibility(
                 visible = isMenuVisible,
@@ -452,11 +463,19 @@ fun FolderCreateDialog(
     var selectedColor by remember { mutableStateOf("#6366F1") }
     val focusManager = LocalFocusManager.current
     var isDismissing by remember { mutableStateOf(false) }
-
+    var isVisible by remember { mutableStateOf(false) }
+    var pendingCreate by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    
+    LaunchedEffect(Unit) { isVisible = true }
     LaunchedEffect(isDismissing) {
         if (isDismissing) {
+            isVisible = false
             kotlinx.coroutines.delay(250)
-            onDismiss()
+            if (pendingCreate != null) {
+                onCreate(pendingCreate!!.first, pendingCreate!!.second, pendingCreate!!.third)
+            } else {
+                onDismiss()
+            }
         }
     }
 
@@ -464,10 +483,15 @@ fun FolderCreateDialog(
         onDismissRequest = { isDismissing = true },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
+        val scrimAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isVisible) HazeStyles.ModalScrimAlpha else 0f,
+            animationSpec = androidx.compose.animation.core.tween(250),
+            label = "scrimAlpha"
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
+                .background(Color.Black.copy(alpha = scrimAlpha))
                 .pointerInput(Unit) {
                     detectTapGestures { 
                         focusManager.clearFocus()
@@ -476,21 +500,17 @@ fun FolderCreateDialog(
                 },
             contentAlignment = Alignment.Center
         ) {
-            var isVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) { isVisible = true }
-            LaunchedEffect(isDismissing) { if (isDismissing) isVisible = false }
-            
             androidx.compose.animation.AnimatedVisibility(
                 visible = isVisible,
-                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(initialScale = 0.9f),
-                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(targetScale = 0.9f)
+                enter = androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(250)),
+                exit = androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(250))
             ) {
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .width(320.dp)
                         .clip(RoundedCornerShape(32.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         }
@@ -556,7 +576,10 @@ fun FolderCreateDialog(
                 Spacer(Modifier.height(32.dp))
                 
                 Button(
-                    onClick = { onCreate(name, "folder", selectedColor) },
+                    onClick = { 
+                        pendingCreate = Triple(name, "folder", selectedColor)
+                        isDismissing = true
+                    },
                     enabled = name.isNotBlank(),
                     modifier = Modifier
                         .fillMaxWidth()

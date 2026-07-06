@@ -49,6 +49,7 @@ fun FolderEditDialog(
     
     var isVisible by remember { mutableStateOf(false) }
     var isDismissing by remember { mutableStateOf(false) }
+    var pendingSave by remember { mutableStateOf<Pair<String, String>?>(null) }
     
     LaunchedEffect(Unit) { isVisible = true }
     
@@ -56,7 +57,11 @@ fun FolderEditDialog(
         if (isDismissing) {
             isVisible = false
             kotlinx.coroutines.delay(250)
-            onDismiss()
+            if (pendingSave != null) {
+                onSave(pendingSave!!.first, pendingSave!!.second)
+            } else {
+                onDismiss()
+            }
         }
     }
 
@@ -64,10 +69,15 @@ fun FolderEditDialog(
         onDismissRequest = { isDismissing = true },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
+        val scrimAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isVisible) HazeStyles.ModalScrimAlpha else 0f,
+            animationSpec = androidx.compose.animation.core.tween(250),
+            label = "scrimAlpha"
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha))
+                .background(Color.Black.copy(alpha = scrimAlpha))
                 .pointerInput(Unit) {
                     detectTapGestures { 
                         focusManager.clearFocus()
@@ -78,15 +88,15 @@ fun FolderEditDialog(
         ) {
             AnimatedVisibility(
                 visible = isVisible,
-                enter = fadeIn() + scaleIn(initialScale = 0.9f),
-                exit = fadeOut() + scaleOut(targetScale = 0.9f)
+                enter = fadeIn(androidx.compose.animation.core.tween(250)),
+                exit = fadeOut(androidx.compose.animation.core.tween(250))
             ) {
                 val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .width(320.dp)
                         .clip(RoundedCornerShape(32.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         }
@@ -154,7 +164,10 @@ fun FolderEditDialog(
                     Spacer(Modifier.height(32.dp))
                     
                     Button(
-                        onClick = { onSave(name, selectedColor) },
+                        onClick = { 
+                            pendingSave = Pair(name, selectedColor)
+                            isDismissing = true
+                        },
                         enabled = if (editMode == FolderEditMode.NAME) name.isNotBlank() && name != initialName else selectedColor != initialColor,
                         modifier = Modifier
                             .fillMaxWidth()

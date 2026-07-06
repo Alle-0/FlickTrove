@@ -157,6 +157,7 @@
     <string name="settings_folder_bookmarks_desc">Mostra un nastro colorato sulle card per indicare l\'appartenenza alle cartelle.</string>
     <string name="settings_badges">Badge informativi</string>
     <string name="settings_badges_desc">Mostra i badge colorati con indicazioni come NEW, HOT, BEST, ecc.</string>
+    <string name="settings_badges_meaning">Significato Badge</string>
     <string name="settings_layout_toggle">Pulsante Layout</string>
     <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
     <string name="settings_split_home">Divisione uscite Home</string>
@@ -166,12 +167,10 @@
     <string name="settings_language_system">Sistema</string>
     <string name="settings_language_en">EN</string>
     <string name="settings_language_it">IT</string>
-
     <string name="settings_default_start_tab">Schermata Iniziale</string>
     <string name="settings_default_start_tab_desc">Scegli quale schermata vedere all\'avvio</string>
     <string name="settings_default_start_home">DA VEDERE</string>
     <string name="settings_default_start_visti">VISTI</string>
-
     <!-- Aesthetics -->
     <string name="settings_aesthetics">Estetica</string>
     <string name="settings_accent_color">Colore accento</string>
@@ -211,6 +210,10 @@
     <string name="settings_external_migration">Importazione Universale</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, CSV/JSON</string>
     <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
+    <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
+    <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
+    <string name="settings_dialog_deep_sync_title">Attenzione: Sync Intensivo</string>
+    <string name="settings_dialog_deep_sync_desc">Questa operazione scaricherà in background i dati mancanti per tutti i vecchi film salvati. Richiede una connessione attiva ed esegue molte operazioni sul cloud.\n\nEseguila SOLO se noti che ai tuoi vecchi salvataggi mancano informazioni essenziali come cast o durata.\n\nSei sicuro di voler procedere?</string>
     <string name="settings_export">Esporta</string>
     <string name="settings_restore">Ripristina</string>
     <!-- Account -->
@@ -591,6 +594,29 @@
     <string name="detail_technical_info">DETTAGLI TECNICI</string>
     <string name="detail_official_trailers">TRAILER UFFICIALI</string>
     <string name="detail_official_trailer">TRAILER UFFICIALE</string>
+    <string name="detail_video_title_teaser">TEASER &amp; PROMO</string>
+    <string name="detail_video_title_clip">CLIP &amp; SCELTE DAL SET</string>
+    <string name="detail_video_title_featurette">FEATURETTE &amp; SPECIALI</string>
+    <string name="detail_video_title_bts">DIETRO LE QUINTE</string>
+    <string name="detail_video_title_bloopers">PAPERE &amp; BLOOPERS</string>
+    <string name="detail_video_title_credits">SIGLE &amp; TITOLI INIZIALI</string>
+    <string name="detail_video_title_recap">RIEPILOGHI</string>
+    <string name="detail_video_pill_trailer">TRAILER</string>
+    <string name="detail_video_pill_teaser">TEASER</string>
+    <string name="detail_video_pill_clip">CLIP</string>
+    <string name="detail_video_pill_featurette">FEATURETTE</string>
+    <string name="detail_video_pill_bts">BACKSTAGE</string>
+    <string name="detail_video_pill_bloopers">PAPERE</string>
+    <string name="detail_video_pill_credits">SIGLA</string>
+    <string name="detail_video_pill_recap">RIEPILOGO</string>
+    <string name="detail_video_menu_trailer">Trailer Ufficiali</string>
+    <string name="detail_video_menu_teaser">Teaser &amp; Promo</string>
+    <string name="detail_video_menu_clip">Clip &amp; Scelte dal Set</string>
+    <string name="detail_video_menu_featurette">Featurette &amp; Speciali</string>
+    <string name="detail_video_menu_bts">Dietro le Quinte</string>
+    <string name="detail_video_menu_bloopers">Papere &amp; Bloopers</string>
+    <string name="detail_video_menu_credits">Sigle &amp; Titoli</string>
+    <string name="detail_video_menu_recap">Riepiloghi</string>
     <string name="detail_swipe">SCORRI</string>
     <string name="detail_personal_zone">ZONA PERSONALE</string>
     <string name="detail_tap_for_more">TOCCA PER ALTRO</string>

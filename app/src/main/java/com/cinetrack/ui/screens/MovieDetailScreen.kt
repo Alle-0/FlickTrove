@@ -248,6 +248,7 @@ fun MovieDetailScreenContent(
     )
 
     val localHazeState = remember { HazeState() }
+    val rootHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
     
     val globalAccentColor = when (val state = uiState) {
@@ -277,17 +278,19 @@ fun MovieDetailScreenContent(
     if (uiState is DetailUiState.Success) {
         cachedSuccess = uiState as DetailUiState.Success
     }
+    var trailersMenuData by remember { mutableStateOf<com.cinetrack.ui.components.detail.TrailersMenuModalData?>(null) }
 
-    MovieActionsWrapper(
-        hazeState = localHazeState,
-        folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList(),
-        isItemInFolder = { movie, folderId -> (uiState as? DetailUiState.Success)?.folders?.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") == true },
-        onUpdateRating = { movie, rating -> viewModel.onEvent(DetailEvent.RateMovie(movie, rating)) },
-        onUpdateNote = { movie, note -> viewModel.onEvent(DetailEvent.UpdateMovieNote(movie, note)) },
-        onToggleFolder = { movie, folder -> viewModel.onEvent(DetailEvent.ToggleMovieFolderMembership(movie, folder)) },
-        onDelete = { movie -> viewModel.onEvent(DetailEvent.DeleteMovieItem(movie)) }
-    ) { actionsState ->
-        Box(modifier = Modifier.fillMaxSize().background(PremiumBackground).background(animatedBgColor)) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        MovieActionsWrapper(
+            hazeState = rootHazeState,
+            folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList(),
+            isItemInFolder = { movie, folderId -> (uiState as? DetailUiState.Success)?.folders?.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") == true },
+            onUpdateRating = { movie, rating -> viewModel.onEvent(DetailEvent.RateMovie(movie, rating)) },
+            onUpdateNote = { movie, note -> viewModel.onEvent(DetailEvent.UpdateMovieNote(movie, note)) },
+            onToggleFolder = { movie, folder -> viewModel.onEvent(DetailEvent.ToggleMovieFolderMembership(movie, folder)) },
+            onDelete = { movie -> viewModel.onEvent(DetailEvent.DeleteMovieItem(movie)) }
+        ) { actionsState ->
+            Box(modifier = Modifier.fillMaxSize().background(PremiumBackground).background(animatedBgColor).haze(rootHazeState, style = HazeStyles.PremiumDark)) {
         
         AnimatedContent(
             targetState = when (uiState) {
@@ -304,7 +307,7 @@ fun MovieDetailScreenContent(
             when (targetIndex) {
                 0 -> {
                     DetailSkeleton(
-                        hazeState = localHazeState,
+                        hazeState = null,
                         paddingValues = paddingValues
                     )
                 }
@@ -326,13 +329,13 @@ fun MovieDetailScreenContent(
                             animationSpec = tween(800),
                             label = "AccentColorAnimation"
                         )
-                        
+
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
-                                    .verticalScroll(scrollState)
+                                    .verticalScroll(scrollState, enabled = trailersMenuData == null)
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     DetailBackdrop(
@@ -459,10 +462,17 @@ fun MovieDetailScreenContent(
 
                                     Spacer(modifier = Modifier.height(40.dp))
 
-                                    if (state.trailers.isNotEmpty()) {
+                                    if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
                                         DetailTrailers(
+                                            videos = state.videos,
                                             trailers = state.trailers,
-                                            accentColor = accentColor
+                                            accentColor = accentColor,
+                                            hazeState = localHazeState,
+                                            isMenuOpen = trailersMenuData != null,
+                                            onMenuOpenChange = { if (!it) trailersMenuData = null },
+                                            onOpenCategoryMenu = { data ->
+                                                trailersMenuData = data
+                                            }
                                         )
                                         Spacer(modifier = Modifier.height(48.dp))
                                     }
@@ -554,7 +564,7 @@ fun MovieDetailScreenContent(
     DetailRatingInfoDialog(
         visible = showRatingInfoDialog,
         onDismiss = { showRatingInfoDialog = false },
-        hazeState = localHazeState
+        hazeState = rootHazeState
     )
     // Translation Prompt Dialog
     DetailTranslationPromptModal(
@@ -563,7 +573,7 @@ fun MovieDetailScreenContent(
         onTranslate = { commentId, text, requireWifi ->
             viewModel.translateComment(commentId, text, requireWifi)
         },
-        hazeState = localHazeState,
+        hazeState = rootHazeState,
         accentColor = globalAccentColor
     )
 
@@ -574,9 +584,17 @@ fun MovieDetailScreenContent(
         backdrops = cachedSuccess?.details?.images?.backdrops ?: emptyList(),
         currentImageQuality = currentImageQuality,
         accentColor = globalAccentColor,
-        hazeState = localHazeState,
+        hazeState = rootHazeState,
         onSelectCover = { filePath ->
             viewModel.onEvent(DetailEvent.UpdateCustomCover(filePath))
         }
     )
+
+    com.cinetrack.ui.components.detail.DetailTrailersMenuModal(
+        data = trailersMenuData,
+        accentColor = globalAccentColor,
+        hazeState = rootHazeState,
+        onDismiss = { trailersMenuData = null }
+    )
+    } // end root Box
 }
