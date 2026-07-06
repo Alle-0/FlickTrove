@@ -270,13 +270,24 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     } else null
 
                     Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
-                        val discoverHasActiveFilters = if (currentTab is DiscoverTab && activity != null) {
+                        var discoverHasActiveFilters = false
+                        var discoverGridColumns: Int? = null
+                        var discoverOnLayoutToggleClick: (() -> Unit)? = null
+
+                        if (currentTab is DiscoverTab && activity != null) {
                             val discoverVm = androidx.hilt.navigation.compose.hiltViewModel<DiscoverViewModel>(activity)
                             val discoverUiStateForBar by discoverVm.uiState.collectAsStateWithLifecycle()
-                            discoverUiStateForBar.sortConfig.selectedGenres.isNotEmpty() ||
+                            discoverHasActiveFilters = discoverUiStateForBar.sortConfig.selectedGenres.isNotEmpty() ||
                                 discoverUiStateForBar.sortConfig.selectedProviders.isNotEmpty() ||
                                 discoverUiStateForBar.sortConfig.selectedDecades.isNotEmpty()
-                        } else false
+                            if (discoverUiStateForBar.preferences.showLayoutToggle) {
+                                val cols = if (discoverUiStateForBar.preferences.gridColumns in 1..4) discoverUiStateForBar.preferences.gridColumns else 3
+                                discoverGridColumns = cols
+                                discoverOnLayoutToggleClick = {
+                                    discoverVm.updateGridColumns(com.cinetrack.ui.components.shared.nextGridColumns(cols))
+                                }
+                            }
+                        }
 
                         GlassyTopBar(
                             title = title,
@@ -290,7 +301,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                             onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
-                            hasActiveFilters = discoverHasActiveFilters
+                            hasActiveFilters = discoverHasActiveFilters,
+                            onLayoutToggleClick = discoverOnLayoutToggleClick,
+                            layoutColumns = discoverGridColumns
                         )
                     }
 

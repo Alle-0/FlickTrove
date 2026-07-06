@@ -95,7 +95,7 @@ fun RatingPickerBox(
                 if (currentRating != null) {
                     Surface(
                         color = Color.White.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .padding(top = 4.dp)
                             .bounceClick {

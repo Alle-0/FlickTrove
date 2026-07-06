@@ -122,30 +122,90 @@ fun MovieListCardSkeleton(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(140.dp),
+            .height(110.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Backdrop Shimmer Background
             Box(
                 modifier = Modifier
-                    .width(93.dp)
-                    .fillMaxHeight()
+                    .fillMaxSize()
                     .shimmerEffect()
             )
+
+            // Gradient for readability (matching MovieListCard banner style)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            0.0f to Color.Black.copy(alpha = 0.95f),
+                            0.3f to Color.Black.copy(alpha = 0.8f),
+                            0.6f to Color.Black.copy(alpha = 0.4f),
+                            1.0f to Color.Transparent
+                        )
+                    )
+            )
+
+            // Text Placeholders (Bottom Left)
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(12.dp)
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 56.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.Bottom
             ) {
-                Box(modifier = Modifier.height(20.dp).fillMaxWidth(0.7f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                // Title placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.45f)
+                        .height(16.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmerEffect()
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.3f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                Spacer(modifier = Modifier.height(12.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth().clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.8f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+
+                // Year & Rating placeholder row
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(36.dp)
+                            .height(10.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(28.dp)
+                            .height(10.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Genres placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.3f)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmerEffect()
+                )
             }
+
+            // Action Button placeholder (Bottom Right)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.1f))
+                    .shimmerEffect()
+            )
         }
     }
 }
