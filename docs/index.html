@@ -58,8 +58,7 @@
         Cinema & TV Companion</div>
       <h1 class="hero-anim delay-2">Track movies, TV shows, and actors with <span class="gradient-text">breathtaking
           style.</span></h1>
-      <p class="hero-anim delay-3">A premium Android personal library crafted for true cinephiles. Built with deep dark
-        glassmorphism, dynamic color wheels, and fluid animations.</p>
+      <p class="hero-anim delay-3">A premium Android personal library crafted for <span id="typed-output" class="gradient-gold" style="font-weight: 700;">true cinephiles</span>. Built with deep dark glassmorphism, dynamic color wheels, and fluid animations.</p>
 
       <!-- Hero Stats Banner -->
       <div class="hero-stats hero-anim delay-4">
@@ -79,7 +78,61 @@
           </svg>
           Explore on GitHub
         </a>
-        <a href="#features" class="btn-secondary">Explore Features</a>
+        <a href="#interactive-demo" class="btn-secondary">Try Live Demo ✨</a>
+      </div>
+    </section>
+
+    <!-- Interactive Live Experience Section -->
+    <section id="interactive-demo" class="interactive-section">
+      <div class="section-header">
+        <h2>Interactive <span class="gradient-text">Live Simulator</span></h2>
+        <p>Test drive FlickTrove's dynamic color extraction engine and glassmorphic watchlist directly in your browser.</p>
+      </div>
+
+      <!-- Theme Selector Pills (Coil Dynamic Extraction Simulation) -->
+      <div class="theme-picker-container">
+        <span class="theme-picker-label">🎨 Live Poster Theming:</span>
+        <div class="theme-pills">
+          <button class="theme-pill active" data-theme="teal" style="--pill-color: #2DD4BF;">🟢 Cyber Teal</button>
+          <button class="theme-pill" data-theme="gold" style="--pill-color: #FFCA28;">🟡 Dune Gold</button>
+          <button class="theme-pill" data-theme="purple" style="--pill-color: #A855F7;">🟣 Midnight Cyber</button>
+          <button class="theme-pill" data-theme="crimson" style="--pill-color: #F43F5E;">🔴 Oppenheimer Crimson</button>
+          <button class="theme-pill" data-theme="emerald" style="--pill-color: #10B981;">🟢 Matrix Emerald</button>
+        </div>
+      </div>
+
+      <!-- Interactive Movie Arena (Simulated TMDB + Room Offline) -->
+      <div class="demo-arena" data-tilt data-tilt-max="3" data-tilt-glare="true" data-tilt-max-glare="0.15">
+        <div class="arena-topbar">
+          <div class="arena-dots">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+          </div>
+          <div class="arena-title">FlickTrove Watchlist Engine • Room DB Simulation</div>
+          <div class="arena-status"><span class="pulse-dot"></span> 60fps Glassmorphism</div>
+        </div>
+
+        <div class="arena-controls">
+          <div class="arena-search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="demoSearchInput" placeholder="Filter 800,000+ movies & TV shows...">
+          </div>
+          <div class="arena-genre-filters">
+            <button class="genre-btn active" data-genre="All">All</button>
+            <button class="genre-btn" data-genre="Sci-Fi">Sci-Fi</button>
+            <button class="genre-btn" data-genre="Drama">Drama</button>
+            <button class="genre-btn" data-genre="Action">Action</button>
+            <button class="genre-btn" data-genre="Animation">Animation</button>
+          </div>
+        </div>
+
+        <div class="arena-grid" id="demoMovieGrid">
+          <!-- Populated dynamically via powerful JSON script -->
+        </div>
+
+        <div class="arena-footer">
+          <span>💡 Tip: Click <b>"+ Folder"</b> on any card to test the bounce-click animation and trigger celebratory confetti!</span>
+          <span id="watchlistCountBadge" class="watchlist-badge">Saved in Folder: 0 items</span>
+        </div>
       </div>
     </section>
 
@@ -311,6 +364,10 @@
     </div>
   </footer>
 
+  <!-- Powerful Online Interactive CDN Libraries (Tilt 3D, Confetti, Typed.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
   <script src="script.js"></script>
 </body>
 
