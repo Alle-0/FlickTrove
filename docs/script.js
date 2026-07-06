@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Navbar scroll effect
   const navbar = document.querySelector('.navbar');
-  
+
   window.addEventListener('scroll', () => {
     if (window.scrollY > 20) {
-      navbar.style.background = 'rgba(11, 15, 25, 0.92)';
+      navbar.style.background = 'rgba(10, 10, 10, 0.94)';
       navbar.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
       navbar.style.borderColor = 'rgba(45, 212, 191, 0.3)';
     } else {
-      navbar.style.background = 'rgba(11, 15, 25, 0.85)';
+      navbar.style.background = 'rgba(5, 5, 5, 0.88)';
       navbar.style.boxShadow = 'none';
       navbar.style.borderColor = 'rgba(255, 255, 255, 0.08)';
     }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const revealElements = document.querySelectorAll('.feature-card, .screenshot-item, .faq-item, .section-header');
-  
+
   const scrollObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -79,23 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollObserver.observe(el);
   });
 
-  // Lightbox Modal for Screenshots
-  const lightbox = document.createElement('div');
-  lightbox.className = 'lightbox';
-  lightbox.innerHTML = `
-    <div class="lightbox-content">
-      <button class="lightbox-close" aria-label="Close modal">&times;</button>
-      <img src="" alt="Screenshot preview">
-    </div>
-  `;
-  document.body.appendChild(lightbox);
+  const lightbox = document.getElementById('screenshot-modal') || document.querySelector('.lightbox-modal');
+  const lightboxImg = lightbox ? (lightbox.querySelector('#lightbox-img') || lightbox.querySelector('img')) : null;
+  const lightboxClose = lightbox ? lightbox.querySelector('.lightbox-close') : null;
+  const lightboxCaption = lightbox ? lightbox.querySelector('#lightbox-caption') : null;
 
-  const lightboxImg = lightbox.querySelector('img');
-  const lightboxClose = lightbox.querySelector('.lightbox-close');
-
-  const openLightbox = (src, alt) => {
-    lightboxImg.src = src;
-    lightboxImg.alt = alt;
+  const openLightbox = (src, alt, captionText) => {
+    if (!lightbox) return;
+    if (lightboxImg) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt || 'Screenshot';
+    }
+    if (lightboxCaption) {
+      lightboxCaption.textContent = captionText || alt || '';
+    }
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   };
@@ -108,24 +105,34 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.screenshot-item').forEach(item => {
     item.addEventListener('click', () => {
       const img = item.querySelector('img');
+      const captionEl = item.querySelector('.screenshot-caption span');
+      const captionText = captionEl ? captionEl.textContent : (img ? img.alt : '');
       if (img) {
-        openLightbox(img.src, img.alt);
+        openLightbox(img.src, img.alt, captionText);
       }
     });
   });
 
-  lightboxClose.addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) {
-      closeLightbox();
+  if (lightbox) {
+    if (lightboxClose) {
+      lightboxClose.addEventListener('click', closeLightbox);
     }
-  });
+    const lightboxBackdrop = lightbox.querySelector('.lightbox-backdrop');
+    if (lightboxBackdrop) {
+      lightboxBackdrop.addEventListener('click', closeLightbox);
+    }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-      closeLightbox();
-    }
-  });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+        closeLightbox();
+      }
+    });
+  }
 
   // FAQ Accordion
   const faqItems = document.querySelectorAll('.faq-item');
@@ -136,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (question && answer) {
       question.addEventListener('click', () => {
         const isActive = item.classList.contains('active');
-        
+
         faqItems.forEach(otherItem => {
           otherItem.classList.remove('active');
           const otherAnswer = otherItem.querySelector('.faq-answer');
@@ -155,187 +162,304 @@ document.addEventListener('DOMContentLoaded', () => {
      POWERFUL ONLINE JS LIBRARIES & INTERACTIVE ENGINE
      ========================================= */
 
-  // 1. Initialize Vanilla-Tilt 3D Glare on Cards & Arena
+  // 1. Initialize Vanilla-Tilt on Cards (without holographic glare)
   if (typeof VanillaTilt !== 'undefined') {
-    VanillaTilt.init(document.querySelectorAll('.feature-card, .screenshot-item, .demo-arena'), {
-      max: 6,
+    VanillaTilt.init(document.querySelectorAll('.feature-card:not(.deck-scroll-card)'), {
+      max: 4,
       speed: 400,
-      glare: true,
-      'max-glare': 0.15,
-      scale: 1.02
+      glare: false,
+      'max-glare': 0,
+      scale: 1.01
     });
   }
 
-  // 2. Initialize Typed.js Dynamic Typing in Hero
-  if (typeof Typed !== 'undefined' && document.getElementById('typed-output')) {
-    new Typed('#typed-output', {
-      strings: [
-        'true cinephiles.',
-        'TV show bingers.',
-        'actor filmographies.',
-        'offline-first lovers.',
-        'smooth 120fps UI.'
-      ],
-      typeSpeed: 50,
-      backSpeed: 30,
-      backDelay: 2000,
-      loop: true
-    });
+  // 2. Initialize Typed.js Dynamic Typing in Hero (with guaranteed offline vanilla JS fallback)
+  const typedEl = document.getElementById('typed-output');
+  if (typedEl) {
+    const strings = [
+      'true cinephiles.',
+      'custom neon folders.',
+      'TMDB & Trakt sync.',
+      '100% offline Room SQLite.',
+      'streaming guides.'
+    ];
+    if (typeof Typed !== 'undefined' || window.Typed) {
+      const TypedConstructor = typeof Typed !== 'undefined' ? Typed : window.Typed;
+      new TypedConstructor('#typed-output', {
+        strings: strings,
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 2000,
+        loop: true
+      });
+    } else {
+      // Vanilla JS Typewriter Fallback if CDN is offline or blocked
+      let strIdx = 0;
+      let charIdx = 0;
+      let isDeleting = false;
+      const typeLoop = () => {
+        const currentStr = strings[strIdx];
+        if (isDeleting) {
+          typedEl.textContent = currentStr.substring(0, charIdx - 1);
+          charIdx--;
+        } else {
+          typedEl.textContent = currentStr.substring(0, charIdx + 1);
+          charIdx++;
+        }
+        let typeSpeed = isDeleting ? 30 : 60;
+        if (!isDeleting && charIdx === currentStr.length) {
+          typeSpeed = 2000;
+          isDeleting = true;
+        } else if (isDeleting && charIdx === 0) {
+          isDeleting = false;
+          strIdx = (strIdx + 1) % strings.length;
+          typeSpeed = 300;
+        }
+        setTimeout(typeLoop, typeSpeed);
+      };
+      setTimeout(typeLoop, 500);
+    }
   }
 
-  // 3. Live Poster Theming Engine (Coil Extraction Simulation)
-  const themes = {
-    teal: { color: '#2DD4BF', glow: 'rgba(45, 212, 191, 0.35)' },
-    gold: { color: '#FFCA28', glow: 'rgba(255, 202, 40, 0.35)' },
-    purple: { color: '#A855F7', glow: 'rgba(168, 85, 247, 0.35)' },
-    crimson: { color: '#F43F5E', glow: 'rgba(244, 63, 94, 0.35)' },
-    emerald: { color: '#10B981', glow: 'rgba(16, 185, 129, 0.35)' }
-  };
+  // 3. Cyberpunk Neon Click Shockwave Ripple
+  document.addEventListener('click', (e) => {
+    const shockwave = document.createElement('div');
+    shockwave.className = 'click-shockwave';
+    shockwave.style.left = `${e.clientX}px`;
+    shockwave.style.top = `${e.clientY}px`;
+    document.body.appendChild(shockwave);
+    setTimeout(() => {
+      shockwave.remove();
+    }, 600);
+  });
 
-  const themePills = document.querySelectorAll('.theme-pill');
-  themePills.forEach(pill => {
-    pill.addEventListener('click', (e) => {
-      themePills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
+  // 3.5 Custom Interactive JS Mouse Cursor with Lag & Trail
+  const cursorDot = document.querySelector('.cursor-dot');
+  const cursorOutline = document.querySelector('.cursor-outline');
+  const bgMouseGlow = document.querySelector('.bg-mouse-glow');
 
-      const themeKey = pill.getAttribute('data-theme');
-      const selected = themes[themeKey] || themes.teal;
+  const isDesktopMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  if (cursorDot && cursorOutline && isDesktopMouse) {
+    document.body.classList.add('custom-cursor-active');
 
-      document.documentElement.style.setProperty('--accent-teal', selected.color);
-      document.documentElement.style.setProperty('--accent-teal-glow', selected.glow);
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let outlineX = mouseX;
+    let outlineY = mouseY;
+    let glowX = mouseX;
+    let glowY = mouseY;
 
-      // Mini confetti celebration on theme switch
-      if (typeof confetti !== 'undefined') {
-        const rect = pill.getBoundingClientRect();
-        confetti({
-          particleCount: 25,
-          spread: 60,
-          origin: {
-            x: (rect.left + rect.width / 2) / window.innerWidth,
-            y: (rect.top + rect.height / 2) / window.innerHeight
-          },
-          colors: [selected.color, '#ffffff', '#1E293B']
-        });
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      // Dot follows instantly
+      cursorDot.style.left = `${mouseX}px`;
+      cursorDot.style.top = `${mouseY}px`;
+    }, { passive: true });
+
+    // Smooth physics loop with requestAnimationFrame
+    const animateCursor = () => {
+      // Outline follows with smooth delay (lerp 0.18)
+      outlineX += (mouseX - outlineX) * 0.07;
+      outlineY += (mouseY - outlineY) * 0.07;
+      cursorOutline.style.left = `${outlineX}px`;
+      cursorOutline.style.top = `${outlineY}px`;
+
+      // Ambient background glow follows with ultra-smooth heavy delay (lerp 0.08)
+      if (bgMouseGlow) {
+        glowX += (mouseX - glowX) * 0.08;
+        glowY += (mouseY - glowY) * 0.08;
+        bgMouseGlow.style.left = `${glowX}px`;
+        bgMouseGlow.style.top = `${glowY}px`;
+      }
+
+      requestAnimationFrame(animateCursor);
+    };
+    animateCursor();
+
+    // Hover effect on true interactive elements only (buttons, links, tabs)
+    const attachCursorHover = () => {
+      const interactiveElements = document.querySelectorAll('a, button, input, .genre-btn, .screenshot-item, .faq-item, .lightbox-close');
+      interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover-active'));
+        el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover-active'));
+      });
+    };
+    attachCursorHover();
+    // Re-attach hover when grid updates
+    window.attachCursorHover = attachCursorHover;
+  }
+
+  /* =========================================
+     4. ADVANCED 120FPS SCROLL DYNAMICS ENGINE
+        (Hero Parallax Zoom, Velocity Skewing, Sticky Card Stacking)
+     ========================================= */
+  const heroSection = document.querySelector('.hero');
+  const featureCards = document.querySelectorAll('.feature-card');
+  const screenshotCards = document.querySelectorAll('.screenshot-item');
+  const faqCards = document.querySelectorAll('.faq-item');
+
+  let lastScrollY = window.scrollY;
+  let scrollVelocity = 0;
+  let smoothVelocity = 0;
+  let heroScale = 1;
+  let heroOpacity = 1;
+  let heroBlur = 0;
+
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    scrollVelocity = currentScrollY - lastScrollY;
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+
+  const scrollCards = Array.from(document.querySelectorAll('.deck-scroll-card'));
+  const scrollDeckSection = document.querySelector('.scroll-deck-section');
+
+  scrollCards.forEach((card, idx) => {
+    card.addEventListener('click', () => {
+      if (scrollDeckSection && idx < scrollCards.length - 1) {
+        const totalScrollableHeight = scrollDeckSection.offsetHeight - window.innerHeight;
+        if (totalScrollableHeight > 0) {
+          const targetStep = idx + 1;
+          const targetProgress = targetStep / (scrollCards.length - 1);
+          const targetScrollY = scrollDeckSection.offsetTop + (targetProgress * totalScrollableHeight);
+          window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+        }
+      } else if (scrollDeckSection && idx === scrollCards.length - 1) {
+        window.scrollTo({ top: scrollDeckSection.offsetTop, behavior: 'smooth' });
       }
     });
   });
 
-  // 4. Interactive Watchlist Simulator Arena (Room DB & TMDB Catalog)
-  const demoMovies = [
-    { id: 1, title: 'Dune: Part Two', genre: 'Sci-Fi', year: '2024', rating: '★ 8.5', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators.', bg: 'linear-gradient(135deg, #432b15, #1e130b)' },
-    { id: 2, title: 'Breaking Bad', genre: 'Drama', year: '2008-2013', rating: '★ 9.5', desc: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing meth.', bg: 'linear-gradient(135deg, #113321, #081a10)' },
-    { id: 3, title: 'Spider-Man: Across the Spider-Verse', genre: 'Animation', year: '2023', rating: '★ 8.7', desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People.', bg: 'linear-gradient(135deg, #4a1525, #190a12)' },
-    { id: 4, title: 'Oppenheimer', genre: 'Drama', year: '2023', rating: '★ 8.9', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', bg: 'linear-gradient(135deg, #3d2214, #140b06)' },
-    { id: 5, title: 'Interstellar', genre: 'Sci-Fi', year: '2014', rating: '★ 8.7', desc: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.', bg: 'linear-gradient(135deg, #162238, #0a0f1a)' },
-    { id: 6, title: 'The Dark Knight', genre: 'Action', year: '2008', rating: '★ 9.0', desc: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest tests.', bg: 'linear-gradient(135deg, #1f242d, #0d1014)' },
-    { id: 7, title: 'Cyberpunk: Edgerunners', genre: 'Animation', year: '2022', rating: '★ 8.3', desc: 'A street kid trying to survive in a technology and body modification-obsessed city of the future.', bg: 'linear-gradient(135deg, #401035, #1f0619)' },
-    { id: 8, title: 'Inception', genre: 'Action', year: '2010', rating: '★ 8.8', desc: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea.', bg: 'linear-gradient(135deg, #252b36, #101318)' }
-  ];
+  const animateScrollDynamics = () => {
+    // Smooth velocity lerp for organic inertia
+    smoothVelocity += (scrollVelocity - smoothVelocity) * 0.12;
+    scrollVelocity *= 0.85; // automatic decay when stopped
 
-  const grid = document.getElementById('demoMovieGrid');
-  const searchInput = document.getElementById('demoSearchInput');
-  const genreBtns = document.querySelectorAll('.genre-btn');
-  const badge = document.getElementById('watchlistCountBadge');
-  let savedCount = 0;
-  let activeGenre = 'All';
-  let searchQuery = '';
+    // 4.1 Velocity Skewing / Aerodynamic Inertia on Cards
+    if (Math.abs(smoothVelocity) > 0.15) {
+      const skewAngle = Math.max(Math.min(smoothVelocity * 0.045, 2.0), -2.0);
+      const stretchY = 1 + Math.min(Math.abs(smoothVelocity) * 0.0005, 0.02);
 
-  const renderGrid = () => {
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    const filtered = demoMovies.filter(m => {
-      const matchGenre = activeGenre === 'All' || m.genre === activeGenre;
-      const matchSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.genre.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchGenre && matchSearch;
-    });
-
-    if (filtered.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">No movies or TV shows found matching your filter.</div>`;
-      return;
-    }
-
-    filtered.forEach(m => {
-      const card = document.createElement('div');
-      card.className = 'demo-card';
-      card.innerHTML = `
-        <div class="demo-card-banner" style="background: ${m.bg};">
-          <div class="demo-card-overlay">
-            <span class="demo-card-rating">${m.rating}</span>
-          </div>
-        </div>
-        <div class="demo-card-body">
-          <div class="demo-card-title">${m.title}</div>
-          <div class="demo-card-meta"><span>${m.year}</span> • <span style="color: var(--accent-teal); font-weight: 600;">${m.genre}</span></div>
-          <div class="demo-card-desc">${m.desc}</div>
-          <div class="demo-card-action">
-            <button class="btn-add-folder" data-id="${m.id}">
-              <span>+ Folder</span>
-            </button>
-          </div>
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-
-    // Re-init Vanilla-Tilt on newly generated cards
-    if (typeof VanillaTilt !== 'undefined') {
-      VanillaTilt.init(grid.querySelectorAll('.demo-card'), {
-        max: 8,
-        speed: 300,
-        glare: true,
-        'max-glare': 0.2
-      });
-    }
-
-    // Attach click events to buttons
-    grid.querySelectorAll('.btn-add-folder').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        if (!btn.classList.contains('saved')) {
-          btn.classList.add('saved');
-          btn.innerHTML = `<span>✓ Saved in Folder</span>`;
-          savedCount++;
-          if (badge) badge.innerText = `Saved in Folder: ${savedCount} items`;
-
-          // Trigger confetti explosion on save!
-          if (typeof confetti !== 'undefined') {
-            const rect = btn.getBoundingClientRect();
-            confetti({
-              particleCount: 40,
-              spread: 70,
-              origin: {
-                x: (rect.left + rect.width / 2) / window.innerWidth,
-                y: (rect.top + rect.height / 2) / window.innerHeight
-              },
-              colors: ['#2DD4BF', '#FFCA28', '#10B981', '#ffffff']
-            });
-          }
-        } else {
-          btn.classList.remove('saved');
-          btn.innerHTML = `<span>+ Folder</span>`;
-          savedCount = Math.max(0, savedCount - 1);
-          if (badge) badge.innerText = `Saved in Folder: ${savedCount} items`;
+      featureCards.forEach(card => {
+        if (!card.classList.contains('deck-scroll-card') && !card.matches(':hover')) {
+          card.style.transform = `perspective(1000px) skewY(${skewAngle.toFixed(2)}deg) scaleY(${stretchY.toFixed(4)})`;
         }
       });
-    });
+      screenshotCards.forEach(item => {
+        if (!item.matches(':hover')) {
+          item.style.transform = `perspective(1000px) skewY(${(skewAngle * 0.6).toFixed(2)}deg)`;
+        }
+      });
+    } else {
+      featureCards.forEach(card => {
+        if (!card.classList.contains('deck-scroll-card') && !card.matches(':hover') && card.style.transform.includes('skewY')) {
+          card.style.transform = '';
+        }
+      });
+      screenshotCards.forEach(item => {
+        if (!item.matches(':hover') && item.style.transform.includes('skewY')) {
+          item.style.transform = '';
+        }
+      });
+    }
+
+    // 4.2 Hero Section Deep 3D Parallax & Depth Fade
+    const heroSection = document.querySelector('.hero');
+    if (heroSection && window.scrollY < 850) {
+      const scrollY = window.scrollY;
+      const targetTranslateY = scrollY * 0.65;
+      heroScale = Math.max(0.88, 1 - scrollY * 0.00025);
+      heroOpacity = Math.max(0, 1 - scrollY * 0.0014);
+      heroBlur = Math.min(12, scrollY * 0.012);
+
+      heroSection.style.transform = `translate3d(0, ${targetTranslateY.toFixed(1)}px, 0) scale(${heroScale.toFixed(4)})`;
+      heroSection.style.opacity = Math.max(0, heroOpacity).toFixed(3);
+      heroSection.style.filter = `blur(${heroBlur.toFixed(1)}px)`;
+    } else if (heroSection && window.scrollY >= 850) {
+      heroSection.style.opacity = '0';
+    }
+
+    // 4.3 Scroll-Controlled 3D Cinematic Deck of 9 Cards
+    if (scrollDeckSection && scrollCards.length > 0) {
+      const rect = scrollDeckSection.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const totalScrollableHeight = rect.height - windowHeight;
+
+      let progress = 0;
+      if (totalScrollableHeight > 0) {
+        progress = Math.max(0, Math.min(1, -rect.top / totalScrollableHeight));
+      }
+
+      const numCards = scrollCards.length;
+      const totalSteps = numCards - 1;
+      const currentStep = progress * totalSteps;
+
+      const activeIdx = Math.floor(currentStep);
+      const stepP = currentStep - activeIdx; // 0.0 to 1.0 within current step
+
+      // Dwell zone: 55% of each step is locked motionless for comfortable reading.
+      // 45% is the smooth swipe transition to the next card.
+      const dwell = 0.55;
+      const trans = 1.0 - dwell;
+      const t = stepP <= dwell ? 0 : (stepP - dwell) / trans; // 0 during dwell, 0->1 during transition
+
+      scrollCards.forEach((card, i) => {
+        let effectiveOffset;
+        if (i < activeIdx) {
+          effectiveOffset = -1; // Already dealt away
+        } else if (i === activeIdx) {
+          effectiveOffset = -t; // 0 (frozen in reading zone!), then moves 0 -> -1 during transition
+        } else {
+          const baseDepth = i - activeIdx;
+          effectiveOffset = baseDepth - t; // e.g. Card 1 rests at depth 1, then moves 1 -> 0 during transition
+        }
+
+        if (effectiveOffset <= -0.98) {
+          // Dealt away off screen
+          card.style.transform = `translate3d(125%, 20%, 0) rotate(22deg) scale(0.85)`;
+          card.style.opacity = '0';
+          card.style.zIndex = '0';
+          card.style.pointerEvents = 'none';
+        } else if (effectiveOffset < 0) {
+          // Currently dealing out! (swiping sideways and slightly down, never up into the header text)
+          const p = -effectiveOffset; // goes from 0 to 1
+          const translateY = p * 15;
+          const translateX = p * 130;
+          const rotate = p * 18;
+          const scale = 1 - p * 0.15;
+          // Stay 100% solid opaque for the first part of the exit swipe, fade out only at the end
+          const opacity = p < 0.35 ? 1 : Math.max(0, 1 - ((p - 0.35) / 0.65));
+
+          card.style.transform = `translate3d(${translateX.toFixed(1)}%, ${translateY.toFixed(1)}%, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+          card.style.opacity = opacity.toFixed(3);
+          card.style.zIndex = `${numCards + 5}`;
+          card.style.pointerEvents = 'none';
+        } else if (effectiveOffset === 0) {
+          // Active top card locked in reading zone!
+          card.style.transform = `translate3d(0, 0, 0) rotate(0deg) scale(1)`;
+          card.style.opacity = '1';
+          card.style.zIndex = `${numCards}`;
+          card.style.pointerEvents = 'auto';
+        } else {
+          // Waiting in the deck behind the top card!
+          const depth = Math.min(effectiveOffset, 5); // limit visible stacking depth
+          const translateY = depth * 24; // 24px down per step
+          const scale = Math.max(0.75, 1 - depth * 0.045);
+          const rotate = ((i % 2 === 0) ? -1 : 1) * depth * 2.2;
+          // ZERO TRANSPARENCY! Stack cards are 100% opaque solid physical cards!
+          const opacity = depth <= 2.5 ? 1 : Math.max(0, 1 - (depth - 2.5) * 0.4);
+
+          card.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+          card.style.opacity = opacity.toFixed(3);
+          card.style.zIndex = `${Math.max(1, numCards - Math.floor(effectiveOffset))}`;
+          card.style.pointerEvents = effectiveOffset <= 1 ? 'auto' : 'none';
+        }
+      });
+    }
+
+    requestAnimationFrame(animateScrollDynamics);
   };
+  animateScrollDynamics();
 
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value;
-      renderGrid();
-    });
-  }
-
-  genreBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      genreBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeGenre = btn.getAttribute('data-genre');
-      renderGrid();
-    });
-  });
-
-  // Initial render
-  renderGrid();
 });

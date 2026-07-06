@@ -8,8 +8,17 @@
   <link rel="icon" href="assets/Icon.svg">
 </head>
 <body>
+  <!-- Background Glow Orbs & Ambient Mouse Tracking -->
   <div class="bg-glow-1"></div>
   <div class="bg-glow-2"></div>
+  <div class="bg-mouse-glow"></div>
+
+  <!-- Interactive 3D Particle Starfield Canvas -->
+  <canvas id="cyber-canvas"></canvas>
+
+  <!-- Custom Interactive JS Mouse Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
 
   <!-- Navigation Bar -->
   <nav class="navbar">
@@ -26,7 +35,7 @@
         <li><a href="terms.html">Terms</a></li>
       </ul>
       <div class="nav-actions">
-        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="nav-github-btn">⭐ GitHub</a>
+        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="nav-github-btn magnetic-btn"><img src="assets/icons/star_piena.svg" alt="star" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub</a>
       </div>
       <button class="mobile-menu-btn" aria-label="Toggle navigation menu">☰</button>
     </div>
@@ -42,7 +51,7 @@
       <li><a href="terms.html" class="drawer-link">Terms of Service</a></li>
     </ul>
     <div class="mobile-drawer-cta">
-      <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary">⭐ GitHub Repo</a>
+      <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary magnetic-btn"><img src="assets/icons/star_piena.svg" alt="star" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub Repo</a>
     </div>
   </div>
 
@@ -118,7 +127,7 @@
 
     <div class="footer-bottom">
       <p>&copy; 2026 FlickTrove. All rights reserved.</p>
-      <p>Built with ❤️</p>
+      <p>Built with <img src="assets/icons/heart.svg" alt="heart" style="width: 16px; height: 16px; vertical-align: -2px; filter: drop-shadow(0 0 5px #f43f5e); color: #f43f5e; display: inline-block;"></p>
     </div>
   </footer>
 
