@@ -26,10 +26,8 @@ class ReminderWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            if (!settingsRepository.notificationsEnabled.first()) {
-                return@withContext Result.success()
-            }
-
+            val notifEnabled = settingsRepository.notificationsEnabled.first()
+            val hasPermission = NotificationHelper.hasNotificationPermission(context)
             val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) // "yyyy-MM-dd"
             
             val favorites = database.favoriteDao().getAll()
@@ -41,13 +39,15 @@ class ReminderWorker @AssistedInject constructor(
                 if (item.mediaType == "movie") {
                     val rDate = item.releaseDate
                     if (!rDate.isNullOrEmpty() && rDate <= today) {
-                        NotificationHelper.showReleaseNotification(
-                            context = context,
-                            movieTitle = item.displayName,
-                            movieId = item.id,
-                            mediaType = item.mediaType,
-                            posterPath = item.posterPath
-                        )
+                        if (notifEnabled && hasPermission) {
+                            NotificationHelper.showReleaseNotification(
+                                context = context,
+                                movieTitle = item.displayName,
+                                movieId = item.id,
+                                mediaType = item.mediaType,
+                                posterPath = item.posterPath
+                            )
+                        }
                         val updated = item.copy(
                             favorite = true,
                             reminder = false,
@@ -62,13 +62,15 @@ class ReminderWorker @AssistedInject constructor(
 
                     // Check if the show itself premieres today
                     if (item.firstAirDate == today) {
-                        NotificationHelper.showReleaseNotification(
-                            context = context,
-                            movieTitle = item.displayName,
-                            movieId = item.id,
-                            mediaType = item.mediaType,
-                            posterPath = item.posterPath
-                        )
+                        if (notifEnabled && hasPermission) {
+                            NotificationHelper.showReleaseNotification(
+                                context = context,
+                                movieTitle = item.displayName,
+                                movieId = item.id,
+                                mediaType = item.mediaType,
+                                posterPath = item.posterPath
+                            )
+                        }
                         val updated = item.copy(
                             migratedAt = today,
                             clientUpdatedAt = System.currentTimeMillis(),
@@ -77,13 +79,15 @@ class ReminderWorker @AssistedInject constructor(
                         database.favoriteDao().insert(updated)
                     } else if (item.nextEpisodeAirDate == today) {
                         val epString = item.nextEpisodeString ?: "nuovo episodio"
-                        NotificationHelper.showEpisodeReleaseNotification(
-                            context = context,
-                            showTitle = item.displayName,
-                            showId = item.id,
-                            episodeString = epString,
-                            posterPath = item.posterPath
-                        )
+                        if (notifEnabled && hasPermission) {
+                            NotificationHelper.showEpisodeReleaseNotification(
+                                context = context,
+                                showTitle = item.displayName,
+                                showId = item.id,
+                                episodeString = epString,
+                                posterPath = item.posterPath
+                            )
+                        }
                         val updated = item.copy(
                             migratedAt = today,
                             clientUpdatedAt = System.currentTimeMillis(),
