@@ -25,6 +25,7 @@ data class Season(
     @SerialName("season_number") val seasonNumber: Int = 0,
     @SerialName("episode_count") val episodeCount: Int? = 0,
     @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("air_date") val airDate: String? = null,
     val overview: String? = null,
     val episodes: List<Episode>? = null
 )

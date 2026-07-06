@@ -58,6 +58,7 @@ object MovieMapper {
             numberOfEpisodes = response.numberOfEpisodes,
             streamingProviderIds = response.watchProviders?.results?.get("IT")?.flatrate?.map { it.providerId },
             seasons = response.seasons,
+            lastAirDate = response.lastEpisodeToAir?.airDate ?: response.lastAirDate,
             nextEpisodeAirDate = response.nextEpisodeToAir?.airDate,
             nextEpisodeString = response.nextEpisodeToAir?.let { "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}" },
             topCastData = topCast,

@@ -141,6 +141,8 @@ data class MovieDetailResponse(
     @SerialName("belongs_to_collection") val belongsToCollection: Collection? = null,
     val status: String? = null,
     @SerialName("next_episode_to_air") val nextEpisodeToAir: com.cinetrack.data.models.Episode? = null,
+    @SerialName("last_episode_to_air") val lastEpisodeToAir: com.cinetrack.data.models.Episode? = null,
+    @SerialName("last_air_date") val lastAirDate: String? = null,
     val tagline: String? = null,
     val budget: Long? = 0,
     val revenue: Long? = 0,
