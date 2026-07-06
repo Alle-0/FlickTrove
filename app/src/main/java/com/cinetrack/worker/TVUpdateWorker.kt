@@ -91,7 +91,8 @@ class TVUpdateWorker(
                                 context = applicationContext,
                                 showTitle = show.title ?: show.name ?: "Serie TV",
                                 showId = show.id,
-                                newEpisodesCount = releasedNewEps
+                                newEpisodesCount = releasedNewEps,
+                                posterPath = show.posterPath
                             )
                         }
                     }
