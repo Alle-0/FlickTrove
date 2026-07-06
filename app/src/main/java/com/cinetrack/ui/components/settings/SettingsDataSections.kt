@@ -159,7 +159,7 @@ fun SettingsSyncBackupSection(
                             }
                         )
                         SettingsActionButton(
-                            icon = Icons.Rounded.Close,
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_x),
                             tint = Color(0xFFFF5252),
                             onClick = {
                                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -356,7 +356,7 @@ fun SettingsSupportSection(
             }
         )
         SettingsItem(
-            icon = Icons.Rounded.Favorite,
+            icon = ImageVector.vectorResource(id = R.drawable.ic_heart),
             title = "Buy me a Coffee ☕",
             description = "Support the developer with a donation",
             isExternal = true,
@@ -434,7 +434,7 @@ fun SettingsFooterSection() {
                 color = OnSurfaceMuted
             )
             Icon(
-                Icons.Rounded.Favorite,
+                ImageVector.vectorResource(id = R.drawable.ic_heart),
                 contentDescription = null,
                 tint = Color(0xFFFF5252),
                 modifier = Modifier.padding(horizontal = 4.dp).size(12.dp)

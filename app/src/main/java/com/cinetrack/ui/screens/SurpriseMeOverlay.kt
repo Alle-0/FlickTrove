@@ -255,9 +255,9 @@ private fun TimeStep(onSelect: (SurpriseTime) -> Unit) {
     WizardStep(
         title = stringResource(R.string.surprise_q_time),
         options = listOf(
-            WizardOption(stringResource(R.string.surprise_time_short), Icons.Rounded.Timer, { onSelect(SurpriseTime.SHORT) }),
+            WizardOption(stringResource(R.string.surprise_time_short), ImageVector.vectorResource(R.drawable.ic_crono), { onSelect(SurpriseTime.SHORT) }),
             WizardOption(stringResource(R.string.surprise_time_medium), ImageVector.vectorResource(R.drawable.ic_clock), { onSelect(SurpriseTime.MEDIUM) }),
-            WizardOption(stringResource(R.string.surprise_time_long), Icons.Rounded.HourglassFull, { onSelect(SurpriseTime.LONG) }),
+            WizardOption(stringResource(R.string.surprise_time_long), ImageVector.vectorResource(R.drawable.ic_clessidra), { onSelect(SurpriseTime.LONG) }),
             WizardOption(stringResource(R.string.surprise_any), ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseTime.ANY) })
         )
     )
@@ -268,10 +268,10 @@ private fun MoodStep(onSelect: (SurpriseMood) -> Unit) {
     WizardStep(
         title = stringResource(R.string.surprise_q_mood),
         options = listOf(
-            WizardOption(stringResource(R.string.surprise_mood_laugh), Icons.Rounded.SentimentSatisfiedAlt, { onSelect(SurpriseMood.LAUGH) }),
-            WizardOption(stringResource(R.string.surprise_mood_tension), Icons.Rounded.Bolt, { onSelect(SurpriseMood.TENSION) }),
-            WizardOption(stringResource(R.string.surprise_mood_emotion), Icons.Rounded.WaterDrop, { onSelect(SurpriseMood.EMOTION) }),
-            WizardOption(stringResource(R.string.surprise_mood_escape), Icons.Rounded.RocketLaunch, { onSelect(SurpriseMood.ESCAPE) }),
+            WizardOption(stringResource(R.string.surprise_mood_laugh), ImageVector.vectorResource(R.drawable.ic_laugh), { onSelect(SurpriseMood.LAUGH) }),
+            WizardOption(stringResource(R.string.surprise_mood_tension), ImageVector.vectorResource(R.drawable.ic_bolt), { onSelect(SurpriseMood.TENSION) }),
+            WizardOption(stringResource(R.string.surprise_mood_emotion), ImageVector.vectorResource(R.drawable.ic_goccia), { onSelect(SurpriseMood.EMOTION) }),
+            WizardOption(stringResource(R.string.surprise_mood_escape), ImageVector.vectorResource(R.drawable.ic_rocket), { onSelect(SurpriseMood.ESCAPE) }),
             WizardOption(stringResource(R.string.surprise_mood_any), ImageVector.vectorResource(R.drawable.ic_sparkle), { onSelect(SurpriseMood.ANY) })
         )
     )
@@ -283,7 +283,7 @@ private fun CompanyStep(onSelect: (SurpriseCompany) -> Unit) {
         title = stringResource(R.string.surprise_q_company),
         options = listOf(
             WizardOption(stringResource(R.string.surprise_company_alone), ImageVector.vectorResource(R.drawable.ic_persona), { onSelect(SurpriseCompany.ALONE) }),
-            WizardOption(stringResource(R.string.surprise_company_couple), Icons.Rounded.Favorite, { onSelect(SurpriseCompany.COUPLE) }),
+            WizardOption(stringResource(R.string.surprise_company_couple), ImageVector.vectorResource(R.drawable.ic_heart), { onSelect(SurpriseCompany.COUPLE) }),
             WizardOption(stringResource(R.string.surprise_company_friends), ImageVector.vectorResource(R.drawable.ic_people), { onSelect(SurpriseCompany.FRIENDS) }),
             WizardOption(stringResource(R.string.surprise_company_family), ImageVector.vectorResource(R.drawable.ic_home), { onSelect(SurpriseCompany.FAMILY) })
         )

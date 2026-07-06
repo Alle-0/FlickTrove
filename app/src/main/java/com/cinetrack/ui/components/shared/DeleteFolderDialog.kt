@@ -1,6 +1,8 @@
 package com.cinetrack.ui.components.shared
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
@@ -78,7 +80,9 @@ fun DeleteFolderDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = scrimAlpha))
-                .clickable(enabled = true, onClick = { isDismissing = true }),
+                .pointerInput(Unit) {
+                    detectTapGestures { isDismissing = true }
+                },
             contentAlignment = Alignment.Center
         ) {
 
@@ -92,7 +96,7 @@ fun DeleteFolderDialog(
                         .width(340.dp)
                         .clip(RoundedCornerShape(32.dp))
                         .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), alpha = blurAlpha)
-                        .clickable(enabled = false) { }
+                        .pointerInput(Unit) { detectTapGestures { } }
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {

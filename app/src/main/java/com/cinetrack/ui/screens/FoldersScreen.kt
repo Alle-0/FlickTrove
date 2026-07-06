@@ -269,6 +269,11 @@ fun FoldersScreenContent(
             val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
             val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
             
+            val menuAlpha by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = if (isMenuVisible) 1f else 0f,
+                animationSpec = tween(200),
+                label = "menuAlpha"
+            )
             AnimatedVisibility(
                 visible = isMenuVisible,
                 enter = fadeIn() + slideInVertically(
@@ -285,7 +290,7 @@ fun FoldersScreenContent(
                     modifier = Modifier
                         .width(200.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .then(Modifier.hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp)))
+                        .then(Modifier.hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp), alpha = menuAlpha))
                 ) {
                     Row(
                         modifier = Modifier
@@ -519,7 +524,6 @@ fun FolderCreateDialog(
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         }
-                        .clickable(enabled = false) { }
                         .premiumScrollbar(scrollState)
                         .verticalScroll(scrollState)
                         .padding(24.dp)

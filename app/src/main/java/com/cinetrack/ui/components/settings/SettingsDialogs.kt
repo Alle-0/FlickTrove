@@ -310,7 +310,7 @@ fun FeedbackDialog(
                                 modifier = Modifier.size(44.dp)
                             ) {
                                 Icon(
-                                    imageVector = if (isSelected) Icons.Rounded.Star else Icons.Rounded.StarOutline,
+                                    imageVector = ImageVector.vectorResource(id = if (isSelected) R.drawable.ic_star_piena else R.drawable.ic_star),
                                     contentDescription = null,
                                     tint = starColor,
                                     modifier = Modifier
@@ -596,7 +596,7 @@ fun ColorSelectionDialog(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Add,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                                     contentDescription = stringResource(R.string.settings_custom),
                                     tint = if (customSelected) Color.White else Color.White.copy(alpha = 0.5f),
                                     modifier = Modifier.size(24.dp)

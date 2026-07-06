@@ -213,7 +213,7 @@ fun SettingsUILayoutSection(
         )
         // Start Screen
         SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
+            icon = ImageVector.vectorResource(id = R.drawable.ic_home),
             title = stringResource(R.string.settings_default_start_tab),
             description = stringResource(R.string.settings_default_start_tab_desc),
             trailing = { },
@@ -327,7 +327,7 @@ fun SettingsStartTabSection(
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
 
     SettingsItem(
-        icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
+        icon = ImageVector.vectorResource(id = R.drawable.ic_home),
         title = stringResource(R.string.settings_default_start_tab),
         description = stringResource(R.string.settings_default_start_tab_desc),
         trailing = { },

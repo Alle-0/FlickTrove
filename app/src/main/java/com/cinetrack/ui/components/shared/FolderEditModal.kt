@@ -105,7 +105,6 @@ fun FolderEditDialog(
                         .pointerInput(Unit) {
                             detectTapGestures { focusManager.clearFocus() }
                         }
-                        .clickable(enabled = false) { }
                         .premiumScrollbar(scrollState)
                         .verticalScroll(scrollState)
                         .padding(24.dp)

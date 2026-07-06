@@ -446,7 +446,7 @@ fun StatsScreenContent(
                                 var dirExpanded by rememberSaveable { mutableStateOf(false) }
                                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     StatsSectionHeader(
-                                        icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_megafono),
                                         title = stringResource(R.string.stats_top_directors),
                                         count = null
                                     )
@@ -466,7 +466,7 @@ fun StatsScreenContent(
                                 if (stats.genreCounts.isNotEmpty()) {
                                     var genreExpanded by rememberSaveable { mutableStateOf(false) }
                                     StatsSectionHeader(
-                                        icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
                                         title = stringResource(R.string.stats_genre_distribution),
                                         count = null
                                     )
