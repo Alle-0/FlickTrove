@@ -49,7 +49,8 @@ fun DetailBackdrop(
         // 1. ATMOSPHERIC PREMIUM FALLBACK (Visibile durante il caricamento, offline o se l'immagine è assente)
         AtmosphericBackdropFallback(
             accentColor = accentColor,
-            backgroundColor = backgroundColor
+            backgroundColor = backgroundColor,
+            showCiack = (path == null)
         )
 
         // 2. BACKDROP IMAGE (Crossfade sopra il fallback quando connesso)
@@ -99,6 +100,7 @@ fun DetailBackdrop(
 private fun AtmosphericBackdropFallback(
     accentColor: Color,
     backgroundColor: Color,
+    showCiack: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val gradient = remember(accentColor, backgroundColor) {
@@ -126,19 +128,21 @@ private fun AtmosphericBackdropFallback(
             .background(radialGlow),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(160.dp)
-                .background(accentColor.copy(alpha = 0.15f), CircleShape)
-                .border(1.5.dp, accentColor.copy(alpha = 0.3f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
-                contentDescription = null,
-                modifier = Modifier.size(54.dp),
-                tint = Color.White.copy(alpha = 0.4f)
-            )
+        if (showCiack) {
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .background(accentColor.copy(alpha = 0.15f), CircleShape)
+                    .border(1.5.dp, accentColor.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                    contentDescription = null,
+                    modifier = Modifier.size(54.dp),
+                    tint = Color.White.copy(alpha = 0.4f)
+                )
+            }
         }
     }
 }

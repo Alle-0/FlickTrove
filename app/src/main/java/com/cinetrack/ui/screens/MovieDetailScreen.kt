@@ -337,7 +337,7 @@ fun MovieDetailScreenContent(
                     val state = cachedSuccess
                     if (state != null) {
                         val activeMovie = state.movieEntry
-                        val targetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
+                        val targetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
                         val accentColor by animateColorAsState(
                             targetValue = targetAccentColor,
                             animationSpec = tween(800),

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="assets/Icon.svg">
 </head>
+
 <body>
   <!-- Background Glow Orbs & Ambient Mouse Tracking -->
   <div class="bg-glow-1"></div>
@@ -35,7 +37,9 @@
         <li><a href="terms.html">Terms</a></li>
       </ul>
       <div class="nav-actions">
-        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="nav-github-btn magnetic-btn"><img src="assets/icons/star_piena.svg" alt="star" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub</a>
+        <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="nav-github-btn magnetic-btn"><img
+            src="assets/icons/star_piena.svg" alt="star"
+            style="width: 16px; height: 16px; margin-right: 5px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub</a>
       </div>
       <button class="mobile-menu-btn" aria-label="Toggle navigation menu">☰</button>
     </div>
@@ -51,7 +55,10 @@
       <li><a href="terms.html" class="drawer-link">Terms of Service</a></li>
     </ul>
     <div class="mobile-drawer-cta">
-      <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary magnetic-btn"><img src="assets/icons/star_piena.svg" alt="star" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub Repo</a>
+      <a href="https://github.com/Alle-0/FlickTrove_Kotlin" target="_blank" class="btn-primary magnetic-btn"><img
+          src="assets/icons/star_piena.svg" alt="star"
+          style="width: 16px; height: 16px; margin-right: 6px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub
+        Repo</a>
     </div>
   </div>
 
@@ -63,37 +70,59 @@
       </div>
 
       <div class="legal-content">
-        <p>Welcome to <strong>FlickTrove</strong>. Your privacy is critically important to us. This Privacy Policy outlines what data we collect, how it is handled, and your rights regarding your personal information.</p>
+        <p>Welcome to <strong>FlickTrove</strong>. Your privacy is critically important to us. This Privacy Policy
+          outlines what data we collect, how it is handled, and your rights regarding your personal information.</p>
 
         <h2>1. Information We Collect</h2>
-        <p>FlickTrove is designed as an offline-first personal library. We collect only the minimum amount of data necessary to provide and improve our services:</p>
+        <p>FlickTrove is designed as an offline-first personal library. We collect only the minimum amount of data
+          necessary to provide and improve our services:</p>
         <ul>
-          <li><strong>Personal Library Data:</strong> Movie and TV show tracking lists, custom folders, watch time statistics, and personal ratings. By default, this data is stored locally on your device using a Room database.</li>
-          <li><strong>Authentication & Cloud Sync:</strong> If you choose to enable cloud synchronization, we use Firebase Authentication and Firebase Cloud Storage to securely store and sync your library across your devices.</li>
-          <li><strong>Anonymous Diagnostic & Crash Logs:</strong> We collect anonymized diagnostic data, stack traces, and crash breadcrumbs via Firebase Crashlytics and Google Analytics to identify software bugs and improve app stability without personally identifying you.</li>
+          <li><strong>Personal Library Data:</strong> Movie and TV show tracking lists, custom folders, watch time
+            statistics, and personal ratings. By default, this data is stored locally on your device using a Room
+            database.</li>
+          <li><strong>Authentication & Cloud Sync:</strong> If you choose to enable cloud synchronization, we use
+            Firebase Authentication and Firebase Cloud Storage to securely store and sync your library across your
+            devices.</li>
+          <li><strong>Anonymous Diagnostic & Crash Logs:</strong> We collect anonymized diagnostic data, stack traces,
+            and crash breadcrumbs via Firebase Crashlytics and Google Analytics to identify software bugs and improve
+            app stability without personally identifying you.</li>
         </ul>
 
         <h2>2. Third-Party Services & APIs</h2>
         <p>FlickTrove integrates with third-party platforms to enrich your cinematic experience:</p>
         <ul>
-          <li><strong>TMDB, OMDB & Trakt APIs:</strong> Movie, TV show, ratings, and actor details, including promotional images and posters, are dynamically fetched from The Movie Database (TMDB), Open Movie Database (OMDB), and Trakt.tv. Please refer to their respective privacy terms for information on third-party data handling.</li>
-          <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, authentication services, and crash diagnostics (Crashlytics & Analytics).</li>
-          <li><strong>News RSS Providers (Everyeye.it & Collider.com):</strong> When you open the News tab, the App connects directly to Everyeye.it (Italian) or Collider.com (English) to retrieve public RSS feeds. Your device's IP address is exposed to these publishers during this request.</li>
-          <li><strong>Google ML Kit (On-Device AI Translation):</strong> Movie synopses can be translated locally using Google ML Kit. Translation is performed entirely on your physical device without sending text or reading preferences to cloud translation servers.</li>
+          <li><strong>TMDB, OMDB & Trakt APIs:</strong> Movie, TV show, ratings, and actor details, including
+            promotional images and posters, are dynamically fetched from The Movie Database (TMDB), Open Movie Database
+            (OMDB), and Trakt.tv. Please refer to their respective privacy terms for information on third-party data
+            handling.</li>
+          <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, authentication
+            services, and crash diagnostics (Crashlytics & Analytics).</li>
+          <li><strong>News RSS Providers (Everyeye.it & Collider.com):</strong> When you open the News tab, the App
+            connects directly to Everyeye.it (Italian) or Collider.com (English) to retrieve public RSS feeds. Your
+            device's IP address is exposed to these publishers during this request.</li>
+          <li><strong>Google ML Kit (On-Device AI Translation):</strong> Movie synopses can be translated locally using
+            Google ML Kit. Translation is performed entirely on your physical device without sending text or reading
+            preferences to cloud translation servers.</li>
         </ul>
 
         <h2>3. Data Security & Retention</h2>
-        <p>We implement industry-standard security practices to protect your data. All communication between the FlickTrove app and cloud servers (Firebase and TMDB) is encrypted in transit using SSL/TLS. Local database data remains on your physical device and can be wiped at any time by uninstalling the app or clearing app data.</p>
+        <p>We implement industry-standard security practices to protect your data. All communication between the
+          FlickTrove app and cloud servers (Firebase and TMDB) is encrypted in transit using SSL/TLS. Local database
+          data remains on your physical device and can be wiped at any time by uninstalling the app or clearing app
+          data.</p>
 
         <h2>4. Your Rights & Data Deletion</h2>
         <p>You maintain full ownership and control over your data. At any time, you can:</p>
         <ul>
           <li>Export or delete your local library directly from the app settings.</li>
-          <li>Request complete deletion of your synced cloud account and associated data by contacting our support team or using the in-app account deletion option.</li>
+          <li>Request complete deletion of your synced cloud account and associated data by contacting our support team
+            or using the in-app account deletion option.</li>
         </ul>
 
         <h2>5. Changes to This Policy</h2>
-        <p>We reserve the right to update or modify this Privacy Policy at any time. Any changes will be reflected on this page with an updated revision date. Continued use of the application implies acceptance of the revised policy.</p>
+        <p>We reserve the right to update or modify this Privacy Policy at any time. Any changes will be reflected on
+          this page with an updated revision date. Continued use of the application implies acceptance of the revised
+          policy.</p>
       </div>
     </div>
   </main>
@@ -129,10 +158,10 @@
 
     <div class="footer-bottom">
       <p>&copy; 2026 FlickTrove. All rights reserved.</p>
-      <p>Built with <img src="assets/icons/heart.svg" alt="heart" style="width: 16px; height: 16px; vertical-align: -2px; filter: drop-shadow(0 0 5px #f43f5e); color: #f43f5e; display: inline-block;"></p>
     </div>
   </footer>
 
   <script src="script.js"></script>
 </body>
+
 </html>

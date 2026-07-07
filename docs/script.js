@@ -314,6 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const scrollCards = Array.from(document.querySelectorAll('.deck-scroll-card'));
   const scrollDeckSection = document.querySelector('.scroll-deck-section');
+  const filmstripHoles = document.querySelectorAll('.filmstrip-divider .film-holes');
+  const filmstripTracks = document.querySelectorAll('.filmstrip-divider .film-line');
 
   scrollCards.forEach((card, idx) => {
     card.addEventListener('click', () => {
@@ -335,6 +337,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Smooth velocity lerp for organic inertia
     smoothVelocity += (scrollVelocity - smoothVelocity) * 0.12;
     scrollVelocity *= 0.85; // automatic decay when stopped
+
+    // 4.1.5 Cinematic Filmstrip Horizontal Scroll
+    if (filmstripHoles.length > 0) {
+      const scrollPos = window.scrollY * 0.55;
+      filmstripHoles.forEach((hole) => {
+        hole.style.backgroundPosition = `${scrollPos.toFixed(1)}px 0px`;
+      });
+      filmstripTracks.forEach((track) => {
+        track.style.backgroundPosition = `${scrollPos.toFixed(1)}px 0px`;
+      });
+    }
 
     // 4.1 Velocity Skewing / Aerodynamic Inertia on Cards
     if (Math.abs(smoothVelocity) > 0.15) {
@@ -371,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetTranslateY = scrollY * 0.65;
       heroScale = Math.max(0.88, 1 - scrollY * 0.00025);
       heroOpacity = Math.max(0, 1 - scrollY * 0.0014);
-      heroBlur = Math.min(12, scrollY * 0.012);
+      heroBlur = Math.min(12, scrollY * 0.0075);
 
       heroSection.style.transform = `translate3d(0, ${targetTranslateY.toFixed(1)}px, 0) scale(${heroScale.toFixed(4)})`;
       heroSection.style.opacity = Math.max(0, heroOpacity).toFixed(3);
@@ -480,10 +493,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const particles = [];
 
     const colors = [
-      'rgba(255, 179, 0, ',   // Gold
-      'rgba(255, 215, 0, ',   // Yellow Gold
+      'rgba(45, 212, 191, ',  // Teal
+      'rgba(96, 239, 255, ',  // Cyan Glow
       'rgba(255, 255, 255, ', // Silver Dust
-      'rgba(45, 212, 191, '   // Teal Cinema Accent
+      'rgba(10, 174, 156, '   // Deep Teal
     ];
 
     for (let i = 0; i < numParticles; i++) {
@@ -512,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw subtle projector light cone bloom on canvas
       const grad = ctx.createRadialGradient(width / 2, 0, 10, width / 2, height * 0.5, width * 0.6);
-      grad.addColorStop(0, 'rgba(255, 179, 0, 0.04)');
+      grad.addColorStop(0, 'rgba(45, 212, 191, 0.05)');
       grad.addColorStop(1, 'transparent');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
