@@ -462,4 +462,96 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   animateScrollDynamics();
 
+  /* =========================================
+     5. CINEMATIC PROJECTOR DUST & GOLDEN SPARKS ENGINE
+     ========================================= */
+  const canvas = document.getElementById('cyber-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }, { passive: true });
+
+    const numParticles = Math.min(Math.floor((width * height) / 12000), 120);
+    const particles = [];
+
+    const colors = [
+      'rgba(255, 179, 0, ',   // Gold
+      'rgba(255, 215, 0, ',   // Yellow Gold
+      'rgba(255, 255, 255, ', // Silver Dust
+      'rgba(45, 212, 191, '   // Teal Cinema Accent
+    ];
+
+    for (let i = 0; i < numParticles; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2.2 + 0.5,
+        colorBase: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.7 + 0.1,
+        speedX: (Math.random() - 0.5) * 0.4,
+        speedY: (Math.random() * -0.6) - 0.2, // Drift gently upward like dust in projector light
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: (Math.random() - 0.5) * 0.03
+      });
+    }
+
+    let mouseCanvasX = width / 2;
+    let mouseCanvasY = height / 2;
+    window.addEventListener('mousemove', (e) => {
+      mouseCanvasX = e.clientX;
+      mouseCanvasY = e.clientY;
+    }, { passive: true });
+
+    const renderCinemaDust = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw subtle projector light cone bloom on canvas
+      const grad = ctx.createRadialGradient(width / 2, 0, 10, width / 2, height * 0.5, width * 0.6);
+      grad.addColorStop(0, 'rgba(255, 179, 0, 0.04)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      particles.forEach(p => {
+        p.wobble += p.wobbleSpeed;
+        p.x += p.speedX + Math.sin(p.wobble) * 0.3;
+        p.y += p.speedY;
+
+        // Interactive mouse dispersion
+        const dx = p.x - mouseCanvasX;
+        const dy = p.y - mouseCanvasY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const force = (120 - dist) / 120;
+          p.x += (dx / dist) * force * 1.5;
+          p.y += (dy / dist) * force * 1.5;
+        }
+
+        // Wrap around screen
+        if (p.y < -10) p.y = height + 10;
+        if (p.x < -10) p.x = width + 10;
+        if (p.x > width + 10) p.x = -10;
+
+        // Twinkle effect
+        const currentAlpha = Math.min(1, Math.max(0.05, p.alpha + Math.sin(p.wobble * 3) * 0.2));
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.colorBase}${currentAlpha.toFixed(2)})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `${p.colorBase}0.8)`;
+        ctx.fill();
+        ctx.shadowBlur = 0; // reset
+      });
+
+      requestAnimationFrame(renderCinemaDust);
+    };
+    renderCinemaDust();
+  }
+
 });

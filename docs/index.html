@@ -17,7 +17,19 @@
   <div class="bg-glow-2"></div>
   <div class="bg-mouse-glow"></div>
 
-  <!-- Interactive 3D Particle Starfield Canvas -->
+  <!-- Cinema Projector & Volumetric Light Beam -->
+  <div class="cinema-projector-container">
+    <div class="projector-housing">
+      <div class="projector-lens"></div>
+      <div class="projector-reels">
+        <div class="reel reel-left"></div>
+        <div class="reel reel-right"></div>
+      </div>
+    </div>
+    <div class="projector-beam"></div>
+  </div>
+
+  <!-- Interactive 3D Particle & Cinema Dust Canvas -->
   <canvas id="cyber-canvas"></canvas>
 
   <!-- Custom Interactive JS Mouse Cursor -->
@@ -67,8 +79,11 @@
   <!-- Hero Section with Staggered Entrance Animation -->
   <main>
     <section class="hero">
-      <div class="hero-badge hero-anim delay-1"><img src="assets/icons/ciak.svg" class="badge-icon" alt="">The Ultimate
-        Cinema & TV Companion</div>
+      <div class="hero-badge hero-anim delay-1 cinema-badge">
+        <span class="rec-dot"></span>
+        <img src="assets/icons/ciak.svg" class="badge-icon" alt="">
+        <span>THE 24 FPS CINEMA & TV COMPANION</span>
+      </div>
       <h1 class="hero-anim delay-2">Track movies and TV shows with <span class="gradient-text">breathtaking
           style.</span></h1>
       <p class="hero-anim delay-3">A premium Android personal library built with deep dark glassmorphism, dynamic color
@@ -98,6 +113,13 @@
             style="width: 18px; height: 18px; margin-left: 6px; vertical-align: -3px; filter: invert(1) drop-shadow(0 0 5px var(--accent-teal));"></a>
       </div>
     </section>
+
+    <!-- Cinematic Filmstrip Perforation Divider -->
+    <div class="filmstrip-divider">
+      <div class="film-holes"></div>
+      <div class="film-line"></div>
+      <div class="film-holes"></div>
+    </div>
 
     <!-- Features Section - 3D Scrollytelling Card Deck -->
     <section id="features" class="features-section scroll-deck-section">
@@ -348,6 +370,13 @@
         </div>
       </div>
     </section>
+
+    <!-- Cinematic Filmstrip Perforation Divider -->
+    <div class="filmstrip-divider">
+      <div class="film-holes"></div>
+      <div class="film-line"></div>
+      <div class="film-holes"></div>
+    </div>
 
     <!-- Screenshots Showcase Section -->
     <section id="screenshots" class="showcase-section">
