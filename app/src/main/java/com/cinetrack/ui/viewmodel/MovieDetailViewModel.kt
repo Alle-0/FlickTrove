@@ -646,6 +646,15 @@ class MovieDetailViewModel @Inject constructor(
                         val brightColor = ColorUtils.ensureMinimumLuminance(averageColor, 0.5f)
                         val finalColor = ColorUtils.saturateColor(brightColor, 2.0f)
                         _extractedColor.value = finalColor
+                        
+                        val r = (finalColor.red * 255).toInt()
+                        val g = (finalColor.green * 255).toInt()
+                        val b = (finalColor.blue * 255).toInt()
+                        val hexString = String.format("#%02X%02X%02X", r, g, b)
+                        val local = repository.getMovie(movie.id, movie.mediaType)
+                        if (local != null && local.accentColor != hexString) {
+                            repository.saveMovie(local.copy(accentColor = hexString))
+                        }
                     }
                 }
             }

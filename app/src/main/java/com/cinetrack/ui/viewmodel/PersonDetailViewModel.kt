@@ -16,6 +16,8 @@ import javax.inject.Inject
 import androidx.lifecycle.SavedStateHandle
 import com.cinetrack.ui.navigation.PersonRoute
 import com.cinetrack.ui.utils.ErrorMapper
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -42,6 +44,7 @@ data class PersonDetailUiState(
 
 @HiltViewModel
 class PersonDetailViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
@@ -167,7 +170,49 @@ class PersonDetailViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                _error.value = ErrorMapper.map(e.message)
+                try {
+                    val localMovies = repository.getLocalMoviesFlow().first()
+                    var personName: String? = null
+                    val personMovies = mutableListOf<Movie>()
+                    val personCrewMovies = mutableListOf<Movie>()
+
+                    for (m in localMovies) {
+                        val asCast = m.topCastData?.find { it.id == id }
+                        if (asCast != null) {
+                            if (personName == null) personName = asCast.name
+                            personMovies.add(m)
+                        }
+                        val asDirector = m.directorData?.find { it.id == id }
+                        if (asDirector != null || m.directorId == id) {
+                            if (personName == null) personName = asDirector?.name ?: m.directorName
+                            if (!personCrewMovies.contains(m)) personCrewMovies.add(m)
+                        }
+                    }
+
+                    if (personName != null || _profilePath != null) {
+                        val fallbackName = personName ?: context.getString(R.string.person_offline_default_name, id)
+                        val offlinePerson = Person(
+                            id = id,
+                            name = fallbackName,
+                            profilePath = _profilePath,
+                            knownForDepartment = if (personCrewMovies.size > personMovies.size) "Directing" else "Acting",
+                            biography = context.getString(R.string.person_offline_bio),
+                            combinedCredits = com.cinetrack.data.api.CombinedCredits(
+                                cast = personMovies,
+                                crew = personCrewMovies
+                            )
+                        )
+                        _person.value = offlinePerson
+                        _error.value = null
+                        if (_activeTab.value == "cast_movie" && personMovies.isEmpty() && personCrewMovies.isNotEmpty()) {
+                            _activeTab.value = "crew_movie"
+                        }
+                    } else {
+                        _error.value = ErrorMapper.map(e.message)
+                    }
+                } catch (fallbackEx: Exception) {
+                    _error.value = ErrorMapper.map(e.message)
+                }
             } finally {
                 val timeTaken = System.currentTimeMillis() - startTime
                 if (timeTaken < 600L) {

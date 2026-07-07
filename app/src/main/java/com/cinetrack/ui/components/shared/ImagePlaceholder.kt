@@ -1,7 +1,6 @@
 package com.cinetrack.ui.components.shared
 
 import com.cinetrack.R
-
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
@@ -36,7 +35,7 @@ fun ImagePlaceholder(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(brush = Brush.verticalGradient(colors = listOf(DarkSurface, DarkGrey, Color.Black))),
+            .background(brush = Brush.verticalGradient(colors = listOf(Color(0xFF2E2E48), Color(0xFF1E1E32), Color(0xFF141422)))),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(12.dp)) {
@@ -44,7 +43,7 @@ fun ImagePlaceholder(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(if (isBackdrop) 48.dp else 32.dp),
-                tint = Color.White.copy(alpha = 0.15f)
+                tint = Color.White.copy(alpha = 0.35f)
             )
             if (title != null && !isBackdrop) {
                 Text(

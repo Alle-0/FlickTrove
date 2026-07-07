@@ -389,7 +389,9 @@ class SettingsViewModel @Inject constructor(
                     title = title,
                     description = description,
                     rating = rating,
-                    appVersion = "3.1.5" // Aligning with UI version
+                    appVersion = "3.1.5", // Aligning with UI version
+                    deviceModel = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
+                    androidVersion = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})"
                 )
                 val result = feedbackRepository.sendFeedback(feedback)
                 if (result.isSuccess) {

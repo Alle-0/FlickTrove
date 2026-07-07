@@ -251,16 +251,30 @@ fun MovieDetailScreenContent(
     val rootHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
     
+    val fallbackAccentColor = remember(uiState) {
+        val id = (uiState as? DetailUiState.Success)?.movieEntry?.id ?: 1L
+        val colors = listOf(
+            Color(0xFFE50914), // Cinema Crimson
+            Color(0xFF6B48FF), // Electric Purple
+            Color(0xFF0080FF), // Neon Blue
+            Color(0xFF00D4B2), // Cyber Teal
+            Color(0xFFFF7A00), // Vibrant Orange
+            Color(0xFFFF007A), // Neon Pink
+            Color(0xFF8A2BE2)  // Blue Violet
+        )
+        colors[(kotlin.math.abs(id) % colors.size).toInt()]
+    }
+
     val globalAccentColor = when (val state = uiState) {
-        is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
-        else -> extractedColor ?: Color(0xFF1A1A1A)
+        is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
+        else -> extractedColor ?: fallbackAccentColor
     }
 
     // Removed showRatingDialog and showNoteDialog as they are now handled inline
 
     val targetBackgroundColor = when (val state = uiState) {
         is DetailUiState.Success -> {
-            val baseColor = state.movieEntry.accentColor.toComposeColor(extractedColor ?: Color(0xFF1A1A1A))
+            val baseColor = state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
             
             lerp(baseColor, Color.Black, 0.65f)
         }

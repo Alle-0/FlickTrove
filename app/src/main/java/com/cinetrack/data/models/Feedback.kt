@@ -12,5 +12,7 @@ data class Feedback(
     val description: String = "",
     val rating: Int = 0,
     val timestamp: Timestamp = Timestamp.now(),
-    val appVersion: String = ""
+    val appVersion: String = "",
+    val deviceModel: String = "",
+    val androidVersion: String = ""
 )

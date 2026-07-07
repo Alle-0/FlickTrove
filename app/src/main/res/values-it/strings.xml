@@ -726,6 +726,7 @@
     <string name="news_empty">Nessuna notizia disponibile al momento.</string>
     <string name="news_read_more">Carica altro</string>
     <string name="news_external_link">Link esterno</string>
+    <string name="news_error_loading">Impossibile caricare le notizie. Controlla la tua connessione a Internet e riprova.</string>
 
     <!-- Detail Actions -->
     <string name="action_reminder_active">RICORDA ATTIVO</string>
@@ -864,5 +865,11 @@
     <string name="status_disabled_plural_f">disattivate</string>
     <string name="status_enabled_plural_m">attivati</string>
     <string name="status_disabled_plural_m">disattivati</string>
+
+    <!-- Person Offline Fallback -->
+    <string name="person_offline_title">Modalità Offline</string>
+    <string name="person_offline_desc">Connessione assente o dati artista non presenti in cache.\nConnettiti per scaricare biografia e filmografia completa.</string>
+    <string name="person_offline_default_name">Artista #%1$d</string>
+    <string name="person_offline_bio">Dati biografici completi e filmografia estesa non disponibili in modalità offline.\nVengono visualizzati i titoli presenti nella tua libreria locale.</string>
 
 </resources>

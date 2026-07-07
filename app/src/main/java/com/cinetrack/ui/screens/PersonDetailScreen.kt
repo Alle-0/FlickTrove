@@ -169,23 +169,89 @@ fun PersonDetailScreenContent(
         } else {
             val error = uiState.error
             if (error != null) {
-                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = error,
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Medium
-                        )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF2E2E48),
+                                    Color(0xFF1E1E32),
+                                    Color(0xFF0A0A0A)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(280.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF6B48FF).copy(alpha = 0.25f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(2.dp, Color(0xFF6B48FF).copy(alpha = 0.5f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                                contentDescription = null,
+                                modifier = Modifier.size(56.dp),
+                                tint = Color(0xFF6B48FF).copy(alpha = 0.8f)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = stringResource(R.string.person_offline_title),
+                            color = Color.White,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-0.5).sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.person_offline_desc),
+                            color = Color.White.copy(alpha = 0.65f),
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 20.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(28.dp))
+
                         Button(
                             onClick = { viewModel.retry() },
-                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B48FF)),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
                         ) {
-                            Text(stringResource(R.string.detail_retry), color = Color.Black, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                            Text(
+                                stringResource(R.string.detail_retry),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                letterSpacing = 0.5.sp
+                            )
                         }
                     }
                 }
@@ -262,8 +328,8 @@ fun PersonDetailScreenContent(
                                         .background(
                                             Brush.verticalGradient(
                                                 colors = listOf(
-                                                    Color(0xFF181820),
-                                                    Color(0xFF101014),
+                                                    Color(0xFF2E2E48),
+                                                    Color(0xFF1E1E32),
                                                     Color(0xFF0A0A0A)
                                                 )
                                             )

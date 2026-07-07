@@ -12,13 +12,15 @@ For any questions, concerns, or requests regarding privacy, the exercise of GDPR
 The App is designed according to the principles of minimization: we collect only the absolute minimum amount of information necessary to ensure the security of your account and provide you with the promised features.
 
 * **Profile and Service Data:** Your email address (used exclusively for login purposes) and your in-app data (Preferences, Ratings, Custom Lists, Folders, and Notes) are securely saved and synchronized on our cloud servers to allow you to access them on any device.
-* **Non-Sensitive Technical Data:** We aggregate non-sensitive technical data (such as device model, OS version) and crash logs. Such data is anonymized and is used exclusively for debugging and improving the App's performance.
+* **Non-Sensitive Technical Data:** We collect anonymized technical data (such as device model, OS version, and stack traces) and diagnostic breadcrumbs via Firebase Crashlytics and Google Analytics. Such data is used exclusively for identifying bugs, resolving crashes, and improving app stability without personally identifying you.
 * **No Sensitive Data:** The application **DOES NOT** collect in any way or under any circumstances sensitive personal data (e.g., political orientation, health data, ethnicity, biometric data, sexual preferences). We do not use your data for marketing or invasive advertising tracking purposes.
 
 ### 3. Third-Party Tools and Services
 FlickTrove uses essential third-party infrastructures to function. These providers may collect and process data according to their own strict policies, in compliance with the European Data Privacy Framework:
-* **Firebase (Google):** Used for secure authentication (Firebase Auth), real-time cloud saving (Firestore), and crash/performance analysis (Crashlytics and Analytics). *See the Google/Firebase Privacy Policy for more details.*
-* **TMDB API:** The App communicates with The Movie Database servers to retrieve plots, posters, and information about movies and TV shows based on your searches.
+* **Firebase (Google):** Used for secure authentication (Firebase Auth), real-time cloud saving (Firestore), and crash diagnostics/stability monitoring (Crashlytics and Analytics). *See the Google/Firebase Privacy Policy for more details.*
+* **TMDB, OMDB & Trakt APIs:** The App communicates with The Movie Database (TMDB), Open Movie Database (OMDB), and Trakt.tv servers to retrieve plots, posters, ratings, and information about movies, actors, and TV shows based on your searches and library synchronization.
+* **News Feeds (Everyeye.it & Collider.com):** When you open the "Latest News" tab, the App directly fetches RSS feeds from external publishers (Everyeye.it for Italian or Collider.com for English). Please note that connecting to these external RSS feeds exposes your device's IP address to their respective servers according to their privacy policies.
+* **Google ML Kit (On-Device Translation):** To provide translations of movie synopses and descriptions without compromising privacy, the App uses Google ML Kit. All translation processing is performed 100% locally on your device (on-device AI) without sending your text or reading habits to external cloud translation services.
 * **GitHub Pages/Raw:** The decentralized hosting infrastructure where log files, README images, or legal policy pages might be hosted.
 
 ### 4. User Rights (GDPR)

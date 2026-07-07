@@ -9,7 +9,7 @@ The use of the "FlickTrove" application (hereinafter referred to as the "App") i
 
 ### 2. Intellectual Property
 All source code, user interface (UI), graphics, animations, design, and original content of the application are the exclusive property of the developer, except for any third-party libraries or assets distributed with their respective open-source licenses (widely credited within the app).
-Any unauthorized reproduction, copying, modification, reverse engineering, or redistribution, for commercial or non-commercial purposes, is strictly prohibited without the explicit written consent of the developer. Data regarding movies and TV shows (including posters) are the property of their rightful copyright holders and are provided via the TMDB APIs in accordance with their terms of use.
+Any unauthorized reproduction, copying, modification, reverse engineering, or redistribution, for commercial or non-commercial purposes, is strictly prohibited without the explicit written consent of the developer. Metadata, ratings, and promotional images (including posters) regarding movies and TV shows are the property of their rightful copyright holders and are provided via the TMDB, OMDB, and Trakt APIs in accordance with their respective terms of use. External news articles and links displayed in the News section remain the property of their respective publishers (Everyeye.it and Collider.com).
 
 ### 3. Limitation of Liability
 FlickTrove is provided on an "as is" and "as available" basis. The developer makes no warranties, express or implied, regarding continuous operation, absence of bugs, defects, software errors, or service interruptions.

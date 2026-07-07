@@ -70,6 +70,41 @@ object MovieMapper {
     }
 
     fun mapMovieToResponse(movie: Movie): MovieDetailResponse {
+        val castList = movie.topCastData?.map { person ->
+            com.cinetrack.data.api.CastMember(
+                id = person.id,
+                name = person.name,
+                character = null,
+                profilePath = person.profilePath
+            )
+        } ?: emptyList()
+
+        val crewList = if (!movie.directorData.isNullOrEmpty()) {
+            movie.directorData!!.map { person ->
+                com.cinetrack.data.api.CrewMember(
+                    id = person.id,
+                    name = person.name,
+                    job = "Director",
+                    profilePath = person.profilePath
+                )
+            }
+        } else if (movie.directorId != null && !movie.directorName.isNullOrEmpty()) {
+            listOf(
+                com.cinetrack.data.api.CrewMember(
+                    id = movie.directorId!!,
+                    name = movie.directorName!!,
+                    job = "Director",
+                    profilePath = movie.directorProfilePath
+                )
+            )
+        } else {
+            emptyList()
+        }
+
+        val creditsResponse = if (castList.isNotEmpty() || crewList.isNotEmpty()) {
+            com.cinetrack.data.api.CreditsResponse(cast = castList, crew = crewList)
+        } else null
+
         return MovieDetailResponse(
             id = movie.id,
             title = movie.title,
@@ -91,6 +126,7 @@ object MovieMapper {
             numberOfSeasons = movie.numberOfSeasons,
             numberOfEpisodes = movie.numberOfEpisodes,
             seasons = movie.seasons,
+            credits = creditsResponse,
             externalIds = ExternalIds(imdbId = movie.imdbId)
         )
     }

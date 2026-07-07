@@ -177,5 +177,5 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 <br>
 
 <div align="center">
-  <i>Developed with passion for movie and TV show maniacs.</i>
+  <i>Developed with passion for movie and TV show lovers.</i>
 </div>

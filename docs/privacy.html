@@ -70,14 +70,16 @@
         <ul>
           <li><strong>Personal Library Data:</strong> Movie and TV show tracking lists, custom folders, watch time statistics, and personal ratings. By default, this data is stored locally on your device using a Room database.</li>
           <li><strong>Authentication & Cloud Sync:</strong> If you choose to enable cloud synchronization, we use Firebase Authentication and Firebase Cloud Storage to securely store and sync your library across your devices.</li>
-          <li><strong>Anonymous Usage & Crash Logs:</strong> We may collect anonymized diagnostic data and crash reports via Firebase Crashlytics to identify bugs and improve app stability.</li>
+          <li><strong>Anonymous Diagnostic & Crash Logs:</strong> We collect anonymized diagnostic data, stack traces, and crash breadcrumbs via Firebase Crashlytics and Google Analytics to identify software bugs and improve app stability without personally identifying you.</li>
         </ul>
 
         <h2>2. Third-Party Services & APIs</h2>
         <p>FlickTrove integrates with third-party platforms to enrich your cinematic experience:</p>
         <ul>
           <li><strong>TMDB, OMDB & Trakt APIs:</strong> Movie, TV show, ratings, and actor details, including promotional images and posters, are dynamically fetched from The Movie Database (TMDB), Open Movie Database (OMDB), and Trakt.tv. Please refer to their respective privacy terms for information on third-party data handling.</li>
-          <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, and authentication services.</li>
+          <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, authentication services, and crash diagnostics (Crashlytics & Analytics).</li>
+          <li><strong>News RSS Providers (Everyeye.it & Collider.com):</strong> When you open the News tab, the App connects directly to Everyeye.it (Italian) or Collider.com (English) to retrieve public RSS feeds. Your device's IP address is exposed to these publishers during this request.</li>
+          <li><strong>Google ML Kit (On-Device AI Translation):</strong> Movie synopses can be translated locally using Google ML Kit. Translation is performed entirely on your physical device without sending text or reading preferences to cloud translation servers.</li>
         </ul>
 
         <h2>3. Data Security & Retention</h2>

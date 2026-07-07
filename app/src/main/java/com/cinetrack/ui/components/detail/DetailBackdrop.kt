@@ -18,12 +18,17 @@ import coil.request.ImageRequest
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.platform.LocalContext
-import com.cinetrack.ui.components.shared.ImagePlaceholder
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 
 /**
  * DetailBackdrop
- * High-fidelity backdrop with multi-step vertical gradient.
- * Replicates the React Native 'DetailBackdrop.tsx' logic.
+ * High-fidelity backdrop with multi-step vertical gradient and atmospheric offline fallback.
  */
 @Composable
 fun DetailBackdrop(
@@ -34,7 +39,6 @@ fun DetailBackdrop(
     modifier: Modifier = Modifier
 ) {
     val path = backdropPath ?: posterPath
-    // imageBaseUrl is no longer needed
 
     Box(
         modifier = modifier
@@ -42,6 +46,13 @@ fun DetailBackdrop(
             .height(480.dp)
             .background(backgroundColor)
     ) {
+        // 1. ATMOSPHERIC PREMIUM FALLBACK (Visibile durante il caricamento, offline o se l'immagine è assente)
+        AtmosphericBackdropFallback(
+            accentColor = accentColor,
+            backgroundColor = backgroundColor
+        )
+
+        // 2. BACKDROP IMAGE (Crossfade sopra il fallback quando connesso)
         if (path != null) {
             val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
             val context = LocalContext.current
@@ -64,16 +75,9 @@ fun DetailBackdrop(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-        } else {
-            ImagePlaceholder(
-                isBackdrop = true,
-                mediaType = "movie",
-                modifier = Modifier.fillMaxSize()
-            )
         }
 
         // 3. GRADIENTE PURO E NATIVO: Multi-step gradient for premium blending
-        // Replicating React Native's: [0, 0.1, 0.35, 0.7, 0.9, 1] locations
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -88,5 +92,53 @@ fun DetailBackdrop(
                     )
                 )
         )
+    }
+}
+
+@Composable
+private fun AtmosphericBackdropFallback(
+    accentColor: Color,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val gradient = remember(accentColor, backgroundColor) {
+        Brush.verticalGradient(
+            0.0f to accentColor.copy(alpha = 0.45f),
+            0.35f to accentColor.copy(alpha = 0.20f),
+            0.65f to Color(0xFF161622),
+            1.0f to backgroundColor
+        )
+    }
+    val radialGlow = remember(accentColor) {
+        Brush.radialGradient(
+            colors = listOf(
+                accentColor.copy(alpha = 0.35f),
+                Color.Transparent
+            ),
+            radius = 600f
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(gradient)
+            .background(radialGlow),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .background(accentColor.copy(alpha = 0.15f), CircleShape)
+                .border(1.5.dp, accentColor.copy(alpha = 0.3f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                contentDescription = null,
+                modifier = Modifier.size(54.dp),
+                tint = Color.White.copy(alpha = 0.4f)
+            )
+        }
     }
 }

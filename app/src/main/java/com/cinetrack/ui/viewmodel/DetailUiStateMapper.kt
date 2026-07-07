@@ -58,7 +58,13 @@ class DetailUiStateMapper @Inject constructor(
             nextEpisodeString = freshMovie.nextEpisodeString,
             releaseYear = freshMovie.releaseYear,
             status = freshMovie.status,
-            imdbId = freshMovie.imdbId
+            imdbId = freshMovie.imdbId,
+            topCastData = freshMovie.topCastData ?: movie.topCastData,
+            directorData = freshMovie.directorData ?: movie.directorData,
+            directorId = freshMovie.directorId ?: movie.directorId,
+            directorName = freshMovie.directorName ?: movie.directorName,
+            directorProfilePath = freshMovie.directorProfilePath ?: movie.directorProfilePath,
+            accentColor = freshMovie.accentColor ?: movie.accentColor
         ) ?: freshMovie
 
         val totalEpisodes = metadata.numberOfEpisodes ?: 0

@@ -13,7 +13,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import com.cinetrack.R
 import com.cinetrack.data.repository.PreferenceRepository
+import com.cinetrack.ui.utils.UiText
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -21,7 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 sealed class NewsUiState {
     object Loading : NewsUiState()
     data class Success(val news: List<NewsItemUi>) : NewsUiState()
-    data class Error(val message: String) : NewsUiState()
+    data class Error(val message: UiText) : NewsUiState()
 }
 
 data class NewsItemUi(
@@ -76,7 +78,7 @@ class NewsViewModel @Inject constructor(
                 _uiState.value = NewsUiState.Success(uiItems)
             } catch (e: Exception) {
                 e.printStackTrace()
-                _uiState.value = NewsUiState.Error(e.localizedMessage ?: "Unknown error")
+                _uiState.value = NewsUiState.Error(UiText.StringResource(R.string.news_error_loading))
             }
         }
     }

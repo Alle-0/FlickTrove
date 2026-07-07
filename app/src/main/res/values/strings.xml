@@ -759,6 +759,7 @@
     <string name="news_empty">No news available at the moment.</string>
     <string name="news_read_more">Read more</string>
     <string name="news_external_link">External link</string>
+    <string name="news_error_loading">Unable to load news. Check your internet connection and try again.</string>
 
     <!-- Dialogs -->
     <string name="dialog_rating_drag">DRAG TO RATE</string>
@@ -865,5 +866,11 @@
     <string name="status_disabled_plural_f">disabled</string>
     <string name="status_enabled_plural_m">enabled</string>
     <string name="status_disabled_plural_m">disabled</string>
+
+    <!-- Person Offline Fallback -->
+    <string name="person_offline_title">Offline Mode</string>
+    <string name="person_offline_desc">No connection or artist data not cached.\nConnect to the internet to download full biography and filmography.</string>
+    <string name="person_offline_default_name">Artist #%1$d</string>
+    <string name="person_offline_bio">Full biographical data and extended filmography are not available in offline mode.\nTitles present in your local library are displayed below.</string>
 
 </resources>
