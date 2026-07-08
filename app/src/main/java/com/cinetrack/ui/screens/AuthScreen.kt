@@ -392,13 +392,13 @@ fun AuthScreen(
                 Text(
                     text = buildAnnotatedString {
                         append(stringResource(R.string.auth_terms_prefix) + " ")
-                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/TERMS_OF_SERVICE.md"))
+                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle0d.github.io/FlickTrove/terms.html"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
                             append(stringResource(R.string.auth_terms_link))
                         }
                         pop()
                         append(" " + stringResource(R.string.auth_terms_and) + " ")
-                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/PRIVACY_POLICY.md"))
+                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle0d.github.io/FlickTrove/privacy.html"))
                         withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
                             append(stringResource(R.string.auth_privacy_link))
                         }

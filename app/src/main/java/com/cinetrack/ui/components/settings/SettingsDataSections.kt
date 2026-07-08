@@ -372,7 +372,7 @@ fun SettingsSupportSection(
             isExternal = true,
             onClick = { 
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/TERMS_OF_SERVICE.md") 
+                uriHandler.openUri("https://alle0d.github.io/FlickTrove/terms.html") 
             }
         )
         SettingsItem(
@@ -381,7 +381,7 @@ fun SettingsSupportSection(
             isExternal = true,
             onClick = { 
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                uriHandler.openUri("https://raw.githubusercontent.com/Alle-0/FlickTrove/main/PRIVACY_POLICY.md") 
+                uriHandler.openUri("https://alle0d.github.io/FlickTrove/privacy.html") 
             }
         )
         
