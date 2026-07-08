@@ -1,62 +1,78 @@
+# =========================
+# Android Studio & IntelliJ
+# =========================
 *.iml
-.gradle
-/local.properties
+.idea/
 /.idea/caches/
 /.idea/libraries/
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
 /captures
-.externalNativeBuild
-.cxx
-local.properties
-.gitignore
 
-# Android Studio
-.idea/
-
-# Gradle
+# =========================
+# Gradle & Build Outputs
+# =========================
 .gradle/
-build/
+/build/
 app/build/
+release/
+*.apk
+*.aab
+*.ap_
 
-# Log files
-*.log
-log.txt
+# =========================
+# NDK & C++ (Native)
+# =========================
+.externalNativeBuild/
+.cxx/
 
-# Sensitive files and credentials
-google-services.json
-GoogleService-Info.plist
-service-account*.json
-*.jks
-*.keystore
-*.pem
-*.pk8
-*.p12
-*.key
+# =========================
+# Kotlin
+# =========================
+.kotlin/
+
+# =========================
+# Sensibles, Secrets & Keys (DO NOT COMMIT!)
+# =========================
 local.properties
 keystore.properties
 apikey.properties
 secrets.properties
 .env
 *.env
+*.jks
+*.keystore
+*.pem
+*.pk8
+*.p12
+*.key
+google-services.json
+GoogleService-Info.plist
+service-account*.json
 
-# Compiled binaries and release outputs
-*.apk
-*.aab
-app/release/
-release/
+# =========================
+# Logs & Firebase Temp Files
+# =========================
+*.log
+log.txt
+firebase-debug.log
+firebase-debug.*.log
+crashlytics-build.properties
 
-# Obsolete root image folders (replaced by docs/assets)
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+.AppleDouble
+._*
+Thumbs.db
+
+# =========================
+# Obsolete/Custom App Folders
+# =========================
 /assets/
 /screenshots/
-
-# Kotlin compiler caches
-.kotlin/
-
-# Local backup exports and dumps
 *.csv
 *backup*.json
