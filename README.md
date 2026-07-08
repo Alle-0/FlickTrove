@@ -23,7 +23,7 @@
   <summary><b><img src="docs/assets/readme_icons/lista.svg" width="20" height="20" align="absmiddle" /> Table of Contents</b></summary>
   <ol>
     <li><a href="#the-project"><img src="docs/assets/readme_icons/ciak.svg" width="18" height="18" align="absmiddle" /> The Project</a></li>
-    <li><a href="#download--installation">📥 Download & Installation</a></li>
+    <li><a href="#download--installation"><img src="docs/assets/readme_icons/scaricare.svg" width="18" height="18" align="absmiddle" /> Download & Installation</a></li>
     <li><a href="#key-features"><img src="docs/assets/readme_icons/sparkle.svg" width="18" height="18" align="absmiddle" /> Key Features</a></li>
     <li><a href="#ui-screenshots"><img src="docs/assets/readme_icons/smartphone_magia.svg" width="18" height="18" align="absmiddle" /> UI Screenshots</a></li>
     <li><a href="#architecture--technology"><img src="docs/assets/readme_icons/settings.svg" width="18" height="18" align="absmiddle" /> Architecture & Technology</a></li>
@@ -46,7 +46,7 @@ This project solves the need for an elegant personal library, cloud-synchronized
 
 ---
 
-## 📥 Download & Installation
+## <img src="docs/assets/readme_icons/scaricare.svg" width="24" height="24" align="absmiddle" /> Download & Installation
 
 Experience FlickTrove on your Android device right now. Download the latest compiled APK directly from our releases page:
 
