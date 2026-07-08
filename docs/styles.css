@@ -2129,3 +2129,45 @@ body {
   background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
   opacity: 0.3;
 }
+
+
+
+
+/* =========================================
+   OTTIMIZZAZIONE PER SCHERMI GIGANTI (2K, 4K, Ultrawide)
+   ========================================= */
+
+/* Per schermi più larghi di 1600px (Monitor grandi standard) */
+@media screen and (min-width: 1600px) {
+  html {
+    /* Aumentando il font-size della root, tutto ciò che è in 'rem' (testi, padding, margini) si ingrandirà proporzionalmente */
+    font-size: 18px;
+  }
+
+  .nav-container,
+  .hero,
+  .features-sticky-viewport,
+  .screenshots-grid,
+  .faq-list,
+  .footer-content {
+    max-width: 1400px;
+    /* Allarga il contenitore centrale */
+  }
+}
+
+/* Per schermi enormi (Ultrawide o 4K) oltre i 2000px */
+@media screen and (min-width: 2000px) {
+  html {
+    font-size: 22px;
+    /* Ingrandisce ulteriormente tutta la UI in proporzione */
+  }
+
+  .nav-container,
+  .hero,
+  .features-sticky-viewport,
+  .screenshots-grid,
+  .faq-list,
+  .footer-content {
+    max-width: 1600px;
+  }
+}
