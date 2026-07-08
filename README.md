@@ -1,9 +1,12 @@
 <div align="center">
 
-<img src="docs/assets/Icon.svg" alt="FlickTrove Logo" width="100" height="100" />
+# FlickTrove — Premium Cinema & TV Show Tracker for Android
+
+<img src="docs/assets/Icon.svg" alt="FlickTrove Logo - Android Cinema & TV Tracker" width="100" height="100" />
 <img src="https://capsule-render.vercel.app/api?type=venom&color=2DD4BF&height=180&section=header&text=FlickTrove&fontSize=80&fontAlignY=40&fontColor=ffffff" alt="FlickTrove Banner" width="100%" />
 
 <p align="center">
+  <a href="https://alle-0.github.io/FlickTrove/"><img src="https://img.shields.io/badge/Website-Live_Showcase-00F2FE?style=for-the-badge&logo=googlechrome&logoColor=black" alt="Official Website"></a>
   <a href="https://github.com/Alle-0/FlickTrove/releases/latest"><img src="https://img.shields.io/github/v/release/Alle-0/FlickTrove?label=Latest%20Release&style=for-the-badge&color=2DD4BF&logo=github" alt="Latest Release"></a>
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
@@ -11,9 +14,9 @@
   <img src="https://img.shields.io/badge/Firebase-Integrated-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase">
 </p>
 
-> **Track movies, TV shows, and actors with breathtaking style.**
+> **The ultimate personal cinema and TV show companion for Android.**
 >
-> *FlickTrove is a premium visual experience for Android, featuring a unique glassmorphic interface, dynamic color palettes, and fluid animations.*
+> *FlickTrove combines a unique glassmorphic interface, dynamic color palettes, and fluid animations with the full **TMDB catalog**, smart release notifications, and offline-first tracking built in **Kotlin** & **Jetpack Compose**.*
 
 </div>
 
