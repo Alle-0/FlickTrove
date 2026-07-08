@@ -2171,3 +2171,14 @@ body {
     max-width: 1600px;
   }
 }
+
+
+/* =========================================
+   FIX CENTRATURA CARD SU SCHERMI GRANDI
+   ========================================= */
+.features-grid {
+  margin: 0 auto !important;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
