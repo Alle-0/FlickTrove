@@ -174,6 +174,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Shared Reviews:** Write custom reviews and rate movies, sharing your thoughts with the community.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
+- [ ] **AI:** ?
 
 ---
 
