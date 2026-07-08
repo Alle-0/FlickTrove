@@ -27,14 +27,22 @@ app/build/
 *.log
 log.txt
 
-# Sensitive files
+# Sensitive files and credentials
 google-services.json
+GoogleService-Info.plist
+service-account*.json
 *.jks
 *.keystore
+*.pem
+*.pk8
+*.p12
+*.key
 local.properties
-.env
+keystore.properties
 apikey.properties
 secrets.properties
+.env
+*.env
 
 # Compiled binaries and release outputs
 *.apk

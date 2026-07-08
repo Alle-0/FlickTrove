@@ -2,7 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navbar scroll effect
   const navbar = document.querySelector('.navbar');
 
+  // Scroll Laser Progress Bar
+  const scrollLaser = document.getElementById('scroll-laser');
+  const updateScrollLaser = () => {
+    if (scrollLaser) {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+      scrollLaser.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    }
+  };
+  updateScrollLaser();
+
   window.addEventListener('scroll', () => {
+    updateScrollLaser();
     if (window.scrollY > 20) {
       navbar.style.background = 'rgba(10, 10, 10, 0.94)';
       navbar.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
@@ -24,10 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isActive) {
         mobileDrawer.classList.remove('active');
         mobileBtn.innerHTML = '☰';
+        document.documentElement.classList.remove('drawer-open');
+        document.body.classList.remove('drawer-open');
+        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
       } else {
         mobileDrawer.classList.add('active');
         mobileBtn.innerHTML = '✕';
+        document.documentElement.classList.add('drawer-open');
+        document.body.classList.add('drawer-open');
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
       }
     };
@@ -178,10 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typedEl) {
     const strings = [
       'true cinephiles.',
-      'custom neon folders.',
-      'TMDB & Trakt sync.',
-      '100% offline Room SQLite.',
-      'streaming guides.'
+      'visual perfection.',
+      'TMDB and Trakt sync.',
+      '100% offline use.',
+      'finding where to stream.',
+      'you.'
     ];
     if (typeof Typed !== 'undefined' || window.Typed) {
       const TypedConstructor = typeof Typed !== 'undefined' ? Typed : window.Typed;
@@ -379,18 +398,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4.2 Hero Section Deep 3D Parallax & Depth Fade
     const heroSection = document.querySelector('.hero');
-    if (heroSection && window.scrollY < 850) {
-      const scrollY = window.scrollY;
-      const targetTranslateY = scrollY * 0.65;
-      heroScale = Math.max(0.88, 1 - scrollY * 0.00025);
-      heroOpacity = Math.max(0, 1 - scrollY * 0.0014);
-      heroBlur = Math.min(12, scrollY * 0.0075);
+    if (heroSection) {
+      // Disabilita l'animazione parallasse pesante su dispositivi mobile
+      const isMobile = window.innerWidth <= 768;
 
-      heroSection.style.transform = `translate3d(0, ${targetTranslateY.toFixed(1)}px, 0) scale(${heroScale.toFixed(4)})`;
-      heroSection.style.opacity = Math.max(0, heroOpacity).toFixed(3);
-      heroSection.style.filter = `blur(${heroBlur.toFixed(1)}px)`;
-    } else if (heroSection && window.scrollY >= 850) {
-      heroSection.style.opacity = '0';
+      if (!isMobile && window.scrollY < 850) {
+        const scrollY = window.scrollY;
+        const targetTranslateY = scrollY * 0.8;
+        heroScale = Math.max(0.88, 1 - scrollY * 0.00025);
+        heroOpacity = Math.max(0, 1 - scrollY * 0.0014);
+        heroBlur = Math.min(12, scrollY * 0.0075);
+
+        heroSection.style.transform = `translate3d(0, ${targetTranslateY.toFixed(1)}px, 0) scale(${heroScale.toFixed(4)})`;
+        heroSection.style.opacity = Math.max(0, heroOpacity).toFixed(3);
+        heroSection.style.filter = `blur(${heroBlur.toFixed(1)}px)`;
+      } else if (!isMobile) {
+        // Reset quando superi la soglia su desktop
+        heroSection.style.transform = 'translate3d(0, 0, 0) scale(1)';
+        heroSection.style.opacity = '1';
+        heroSection.style.filter = 'blur(0px)';
+      } else {
+        // SU MOBILE: Reset forzato per evitare scatti
+        heroSection.style.transform = 'none';
+        heroSection.style.opacity = '1';
+        heroSection.style.filter = 'none';
+      }
     }
 
     // 4.3 Scroll-Controlled 3D Cinematic Deck of 9 Cards
@@ -567,4 +599,204 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCinemaDust();
   }
 
+});
+
+
+/* =========================================
+     EFFETTO PULSANTI MAGNETICI
+     ========================================= */
+const magneticBtns = document.querySelectorAll('.magnetic-btn');
+
+magneticBtns.forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    // Calcola la distanza del mouse dal centro del pulsante
+    const x = (e.clientX - rect.left) - rect.width / 2;
+    const y = (e.clientY - rect.top) - rect.height / 2;
+
+    // Muovi il pulsante di una frazione della distanza (forza magnetica)
+    btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px) scale(1.05)`;
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    // Quando il mouse esce, rimuovi il transform per far agire la transizione CSS
+    btn.style.transform = '';
+  });
+});
+
+/* =========================================
+     EFFETTO SPOTLIGHT SUI PULSANTI
+     ========================================= */
+const spotlightBtns = document.querySelectorAll('.btn-primary, .btn-secondary');
+
+spotlightBtns.forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Passa le coordinate esatte al CSS
+    btn.style.setProperty('--x', `${x}px`);
+    btn.style.setProperty('--y', `${y}px`);
+  });
+});
+
+
+/* =========================================
+     EFFETTO PROFONDITÀ (PANNING INTERNO)
+     ========================================= */
+const panImages = document.querySelectorAll('.screenshot-item');
+
+panImages.forEach(container => {
+  const img = container.querySelector('img');
+
+  // Assicuriamoci che l'immagine sia un po' più grande del contenitore per poterla muovere
+  if (img) {
+    // Ingrandiamo col transform invece che con la larghezza per mantenere il centro perfetto
+    img.style.transformOrigin = "center center";
+    img.style.transition = "transform 0.1s linear";
+    img.style.transform = "scale(1.05)";
+  }
+
+  container.addEventListener('mousemove', (e) => {
+    if (!img) return;
+    const rect = container.getBoundingClientRect();
+
+    // Calcola la posizione percentuale del mouse (da -0.5 a +0.5)
+    const xPos = ((e.clientX - rect.left) / rect.width) - 0.5;
+    const yPos = ((e.clientY - rect.top) / rect.height) - 0.5;
+
+    // Muovi l'immagine in direzione OPPOSTA al mouse (effetto parallasse interno)
+    const xOffset = xPos * -15; // px di spostamento massimo
+    const yOffset = yPos * -15;
+
+    img.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(1.05)`;
+  });
+
+  container.addEventListener('mouseleave', () => {
+    if (img) {
+      img.style.transition = "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)";
+      img.style.transform = `translate(0px, 0px) scale(1)`; // Torna alla dimensione normale
+    }
+  });
+
+  // Rimuovi la transizione lenta quando rientri per un tracciamento immediato
+  container.addEventListener('mouseenter', () => {
+    if (img) img.style.transition = "none";
+  });
+});
+
+/* =========================================
+     HOLOGRAPHIC LIGHTBOX & ZOOM ENGINE
+     ========================================= */
+const lightbox = document.getElementById('screenshot-modal') || document.querySelector('.lightbox-modal');
+const lightboxImg = lightbox ? (lightbox.querySelector('#lightbox-img') || lightbox.querySelector('img')) : null;
+const lightboxClose = lightbox ? lightbox.querySelector('.lightbox-close') : null;
+const lightboxCaption = lightbox ? lightbox.querySelector('#lightbox-caption') : null;
+const lightboxWrapper = lightbox ? lightbox.querySelector('.lightbox-img-wrapper') : null;
+
+let isZoomed = false;
+
+const openLightbox = (src, alt, captionText) => {
+  if (!lightbox) return;
+  if (lightboxImg) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || 'Screenshot';
+  }
+  if (lightboxCaption) {
+    lightboxCaption.textContent = captionText || alt || '';
+  }
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
+const closeLightbox = () => {
+  if (lightbox) lightbox.classList.remove('active');
+  document.body.style.overflow = '';
+
+  // Reset automatico dello zoom alla chiusura
+  isZoomed = false;
+  if (lightboxImg) {
+    lightboxImg.style.transform = 'scale(1)';
+    lightboxImg.style.cursor = 'zoom-in';
+    setTimeout(() => {
+      if (!isZoomed) lightboxImg.style.transformOrigin = 'center center';
+    }, 300);
+  }
+};
+
+// Apertura al click sugli screenshot
+document.querySelectorAll('.screenshot-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const img = item.querySelector('img');
+    const captionEl = item.querySelector('.screenshot-caption span');
+    const captionText = captionEl ? captionEl.textContent : (img ? img.alt : '');
+    if (img) openLightbox(img.src, img.alt, captionText);
+  });
+});
+
+// Chiusura dai vari trigger
+if (lightbox) {
+  if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+  const lightboxBackdrop = lightbox.querySelector('.lightbox-backdrop');
+  if (lightboxBackdrop) lightboxBackdrop.addEventListener('click', closeLightbox);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+  });
+}
+
+// MOTORE DI ZOOM E PANNING
+if (lightboxWrapper && lightboxImg) {
+  lightboxImg.style.cursor = 'zoom-in';
+
+  const updatePan = (e) => {
+    const rect = lightboxWrapper.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    lightboxImg.style.transformOrigin = `${x}% ${y}%`;
+  };
+
+  lightboxWrapper.addEventListener('click', (e) => {
+    // Ignoriamo il click se l'utente clicca sul bottone di chiusura
+    if (e.target.classList.contains('lightbox-close')) return;
+
+    isZoomed = !isZoomed;
+    if (isZoomed) {
+      lightboxImg.style.cursor = 'zoom-out';
+      lightboxImg.style.transform = 'scale(2.4)'; // Zoom del 240%
+      updatePan(e);
+    } else {
+      lightboxImg.style.cursor = 'zoom-in';
+      lightboxImg.style.transform = 'scale(1)';
+    }
+  });
+
+  lightboxWrapper.addEventListener('mousemove', (e) => {
+    if (isZoomed) updatePan(e);
+  });
+
+  lightboxWrapper.addEventListener('mouseleave', () => {
+    if (isZoomed) {
+      isZoomed = false;
+      lightboxImg.style.cursor = 'zoom-in';
+      lightboxImg.style.transform = 'scale(1)';
+    }
+  });
+}
+
+/* Magnetismo leggero per i link del footer */
+const footerLinks = document.querySelectorAll('.footer-links a');
+footerLinks.forEach(link => {
+  link.addEventListener('mousemove', (e) => {
+    const rect = link.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) * 0.2;
+    const y = (e.clientY - rect.top - rect.height / 2) * 0.2;
+    link.style.transform = `translate(${x}px, ${y}px)`;
+    link.style.color = "var(--accent-teal)";
+  });
+  link.addEventListener('mouseleave', () => {
+    link.style.transform = '';
+    link.style.color = '';
+  });
 });

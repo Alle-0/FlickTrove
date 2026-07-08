@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.data.api.MovieDetailResponse
@@ -73,7 +74,7 @@ fun DetailTechnicalInfo(
                     "Released" -> stringResource(R.string.status_released)
                     else -> rawStatus
                 }
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     TechnicalItem(
                         label = stringResource(R.string.detail_tech_original_title),
                         value = originalTitle,
@@ -92,7 +93,7 @@ fun DetailTechnicalInfo(
             }
 
             // Row 1: Release Date & Budget
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TechnicalItem(
                     label = stringResource(R.string.detail_tech_release_date),
                     value = details.releaseDate ?: details.firstAirDate ?: "—",
@@ -110,7 +111,7 @@ fun DetailTechnicalInfo(
             }
 
             // Row 2: Language & Revenue
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TechnicalItem(
                     label = stringResource(R.string.detail_tech_language),
                     value = details.originalLanguage?.uppercase(Locale.getDefault()) ?: "—",
@@ -128,7 +129,7 @@ fun DetailTechnicalInfo(
             }
 
             // Row 3: Production & Country
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TechnicalItem(
                     label = stringResource(R.string.detail_tech_production),
                     value = details.productionCompanies?.firstOrNull()?.name ?: "—",
@@ -178,7 +179,7 @@ private fun TechnicalItem(
         
         Spacer(modifier = Modifier.width(12.dp))
         
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -186,7 +187,9 @@ private fun TechnicalItem(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 ),
-                color = Color.White.copy(alpha = 0.3f)
+                color = Color.White.copy(alpha = 0.3f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = value,
@@ -195,7 +198,8 @@ private fun TechnicalItem(
                     fontWeight = FontWeight.ExtraBold
                 ),
                 color = Color.White,
-                maxLines = 2
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

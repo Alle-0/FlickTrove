@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cinetrack.data.Genre
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.data.api.Provider
 import com.cinetrack.ui.utils.bounceClick
 
@@ -280,7 +281,7 @@ fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
                 .clip(shape)
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                 .background(accentColor.copy(alpha = 0.15f))
-                .border(0.5.dp, accentColor.copy(alpha = 0.5f), shape),
+                .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), shape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -290,7 +291,7 @@ fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = accentColor,
+                color = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }
@@ -311,7 +312,7 @@ fun KeywordCollapsePill(accentColor: Color, onClick: () -> Unit) {
                 .clip(shape)
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                 .background(accentColor.copy(alpha = 0.15f))
-                .border(0.5.dp, accentColor.copy(alpha = 0.5f), shape),
+                .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), shape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -321,7 +322,7 @@ fun KeywordCollapsePill(accentColor: Color, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = accentColor,
+                color = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }

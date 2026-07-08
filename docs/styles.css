@@ -17,7 +17,7 @@
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(45, 212, 191, 0.4);
   --card-bg: rgba(30, 41, 59, 0.82);
-  --glass-bg: rgba(11, 15, 25, 0.88);
+  --glass-bg: rgba(11, 15, 25, 0.4);
   --font-main: 'Outfit', sans-serif;
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -176,12 +176,26 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
 }
 
 .gradient-gold {
   background: linear-gradient(135deg, #FFF8E1 0%, #FFCA28 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: inline-block;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
+}
+
+.gradient-blue-flick {
+  background: linear-gradient(135deg, #00f0ff 0%, #ff00f4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
 }
 
 /* Navigation Bar (FIXED: High Z-Index so drawer NEVER covers navbar and close button!) */
@@ -309,7 +323,9 @@ body {
   width: 85%;
   max-width: 320px;
   height: calc(100vh - 66px);
-  background: #0D121F;
+  background: rgba(9, 12, 18, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-left: 1px solid var(--border-color);
   border-top: 1px solid var(--border-color);
   box-shadow: -15px 0 35px rgba(0, 0, 0, 0.7);
@@ -367,6 +383,51 @@ body {
   font-size: 0.95rem;
   border-radius: 12px;
   justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, box-shadow 0.3s;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Creiamo la torcia invisibile */
+.btn-primary::before,
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: var(--y, 50%);
+  left: var(--x, 50%);
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  /* Ignora i click sulla luce */
+  z-index: 0;
+}
+
+/* Colore della luce per il pulsante primario (Teal) */
+.btn-primary::before {
+  background: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.3), transparent);
+}
+
+/* Colore della luce per il pulsante secondario (Nero) */
+.btn-secondary::before {
+  background: radial-gradient(circle closest-side, rgba(45, 212, 191, 0.25), transparent);
+}
+
+/* Mostra la luce all'hover */
+.btn-primary:hover::before,
+.btn-secondary:hover::before {
+  opacity: 1;
+}
+
+/* Assicurati che il testo e le icone stiano SOPRA la luce */
+.btn-primary *,
+.btn-secondary * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Buttons */
@@ -394,6 +455,8 @@ body {
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--text-main) !important;
   font-weight: 600;
   padding: 0.7rem 1.6rem;
@@ -415,13 +478,15 @@ body {
 
 /* Hero Section */
 .hero {
-  padding: 8.5rem 1.5rem 4rem;
+  min-height: calc(100vh - 66px);
+  padding: 6rem 1.5rem 4rem;
   max-width: 1100px;
   margin: 0 auto;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   will-change: transform, opacity, filter;
 }
 
@@ -444,10 +509,11 @@ body {
 .hero h1 {
   font-size: clamp(2.4rem, 6.5vw, 4.8rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.25;
   margin-bottom: 1.25rem;
   max-width: 900px;
   letter-spacing: -1px;
+  padding-bottom: 0.1em;
 }
 
 .hero p {
@@ -1327,7 +1393,7 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  transition: border-color 0.3s ease, background 0.3s ease;
+  transition: all 0.3s ease;
   will-change: transform, opacity, filter;
 }
 
@@ -1391,6 +1457,20 @@ body {
 
 .faq-item.active .faq-answer {
   padding-bottom: 1.25rem;
+}
+
+/* Quando la lista delle FAQ è in hover, abbassa l'opacità e sfoca TUTTI gli item */
+.faq-list:hover .faq-item {
+  opacity: 0.35;
+  transform: scale(0.98);
+}
+
+/* Ma mantieni illuminato e ingrandito SOLO quello che ha il mouse sopra */
+.faq-list .faq-item:hover {
+  opacity: 1;
+  filter: blur(0px);
+  transform: scale(1.02);
+  z-index: 10;
 }
 
 /* Legal Content */
@@ -1873,11 +1953,10 @@ body {
 /* Volumetric Projector & Light Beam */
 .cinema-projector-container {
   position: absolute;
-  top: 70px;
+  top: 0px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 1200px;
   height: 600px;
   pointer-events: none;
   z-index: 1;
@@ -1887,78 +1966,10 @@ body {
   overflow: hidden;
 }
 
-.projector-housing {
-  position: relative;
-  width: 140px;
-  height: 50px;
-  background: linear-gradient(180deg, rgba(15, 25, 28, 0.9) 0%, rgba(8, 15, 18, 0.95) 100%);
-  border: 1px solid rgba(45, 212, 191, 0.4);
-  border-radius: 0 0 25px 25px;
-  box-shadow: 0 5px 30px rgba(45, 212, 191, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.05);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 5px;
-}
-
-.projector-lens {
-  width: 36px;
-  height: 20px;
-  background: radial-gradient(circle, #E0F2FE 0%, #2DD4BF 40%, #0D9488 70%, #1E1E2E 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 25px #2DD4BF, 0 0 50px rgba(45, 212, 191, 0.8), 0 0 100px rgba(96, 239, 255, 0.5);
-  animation: lens-glow-pulse 4s infinite alternate ease-in-out;
-}
-
-@keyframes lens-glow-pulse {
-  0% {
-    box-shadow: 0 0 20px #2DD4BF, 0 0 40px rgba(45, 212, 191, 0.6);
-    transform: scale(0.98);
-  }
-
-  100% {
-    box-shadow: 0 0 35px #60EFFF, 0 0 70px rgba(96, 239, 255, 0.9), 0 0 120px rgba(45, 212, 191, 0.6);
-    transform: scale(1.04);
-  }
-}
-
-.projector-reels {
-  position: absolute;
-  top: -25px;
-  display: flex;
-  gap: 30px;
-}
-
-.reel {
-  width: 32px;
-  height: 32px;
-  border: 3px dashed rgba(45, 212, 191, 0.6);
-  border-radius: 50%;
-  animation: spin-reel 8s linear infinite;
-}
-
-.reel-left {
-  animation-direction: normal;
-}
-
-.reel-right {
-  animation-direction: reverse;
-}
-
-@keyframes spin-reel {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .projector-beam {
-  width: 100%;
+  width: 150%;
   height: 550px;
-  background: linear-gradient(180deg, rgba(253, 255, 99, 0.2) 0%, rgba(250, 255, 105, 0.1) 40%, rgba(248, 255, 116, 0.05) 75%, transparent 100%);
+  background: linear-gradient(180deg, rgba(253, 255, 99, 0.1) 0%, rgba(250, 255, 105, 0.01) 40%, transparent 100%);
   clip-path: polygon(48% 0%, 52% 0%, 85% 100%, 15% 100%);
   filter: blur(12px);
   opacity: 0.85;
@@ -1992,10 +2003,10 @@ body {
 
 /* Clapperboard 24 FPS Badge */
 .cinema-badge {
-  background: rgba(255, 179, 0, 0.1) !important;
-  border: 1px solid rgba(255, 179, 0, 0.4) !important;
-  box-shadow: 0 0 20px rgba(255, 179, 0, 0.2) !important;
-  color: #FFD700 !important;
+  background: rgba(2, 229, 199, 0.2) !important;
+  border: 1px solid rgba(2, 229, 199, 0.521) !important;
+  box-shadow: 0 0 20px rgba(2, 229, 199, 0.521) !important;
+  color: rgb(108, 234, 248) !important;
   font-weight: 700 !important;
   letter-spacing: 1.5px !important;
   display: inline-flex !important;
@@ -2084,4 +2095,37 @@ body {
       rgba(45, 212, 191, 0.65) 136px);
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.85);
   position: relative;
+}
+
+.lightbox-img-wrapper img {
+  max-height: 75vh;
+  max-width: 90vw;
+  width: auto;
+  height: auto;
+  aspect-ratio: 9 / 20;
+  display: block;
+  object-fit: contain;
+  /* Aggiungi questa riga per rendere fluido lo zoom e il pan */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform-origin 0.1s linear;
+}
+
+.footer {
+  /* Aggiungi un leggero gradiente per staccare dal nero puro */
+  background: linear-gradient(to bottom, #050505, #0a0a0a);
+  border-top: 1px solid rgba(45, 212, 191, 0.1);
+  /* Teal molto tenue */
+  padding: 5rem 1.5rem 2rem;
+  position: relative;
+}
+
+/* Aggiungi un bagliore tenue solo in cima al footer */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
+  opacity: 0.3;
 }

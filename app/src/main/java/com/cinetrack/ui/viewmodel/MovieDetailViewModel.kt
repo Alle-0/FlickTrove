@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
 import android.graphics.drawable.BitmapDrawable
+import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.ui.graphics.Color
 import coil.Coil
 import coil.request.ImageRequest
@@ -220,11 +221,29 @@ class MovieDetailViewModel @Inject constructor(
                 }
             }
 
+            // Preload accent color BEFORE emitting metadata so Skeleton stays up until the color is ready
+            val targetPath = response.backdropPath ?: response.posterPath
+            if (targetPath != null && _extractedColor.value == null) {
+                val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
+                val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
+                if (imageUrl != null) {
+                    preloadAccentColor(imageUrl)
+                }
+            }
+
             _metadata.value = response
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
             if (localMovie != null) {
+                val targetPath = localMovie.customBackdropPath ?: localMovie.backdropPath ?: localMovie.posterPath
+                if (targetPath != null && _extractedColor.value == null && localMovie.accentColor == null) {
+                    val imageType = if (localMovie.customBackdropPath != null || localMovie.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
+                    val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
+                    if (imageUrl != null) {
+                        preloadAccentColor(imageUrl)
+                    }
+                }
                 _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
             } else {
                 _error.value = e.stackTraceToString()
@@ -628,34 +647,66 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    fun fetchAccentColor(imageUrl: String, movie: Movie, forceReload: Boolean = false) {
-        if (forceReload || (movie.accentColor == null && _extractedColor.value == null && (movie.posterPath != null || movie.backdropPath != null))) {
-            viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+    private suspend fun preloadAccentColor(imageUrl: String) {
+        if (_extractedColor.value != null) return
+        kotlinx.coroutines.withTimeoutOrNull(900L) {
+            try {
                 val loader = Coil.imageLoader(context)
                 val request = ImageRequest.Builder(context)
                     .data(imageUrl)
                     .allowHardware(false)
                     .build()
-                
                 val result = loader.execute(request)
                 if (result is SuccessResult) {
-                    val drawable = result.drawable
-                    if (drawable is BitmapDrawable && drawable.bitmap.width > 0 && drawable.bitmap.height > 0) {
-                        val bitmap = drawable.bitmap
-                        val averageColor = ColorUtils.extractAverageColor(bitmap)
-                        val brightColor = ColorUtils.ensureMinimumLuminance(averageColor, 0.5f)
-                        val finalColor = ColorUtils.saturateColor(brightColor, 2.0f)
-                        _extractedColor.value = finalColor
-                        
-                        val r = (finalColor.red * 255).toInt()
-                        val g = (finalColor.green * 255).toInt()
-                        val b = (finalColor.blue * 255).toInt()
-                        val hexString = String.format("#%02X%02X%02X", r, g, b)
-                        val local = repository.getMovie(movie.id, movie.mediaType)
-                        if (local != null && local.accentColor != hexString) {
-                            repository.saveMovie(local.copy(accentColor = hexString))
+                    val bitmap = result.drawable.toBitmap()
+                    if (bitmap.width > 0 && bitmap.height > 0) {
+                        val rawColor = ColorUtils.extractAverageColor(bitmap)
+                        if (rawColor != Color.Unspecified) {
+                            val ambientColor = ColorUtils.darkenForAmbient(rawColor)
+                            val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                            _extractedColor.value = finalColor
                         }
                     }
+                }
+            } catch (e: Exception) {
+                // Ignore timeout or extraction error during preload
+            }
+        }
+    }
+
+    fun fetchAccentColor(imageUrl: String, movie: Movie, forceReload: Boolean = false) {
+        if (forceReload || movie.accentColor == null || _extractedColor.value == null) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+                try {
+                    val loader = Coil.imageLoader(context)
+                    val request = ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .allowHardware(false)
+                        .build()
+                    
+                    val result = loader.execute(request)
+                    if (result is SuccessResult) {
+                        val bitmap = result.drawable.toBitmap()
+                        if (bitmap.width > 0 && bitmap.height > 0) {
+                            val rawColor = ColorUtils.extractAverageColor(bitmap)
+                            if (rawColor != Color.Unspecified) {
+                                val ambientColor = ColorUtils.darkenForAmbient(rawColor)
+                                val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                                _extractedColor.value = finalColor
+                                
+                                val r = (finalColor.red * 255).toInt().coerceIn(0, 255)
+                                val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
+                                val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
+                                val hexString = String.format("#%02X%02X%02X", r, g, b)
+                                val local = repository.getMovie(movie.id, movie.mediaType)
+                                if (local != null && (forceReload || local.accentColor == null || local.accentColor != hexString)) {
+                                    repository.saveMovie(local.copy(accentColor = hexString))
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore extraction errors and fallback to default
                 }
             }
         }

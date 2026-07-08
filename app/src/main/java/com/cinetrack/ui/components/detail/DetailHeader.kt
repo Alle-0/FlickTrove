@@ -52,6 +52,7 @@ import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.LocalAdvancedVisualEffects
 
 /**
@@ -200,7 +201,7 @@ fun DetailHeader(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = accentColor
+                                    color = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                             }
                         } else {
@@ -209,7 +210,7 @@ fun DetailHeader(
                                 modifier = Modifier
                                     .clip(CircleShape)
                                     .background(Color(0xFF1E1A22))
-                                    .border(0.5.dp, accentColor.copy(alpha = 0.4f), CircleShape)
+                                    .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
                                     .padding(horizontal = 10.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -220,7 +221,7 @@ fun DetailHeader(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = accentColor
+                                    color = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                             }
                         }
@@ -243,7 +244,7 @@ fun DetailHeader(
                                     } else {
                                         Modifier
                                             .background(Color(0xFF1E1A22))
-                                            .border(0.5.dp, accentColor.copy(alpha = 0.4f), CircleShape)
+                                            .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
                                     }
                                 ),
@@ -258,13 +259,13 @@ fun DetailHeader(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
                                     contentDescription = stringResource(R.string.detail_select_cover),
                                     modifier = Modifier.size(13.dp),
-                                    tint = accentColor
+                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                                     contentDescription = null,
                                     modifier = Modifier.size(13.dp),
-                                    tint = accentColor
+                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                             }
                         }

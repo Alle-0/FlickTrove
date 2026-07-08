@@ -209,8 +209,8 @@ fun MovieDetailScreenContent(
         val currentState = uiState
         if (currentState is DetailUiState.Success) {
             val movie = currentState.movieEntry
-            val targetPath = movie.customBackdropPath ?: movie.posterPath ?: movie.backdropPath
-            val imageType = if (movie.customBackdropPath != null || movie.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
+            val targetPath = movie.customBackdropPath ?: movie.backdropPath ?: movie.posterPath
+            val imageType = if (movie.customBackdropPath != null || movie.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, currentImageQuality)
             if (imageUrl != null) {
                 viewModel.fetchAccentColor(imageUrl, movie)
@@ -251,34 +251,21 @@ fun MovieDetailScreenContent(
     val rootHazeState = remember { HazeState() }
     val backdropHazeState = remember { HazeState() }
     
-    val fallbackAccentColor = remember(uiState) {
-        val id = (uiState as? DetailUiState.Success)?.movieEntry?.id ?: 1L
-        val colors = listOf(
-            Color(0xFFE50914), // Cinema Crimson
-            Color(0xFF6B48FF), // Electric Purple
-            Color(0xFF0080FF), // Neon Blue
-            Color(0xFF00D4B2), // Cyber Teal
-            Color(0xFFFF7A00), // Vibrant Orange
-            Color(0xFFFF007A), // Neon Pink
-            Color(0xFF8A2BE2)  // Blue Violet
-        )
-        colors[(kotlin.math.abs(id) % colors.size).toInt()]
+    val themePrimaryColor = MaterialTheme.colorScheme.primary
+    val fallbackAccentColor = remember(themePrimaryColor) {
+        themePrimaryColor
     }
 
-    val globalAccentColor = when (val state = uiState) {
+    val rawAccentColor = when (val state = uiState) {
         is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
         else -> extractedColor ?: fallbackAccentColor
     }
+    val globalAccentColor = rawAccentColor
 
-    // Removed showRatingDialog and showNoteDialog as they are now handled inline
-
-    val targetBackgroundColor = when (val state = uiState) {
-        is DetailUiState.Success -> {
-            val baseColor = state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
-            
-            lerp(baseColor, Color.Black, 0.65f)
-        }
-        else -> Color(0xFF0A0A0A)
+    val baseDarkColor = remember { Color(0xFF161620) } // Neutral sleek dark slate fallback instead of false random neon colors
+    val targetBackgroundColor = when (uiState) {
+        is DetailUiState.Success -> lerp(globalAccentColor, baseDarkColor, 0.65f)
+        else -> baseDarkColor
     }
     val animatedBgColor by animateColorAsState(
         targetValue = targetBackgroundColor,
