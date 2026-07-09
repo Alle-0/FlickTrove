@@ -102,7 +102,7 @@
     <string name="stats_generating_card_desc">We are creating your image to share</string>
     <string name="stats_total_time">TOTAL TIME SPENT</string>
     <string name="stats_total_time_combined">COMBINED VIEWING</string>
-    <string name="stats_share_text">🏆 My total time on FlickTrove: %s of movies and TV series!\nDownload the app to track your progress.</string>
+    <string name="stats_share_text">🏆 My total watch time on FlickTrove: %1$s of movies and TV shows! 🎬\nJoin me and track your progress: https://alle-0.github.io/FlickTrove/</string>
     <string name="stats_title_singular">TITLE</string>
     <string name="stats_title_plural">TITLES</string>
     <string name="stats_of_total">%s OF TOTAL</string>

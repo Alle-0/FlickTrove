@@ -127,22 +127,35 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
 
-            LaunchedEffect(deepLinkIntent.value) {
-                val intent = deepLinkIntent.value ?: return@LaunchedEffect
-                val uri = intent.data
-                val action = intent.action
-                if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
-                    val isCustomScheme = uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")
+LaunchedEffect(deepLinkIntent.value) {
+    val intent = deepLinkIntent.value ?: return@LaunchedEffect
+    val uri = intent.data
+    val action = intent.action
+    
+    // 1. LOG DI PARTENZA: Vediamo se l'intento arriva e cosa contiene
+    println("FlickTroveDebug: LaunchedEffect intercettato! URI = $uri | Action = $action")
 
-                    if (uri?.scheme == "https" && uri.host == "alle-0.github.io" && uri.path?.startsWith("/FlickTrove/open.html") == true) {
-                        // HTTPS App Link: https://alle-0.github.io/FlickTrove/open.html?type=movie&id=123
-                        val type = uri.getQueryParameter("type") ?: "movie"
-                        val id   = uri.getQueryParameter("id")?.toLongOrNull()
-                        if (id != null) {
-                            if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
-                            else rootNavigator.push(MovieDetailScreen(id, type))
-                        }
-                    } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
+    if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
+        if (uri != null) {
+            // Alziamo a 800ms solo per il test, per escludere al 100% i problemi di caricamento di Voyager
+            kotlinx.coroutines.delay(800) 
+        }
+
+        val isCustomScheme = uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")
+
+        val isHttpsAppLink = uri?.scheme == "https" && 
+                uri.host?.lowercase() == "alle-0.github.io" && 
+                uri.path?.contains("open.html", ignoreCase = true) == true
+
+        if (isHttpsAppLink) {
+            val type = uri.getQueryParameter("type") ?: "movie"
+            val id   = uri.getQueryParameter("id")?.toLongOrNull()
+            
+            if (id != null) {
+                if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
+                else rootNavigator.push(MovieDetailScreen(id, type))
+            }
+        } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
                         // Trakt OAuth callback: flicktrove://auth?code=XXXXX
                         val code = uri.getQueryParameter("code")
                         if (!code.isNullOrEmpty()) {

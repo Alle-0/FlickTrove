@@ -102,7 +102,7 @@
     <string name="stats_generating_card_desc">Stiamo creando la tua immagine da condividere</string>
     <string name="stats_total_time">TEMPO TOTALE TRASCORSO</string>
     <string name="stats_total_time_combined">DI VISIONE COMBINATA</string>
-    <string name="stats_share_text">🏆 Il mio tempo totale su FlickTrove: %s di cinema e serie TV!\nScarica l\'app per tracciare i tuoi progressi.</string>
+    <string name="stats_share_text">🏆 Il mio tempo di visione totale su FlickTrove: %1$s tra film e serie TV! 🎬\nUnisciti a me e traccia i tuoi progressi: https://alle-0.github.io/FlickTrove/</string>
     <string name="stats_title_singular">TITOLO</string>
     <string name="stats_title_plural">TITOLI</string>
     <string name="stats_of_total">%s DEL TOTALE</string>
