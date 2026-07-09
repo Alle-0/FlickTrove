@@ -853,6 +853,8 @@
     <string name="trakt_sync_channel_desc">Notifications for Trakt.tv deep import</string>
     <string name="trakt_manual_sync_started">Manual synchronization started</string>
     <string name="trakt_disconnected">Disconnected from Trakt</string>
+    <string name="trakt_connected">Connected to Trakt!</string>
+    <string name="trakt_connect_error">Connection to Trakt failed. Please try again.</string>
 
     <string name="status_visible">visible</string>
     <string name="status_hidden">hidden</string>

@@ -34,6 +34,9 @@ class AuthViewModel @Inject constructor(
     private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase
 ) : ViewModel() {
 
+    private val _processState = MutableStateFlow<AuthState?>(null)
+    val processState: StateFlow<AuthState?> = _processState
+
     init {
         checkAutoSync()
     }
@@ -53,9 +56,6 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
-
-    private val _processState = MutableStateFlow<AuthState?>(null)
-    val processState: StateFlow<AuthState?> = _processState
 
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {

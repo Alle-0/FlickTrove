@@ -40,6 +40,18 @@
                 <data android:scheme="flicktrove" android:host="auth" />
             </intent-filter>
 
+            <!-- HTTPS App Links — shared links via WhatsApp etc. -->
+            <!-- Verified via https://alle-0.github.io/.well-known/assetlinks.json -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="alle-0.github.io"
+                    android:path="/FlickTrove/open.html" />
+            </intent-filter>
+
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />

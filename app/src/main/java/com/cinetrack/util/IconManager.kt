@@ -58,15 +58,13 @@ object IconManager {
             }
         }
 
-        // Restart the app to prevent the black screen issue from Recents
-        android.widget.Toast.makeText(context, context.getString(com.cinetrack.R.string.icon_updated_restart), android.widget.Toast.LENGTH_SHORT).show()
+        // Restart the app cleanly to apply the new icon
         val intent = android.content.Intent(context, com.cinetrack.MainActivity::class.java).apply {
             addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
             action = android.content.Intent.ACTION_MAIN
             addCategory(android.content.Intent.CATEGORY_LAUNCHER)
         }
         context.startActivity(intent)
-        kotlin.system.exitProcess(0)
     }
 
     private val presetColors = mapOf(

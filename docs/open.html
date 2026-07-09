@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlickTrove — Open in App</title>
+  <meta name="description" content="Open this content in FlickTrove, the premium cinema & TV show tracker for Android.">
+  <meta name="theme-color" content="#0B0F19">
+  <meta name="robots" content="noindex, follow">
+
+  <!-- Open Graph — populated dynamically via JS -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="FlickTrove">
+  <meta property="og:image" content="https://alle-0.github.io/FlickTrove/assets/Icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #2DD4BF;
+      --accent-dim: rgba(45, 212, 191, 0.15);
+      --bg: #0B0F19;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --text: #FFFFFF;
+      --text-dim: rgba(255,255,255,0.5);
+      --text-muted: rgba(255,255,255,0.3);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient orbs */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+      animation: float 8s ease-in-out infinite;
+    }
+    .bg-orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #2DD4BF, transparent);
+      top: -150px; left: -150px;
+      animation-delay: 0s;
+    }
+    .bg-orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #6366f1, transparent);
+      bottom: -100px; right: -100px;
+      animation-delay: -4s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 32px;
+    }
+
+    /* Top bar */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-logo {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+    }
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    /* Main card */
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px var(--border);
+      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Poster area */
+    .poster-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #1a1f2e, #0d1117);
+      overflow: hidden;
+    }
+    .poster-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .poster-img.loaded { display: block; }
+    .poster-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+    .poster-placeholder svg { opacity: 0.4; }
+    .poster-gradient {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 60%;
+      background: linear-gradient(to top, var(--bg), transparent);
+    }
+
+    /* Badge type */
+    .type-badge {
+      position: absolute;
+      top: 14px; left: 14px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 20px 24px 24px;
+    }
+    .content-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.4px;
+      color: var(--text);
+      min-height: 28px;
+      margin-bottom: 6px;
+    }
+    .content-meta {
+      font-size: 13px;
+      color: var(--text-dim);
+      min-height: 18px;
+      margin-bottom: 20px;
+    }
+
+    /* Skeleton loading */
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(255,255,255,0.05) 25%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0.05) 75%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* CTA buttons */
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent), #14b8a6);
+      color: #0B0F19;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: -0.2px;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--surface-hover);
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 11px 20px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Footer note */
+    .footnote {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .footnote a { color: var(--accent); text-decoration: none; }
+    .footnote a:hover { text-decoration: underline; }
+
+    /* Error state */
+    .error-state { display: none; }
+    .error-state.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<div class="page">
+
+  <a class="brand" href="https://alle-0.github.io/FlickTrove/">
+    <img class="brand-logo" src="https://alle-0.github.io/FlickTrove/assets/Icon.svg" alt="FlickTrove" onerror="this.style.display='none'">
+    <span class="brand-name">FlickTrove</span>
+  </a>
+
+  <div class="card" id="main-card">
+    <!-- Poster -->
+    <div class="poster-container">
+      <img class="poster-img" id="poster-img" alt="Poster">
+      <div class="poster-placeholder" id="poster-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        </svg>
+      </div>
+      <div class="poster-gradient"></div>
+      <div class="type-badge" id="type-badge">Movie</div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+      <div class="content-title skeleton" id="content-title" style="width:80%; height:28px;">&nbsp;</div>
+      <div class="content-meta skeleton" id="content-meta" style="width:50%; height:16px; margin-bottom:20px;">&nbsp;</div>
+
+      <div class="cta-group">
+        <a id="btn-open-app" class="btn-primary" href="#" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          Apri in FlickTrove
+        </a>
+
+        <div class="divider" id="divider" style="display:none;">oppure</div>
+
+        <a id="btn-play-store"
+           href="https://github.com/Alle-0/FlickTrove/releases/latest"
+           class="btn-secondary"
+           target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          Scarica da GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Non hai l'app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Scaricala gratis da GitHub Releases</a>.<br>
+    Potrebbe essere necessario abilitare <em>"Installa da origini sconosciute"</em> nelle impostazioni Android.<br>
+    <a href="https://alle-0.github.io/FlickTrove/">Scopri FlickTrove →</a>
+  </p>
+
+</div>
+
+<script>
+  const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+  const TMDB_API_BASE   = 'https://api.themoviedb.org/3';
+  // Public read-only TMDB token (no secret needed for public data)
+  const TMDB_READ_TOKEN = '';
+
+  // --- Parse query params ---
+  const params  = new URLSearchParams(window.location.search);
+  const type    = params.get('type') || 'movie';  // movie | tv | person
+  const id      = params.get('id');
+
+  // --- Elements ---
+  const titleEl     = document.getElementById('content-title');
+  const metaEl      = document.getElementById('content-meta');
+  const posterImg   = document.getElementById('poster-img');
+  const posterPh    = document.getElementById('poster-placeholder');
+  const typeBadge   = document.getElementById('type-badge');
+  const btnOpenApp  = document.getElementById('btn-open-app');
+  const divider     = document.getElementById('divider');
+
+  // --- Type label ---
+  const typeLabels = { movie: 'Film', tv: 'Serie TV', person: 'Persona' };
+  typeBadge.textContent = typeLabels[type] || 'Contenuto';
+
+  // --- Deep link intent URL (custom scheme, still works if app is installed) ---
+  if (id) {
+    const scheme = type === 'person'
+      ? `flicktrove://media/person/${id}`
+      : `flicktrove://media/${type}/${id}`;
+    btnOpenApp.href = scheme;
+    btnOpenApp.style.display = 'flex';
+    divider.style.display = 'flex';
+  }
+
+  // --- Fetch metadata from TMDB (public API, no key needed for basic info) ---
+  async function fetchTmdb() {
+    if (!id) { showFallback('Link non valido'); return; }
+
+    try {
+      let endpoint = '';
+      if (type === 'movie')  endpoint = `/movie/${id}?language=it-IT`;
+      if (type === 'tv')     endpoint = `/tv/${id}?language=it-IT`;
+      if (type === 'person') endpoint = `/person/${id}?language=it-IT`;
+
+      // Try TMDB without auth (public endpoints return limited data but title is available)
+      const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
+        headers: TMDB_READ_TOKEN
+          ? { 'Authorization': `Bearer ${TMDB_READ_TOKEN}` }
+          : {}
+      });
+
+      if (!res.ok) { showFallback(); return; }
+      const data = await res.json();
+
+      // Title
+      const title = data.title || data.name || 'Contenuto FlickTrove';
+      titleEl.textContent  = title;
+      titleEl.classList.remove('skeleton');
+      titleEl.style.width  = '';
+      titleEl.style.height = '';
+
+      // Meta (year + genres or known_for)
+      let metaText = '';
+      if (data.release_date) metaText = data.release_date.slice(0,4);
+      if (data.first_air_date) metaText = data.first_air_date.slice(0,4);
+      if (data.genres?.length) metaText += (metaText ? ' · ' : '') + data.genres.slice(0,2).map(g => g.name).join(', ');
+      if (data.known_for_department) metaText = data.known_for_department;
+      metaEl.textContent = metaText;
+      metaEl.classList.remove('skeleton');
+      metaEl.style.width  = '';
+      metaEl.style.height = '';
+
+      // Poster
+      const posterPath = data.poster_path || data.profile_path;
+      if (posterPath) {
+        posterImg.src = `${TMDB_IMAGE_BASE}w500${posterPath}`;
+        posterImg.onload = () => {
+          posterImg.classList.add('loaded');
+          posterPh.style.display = 'none';
+        };
+        posterImg.onerror = () => { /* keep placeholder */ };
+      }
+
+      // Update page title + OG
+      document.title = `${title} — FlickTrove`;
+
+    } catch (e) {
+      showFallback();
+    }
+  }
+
+  function showFallback(msg) {
+    titleEl.textContent  = 'Contenuto FlickTrove';
+    titleEl.classList.remove('skeleton');
+    metaEl.textContent   = msg || 'Apri nell\'app per vedere i dettagli';
+    metaEl.classList.remove('skeleton');
+    titleEl.style.width = metaEl.style.width = '';
+    titleEl.style.height = metaEl.style.height = '';
+  }
+
+  fetchTmdb();
+</script>
+
+</body>
+</html>

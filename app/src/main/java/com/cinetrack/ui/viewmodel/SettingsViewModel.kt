@@ -38,6 +38,7 @@ class SettingsViewModel @Inject constructor(
     private val backupRepository: BackupRepository,
     private val movieRepository: MovieRepository,
     private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
+    private val traktService: dagger.Lazy<com.cinetrack.data.api.TraktService>,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
     @ApplicationContext private val context: Context
@@ -275,6 +276,30 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dynamic_icon, context.getString(statusRes)))
+        }
+    }
+
+    fun exchangeTraktCode(code: String) {
+        viewModelScope.launch {
+            try {
+                val response = traktService.get().getAccessToken(
+                    com.cinetrack.data.api.TraktTokenRequest(
+                        code = code,
+                        client_id = com.cinetrack.utils.Keys.getTraktKey(),
+                        client_secret = com.cinetrack.utils.Keys.getTraktSecret(),
+                        redirect_uri = "flicktrove://auth"
+                    )
+                )
+                traktAuthRepository.saveTokens(
+                    accessToken = response.access_token,
+                    refreshToken = response.refresh_token,
+                    expiresInSeconds = response.expires_in
+                )
+                actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connected))
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsViewModel", "Trakt token exchange failed", e)
+                actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connect_error))
+            }
         }
     }
 

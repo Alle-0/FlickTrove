@@ -134,7 +134,21 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
                     val isCustomScheme = uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")
 
-                    if (isCustomScheme) {
+                    if (uri?.scheme == "https" && uri.host == "alle-0.github.io" && uri.path?.startsWith("/FlickTrove/open.html") == true) {
+                        // HTTPS App Link: https://alle-0.github.io/FlickTrove/open.html?type=movie&id=123
+                        val type = uri.getQueryParameter("type") ?: "movie"
+                        val id   = uri.getQueryParameter("id")?.toLongOrNull()
+                        if (id != null) {
+                            if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
+                            else rootNavigator.push(MovieDetailScreen(id, type))
+                        }
+                    } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
+                        // Trakt OAuth callback: flicktrove://auth?code=XXXXX
+                        val code = uri.getQueryParameter("code")
+                        if (!code.isNullOrEmpty()) {
+                            settingsViewModel.exchangeTraktCode(code)
+                        }
+                    } else if (isCustomScheme) {
                         val segments = uri.pathSegments
                         
                         // For flicktrove://media/movie/123, segments are ["movie", "123"]
