@@ -228,7 +228,7 @@
     <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non è approvato o certificato da TMDB.</string>
     <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
     <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
-    <string name="settings_app_version">FlickTrove v3.1.5</string>
+    <string name="settings_app_version">FlickTrove v3.1.6</string>
     <string name="settings_made_with">Sviluppato con </string>
     <string name="settings_for_lovers"> per amanti del cinema</string>
     <!-- Dialog buttons -->
