@@ -33,6 +33,7 @@
     <li><a href="#design--ui"><img src="docs/assets/readme_icons/palette.svg" width="18" height="18" align="absmiddle" /> Design & UI</a></li>
     <li><a href="#note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="18" height="18" align="absmiddle" /> Developer Note</a></li>
     <li><a href="#usage"><img src="docs/assets/readme_icons/play.svg" width="18" height="18" align="absmiddle" /> Usage</a></li>
+    <li><a href="#usage"><img src="docs/assets/readme_icons/heart.svg" width="18" height="18" align="absmiddle" /> Support</a></li>
     <li><a href="#license"><img src="docs/assets/readme_icons/documento.svg" width="18" height="18" align="absmiddle" /> License</a></li>
     <li><a href="#contacts--credits"><img src="docs/assets/readme_icons/people.svg" width="18" height="18" align="absmiddle" /> Contacts & Credits</a></li>
   </ol>
@@ -183,6 +184,28 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
 This repository is public for reference and sharing. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+
+---
+
+## <img src="docs/assets/readme_icons/heart.svg" width="24" height="24" align="absmiddle" /> Support the Project
+
+FlickTrove is, and will always be, completely free, open-source, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
+
+<br>
+
+<div align="center">
+  <!-- GitHub Star Badge -->
+  <a href="https://github.com/Alle-0/FlickTrove">
+    <img src="https://img.shields.io/github/stars/Alle-0/FlickTrove?style=for-the-badge&color=FFD700&label=Star%20The%20Repo&logo=github&logoColor=black" alt="Star the Repo" />
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <!-- PayPal Donate Badge -->
+  <a href="https://www.paypal.me/AlessandroBasile0" target="_blank">
+    <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" />
+  </a>
+</div>
+
+<br>
 
 ---
 
