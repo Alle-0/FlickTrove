@@ -41,7 +41,7 @@
 
 ---
 
-## <img src="docs/assets/readme_icons/ciak.svg" width="24" height="24" align="absmiddle" /> The Project
+## <h2 id="the-project"><img src="docs/assets/readme_icons/ciak.svg" width="24" height="24" align="absmiddle" /> The Project<\h2>
 
 **What is the motivation behind FlickTrove?**
 There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies.
@@ -50,7 +50,7 @@ This project solves the need for an elegant personal library, cloud-synchronized
 
 ---
 
-## <img src="docs/assets/readme_icons/scaricare.svg" width="24" height="24" align="absmiddle" /> Download & Installation
+## <h2 id="download--installation"><img src="docs/assets/readme_icons/scaricare.svg" width="24" height="24" align="absmiddle" /> Download & Installation<\h2>
 
 Experience FlickTrove on your Android device right now. Download the latest compiled APK directly from our releases page:
 
@@ -68,7 +68,7 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 ---
 
-## <img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features
+## <h2 id="key-feature"><img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features<\h2>
 
 FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
 
