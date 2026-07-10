@@ -191,7 +191,7 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 **Developed by:**
 
 - 👨‍💻 **Alessandro Basile** - <alessandrobasile909@gmail.com>
-- 🔗 **Project Link:** [FlickTrove on GitHub](https://github.com/Alle-0/FlickTrove)
+- 🔗 **Project Link:** [FlickTrove on GitHub](https://github.com/Alle-0/FlickTrove) or [FlickTrove site](https://alle-0.github.io/FlickTrove)
 
 **Credits & Useful Resources:**
 
