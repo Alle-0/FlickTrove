@@ -41,7 +41,7 @@
 
 ---
 
-## <h2 id="the-project"><img src="docs/assets/readme_icons/ciak.svg" width="24" height="24" align="absmiddle" /> The Project<\h2>
+## <h2 id="the-project"><img src="docs/assets/readme_icons/ciak.svg" width="24" height="24" align="absmiddle" /> The Project</h2>
 
 **What is the motivation behind FlickTrove?**
 There are many apps for tracking movies and TV shows, but they often lack visual polish or feel sluggish. The goal of FlickTrove is to provide enthusiasts with not just a useful tool, but a premium, responsive, and delightful experience, fully utilizing modern Android technologies.
@@ -50,7 +50,7 @@ This project solves the need for an elegant personal library, cloud-synchronized
 
 ---
 
-## <h2 id="download--installation"><img src="docs/assets/readme_icons/scaricare.svg" width="24" height="24" align="absmiddle" /> Download & Installation<\h2>
+## <h2 id="download--installation"><img src="docs/assets/readme_icons/scaricare.svg" width="24" height="24" align="absmiddle" /> Download & Installation</h2>
 
 Experience FlickTrove on your Android device right now. Download the latest compiled APK directly from our releases page:
 
@@ -68,7 +68,7 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 ---
 
-## <h2 id="key-feature"><img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features<\h2>
+## <h2 id="key-feature"><img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features</h2>
 
 FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
 
@@ -86,7 +86,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 
 ---
 
-## <img src="docs/assets/readme_icons/smartphone_magia.svg" width="24" height="24" align="absmiddle" /> UI Screenshots
+## <h2 id="ui-screenshots"><img src="docs/assets/readme_icons/smartphone_magia.svg" width="24" height="24" align="absmiddle" /> UI Screenshots</h2>
 
 <div align="center">
   <table>
@@ -115,7 +115,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 
 ---
 
-## <img src="docs/assets/readme_icons/settings.svg" width="24" height="24" align="absmiddle" /> Architecture & Technology
+## <h2 id="architecture--technology"><img src="docs/assets/readme_icons/settings.svg" width="24" height="24" align="absmiddle" /> Architecture & Technology</h2>
 
 Behind a gorgeous interface lies a solid and scalable engine. We used the best practices of modern Android development.
 
@@ -138,7 +138,7 @@ FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows 
 
 ---
 
-## <img src="docs/assets/readme_icons/palette.svg" width="24" height="24" align="absmiddle" /> Design & UI
+## <h2 id="design--ui"><img src="docs/assets/readme_icons/palette.svg" width="24" height="24" align="absmiddle" /> Design & UI</h2>
 
 Design is the true crown jewel of FlickTrove.
 
@@ -148,7 +148,7 @@ Design is the true crown jewel of FlickTrove.
 
 ---
 
-## <img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note
+## <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
 For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
 
@@ -156,7 +156,7 @@ Therefore, the project cannot be cloned and compiled "out-of-the-box". The sourc
 
 ---
 
-## <img src="docs/assets/readme_icons/play.svg" width="24" height="24" align="absmiddle" /> Usage
+## <h2 id="usage"><img src="docs/assets/readme_icons/play.svg" width="24" height="24" align="absmiddle" /> Usage</h2>
 
 Once the app is launched:
 
@@ -167,7 +167,7 @@ Once the app is launched:
 
 ---
 
-## <img src="docs/assets/readme_icons/calendario.svg" width="24" height="24" align="absmiddle" /> Future Roadmap
+## <h2 id="future-roadmap"><img src="docs/assets/readme_icons/calendario.svg" width="24" height="24" align="absmiddle" /> Future Roadmap</h2>
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
@@ -179,7 +179,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 ---
 
-## <img src="docs/assets/readme_icons/documento.svg" width="24" height="24" align="absmiddle" /> License
+## <h2 id="license"><img src="docs/assets/readme_icons/documento.svg" width="24" height="24" align="absmiddle" /> License</h2>
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
@@ -187,7 +187,7 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 
 ---
 
-## <img src="docs/assets/readme_icons/heart.svg" width="24" height="24" align="absmiddle" /> Support the Project
+## <h2 id="support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="24" height="24" align="absmiddle" /> Support the Project</h2>
 
 FlickTrove is, and will always be, completely free, open-source, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
 
@@ -207,7 +207,7 @@ FlickTrove is, and will always be, completely free, open-source, and ad-free. If
 
 ---
 
-## <img src="docs/assets/readme_icons/people.svg" width="24" height="24" align="absmiddle" /> Contacts & Credits
+## <h2 id="contacts--credits"><img src="docs/assets/readme_icons/people.svg" width="24" height="24" align="absmiddle" /> Contacts & Credits</h2>
 
 **Developed by:**
 
