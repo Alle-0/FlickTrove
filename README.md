@@ -194,12 +194,10 @@ FlickTrove is, and will always be, completely free, open-source, and ad-free. If
 <br>
 
 <div align="center">
-  <!-- GitHub Star Badge -->
   <a href="https://github.com/Alle-0/FlickTrove">
     <img src="https://img.shields.io/github/stars/Alle-0/FlickTrove?style=for-the-badge&color=FFD700&label=Star%20The%20Repo&logo=github&logoColor=black" alt="Star the Repo" />
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <!-- PayPal Donate Badge -->
   <a href="https://www.paypal.me/AlessandroBasile0" target="_blank">
     <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" />
   </a>
