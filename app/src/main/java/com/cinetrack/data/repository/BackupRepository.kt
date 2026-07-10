@@ -519,6 +519,166 @@ class BackupRepository @Inject constructor(
         count
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // YAMTRACK IMPORT
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Parses a Yamtrack CSV export (InputStream, line-by-line) and imports
+     * only TMDB-sourced movies and TV shows.
+     *
+     * Yamtrack header: media_id, source, media_type, title, image,
+     *                  season_number, episode_number, score, status, notes,
+     *                  start_date, end_date, progress
+     *
+     * Status mapping:
+     *   Completed          → watched = true
+     *   Planned / Watching → watched = false  (added to library, not watched)
+     *   Dropped / Paused   → skipped entirely
+     *
+     * Non-TMDB sources (mal, igdb, manual, …) are silently skipped.
+     */
+    suspend fun migrateYamtrackCsvStream(inputStream: InputStream): Int =
+        withContext(Dispatchers.IO) {
+            var count = 0
+            inputStream.bufferedReader().useLines { linesSequence ->
+                val lines = linesSequence.filter { it.isNotBlank() }.iterator()
+                if (!lines.hasNext()) return@withContext 0
+
+                val headers = parseCsvLine(lines.next()).map { it.trim().lowercase() }
+
+                val mediaIdIdx    = headers.indexOfFirst { it == "media_id" }
+                val sourceIdx     = headers.indexOfFirst { it == "source" }
+                val mediaTypeIdx  = headers.indexOfFirst { it == "media_type" }
+                val titleIdx      = headers.indexOfFirst { it == "title" }
+                val scoreIdx      = headers.indexOfFirst { it == "score" }
+                val statusIdx     = headers.indexOfFirst { it == "status" }
+                val notesIdx      = headers.indexOfFirst { it == "notes" }
+                val seasonIdx     = headers.indexOfFirst { it == "season_number" }
+                val episodeIdx    = headers.indexOfFirst { it == "episode_number" }
+
+                // Require the Yamtrack-specific "media_id" header to proceed
+                if (mediaIdIdx == -1) return@withContext 0
+
+                val chunks = lines.asSequence().chunked(20)
+                for (chunk in chunks) {
+                    val deferreds = chunk.mapNotNull { line ->
+                        val cols = parseCsvLine(line)
+                        if (cols.isEmpty()) return@mapNotNull null
+
+                        fun col(idx: Int) = if (idx != -1 && cols.size > idx) cols[idx].trim() else ""
+
+                        // Only process TMDB items
+                        val source = col(sourceIdx).lowercase()
+                        if (source.isNotBlank() && source != "tmdb") return@mapNotNull null
+
+                        val tmdbId = col(mediaIdIdx).toLongOrNull()?.takeIf { it > 0 }
+                            ?: return@mapNotNull null
+
+                        // Map Yamtrack media_type → FlickTrove movie/tv
+                        val mediaType = when (col(mediaTypeIdx).lowercase()) {
+                            "movie"           -> "movie"
+                            "tv", "season",
+                            "episode"         -> "tv"
+                            else              -> return@mapNotNull null  // anime, manga, game, …
+                        }
+
+                        // Map status — skip Dropped and Paused
+                        val status = col(statusIdx)
+                        val watched = when (status) {
+                            "Completed"         -> true
+                            "Planned",
+                            "Watching"          -> false
+                            "Dropped", "Paused" -> return@mapNotNull null
+                            else                -> false
+                        }
+
+                        val titleVal   = col(titleIdx).takeIf { it.isNotBlank() }
+                        val scoreVal   = col(scoreIdx).toDoubleOrNull()
+                        val notesVal   = col(notesIdx).takeIf { it.isNotBlank() }
+                        val seasonVal  = col(seasonIdx).toIntOrNull()
+                        val episodeVal = col(episodeIdx).toIntOrNull()
+
+                        val epsMap = if (seasonVal != null && seasonVal > 0 &&
+                                        episodeVal != null && episodeVal > 0) {
+                            mapOf(seasonVal.toString() to listOf(episodeVal))
+                        } else null
+
+                        async {
+                            try {
+                                Pair(
+                                    Movie(
+                                        id              = tmdbId,
+                                        mediaType       = mediaType,
+                                        title           = titleVal ?: "Unknown ($tmdbId)",
+                                        name            = if (mediaType == "tv") titleVal else null,
+                                        watched         = watched,
+                                        favorite        = false,
+                                        personalRating  = scoreVal,
+                                        personalNote    = notesVal,
+                                        watchedEpisodes = epsMap,
+                                        watchedAt       = if (watched) java.time.Instant.now().toString() else null,
+                                        syncStatus      = "pending",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    ),
+                                    null as String?
+                                )
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                    }
+
+                    val results = deferreds.awaitAll().filterNotNull()
+                    if (results.isNotEmpty()) {
+                        processAndSaveImportedItems(results)
+                        count += results.size
+                    }
+                    kotlinx.coroutines.delay(300)
+                }
+            }
+            count
+        }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // YAMTRACK EXPORT
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Exports the entire local library as a Yamtrack-compatible CSV string.
+     *
+     * Fixed values per row:
+     *   source  = "tmdb"
+     *   status  = "Completed" if watched, "Planned" otherwise
+     *   progress = 100 if watched, 0 otherwise
+     */
+    suspend fun exportAsYamtrackCsv(): String = withContext(Dispatchers.IO) {
+        val favorites = favoriteDao.getAll()
+        buildString {
+            appendLine("media_id,source,media_type,title,image,season_number,episode_number,score,status,notes,start_date,end_date,progress")
+            for (movie in favorites) {
+                val title    = (movie.title ?: movie.name ?: "").csvQuote()
+                val score    = movie.personalRating?.toString() ?: ""
+                val status   = if (movie.watched) "Completed" else "Planned"
+                val notes    = (movie.personalNote ?: "").csvQuote()
+                val endDate  = if (movie.watched && movie.watchedAt != null) {
+                    runCatching {
+                        java.time.LocalDate.ofInstant(
+                            java.time.Instant.parse(movie.watchedAt),
+                            java.time.ZoneId.systemDefault()
+                        ).toString()
+                    }.getOrDefault("")
+                } else ""
+                val progress = if (movie.watched) "100" else "0"
+
+                appendLine("${movie.id},tmdb,${movie.mediaType ?: "movie"},$title,,,,$score,$status,$notes,,$endDate,$progress")
+            }
+        }
+    }
+
+    /** Wraps a CSV field in double-quotes, escaping any internal quotes. */
+    private fun String.csvQuote(): String = "\"${replace("\"", "\"\"")}\""
+
     private suspend fun processAndSaveImportedItems(itemsWithFolders: List<Pair<Movie, String?>>) {
         if (itemsWithFolders.isEmpty()) return
         

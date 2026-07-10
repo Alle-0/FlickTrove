@@ -207,8 +207,8 @@
     <!-- Sync and Backup -->
     <string name="settings_sync_backup">Sync and Backup</string>
     <string name="settings_smart_merge">Smart Merge will combine data while always protecting your local ratings and notes.</string>
-    <string name="settings_external_migration">Universal Data Import</string>
-    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, CSV/JSON</string>
+    <string name="settings_external_migration">Universal Data Import / Export</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, All CSV/JSON</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
     <string name="settings_sync_missing_details">Sync Missing Details</string>
     <string name="settings_sync_missing_details_desc">Retrieve missing data for older movies in your library. Use only if strictly necessary (intensive background operation).</string>
@@ -314,9 +314,13 @@
     <string name="settings_processing">Processing...</string>
     <string name="settings_backup_restore_title">Backup and Restore</string>
     <string name="settings_backup_restore_desc">Export a copy of your data (favorites, folders, and settings) or restore from a previously saved file.</string>
-    <string name="settings_external_migration_dialog_title">Universal Data Import</string>
+    <string name="settings_external_migration_dialog_title">Universal Data Import &amp; Export</string>
     <string name="settings_start_migration">Start Import</string>
     <string name="settings_external_migration_dialog_desc">Import your watch history from any platform or site! You can upload exports from Trakt.tv, Letterboxd, IMDb, TVTime, Serializd, or any custom CSV/JSON file containing titles, IDs, or release years. FlickTrove\'s smart engine will automatically detect format and match your movies and TV shows!</string>
+    <string name="settings_yamtrack_import">Import from Yamtrack</string>
+    <string name="settings_yamtrack_export">Export to Yamtrack</string>
+    <string name="settings_yamtrack_section">Yamtrack</string>
+    <string name="settings_yamtrack_desc">Import your Yamtrack library or export in Yamtrack CSV format (TMDB sources only).</string>
 
     <!-- Movie Detail Strings -->
     <string name="detail_error_title">Something went wrong</string>

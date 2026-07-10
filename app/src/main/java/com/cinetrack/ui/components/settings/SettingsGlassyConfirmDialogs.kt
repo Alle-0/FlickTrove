@@ -537,8 +537,11 @@ fun SettingsBackupDialog(
 fun SettingsExternalMigrationDialog(
     visible: Boolean,
     activeHazeState: HazeState,
+    isBackupLoading: Boolean,
     onDismiss: () -> Unit,
-    onImport: () -> Unit
+    onImport: () -> Unit,
+    onYamtrackImport: () -> Unit,
+    onYamtrackExport: () -> Unit
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -549,8 +552,11 @@ fun SettingsExternalMigrationDialog(
         val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == EnterExitState.Visible) 1f else 0f }
         ExternalMigrationDialog(
             hazeState = activeHazeState, alpha = alpha,
+            isYamtrackLoading = isBackupLoading,
             onDismiss = onDismiss,
-            onImport = onImport
+            onImport = onImport,
+            onYamtrackImport = onYamtrackImport,
+            onYamtrackExport = onYamtrackExport
         )
     }
 }

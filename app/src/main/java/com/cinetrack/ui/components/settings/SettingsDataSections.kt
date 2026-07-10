@@ -130,7 +130,7 @@ fun SettingsSyncBackupSection(
                 onShowExternalMigrationDialog()
             }
         )
-        
+
         // Trakt Sync Card
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_trakt_logo),
@@ -358,7 +358,7 @@ fun SettingsSupportSection(
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_heart),
             title = "Buy me a Coffee ☕",
-            description = "Support the developer with a donation",
+            description = "Support the developer with a donation via Paypal",
             isExternal = true,
             tint = Color(0xFFFFA000),
             onClick = { 

@@ -478,4 +478,30 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    fun migrateYamtrackData(inputStream: java.io.InputStream) {
+        viewModelScope.launch {
+            _isBackupLoading.value = true
+            try {
+                val count = backupRepository.migrateYamtrackCsvStream(inputStream)
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
+            } finally {
+                _isBackupLoading.value = false
+            }
+        }
+    }
+
+    suspend fun getYamtrackExportData(): String? {
+        _isBackupLoading.value = true
+        return try {
+            backupRepository.exportAsYamtrackCsv()
+        } catch (e: Exception) {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_export_error))
+            null
+        } finally {
+            _isBackupLoading.value = false
+        }
+    }
 }

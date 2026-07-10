@@ -155,6 +155,9 @@ fun ExternalMigrationDialog(
     hazeState: HazeState,
     onDismiss: () -> Unit,
     onImport: () -> Unit,
+    onYamtrackImport: () -> Unit,
+    onYamtrackExport: () -> Unit,
+    isYamtrackLoading: Boolean = false,
     alpha: Float = 1f
 ) {
     Box(
@@ -195,16 +198,15 @@ fun ExternalMigrationDialog(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
+                // Universal import (primary)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.primary)
-                        .bounceClick {
-                            onImport()
-                        },
+                        .bounceClick { onImport() },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -213,9 +215,165 @@ fun ExternalMigrationDialog(
                         Text(stringResource(R.string.settings_select_file), fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                 }
-                
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Yamtrack divider
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
+                    Text(
+                        stringResource(R.string.settings_yamtrack_section),
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.4f)
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Yamtrack import (secondary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            if (!isYamtrackLoading) Color.White.copy(alpha = 0.07f)
+                            else Color.White.copy(alpha = 0.03f)
+                        )
+                        .bounceClick(enabled = !isYamtrackLoading) { onYamtrackImport() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_yamtrack_import), fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.8f))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Yamtrack export (secondary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color.White.copy(alpha = 0.07f))
+                        .bounceClick { onYamtrackExport() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_yamtrack_export), fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.8f))
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
+                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun YamtrackDialog(
+    hazeState: HazeState,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onImport: () -> Unit,
+    onExport: () -> Unit,
+    alpha: Float = 1f
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = 400.dp)
+                .fillMaxWidth(0.85f)
+                .hazeGlass(
+                    state = hazeState, alpha = alpha,
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .clickable(enabled = false) {}
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                    null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Yamtrack",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "Import your Yamtrack library or export your FlickTrove collection in Yamtrack-compatible CSV format.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Import button (primary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (!isLoading) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                        )
+                        .bounceClick(enabled = !isLoading) { onImport() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.Black)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Import from Yamtrack", fontWeight = FontWeight.Bold, color = Color.Black)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Export button (secondary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .bounceClick { onExport() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Export to Yamtrack", fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }

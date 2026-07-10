@@ -351,7 +351,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showDeepSyncConfirm || false
+                           showDeepSyncConfirm
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -440,6 +440,39 @@ fun SettingsScreenContent(
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
+            }
+        }
+    }
+
+    val yamtrackImportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            try {
+                context.contentResolver.openInputStream(it)?.let { stream ->
+                    settingsViewModel.migrateYamtrackData(stream)
+                }
+            } catch (e: Exception) {
+                // Error handling is managed by ViewModel
+            }
+        }
+    }
+
+    val yamtrackExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                val csv = settingsViewModel.getYamtrackExportData()
+                if (csv != null) {
+                    try {
+                        context.contentResolver.openOutputStream(it)?.use { stream ->
+                            OutputStreamWriter(stream).use { writer -> writer.write(csv) }
+                        }
+                    } catch (e: Exception) {
+                        // Error handled by ViewModel
+                    }
+                }
             }
         }
     }
@@ -702,10 +735,19 @@ fun SettingsScreenContent(
         SettingsExternalMigrationDialog(
             visible = showExternalMigrationDialog,
             activeHazeState = activeHazeState,
+            isBackupLoading = isBackupLoading,
             onDismiss = { showExternalMigrationDialog = false },
-            onImport = { 
+            onImport = {
                 showExternalMigrationDialog = false
-                externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*")) 
+                externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
+            },
+            onYamtrackImport = {
+                showExternalMigrationDialog = false
+                yamtrackImportLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
+            },
+            onYamtrackExport = {
+                showExternalMigrationDialog = false
+                yamtrackExportLauncher.launch("FlickTrove_Yamtrack_${System.currentTimeMillis()}.csv")
             }
         )
 
