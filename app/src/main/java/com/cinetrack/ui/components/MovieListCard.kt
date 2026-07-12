@@ -336,8 +336,15 @@ fun MovieListCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (isTv && !isWatched && progress > 0f) {
-                    MovieCircularProgress(progress = progress)
+                val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
+                    if (progress > 0f) progress
+                    else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
+                        val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                        (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                    } else 0f
+                }
+                if (isTv && !isWatched && computedProgress > 0f) {
+                    MovieCircularProgress(progress = computedProgress)
                 }
 
                 val appAccent = MaterialTheme.colorScheme.primary

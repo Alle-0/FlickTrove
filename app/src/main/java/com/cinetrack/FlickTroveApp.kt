@@ -262,6 +262,12 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                         },
                                                         onPersonClick = { 
                                                             navigator.push(com.cinetrack.ui.screens.PersonDetailScreen(it, null)) 
+                                                        },
+                                                        onDiscoverTrendingClick = { reqType ->
+                                                            isSearchOverlayOpen = false
+                                                            deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_DISCOVER_TAB").apply {
+                                                                putExtra("requestedType", reqType)
+                                                            }
                                                         }
                                                     )
                                                 }

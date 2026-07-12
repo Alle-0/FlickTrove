@@ -4,6 +4,7 @@ import com.cinetrack.data.api.OmdbService
 import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.api.TMDBService
 import com.cinetrack.data.api.NewsService
+import com.cinetrack.data.api.GithubService
 import com.cinetrack.data.api.TraktAuthInterceptor
 import com.cinetrack.data.api.TraktAuthenticator
 import com.cinetrack.utils.Keys
@@ -149,9 +150,39 @@ object NetworkModule {
     @Singleton
     fun provideTraktService(@Named("trakt_retrofit") retrofit: Retrofit): TraktService = retrofit.create(TraktService::class.java)
 
+    /**
+     * A Trakt service backed by the plain OkHttpClient — NO TraktAuthInterceptor and
+     * NO TraktAuthenticator. Used exclusively by [TraktAuthenticator] for the token
+     * refresh call, which MUST NOT go through the authenticating client to avoid an
+     * infinite loop / deadlock when the refresh token itself is rejected with 401.
+     */
     @Provides
     @Singleton
+    @Named("trakt_refresh_service")
+    fun provideTraktRefreshService(json: Json, okHttpClient: OkHttpClient): TraktService {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.trakt.tv/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(TraktService::class.java)
+    }
+
+    @Provides
     fun provideNewsService(@Named("news_retrofit") retrofit: Retrofit): NewsService = retrofit.create(NewsService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGithubService(okHttpClient: OkHttpClient, json: Json): GithubService {
+        return Retrofit.Builder()
+            .baseUrl("https://api.github.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(GithubService::class.java)
+    }
+
 
     @Provides
     @Named("tmdb_api_key")

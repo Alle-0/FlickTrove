@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flowOn
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
+    val notificationCount: Int = 0,
     val isLoading: Boolean = true
 )
 
@@ -27,11 +28,19 @@ class UpdatesViewModel @Inject constructor(
 
     val uiState: StateFlow<UpdatesUiState> = repository.getLocalMoviesFlow()
         .map { movies ->
+            val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
                 (it.newEpisodesFound ?: 0) > 0 || it.reminder == true 
             }
                 .sortedByDescending { it.clientUpdatedAt }
-            UpdatesUiState(movies = updateList.toImmutableList(), isLoading = false)
+            val unreadNotifCount = movies.count {
+                (it.newEpisodesFound ?: 0) > 0 || (it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0)
+            }
+            UpdatesUiState(
+                movies = updateList.toImmutableList(),
+                notificationCount = unreadNotifCount,
+                isLoading = false
+            )
         }
         .flowOn(Dispatchers.Default)
         .catch { e ->

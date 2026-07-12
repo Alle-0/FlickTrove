@@ -210,6 +210,7 @@
     <string name="settings_external_migration">Importazione / Esportazione Universale</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tutti i CSV/JSON</string>
     <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
+    <string name="settings_trakt_sync_desc">App ➔ Trakt: Istantaneo\nTrakt ➔ App: 24h</string>
     <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
     <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
     <string name="settings_dialog_deep_sync_title">Attenzione: Sync Intensivo</string>
@@ -382,6 +383,7 @@
     <!-- Search Strings -->
     <string name="search_error_message">Impossibile caricare i dati. Controlla la tua connessione e riprova.</string>
     <string name="search_trending_now">Tendenze del momento</string>
+    <string name="search_discover_more">Scopri altro</string>
     <string name="search_no_results">Nessun risultato</string>
     <string name="search_no_results_short">Nessun risultato trovato.\nDigita almeno 3 lettere</string>
     <string name="search_no_results_simplify">Nessun risultato trovato.\nProva a semplificare la ricerca</string>
@@ -876,6 +878,22 @@
     <string name="person_offline_title">Modalità Offline</string>
     <string name="person_offline_desc">Connessione assente o dati artista non presenti in cache.\nConnettiti per scaricare biografia e filmografia completa.</string>
     <string name="person_offline_default_name">Artista #%1$d</string>
-    <string name="person_offline_bio">Dati biografici completi e filmografia estesa non disponibili in modalità offline.\nVengono visualizzati i titoli presenti nella tua libreria locale.</string>
+    <!-- Update & WhatsNew Dialogs -->
+    <string name="whats_new_title">App Aggiornata!</string>
+    <string name="whats_new_version">FlickTrove v%1$s</string>
+    <string name="whats_new_fallback_notes">• Nuova interfaccia Glassmorphism con effetto Haze Blur reale
+• Pallino di notifica aggiornamento app integrato nel menu e impostazioni
+• Sistema promemoria e notifiche separato per Film e Serie TV
+• Miglioramenti alle prestazioni generali e fix di stabilità</string>
+    <string name="whats_new_section_title">NOVITÀ PRINCIPALI</string>
+    <string name="whats_new_btn_start">Ottimo, Iniziamo!</string>
+
+    <string name="github_update_title">Nuovo Aggiornamento Disponibile</string>
+    <string name="github_update_desc">È disponibile una nuova versione di FlickTrove su GitHub! Stai attualmente utilizzando la v%1$s. Aggiorna ora per avere tutte le ultime novità, miglioramenti e correzioni.</string>
+    <string name="github_update_btn_download">Scarica da GitHub</string>
+    <string name="github_update_btn_later">Più tardi</string>
+    <string name="github_update_btn_ignore">Non ricordarlo più</string>
+
+    <string name="settings_new_version_available">Nuova versione v%1$s disponibile su GitHub →</string>
 
 </resources>

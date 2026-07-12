@@ -97,19 +97,100 @@ class MovieRepository @Inject constructor(
         widgetNotifier.notifyWidgetUpdated()
 
         // Enqueue Instant Write to Trakt via WorkManager
-        if (syncToTrakt && oldMovie != null && oldMovie.watched != movie.watched) {
-            val action = if (movie.watched) TraktInstantWriteWorker.ACTION_MARK_WATCHED else TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
-            val workData = workDataOf(
-                TraktInstantWriteWorker.KEY_ACTION to action,
-                TraktInstantWriteWorker.KEY_MEDIA_TYPE to movie.mediaType,
-                TraktInstantWriteWorker.KEY_TMDB_ID to movie.id,
-                TraktInstantWriteWorker.KEY_IMDB_ID to movie.imdbId
-            )
-            val workRequest = OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                .setInputData(workData)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
-                .build()
-            WorkManager.getInstance(context).enqueue(workRequest)
+        if (syncToTrakt) {
+            val workRequests = mutableListOf<androidx.work.OneTimeWorkRequest>()
+
+            fun enqueue(action: String, extras: androidx.work.Data.Builder.() -> Unit = {}) {
+                val builder = androidx.work.Data.Builder()
+                    .putString(TraktInstantWriteWorker.KEY_ACTION,     action)
+                    .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
+                    .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
+                if (movie.imdbId != null) {
+                    builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
+                }
+                builder.apply(extras)
+                workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(builder.build())
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+                    .build()
+            }
+
+            // Estraiamo i vecchi valori in sicurezza (se oldMovie è null, usiamo i default)
+            val oldWatched = oldMovie?.watched ?: false
+            val oldRating  = oldMovie?.personalRating
+            val oldFav     = oldMovie?.favorite ?: false
+
+            // watched changed (o nuovo inserimento già visto)
+            if (oldWatched != movie.watched) {
+                if (movie.mediaType == "tv") {
+                    // FIX: Per le serie TV, non "nuclearizzare" lo show se scende al 99%.
+                    // Rimuovi l'intero show SOLO se tutti gli episodi sono stati tolti.
+                    if (movie.watched) {
+                        enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
+                    } else if (movie.watchedEpisodes.isNullOrEmpty()) {
+                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
+                    }
+                } else {
+                    // I film funzionano in modo standard (acceso/spento)
+                    val action = if (movie.watched) TraktInstantWriteWorker.ACTION_MARK_WATCHED
+                                 else               TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
+                    enqueue(action)
+                }
+            }
+
+            // personalRating changed
+            if (oldRating != movie.personalRating) {
+                val rating = movie.personalRating
+                if (rating != null && rating > 0.0) {
+                    val traktRating = rating.toInt().coerceIn(1, 10)
+                    enqueue(TraktInstantWriteWorker.ACTION_ADD_RATING) {
+                        putInt(TraktInstantWriteWorker.KEY_RATING, traktRating)
+                    }
+                } else {
+                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_RATING)
+                }
+            }
+
+            // favorite changed (watchlist)
+            if (oldFav != movie.favorite) {
+                val action = if (movie.favorite) TraktInstantWriteWorker.ACTION_ADD_WATCHLIST
+                             else                TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST
+                enqueue(action)
+            }
+
+            // watchedEpisodes changed (TV only)
+            if (movie.mediaType == "tv" && oldMovie?.watchedEpisodes != movie.watchedEpisodes) {
+                val oldEps    = oldMovie?.watchedEpisodes ?: emptyMap()
+                val newEps    = movie.watchedEpisodes    ?: emptyMap()
+
+                // Episodes added
+                val addedEps  = newEps.mapValues { (season, eps) ->
+                    eps - (oldEps[season]?.toSet() ?: emptySet())
+                }.filter { it.value.isNotEmpty() }
+
+                // Episodes removed
+                val removedEps = oldEps.mapValues { (season, eps) ->
+                    eps - (newEps[season]?.toSet() ?: emptySet())
+                }.filter { it.value.isNotEmpty() }
+
+                if (addedEps.isNotEmpty()) {
+                    val encoded = TraktInstantWriteWorker.encodeEpisodes(addedEps)
+                    enqueue(TraktInstantWriteWorker.ACTION_MARK_EPISODES_WATCHED) {
+                        putString(TraktInstantWriteWorker.KEY_SEASON_EPISODES, encoded)
+                    }
+                }
+                if (removedEps.isNotEmpty()) {
+                    val encoded = TraktInstantWriteWorker.encodeEpisodes(removedEps)
+                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_EPISODES_WATCHED) {
+                        putString(TraktInstantWriteWorker.KEY_SEASON_EPISODES, encoded)
+                    }
+                }
+            }
+
+            if (workRequests.isNotEmpty()) {
+                WorkManager.getInstance(context).enqueue(workRequests)
+            }
         }
         
         // 2. Fire-and-forget to Firebase (SDK handles persistence/retry)
@@ -169,14 +250,14 @@ class MovieRepository @Inject constructor(
 
     suspend fun saveMoviesBulk(movies: List<Movie>) {
         if (movies.isEmpty()) return
-        
+
         val updatedMovies = movies.map { 
             it.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()) 
         }
         
-        favoriteDao.insertAll(updatedMovies)
+        favoriteDao.insertAll(updatedMovies) 
         widgetNotifier.notifyWidgetUpdated()
-        
+    
         repositoryScope.launch {
             try {
                 // Firebase bulk update isn't strictly defined, so we can run them concurrently
@@ -189,24 +270,78 @@ class MovieRepository @Inject constructor(
             }
         }
     }
+
     suspend fun deleteMovie(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
-        
-        // Notify Widget of changes
         widgetNotifier.notifyWidgetUpdated()
+
+        // --- PUSH RIMOZIONE A TRAKT ---
+        val builder = androidx.work.Data.Builder()
+            .putString(TraktInstantWriteWorker.KEY_ACTION,     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
+            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
+            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
+        if (movie.imdbId != null) {
+            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
+        }
+
+        val workRequests = mutableListOf(
+            OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setInputData(builder.build())
+                .build()
+        )
+
+        // Fix smart-cast salvando in una variabile locale immutabile
+        val currentRating = movie.personalRating
+        if (currentRating != null && currentRating > 0.0) {
+            // Fix: uso di .putAll() al posto di fromData()
+            val ratingBuilder = androidx.work.Data.Builder().putAll(builder.build())
+                .putString(TraktInstantWriteWorker.KEY_ACTION, TraktInstantWriteWorker.ACTION_REMOVE_RATING)
+            workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                .setInputData(ratingBuilder.build())
+                .build()
+        }
+        
+        if (movie.favorite) {
+            // Fix: uso di .putAll() al posto di fromData()
+            val watchlistBuilder = androidx.work.Data.Builder().putAll(builder.build())
+                .putString(TraktInstantWriteWorker.KEY_ACTION, TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
+            workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                .setInputData(watchlistBuilder.build())
+                .build()
+        }
+
+        WorkManager.getInstance(context).enqueue(workRequests)
+        // ------------------------------
         
         repositoryScope.launch {
             try {
                 firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                // Will be retried by syncWorker
             }
         }
     }
 
     suspend fun markAsDeleted(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
+
+        // --- PUSH RIMOZIONE A TRAKT ---
+        val builder = androidx.work.Data.Builder()
+            .putString(TraktInstantWriteWorker.KEY_ACTION,     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
+            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
+            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
+        if (movie.imdbId != null) {
+            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
+        }
+
+        WorkManager.getInstance(context).enqueue(
+            OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setInputData(builder.build())
+                .build()
+        )
+
         repositoryScope.launch {
             try {
                 firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
@@ -224,13 +359,82 @@ class MovieRepository @Inject constructor(
     fun getMoviesByCompositeIds(compositeIds: List<String>): Flow<List<Movie>> = favoriteDao.getByCompositeIds(compositeIds)
 
     suspend fun saveFolder(folderEntity: FolderEntity) {
+        // Estraiamo la vecchia cartella per fare il calcolo delle differenze (diff)
+        val oldFolder = folderDao.getByIdFlow(folderEntity.id).firstOrNull()
+        
         val now = System.currentTimeMillis()
         val updatedEntity = folderEntity.copy(syncStatus = "synced", clientUpdatedAt = now)
         folderDao.insert(updatedEntity)
         
+        // --- INIZIO INTEGRAZIONE TRAKT (Instant Write) ---
+        if (folderEntity.id.startsWith("trakt_")) {
+            val traktListId = folderEntity.id.removePrefix("trakt_").toLongOrNull()
+            if (traktListId != null) {
+                val workRequests = mutableListOf<androidx.work.OneTimeWorkRequest>()
+                
+                // 1. Controllo cambio Nome o Descrizione
+                if (oldFolder != null && (oldFolder.name != folderEntity.name || oldFolder.description != folderEntity.description)) {
+                    val updateBuilder = androidx.work.Data.Builder()
+                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_UPDATE_LIST")
+                        .putLong("LIST_ID", traktListId)
+                        .putString("LIST_NAME", folderEntity.name)
+                        .putString("LIST_DESC", folderEntity.description ?: "")
+                    
+                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                        .setInputData(updateBuilder.build()).build())
+                }
+                
+                // 2. Controllo Film/Serie aggiunti o rimossi
+                val oldItems = oldFolder?.itemIds?.toSet() ?: emptySet()
+                val newItems = folderEntity.itemIds.toSet()
+                
+                val added = newItems - oldItems
+                val removed = oldItems - newItems
+                
+                if (added.isNotEmpty()) {
+                    val addBuilder = androidx.work.Data.Builder()
+                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_ADD_LIST_ITEMS")
+                        .putLong("LIST_ID", traktListId)
+                        .putStringArray("ITEMS_ADDED", added.toTypedArray())
+                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                        .setInputData(addBuilder.build()).build())
+                }
+                
+                if (removed.isNotEmpty()) {
+                    val removeBuilder = androidx.work.Data.Builder()
+                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_REMOVE_LIST_ITEMS")
+                        .putLong("LIST_ID", traktListId)
+                        .putStringArray("ITEMS_REMOVED", removed.toTypedArray())
+                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                        .setInputData(removeBuilder.build()).build())
+                }
+                
+                if (workRequests.isNotEmpty()) {
+                    WorkManager.getInstance(context).enqueue(workRequests)
+                }
+            }
+        } else if (oldFolder == null) {
+            // FIX: È una cartella appena creata localmente! La pushiamo su Trakt.
+            val createBuilder = androidx.work.Data.Builder()
+                .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_CREATE_LIST")
+                .putString("LOCAL_FOLDER_ID", folderEntity.id)
+                .putString("LIST_NAME", folderEntity.name)
+                .putString("LIST_DESC", folderEntity.description ?: "")
+
+            WorkManager.getInstance(context).enqueue(
+                OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(createBuilder.build()).build()
+            )
+        }
+        // --- FINE INTEGRAZIONE TRAKT ---
+
         repositoryScope.launch {
             try {
-                val folder = Folder(
+                val folder = com.cinetrack.data.models.Folder(
                     id = updatedEntity.id,
                     name = updatedEntity.name,
                     icon = updatedEntity.icon,
@@ -254,13 +458,30 @@ class MovieRepository @Inject constructor(
 
     suspend fun deleteFolder(folderId: String) {
         folderDao.markDeleted(folderId)
+        
+        // --- INIZIO INTEGRAZIONE TRAKT ---
+        if (folderId.startsWith("trakt_")) {
+            val traktListId = folderId.removePrefix("trakt_").toLongOrNull()
+            if (traktListId != null) {
+                val deleteBuilder = androidx.work.Data.Builder()
+                    .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_DELETE_LIST")
+                    .putLong("LIST_ID", traktListId)
+                
+                WorkManager.getInstance(context).enqueue(
+                    OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                        .setInputData(deleteBuilder.build()).build()
+                )
+            }
+        }
+        // --- FINE INTEGRAZIONE TRAKT ---
+
         repositoryScope.launch {
             try {
                 firebaseRemoteDataSource.deleteFolder(folderId)
                 folderDao.deleteById(folderId)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                // Keep as pending_delete for sync retry
             }
         }
     }
@@ -474,9 +695,10 @@ class MovieRepository @Inject constructor(
         
         try {
             val currentPrefs = preferenceRepository.userPreferencesFlow
+                // Fix: Emesso UserPreferences() corretto al posto di SyncProgress
                 .catch { emit(com.cinetrack.data.models.UserPreferences()) }
                 .firstOrNull() ?: com.cinetrack.data.models.UserPreferences()
-            
+                
             // Helper to parse SortConfig from Firebase Map
             fun parseSortConfig(map: Any?, default: com.cinetrack.data.models.SortConfig): com.cinetrack.data.models.SortConfig {
                 if (map !is Map<*, *>) return default

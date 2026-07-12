@@ -31,6 +31,16 @@ class SettingsRepositoryImpl @Inject constructor(
         val LAST_FEEDBACK_TIMESTAMP = longPreferencesKey("last_feedback_timestamp")
         val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
+        val LAST_SEEN_APP_VERSION = stringPreferencesKey("last_seen_app_version")
+        val IGNORED_UPDATE_VERSION = stringPreferencesKey("ignored_update_version")
+    }
+
+    override val lastSeenAppVersion: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.LAST_SEEN_APP_VERSION] ?: ""
+    }
+
+    override val ignoredUpdateVersion: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.IGNORED_UPDATE_VERSION] ?: ""
     }
 
     override val accentColor: Flow<String> = dataStore.data.map { preferences ->
@@ -140,6 +150,18 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateImageQuality(quality: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.IMAGE_QUALITY] = quality
+        }
+    }
+
+    override suspend fun updateLastSeenAppVersion(version: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_SEEN_APP_VERSION] = version
+        }
+    }
+
+    override suspend fun updateIgnoredUpdateVersion(version: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IGNORED_UPDATE_VERSION] = version
         }
     }
 }

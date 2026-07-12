@@ -165,8 +165,37 @@ fun FolderDetailScreenContent(
         ) {
             when (val state = uiState) {
                 is FolderDetailUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color.White)
+                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
+                        val gap = 8.dp
+                        val padding = 16.dp
+                        val cardWidth = if (columns > 1) {
+                            (maxWidth - (padding * 2) - (gap * (columns - 1))) / columns
+                        } else {
+                            maxWidth - (padding * 2)
+                        }
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(columns),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
+                                bottom = paddingValues.calculateBottomPadding() + 32.dp
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            userScrollEnabled = false
+                        ) {
+                            items(12, contentType = { "skeleton" }) {
+                                if (columns == 1) {
+                                    com.cinetrack.ui.components.shared.MovieListCardSkeleton()
+                                } else {
+                                    com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                                }
+                            }
+                        }
                     }
                 }
                 is FolderDetailUiState.Error -> {

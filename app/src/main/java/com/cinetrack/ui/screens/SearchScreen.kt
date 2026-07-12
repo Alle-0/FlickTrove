@@ -125,6 +125,7 @@ data class SearchScreen(
             }
         }
 
+        val deepLinkIntent = com.cinetrack.ui.LocalDeepLinkIntent.current
         SearchScreenContent(
             viewModel = viewModel,
             paddingValues = PaddingValues(0.dp),
@@ -139,6 +140,12 @@ data class SearchScreen(
             },
             onPersonClick = { personId ->
                 navigator.push(PersonDetailScreen(personId, null))
+            },
+            onDiscoverTrendingClick = { reqType ->
+                navigator.pop()
+                deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_DISCOVER_TAB").apply {
+                    putExtra("requestedType", reqType)
+                }
             }
         )
     }
@@ -159,7 +166,8 @@ fun SearchScreenContent(
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
-    onPersonClick: (Long) -> Unit
+    onPersonClick: (Long) -> Unit,
+    onDiscoverTrendingClick: ((String) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -452,7 +460,8 @@ fun SearchScreenContent(
                                         onMovieClick = onMovieClick,
                                         onToggleFavorite = { viewModel.toggleFavorite(it) },
                                         onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
-                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) },
+                                        onDiscoverMore = onDiscoverTrendingClick?.let { cb -> { cb("trending_movies") } }
                                     )
                                 }
 
@@ -471,7 +480,8 @@ fun SearchScreenContent(
                                         onMovieClick = onMovieClick,
                                         onToggleFavorite = { viewModel.toggleFavorite(it) },
                                         onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
-                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                        onEmitMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) },
+                                        onDiscoverMore = onDiscoverTrendingClick?.let { cb -> { cb("trending_tv") } }
                                     )
                                 }
 

@@ -312,6 +312,7 @@ fun SettingsScreenContent(
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
+    val updateInfo by settingsViewModel.updateInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
@@ -444,38 +445,9 @@ fun SettingsScreenContent(
         }
     }
 
-    val yamtrackImportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let {
-            try {
-                context.contentResolver.openInputStream(it)?.let { stream ->
-                    settingsViewModel.migrateYamtrackData(stream)
-                }
-            } catch (e: Exception) {
-                // Error handling is managed by ViewModel
-            }
-        }
-    }
 
-    val yamtrackExportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/csv")
-    ) { uri ->
-        uri?.let {
-            scope.launch {
-                val csv = settingsViewModel.getYamtrackExportData()
-                if (csv != null) {
-                    try {
-                        context.contentResolver.openOutputStream(it)?.use { stream ->
-                            OutputStreamWriter(stream).use { writer -> writer.write(csv) }
-                        }
-                    } catch (e: Exception) {
-                        // Error handled by ViewModel
-                    }
-                }
-            }
-        }
-    }
+
+
 
     // If logout or delete succeeds, navigate back to login
     LaunchedEffect(authState) {
@@ -601,7 +573,12 @@ fun SettingsScreenContent(
                         )
                     }
 
-                    item { SettingsFooterSection() }
+                    item {
+                        SettingsFooterSection(
+                            updateInfo = updateInfo,
+                            accentColor = currentAccentColor
+                        )
+                    }
 
                     item { Spacer(modifier = Modifier.height(40.dp)) }
                 }
@@ -735,19 +712,10 @@ fun SettingsScreenContent(
         SettingsExternalMigrationDialog(
             visible = showExternalMigrationDialog,
             activeHazeState = activeHazeState,
-            isBackupLoading = isBackupLoading,
             onDismiss = { showExternalMigrationDialog = false },
             onImport = {
                 showExternalMigrationDialog = false
                 externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
-            },
-            onYamtrackImport = {
-                showExternalMigrationDialog = false
-                yamtrackImportLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
-            },
-            onYamtrackExport = {
-                showExternalMigrationDialog = false
-                yamtrackExportLauncher.launch("FlickTrove_Yamtrack_${System.currentTimeMillis()}.csv")
             }
         )
 

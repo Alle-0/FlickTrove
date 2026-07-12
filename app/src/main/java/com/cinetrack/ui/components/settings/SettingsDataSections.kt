@@ -3,11 +3,13 @@ package com.cinetrack.ui.components.settings
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -113,6 +115,7 @@ fun SettingsSyncBackupSection(
 ) {
     val context = LocalContext.current
     val isTraktLoggedIn by settingsViewModel.isTraktLoggedIn.collectAsStateWithLifecycle()
+    val traktNeedsReconnect by settingsViewModel.traktNeedsReconnect.collectAsStateWithLifecycle()
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
 
@@ -135,6 +138,7 @@ fun SettingsSyncBackupSection(
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_trakt_logo),
             title = "Trakt.tv",
+            description = stringResource(R.string.settings_trakt_sync_desc),
             iconTint = Color.Unspecified,
             onClick = {},
             trailing = {
@@ -171,10 +175,20 @@ fun SettingsSyncBackupSection(
                             text = stringResource(R.string.trakt_connect),
                             onClick = {
                                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                                val clientId = Keys.getTraktClientId()
+                                val clientId = Keys.getTraktKey()
+                                // Generate a random state for CSRF protection and save it
+                                // so the callback in MainScreen can validate it
+                                val oauthState = java.util.UUID.randomUUID().toString()
+                                settingsViewModel.savePendingOAuthState(oauthState)
                                 val intent = android.content.Intent(
                                     android.content.Intent.ACTION_VIEW,
-                                    android.net.Uri.parse("https://trakt.tv/oauth/authorize?response_type=code&client_id=$clientId&redirect_uri=flicktrove://auth")
+                                    android.net.Uri.parse(
+                                        "https://trakt.tv/oauth/authorize" +
+                                        "?response_type=code" +
+                                        "&client_id=$clientId" +
+                                        "&redirect_uri=flicktrove://auth" +
+                                        "&state=$oauthState"
+                                    )
                                 )
                                 context.startActivity(intent)
                             }
@@ -183,6 +197,34 @@ fun SettingsSyncBackupSection(
                 }
             },
             customContent = {
+                // Session-expired warning — shown when a token refresh was rejected
+                // (e.g. after Trakt's March 2025 token-lifetime change)
+                if (traktNeedsReconnect && !isTraktLoggedIn) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFFFFA000).copy(alpha = 0.15f))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = null,
+                            tint = Color(0xFFFFA000),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Session expired due to Trakt security updates. Tap Connect to reconnect.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFFFA000)
+                        )
+                    }
+                }
+
+                // Sync progress indicator
                 if (syncWorkInfo != null && syncWorkInfo!!.state == WorkInfo.State.RUNNING) {
                     val progressData = syncWorkInfo!!.progress
                     val current = progressData.getInt("current", 0)
@@ -410,22 +452,86 @@ fun SettingsSupportSection(
     }
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun SettingsFooterSection() {
+fun SettingsFooterSection(
+    updateInfo: com.cinetrack.util.AppUpdateInfo? = null,
+    accentColor: Color = Color(0xFF2DD4BF),
+) {
+    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (updateInfo != null && updateInfo.isUpdateAvailable) {
+            Surface(
+                color = accentColor.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .clickable {
+                        uriHandler.openUri(updateInfo.htmlUrl)
+                    }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_rocket),
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.settings_new_version_available, updateInfo.latestVersion),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = accentColor
+                        )
+                    )
+                }
+            }
+        } else {
+            Surface(
+                color = Color.White.copy(alpha = 0.06f),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .clickable {
+                        uriHandler.openUri("https://github.com/Alle-0/FlickTrove/releases/latest")
+                    }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Controlla aggiornamenti su GitHub ↗",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.65f)
+                        )
+                    )
+                }
+            }
+        }
+
         Text(
-            text = stringResource(R.string.settings_app_version),
+            text = "FlickTrove v${com.cinetrack.BuildConfig.VERSION_NAME}",
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 0.5.sp
             ),
-            color = Color.White.copy(alpha = 0.4f)
+            color = Color.White.copy(alpha = 0.4f),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
+
         Spacer(modifier = Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -447,3 +553,4 @@ fun SettingsFooterSection() {
         }
     }
 }
+

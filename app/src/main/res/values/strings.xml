@@ -210,6 +210,7 @@
     <string name="settings_external_migration">Universal Data Import / Export</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, All CSV/JSON</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
+    <string name="settings_trakt_sync_desc">App ➔ Trakt: Instant\nTrakt ➔ App: 24h</string>
     <string name="settings_sync_missing_details">Sync Missing Details</string>
     <string name="settings_sync_missing_details_desc">Retrieve missing data for older movies in your library. Use only if strictly necessary (intensive background operation).</string>
     <string name="settings_dialog_deep_sync_title">Warning: Intensive Sync</string>
@@ -384,6 +385,7 @@
     <!-- Search Strings -->
     <string name="search_error_message">Unable to load data. Check your connection and try again.</string>
     <string name="search_trending_now">Trending Now</string>
+    <string name="search_discover_more">Discover more</string>
     <string name="search_no_results">No results</string>
     <string name="search_no_results_short">No results found.\nType at least 3 characters</string>
     <string name="search_no_results_simplify">No results found.\nTry simplifying your search</string>
@@ -878,5 +880,23 @@
     <string name="person_offline_desc">No connection or artist data not cached.\nConnect to the internet to download full biography and filmography.</string>
     <string name="person_offline_default_name">Artist #%1$d</string>
     <string name="person_offline_bio">Full biographical data and extended filmography are not available in offline mode.\nTitles present in your local library are displayed below.</string>
+
+    <!-- Update & WhatsNew Dialogs -->
+    <string name="whats_new_title">App Updated!</string>
+    <string name="whats_new_version">FlickTrove v%1$s</string>
+    <string name="whats_new_fallback_notes">• New Glassmorphic UI with real-time Haze Blur effects
+• App update badge cleanly integrated in Menu &amp; Settings
+• Smart notification and reminder system for Movies &amp; TV Shows
+• Overall performance improvements and stability fixes</string>
+    <string name="whats_new_section_title">MAIN HIGHLIGHTS</string>
+    <string name="whats_new_btn_start">Awesome, let\'s go!</string>
+
+    <string name="github_update_title">New Update Available</string>
+    <string name="github_update_desc">A new version of FlickTrove is available on GitHub! You are currently running v%1$s. Update now to get all the latest features, improvements, and bug fixes.</string>
+    <string name="github_update_btn_download">Download from GitHub</string>
+    <string name="github_update_btn_later">Later</string>
+    <string name="github_update_btn_ignore">Don\'t remind me again</string>
+
+    <string name="settings_new_version_available">New version v%1$s available on GitHub →</string>
 
 </resources>

@@ -14,6 +14,8 @@ interface SettingsRepository {
     val lastFeedbackTimestamp: Flow<Long>
     val titleTextSizeMultiplier: Flow<Float>
     val imageQuality: Flow<String>
+    val lastSeenAppVersion: Flow<String>
+    val ignoredUpdateVersion: Flow<String>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -26,4 +28,6 @@ interface SettingsRepository {
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)
     suspend fun updateTitleTextSizeMultiplier(multiplier: Float)
     suspend fun updateImageQuality(quality: String)
+    suspend fun updateLastSeenAppVersion(version: String)
+    suspend fun updateIgnoredUpdateVersion(version: String)
 }

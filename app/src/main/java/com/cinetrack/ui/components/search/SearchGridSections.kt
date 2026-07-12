@@ -30,6 +30,19 @@ import com.cinetrack.data.models.UserPreferences
 import com.cinetrack.ui.components.MovieCard
 import com.cinetrack.ui.components.MovieListCard
 import com.cinetrack.ui.components.PersonCard
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.toComposeColor
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -99,6 +112,50 @@ fun SearchGridMovieItem(
     }
 }
 
+@Composable
+fun DiscoverMoreTrendingButton(
+    onClick: () -> Unit
+) {
+    val accentColor = MaterialTheme.colorScheme.primary
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, bottom = 28.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .bounceClick(onClick = onClick)
+                .background(
+                    color = accentColor.copy(alpha = 0.12f),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                .border(
+                    width = 1.dp,
+                    color = accentColor.copy(alpha = 0.35f),
+                    shape = androidx.compose.foundation.shape.CircleShape
+                )
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.search_discover_more),
+                color = accentColor,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                contentDescription = null,
+                tint = accentColor,
+                modifier = Modifier.size(13.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchTrendingMoviesSection(
     trendingMovies: List<TMDBSearchResult>,
@@ -114,7 +171,8 @@ fun LazyGridScope.searchTrendingMoviesSection(
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
-    onEmitMessage: (String) -> Unit
+    onEmitMessage: (String) -> Unit,
+    onDiscoverMore: (() -> Unit)? = null
 ) {
     if (trendingMovies.isNotEmpty()) {
         item(span = { GridItemSpan(12) }) {
@@ -168,6 +226,11 @@ fun LazyGridScope.searchTrendingMoviesSection(
                 )
             }
         }
+        if (onDiscoverMore != null) {
+            item(span = { GridItemSpan(12) }) {
+                DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+            }
+        }
     }
 }
 
@@ -186,7 +249,8 @@ fun LazyGridScope.searchTrendingTvSection(
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
-    onEmitMessage: (String) -> Unit
+    onEmitMessage: (String) -> Unit,
+    onDiscoverMore: (() -> Unit)? = null
 ) {
     if (trendingTv.isNotEmpty()) {
         item(span = { GridItemSpan(12) }) {
@@ -238,6 +302,11 @@ fun LazyGridScope.searchTrendingTvSection(
                     onLongPress = onLongPress,
                     onEmitMessage = onEmitMessage
                 )
+            }
+        }
+        if (onDiscoverMore != null) {
+            item(span = { GridItemSpan(12) }) {
+                DiscoverMoreTrendingButton(onClick = onDiscoverMore)
             }
         }
     }

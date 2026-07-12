@@ -70,7 +70,8 @@ fun GlassyTopBar(
     onFolderOptionsClick: ((Offset) -> Unit)? = null,
     indicatorColor: Color? = null,
     onLayoutToggleClick: (() -> Unit)? = null,
-    layoutColumns: Int? = null
+    layoutColumns: Int? = null,
+    hasAppUpdateBadge: Boolean = false
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -187,6 +188,16 @@ fun GlassyTopBar(
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
+                    if (onBackPress == null && hasAppUpdateBadge) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .align(Alignment.TopEnd)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .border(1.dp, Color.Black, CircleShape)
+                        )
+                    }
                 }
 
                 Row(

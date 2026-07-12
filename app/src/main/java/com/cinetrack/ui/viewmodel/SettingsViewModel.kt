@@ -1,5 +1,6 @@
 package com.cinetrack.ui.viewmodel
 
+import com.cinetrack.BuildConfig
 import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import android.content.Context
@@ -41,8 +42,56 @@ class SettingsViewModel @Inject constructor(
     private val traktService: dagger.Lazy<com.cinetrack.data.api.TraktService>,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
+    private val appUpdateManager: com.cinetrack.util.AppUpdateManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    val updateInfo = appUpdateManager.updateInfo
+
+    init {
+        checkForUpdates(false)
+    }
+
+    fun checkForUpdates(force: Boolean = false) {
+        viewModelScope.launch {
+            appUpdateManager.checkForUpdates(force)
+        }
+    }
+
+    val dismissedUpdateVersion = appUpdateManager.dismissedVersionThisSession
+
+    val ignoredUpdateVersion = settingsRepository.ignoredUpdateVersion.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ""
+    )
+
+    fun dismissUpdate(version: String) {
+        appUpdateManager.dismissUpdateForSession(version)
+    }
+
+    fun ignoreUpdatePermanently(version: String) {
+        viewModelScope.launch {
+            settingsRepository.updateIgnoredUpdateVersion(version)
+            appUpdateManager.dismissUpdateForSession(version)
+        }
+    }
+
+    fun isUpdateDismissed(version: String): Boolean {
+        return appUpdateManager.isDismissedForSession(version)
+    }
+
+    val lastSeenAppVersion = settingsRepository.lastSeenAppVersion.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = BuildConfig.VERSION_NAME
+    )
+
+    fun markCurrentAppVersionSeen() {
+        viewModelScope.launch {
+            settingsRepository.updateLastSeenAppVersion(BuildConfig.VERSION_NAME)
+        }
+    }
 
     private val _isBackupLoading = MutableStateFlow(false)
     val isBackupLoading = _isBackupLoading.asStateFlow()
@@ -67,11 +116,19 @@ class SettingsViewModel @Inject constructor(
 
     val isTraktLoggedIn: StateFlow<Boolean> = traktAuthRepository.isLoggedIn
 
+    /** Emits true when the session was forcibly cleared after a token-refresh failure. */
+    val traktNeedsReconnect: StateFlow<Boolean> = traktAuthRepository.needsReconnect
+
     fun disconnectTrakt() {
         traktAuthRepository.clearAuth()
         viewModelScope.launch {
             actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_disconnected)))
         }
+    }
+
+    /** Generates and persists the OAuth CSRF state before opening the Trakt browser flow. */
+    fun savePendingOAuthState(state: String) {
+        traktAuthRepository.savePendingOAuthState(state)
     }
 
     val syncWorkInfo = androidx.work.WorkManager.getInstance(context)
@@ -83,6 +140,7 @@ class SettingsViewModel @Inject constructor(
         if (!isTraktLoggedIn.value) return
         viewModelScope.launch {
             val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
+                .setInputData(androidx.work.workDataOf("force" to true))
                 .build() // No constraints for forced manual sync
             androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
                 "TraktManualSync",
@@ -279,8 +337,29 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun exchangeTraktCode(code: String) {
+    /**
+     * Completes the OAuth code exchange after the browser redirects back to flicktrove://auth.
+     *
+     * @param code   The authorization code from Trakt.
+     * @param returnedState  The `state` param from the callback URI — validated against the
+     *               value saved before the browser was launched to prevent CSRF attacks.
+     */
+    fun exchangeTraktCode(code: String, returnedState: String? = null) {
         viewModelScope.launch {
+            // Validate CSRF state if the callback included one
+            if (returnedState != null) {
+                val expectedState = traktAuthRepository.getPendingOAuthState()
+                traktAuthRepository.clearPendingOAuthState()
+                if (expectedState == null || expectedState != returnedState) {
+                    android.util.Log.e("SettingsViewModel", "Trakt OAuth state mismatch — possible CSRF attack")
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connect_error))
+                    return@launch
+                }
+            } else {
+                // No state in callback — clear any pending state regardless
+                traktAuthRepository.clearPendingOAuthState()
+            }
+
             try {
                 val response = traktService.get().getAccessToken(
                     com.cinetrack.data.api.TraktTokenRequest(
@@ -295,6 +374,9 @@ class SettingsViewModel @Inject constructor(
                     refreshToken = response.refresh_token,
                     expiresInSeconds = response.expires_in
                 )
+                // Kick off an immediate full sync so the user's history is populated
+                // right away without having to wait for the next scheduled run.
+                syncTraktNow()
                 actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connected))
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Trakt token exchange failed", e)
@@ -479,29 +561,4 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun migrateYamtrackData(inputStream: java.io.InputStream) {
-        viewModelScope.launch {
-            _isBackupLoading.value = true
-            try {
-                val count = backupRepository.migrateYamtrackCsvStream(inputStream)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
-            } finally {
-                _isBackupLoading.value = false
-            }
-        }
-    }
-
-    suspend fun getYamtrackExportData(): String? {
-        _isBackupLoading.value = true
-        return try {
-            backupRepository.exportAsYamtrackCsv()
-        } catch (e: Exception) {
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_export_error))
-            null
-        } finally {
-            _isBackupLoading.value = false
-        }
-    }
 }

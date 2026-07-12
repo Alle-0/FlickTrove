@@ -50,10 +50,105 @@ interface TraktService {
     ): TraktSyncResponse
 
     @retrofit2.http.GET("sync/history")
-    suspend fun getHistory(@retrofit2.http.Query("page") page: Int = 1, @retrofit2.http.Query("limit") limit: Int = 10000): retrofit2.Response<List<TraktHistoryItem>>
+    suspend fun getHistory(
+        @retrofit2.http.Query("page") page: Int = 1,
+        @retrofit2.http.Query("limit") limit: Int = 1000,
+        @retrofit2.http.Query("extended") extended: String = "full"
+    ): retrofit2.Response<List<TraktHistoryItem>>
 
     @retrofit2.http.GET("sync/watchlist")
-    suspend fun getWatchlist(@retrofit2.http.Query("limit") limit: Int = 10000): List<TraktWatchlistItem>
+    suspend fun getWatchlist(
+        @retrofit2.http.Query("page") page: Int = 1,
+        @retrofit2.http.Query("limit") limit: Int = 1000
+    ): retrofit2.Response<List<TraktWatchlistItem>>
+
+    @retrofit2.http.GET("sync/ratings/movies")
+    suspend fun getUserMovieRatings(
+        @retrofit2.http.Query("extended") extended: String = "full"
+    ): List<TraktRatedItem>
+
+    @retrofit2.http.GET("sync/ratings/shows")
+    suspend fun getUserShowRatings(
+        @retrofit2.http.Query("extended") extended: String = "full"
+    ): List<TraktRatedItem>
+
+    @retrofit2.http.POST("sync/ratings")
+    suspend fun addRating(
+        @retrofit2.http.Body request: TraktRatingRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.POST("sync/ratings/remove")
+    suspend fun removeRating(
+        @retrofit2.http.Body request: TraktRatingRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.POST("sync/watchlist")
+    suspend fun addToWatchlist(
+        @retrofit2.http.Body request: TraktSyncRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.POST("sync/watchlist/remove")
+    suspend fun removeFromWatchlist(
+        @retrofit2.http.Body request: TraktSyncRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.POST("sync/history")
+    suspend fun addEpisodesToHistory(
+        @retrofit2.http.Body request: TraktEpisodeHistoryRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.POST("sync/history/remove")
+    suspend fun removeEpisodesFromHistory(
+        @retrofit2.http.Body request: TraktEpisodeHistoryRequest
+    ): TraktSyncResponse
+
+    @retrofit2.http.GET("users/me/notes/movies")
+    suspend fun getUserMovieNotes(): retrofit2.Response<List<TraktNoteItem>>
+
+    @retrofit2.http.GET("users/me/notes/shows")
+    suspend fun getUserShowNotes(): retrofit2.Response<List<TraktNoteItem>>
+
+    @retrofit2.http.GET("users/me/lists")
+    suspend fun getUserLists(): retrofit2.Response<List<TraktList>>
+
+    @retrofit2.http.GET("users/me/lists/{id}/items")
+    suspend fun getListItems(
+        @retrofit2.http.Path("id") listId: Long
+    ): retrofit2.Response<List<TraktListItem>>
+
+    @retrofit2.http.POST("users/me/lists")
+    suspend fun createList(@retrofit2.http.Body request: TraktListRequest): retrofit2.Response<TraktList>
+
+    @retrofit2.http.PUT("users/me/lists/{id}")
+    suspend fun updateList(
+        @retrofit2.http.Path("id") listId: Long, 
+        @retrofit2.http.Body request: TraktListRequest
+    ): retrofit2.Response<TraktList>
+
+    @retrofit2.http.DELETE("users/me/lists/{id}")
+    suspend fun deleteList(@retrofit2.http.Path("id") listId: Long): retrofit2.Response<Unit>
+
+    @retrofit2.http.POST("users/me/lists/{id}/items")
+    suspend fun addListItems(
+        @retrofit2.http.Path("id") listId: Long, 
+        @retrofit2.http.Body request: TraktListItemsRequest
+    ): retrofit2.Response<TraktSyncResponse>
+
+    @retrofit2.http.POST("users/me/lists/{id}/items/remove")
+    suspend fun removeListItems(
+        @retrofit2.http.Path("id") listId: Long, 
+        @retrofit2.http.Body request: TraktListItemsRequest
+    ): retrofit2.Response<TraktSyncResponse>
+
+    @retrofit2.http.GET("sync/watched/shows")
+    suspend fun getWatchedShows(
+        @retrofit2.http.Query("extended") extended: String? = null
+    ): retrofit2.Response<List<TraktWatchedShow>>
+
+    @retrofit2.http.GET("sync/watched/shows")
+    suspend fun getWatchedShowsRaw(
+        @retrofit2.http.Query("extended") extended: String? = null
+    ): retrofit2.Response<okhttp3.ResponseBody>
 }
 
 @Serializable
@@ -61,9 +156,18 @@ data class TraktHistoryItem(
     val id: Long = 0,
     val watched_at: String? = null,
     val action: String? = null,
-    val type: String? = null, // "movie" or "show"
+    val type: String? = null, // "movie", "episode"
     val movie: TraktMovieItem? = null,
-    val show: TraktShowItem? = null
+    val show: TraktShowItem? = null,
+    val episode: TraktEpisodeItem? = null
+)
+
+@Serializable
+data class TraktEpisodeItem(
+    val season: Int = 0,
+    val number: Int = 0,
+    val title: String? = null,
+    val ids: TraktSyncIds? = null
 )
 
 @Serializable
@@ -121,6 +225,7 @@ data class TraktTokenResponse(
 data class TraktLastActivitiesResponse(
     val all: String,
     val movies: TraktActivityItem,
+    val shows: TraktActivityItem = TraktActivityItem(),
     val episodes: TraktActivityItem
 )
 
@@ -215,4 +320,127 @@ data class TraktUser(
     val name: String? = null,
     val vip: Boolean = false,
     val vip_ep: Boolean = false
+)
+
+@Serializable
+data class TraktRatedItem(
+    val rated_at: String? = null,
+    val rating: Int = 0,           // 1–10
+    val type: String? = null,      // "movie" or "show"
+    val movie: TraktMovieItem? = null,
+    val show: TraktShowItem? = null
+)
+
+@Serializable
+data class TraktNoteItem(
+    val id: Long = 0,
+    val notes: String? = null,
+    val privacy: String? = null,
+    val spoiler: Boolean = false,
+    val attached_to: TraktNoteAttachment? = null,
+    val movie: TraktMovieItem? = null,
+    val show: TraktShowItem? = null
+)
+
+@Serializable
+data class TraktNoteAttachment(
+    val type: String? = null       // "movie" or "show"
+)
+
+// ── Rating push ───────────────────────────────────────────────────────────────
+
+@Serializable
+data class TraktRatingRequest(
+    val rating: Int,
+    val movies: List<TraktRatingMovie>? = null,
+    val shows: List<TraktRatingShow>? = null
+)
+
+@Serializable
+data class TraktRatingMovie(
+    val ids: TraktSyncIds,
+    val rated_at: String? = null
+)
+
+@Serializable
+data class TraktRatingShow(
+    val ids: TraktSyncIds,
+    val rated_at: String? = null
+)
+
+// ── Episode history push ──────────────────────────────────────────────────────
+
+@Serializable
+data class TraktEpisodeHistoryRequest(
+    val shows: List<TraktShowWithEpisodes>
+)
+
+@Serializable
+data class TraktShowWithEpisodes(
+    val ids: TraktSyncIds,
+    val seasons: List<TraktSeasonEpisodes>
+)
+
+@Serializable
+data class TraktSeasonEpisodes(
+    val number: Int,
+    val episodes: List<TraktEpisodeNumber>
+)
+
+@Serializable
+data class TraktEpisodeNumber(
+    val number: Int
+)
+
+// --- Custom Lists/Folders ──────────────────────────────────────────────────────────────
+
+@Serializable
+data class TraktList(
+    val name: String? = null,
+    val description: String? = null,
+    val ids: TraktSyncIds? = null
+)
+
+@Serializable
+data class TraktListItem(
+    val id: Long = 0,
+    val rank: Int = 0,
+    val type: String? = null,
+    val movie: TraktMovieItem? = null,
+    val show: TraktShowItem? = null
+)
+
+@Serializable
+data class TraktListRequest(
+    val name: String,
+    val description: String? = null,
+    val privacy: String = "private" // Puoi mettere "public" se vuoi che gli altri le vedano
+)
+
+@Serializable
+data class TraktListItemsRequest(
+    val movies: List<TraktMovieItem>? = null,
+    val shows: List<TraktShowItem>? = null
+)
+
+@Serializable
+data class TraktWatchedShow(
+    val plays: Int = 0,
+    val last_watched_at: String? = null,
+    val last_updated_at: String? = null,
+    val show: TraktShowItem? = null,
+    val seasons: List<TraktWatchedSeason>? = null 
+)
+
+@Serializable
+data class TraktWatchedSeason(
+    val number: Int = 0,
+    val episodes: List<TraktWatchedEpisode>? = null 
+)
+
+@Serializable
+data class TraktWatchedEpisode(
+    val number: Int = 0,
+    val plays: Int = 0,
+    val last_watched_at: String? = null
 )

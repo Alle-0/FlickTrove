@@ -7,17 +7,24 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import retrofit2.HttpException
 import javax.inject.Inject
+import javax.inject.Named
 
 class TraktAuthenticator @Inject constructor(
     private val authRepository: TraktAuthRepository,
-    private val traktServiceProvider: dagger.Lazy<TraktService>
+    /**
+     * Uses the plain (non-authenticated) OkHttpClient so the refresh request itself
+     * does NOT go through this authenticator — breaking the infinite loop / deadlock
+     * that would occur if the refresh token is rejected with 401.
+     */
+    @Named("trakt_refresh_service") private val refreshServiceProvider: dagger.Lazy<TraktService>
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        // If the request already failed with 401 twice, give up to avoid infinite loops
+        // If the request already failed with 401 twice, don't retry
         if (response.priorResponse?.code == 401) {
-            authRepository.clearAuth()
+            authRepository.clearAuthOnTokenFailure()
             return null
         }
 
@@ -27,20 +34,20 @@ class TraktAuthenticator @Inject constructor(
         }
 
         return synchronized(this) {
-            // Check if another thread already refreshed the token
-            val newAccessToken = authRepository.getAccessToken()
-            val oldAccessToken = response.request.header("Authorization")?.removePrefix("Bearer ")
-            
-            if (newAccessToken != oldAccessToken && !newAccessToken.isNullOrEmpty()) {
+            // Check if another thread already refreshed the token while we were waiting
+            val currentAccessToken = authRepository.getAccessToken()
+            val requestAccessToken = response.request.header("Authorization")?.removePrefix("Bearer ")
+
+            if (currentAccessToken != requestAccessToken && !currentAccessToken.isNullOrEmpty()) {
                 return@synchronized response.request.newBuilder()
-                    .header("Authorization", "Bearer $newAccessToken")
+                    .header("Authorization", "Bearer $currentAccessToken")
                     .build()
             }
 
             try {
-                // Perform synchronous refresh
                 val refreshResponse = runBlocking {
-                    traktServiceProvider.get().refreshToken(
+                    // Uses the clean, non-authenticated service — no deadlock risk
+                    refreshServiceProvider.get().refreshToken(
                         TraktRefreshTokenRequest(
                             refresh_token = refreshToken,
                             client_id = Keys.getTraktKey(),
@@ -59,10 +66,21 @@ class TraktAuthenticator @Inject constructor(
                 response.request.newBuilder()
                     .header("Authorization", "Bearer ${refreshResponse.access_token}")
                     .build()
+
+            } catch (e: HttpException) {
+                // 400/401 from Trakt → invalid_grant or token revoked.
+                // Signal the UI to show a "please reconnect" warning.
+                if (e.code() == 400 || e.code() == 401) {
+                    authRepository.clearAuthOnTokenFailure()
+                }
+                null
             } catch (e: Exception) {
-                authRepository.clearAuth()
+                // Network error, server down, etc. — don't clear auth, just fail this
+                // request so the app can retry on the next network call.
+                android.util.Log.w("TraktAuthenticator", "Token refresh failed (network): ${e.message}")
                 null
             }
         }
     }
 }
+

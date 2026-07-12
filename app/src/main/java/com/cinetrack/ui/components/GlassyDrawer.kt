@@ -41,6 +41,7 @@ import com.cinetrack.ui.utils.bounceClick
 fun GlassyDrawer(
     hazeState: HazeState,
     selectedRoute: String? = null,
+    hasAppUpdateBadge: Boolean = false,
     onClose: () -> Unit,
     onNavigate: (String) -> Unit
 ) {
@@ -279,7 +280,8 @@ fun GlassyDrawer(
                                 label = stringResource(R.string.drawer_general_settings),
                                 isSelected = selectedRoute == "settings",
                                 onClick = { onNavigate("settings") },
-                                accentColor = accentColor
+                                accentColor = accentColor,
+                                showBadge = hasAppUpdateBadge
                             )
                         }
                         "FILM" -> {
@@ -344,7 +346,8 @@ private fun DrawerItem(
     onClick: () -> Unit,
     accentColor: Color,
     isSelected: Boolean = false,
-    trailingIcon: ImageVector? = null
+    trailingIcon: ImageVector? = null,
+    showBadge: Boolean = false
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -401,6 +404,16 @@ private fun DrawerItem(
                 fontSize = 14.sp
             )
         )
+        if (showBadge) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(accentColor)
+                    .border(1.dp, Color.Black, CircleShape)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         if (trailingIcon != null) {
             Icon(
                 imageVector = trailingIcon,

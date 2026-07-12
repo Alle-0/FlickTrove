@@ -94,7 +94,21 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         val isSettingsDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
-        
+        val updateInfo by settingsViewModel.updateInfo.collectAsStateWithLifecycle()
+        val dismissedUpdateVersion by settingsViewModel.dismissedUpdateVersion.collectAsStateWithLifecycle()
+        val ignoredUpdateVersion by settingsViewModel.ignoredUpdateVersion.collectAsStateWithLifecycle()
+        val lastSeenAppVersion by settingsViewModel.lastSeenAppVersion.collectAsStateWithLifecycle()
+
+        val updatesViewModel: com.cinetrack.ui.viewmodel.UpdatesViewModel = getViewModel()
+        val updatesUiState by updatesViewModel.uiState.collectAsStateWithLifecycle()
+        val hasAppUpdateBadge = updateInfo != null && updateInfo!!.isUpdateAvailable && ignoredUpdateVersion != updateInfo!!.latestVersion
+
+        LaunchedEffect(lastSeenAppVersion) {
+            if (lastSeenAppVersion == "") {
+                settingsViewModel.markCurrentAppVersionSeen()
+            }
+        }
+
 
         // Hoisted Modals State
         var isFilterModalVisible by remember { mutableStateOf(false) }
@@ -135,7 +149,7 @@ LaunchedEffect(deepLinkIntent.value) {
     // 1. LOG DI PARTENZA: Vediamo se l'intento arriva e cosa contiene
     println("FlickTroveDebug: LaunchedEffect intercettato! URI = $uri | Action = $action")
 
-    if (uri != null || action?.startsWith("com.cinetrack.SHORTCUT_") == true) {
+    if (uri != null || action?.startsWith("com.cinetrack.") == true) {
         if (uri != null) {
             // Alziamo a 800ms solo per il test, per escludere al 100% i problemi di caricamento di Voyager
             kotlinx.coroutines.delay(800) 
@@ -156,21 +170,22 @@ LaunchedEffect(deepLinkIntent.value) {
                 else rootNavigator.push(MovieDetailScreen(id, type))
             }
         } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
-                        // Trakt OAuth callback: flicktrove://auth?code=XXXXX
+                        // Trakt OAuth callback: flicktrove://auth?code=XXXXX&state=YYYYY
                         val code = uri.getQueryParameter("code")
+                        val returnedState = uri.getQueryParameter("state")
                         if (!code.isNullOrEmpty()) {
-                            settingsViewModel.exchangeTraktCode(code)
+                            settingsViewModel.exchangeTraktCode(code, returnedState)
                         }
                     } else if (isCustomScheme) {
-                        val segments = uri.pathSegments
-                        
-                        // For flicktrove://media/movie/123, segments are ["movie", "123"]
-                        if (segments.size >= 2) {
-                            val type = segments[0]
-                            val id = segments[1].toLongOrNull()
-                            if (id != null) {
-                                if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
-                                else rootNavigator.push(MovieDetailScreen(id, type))
+                        val type = uri.getQueryParameter("type") ?: "movie"
+                        val idStr = uri.getQueryParameter("id")
+                        val id = idStr?.toLongOrNull()
+
+                        if (id != null) {
+                            if (type == "person") {
+                                rootNavigator.push(PersonDetailScreen(id, null))
+                            } else {
+                                rootNavigator.push(MovieDetailScreen(id, type))
                             }
                         }
                     } else if (uri?.scheme == "flicktrove" && uri.host == "search") {
@@ -184,6 +199,10 @@ LaunchedEffect(deepLinkIntent.value) {
                         tabNavigator.current = DiscoverTab
                     } else if (action == "com.cinetrack.SHORTCUT_UPCOMING_TV") {
                         DiscoverTab.requestedType = "on_the_air_tv"
+                        tabNavigator.current = DiscoverTab
+                    } else if (action == "com.cinetrack.OPEN_DISCOVER_TAB") {
+                        val reqType = intent.getStringExtra("requestedType") ?: "popular_movies"
+                        DiscoverTab.requestedType = reqType
                         tabNavigator.current = DiscoverTab
                     }
                     
@@ -220,6 +239,7 @@ LaunchedEffect(deepLinkIntent.value) {
                 drawerContent = {
                     GlassyDrawer(
                         hazeState = drawerHazeState,
+                        hasAppUpdateBadge = hasAppUpdateBadge,
                         selectedRoute = when (currentTab) {
                             is HomeTab -> null
                             is DiscoverTab -> DiscoverTab.requestedType
@@ -330,7 +350,9 @@ LaunchedEffect(deepLinkIntent.value) {
                             onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                             hasActiveFilters = discoverHasActiveFilters,
                             onLayoutToggleClick = discoverOnLayoutToggleClick,
-                            layoutColumns = discoverGridColumns
+                            layoutColumns = discoverGridColumns,
+                            notificationCount = updatesUiState.notificationCount,
+                            hasAppUpdateBadge = hasAppUpdateBadge
                         )
                     }
 
@@ -565,7 +587,6 @@ LaunchedEffect(deepLinkIntent.value) {
                                 modifier = Modifier.padding(bottom = 24.dp)
                             )
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                val context = LocalContext.current
                                 Box(
                                     modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
                                         .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
@@ -578,7 +599,10 @@ LaunchedEffect(deepLinkIntent.value) {
                                 Box(
                                     modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
                                         .background(MaterialTheme.colorScheme.primary)
-                                        .bounceClick { showExitConfirmation = false; (context as? ComponentActivity)?.finish() },
+                                        // Use the already-unwrapped activity reference — a direct
+                                        // `context as? ComponentActivity` cast fails inside nested
+                                        // composable lambdas where LocalContext is a ContextWrapper.
+                                        .bounceClick { showExitConfirmation = false; activity?.finish() },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(stringResource(R.string.main_exit_confirm), color = Color.Black, fontWeight = FontWeight.Bold)
@@ -698,6 +722,31 @@ LaunchedEffect(deepLinkIntent.value) {
                                 onClose = { showSurpriseMeOverlay = false }
                             )
                         }
+                    }
+
+                    if (updateInfo != null && updateInfo!!.isUpdateAvailable && dismissedUpdateVersion != updateInfo!!.latestVersion && ignoredUpdateVersion != updateInfo!!.latestVersion) {
+                        com.cinetrack.ui.components.GithubUpdateDialog(
+                            updateInfo = updateInfo,
+                            hazeState = globalHazeState,
+                            onDismiss = {
+                                updateInfo?.let { settingsViewModel.dismissUpdate(it.latestVersion) }
+                            },
+                            onIgnoreForever = {
+                                updateInfo?.let { settingsViewModel.ignoreUpdatePermanently(it.latestVersion) }
+                            }
+                        )
+                    }
+
+                    if (lastSeenAppVersion.isNotEmpty() && lastSeenAppVersion != com.cinetrack.BuildConfig.VERSION_NAME) {
+                        com.cinetrack.ui.components.WhatsNewDialog(
+                            versionName = com.cinetrack.BuildConfig.VERSION_NAME,
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            releaseNotes = updateInfo?.releaseNotes?.takeIf { it.isNotBlank() },
+                            hazeState = globalHazeState,
+                            onDismiss = {
+                                settingsViewModel.markCurrentAppVersionSeen()
+                            }
+                        )
                     }
                 }
             }

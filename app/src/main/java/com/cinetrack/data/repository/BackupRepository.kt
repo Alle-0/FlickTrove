@@ -230,15 +230,28 @@ class BackupRepository @Inject constructor(
                         ?: itemObj["note"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["comment"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["review"]?.jsonPrimitive?.contentOrNull
-                    val isSeen = obj["watched"]?.jsonPrimitive?.booleanOrNull == true
+                    // Determine if this item is watched.
+                    // We check explicit watched/seen/status fields first.
+                    // If none of those fields are present in the JSON at all, we assume
+                    // the file is a pure watch-history export (every entry = watched).
+                    val hasWatchedField = listOf("watched", "seen", "status", "watch_status").any { key ->
+                        obj.containsKey(key) || itemObj.containsKey(key)
+                    }
+                    val explicitSeen = obj["watched"]?.jsonPrimitive?.booleanOrNull == true
                         || obj["seen"]?.jsonPrimitive?.contentOrNull == "1"
                         || obj["seen"]?.jsonPrimitive?.intOrNull == 1
                         || obj["seen"]?.jsonPrimitive?.booleanOrNull == true
+                        || obj["status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "watched" || it == "completed" || it == "seen" } == true
+                        || obj["watch_status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "watched" || it == "completed" } == true
                         || itemObj["watched"]?.jsonPrimitive?.booleanOrNull == true
                         || itemObj["seen"]?.jsonPrimitive?.contentOrNull == "1"
                         || itemObj["seen"]?.jsonPrimitive?.intOrNull == 1
                         || itemObj["seen"]?.jsonPrimitive?.booleanOrNull == true
-                        || true
+                        || itemObj["status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "watched" || it == "completed" || it == "seen" } == true
+                    val isSeen = if (hasWatchedField) explicitSeen else true
                     val isFav = obj["favorite"]?.jsonPrimitive?.booleanOrNull == true
                         || obj["fav"]?.jsonPrimitive?.booleanOrNull == true
                         || obj["starred"]?.jsonPrimitive?.booleanOrNull == true
@@ -398,18 +411,30 @@ class BackupRepository @Inject constructor(
             val headerLine = lines.next()
             val headers = parseCsvLine(headerLine)
             val lowerHeaders = headers.map { it.trim().lowercase() }
-            
+
+            // Common Headers
             val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst") }
-            val tmdbIdx = lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid") }
-            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "letterboxd uri", "show_title") }
+            // `letterboxd uri` excluded: it's a URL, handled separately below to extract slug as title fallback
+            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "show_title") }
+            val letterboxdUriIdx = lowerHeaders.indexOfFirst { it == "letterboxd uri" }
             val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date", "date", "watched date", "created date") }
-            val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media type", "media_type", "item_type", "contenttype") }
+            val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media_type", "item_type", "contenttype") }
             val ratingIdx = lowerHeaders.indexOfFirst { it in listOf("rating", "your rating", "my rating", "score", "user rating", "rating10", "rating5", "user_rating", "personal_rating") }
             val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes") }
             val watchedIdx = lowerHeaders.indexOfFirst { it in listOf("watched", "seen", "status", "watched status", "watched_status") }
             val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season", "season number", "season_number", "s", "season_num") }
             val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode", "episode number", "episode_number", "e", "episode_num", "ep") }
             val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection") }
+            
+            // Yamtrack-specific Headers
+            val yamtrackMediaIdIdx = lowerHeaders.indexOfFirst { it == "media_id" }
+            val yamtrackSourceIdx  = lowerHeaders.indexOfFirst { it == "source" }
+
+            // Universal TMDB ID - prioritize Yamtrack's `media_id` if present
+            val tmdbIdx = if (yamtrackMediaIdIdx != -1) yamtrackMediaIdIdx 
+                          else lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid") }
+            
+            val isYamtrack = yamtrackMediaIdIdx != -1
             
             val hasKnownHeaders = imdbIdx != -1 || tmdbIdx != -1 || titleIdx != -1
             if (!hasKnownHeaders && headers.none { it.startsWith("tt") }) {
@@ -423,18 +448,43 @@ class BackupRepository @Inject constructor(
                     val columns = parseCsvLine(line)
                     if (columns.isEmpty()) return@mapNotNull null
                     
+                    // Yamtrack source check
+                    if (isYamtrack) {
+                        val source = if (yamtrackSourceIdx != -1 && columns.size > yamtrackSourceIdx) columns[yamtrackSourceIdx].trim().lowercase() else ""
+                        if (source.isNotBlank() && source != "tmdb") return@mapNotNull null
+                    }
+                    
                     val imdbVal = if (imdbIdx != -1 && columns.size > imdbIdx) columns[imdbIdx] 
                                   else columns.firstOrNull { it.trim().startsWith("tt") }
                     val tmdbVal = if (tmdbIdx != -1 && columns.size > tmdbIdx) columns[tmdbIdx]?.toLongOrNull() else null
                     val titleVal = if (titleIdx != -1 && columns.size > titleIdx) columns[titleIdx] else null
                     val yearVal = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
-                    val typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
                     val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx]?.toDoubleOrNull() else null
                     val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx] else null
-                    val watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
+                    
+                    var typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
+                    if (isYamtrack) {
+                        typeVal = when (typeVal.lowercase()) {
+                            "movie" -> "movie"
+                            "tv", "season", "episode" -> "tv"
+                            else -> "movie" // Fallback, though invalid types are skipped
+                        }
+                    }
+
+                    var watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
                         val w = columns[watchedIdx]?.trim()?.lowercase()
                         w == "1" || w == "true" || w == "yes" || w == "watched" || w == "completed"
                     } else true
+
+                    if (isYamtrack && watchedIdx != -1 && columns.size > watchedIdx) {
+                        watchedVal = when (columns[watchedIdx]) {
+                            "Completed" -> true
+                            "Planned", "Watching" -> false
+                            "Dropped", "Paused" -> return@mapNotNull null // Skip
+                            else -> false
+                        }
+                    }
+                    
                     val seasonVal = if (seasonIdx != -1 && columns.size > seasonIdx) columns[seasonIdx]?.toIntOrNull() else null
                     val episodeVal = if (episodeIdx != -1 && columns.size > episodeIdx) columns[episodeIdx]?.toIntOrNull() else null
                     val epsMap = if (seasonVal != null && seasonVal > 0 && episodeVal != null && episodeVal > 0) {
@@ -458,7 +508,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = ratingVal,
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
-                                        watchedAt = java.time.Instant.now().toString(),
+                                        watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -476,7 +526,7 @@ class BackupRepository @Inject constructor(
                                     personalRating = ratingVal,
                                     personalNote = noteVal,
                                     watchedEpisodes = epsMap,
-                                    watchedAt = java.time.Instant.now().toString(),
+                                    watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
@@ -495,7 +545,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = ratingVal,
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
-                                        watchedAt = java.time.Instant.now().toString(),
+                                        watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -518,166 +568,6 @@ class BackupRepository @Inject constructor(
         }
         count
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // YAMTRACK IMPORT
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Parses a Yamtrack CSV export (InputStream, line-by-line) and imports
-     * only TMDB-sourced movies and TV shows.
-     *
-     * Yamtrack header: media_id, source, media_type, title, image,
-     *                  season_number, episode_number, score, status, notes,
-     *                  start_date, end_date, progress
-     *
-     * Status mapping:
-     *   Completed          → watched = true
-     *   Planned / Watching → watched = false  (added to library, not watched)
-     *   Dropped / Paused   → skipped entirely
-     *
-     * Non-TMDB sources (mal, igdb, manual, …) are silently skipped.
-     */
-    suspend fun migrateYamtrackCsvStream(inputStream: InputStream): Int =
-        withContext(Dispatchers.IO) {
-            var count = 0
-            inputStream.bufferedReader().useLines { linesSequence ->
-                val lines = linesSequence.filter { it.isNotBlank() }.iterator()
-                if (!lines.hasNext()) return@withContext 0
-
-                val headers = parseCsvLine(lines.next()).map { it.trim().lowercase() }
-
-                val mediaIdIdx    = headers.indexOfFirst { it == "media_id" }
-                val sourceIdx     = headers.indexOfFirst { it == "source" }
-                val mediaTypeIdx  = headers.indexOfFirst { it == "media_type" }
-                val titleIdx      = headers.indexOfFirst { it == "title" }
-                val scoreIdx      = headers.indexOfFirst { it == "score" }
-                val statusIdx     = headers.indexOfFirst { it == "status" }
-                val notesIdx      = headers.indexOfFirst { it == "notes" }
-                val seasonIdx     = headers.indexOfFirst { it == "season_number" }
-                val episodeIdx    = headers.indexOfFirst { it == "episode_number" }
-
-                // Require the Yamtrack-specific "media_id" header to proceed
-                if (mediaIdIdx == -1) return@withContext 0
-
-                val chunks = lines.asSequence().chunked(20)
-                for (chunk in chunks) {
-                    val deferreds = chunk.mapNotNull { line ->
-                        val cols = parseCsvLine(line)
-                        if (cols.isEmpty()) return@mapNotNull null
-
-                        fun col(idx: Int) = if (idx != -1 && cols.size > idx) cols[idx].trim() else ""
-
-                        // Only process TMDB items
-                        val source = col(sourceIdx).lowercase()
-                        if (source.isNotBlank() && source != "tmdb") return@mapNotNull null
-
-                        val tmdbId = col(mediaIdIdx).toLongOrNull()?.takeIf { it > 0 }
-                            ?: return@mapNotNull null
-
-                        // Map Yamtrack media_type → FlickTrove movie/tv
-                        val mediaType = when (col(mediaTypeIdx).lowercase()) {
-                            "movie"           -> "movie"
-                            "tv", "season",
-                            "episode"         -> "tv"
-                            else              -> return@mapNotNull null  // anime, manga, game, …
-                        }
-
-                        // Map status — skip Dropped and Paused
-                        val status = col(statusIdx)
-                        val watched = when (status) {
-                            "Completed"         -> true
-                            "Planned",
-                            "Watching"          -> false
-                            "Dropped", "Paused" -> return@mapNotNull null
-                            else                -> false
-                        }
-
-                        val titleVal   = col(titleIdx).takeIf { it.isNotBlank() }
-                        val scoreVal   = col(scoreIdx).toDoubleOrNull()
-                        val notesVal   = col(notesIdx).takeIf { it.isNotBlank() }
-                        val seasonVal  = col(seasonIdx).toIntOrNull()
-                        val episodeVal = col(episodeIdx).toIntOrNull()
-
-                        val epsMap = if (seasonVal != null && seasonVal > 0 &&
-                                        episodeVal != null && episodeVal > 0) {
-                            mapOf(seasonVal.toString() to listOf(episodeVal))
-                        } else null
-
-                        async {
-                            try {
-                                Pair(
-                                    Movie(
-                                        id              = tmdbId,
-                                        mediaType       = mediaType,
-                                        title           = titleVal ?: "Unknown ($tmdbId)",
-                                        name            = if (mediaType == "tv") titleVal else null,
-                                        watched         = watched,
-                                        favorite        = false,
-                                        personalRating  = scoreVal,
-                                        personalNote    = notesVal,
-                                        watchedEpisodes = epsMap,
-                                        watchedAt       = if (watched) java.time.Instant.now().toString() else null,
-                                        syncStatus      = "pending",
-                                        clientUpdatedAt = System.currentTimeMillis()
-                                    ),
-                                    null as String?
-                                )
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }
-                    }
-
-                    val results = deferreds.awaitAll().filterNotNull()
-                    if (results.isNotEmpty()) {
-                        processAndSaveImportedItems(results)
-                        count += results.size
-                    }
-                    kotlinx.coroutines.delay(300)
-                }
-            }
-            count
-        }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // YAMTRACK EXPORT
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Exports the entire local library as a Yamtrack-compatible CSV string.
-     *
-     * Fixed values per row:
-     *   source  = "tmdb"
-     *   status  = "Completed" if watched, "Planned" otherwise
-     *   progress = 100 if watched, 0 otherwise
-     */
-    suspend fun exportAsYamtrackCsv(): String = withContext(Dispatchers.IO) {
-        val favorites = favoriteDao.getAll()
-        buildString {
-            appendLine("media_id,source,media_type,title,image,season_number,episode_number,score,status,notes,start_date,end_date,progress")
-            for (movie in favorites) {
-                val title    = (movie.title ?: movie.name ?: "").csvQuote()
-                val score    = movie.personalRating?.toString() ?: ""
-                val status   = if (movie.watched) "Completed" else "Planned"
-                val notes    = (movie.personalNote ?: "").csvQuote()
-                val endDate  = if (movie.watched && movie.watchedAt != null) {
-                    runCatching {
-                        java.time.LocalDate.ofInstant(
-                            java.time.Instant.parse(movie.watchedAt),
-                            java.time.ZoneId.systemDefault()
-                        ).toString()
-                    }.getOrDefault("")
-                } else ""
-                val progress = if (movie.watched) "100" else "0"
-
-                appendLine("${movie.id},tmdb,${movie.mediaType ?: "movie"},$title,,,,$score,$status,$notes,,$endDate,$progress")
-            }
-        }
-    }
-
-    /** Wraps a CSV field in double-quotes, escaping any internal quotes. */
-    private fun String.csvQuote(): String = "\"${replace("\"", "\"\"")}\""
 
     private suspend fun processAndSaveImportedItems(itemsWithFolders: List<Pair<Movie, String?>>) {
         if (itemsWithFolders.isEmpty()) return
