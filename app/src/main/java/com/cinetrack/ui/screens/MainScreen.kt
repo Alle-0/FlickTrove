@@ -104,12 +104,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val updatesUiState by updatesViewModel.uiState.collectAsStateWithLifecycle()
         val hasAppUpdateBadge = updateInfo != null && updateInfo!!.isUpdateAvailable && ignoredUpdateVersion != updateInfo!!.latestVersion
 
-        LaunchedEffect(lastSeenAppVersion) {
-            if (lastSeenAppVersion == "") {
-                settingsViewModel.markCurrentAppVersionSeen()
-            }
-        }
-
 
         // Hoisted Modals State
         var isFilterModalVisible by remember { mutableStateOf(false) }
@@ -738,7 +732,7 @@ LaunchedEffect(deepLinkIntent.value) {
                         )
                     }
 
-                    if (lastSeenAppVersion.isNotEmpty() && lastSeenAppVersion != com.cinetrack.BuildConfig.VERSION_NAME) {
+                    if (hasSeenOnboarding && lastSeenAppVersion != com.cinetrack.BuildConfig.VERSION_NAME) {
                         com.cinetrack.ui.components.WhatsNewDialog(
                             versionName = com.cinetrack.BuildConfig.VERSION_NAME,
                             accentColor = MaterialTheme.colorScheme.primary,
