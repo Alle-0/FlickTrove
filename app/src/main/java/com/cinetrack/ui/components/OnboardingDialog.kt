@@ -42,7 +42,8 @@ data class OnboardingSlide(
     val subtitleRes: Int,
     val descriptionRes: Int,
     val iconRes: Int,
-    val imageRes: Int? = null
+    val imageRes: Int? = null,
+    val verticalBias: Float = 0f
 )
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -73,7 +74,8 @@ fun OnboardingDialog(
                 subtitleRes = R.string.onboarding_slide3_sub,
                 descriptionRes = R.string.onboarding_slide3_desc,
                 iconRes = R.drawable.ic_tick,
-                imageRes = R.drawable.onboarding_img_3
+                imageRes = R.drawable.onboarding_img_3,
+                verticalBias = 0f
             ),
             OnboardingSlide(
                 titleRes = R.string.onboarding_slide4_title,
@@ -201,7 +203,7 @@ fun OnboardingDialog(
                                         painter = painterResource(id = slide.imageRes),
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,
-                                        alignment = Alignment.Center,
+                                        alignment = androidx.compose.ui.BiasAlignment(0f, slide.verticalBias),
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }

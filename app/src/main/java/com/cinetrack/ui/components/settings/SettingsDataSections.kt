@@ -513,11 +513,18 @@ fun SettingsFooterSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Controlla aggiornamenti su GitHub ↗",
+                        text = "Controlla aggiornamenti su GitHub",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.65f)
                         )
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_external_link),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.65f),
+                        modifier = Modifier.size(12.dp)
                     )
                 }
             }
