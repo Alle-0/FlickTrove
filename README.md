@@ -189,7 +189,7 @@ This repository is public for reference and sharing. Reproduction, copying, modi
 
 ## <h2 id="support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="24" height="24" align="absmiddle" /> Support the Project</h2>
 
-FlickTrove is, and will always be, completely free, open-source, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
+FlickTrove is, and will always be, completely free, source-available, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
 
 <br>
 
