@@ -35,18 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const isActive = mobileDrawer.classList.contains('active');
       if (isActive) {
         mobileDrawer.classList.remove('active');
-        mobileBtn.innerHTML = '☰';
+        mobileBtn.classList.remove('active');
+        mobileBtn.setAttribute('aria-expanded', 'false');
         document.documentElement.classList.remove('drawer-open');
         document.body.classList.remove('drawer-open');
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
       } else {
         mobileDrawer.classList.add('active');
-        mobileBtn.innerHTML = '✕';
+        mobileBtn.classList.add('active');
+        mobileBtn.setAttribute('aria-expanded', 'true');
         document.documentElement.classList.add('drawer-open');
         document.body.classList.add('drawer-open');
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
       }
     };
 
@@ -66,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close drawer when clicking outside
     document.addEventListener('click', (e) => {
-      if (mobileDrawer.classList.contains('active') && !mobileDrawer.contains(e.target) && e.target !== mobileBtn) {
+      if (mobileDrawer.classList.contains('active') && !mobileDrawer.contains(e.target) && !mobileBtn.contains(e.target)) {
         toggleDrawer();
       }
     });
@@ -449,6 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const trans = 1.0 - dwell;
       const t = stepP <= dwell ? 0 : (stepP - dwell) / trans; // 0 during dwell, 0->1 during transition
 
+      const isMobileDeck = window.innerWidth <= 768;
+
       scrollCards.forEach((card, i) => {
         let effectiveOffset;
         if (i < activeIdx) {
@@ -461,19 +461,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (effectiveOffset <= -0.98) {
-          // Dealt away off screen
-          card.style.transform = `translate3d(125%, 20%, 0) rotate(22deg) scale(0.85)`;
+          // Dealt away off screen - Nascondiamo completamente dal compositing GPU su mobile
+          card.style.transform = `translate3d(125%, 20%, 0) scale(0.85)`;
           card.style.opacity = '0';
+          card.style.visibility = 'hidden';
           card.style.zIndex = '0';
           card.style.pointerEvents = 'none';
         } else if (effectiveOffset < 0) {
-          // Currently dealing out! (swiping sideways and slightly down, never up into the header text)
+          // Currently dealing out!
+          card.style.visibility = 'visible';
           const p = -effectiveOffset; // goes from 0 to 1
           const translateY = p * 15;
-          const translateX = p * 130;
-          const rotate = p * 18;
+          const translateX = p * 125;
+          const rotate = isMobileDeck ? 0 : (p * 18);
           const scale = 1 - p * 0.15;
-          // Stay 100% solid opaque for the first part of the exit swipe, fade out only at the end
           const opacity = p < 0.35 ? 1 : Math.max(0, 1 - ((p - 0.35) / 0.65));
 
           card.style.transform = `translate3d(${translateX.toFixed(1)}%, ${translateY.toFixed(1)}%, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
@@ -482,23 +483,34 @@ document.addEventListener('DOMContentLoaded', () => {
           card.style.pointerEvents = 'none';
         } else if (effectiveOffset === 0) {
           // Active top card locked in reading zone!
-          card.style.transform = `translate3d(0, 0, 0) rotate(0deg) scale(1)`;
+          card.style.visibility = 'visible';
+          card.style.transform = `translate3d(0, 0, 0) scale(1)`;
           card.style.opacity = '1';
           card.style.zIndex = `${numCards}`;
           card.style.pointerEvents = 'auto';
         } else {
           // Waiting in the deck behind the top card!
-          const depth = Math.min(effectiveOffset, 5); // limit visible stacking depth
-          const translateY = depth * 24; // 24px down per step
-          const scale = Math.max(0.75, 1 - depth * 0.045);
-          const rotate = ((i % 2 === 0) ? -1 : 1) * depth * 2.2;
-          // ZERO TRANSPARENCY! Stack cards are 100% opaque solid physical cards!
-          const opacity = depth <= 2.5 ? 1 : Math.max(0, 1 - (depth - 2.5) * 0.4);
+          const maxStack = isMobileDeck ? 1.8 : 5;
+          const depth = effectiveOffset;
 
-          card.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
-          card.style.opacity = opacity.toFixed(3);
-          card.style.zIndex = `${Math.max(1, numCards - Math.floor(effectiveOffset))}`;
-          card.style.pointerEvents = effectiveOffset <= 1 ? 'auto' : 'none';
+          if (isMobileDeck && depth > 2.0) {
+            // Su mobile non disegniamo più di 2 carte impilate dietro per risparmiare il 75% della GPU
+            card.style.visibility = 'hidden';
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+          } else {
+            card.style.visibility = 'visible';
+            const clampedDepth = Math.min(depth, maxStack);
+            const translateY = clampedDepth * (isMobileDeck ? 16 : 22);
+            const scale = Math.max(0.75, 1 - clampedDepth * 0.045);
+            const rotate = isMobileDeck ? 0 : (((i % 2 === 0) ? -1 : 1) * clampedDepth * 2.2);
+            const opacity = Math.max(0.1, 1 - clampedDepth * 0.45);
+
+            card.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+            card.style.opacity = opacity.toFixed(3);
+            card.style.zIndex = `${Math.max(1, numCards - Math.floor(effectiveOffset))}`;
+            card.style.pointerEvents = effectiveOffset <= 0.2 ? 'auto' : 'none';
+          }
         }
       });
     }
@@ -800,3 +812,137 @@ footerLinks.forEach(link => {
     link.style.color = '';
   });
 });
+
+/* =========================================
+   INTERACTIVE CINEMA DUST CANVAS ENGINE
+   ========================================= */
+const initCinemaDustCanvas = () => {
+  if (window.__cinemaDustInitialized) return;
+  const canvas = document.getElementById('cyber-canvas');
+  if (!canvas) return;
+  window.__cinemaDustInitialized = true;
+
+  // Forza stili fissi ad altissima priorità nel caso il CSS venga coperto
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '999';
+
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
+  const particleCount = 45; // Effetto minimal, discreto e ultra-elegante
+
+  let mouse = { x: -1000, y: -1000, vx: 0, vy: 0 };
+  let lastMouse = { x: -1000, y: -1000 };
+
+  window.addEventListener('mousemove', (e) => {
+    mouse.vx = (e.clientX - lastMouse.x) * 0.03;
+    mouse.vy = (e.clientY - lastMouse.y) * 0.03;
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    lastMouse.x = e.clientX;
+    lastMouse.y = e.clientY;
+  });
+
+  const resizeCanvas = () => {
+    width = window.innerWidth || document.documentElement.clientWidth;
+    height = window.innerHeight || document.documentElement.clientHeight;
+    canvas.width = width;
+    canvas.height = height;
+  };
+
+  class DustParticle {
+    constructor() {
+      this.reset(true);
+    }
+
+    reset(initial = false) {
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : height + 15;
+      // Micro-granelli leggeri e raffinati
+      this.size = Math.random() * 1.1 + 0.7;
+      // Movimento calmissimo e ipnotico (quasi sospeso nell'aria)
+      this.baseSpeedY = -(Math.random() * 0.12 + 0.04);
+      this.speedX = (Math.random() - 0.5) * 0.07;
+      this.speedY = this.baseSpeedY;
+
+      const palette = [
+        'rgba(245, 245, 250, ',
+        'rgba(255, 248, 220, ',
+        'rgba(200, 245, 235, '
+      ];
+      this.colorPrefix = palette[Math.floor(Math.random() * palette.length)];
+      // Opacità elegante e morbida
+      this.baseAlpha = Math.random() * 0.15 + 0.10;
+      this.alpha = this.baseAlpha;
+      // Sfarfallio lentissimo come un respiro placido
+      this.twinkleSpeed = Math.random() * 0.006 + 0.003;
+      this.twinkleAngle = Math.random() * Math.PI * 2;
+    }
+
+    update() {
+      this.twinkleAngle += this.twinkleSpeed;
+      this.alpha = this.baseAlpha + Math.sin(this.twinkleAngle) * 0.04;
+      if (this.alpha < 0.06) this.alpha = 0.06;
+
+      const dx = this.x - mouse.x;
+      const dy = this.y - mouse.y;
+      const distSq = dx * dx + dy * dy;
+      const maxDist = 130;
+
+      if (distSq < maxDist * maxDist) {
+        const dist = Math.sqrt(distSq) || 1;
+        const force = (maxDist - dist) / maxDist;
+        // Reazione dolcissima come una brezza leggerissima
+        this.x += (dx / dist) * force * 0.35 + mouse.vx * force * 0.15;
+        this.y += (dy / dist) * force * 0.35 + mouse.vy * force * 0.15;
+      }
+
+      this.x += this.speedX;
+      this.y += this.speedY;
+
+      this.speedY += (this.baseSpeedY - this.speedY) * 0.03;
+
+      if (this.y < -20 || this.x < -20 || this.x > width + 20) {
+        this.reset(false);
+      }
+    }
+
+    draw() {
+      const safeAlpha = Math.min(0.25, Math.max(0.05, this.alpha));
+      // Granello ultra-fine
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `${this.colorPrefix}${safeAlpha.toFixed(3)})`;
+      ctx.fill();
+    }
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  particles = Array.from({ length: particleCount }, () => new DustParticle());
+
+  const animate = () => {
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach((p) => {
+      p.update();
+      p.draw();
+    });
+    mouse.vx *= 0.9;
+    mouse.vy *= 0.9;
+    requestAnimationFrame(animate);
+  };
+
+  animate();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCinemaDustCanvas);
+} else {
+  initCinemaDustCanvas();
+}

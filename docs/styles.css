@@ -170,6 +170,43 @@ body {
   filter: blur(50px);
 }
 
+/* Cinema Projector Volumetric Light Beam */
+.cinema-projector-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1200px;
+  height: 750px;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+}
+
+.projector-beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 650px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(45, 212, 191, 0.18) 0%, rgba(255, 215, 120, 0.08) 35%, transparent 70%);
+  filter: blur(25px);
+  opacity: 0.75;
+}
+
+/* Interactive Cinema Dust Canvas */
+#cyber-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999;
+}
+
 /* Typography Gradients */
 .gradient-text {
   background: linear-gradient(135deg, #2DD4BF 0%, #7F52FF 100%);
@@ -290,25 +327,71 @@ body {
   color: var(--accent-teal) !important;
 }
 
-/* Mobile Hamburger Button (FIXED: Z-Index above drawer!) */
+/* Animated 3-Bar Hamburger Morph into X (Touch & Mobile Optimized) */
 .mobile-menu-btn {
   display: none;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-color);
-  color: var(--text-main);
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  font-size: 1.3rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   cursor: pointer;
   z-index: 2001;
-  transition: var(--transition-fast);
+  transition: all 0.35s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Feedback immediato e tattile al tocco del dito su schermo mobile */
 .mobile-menu-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.90);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mobile-menu-btn:hover {
+    background: rgba(45, 212, 191, 0.12);
+    border-color: rgba(45, 212, 191, 0.4);
+  }
+
+  .mobile-menu-btn:not(.active):hover .bar-2 {
+    width: 15px;
+  }
+}
+
+.hamburger-bar {
+  display: block;
+  width: 22px;
+  height: 2.2px;
+  background: #ffffff;
+  border-radius: 4px;
+  transition: transform 0.35s cubic-bezier(0.68, -0.6, 0.32, 1.6), opacity 0.25s ease, background-color 0.3s ease, width 0.3s ease;
+  transform-origin: center;
+}
+
+/* Trasformazione elastica in X (sia al tap su mobile che su desktop) */
+.mobile-menu-btn.active {
+  background: rgba(45, 212, 191, 0.18);
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 15px rgba(45, 212, 191, 0.25);
+}
+
+.mobile-menu-btn.active .bar-1 {
+  transform: translateY(7.2px) rotate(45deg);
+  background: var(--accent-teal);
+}
+
+.mobile-menu-btn.active .bar-2 {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.mobile-menu-btn.active .bar-3 {
+  transform: translateY(-7.2px) rotate(-45deg);
+  background: var(--accent-teal);
 }
 
 /* 
@@ -323,18 +406,19 @@ body {
   width: 85%;
   max-width: 320px;
   height: calc(100vh - 66px);
-  background: rgba(9, 12, 18, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(9, 12, 18, 0.95);
   border-left: 1px solid var(--border-color);
   border-top: 1px solid var(--border-color);
-  box-shadow: -15px 0 35px rgba(0, 0, 0, 0.7);
+  box-shadow: -15px 0 35px rgba(0, 0, 0, 0.85);
   z-index: 1500;
   padding: 2.5rem 1.75rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  isolation: isolate;
+  transform: translate3d(0, 0, 0);
+  will-change: right;
 }
 
 .mobile-drawer.active {
@@ -658,7 +742,8 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 85% 15%, rgba(45, 212, 191, 0.15) 0%, transparent 55%), linear-gradient(135deg, rgba(20, 20, 22, 0.92) 0%, rgba(10, 10, 12, 0.96) 100%) !important;
+  background-color: #0E1118 !important;
+  background: radial-gradient(circle at 85% 15%, rgba(45, 212, 191, 0.15) 0%, transparent 55%), linear-gradient(135deg, #151820 0%, #0A0C10 100%) !important;
   border: 1.5px solid rgba(45, 212, 191, 0.35) !important;
   border-top: 1.5px solid rgba(45, 212, 191, 0.7) !important;
   border-radius: 28px !important;
@@ -666,9 +751,8 @@ body {
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
   will-change: transform, opacity;
   transform-style: preserve-3d;
+  backface-visibility: hidden !important;
   user-select: none;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-start !important;
@@ -677,13 +761,15 @@ body {
 }
 
 .deck-scroll-card:nth-child(2n) {
-  background: radial-gradient(circle at 85% 15%, rgba(187, 134, 252, 0.18) 0%, transparent 55%), linear-gradient(135deg, rgba(20, 20, 22, 0.92) 0%, rgba(10, 10, 12, 0.96) 100%) !important;
+  background-color: #0E1118 !important;
+  background: radial-gradient(circle at 85% 15%, rgba(187, 134, 252, 0.18) 0%, transparent 55%), linear-gradient(135deg, #151820 0%, #0A0C10 100%) !important;
   border-color: rgba(187, 134, 252, 0.35) !important;
   border-top-color: rgba(187, 134, 252, 0.7) !important;
 }
 
 .deck-scroll-card:nth-child(3n) {
-  background: radial-gradient(circle at 85% 15%, rgba(255, 179, 0, 0.16) 0%, transparent 55%), linear-gradient(135deg, rgba(20, 20, 22, 0.92) 0%, rgba(10, 10, 12, 0.96) 100%) !important;
+  background-color: #0E1118 !important;
+  background: radial-gradient(circle at 85% 15%, rgba(255, 179, 0, 0.16) 0%, transparent 55%), linear-gradient(135deg, #151820 0%, #0A0C10 100%) !important;
   border-color: rgba(255, 179, 0, 0.35) !important;
   border-top-color: rgba(255, 179, 0, 0.7) !important;
 }
@@ -1316,23 +1402,60 @@ body {
   justify-items: center;
 }
 
+.showcase-section {
+  position: relative;
+}
+
 .screenshot-item {
   position: relative;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: var(--transition-normal);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 28px var(--ambilight-color, rgba(45, 212, 191, 0.18));
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
   max-width: 220px;
   width: 100%;
   background: var(--bg-secondary);
   cursor: pointer;
+  z-index: 1;
+}
+
+.screenshot-item:nth-child(1) {
+  --ambilight-color: rgba(45, 212, 191, 0.20);
+  --ambilight-hover: rgba(45, 212, 191, 0.55);
+}
+
+.screenshot-item:nth-child(2) {
+  --ambilight-color: rgba(59, 130, 246, 0.20);
+  --ambilight-hover: rgba(59, 130, 246, 0.55);
+}
+
+.screenshot-item:nth-child(3) {
+  --ambilight-color: rgba(249, 115, 22, 0.22);
+  --ambilight-hover: rgba(179, 97, 38, 0.6);
+}
+
+.screenshot-item:nth-child(4) {
+  --ambilight-color: rgba(16, 185, 129, 0.20);
+  --ambilight-hover: rgba(16, 185, 129, 0.55);
+
+}
+
+.screenshot-item:nth-child(5) {
+  --ambilight-color: rgba(192, 132, 252, 0.20);
+  --ambilight-hover: rgba(192, 132, 252, 0.55);
+}
+
+.screenshot-item:nth-child(6) {
+  --ambilight-color: rgba(236, 72, 153, 0.20);
+  --ambilight-hover: rgba(236, 72, 153, 0.55);
 }
 
 .screenshot-item:hover {
-  transform: scale(1.04) translateY(-5px);
-  border-color: var(--accent-teal);
-  box-shadow: 0 20px 45px var(--accent-teal-glow);
+  transform: scale(1.05) translateY(-6px);
+  border-color: var(--ambilight-hover, var(--accent-teal));
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), 0 0 50px var(--ambilight-hover, rgba(45, 212, 191, 0.55));
+  z-index: 10;
 }
 
 .screenshot-item>img {
@@ -1348,24 +1471,33 @@ body {
   transform: scale(1.03);
 }
 
+/* Glassmorphic Floating Pill Badge Caption (No more dark rectangle covering bottom app buttons!) */
 .screenshot-caption {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(11, 15, 25, 0.96), rgba(11, 15, 25, 0.7) 70%, transparent);
-  padding: 1.5rem 1rem 0.85rem;
-  text-align: center;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13, 17, 23, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--text-main);
-  opacity: 0.9;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   transition: var(--transition-normal);
 }
 
 .screenshot-item:hover .screenshot-caption {
-  opacity: 1;
-  color: var(--accent-teal);
+  border-color: var(--ambilight-color, var(--accent-teal));
+  color: #ffffff;
+  transform: translateX(-50%) translateY(-2px);
 }
 
 /* FAQ Section */
@@ -1684,6 +1816,22 @@ body {
 
   .features-grid {
     gap: 1.5rem;
+  }
+
+  #features-card-deck.features-grid {
+    perspective: none !important;
+  }
+
+  /* OTTIMIZZAZIONE GPU 60FPS PER MOBILE (elimina il lag da blur sovrapposti e bug culling 3D) */
+  .deck-scroll-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #0F1218 !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.65) !important;
+    will-change: transform;
+    transform-style: flat !important;
+    border-radius: 20px !important;
+    padding: 1.5rem 1.35rem !important;
   }
 
   .feature-card {
@@ -2067,13 +2215,15 @@ body {
   width: 100%;
   height: 14px;
   background-color: #050a09;
-  background-image: repeating-linear-gradient(90deg,
+  background-image: linear-gradient(90deg,
       transparent 0px,
-      transparent 12px,
-      rgba(45, 212, 191, 0.9) 12px,
-      rgba(45, 212, 191, 0.9) 22px,
-      transparent 22px,
-      transparent 34px);
+      transparent 10px,
+      rgba(45, 212, 191, 0.9) 10px,
+      rgba(45, 212, 191, 0.9) 30px,
+      transparent 30px,
+      transparent 40px);
+  background-size: 40px 100%;
+  background-repeat: repeat-x;
   border-bottom: 1px solid rgba(45, 212, 191, 0.3);
   box-shadow: 0 0 10px rgba(45, 212, 191, 0.4);
 }
@@ -2087,12 +2237,14 @@ body {
   flex: 1;
   width: 100%;
   background-color: rgba(45, 212, 191, 0.03);
-  /* Vertical Frame Dividers across the celluloid track */
-  background-image: repeating-linear-gradient(90deg,
-      transparent 0px,
-      transparent 134px,
-      rgba(45, 212, 191, 0.65) 134px,
-      rgba(45, 212, 191, 0.65) 136px);
+  /* Vertical Frame Dividers perfectly aligned at 0px of every 4 perforations (160px tile) */
+  background-image: linear-gradient(90deg,
+      rgba(45, 212, 191, 0.65) 0px,
+      rgba(45, 212, 191, 0.65) 2px,
+      transparent 2px,
+      transparent 160px);
+  background-size: 160px 100%;
+  background-repeat: repeat-x;
   box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.85);
   position: relative;
 }
