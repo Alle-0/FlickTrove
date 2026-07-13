@@ -457,6 +457,7 @@ fun SettingsSupportSection(
 fun SettingsFooterSection(
     updateInfo: com.cinetrack.util.AppUpdateInfo? = null,
     accentColor: Color = Color(0xFF2DD4BF),
+    onReplayTutorial: () -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -519,6 +520,34 @@ fun SettingsFooterSection(
                         )
                     )
                 }
+            }
+        }
+
+        Surface(
+            color = Color.White.copy(alpha = 0.06f),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .padding(bottom = 14.dp)
+                .clickable { onReplayTutorial() }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.settings_review_tutorial),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                )
             }
         }
 

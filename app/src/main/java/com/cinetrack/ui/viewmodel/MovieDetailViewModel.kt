@@ -314,13 +314,16 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun updateCustomCover(newPath: String?) {
         viewModelScope.launch {
-            val local = repository.getMovie(movieId, mediaType) ?: return@launch
-            repository.saveMovie(local.copy(customBackdropPath = newPath))
+            val local = repository.getMovie(movieId, mediaType)
+                ?: (uiState.value as? DetailUiState.Success)?.movieEntry
+                ?: return@launch
+            val updated = local.copy(customBackdropPath = newPath)
+            repository.saveMovie(updated)
             // Re-extract the dominant color from the new cover or fallback to poster/backdrop
-            val targetPath = newPath ?: local.posterPath ?: local.backdropPath
-            val imageType = if (newPath != null || local.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
+            val targetPath = newPath ?: updated.posterPath ?: updated.backdropPath
+            val imageType = if (newPath != null || updated.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
-            if (imageUrl != null) fetchAccentColor(imageUrl, local, forceReload = true)
+            if (imageUrl != null) fetchAccentColor(imageUrl, updated, forceReload = true)
         }
     }
 

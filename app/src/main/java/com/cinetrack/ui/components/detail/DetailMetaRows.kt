@@ -196,8 +196,8 @@ fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) 
             modifier = Modifier
                 .clip(shape)
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(0.5.dp, Color.White.copy(alpha = 0.1f), shape),
+                .background(accentColor.copy(alpha = 0.16f))
+                .border(0.75.dp, accentColor.copy(alpha = 0.45f), shape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -207,7 +207,7 @@ fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) 
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = Color.White.copy(alpha = 0.7f),
+                color = Color.White.copy(alpha = 0.95f),
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }
@@ -349,8 +349,8 @@ fun KeywordPill(keyword: String, accentColor: Color, onKeywordClick: (Offset) ->
         Box(
             modifier = Modifier
                 .clip(shape)
-                .background(Color.White.copy(alpha = 0.02f))
-                .border(0.5.dp, Color.White.copy(alpha = 0.05f), shape),
+                .background(accentColor.copy(alpha = 0.12f))
+                .border(0.5.dp, accentColor.copy(alpha = 0.35f), shape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -360,7 +360,7 @@ fun KeywordPill(keyword: String, accentColor: Color, onKeywordClick: (Offset) ->
                     fontWeight = FontWeight.Normal,
                     letterSpacing = 1.sp
                 ),
-                color = Color.White.copy(alpha = 0.5f),
+                color = Color.White.copy(alpha = 0.9f),
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
             )
         }

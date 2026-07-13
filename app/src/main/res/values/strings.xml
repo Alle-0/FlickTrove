@@ -230,7 +230,6 @@
     <string name="settings_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
     <string name="settings_omdb_notice">Additional data and ratings provided by OMDb API.</string>
     <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
-    <string name="settings_app_version">FlickTrove v3.1.6</string>
     <string name="settings_made_with">Developed with </string>
     <string name="settings_for_lovers"> for movie lovers</string>
     <!-- Dialog buttons -->
@@ -899,4 +898,21 @@
 
     <string name="settings_new_version_available">New version v%1$s available on GitHub →</string>
 
+    <!-- Onboarding Dialog -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get Started!</string>
+    <string name="onboarding_slide1_title">Welcome to FlickTrove</string>
+    <string name="onboarding_slide1_sub">YOUR PERSONAL TRACKER</string>
+    <string name="onboarding_slide1_desc">Explore, search, and track Movies &amp; TV Shows with a fluid, fast, ad-free Glassmorphism experience.</string>
+    <string name="onboarding_slide2_title">Organize Your Way</string>
+    <string name="onboarding_slide2_sub">FAVORITES, WATCHED &amp; FOLDERS</string>
+    <string name="onboarding_slide2_desc">Create custom folders, rate and add text or audio notes to your collection.</string>
+    <string name="onboarding_slide3_title">Everything at Your Fingertips</string>
+    <string name="onboarding_slide3_sub">LONG PRESS GESTURES</string>
+    <string name="onboarding_slide3_desc">Long press any poster to instantly open the quick actions menu and manage your library without entering details.</string>
+    <string name="onboarding_slide4_title">Your Data Belongs to You</string>
+    <string name="onboarding_slide4_sub">LOCAL BACKUP &amp; TRAKT SYNC</string>
+    <string name="onboarding_slide4_desc">Export and import local JSON backups in a second, or connect your Trakt account for automatic sync.</string>
+    <string name="settings_review_tutorial">Replay Welcome Tutorial</string>
 </resources>

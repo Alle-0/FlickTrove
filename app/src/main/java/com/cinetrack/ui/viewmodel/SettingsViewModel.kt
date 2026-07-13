@@ -93,6 +93,24 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val hasSeenOnboarding = settingsRepository.hasSeenOnboarding.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true // default true while loading
+    )
+
+    fun markOnboardingSeen() {
+        viewModelScope.launch {
+            settingsRepository.setOnboardingSeen(true)
+        }
+    }
+
+    fun resetOnboarding() {
+        viewModelScope.launch {
+            settingsRepository.setOnboardingSeen(false)
+        }
+    }
+
     private val _isBackupLoading = MutableStateFlow(false)
     val isBackupLoading = _isBackupLoading.asStateFlow()
 

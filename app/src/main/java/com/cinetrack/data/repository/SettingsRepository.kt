@@ -16,6 +16,7 @@ interface SettingsRepository {
     val imageQuality: Flow<String>
     val lastSeenAppVersion: Flow<String>
     val ignoredUpdateVersion: Flow<String>
+    val hasSeenOnboarding: Flow<Boolean>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -30,4 +31,5 @@ interface SettingsRepository {
     suspend fun updateImageQuality(quality: String)
     suspend fun updateLastSeenAppVersion(version: String)
     suspend fun updateIgnoredUpdateVersion(version: String)
+    suspend fun setOnboardingSeen(seen: Boolean)
 }

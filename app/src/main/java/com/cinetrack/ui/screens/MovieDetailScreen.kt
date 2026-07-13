@@ -260,11 +260,13 @@ fun MovieDetailScreenContent(
         is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
         else -> extractedColor ?: fallbackAccentColor
     }
-    val globalAccentColor = rawAccentColor
+    val globalAccentColor = remember(rawAccentColor) {
+        ColorUtils.ensureVividAccent(rawAccentColor)
+    }
 
-    val baseDarkColor = remember { Color(0xFF161620) } // Neutral sleek dark slate fallback instead of false random neon colors
+    val baseDarkColor = remember { Color(0xFF161620) } // Balanced sleek dark slate
     val targetBackgroundColor = when (uiState) {
-        is DetailUiState.Success -> lerp(globalAccentColor, baseDarkColor, 0.65f)
+        is DetailUiState.Success -> lerp(globalAccentColor, baseDarkColor, 0.68f)
         else -> baseDarkColor
     }
     val animatedBgColor by animateColorAsState(
@@ -324,7 +326,10 @@ fun MovieDetailScreenContent(
                     val state = cachedSuccess
                     if (state != null) {
                         val activeMovie = state.movieEntry
-                        val targetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
+                        val rawTargetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
+                        val targetAccentColor = remember(rawTargetAccentColor) {
+                            ColorUtils.ensureVividAccent(rawTargetAccentColor)
+                        }
                         val accentColor by animateColorAsState(
                             targetValue = targetAccentColor,
                             animationSpec = tween(800),

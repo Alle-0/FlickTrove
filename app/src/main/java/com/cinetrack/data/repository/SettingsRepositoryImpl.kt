@@ -33,6 +33,11 @@ class SettingsRepositoryImpl @Inject constructor(
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
         val LAST_SEEN_APP_VERSION = stringPreferencesKey("last_seen_app_version")
         val IGNORED_UPDATE_VERSION = stringPreferencesKey("ignored_update_version")
+        val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+    }
+
+    override val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HAS_SEEN_ONBOARDING] ?: false
     }
 
     override val lastSeenAppVersion: Flow<String> = dataStore.data.map { preferences ->
@@ -162,6 +167,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateIgnoredUpdateVersion(version: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.IGNORED_UPDATE_VERSION] = version
+        }
+    }
+
+    override suspend fun setOnboardingSeen(seen: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HAS_SEEN_ONBOARDING] = seen
         }
     }
 }

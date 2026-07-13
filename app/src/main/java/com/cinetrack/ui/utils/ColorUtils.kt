@@ -178,6 +178,23 @@ object ColorUtils {
     }
 
     /**
+     * Garantisce che il colore di accento estratto sia sempre sufficientemente luminoso e vivido
+     * per pulsanti, icone, pillole e badge su tema scuro, evitando che appaia troppo scuro o spento.
+     */
+    fun ensureVividAccent(color: Color, minBrightness: Float = 0.88f, minSaturation: Float = 0.45f): Color {
+        val hsv = FloatArray(3)
+        AndroidColor.colorToHSV(color.toArgb(), hsv)
+
+        if (hsv[1] > 0.05f && hsv[1] < minSaturation) {
+            hsv[1] = minSaturation
+        }
+        if (hsv[2] < minBrightness) {
+            hsv[2] = minBrightness
+        }
+        return Color(AndroidColor.HSVToColor(hsv))
+    }
+
+    /**
      * Aumenta la luminosità di un colore dinamico preservandone la vivacità.
      * Perfetto per testi colorati su sfondi scuri senza l'effetto "pastello slavato".
      */

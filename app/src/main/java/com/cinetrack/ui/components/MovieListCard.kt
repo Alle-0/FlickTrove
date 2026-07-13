@@ -353,21 +353,21 @@ fun MovieListCard(
                 val isOcchio = isReleased && (isReminder || isFavorite)
 
                 val actionBg = when {
-                    isWatched -> Color(0xFF10B981).copy(alpha = 0.1f) // Green for Watched
+                    isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                     isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassColor.copy(alpha = 0.60f)
                 }
 
                 val actionBorder = when {
-                    isWatched -> Color(0xFF10B981)
+                    isWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassBorderColor
                 }.copy(alpha = 0.3f)
 
                 val actionTint = when {
-                    isWatched -> Color(0xFF10B981)
+                    isWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> Color.White

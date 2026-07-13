@@ -229,7 +229,6 @@
     <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non è approvato o certificato da TMDB.</string>
     <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
     <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
-    <string name="settings_app_version">FlickTrove v3.1.6</string>
     <string name="settings_made_with">Sviluppato con </string>
     <string name="settings_for_lovers"> per amanti del cinema</string>
     <!-- Dialog buttons -->
@@ -896,4 +895,21 @@
 
     <string name="settings_new_version_available">Nuova versione v%1$s disponibile su GitHub →</string>
 
+    <!-- Onboarding Dialog -->
+    <string name="onboarding_skip">Salta</string>
+    <string name="onboarding_next">Successivo</string>
+    <string name="onboarding_start">Inizia Subito!</string>
+    <string name="onboarding_slide1_title">Benvenuto in FlickTrove</string>
+    <string name="onboarding_slide1_sub">IL TUO TRACKER PERSONALE</string>
+    <string name="onboarding_slide1_desc">Esplora, cerca e tieni traccia di Film &amp; Serie TV con un\'interfaccia Glassmorphism fluida, veloce e senza pubblicità.</string>
+    <string name="onboarding_slide2_title">Organizza come preferisci</string>
+    <string name="onboarding_slide2_sub">PREFERITI, VISTI &amp; CARTELLE</string>
+    <string name="onboarding_slide2_desc">Crea cartelle su misura per ogni occasione, vota e aggiungi note testuali o audio alle tue collezioni.</string>
+    <string name="onboarding_slide3_title">Tutto a portata di dito</string>
+    <string name="onboarding_slide3_sub">GESTURES &amp; AZIONI RAPIDE</string>
+    <string name="onboarding_slide3_desc">Tieni premuta qualsiasi locandina per aprire istantaneamente il menu rapido e gestire il film senza entrare nei dettagli.</string>
+    <string name="onboarding_slide4_title">I tuoi dati sono tuoi</string>
+    <string name="onboarding_slide4_sub">BACKUP LOCALE &amp; TRAKT SYNC</string>
+    <string name="onboarding_slide4_desc">Esporta e importa i tuoi backup locali in formato JSON in un secondo, oppure collega il tuo account Trakt per la sincronizzazione automatica.</string>
+    <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
 </resources>

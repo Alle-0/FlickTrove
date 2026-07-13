@@ -576,7 +576,8 @@ fun SettingsScreenContent(
                     item {
                         SettingsFooterSection(
                             updateInfo = updateInfo,
-                            accentColor = currentAccentColor
+                            accentColor = currentAccentColor,
+                            onReplayTutorial = { settingsViewModel.resetOnboarding() }
                         )
                     }
 

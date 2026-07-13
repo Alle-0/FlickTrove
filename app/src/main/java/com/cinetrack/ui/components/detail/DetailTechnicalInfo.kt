@@ -165,14 +165,14 @@ private fun TechnicalItem(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .background(accentColor.copy(alpha = 0.1f), iconShape)
-                .border(0.5.dp, accentColor.copy(alpha = 0.15f), iconShape),
+                .background(accentColor.copy(alpha = 0.18f), iconShape)
+                .border(1.dp, accentColor.copy(alpha = 0.45f), iconShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = accentColor.copy(alpha = 0.6f),
+                tint = accentColor,
                 modifier = Modifier.size(18.dp)
             )
         }

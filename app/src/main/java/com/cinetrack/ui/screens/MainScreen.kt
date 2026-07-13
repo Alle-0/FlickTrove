@@ -98,6 +98,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val dismissedUpdateVersion by settingsViewModel.dismissedUpdateVersion.collectAsStateWithLifecycle()
         val ignoredUpdateVersion by settingsViewModel.ignoredUpdateVersion.collectAsStateWithLifecycle()
         val lastSeenAppVersion by settingsViewModel.lastSeenAppVersion.collectAsStateWithLifecycle()
+        val hasSeenOnboarding by settingsViewModel.hasSeenOnboarding.collectAsStateWithLifecycle()
 
         val updatesViewModel: com.cinetrack.ui.viewmodel.UpdatesViewModel = getViewModel()
         val updatesUiState by updatesViewModel.uiState.collectAsStateWithLifecycle()
@@ -745,6 +746,16 @@ LaunchedEffect(deepLinkIntent.value) {
                             hazeState = globalHazeState,
                             onDismiss = {
                                 settingsViewModel.markCurrentAppVersionSeen()
+                            }
+                        )
+                    }
+
+                    if (!hasSeenOnboarding) {
+                        com.cinetrack.ui.components.OnboardingDialog(
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            hazeState = globalHazeState,
+                            onDismiss = {
+                                settingsViewModel.markOnboardingSeen()
                             }
                         )
                     }

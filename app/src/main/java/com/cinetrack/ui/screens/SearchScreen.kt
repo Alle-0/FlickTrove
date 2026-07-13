@@ -650,7 +650,7 @@ fun SearchScreenContent(
                                         modifier = Modifier.fillMaxSize().bounceClick(scaleDown = 0.92f) {
                                             val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
                                             viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
-                                        }.border(BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)), CircleShape),
+                                        },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
