@@ -136,6 +136,53 @@ object NotificationHelper {
         }
     }
 
+    suspend fun showReleaseNotificationSync(
+        context: Context,
+        movieTitle: String,
+        movieId: Long,
+        mediaType: String,
+        posterPath: String? = null
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val intent = buildDeepLinkIntent(context, movieId, mediaType)
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            movieId.toInt(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val mediaLabel = if (mediaType == "tv") context.getString(R.string.notif_media_tv) else context.getString(R.string.notif_media_movie)
+        val bodyText = context.getString(R.string.notif_new_release_body, movieTitle)
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val largeIcon = loadPosterBitmap(context, posterPath)
+                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(largeIcon)
+                .setContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                .setContentText(context.getString(R.string.notif_new_release_body, movieTitle))
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(bodyText)
+                        .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
+                )
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setColor(ACCENT_COLOR)
+                .setColorized(true)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .build()
+
+            NotificationManagerCompat.from(context).notify(movieId.toInt(), notification)
+        }
+    }
+
     /**
      * Shows a notification when a specific episode airs today.
      */
@@ -198,6 +245,52 @@ object NotificationHelper {
         }
     }
 
+    suspend fun showEpisodeReleaseNotificationSync(
+        context: Context,
+        showTitle: String,
+        showId: Long,
+        episodeString: String,
+        posterPath: String? = null
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val intent = buildDeepLinkIntent(context, showId, "tv")
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            (showId + 2_000_000L).toInt(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val bodyText = context.getString(R.string.notif_new_episode_body, episodeString, showTitle)
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val largeIcon = loadPosterBitmap(context, posterPath)
+                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(largeIcon)
+                .setContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                .setContentText(bodyText)
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(bodyText)
+                        .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
+                )
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setColor(ACCENT_COLOR)
+                .setColorized(true)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .build()
+
+            NotificationManagerCompat.from(context).notify((showId + 2_000_000L).toInt(), notification)
+        }
+    }
+
     // ── New-episodes notification ─────────────────────────────────────────────
 
     /**
@@ -231,6 +324,55 @@ object NotificationHelper {
         }
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            val largeIcon = loadPosterBitmap(context, posterPath)
+                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val notification = NotificationCompat.Builder(context, EPISODES_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(largeIcon)
+                .setContentTitle(context.getString(R.string.notif_new_episodes_title))
+                .setContentText(bodyText)
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(bodyText)
+                        .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                        .setSummaryText(context.getString(R.string.notif_update_summary))
+                )
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setColor(ACCENT_COLOR)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
+                .build()
+
+            NotificationManagerCompat.from(context).notify((showId + 1_000_000L).toInt(), notification)
+        }
+    }
+
+    suspend fun showNewEpisodesNotificationSync(
+        context: Context,
+        showTitle: String,
+        showId: Long,
+        newEpisodesCount: Int,
+        posterPath: String? = null
+    ) {
+        if (!hasNotificationPermission(context)) return
+
+        val intent = buildDeepLinkIntent(context, showId, "tv")
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            (showId + 1_000_000L).toInt(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val bodyText = if (newEpisodesCount == 1) {
+            context.getString(R.string.notif_new_episodes_body_single, showTitle)
+        } else {
+            context.getString(R.string.notif_new_episodes_body_plural, newEpisodesCount, showTitle)
+        }
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val largeIcon = loadPosterBitmap(context, posterPath)
                 ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
 

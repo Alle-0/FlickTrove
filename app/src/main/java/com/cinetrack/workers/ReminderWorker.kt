@@ -40,7 +40,7 @@ class ReminderWorker @AssistedInject constructor(
                     val rDate = item.releaseDate
                     if (!rDate.isNullOrEmpty() && rDate <= today) {
                         if (notifEnabled && hasPermission) {
-                            NotificationHelper.showReleaseNotification(
+                            NotificationHelper.showReleaseNotificationSync(
                                 context = context,
                                 movieTitle = item.displayName,
                                 movieId = item.id,
@@ -63,7 +63,7 @@ class ReminderWorker @AssistedInject constructor(
                     // Check if the show itself premieres today
                     if (item.firstAirDate == today) {
                         if (notifEnabled && hasPermission) {
-                            NotificationHelper.showReleaseNotification(
+                            NotificationHelper.showReleaseNotificationSync(
                                 context = context,
                                 movieTitle = item.displayName,
                                 movieId = item.id,
@@ -80,7 +80,7 @@ class ReminderWorker @AssistedInject constructor(
                     } else if (item.nextEpisodeAirDate == today) {
                         val epString = item.nextEpisodeString ?: "nuovo episodio"
                         if (notifEnabled && hasPermission) {
-                            NotificationHelper.showEpisodeReleaseNotification(
+                            NotificationHelper.showEpisodeReleaseNotificationSync(
                                 context = context,
                                 showTitle = item.displayName,
                                 showId = item.id,

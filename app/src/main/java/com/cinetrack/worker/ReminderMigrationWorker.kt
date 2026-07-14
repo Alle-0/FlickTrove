@@ -60,7 +60,7 @@ class ReminderMigrationWorker(
                 // Show notification only when both the user preference
                 // and the system permission are satisfied
                 if (notifEnabled && hasPermission) {
-                    NotificationHelper.showReleaseNotification(
+                    NotificationHelper.showReleaseNotificationSync(
                         context = applicationContext,
                         movieTitle = movie.title ?: movie.name ?: "Contenuto rilasciato",
                         movieId = movie.id,
