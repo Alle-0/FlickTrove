@@ -337,19 +337,20 @@ fun GlassyTopBar(
 
                         if (notificationCount > 0) {
                             val isPill = notificationCount > 9
+                            val badgeText = if (notificationCount > 99) "99+" else notificationCount.toString()
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     // Keep offset inside the enlarged 36dp box — no overflow, no clipping
                                     .offset(x = (-1).dp, y = 1.dp)
                                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
-                                    .then(if (isPill) Modifier.sizeIn(minWidth = 14.dp).height(14.dp) else Modifier.size(14.dp))
+                                    .then(if (isPill) Modifier.sizeIn(minWidth = 16.dp).height(14.dp) else Modifier.size(14.dp))
                                     .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(50))
-                                    .padding(horizontal = if (isPill) 4.dp else 0.dp),
+                                    .padding(horizontal = if (isPill) 3.dp else 0.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (isPill) "9+" else notificationCount.toString(),
+                                    text = badgeText,
                                     color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 8.sp,
                                     fontWeight = FontWeight.Black,

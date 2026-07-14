@@ -1851,8 +1851,9 @@ body {
   }
 
   .screenshot-caption {
-    padding: 1.2rem 0.5rem 0.6rem;
-    font-size: 0.78rem;
+    padding: 0.32rem 0.75rem;
+    font-size: 0.75rem;
+    bottom: 10px;
   }
 
   .faq-section {
