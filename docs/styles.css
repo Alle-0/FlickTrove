@@ -409,7 +409,7 @@ body {
   height: calc(100dvh - 66px);
   max-height: calc(100dvh - 66px);
   overflow-y: auto;
-  background: #090C12;
+  background: #090c12;
   border-left: 1px solid var(--border-color);
   border-top: 1px solid var(--border-color);
   box-shadow: -15px 0 35px rgba(0, 0, 0, 0.95);
