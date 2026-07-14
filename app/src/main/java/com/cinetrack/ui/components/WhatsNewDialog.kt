@@ -196,12 +196,23 @@ fun MarkdownNotesViewer(
         for (line in lines) {
             val trimmed = line.trim()
             when {
-                trimmed.startsWith("## ") || trimmed.startsWith("# ") -> {
+                trimmed.startsWith("###") || trimmed.startsWith("####") || trimmed.startsWith("#####") || trimmed.startsWith("######") -> {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = trimmed.dropWhile { it == '#' }.trim(),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = accentColor
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                trimmed.startsWith("#") -> {
                     // Skip if it duplicates the main release header
                     if (!trimmed.contains("Release v", ignoreCase = true)) {
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = trimmed.removePrefix("## ").removePrefix("# ").trim(),
+                            text = trimmed.dropWhile { it == '#' }.trim(),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.ExtraBold
                             ),
@@ -210,19 +221,8 @@ fun MarkdownNotesViewer(
                         Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
-                trimmed.startsWith("### ") -> {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = trimmed.removePrefix("### ").trim(),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = accentColor
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
-                trimmed.startsWith("* ") || trimmed.startsWith("- ") -> {
-                    val content = trimmed.removePrefix("* ").removePrefix("- ").trim()
+                trimmed.startsWith("* ") || trimmed.startsWith("- ") || trimmed.startsWith("+ ") || trimmed.startsWith("• ") -> {
+                    val content = trimmed.removePrefix("* ").removePrefix("- ").removePrefix("+ ").removePrefix("• ").trim()
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
