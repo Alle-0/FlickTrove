@@ -131,6 +131,7 @@ class FlickTroveWidget : GlanceAppWidget() {
         }
 
         val intent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             if (moviesToWatch.isNotEmpty()) {
                 val m = moviesToWatch[0].first
@@ -217,6 +218,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                             .background(Color(0xAA000000))
                             .cornerRadius(18.dp)
                             .clickable(actionStartActivity(Intent(context, MainActivity::class.java).apply {
+                                action = Intent.ACTION_VIEW
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                                 data = Uri.parse("flicktrove://search")
                             })),

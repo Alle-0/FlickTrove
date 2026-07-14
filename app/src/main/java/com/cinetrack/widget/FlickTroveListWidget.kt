@@ -178,6 +178,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
                         Spacer(modifier = GlanceModifier.defaultWeight())
                         
                         val searchIntent = Intent(context, MainActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                             data = Uri.parse("flicktrove://search")
                         }
@@ -205,6 +206,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
                             val movie = item.first
                             val bitmap = item.second
                             val intent = Intent(context, MainActivity::class.java).apply {
+                                action = Intent.ACTION_VIEW
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                                 data = Uri.parse("flicktrove://detail/${movie.mediaType}/${movie.id}")
                             }
