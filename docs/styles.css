@@ -406,12 +406,15 @@ body {
   width: 85%;
   max-width: 320px;
   height: calc(100vh - 66px);
-  background: rgba(9, 12, 18, 0.95);
+  height: calc(100dvh - 66px);
+  max-height: calc(100dvh - 66px);
+  overflow-y: auto;
+  background: #090C12;
   border-left: 1px solid var(--border-color);
   border-top: 1px solid var(--border-color);
-  box-shadow: -15px 0 35px rgba(0, 0, 0, 0.85);
+  box-shadow: -15px 0 35px rgba(0, 0, 0, 0.95);
   z-index: 1500;
-  padding: 2.5rem 1.75rem 2rem;
+  padding: 2.5rem 1.75rem calc(2rem + env(safe-area-inset-bottom, 10px));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
