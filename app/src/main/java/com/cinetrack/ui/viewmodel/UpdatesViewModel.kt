@@ -30,7 +30,7 @@ class UpdatesViewModel @Inject constructor(
         .map { movies ->
             val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
-                (it.newEpisodesFound ?: 0) > 0 || it.reminder == true 
+                (it.newEpisodesFound ?: 0) > 0 || it.reminder == true || it.migratedAt == today
             }
                 .sortedByDescending { it.clientUpdatedAt }
             val unreadNotifCount = movies.count {
@@ -72,7 +72,7 @@ class UpdatesViewModel @Inject constructor(
 
     fun clearAllNewEpisodes() {
         viewModelScope.launch {
-            val moviesWithUpdates = uiState.value.movies.filter { (it.newEpisodesFound ?: 0) > 0 }
+            val moviesWithUpdates = repository.getLocalMovies().filter { (it.newEpisodesFound ?: 0) > 0 }
             moviesWithUpdates.forEach { movie ->
                 repository.saveMovie(movie.copy(newEpisodesFound = 0))
             }
@@ -82,7 +82,7 @@ class UpdatesViewModel @Inject constructor(
     fun clearAllMigrated() {
         viewModelScope.launch {
             val today = java.time.LocalDate.now().toString()
-            val moviesWithMigrated = uiState.value.movies.filter { it.migratedAt == today }
+            val moviesWithMigrated = repository.getLocalMovies().filter { it.migratedAt == today }
             moviesWithMigrated.forEach { movie ->
                 repository.saveMovie(movie.copy(migratedAt = null))
             }
