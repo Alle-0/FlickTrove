@@ -428,6 +428,12 @@ body {
   right: 0;
 }
 
+html.drawer-open,
+body.drawer-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
 .mobile-drawer-links {
   list-style: none;
   display: flex;
