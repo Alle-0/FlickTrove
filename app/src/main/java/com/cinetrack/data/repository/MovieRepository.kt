@@ -846,24 +846,26 @@ class MovieRepository @Inject constructor(
     suspend fun getMovieRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getMovieRecommendations(id, page = page).results
     suspend fun getTVRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getTVRecommendations(id, page = page).results
 
-    suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = "IT").results
-
-    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> {
+    private suspend fun getRegionFromPrefs(): String {
         val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
         val resolvedLanguage = if (rawLanguage == "system") {
             java.util.Locale.getDefault().language
         } else {
             rawLanguage
         }
-        val region = if (resolvedLanguage == "it") "IT" else "US"
+        return if (resolvedLanguage == "it") "IT" else "US"
+    }
 
+    suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = getRegionFromPrefs()).results
+
+    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> {
         val today = java.time.LocalDate.now()
         return tmdbService.discoverMovies(
             page = page,
             options = mapOf(
                 "release_date.gte" to today.toString(),
                 "with_release_type" to "2|3",
-                "region" to region,
+                "region" to getRegionFromPrefs(),
                 "sort_by" to "popularity.desc"
             )
         ).results
@@ -878,7 +880,7 @@ class MovieRepository @Inject constructor(
             page = page,
             options = mapOf(
                 "first_air_date.gte" to today.toString(),
-                "watch_region" to "IT",
+                "watch_region" to getRegionFromPrefs(),
                 "sort_by" to "popularity.desc"
             )
         ).results

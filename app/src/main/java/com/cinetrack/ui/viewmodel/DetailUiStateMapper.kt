@@ -92,6 +92,12 @@ class DetailUiStateMapper @Inject constructor(
         val finalMovie = effectiveMovie
         val matchScore = calculateMatchScoreUseCase(finalMovie, localMovies)
 
+        val currentLang = java.util.Locale.getDefault().language.lowercase()
+        val watchRegion = if (currentLang == "it") "IT" else {
+            val userCountry = java.util.Locale.getDefault().country
+            if (userCountry.isNotBlank() && metadata.watchProviders?.results?.containsKey(userCountry) == true) userCountry else "US"
+        }
+
         return DetailUiState.Success(
             movieEntry = finalMovie,
             details = metadata,
@@ -106,9 +112,9 @@ class DetailUiStateMapper @Inject constructor(
             matchPercentage = matchScore,
             directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
             cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
-            streamingProviders = (metadata.watchProviders?.results?.get("IT")?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
-            buyRentProviders = ((metadata.watchProviders?.results?.get("IT")?.buy ?: emptyList()) + 
-                               (metadata.watchProviders?.results?.get("IT")?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
+            streamingProviders = (metadata.watchProviders?.results?.get(watchRegion)?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
+            buyRentProviders = ((metadata.watchProviders?.results?.get(watchRegion)?.buy ?: emptyList()) + 
+                               (metadata.watchProviders?.results?.get(watchRegion)?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
             trailers = (metadata.videos?.results?.let { videos -> 
                 videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
             } ?: emptyList()).toImmutableList(),
@@ -129,7 +135,7 @@ class DetailUiStateMapper @Inject constructor(
             loadingSeason = loadingSeason,
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
-            watchProviderLink = metadata.watchProviders?.results?.get("IT")?.link,
+            watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
             traktComments = traktComments.toImmutableList()
         )
     }

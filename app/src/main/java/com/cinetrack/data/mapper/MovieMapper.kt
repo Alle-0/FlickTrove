@@ -56,7 +56,7 @@ object MovieMapper {
             genreIds = response.genres?.map { it.id },
             numberOfSeasons = response.numberOfSeasons,
             numberOfEpisodes = response.numberOfEpisodes,
-            streamingProviderIds = response.watchProviders?.results?.get("IT")?.flatrate?.map { it.providerId },
+            streamingProviderIds = response.watchProviders?.results?.get(region)?.flatrate?.map { it.providerId },
             seasons = response.seasons,
             lastAirDate = response.lastEpisodeToAir?.airDate ?: response.lastAirDate,
             nextEpisodeAirDate = response.nextEpisodeToAir?.airDate,
