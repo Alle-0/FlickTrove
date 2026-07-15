@@ -19,8 +19,8 @@ data class FilterModalConfig(
     val triggerBounds: Rect? = null,
     val isVisti: Boolean = false,
     val category: String = "movie",
-    val sortConfig: com.cinetrack.data.models.SortConfig,
-    val onSortConfigChanged: (com.cinetrack.data.models.SortConfig) -> Unit
+    val sortConfig: com.cinetrack.data.model.SortConfig,
+    val onSortConfigChanged: (com.cinetrack.data.model.SortConfig) -> Unit
 )
 
 val LocalActiveFilterConfig = compositionLocalOf<MutableState<FilterModalConfig?>> { error("No LocalActiveFilterConfig provided") }

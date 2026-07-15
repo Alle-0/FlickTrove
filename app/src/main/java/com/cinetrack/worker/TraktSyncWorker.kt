@@ -136,7 +136,7 @@ class TraktSyncWorker @AssistedInject constructor(
             val total = history.size
             var current = 0
             
-            val moviesToUpdate = mutableListOf<com.cinetrack.data.Movie>()
+            val moviesToUpdate = mutableListOf<com.cinetrack.data.model.Movie>()
 
             for (item in history) {
                 current++
@@ -273,7 +273,7 @@ class TraktSyncWorker @AssistedInject constructor(
 
                 android.util.Log.e("TRAKT_DEBUG", "SYNC: Ricevuti ${watchedShows.size} show da Trakt.")
 
-                val episodeUpdates = mutableListOf<com.cinetrack.data.Movie>()
+                val episodeUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
                 val processedShowTmdbIds = mutableSetOf<Long>()
 
                 suspend fun processShowEpisodes(
@@ -465,7 +465,7 @@ class TraktSyncWorker @AssistedInject constructor(
                 try {
                     val ratedMovies = traktService.getUserMovieRatings()
                     val ratedShows  = traktService.getUserShowRatings()
-                    val ratingUpdates = mutableListOf<com.cinetrack.data.Movie>()
+                    val ratingUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
 
                     for (item in ratedMovies + ratedShows) {
                         val tmdbId    = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: continue
@@ -563,7 +563,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         if (tmdbId != null) Pair(tmdbId, mt) else null
                     }.toHashSet()
 
-                    val watchlistUpdates = mutableListOf<com.cinetrack.data.Movie>()
+                    val watchlistUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
                     val localMovies      = movieRepository.getLocalMovies()
 
                     // favorite = true per tutto ciò che è in watchlist remota
@@ -645,7 +645,7 @@ class TraktSyncWorker @AssistedInject constructor(
 
             // ── Fase 4: Notes (solo utenti VIP, 403 = skip silenzioso) ───────
             try {
-                val noteUpdates = mutableListOf<com.cinetrack.data.Movie>()
+                val noteUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
 
                 val movieNotesResponse = traktService.getUserMovieNotes()
                 val showNotesResponse  = traktService.getUserShowNotes()
@@ -705,7 +705,7 @@ class TraktSyncWorker @AssistedInject constructor(
 
                         val itemsResponse = traktService.getListItems(traktId)
                         val compositeIds = mutableListOf<String>()
-                        val missingMovies = mutableListOf<com.cinetrack.data.Movie>()
+                        val missingMovies = mutableListOf<com.cinetrack.data.model.Movie>()
 
                         if (itemsResponse.isSuccessful) {
                             itemsResponse.body()?.forEach { item ->

@@ -53,7 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.theme.HazeStyles

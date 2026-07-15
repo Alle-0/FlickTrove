@@ -53,7 +53,7 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.flow.first
 import com.cinetrack.di.dataStore
 import com.cinetrack.MainActivity
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.database.FlickTroveDatabase
 
 class FlickTroveListWidget : GlanceAppWidget() {

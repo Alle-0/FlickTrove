@@ -47,7 +47,7 @@ import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.shared.PremiumConfirmDialog
 import com.cinetrack.ui.components.shared.ConfirmType

@@ -45,6 +45,7 @@ import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.roundToInt
+import com.cinetrack.ui.components.dialog.HomeFilterModal
 
 // ════════════════════════════════════════════════════════════════════
 // Improved Loading Skeleton

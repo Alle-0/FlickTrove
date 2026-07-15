@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.cinetrack.ui.utils.GlobalErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import com.cinetrack.ui.components.common.GlobalErrorToast
 
 /**
  * Thin ViewModel that exposes GlobalErrorHandler to the UI layer.

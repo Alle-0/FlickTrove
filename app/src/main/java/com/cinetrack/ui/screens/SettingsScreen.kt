@@ -59,7 +59,7 @@ import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.viewmodel.*
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.settings.*
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
 import androidx.compose.ui.res.vectorResource

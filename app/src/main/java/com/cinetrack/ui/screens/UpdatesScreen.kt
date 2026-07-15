@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.ui.components.updates.*
 import com.cinetrack.ui.assets.CustomIcons
@@ -82,7 +82,7 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.utils.bounceClick
 
 @OptIn(ExperimentalSharedTransitionApi::class)

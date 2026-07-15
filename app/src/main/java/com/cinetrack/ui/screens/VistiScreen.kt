@@ -41,14 +41,14 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cinetrack.data.Movie
-import com.cinetrack.ui.components.MovieCard
-import com.cinetrack.ui.components.CategoryButton
-import com.cinetrack.ui.components.CategoryTabSelector
+import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.components.card.MovieCard
+import com.cinetrack.ui.components.common.CategoryButton
+import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.viewmodel.VistiViewModel
@@ -67,7 +67,8 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.HomeFilterModal
+import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.card.MovieListCard
 
 object VistiTab : Tab {
     override val options: TabOptions
@@ -154,7 +155,7 @@ fun VistiScreenContent(
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
     val activeHazeState = hazeState ?: remember { HazeState() }
 
-    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
+    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.model.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
         if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
             if (uiState.movies.isNotEmpty()) {
@@ -243,7 +244,7 @@ fun VistiScreenContent(
                             } ?: emptyList()
                         }
                         if (columns == 1) {
-                            com.cinetrack.ui.components.MovieListCard(
+                            com.cinetrack.ui.components.card.MovieListCard(
                                 movie = movie,
                                 modifier = Modifier.fillMaxWidth(),
                                 isFavorite = movie.favorite,

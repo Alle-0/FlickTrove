@@ -4,10 +4,10 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
-import com.cinetrack.data.models.DiscoveryFilters
-import com.cinetrack.data.models.SortConfig
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.DiscoveryFilters
+import com.cinetrack.data.model.SortConfig
+import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository

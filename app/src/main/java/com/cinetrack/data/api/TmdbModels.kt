@@ -1,8 +1,8 @@
 package com.cinetrack.data.api
 
 import androidx.compose.runtime.Stable
-import com.cinetrack.data.Movie
-import com.cinetrack.data.Genre
+import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.Genre
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -140,8 +140,8 @@ data class MovieDetailResponse(
     @SerialName("watch/providers") val watchProviders: WatchProvidersResponse? = null,
     @SerialName("belongs_to_collection") val belongsToCollection: Collection? = null,
     val status: String? = null,
-    @SerialName("next_episode_to_air") val nextEpisodeToAir: com.cinetrack.data.models.Episode? = null,
-    @SerialName("last_episode_to_air") val lastEpisodeToAir: com.cinetrack.data.models.Episode? = null,
+    @SerialName("next_episode_to_air") val nextEpisodeToAir: com.cinetrack.data.model.Episode? = null,
+    @SerialName("last_episode_to_air") val lastEpisodeToAir: com.cinetrack.data.model.Episode? = null,
     @SerialName("last_air_date") val lastAirDate: String? = null,
     val tagline: String? = null,
     val budget: Long? = 0,
@@ -150,7 +150,7 @@ data class MovieDetailResponse(
     @SerialName("production_companies") val productionCompanies: List<ProductionCompany>? = null,
     @SerialName("number_of_seasons") val numberOfSeasons: Int? = 0,
     @SerialName("number_of_episodes") val numberOfEpisodes: Int? = 0,
-    val seasons: List<com.cinetrack.data.models.Season>? = null,
+    val seasons: List<com.cinetrack.data.model.Season>? = null,
     @SerialName("release_dates") val releaseDates: ReleaseDatesResponse? = null,
     @SerialName("content_ratings") val contentRatings: ContentRatingsResponse? = null,
     @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,

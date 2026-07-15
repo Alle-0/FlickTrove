@@ -1,12 +1,12 @@
 package com.cinetrack.ui.viewmodel
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.api.TraktComment
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.mapper.MovieMapper
-import com.cinetrack.data.models.Season
+import com.cinetrack.data.model.Season
 import com.cinetrack.domain.CalculateMatchScoreUseCase
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap

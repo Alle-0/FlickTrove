@@ -3,7 +3,7 @@ package com.cinetrack.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.SettingsRepository
 import com.cinetrack.util.NotificationHelper

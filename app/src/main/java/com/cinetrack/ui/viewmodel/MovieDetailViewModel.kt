@@ -4,7 +4,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
@@ -16,7 +16,7 @@ import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.ErrorMapper
-import com.cinetrack.utils.TranslationManager
+import com.cinetrack.util.TranslationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -73,7 +73,7 @@ class MovieDetailViewModel @Inject constructor(
     private val _metadata = MutableStateFlow<MovieDetailResponse?>(null)
     private val _externalRatings = MutableStateFlow(ExternalRatings())
     private val _loadingSeason = MutableStateFlow(false)
-    private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.models.Season>>(emptyMap())
+    private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.model.Season>>(emptyMap())
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
     private val _traktComments = MutableStateFlow<List<com.cinetrack.data.api.TraktComment>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
@@ -262,7 +262,7 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { repository.fetchComments(traktId, mediaType == "tv") }
+                val commentsDeferred = async { repository.fetchComments(traktId, tmdbId, mediaType == "tv") }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
@@ -721,7 +721,7 @@ private data class MetadataState(
     val metadata: MovieDetailResponse?,
     val external: ExternalRatings,
     val loadingS: Boolean,
-    val seasonD: Map<Int, com.cinetrack.data.models.Season>,
+    val seasonD: Map<Int, com.cinetrack.data.model.Season>,
     val collectionM: List<Movie>,
     val errorMsg: String?,
     val traktComments: List<com.cinetrack.data.api.TraktComment>

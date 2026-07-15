@@ -1,6 +1,7 @@
 package com.cinetrack.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.cinetrack.ui.components.common.CinematicBackground
 
 // Core Brand Colors
 val DarkGrey = Color(0xFF0A0A0A)

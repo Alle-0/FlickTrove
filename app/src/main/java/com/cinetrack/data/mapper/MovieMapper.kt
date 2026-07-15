@@ -1,6 +1,6 @@
 package com.cinetrack.data.mapper
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.ExternalIds
 import com.cinetrack.data.api.MovieDetailResponse
 
@@ -26,11 +26,11 @@ object MovieMapper {
         }
 
         val topCast = response.credits?.cast?.take(15)?.distinctBy { it.id }?.map { 
-            com.cinetrack.data.models.PersonData(id = it.id, name = it.name, profilePath = it.profilePath) 
+            com.cinetrack.data.model.PersonData(id = it.id, name = it.name, profilePath = it.profilePath) 
         }
 
         val directors = response.credits?.crew?.filter { it.job == "Director" }?.distinctBy { it.id }?.map {
-            com.cinetrack.data.models.PersonData(id = it.id, name = it.name, profilePath = it.profilePath)
+            com.cinetrack.data.model.PersonData(id = it.id, name = it.name, profilePath = it.profilePath)
         }
         val mainDirector = directors?.firstOrNull()
 

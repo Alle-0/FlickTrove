@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.composed
 import coil.request.ImageRequest
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.ExternalRatings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

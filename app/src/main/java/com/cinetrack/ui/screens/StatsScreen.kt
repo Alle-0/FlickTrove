@@ -82,7 +82,7 @@ import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.DarkSurface
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.*
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -106,6 +106,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.card.MovieCard
 
 object StatsTab : Tab {
     override val options: TabOptions
@@ -320,7 +322,7 @@ fun StatsScreenContent(
                                                             items = uiState.moviesInSelectedRange,
                                                             key = { "${it.id}_${it.mediaType}" }
                                                         ) { movie ->
-                                                            com.cinetrack.ui.components.MovieCard(
+                                                            com.cinetrack.ui.components.card.MovieCard(
                                                                 movie = movie,
                                                                 cardWidth = 100.dp,
                                                                 isWatched = movie.watched,

@@ -1,6 +1,6 @@
 package com.cinetrack.data.api
 
-import com.cinetrack.data.models.Season
+import com.cinetrack.data.model.Season
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

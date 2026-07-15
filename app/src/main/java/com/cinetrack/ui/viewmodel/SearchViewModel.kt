@@ -4,14 +4,14 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.api.TMDBSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import com.cinetrack.data.models.SortConfig
+import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.api.TMDBService
 import com.cinetrack.ui.utils.ErrorMapper
 import com.cinetrack.ui.utils.ActionFeedbackManager
@@ -46,7 +46,7 @@ data class SearchUiState(
     val recentSearches: ImmutableList<String> = persistentListOf(),
     val sortConfig: SortConfig = SortConfig(sortType = "popularity"),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
-    val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences(),
+    val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
     val togglingIds: PersistentSet<Long> = persistentSetOf(),
     val errorMessage: String? = null,
     val suggestedFilters: ImmutableList<FilterPill> = persistentListOf()
@@ -60,7 +60,7 @@ class SearchViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val tmdbService: TMDBService,
-    private val networkMonitor: com.cinetrack.utils.NetworkMonitor,
+    private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
@@ -728,7 +728,7 @@ class SearchViewModel @Inject constructor(
         overview = overview
     )
 
-    fun updatePreferences(prefs: com.cinetrack.data.models.UserPreferences) {
+    fun updatePreferences(prefs: com.cinetrack.data.model.UserPreferences) {
         viewModelScope.launch {
             try {
                 preferenceRepository.updateAll(prefs)

@@ -32,7 +32,7 @@ import com.cinetrack.ui.theme.OnSurfaceMuted
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.VibrationHelper
-import com.cinetrack.utils.Keys
+import com.cinetrack.util.Keys
 import com.google.firebase.auth.FirebaseUser
 
 @Composable

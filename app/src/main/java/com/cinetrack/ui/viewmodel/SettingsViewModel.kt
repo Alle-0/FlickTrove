@@ -24,12 +24,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.cinetrack.data.repository.PreferenceRepository
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.util.IconManager
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import com.cinetrack.ui.components.common.CircularRevealOverlay
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -382,8 +383,8 @@ class SettingsViewModel @Inject constructor(
                 val response = traktService.get().getAccessToken(
                     com.cinetrack.data.api.TraktTokenRequest(
                         code = code,
-                        client_id = com.cinetrack.utils.Keys.getTraktKey(),
-                        client_secret = com.cinetrack.utils.Keys.getTraktSecret(),
+                        client_id = com.cinetrack.util.Keys.getTraktKey(),
+                        client_secret = com.cinetrack.util.Keys.getTraktSecret(),
                         redirect_uri = "flicktrove://auth"
                     )
                 )
@@ -508,7 +509,7 @@ class SettingsViewModel @Inject constructor(
             _isFeedbackLoading.value = true
             try {
                 val userId = auth.currentUser?.uid ?: "anonymous"
-                val feedback = com.cinetrack.data.models.Feedback(
+                val feedback = com.cinetrack.data.model.Feedback(
                     userId = userId,
                     userEmail = email.ifBlank { auth.currentUser?.email ?: "" },
                     title = title,

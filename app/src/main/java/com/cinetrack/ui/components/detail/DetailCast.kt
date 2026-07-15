@@ -37,6 +37,7 @@ import com.cinetrack.data.api.CrewMember
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import com.cinetrack.ui.components.card.PersonCard
 
 /**
  * DetailCast

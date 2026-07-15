@@ -1,8 +1,8 @@
 package com.cinetrack.domain
 
-import com.cinetrack.data.Movie
-import com.cinetrack.data.models.SortConfig
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.SortConfig
+import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.ui.viewmodel.HomeUiState
 import kotlinx.coroutines.flow.*

@@ -68,7 +68,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -102,6 +102,7 @@ import com.cinetrack.util.toComposeColor
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.cinetrack.ui.components.dialog.EpisodesBottomSheet
 
 data class MovieDetailScreen(
     val movieId: Long,

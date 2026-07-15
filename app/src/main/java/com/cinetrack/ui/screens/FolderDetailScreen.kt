@@ -30,12 +30,12 @@ import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.viewmodel.FolderDetailViewModel
 import com.cinetrack.ui.viewmodel.FolderDetailUiState
-import com.cinetrack.ui.components.MovieCard
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.card.MovieCard
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.DeleteFolderDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -50,6 +50,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import androidx.compose.runtime.remember
+import com.cinetrack.ui.components.card.MovieListCard
 
 data class FolderDetailTab(
     val folderId: String,
@@ -133,7 +134,7 @@ fun FolderDetailScreenContent(
 
     val successStateForScroll = uiState as? FolderDetailUiState.Success
     val currentActiveTab = successStateForScroll?.activeTab ?: "all"
-    val currentSortConfig = successStateForScroll?.sortConfig ?: com.cinetrack.data.models.SortConfig()
+    val currentSortConfig = successStateForScroll?.sortConfig ?: com.cinetrack.data.model.SortConfig()
 
     LaunchedEffect(currentActiveTab, currentSortConfig, successStateForScroll != null) {
         if (successStateForScroll != null) {
@@ -296,7 +297,7 @@ fun FolderDetailScreenContent(
                                         }
                                         
                                         if (columns == 1) {
-                                            com.cinetrack.ui.components.MovieListCard(
+                                            com.cinetrack.ui.components.card.MovieListCard(
                                                 movie = movie,
                                                 modifier = Modifier.fillMaxWidth(),
                                                 isFavorite = movie.favorite,
@@ -408,7 +409,7 @@ fun FolderDetailScreenContent(
                                     val counts = listOf(state.movieCount + state.tvCount, state.movieCount, state.tvCount)
                                     val selectedIndex = when(state.activeTab) { "movie" -> 1; "tv" -> 2; else -> 0 }
                                     
-                                    com.cinetrack.ui.components.CategoryTabSelector(
+                                    com.cinetrack.ui.components.common.CategoryTabSelector(
                                         options = options,
                                         counts = counts,
                                         selectedIndex = selectedIndex,

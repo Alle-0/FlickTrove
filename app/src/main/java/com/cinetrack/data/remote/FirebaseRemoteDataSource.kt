@@ -1,7 +1,7 @@
 package com.cinetrack.data.remote
 
-import com.cinetrack.data.Movie
-import com.cinetrack.data.models.Folder
+import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.Folder
 import com.cinetrack.data.local.entities.FolderEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

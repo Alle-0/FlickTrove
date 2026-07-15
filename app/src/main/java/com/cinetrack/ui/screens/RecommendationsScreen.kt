@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -89,6 +89,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.card.MovieListCard
+import com.cinetrack.ui.components.card.MovieCard
+import com.cinetrack.ui.components.common.*
 
 object RecommendationsTab : Tab {
     override val options: TabOptions
@@ -451,7 +455,7 @@ fun RecommendationsScreenContent(
                         ) { index, movie ->
                             val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
                             if (columns == 1) {
-                                com.cinetrack.ui.components.MovieListCard(
+                                com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie.copy(personalRating = movieStatus?.personalRating),
                                     modifier = Modifier.fillMaxWidth(),
                                     isFavorite = movieStatus?.favorite ?: false,

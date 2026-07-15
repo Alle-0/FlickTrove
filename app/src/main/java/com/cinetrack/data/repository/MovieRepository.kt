@@ -1,14 +1,14 @@
 package com.cinetrack.data.repository
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.OmdbService
 import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.api.Person
 import com.cinetrack.data.api.PersonSearchResult
-import com.cinetrack.data.models.Season
+import com.cinetrack.data.model.Season
 import com.cinetrack.data.api.TMDBService
 import com.cinetrack.data.api.TMDBSearchResult
-import com.cinetrack.data.models.ExtraRatings
+import com.cinetrack.data.model.ExtraRatings
 import com.cinetrack.data.local.dao.CacheDao
 import com.cinetrack.data.local.dao.FavoriteDao
 import com.cinetrack.data.local.dao.FolderDao
@@ -16,7 +16,7 @@ import com.cinetrack.data.local.dao.SearchHistoryDao
 import com.cinetrack.data.remote.FirebaseRemoteDataSource
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
-import com.cinetrack.data.models.Folder
+import com.cinetrack.data.model.Folder
 import com.cinetrack.data.sync.SyncProgress
 import com.cinetrack.domain.UpdateEpisodesUseCase
 import kotlinx.coroutines.CancellationException
@@ -434,7 +434,7 @@ class MovieRepository @Inject constructor(
 
         repositoryScope.launch {
             try {
-                val folder = com.cinetrack.data.models.Folder(
+                val folder = com.cinetrack.data.model.Folder(
                     id = updatedEntity.id,
                     name = updatedEntity.name,
                     icon = updatedEntity.icon,
@@ -514,7 +514,7 @@ class MovieRepository @Inject constructor(
                     firebaseRemoteDataSource.deleteFolder(folder.id)
                     folderDao.deleteById(folder.id)
                 } else if (folder.syncStatus == "pending") {
-                    val folderDto = com.cinetrack.data.models.Folder(
+                    val folderDto = com.cinetrack.data.model.Folder(
                         id = folder.id,
                         name = folder.name,
                         icon = folder.icon,
@@ -696,13 +696,13 @@ class MovieRepository @Inject constructor(
         try {
             val currentPrefs = preferenceRepository.userPreferencesFlow
                 // Fix: Emesso UserPreferences() corretto al posto di SyncProgress
-                .catch { emit(com.cinetrack.data.models.UserPreferences()) }
-                .firstOrNull() ?: com.cinetrack.data.models.UserPreferences()
+                .catch { emit(com.cinetrack.data.model.UserPreferences()) }
+                .firstOrNull() ?: com.cinetrack.data.model.UserPreferences()
                 
             // Helper to parse SortConfig from Firebase Map
-            fun parseSortConfig(map: Any?, default: com.cinetrack.data.models.SortConfig): com.cinetrack.data.models.SortConfig {
+            fun parseSortConfig(map: Any?, default: com.cinetrack.data.model.SortConfig): com.cinetrack.data.model.SortConfig {
                 if (map !is Map<*, *>) return default
-                return com.cinetrack.data.models.SortConfig(
+                return com.cinetrack.data.model.SortConfig(
                     sortType = map["sortType"] as? String ?: default.sortType,
                     sortDirection = map["sortDirection"] as? String ?: default.sortDirection,
                     selectedGenres = (map["selectedGenres"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedGenres,
@@ -712,9 +712,9 @@ class MovieRepository @Inject constructor(
             }
 
             // Helper to parse DiscoveryFilters from Firebase Map
-            fun parseDiscoveryFilters(map: Any?, default: com.cinetrack.data.models.DiscoveryFilters): com.cinetrack.data.models.DiscoveryFilters {
+            fun parseDiscoveryFilters(map: Any?, default: com.cinetrack.data.model.DiscoveryFilters): com.cinetrack.data.model.DiscoveryFilters {
                 if (map !is Map<*, *>) return default
-                return com.cinetrack.data.models.DiscoveryFilters(
+                return com.cinetrack.data.model.DiscoveryFilters(
                     selectedGenres = (map["selectedGenres"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedGenres,
                     selectedProviders = (map["selectedProviders"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedProviders,
                     selectedDecades = (map["selectedDecades"] as? List<*>)?.filterIsInstance<String>() ?: default.selectedDecades,
@@ -745,7 +745,7 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    suspend fun savePreferencesRemote(prefs: com.cinetrack.data.models.UserPreferences) {
+    suspend fun savePreferencesRemote(prefs: com.cinetrack.data.model.UserPreferences) {
         repositoryScope.launch {
             try {
                 // Convert to Map for Firestore
@@ -956,9 +956,9 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchComments(id: String, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
+    suspend fun fetchComments(id: String, tmdbId: Long, isTv: Boolean): List<com.cinetrack.data.api.TraktComment> {
         val type = if (isTv) "shows" else "movies"
-        return try {
+        val traktComments = try {
             traktService.getComments(
                 type = type,
                 id = id,
@@ -969,6 +969,28 @@ class MovieRepository @Inject constructor(
             if (e is CancellationException) throw e
             emptyList()
         }
+
+        val tmdbReviews = try {
+            val reviewsRes = if (isTv) tmdbService.getTVReviews(tmdbId) else tmdbService.getMovieReviews(tmdbId)
+            reviewsRes.results.map { review ->
+                com.cinetrack.data.api.TraktComment(
+                    id = review.id.hashCode().toLong(),
+                    created_at = review.createdAt,
+                    comment = review.content,
+                    review = true,
+                    likes = review.authorDetails?.rating?.let { (it * 10).toInt() } ?: 0,
+                    user = com.cinetrack.data.api.TraktUser(
+                        username = review.authorDetails?.username ?: review.author,
+                        name = review.authorDetails?.name?.takeIf { !it.isBlank() } ?: review.author
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            emptyList()
+        }
+
+        return (traktComments + tmdbReviews).distinctBy { it.comment?.take(40) }
     }
 }
 

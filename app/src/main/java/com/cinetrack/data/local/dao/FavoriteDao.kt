@@ -1,7 +1,7 @@
 package com.cinetrack.data.local.dao
 
 import androidx.room.*
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -32,13 +32,13 @@ interface FavoriteDao {
         mediaType: String,
         runtime: Int?,
         episodeRunTime: List<Int>?,
-        genres: List<com.cinetrack.data.Genre>?,
-        topCastData: List<com.cinetrack.data.models.PersonData>?,
-        directorData: List<com.cinetrack.data.models.PersonData>?,
+        genres: List<com.cinetrack.data.model.Genre>?,
+        topCastData: List<com.cinetrack.data.model.PersonData>?,
+        directorData: List<com.cinetrack.data.model.PersonData>?,
         directorId: Long?,
         directorName: String?,
         directorProfilePath: String?,
-        seasons: List<com.cinetrack.data.models.Season>?,
+        seasons: List<com.cinetrack.data.model.Season>?,
         numberOfSeasons: Int?,
         numberOfEpisodes: Int?
     )
