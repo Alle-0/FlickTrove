@@ -505,11 +505,13 @@ fun HomeFilterModal(
                                 badgeCount = localSortConfig.selectedProviders.size,
                                 onToggle = { expandedSection = if (expandedSection == "platforms") null else "platforms" }
                             ) {
+                                val currentLang = configuration.locales[0]?.language?.lowercase() ?: java.util.Locale.getDefault().language.lowercase()
+                                val availableProviders = remember(currentLang) { ProviderConstants.getAvailableProviders(currentLang) }
                                 LazyRow(
                                     contentPadding = PaddingValues(horizontal = 12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    items(ProviderConstants.ALL_PROVIDERS, key = { it.providerId }, contentType = { "provider" }) { provider ->
+                                    items(availableProviders, key = { it.providerId }, contentType = { "provider" }) { provider ->
                                         val isSelected = provider.providerId in localSortConfig.selectedProviders
                                         ProviderItem(
                                             name = provider.providerName,
