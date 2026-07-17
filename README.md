@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://alle-0.github.io/FlickTrove/"><img src="https://img.shields.io/badge/Website-Live_Showcase-00F2FE?style=for-the-badge&logo=googlechrome&logoColor=black" alt="Official Website"></a>
   <a href="https://github.com/Alle-0/FlickTrove/releases/latest"><img src="https://img.shields.io/github/v/release/Alle-0/FlickTrove?label=Latest%20Release&style=for-the-badge&color=2DD4BF&logo=github" alt="Latest Release"></a>
+  <a href="https://www.reddit.com/r/FlickTrove/"><img src="https://img.shields.io/badge/Reddit-r/FlickTrove-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Reddit Community"></a>
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
@@ -213,6 +214,10 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 
 - 👨‍💻 **Alessandro Basile** - <alessandrobasile909@gmail.com>
 - 🔗 **Project Link:** [FlickTrove on GitHub](https://github.com/Alle-0/FlickTrove) or [FlickTrove site](https://alle-0.github.io/FlickTrove)
+
+**Community:**
+
+- 💬 **Reddit:** Join [r/FlickTrove](https://www.reddit.com/r/FlickTrove/) to report bugs, suggest new features, and talk about the app's future!
 
 **Credits & Useful Resources:**
 
