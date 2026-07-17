@@ -1,11 +1,11 @@
 package com.cinetrack.data.repository
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.dao.FavoriteDao
 import com.cinetrack.data.local.dao.FolderDao
 import com.cinetrack.data.local.entities.FolderEntity
-import com.cinetrack.data.models.BackupData
-import com.cinetrack.data.models.TraktExportItem
+import com.cinetrack.data.model.BackupData
+import com.cinetrack.data.model.TraktExportItem
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.Dispatchers

@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.converters.FlickTroveConverters
 import com.cinetrack.data.local.dao.CacheDao
 import com.cinetrack.data.local.dao.FavoriteDao

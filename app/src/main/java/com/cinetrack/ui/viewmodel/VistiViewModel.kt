@@ -4,8 +4,8 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
-import com.cinetrack.data.models.SortConfig
+import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
@@ -33,7 +33,7 @@ data class VistiUiState(
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val sortConfig: SortConfig = SortConfig(),
-    val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences()
+    val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences()
 )
 
 @HiltViewModel

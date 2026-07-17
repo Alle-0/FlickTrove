@@ -1,10 +1,10 @@
 package com.cinetrack.domain
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.local.entities.FolderEntity
-import com.cinetrack.data.models.SortConfig
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.SortConfig
+import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.ui.viewmodel.FilterPill
 import com.cinetrack.ui.viewmodel.SearchUiState
 import kotlinx.collections.immutable.PersistentSet
@@ -74,8 +74,8 @@ class GetSearchUiStateUseCase @Inject constructor() {
         val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
         val lowerQuery = query.lowercase()
-        val availableGenres = if (category == "movie") com.cinetrack.data.GenreConstants.MOVIE_GENRES else com.cinetrack.data.GenreConstants.TV_GENRES
-        val keywordToGenre = com.cinetrack.data.KeywordDictionary.getDictionaryForLanguage(currentState.preferences.contentLanguage)
+        val availableGenres = if (category == "movie") com.cinetrack.data.model.GenreConstants.MOVIE_GENRES else com.cinetrack.data.model.GenreConstants.TV_GENRES
+        val keywordToGenre = com.cinetrack.data.model.KeywordDictionary.getDictionaryForLanguage(currentState.preferences.contentLanguage)
 
         val dynamicKeywords = rawDynamicKeywords.filter { it.isKeyword }
             
@@ -85,15 +85,15 @@ class GetSearchUiStateUseCase @Inject constructor() {
         sortConfig.selectedGenres.forEach { selectedId ->
             val genre = availableGenres.find { it.id == selectedId }
             if (genre != null) {
-                val locName = com.cinetrack.data.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
+                val locName = com.cinetrack.data.model.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
                 suggestedFilters.add(FilterPill(genre.id, locName, isKeyword = false))
             }
         }
 
         if (query.length >= 2) {
-            availableGenres.filter { it.name.lowercase().contains(lowerQuery) || com.cinetrack.data.GenreConstants.getLocalizedName(it.id, "en", it.name).lowercase().contains(lowerQuery) }.forEach { genre ->
+            availableGenres.filter { it.name.lowercase().contains(lowerQuery) || com.cinetrack.data.model.GenreConstants.getLocalizedName(it.id, "en", it.name).lowercase().contains(lowerQuery) }.forEach { genre ->
                 if (!suggestedFilters.any { it.id == genre.id }) {
-                    val locName = com.cinetrack.data.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
+                    val locName = com.cinetrack.data.model.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)
                     suggestedFilters.add(FilterPill(genre.id, locName, isKeyword = false))
                 }
             }

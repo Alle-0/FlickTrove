@@ -21,9 +21,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.Collection
-import com.cinetrack.ui.components.MovieCard
+import com.cinetrack.ui.components.card.MovieCard
 
 /**
  * DetailRecommendations

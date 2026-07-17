@@ -29,7 +29,7 @@ import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
-import com.cinetrack.utils.AudioRecorderHelper
+import com.cinetrack.util.AudioRecorderHelper
 import androidx.compose.foundation.border
 import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable

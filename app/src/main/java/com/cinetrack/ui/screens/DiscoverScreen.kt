@@ -19,9 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cinetrack.data.Movie
-import com.cinetrack.ui.components.CinematicBackground
-import com.cinetrack.ui.components.MovieCard
+import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.card.MovieCard
 
 import com.cinetrack.ui.viewmodel.DiscoverViewModel
 import dev.chrisbanes.haze.haze
@@ -50,7 +50,8 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.HomeFilterModal
+import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.card.MovieListCard
 
 object DiscoverTab : Tab {
     var requestedType: String by androidx.compose.runtime.mutableStateOf("popular_movies")
@@ -247,7 +248,7 @@ fun DiscoverScreenContent(
                             } ?: emptyList()
                             
                             if (columns == 1) {
-                                com.cinetrack.ui.components.MovieListCard(
+                                com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie,
                                     modifier = Modifier.fillMaxWidth(),
                                     isFavorite = movieStatus?.favorite ?: false,

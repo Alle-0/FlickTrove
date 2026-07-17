@@ -2,7 +2,7 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.entities.FolderEntity
 
 /**

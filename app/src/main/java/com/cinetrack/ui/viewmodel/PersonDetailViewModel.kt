@@ -4,7 +4,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.Person
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
@@ -26,7 +26,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import com.cinetrack.data.repository.PreferenceRepository
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.UserPreferences
 
 data class PersonDetailUiState(
     val personId: Long = 0L,

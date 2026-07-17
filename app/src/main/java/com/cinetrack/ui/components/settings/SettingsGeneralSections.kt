@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.R
-import com.cinetrack.ui.components.FlickTroveSwitch
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.VibrationHelper
 import com.cinetrack.ui.utils.bounceClick

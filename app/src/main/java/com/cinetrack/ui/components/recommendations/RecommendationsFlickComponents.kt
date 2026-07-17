@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
@@ -290,8 +290,8 @@ fun FlickMovieCard(
                 val genres = remember(movie.genreIds, movie.genreNamesString, contextLocale) {
                     if (!movie.genreIds.isNullOrEmpty()) {
                         movie.genreIds!!.mapNotNull { id ->
-                            val defaultName = com.cinetrack.data.GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: ""
-                            val localized = com.cinetrack.data.GenreConstants.getLocalizedName(id, contextLocale, defaultName)
+                            val defaultName = com.cinetrack.data.model.GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: ""
+                            val localized = com.cinetrack.data.model.GenreConstants.getLocalizedName(id, contextLocale, defaultName)
                             localized.takeIf { it.isNotEmpty() }
                         }.joinToString(", ")
                     } else {

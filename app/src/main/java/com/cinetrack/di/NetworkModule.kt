@@ -7,7 +7,7 @@ import com.cinetrack.data.api.NewsService
 import com.cinetrack.data.api.GithubService
 import com.cinetrack.data.api.TraktAuthInterceptor
 import com.cinetrack.data.api.TraktAuthenticator
-import com.cinetrack.utils.Keys
+import com.cinetrack.util.Keys
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

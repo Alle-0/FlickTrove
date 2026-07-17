@@ -1,6 +1,6 @@
 package com.cinetrack.domain
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import javax.inject.Inject
 

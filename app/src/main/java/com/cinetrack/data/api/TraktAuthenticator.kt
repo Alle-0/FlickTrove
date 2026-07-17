@@ -1,7 +1,7 @@
 package com.cinetrack.data.api
 
 import com.cinetrack.data.repository.TraktAuthRepository
-import com.cinetrack.utils.Keys
+import com.cinetrack.util.Keys
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request

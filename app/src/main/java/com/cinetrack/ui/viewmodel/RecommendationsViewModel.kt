@@ -4,7 +4,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
@@ -31,7 +31,7 @@ data class RecommendationsUiState(
     val favorites: ImmutableList<Movie> = persistentListOf(),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
-    val preferences: com.cinetrack.data.models.UserPreferences = com.cinetrack.data.models.UserPreferences()
+    val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences()
 )
 
 @HiltViewModel
@@ -338,7 +338,7 @@ class RecommendationsViewModel @Inject constructor(
         }
     }
 
-    fun updatePreferences(prefs: com.cinetrack.data.models.UserPreferences) {
+    fun updatePreferences(prefs: com.cinetrack.data.model.UserPreferences) {
         viewModelScope.launch {
             preferenceRepository.updateAll(prefs)
         }

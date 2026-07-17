@@ -1,6 +1,6 @@
 package com.cinetrack.domain
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject

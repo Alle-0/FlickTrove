@@ -47,7 +47,7 @@ class FlickTroveApplication : Application(), Configuration.Provider {
                 .setConstraints(networkConstraints)
                 .build()
             
-            val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.workers.ReminderWorker>(
+            val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderWorker>(
                 12, java.util.concurrent.TimeUnit.HOURS
             )
                 .setConstraints(localConstraints)

@@ -1,9 +1,9 @@
 package com.cinetrack.data.local.converters
 
 import androidx.room.TypeConverter
-import com.cinetrack.data.Genre
-import com.cinetrack.data.models.PersonData
-import com.cinetrack.data.models.Season
+import com.cinetrack.data.model.Genre
+import com.cinetrack.data.model.PersonData
+import com.cinetrack.data.model.Season
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

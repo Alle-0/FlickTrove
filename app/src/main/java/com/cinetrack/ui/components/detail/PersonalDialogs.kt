@@ -54,7 +54,7 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
-import com.cinetrack.utils.AudioRecorderHelper
+import com.cinetrack.util.AudioRecorderHelper
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable

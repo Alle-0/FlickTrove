@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.cinetrack.data.Genre
+import com.cinetrack.data.model.Genre
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.data.api.Provider
 import com.cinetrack.ui.utils.bounceClick

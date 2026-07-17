@@ -46,12 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.util.toComposeColor
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
-import com.cinetrack.ui.components.HomeFilterModal
+import com.cinetrack.ui.components.dialog.HomeFilterModal
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
@@ -70,6 +70,10 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.card.MovieListCard
+import com.cinetrack.ui.components.card.MovieCard
+import com.cinetrack.ui.components.common.*
 
 object HomeTab : Tab {
     override val options: TabOptions
@@ -152,7 +156,7 @@ fun HomeScreenContent(
     
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
     
-    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.models.SortConfig?>(null) }
+    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.model.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
         if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
             if (uiState.movies.isNotEmpty()) {
@@ -297,7 +301,7 @@ fun HomeScreenContent(
                             }
 
                             if (columns == 1) {
-                                com.cinetrack.ui.components.MovieListCard(
+                                com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie,
                                     isFavorite = movie.favorite,
                                     isWatched = movie.watched,

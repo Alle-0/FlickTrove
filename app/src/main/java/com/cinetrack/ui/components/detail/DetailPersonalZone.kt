@@ -20,13 +20,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.cinetrack.utils.AudioRecorderHelper
+import com.cinetrack.util.AudioRecorderHelper
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.graphicsLayer

@@ -1,11 +1,11 @@
 package com.cinetrack.ui.viewmodel
 
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.Provider
-import com.cinetrack.data.models.Season
+import com.cinetrack.data.model.Season
 import com.cinetrack.data.api.TraktComment
 import com.cinetrack.data.api.Video
 

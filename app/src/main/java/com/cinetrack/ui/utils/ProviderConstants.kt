@@ -28,5 +28,20 @@ object ProviderConstants {
         if (logoPath.startsWith("http")) return logoPath
         return "https://image.tmdb.org/t/p/w154$logoPath"
     }
+
+    fun getAvailableProviders(language: String = java.util.Locale.getDefault().language.lowercase()): List<Provider> {
+        val italianProviderIds = setOf(359L, 222L, 109L, 40L) // Mediaset Infinity, RaiPlay, TIMVISION, Chili
+        val internationalProviders = ALL_PROVIDERS + listOf(
+            Provider(15L, "Hulu", "/zlw30tq6PVPkRj0uN8Cg3yN4p7d.jpg"),
+            Provider(1899L, "Max", "/6kIy0nIAGc1XINtM5m8305F8uGq.jpg"),
+            Provider(386L, "Peacock", "/xKkI6M4d23VqWkM7N6q0A0d3gR.jpg")
+        )
+
+        return if (language == "it") {
+            ALL_PROVIDERS
+        } else {
+            internationalProviders.filterNot { it.providerId in italianProviderIds }
+        }
+    }
 }
 

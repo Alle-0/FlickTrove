@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.ImageItem
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.premiumScrollbar

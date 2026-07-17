@@ -2,9 +2,9 @@ package com.cinetrack.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
-import com.cinetrack.data.models.DiscoveryFilters
-import com.cinetrack.data.models.SortConfig
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.DiscoveryFilters
+import com.cinetrack.data.model.SortConfig
+import com.cinetrack.data.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

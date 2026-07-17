@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Box
-import com.cinetrack.ui.components.MovieActionsPopup
+import com.cinetrack.ui.components.card.MovieActionsPopup
 import com.cinetrack.ui.components.shared.QuickRatingModal
 import com.cinetrack.ui.components.shared.QuickNoteModal
 import com.cinetrack.ui.components.shared.QuickFolderModal

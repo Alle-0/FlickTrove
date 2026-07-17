@@ -1,6 +1,6 @@
 package com.cinetrack.data.repository
 
-import com.cinetrack.data.models.Feedback
+import com.cinetrack.data.model.Feedback
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

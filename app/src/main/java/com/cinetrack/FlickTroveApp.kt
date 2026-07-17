@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
+import com.cinetrack.ui.components.common.UndoToast
+import com.cinetrack.ui.components.common.GlobalErrorToast
 
 private val initialSystemLocale = java.util.Locale.getDefault()
 
@@ -285,13 +287,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                         hazeState = globalHazeState
                     )
                     
-                    com.cinetrack.ui.components.UndoToast(
+                    com.cinetrack.ui.components.common.UndoToast(
                         actionFeedbackManager = undoViewModel.actionFeedbackManager,
                         hazeState = globalHazeState,
                         modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(200000f)
                     )
                     
-                    com.cinetrack.ui.components.GlobalErrorToast(
+                    com.cinetrack.ui.components.common.GlobalErrorToast(
                         globalErrorHandler = errorViewModel.globalErrorHandler,
                         hazeState = globalHazeState,
                         modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)

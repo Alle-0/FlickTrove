@@ -5,7 +5,7 @@ import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cinetrack.data.Movie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.data.repository.PreferenceRepository
-import com.cinetrack.data.models.UserPreferences
+import com.cinetrack.data.model.UserPreferences
 import javax.inject.Inject
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +34,7 @@ sealed interface FolderDetailUiState {
         val activeTab: String = "all",
         val movieCount: Int = 0,
         val tvCount: Int = 0,
-        val sortConfig: com.cinetrack.data.models.SortConfig = com.cinetrack.data.models.SortConfig()
+        val sortConfig: com.cinetrack.data.model.SortConfig = com.cinetrack.data.model.SortConfig()
     ) : FolderDetailUiState
     data class Error(val message: String) : FolderDetailUiState
 }
@@ -87,8 +87,8 @@ class FolderDetailViewModel @Inject constructor(
         }
     }
 
-    private val _sortConfig = MutableStateFlow(com.cinetrack.data.models.SortConfig())
-    fun updateSortConfig(config: com.cinetrack.data.models.SortConfig) {
+    private val _sortConfig = MutableStateFlow(com.cinetrack.data.model.SortConfig())
+    fun updateSortConfig(config: com.cinetrack.data.model.SortConfig) {
         _sortConfig.value = config
     }
 
@@ -139,7 +139,7 @@ class FolderDetailViewModel @Inject constructor(
         initialValue = FolderDetailUiState.Loading
     )
 
-    private fun applySortConfig(movies: List<Movie>, sort: com.cinetrack.data.models.SortConfig): List<Movie> {
+    private fun applySortConfig(movies: List<Movie>, sort: com.cinetrack.data.model.SortConfig): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         var filtered = movies
         

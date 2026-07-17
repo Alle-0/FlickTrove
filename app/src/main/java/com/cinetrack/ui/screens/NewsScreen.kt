@@ -37,7 +37,7 @@ import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.NewsItemUi
 import com.cinetrack.ui.viewmodel.NewsUiState

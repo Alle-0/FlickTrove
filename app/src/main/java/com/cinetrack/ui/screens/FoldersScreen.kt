@@ -47,7 +47,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.components.shared.DeleteFolderDialog
-import com.cinetrack.ui.components.CinematicBackground
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
 import androidx.compose.ui.layout.onGloballyPositioned
