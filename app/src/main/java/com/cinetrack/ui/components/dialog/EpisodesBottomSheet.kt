@@ -65,7 +65,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.unit.Velocity
 
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -154,15 +157,27 @@ fun EpisodesBottomSheet(
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                return Offset.Zero
+            }
+
             override fun onPostScroll(
                 consumed: Offset,
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                if (available.y > 0f) {
-                    return available
-                }
-                return Offset.Zero
+                return Offset(0f, available.y)
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                return Velocity.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                return Velocity(0f, available.y)
             }
         }
     }
@@ -224,11 +239,7 @@ fun EpisodesBottomSheet(
 
             // Non-draggable content area
             Column(
-                modifier = Modifier.pointerInput(Unit) {
-                    detectVerticalDragGestures { change, _ -> 
-                        change.consume() 
-                    }
-                }
+                modifier = Modifier.blockBottomSheetVerticalDrag()
             ) {
                 // Header
                 Header(movie, dismissAndSync)
@@ -280,7 +291,12 @@ fun EpisodesBottomSheet(
 
             // Episode List
             if (loadingSeason) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blockBottomSheetVerticalDrag(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(color = Color(0xFF00E676))
                 }
             } else {
@@ -659,6 +675,36 @@ private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                             letterSpacing = 1.sp
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Modifier.blockBottomSheetVerticalDrag(): Modifier {
+    val touchSlop = androidx.compose.ui.platform.LocalViewConfiguration.current.touchSlop
+    return this.pointerInput(Unit) {
+        awaitEachGesture {
+            val down = awaitFirstDown(pass = PointerEventPass.Initial, requireUnconsumed = false)
+            var verticalDragged = false
+            var totalDy = 0f
+            var totalDx = 0f
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                if (change.isConsumed || !change.pressed) break
+                val dy = change.position.y - change.previousPosition.y
+                val dx = change.position.x - change.previousPosition.x
+                totalDy += dy
+                totalDx += dx
+                if (!verticalDragged) {
+                    if (kotlin.math.abs(totalDy) > touchSlop && kotlin.math.abs(totalDy) > kotlin.math.abs(totalDx)) {
+                        verticalDragged = true
+                    }
+                }
+                if (verticalDragged) {
+                    change.consume()
                 }
             }
         }
