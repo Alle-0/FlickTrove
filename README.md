@@ -151,9 +151,9 @@ Design is the true crown jewel of FlickTrove.
 
 ## <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
-For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
+For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
 
-Therefore, the project cannot be cloned and compiled "out-of-the-box". The source code is publicly exposed **just for reference and sharing**, rather than as a plug-and-play application.
+Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
 
 ---
 
@@ -184,7 +184,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
-This repository is public for reference and sharing. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+The source code is publicly exposed strictly for reference and sharing purposes. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the TERMS_OF_SERVICE.md file for further details.
 
 ---
 
