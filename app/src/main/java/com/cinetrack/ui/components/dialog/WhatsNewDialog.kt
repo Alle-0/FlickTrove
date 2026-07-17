@@ -30,6 +30,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.BuildConfig
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -185,11 +187,14 @@ fun MarkdownNotesViewer(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(max = 240.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
+            .verticalFadingEdges(scrollState, 16.dp, 16.dp)
+            .premiumScrollbar(scrollState)
     ) {
         val lines = rawNotes.lines()
         for (line in lines) {

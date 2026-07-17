@@ -376,6 +376,146 @@ data class Movie(
             return true
         }
 
+    @get:Exclude
+    val effectiveTotalEpisodes: Int
+        get() {
+            if (mediaType != "tv") return 1
+            val todayIso = try {
+                LocalDate.now().toString()
+            } catch (e: Exception) {
+                "2026-01-01"
+            }
+
+            var nextEpSeason: Int? = null
+            var nextEpNum: Int? = null
+            if (!nextEpisodeString.isNullOrBlank() && (nextEpisodeAirDate.isNullOrBlank() || nextEpisodeAirDate!! > todayIso)) {
+                try {
+                    val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(nextEpisodeString!!)
+                    if (match != null) {
+                        nextEpSeason = match.groupValues[1].toIntOrNull()
+                        nextEpNum = match.groupValues[2].toIntOrNull()
+                    }
+                } catch (e: Exception) {
+                    // Ignore parsing error
+                }
+            }
+
+            val validSeasons = seasons?.filter { (it.seasonNumber ?: 0) > 0 }
+            if (!validSeasons.isNullOrEmpty()) {
+                val sum = validSeasons.sumOf { season ->
+                    getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
+                }
+                if (sum > 0) return minOf(sum, numberOfEpisodes ?: sum)
+            }
+
+            return numberOfEpisodes ?: 0
+        }
+
+    fun getEffectiveAiredEpisodeCountForSeason(
+        season: Season,
+        todayIso: String,
+        nextEpSeason: Int? = null,
+        nextEpNum: Int? = null
+    ): Int {
+        val sNum = season.seasonNumber ?: 0
+        if (sNum <= 0) return 0
+        val totalCount = season.episodeCount ?: 0
+        if (totalCount <= 0) return 0
+
+        // 1. Check nextEpisodeToAir if available
+        if (nextEpSeason != null && nextEpNum != null) {
+            if (sNum > nextEpSeason) return 0
+            if (sNum == nextEpSeason && nextEpNum == 1) {
+                val nDate = nextEpisodeAirDate
+                if (nDate.isNullOrBlank() || nDate.take(10) > todayIso) {
+                    return 0 // Season hasn't started yet!
+                }
+            }
+            // Otherwise, at least 1 episode of this season has started or it's a past season.
+            return totalCount
+        }
+
+        // 2. Check full episode list if present
+        val eps = season.episodes
+        if (!eps.isNullOrEmpty() && eps.any { !it.airDate.isNullOrBlank() }) {
+            val hasStarted = eps.any { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }
+            return if (hasStarted) totalCount else 0
+        }
+
+        // 3. Check season airDate
+        val sDate = season.airDate
+        if (!sDate.isNullOrBlank()) {
+            if (sDate.take(10) > todayIso) {
+                return 0 // Future season that hasn't started yet
+            }
+            return totalCount // Season started in the past or today
+        }
+
+        // 4. If season.airDate is null/blank, check if there is evidence it's a future season
+        if (!firstAirDate.isNullOrBlank() && firstAirDate!!.take(10) > todayIso) {
+            return 0
+        }
+
+        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+        if (maxDatedSeason > 0 && sNum > maxDatedSeason) {
+            return 0
+        }
+
+        return totalCount
+    }
+
+    fun getEffectiveSeasonEpisodeCount(
+        season: Season,
+        todayIso: String,
+        nextEpSeason: Int? = null,
+        nextEpNum: Int? = null
+    ): Int = getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
+
+    fun getReleasedEpisodeCountForSeason(
+        season: Season,
+        todayIso: String,
+        nextEpSeason: Int? = null,
+        nextEpNum: Int? = null
+    ): Int {
+        val sNum = season.seasonNumber ?: 0
+        if (sNum <= 0) return 0
+        val totalCount = season.episodeCount ?: 0
+        if (totalCount <= 0) return 0
+
+        val eps = season.episodes
+        if (!eps.isNullOrEmpty() && eps.any { !it.airDate.isNullOrBlank() }) {
+            return eps.count { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }
+        }
+
+        if (nextEpSeason != null && nextEpNum != null) {
+            if (sNum > nextEpSeason) return 0
+            if (sNum == nextEpSeason) {
+                val airedInCurrent = maxOf(0, nextEpNum - 1)
+                return minOf(totalCount, airedInCurrent)
+            }
+            return totalCount
+        }
+
+        val sDate = season.airDate
+        if (!sDate.isNullOrBlank()) {
+            if (sDate.take(10) > todayIso) {
+                return 0
+            }
+            return totalCount
+        }
+
+        if (!firstAirDate.isNullOrBlank() && firstAirDate!!.take(10) > todayIso) {
+            return 0
+        }
+
+        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+        if (maxDatedSeason > 0 && sNum > maxDatedSeason) {
+            return 0
+        }
+
+        return totalCount
+    }
+
     // --- Firestore Resilient Deserialization Proxies ---
 
     @get:PropertyName("vote_average")

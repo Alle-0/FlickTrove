@@ -67,9 +67,9 @@ class DetailUiStateMapper @Inject constructor(
             accentColor = freshMovie.accentColor ?: movie.accentColor
         ) ?: freshMovie
 
-        val totalEpisodes = metadata.numberOfEpisodes ?: 0
+        val totalEpisodes = effectiveMovie.effectiveTotalEpisodes
         val watchedEpisodesCount = effectiveMovie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
-        val progress = if (mediaType == "tv" && totalEpisodes > 0) (watchedEpisodesCount.toFloat() / totalEpisodes).coerceAtMost(1f) else 0f
+        val progress = if (mediaType == "tv" && totalEpisodes > 0) (watchedEpisodesCount.toFloat() / totalEpisodes).coerceIn(0f, 1f) else 0f
     
         val localMoviesMap = localMovies.associateBy { "${it.mediaType}_${it.id}" }
 

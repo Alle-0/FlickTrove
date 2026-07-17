@@ -290,7 +290,7 @@ class TraktSyncWorker @AssistedInject constructor(
                             val tmdbResponse = tmdbService.getTVBasicDetails(showTmdbId)
                             var newShow = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, "tv")
 
-                            val totalEps = newShow.numberOfEpisodes ?: 0
+                            val totalEps = newShow.effectiveTotalEpisodes
                             val isCompleted = totalEps > 0 && totalWatched >= totalEps
                             val progressVal = if (totalEps > 0) (totalWatched.toDouble() / totalEps.toDouble()).coerceIn(0.0, 1.0) else 0.0
 
@@ -308,14 +308,14 @@ class TraktSyncWorker @AssistedInject constructor(
                             android.util.Log.e("TraktSyncWorker", "Errore download TMDB per $showTitle", e)
                         }
                     } else {
-                        var totalEps = local.numberOfEpisodes ?: 0
+                        var totalEps = local.effectiveTotalEpisodes
                         var updatedNumberOfEpisodes = local.numberOfEpisodes
                         if (totalEps == 0) {
                             try {
                                 val tmdbResponse = tmdbService.getTVBasicDetails(showTmdbId)
                                 val mapped = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, "tv")
-                                totalEps = mapped.numberOfEpisodes ?: 0
-                                updatedNumberOfEpisodes = if (totalEps > 0) totalEps else local.numberOfEpisodes
+                                totalEps = mapped.effectiveTotalEpisodes
+                                updatedNumberOfEpisodes = if ((mapped.numberOfEpisodes ?: 0) > 0) mapped.numberOfEpisodes else local.numberOfEpisodes
                             } catch (e: Exception) {
                                 android.util.Log.w("TraktSyncWorker", "Impossibile aggiornare totalEps per $showTitle", e)
                             }

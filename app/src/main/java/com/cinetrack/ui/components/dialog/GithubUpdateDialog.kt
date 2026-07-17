@@ -128,23 +128,6 @@ fun GithubUpdateDialog(
                     textAlign = TextAlign.Center
                 )
 
-                if (updateInfo.releaseNotes.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-                            .padding(14.dp)
-                    ) {
-                        MarkdownNotesViewer(
-                            rawNotes = updateInfo.releaseNotes,
-                            accentColor = accentColor
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Action Buttons

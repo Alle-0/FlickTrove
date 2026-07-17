@@ -2,6 +2,7 @@ package com.cinetrack.domain
 
 import com.cinetrack.data.model.Movie
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 import javax.inject.Inject
 
@@ -24,8 +25,8 @@ class UpdateEpisodesUseCase @Inject constructor() {
         currentWatched[seasonNum.toString()] = episodeNums
 
         val totalWatched = currentWatched.filter { it.key != "0" }.values.sumOf { it.size }
-        val totalEpisodes = movie.numberOfEpisodes ?: 0
-        val progressVal = if (totalEpisodes > 0) totalWatched.toDouble() / totalEpisodes else 0.0
+        val totalEpisodes = movie.effectiveTotalEpisodes
+        val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
 
         val now = dateFormat.format(Date())
 
@@ -65,8 +66,8 @@ class UpdateEpisodesUseCase @Inject constructor() {
         }
 
         val totalWatched = currentWatched.filter { it.key != "0" }.values.sumOf { it.size }
-        val totalEpisodes = movie.numberOfEpisodes ?: 0
-        val progressVal = if (totalEpisodes > 0) totalWatched.toDouble() / totalEpisodes else 0.0
+        val totalEpisodes = movie.effectiveTotalEpisodes
+        val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
 
         val now = dateFormat.format(Date())
 
@@ -98,11 +99,32 @@ class UpdateEpisodesUseCase @Inject constructor() {
      */
     fun markAllWatched(movie: Movie): Movie {
         val allWatched = mutableMapOf<String, List<Int>>()
+        val todayIso = try {
+            LocalDate.now().toString()
+        } catch (e: Exception) {
+            "2026-01-01"
+        }
+        var nextEpSeason: Int? = null
+        var nextEpNum: Int? = null
+        if (!movie.nextEpisodeString.isNullOrBlank() && (movie.nextEpisodeAirDate.isNullOrBlank() || movie.nextEpisodeAirDate!! > todayIso)) {
+            try {
+                val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(movie.nextEpisodeString!!)
+                if (match != null) {
+                    nextEpSeason = match.groupValues[1].toIntOrNull()
+                    nextEpNum = match.groupValues[2].toIntOrNull()
+                }
+            } catch (e: Exception) {
+                // Ignore parsing error
+            }
+        }
+
         movie.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.forEach { season ->
-            val count = season.episodeCount ?: 0
-            val seasonNum = season.seasonNumber ?: 0
-            val eps = (1..count).toList()
-            allWatched[seasonNum.toString()] = eps
+            val count = movie.getReleasedEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
+            if (count > 0) {
+                val seasonNum = season.seasonNumber ?: 0
+                val eps = (1..count).toList()
+                allWatched[seasonNum.toString()] = eps
+            }
         }
 
         // If for some reason we had episodes in Season 0, preserve them but they don't count towards the mark-all

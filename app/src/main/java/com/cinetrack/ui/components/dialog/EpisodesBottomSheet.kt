@@ -261,20 +261,31 @@ fun EpisodesBottomSheet(
 
                 // Bulk Action
                 if (currentSeasonData != null) {
+                    val todayIso = remember {
+                        try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+                    }
+                    val releasedEps = currentSeasonData.episodes?.filter { ep ->
+                        val epDate = ep.airDate
+                        if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
+                        else if (!currentSeasonData.airDate.isNullOrBlank()) currentSeasonData.airDate.take(10) <= todayIso
+                        else true
+                    }?.map { it.episodeNumber } ?: emptyList<Int>()
                     val allEps = currentSeasonData.episodes?.map { it.episodeNumber } ?: emptyList<Int>()
+                    val targetEps = if (releasedEps.isNotEmpty()) releasedEps else allEps
+
                     BulkAction(
                         isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
                         onToggle = { 
                             val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
-                            val nextWatched = if (currentWatched.size >= allEps.size) {
+                            val nextWatched = if (currentWatched.size >= targetEps.size) {
                                 emptyList()
                             } else {
-                                allEps
+                                targetEps
                             }
                             localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
                         },
                         onLongClick = {
-                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to allEps)
+                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to targetEps)
                         }
                     )
                 }
@@ -301,6 +312,20 @@ fun EpisodesBottomSheet(
                 }
             } else {
                 val listState = rememberLazyListState()
+
+                LaunchedEffect(currentSeasonData, selectedSeasonNumber) {
+                    val episodes = currentSeasonData?.episodes
+                    if (!episodes.isNullOrEmpty()) {
+                        val watched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
+                        val targetIndex = episodes.indexOfFirst { it.episodeNumber !in watched }
+                        if (targetIndex >= 0) {
+                            listState.animateScrollToItem(targetIndex)
+                        } else {
+                            listState.animateScrollToItem(0)
+                        }
+                    }
+                }
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -384,7 +409,17 @@ private fun SeasonSelector(
     completedSeasons: Set<Int>,
     onSeasonSelected: (Int) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(selectedSeason, seasons) {
+        val index = seasons.indexOf(selectedSeason)
+        if (index >= 0) {
+            lazyListState.animateScrollToItem(index)
+        }
+    }
+
     LazyRow(
+        state = lazyListState,
         contentPadding = PaddingValues(horizontal = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
@@ -530,7 +565,14 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
 
 private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, currentSeasonNumber: Int, seasonData: Season): Boolean {
     val watched = localWatchedEpisodes[currentSeasonNumber.toString()] ?: emptyList()
-    val total = seasonData.episodes?.size ?: 0
+    val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+    val releasedCount = seasonData.episodes?.count { ep ->
+        val epDate = ep.airDate
+        if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
+        else if (!seasonData.airDate.isNullOrBlank()) seasonData.airDate.take(10) <= todayIso
+        else true
+    } ?: 0
+    val total = if (releasedCount > 0) releasedCount else (seasonData.episodes?.size ?: 0)
     return total > 0 && watched.size >= total
 }
 
