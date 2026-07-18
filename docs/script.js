@@ -333,6 +333,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const scrollDeckSection = document.querySelector('.scroll-deck-section');
   const filmstripHoles = document.querySelectorAll('.filmstrip-divider .film-holes');
   const filmstripTracks = document.querySelectorAll('.filmstrip-divider .film-line');
+  const deckDots = Array.from(document.querySelectorAll('.deck-sidebar-dots .deck-dot'));
+
+  deckDots.forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      if (scrollDeckSection && scrollCards.length > 1) {
+        const totalScrollableHeight = scrollDeckSection.offsetHeight - window.innerHeight;
+        if (totalScrollableHeight > 0) {
+          const targetProgress = idx / (scrollCards.length - 1);
+          const targetScrollY = scrollDeckSection.offsetTop + (targetProgress * totalScrollableHeight);
+          window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+        }
+      }
+    });
+  });
 
   scrollCards.forEach((card, idx) => {
     card.addEventListener('click', () => {
@@ -513,6 +527,74 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       });
+      // Effetto Simbionte a Scatto (Snapping Gooey Metaball & Elastic Stretch)
+      const activeThumb = document.querySelector('.deck-sidebar-dots .deck-active-thumb');
+      if (activeThumb && deckDots && deckDots.length > 0) {
+        const targetDot = deckDots[activeIdx] || deckDots[0];
+        if (targetDot) {
+          const targetX = targetDot.offsetLeft + (targetDot.offsetWidth / 2);
+          const targetY = targetDot.offsetTop + (targetDot.offsetHeight / 2);
+          const baseWidth = isMobileDeck ? 18 : 14;
+          const baseHeight = isMobileDeck ? 10 : 20;
+          const thumbWidth = activeThumb.offsetWidth || baseWidth;
+          const thumbHeight = activeThumb.offsetHeight || baseHeight;
+          
+          const leftPos = targetX - (baseWidth / 2);
+          const topPos = targetY - (baseHeight / 2);
+
+          // Controlla se activeIdx è cambiato rispetto al frame precedente per innescare lo scatto e l'allungamento organico
+          if (activeThumb.dataset.lastIdx !== String(activeIdx)) {
+            const oldIdx = parseInt(activeThumb.dataset.lastIdx || '0', 10);
+            activeThumb.dataset.lastIdx = String(activeIdx);
+            
+            const distanceSteps = Math.abs(activeIdx - oldIdx) || 1;
+            if (isMobileDeck) {
+              // Allungamento elastico orizzontale per la barra pallini bottom (mobile)
+              const stretchWidth = baseWidth + Math.min(28, distanceSteps * 12);
+              const stretchScaleY = 0.65;
+              const stretchLeftPos = targetX - (stretchWidth / 2);
+              
+              activeThumb.style.width = `${stretchWidth}px`;
+              activeThumb.style.height = `${baseHeight}px`;
+              activeThumb.style.transform = `translate3d(${stretchLeftPos.toFixed(1)}px, ${topPos.toFixed(1)}px, 0) scaleY(${stretchScaleY})`;
+              
+              clearTimeout(activeThumb.snapTimeout);
+              activeThumb.snapTimeout = setTimeout(() => {
+                activeThumb.style.width = `${baseWidth}px`;
+                activeThumb.style.height = `${baseHeight}px`;
+                activeThumb.style.transform = `translate3d(${leftPos.toFixed(1)}px, ${topPos.toFixed(1)}px, 0) scaleY(1)`;
+              }, 180);
+            } else {
+              // Allungamento elastico verticale per la barra pallini laterale (desktop)
+              const stretchHeight = baseHeight + Math.min(32, distanceSteps * 14);
+              const stretchScaleX = 0.65;
+              const stretchTopPos = targetY - (stretchHeight / 2);
+              
+              activeThumb.style.width = `${baseWidth}px`;
+              activeThumb.style.height = `${stretchHeight}px`;
+              activeThumb.style.transform = `translate3d(${leftPos.toFixed(1)}px, ${stretchTopPos.toFixed(1)}px, 0) scaleX(${stretchScaleX})`;
+              
+              clearTimeout(activeThumb.snapTimeout);
+              activeThumb.snapTimeout = setTimeout(() => {
+                activeThumb.style.width = `${baseWidth}px`;
+                activeThumb.style.height = `${baseHeight}px`;
+                activeThumb.style.transform = `translate3d(${leftPos.toFixed(1)}px, ${topPos.toFixed(1)}px, 0) scaleX(1)`;
+              }, 180);
+            }
+          } else if (!activeThumb.snapTimeout) {
+            // Mantiene la posizione saldamente bloccata sul pallino attivo (a scatto)
+            activeThumb.style.width = `${baseWidth}px`;
+            activeThumb.style.height = `${baseHeight}px`;
+            activeThumb.style.transform = `translate3d(${leftPos.toFixed(1)}px, ${topPos.toFixed(1)}px, 0) scale(1, 1)`;
+          }
+
+          const colorClass = `color-${activeIdx % 3}`;
+          if (!activeThumb.classList.contains(colorClass)) {
+            activeThumb.classList.remove('color-0', 'color-1', 'color-2');
+            activeThumb.classList.add(colorClass);
+          }
+        }
+      }
     }
 
     requestAnimationFrame(animateScrollDynamics);
@@ -946,3 +1028,144 @@ if (document.readyState === 'loading') {
 } else {
   initCinemaDustCanvas();
 }
+
+/* ==========================================================================
+   NEXT-GEN FLOW CONSTRUCTION ENGINE (Lenis, Word Reveal, Flow Assembly, Magnetic LERP)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Lenis Smooth Scrolling Engine (120 FPS Momentum Inertia)
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.25,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0
+    });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    window.lenis = lenis;
+  }
+
+  // 2. Split-Text Blur-to-Clear Word Reveal Engine
+  const initBlurWordReveal = () => {
+    const revealTargets = document.querySelectorAll('.blur-word-reveal, .hero h1, .section-header h2, .section-header p');
+    revealTargets.forEach(el => {
+      if (el.dataset.wordSplit) return;
+      el.dataset.wordSplit = "true";
+      const htmlText = el.innerHTML;
+      if (htmlText.includes('<')) {
+        const childNodes = Array.from(el.childNodes);
+        el.innerHTML = '';
+        childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const words = node.textContent.split(/\s+/).filter(w => w.length > 0);
+            words.forEach((word) => {
+              const span = document.createElement('span');
+              span.className = 'blur-word';
+              span.textContent = word;
+              el.appendChild(span);
+            });
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName.toLowerCase() === 'br') {
+              el.appendChild(node.cloneNode());
+            } else {
+              const innerWords = node.textContent.split(/\s+/).filter(w => w.length > 0);
+              const clone = node.cloneNode(false);
+              clone.innerHTML = innerWords.map(w => `<span class="blur-word">${w}</span>`).join('');
+              el.appendChild(clone);
+            }
+          }
+        });
+      } else {
+        const words = el.textContent.split(/\s+/).filter(w => w.length > 0);
+        el.innerHTML = words.map(w => `<span class="blur-word">${w}</span>`).join('');
+      }
+    });
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const blurWords = entry.target.querySelectorAll('.blur-word');
+          blurWords.forEach((wordSpan, idx) => {
+            setTimeout(() => {
+              wordSpan.classList.add('revealed');
+            }, idx * 45);
+          });
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    revealTargets.forEach(el => observer.observe(el));
+  };
+  initBlurWordReveal();
+
+  // 3. Flow Construct SVG Icon & Pipeline Assembly Engine
+  const initFlowAssemblyEngine = () => {
+    const flowContainers = document.querySelectorAll('.flow-pipeline-section, .flow-node-card, .deck-scroll-card, .feature-card');
+    const flowObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('flow-active');
+        }
+      });
+    }, { threshold: 0.2 });
+
+    flowContainers.forEach(container => flowObserver.observe(container));
+
+    // Interactive Hover Acceleration on Pipeline Nodes
+    const pipelineContainer = document.querySelector('.pipeline-container');
+    const energyPackets = document.querySelectorAll('.energy-packet');
+    if (pipelineContainer && energyPackets.length > 0) {
+      pipelineContainer.addEventListener('mouseenter', () => {
+        energyPackets.forEach(p => p.style.animationDuration = '1.6s');
+      });
+      pipelineContainer.addEventListener('mouseleave', () => {
+        energyPackets.forEach((p, idx) => {
+          p.style.animationDuration = idx === 0 ? '3.5s' : idx === 1 ? '4s' : '3.2s';
+        });
+      });
+    }
+  };
+  initFlowAssemblyEngine();
+
+  // 4. Spring Physics Magnetic Button LERP
+  const initSpringMagneticButtons = () => {
+    const magneticBtns = document.querySelectorAll('.magnetic-btn, .btn-primary, .btn-secondary');
+    magneticBtns.forEach(btn => {
+      let x = 0, y = 0, targetX = 0, targetY = 0;
+      let isHovered = false;
+
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        targetX = (e.clientX - centerX) * 0.35;
+        targetY = (e.clientY - centerY) * 0.35;
+        isHovered = true;
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        targetX = 0;
+        targetY = 0;
+        isHovered = false;
+      });
+
+      const animateSpring = () => {
+        x += (targetX - x) * 0.12;
+        y += (targetY - y) * 0.12;
+        if (Math.abs(x) > 0.01 || Math.abs(y) > 0.01 || isHovered) {
+          btn.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+        } else {
+          btn.style.transform = '';
+        }
+        requestAnimationFrame(animateSpring);
+      };
+      animateSpring();
+    });
+  };
+  initSpringMagneticButtons();
+});

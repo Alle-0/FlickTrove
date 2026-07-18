@@ -47,8 +47,30 @@
   background: var(--accent-teal);
 }
 
+/* Lenis Required CSS */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto !important;
   font-family: var(--font-main);
   background-color: var(--bg-primary);
   color: var(--text-main);
@@ -233,6 +255,24 @@ body {
   display: inline-block;
   padding-bottom: 0.15em;
   margin-bottom: -0.15em;
+}
+
+.gradient-teal {
+  background: linear-gradient(135deg, #2DD4BF 0%, #1476a0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
+}
+
+/* FIX: Quando le parole dentro uno span gradient-* vengono separate in span.blur-word, 
+   dobbiamo assicurarci che lo span interno erediti il gradiente e lo ritagli sul proprio testo! */
+[class*="gradient-"] .blur-word {
+  background: inherit;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 /* Navigation Bar (FIXED: High Z-Index so drawer NEVER covers navbar and close button!) */
@@ -815,14 +855,112 @@ body.drawer-open {
   gap: 0.75rem;
 }
 
-.feature-num {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--accent-teal);
-  background: rgba(45, 212, 191, 0.12);
-  padding: 0.25rem 0.65rem;
-  border-radius: 12px;
-  border: 1px solid rgba(45, 212, 191, 0.25);
+/* Vertical 9-Dot Deck Navigation Track (`al posto di 1/9, 2/9...`) */
+.deck-sidebar-dots {
+  position: absolute;
+  right: max(16px, calc(50% - 356px));
+  top: 56%;
+  transform: translateY(-50%);
+  z-index: 40;
+  padding: 18px 10px;
+  background: rgba(11, 15, 25, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.deck-dots-gooey-canvas {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  filter: url(#symbiote-goo);
+  -webkit-filter: url(#symbiote-goo);
+}
+
+.deck-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+  z-index: 1;
+}
+
+.deck-dot:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.4);
+}
+
+/* Sliding & Morphing Symbiote active glowing thumb/pill (A Scatto / Snapping) */
+.deck-active-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  width: 14px;
+  height: 20px;
+  border-radius: 9999px;
+  transform-origin: center center;
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform, height, background;
+  transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.15), height 0.28s ease, background 0.4s ease;
+}
+
+.deck-active-thumb.color-0 {
+  background: var(--accent-teal);
+  box-shadow: 0 0 16px var(--accent-teal), 0 0 28px rgba(45, 212, 191, 0.75);
+}
+
+.deck-active-thumb.color-1 {
+  background: var(--accent-purple);
+  box-shadow: 0 0 16px var(--accent-purple), 0 0 28px rgba(187, 134, 252, 0.75);
+}
+
+.deck-active-thumb.color-2 {
+  background: var(--accent-gold);
+  box-shadow: 0 0 16px var(--accent-gold), 0 0 28px rgba(255, 179, 0, 0.75);
+}
+
+@media (max-width: 768px) {
+  /* Barra navigazione pallini orizzontale centrata in basso sul mobile */
+  .deck-sidebar-dots {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 16px;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    border-radius: 9999px;
+    width: auto;
+  }
+
+  .deck-dots-gooey-canvas {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .deck-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .deck-active-thumb {
+    width: 18px;
+    height: 10px;
+  }
+
+  #features-card-deck.features-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -831,12 +969,19 @@ body.drawer-open {
   }
 
   #features-card-deck.features-grid {
-    height: 500px;
-    max-width: 100%;
+    height: 510px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
   }
 
   .deck-scroll-card {
-    padding: 1.5rem !important;
+    padding: 1.35rem 1.15rem !important;
+  }
+
+  .widget-pills span {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
   }
 }
 
@@ -1486,7 +1631,7 @@ body.drawer-open {
   bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(13, 17, 23, 0.88);
+  background: rgba(13, 17, 23, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
@@ -1829,6 +1974,9 @@ body.drawer-open {
 
   #features-card-deck.features-grid {
     perspective: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
   }
 
   /* OTTIMIZZAZIONE GPU 60FPS PER MOBILE (elimina il lag da blur sovrapposti e bug culling 3D) */
@@ -1840,13 +1988,13 @@ body.drawer-open {
     will-change: transform;
     transform-style: flat !important;
     border-radius: 20px !important;
-    padding: 1.5rem 1.35rem !important;
+    padding: 1.35rem 1.15rem !important;
   }
 
   .feature-card {
     top: 85px;
-    padding: 1.75rem 1.5rem;
-    border-radius: 22px;
+    padding: 1.5rem 1.25rem;
+    border-radius: 20px;
   }
 
   .screenshots-grid {
@@ -2290,4 +2438,428 @@ body.drawer-open {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
   opacity: 0.3;
+}
+
+/* ==========================================================================
+   NEXT-GEN FLOW CONSTRUCTION ENGINE (Lenis, Conic Borders, Flow Icons, Pipeline)
+   ========================================================================== */
+
+/* 1. Rotating Conic Gradient Border (`border-rotate`) */
+@keyframes border-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.border-rotate-glow {
+  position: relative;
+  border-radius: 9999px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: 0 0 25px rgba(45, 212, 191, 0.25);
+  z-index: 1;
+}
+
+.border-rotate-glow::before {
+  content: '';
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 400%;
+  height: 400%;
+  background: conic-gradient(from 0deg, transparent 0%, var(--accent-teal) 15%, var(--accent-purple) 35%, var(--accent-gold) 50%, var(--accent-teal) 70%, transparent 100%);
+  animation: border-rotate 5s linear infinite;
+  z-index: -1;
+}
+
+.border-rotate-glow::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: rgba(11, 15, 25, 0.94);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+.border-rotate-glow.purple-glow::before {
+  background: conic-gradient(from 0deg, transparent 0%, var(--accent-purple) 15%, var(--accent-pink) 35%, var(--accent-teal) 50%, var(--accent-purple) 70%, transparent 100%);
+}
+
+.border-rotate-glow.gold-glow::before {
+  background: conic-gradient(from 0deg, transparent 0%, var(--accent-gold) 15%, var(--accent-teal) 35%, var(--accent-purple) 50%, var(--accent-gold) 70%, transparent 100%);
+}
+
+.flow-badge-top {
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.flow-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-teal);
+  box-shadow: 0 0 10px var(--accent-teal);
+  animation: status-blink 1.5s infinite;
+}
+
+/* 2. Split-Text Word Reveal (`blur-to-clear`) */
+.blur-word {
+  display: inline-block;
+  margin-right: 0.26em;
+  opacity: 0;
+  filter: blur(14px);
+  transform: translateY(22px) scale(0.94);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, filter, transform;
+}
+
+.blur-word.revealed {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0) scale(1);
+}
+
+/* 3. Interactive Flow Pipeline Section & SVG Construction Engine */
+.flow-pipeline-section {
+  position: relative;
+  padding: 7rem 1.5rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  overflow: visible;
+  z-index: 10;
+}
+
+.pipeline-board-wrapper {
+  position: relative;
+  margin-top: 4rem;
+  width: 100%;
+}
+
+.pipeline-container {
+  position: relative;
+  z-index: 2;
+  padding: 3.5rem 1.5rem;
+  background: rgba(18, 24, 38, 0.45);
+  border: 1px solid rgba(45, 212, 191, 0.18);
+  border-radius: 28px;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(45, 212, 191, 0.05);
+}
+
+/* Animated Energy Track Bridge che esce dallo schermo a sinistra e destra (150vw) e sta sotto il vetro del box grande */
+.pipeline-flow-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vw;
+  height: 240px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pipe-base-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.10);
+  stroke-width: 3;
+}
+
+.pipe-energy-beam {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  transition: stroke-dashoffset 3s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 14px var(--accent-teal));
+}
+
+.flow-pipeline-section.flow-active .pipe-energy-beam,
+.pipeline-board-wrapper.flow-active .pipe-energy-beam,
+.pipeline-container.flow-active .pipe-energy-beam {
+  stroke-dashoffset: 0;
+}
+
+@keyframes packet-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  8% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  92% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.energy-packet {
+  fill: var(--accent-teal);
+  filter: drop-shadow(0 0 14px var(--accent-teal));
+  offset-path: path('M -100 120 C 150 20, 380 220, 520 120 C 650 20, 720 220, 800 120 C 880 20, 950 220, 1080 120 C 1220 20, 1450 220, 1700 120');
+  animation: packet-travel 4s linear infinite;
+}
+
+.packet-2 {
+  fill: var(--accent-purple);
+  filter: drop-shadow(0 0 14px var(--accent-purple));
+  animation-delay: 1.4s;
+  animation-duration: 4.5s;
+}
+
+.packet-3 {
+  fill: var(--accent-gold);
+  filter: drop-shadow(0 0 14px var(--accent-gold));
+  animation-delay: 2.4s;
+  animation-duration: 3.2s;
+}
+
+.pipeline-nodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  position: relative;
+}
+
+.flow-node-card {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flow-node-card:hover {
+  transform: translateY(-6px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.node-icon-wrapper {
+  width: 66px;
+  height: 66px;
+  border-radius: 18px;
+  margin-bottom: 0.5rem;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.flow-node-card:hover .node-icon-wrapper {
+  transform: scale(1.12);
+}
+
+/* 4. Flow Construct SVG Icon Drawing Engine (`stroke-dashoffset` drawing) */
+.flow-construct-svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-teal);
+  filter: drop-shadow(0 0 8px var(--accent-teal-glow));
+}
+
+.purple-glow .flow-construct-svg {
+  color: var(--accent-purple);
+  filter: drop-shadow(0 0 8px var(--accent-purple-glow));
+}
+
+.gold-glow .flow-construct-svg {
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 8px rgba(255, 179, 0, 0.3));
+}
+
+.construct-path {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flow-node-card:hover .construct-path,
+.flow-active .construct-path {
+  stroke-dashoffset: 0;
+}
+
+.construct-path.delay-draw-1 {
+  transition-delay: 0.25s;
+}
+
+.construct-path.delay-draw-2 {
+  transition-delay: 0.5s;
+}
+
+.construct-fill {
+  opacity: 0;
+  transform: scale(0.85);
+  transform-origin: center;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+}
+
+.flow-node-card:hover .construct-fill,
+.flow-active .construct-fill {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes pulse-energy-circle {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.3;
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+
+  50% {
+    transform: scale(1.4);
+    opacity: 1;
+    filter: drop-shadow(0 0 15px currentColor);
+  }
+
+  100% {
+    transform: scale(0.6);
+    opacity: 0.3;
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+}
+
+.construct-pulse-dot {
+  transform-origin: center;
+  animation: pulse-energy-circle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.node-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  margin-top: auto;
+}
+
+.status-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-teal);
+  box-shadow: 0 0 8px var(--accent-teal);
+  animation: status-blink 1.5s infinite;
+}
+
+.status-pulse.purple {
+  background: var(--accent-purple);
+  box-shadow: 0 0 8px var(--accent-purple);
+}
+
+.status-pulse.gold {
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+
+@keyframes status-blink {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+@media (max-width: 768px) {
+  .pipeline-flow-svg {
+    display: none;
+  }
+
+  .flow-pipeline-section {
+    padding: 4.5rem 1rem;
+  }
+
+  /* Ottimizzazione GPU 60 FPS: rimuove il blur pesante sul contenitore mobile */
+  .pipeline-container {
+    padding: 2.5rem 1.25rem;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(15, 18, 24, 0.96);
+    border-radius: 24px;
+  }
+
+  /* Spina dorsale di energia verticale che collega i 3 nodi su telefono */
+  .pipeline-nodes-grid::before {
+    content: '';
+    position: absolute;
+    top: 2rem;
+    bottom: 2rem;
+    left: 50%;
+    width: 3px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, #2DD4BF 0%, #BB86FC 50%, #FFB300 100%);
+    box-shadow: 0 0 14px rgba(187, 134, 252, 0.6), 0 0 28px rgba(45, 212, 191, 0.4);
+    z-index: 0;
+  }
+
+  .pipeline-nodes-grid {
+    gap: 2.25rem;
+  }
+
+  .flow-node-card {
+    padding: 1.5rem 1.25rem;
+    background: rgba(18, 22, 30, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+    z-index: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .flow-node-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .flow-node-card h4 {
+    font-size: 1.1rem;
+  }
 }
