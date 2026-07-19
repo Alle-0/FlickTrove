@@ -361,12 +361,24 @@
     <string name="person_birthday">DATA DI NASCITA</string>
     <string name="person_birth_place">LUOGO DI NASCITA</string>
     <string name="person_known_for">CONOSCIUTO PER</string>
-    <string name="person_popularity">POPOLARIT</string>
+    <string name="person_popularity">POPOLARITÀ</string>
     <string name="person_nd">N/D</string>
     <string name="person_highlights">Punti Forti</string>
     <string name="person_filmography">Filmografia</string>
     <string name="person_cast_movie_format">Cast - Film (%d)</string>
     <string name="person_cast_tv_format">Cast - Serie (%d)</string>
+    <string name="person_directing_movie_format">Regia - Film (%d)</string>
+    <string name="person_directing_tv_format">Regia - Serie (%d)</string>
+    <string name="person_writing_movie_format">Sceneggiatura - Film (%d)</string>
+    <string name="person_writing_tv_format">Sceneggiatura - Serie (%d)</string>
+    <string name="person_production_movie_format">Produzione - Film (%d)</string>
+    <string name="person_production_tv_format">Produzione - Serie (%d)</string>
+    <string name="person_sound_movie_format">Musica - Film (%d)</string>
+    <string name="person_sound_tv_format">Musica - Serie (%d)</string>
+    <string name="person_art_movie_format">Scenografia - Film (%d)</string>
+    <string name="person_art_tv_format">Scenografia - Serie (%d)</string>
+    <string name="person_camera_movie_format">Fotografia - Film (%d)</string>
+    <string name="person_camera_tv_format">Fotografia - Serie (%d)</string>
     <string name="person_crew_movie_format">Crew - Film (%d)</string>
     <string name="person_crew_tv_format">Crew - Serie (%d)</string>
 
@@ -912,4 +924,10 @@
     <string name="onboarding_slide4_sub">BACKUP LOCALE &amp; TRAKT SYNC</string>
     <string name="onboarding_slide4_desc">Esporta e importa i tuoi backup locali in formato JSON in un secondo, oppure collega il tuo account Trakt per la sincronizzazione automatica.</string>
     <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
+
+    <!-- Rewatch Import Dialog -->
+    <string name="import_rewatch_dialog_title">Gestione Re-watch (Visioni Multiple)</string>
+    <string name="import_rewatch_dialog_desc">Il file importato potrebbe contenere film visti più volte in date diverse. Quale data di visione preferisci conservare per i film duplicati?</string>
+    <string name="import_rewatch_keep_latest">Ultima data (Più recente)</string>
+    <string name="import_rewatch_keep_first">Prima data (Storica)</string>
 </resources>

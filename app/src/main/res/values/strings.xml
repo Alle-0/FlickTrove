@@ -369,6 +369,18 @@
     <string name="person_filmography">Filmography</string>
     <string name="person_cast_movie_format">Cast - Movies (%d)</string>
     <string name="person_cast_tv_format">Cast - TV (%d)</string>
+    <string name="person_directing_movie_format">Directing - Movies (%d)</string>
+    <string name="person_directing_tv_format">Directing - TV (%d)</string>
+    <string name="person_writing_movie_format">Writing - Movies (%d)</string>
+    <string name="person_writing_tv_format">Writing - TV (%d)</string>
+    <string name="person_production_movie_format">Production - Movies (%d)</string>
+    <string name="person_production_tv_format">Production - TV (%d)</string>
+    <string name="person_sound_movie_format">Music - Movies (%d)</string>
+    <string name="person_sound_tv_format">Music - TV (%d)</string>
+    <string name="person_art_movie_format">Art - Movies (%d)</string>
+    <string name="person_art_tv_format">Art - TV (%d)</string>
+    <string name="person_camera_movie_format">Camera - Movies (%d)</string>
+    <string name="person_camera_tv_format">Camera - TV (%d)</string>
     <string name="person_crew_movie_format">Crew - Movies (%d)</string>
     <string name="person_crew_tv_format">Crew - TV (%d)</string>
 
@@ -915,4 +927,10 @@
     <string name="onboarding_slide4_sub">LOCAL BACKUP &amp; TRAKT SYNC</string>
     <string name="onboarding_slide4_desc">Export and import local JSON backups in a second, or connect your Trakt account for automatic sync.</string>
     <string name="settings_review_tutorial">Replay Welcome Tutorial</string>
+
+    <!-- Rewatch Import Dialog -->
+    <string name="import_rewatch_dialog_title">Re-watch Handling (Multiple Watches)</string>
+    <string name="import_rewatch_dialog_desc">The imported file may contain movies watched multiple times across different dates. Which watch date would you like to preserve for duplicate entries?</string>
+    <string name="import_rewatch_keep_latest">Latest Date (Most Recent)</string>
+    <string name="import_rewatch_keep_first">First Date (Historical)</string>
 </resources>

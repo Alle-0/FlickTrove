@@ -7,7 +7,10 @@ import kotlinx.serialization.SerialName
 data class TraktExportItem(
     val movie: TraktMovie? = null,
     val show: TraktShow? = null,
-    @SerialName("watched_at") val watchedAt: String? = null
+    @SerialName("watched_at") val watchedAt: String? = null,
+    val watched: Boolean? = null,
+    val rating: Float? = null,
+    val notes: String? = null
 )
 
 @Serializable

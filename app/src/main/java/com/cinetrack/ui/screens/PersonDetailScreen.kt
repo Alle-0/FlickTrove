@@ -288,26 +288,45 @@ fun PersonDetailScreenContent(
                                 ?.sortedByDescending { it.firstAirDate ?: "" }
                                 .orEmpty()
                         }
-                        val crewMovies = remember(p.combinedCredits) {
-                            p.combinedCredits?.crew?.filter { it.mediaType == "movie" }
-                                ?.distinctBy { it.id }
-                                ?.sortedByDescending { it.releaseDate ?: "" }
-                                .orEmpty()
-                        }
-                        val crewTV = remember(p.combinedCredits) {
-                            p.combinedCredits?.crew?.filter { it.mediaType == "tv" }
-                                ?.distinctBy { it.id }
-                                ?.sortedByDescending { it.firstAirDate ?: "" }
-                                .orEmpty()
+                        val allCrew = remember(p.combinedCredits) { p.combinedCredits?.crew.orEmpty() }
+                        val mainDept = remember(allCrew, p.knownForDepartment) {
+                            p.knownForDepartment?.takeIf { it != "Acting" }
+                                ?: if (allCrew.any { it.department == "Directing" || it.job == "Director" }) "Directing"
+                                else allCrew.groupingBy { it.department }.eachCount().maxByOrNull { it.value }?.key
                         }
 
-                        val filmo = remember(uiState.activeTab, castMovies, castTV, crewMovies, crewTV) {
+                        val deptMovies = remember(allCrew, mainDept) {
+                            if (mainDept == null) emptyList()
+                            else allCrew.filter { it.mediaType == "movie" && (it.department == mainDept || (mainDept == "Directing" && it.job == "Director")) }
+                                .distinctBy { it.id }
+                                .sortedByDescending { it.releaseDate ?: "" }
+                        }
+                        val deptTV = remember(allCrew, mainDept) {
+                            if (mainDept == null) emptyList()
+                            else allCrew.filter { it.mediaType == "tv" && (it.department == mainDept || (mainDept == "Directing" && it.job == "Director")) }
+                                .distinctBy { it.id }
+                                .sortedByDescending { it.firstAirDate ?: "" }
+                        }
+                        val crewMovies = remember(allCrew, mainDept) {
+                            allCrew.filter { it.mediaType == "movie" && (mainDept == null || !(it.department == mainDept || (mainDept == "Directing" && it.job == "Director"))) }
+                                .distinctBy { it.id }
+                                .sortedByDescending { it.releaseDate ?: "" }
+                        }
+                        val crewTV = remember(allCrew, mainDept) {
+                            allCrew.filter { it.mediaType == "tv" && (mainDept == null || !(it.department == mainDept || (mainDept == "Directing" && it.job == "Director"))) }
+                                .distinctBy { it.id }
+                                .sortedByDescending { it.firstAirDate ?: "" }
+                        }
+
+                        val filmo = remember(uiState.activeTab, castMovies, castTV, deptMovies, deptTV, crewMovies, crewTV) {
                             when (uiState.activeTab) {
-                                "cast_movie" -> if (castMovies.isNotEmpty()) castMovies else crewMovies.ifEmpty { castTV.ifEmpty { crewTV } }
-                                "cast_tv" -> if (castTV.isNotEmpty()) castTV else castMovies.ifEmpty { crewTV.ifEmpty { crewMovies } }
-                                "crew_movie" -> if (crewMovies.isNotEmpty()) crewMovies else castMovies.ifEmpty { crewTV.ifEmpty { castTV } }
-                                "crew_tv" -> if (crewTV.isNotEmpty()) crewTV else crewMovies.ifEmpty { castMovies.ifEmpty { castTV } }
-                                else -> castMovies.ifEmpty { crewMovies.ifEmpty { castTV.ifEmpty { crewTV } } }
+                                "cast_movie" -> if (castMovies.isNotEmpty()) castMovies else deptMovies.ifEmpty { crewMovies.ifEmpty { castTV.ifEmpty { deptTV.ifEmpty { crewTV } } } }
+                                "cast_tv" -> if (castTV.isNotEmpty()) castTV else castMovies.ifEmpty { deptTV.ifEmpty { crewTV.ifEmpty { deptMovies.ifEmpty { crewMovies } } } }
+                                "dept_movie" -> if (deptMovies.isNotEmpty()) deptMovies else crewMovies.ifEmpty { castMovies.ifEmpty { deptTV.ifEmpty { crewTV.ifEmpty { castTV } } } }
+                                "dept_tv" -> if (deptTV.isNotEmpty()) deptTV else deptMovies.ifEmpty { crewTV.ifEmpty { castTV.ifEmpty { crewMovies.ifEmpty { castMovies } } } }
+                                "crew_movie" -> if (crewMovies.isNotEmpty()) crewMovies else deptMovies.ifEmpty { castMovies.ifEmpty { crewTV.ifEmpty { deptTV.ifEmpty { castTV } } } }
+                                "crew_tv" -> if (crewTV.isNotEmpty()) crewTV else crewMovies.ifEmpty { deptTV.ifEmpty { castTV.ifEmpty { deptMovies.ifEmpty { castMovies } } } }
+                                else -> deptMovies.ifEmpty { castMovies.ifEmpty { crewMovies.ifEmpty { deptTV.ifEmpty { castTV.ifEmpty { crewTV } } } } }
                             }
                         }
                         val filmoRows = remember(filmo, columns) {
@@ -361,8 +380,11 @@ fun PersonDetailScreenContent(
                                             activeTab = uiState.activeTab,
                                             castMoviesCount = castMovies.size,
                                             castTVCount = castTV.size,
+                                            deptMoviesCount = deptMovies.size,
+                                            deptTVCount = deptTV.size,
                                             crewMoviesCount = crewMovies.size,
                                             crewTVCount = crewTV.size,
+                                            mainDepartment = mainDept,
                                             hazeState = localHazeState,
                                             onTabChanged = { viewModel.onTabChanged(it) }
                                         )

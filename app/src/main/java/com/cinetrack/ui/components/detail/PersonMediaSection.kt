@@ -87,12 +87,41 @@ fun PersonHighlightsRow(
 }
 
 @Composable
+private fun getDepartmentMovieFormatRes(department: String?): Int {
+    return when (department) {
+        "Directing" -> R.string.person_directing_movie_format
+        "Writing" -> R.string.person_writing_movie_format
+        "Production" -> R.string.person_production_movie_format
+        "Sound" -> R.string.person_sound_movie_format
+        "Art" -> R.string.person_art_movie_format
+        "Camera" -> R.string.person_camera_movie_format
+        else -> R.string.person_crew_movie_format
+    }
+}
+
+@Composable
+private fun getDepartmentTvFormatRes(department: String?): Int {
+    return when (department) {
+        "Directing" -> R.string.person_directing_tv_format
+        "Writing" -> R.string.person_writing_tv_format
+        "Production" -> R.string.person_production_tv_format
+        "Sound" -> R.string.person_sound_tv_format
+        "Art" -> R.string.person_art_tv_format
+        "Camera" -> R.string.person_camera_tv_format
+        else -> R.string.person_crew_tv_format
+    }
+}
+
+@Composable
 fun PersonFilmographyTabs(
     activeTab: String,
     castMoviesCount: Int,
     castTVCount: Int,
+    deptMoviesCount: Int,
+    deptTVCount: Int,
     crewMoviesCount: Int,
     crewTVCount: Int,
+    mainDepartment: String?,
     hazeState: HazeState,
     onTabChanged: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -124,6 +153,24 @@ fun PersonFilmographyTabs(
                 isSelected = activeTab == "cast_tv",
                 hazeState = hazeState,
                 onClick = { onTabChanged("cast_tv") }
+            )
+        }
+        if (deptMoviesCount > 0) {
+            val formatRes = getDepartmentMovieFormatRes(mainDepartment)
+            CategoryPill(
+                text = stringResource(formatRes, deptMoviesCount),
+                isSelected = activeTab == "dept_movie",
+                hazeState = hazeState,
+                onClick = { onTabChanged("dept_movie") }
+            )
+        }
+        if (deptTVCount > 0) {
+            val formatRes = getDepartmentTvFormatRes(mainDepartment)
+            CategoryPill(
+                text = stringResource(formatRes, deptTVCount),
+                isSelected = activeTab == "dept_tv",
+                hazeState = hazeState,
+                onClick = { onTabChanged("dept_tv") }
             )
         }
         if (crewMoviesCount > 0) {

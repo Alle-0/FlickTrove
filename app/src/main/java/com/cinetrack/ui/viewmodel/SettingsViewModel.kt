@@ -561,15 +561,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun migrateExternalData(fileContent: String) {
+    fun migrateExternalData(fileContent: String, keepLatestWatchDate: Boolean = true) {
         viewModelScope.launch {
             _isBackupLoading.value = true
             try {
                 val isJson = fileContent.trimStart().startsWith("[") || fileContent.trimStart().startsWith("{")
                 val count = if (isJson) {
-                    backupRepository.migrateTraktStream(fileContent.byteInputStream())
+                    backupRepository.migrateTraktStream(fileContent.byteInputStream(), keepLatestWatchDate)
                 } else {
-                    backupRepository.migrateCsvStream(fileContent.byteInputStream())
+                    backupRepository.migrateCsvStream(fileContent.byteInputStream(), keepLatestWatchDate)
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
             } catch (e: Exception) {

@@ -556,6 +556,30 @@ fun SettingsExternalMigrationDialog(
 }
 
 @Composable
+fun SettingsRewatchMigrationDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    onDismiss: () -> Unit,
+    onKeepLatest: () -> Unit,
+    onKeepFirst: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(200)),
+        exit = fadeOut(tween(200)),
+        modifier = Modifier.zIndex(100f)
+    ) {
+        val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == EnterExitState.Visible) 1f else 0f }
+        RewatchMigrationDialog(
+            hazeState = activeHazeState, alpha = alpha,
+            onDismiss = onDismiss,
+            onKeepLatest = onKeepLatest,
+            onKeepFirst = onKeepFirst
+        )
+    }
+}
+
+@Composable
 fun SettingsLoadingOverlay(
     visible: Boolean,
     activeHazeState: HazeState

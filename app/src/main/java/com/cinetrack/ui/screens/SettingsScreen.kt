@@ -338,6 +338,7 @@ fun SettingsScreenContent(
     var showLogoutConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
+    var pendingMigrationContent by remember { mutableStateOf<String?>(null) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -352,7 +353,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showDeepSyncConfirm
+                           showDeepSyncConfirm || pendingMigrationContent != null
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -390,6 +391,7 @@ fun SettingsScreenContent(
             showLogoutConfirm = false
             showBackupDialog = false
             showExternalMigrationDialog = false
+            pendingMigrationContent = null
         }
     }
 
@@ -437,7 +439,7 @@ fun SettingsScreenContent(
             try {
                 context.contentResolver.openInputStream(it)?.use { stream ->
                     val content = stream.bufferedReader().use { reader -> reader.readText() }
-                    settingsViewModel.migrateExternalData(content)
+                    pendingMigrationContent = content
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
@@ -717,6 +719,24 @@ fun SettingsScreenContent(
             onImport = {
                 showExternalMigrationDialog = false
                 externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
+            }
+        )
+
+        SettingsRewatchMigrationDialog(
+            visible = pendingMigrationContent != null,
+            activeHazeState = activeHazeState,
+            onDismiss = { pendingMigrationContent = null },
+            onKeepLatest = {
+                pendingMigrationContent?.let { content ->
+                    settingsViewModel.migrateExternalData(content, keepLatestWatchDate = true)
+                }
+                pendingMigrationContent = null
+            },
+            onKeepFirst = {
+                pendingMigrationContent?.let { content ->
+                    settingsViewModel.migrateExternalData(content, keepLatestWatchDate = false)
+                }
+                pendingMigrationContent = null
             }
         )
 

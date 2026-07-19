@@ -71,7 +71,7 @@ class BackupRepository @Inject constructor(
 
                     // Smart Merge: Keep local personalNote, personalRating, and watched data if present locally
                     importedMovie.copy(
-                        personalNote = localMovie.personalNote ?: importedMovie.personalNote,
+                        personalNote = (localMovie.personalNote ?: importedMovie.personalNote)?.take(5000),
                         personalRating = localMovie.personalRating ?: importedMovie.personalRating,
                         watchedAt = localMovie.watchedAt ?: importedMovie.watchedAt,
                         watched = localMovie.watched || importedMovie.watched,
@@ -101,7 +101,7 @@ class BackupRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun migrateTraktStream(inputStream: InputStream): Int = withContext(Dispatchers.IO) {
+    suspend fun migrateTraktStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
         val content = inputStream.bufferedReader().use { it.readText() }
         if (content.isBlank()) return@withContext 0
         var count = 0
@@ -115,17 +115,19 @@ class BackupRepository @Inject constructor(
                 Movie(
                     id = tmdbId,
                     mediaType = mediaType,
-                    title = item.movie?.title ?: item.show?.title,
-                    name = item.show?.title,
-                    watched = true,
+                    title = item.movie?.title ?: item.show?.title ?: "Unknown ($tmdbId)",
+                    name = if (mediaType == "tv") (item.show?.title ?: "Unknown ($tmdbId)") else null,
+                    watched = item.watched == true || item.watchedAt != null,
                     favorite = false,
-                    watchedAt = item.watchedAt ?: java.time.Instant.now().toString(),
+                    personalRating = item.rating?.toDouble(),
+                    personalNote = item.notes?.take(5000),
+                    watchedAt = parseAndNormalizeWatchedDate(item.watchedAt),
                     syncStatus = "pending",
                     clientUpdatedAt = System.currentTimeMillis()
                 )
             }
             if (moviesToInsert.isNotEmpty()) {
-                processAndSaveImportedItems(moviesToInsert.map { Pair(it, null) })
+                processAndSaveImportedItems(moviesToInsert.map { Pair(it, null) }, keepLatestWatchDate)
                 return@withContext moviesToInsert.size
             }
         } catch (e: Exception) {
@@ -222,14 +224,14 @@ class BackupRepository @Inject constructor(
                             ?: itemObj["my_rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
                             ?: if (ratingsMap.isEmpty()) (obj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull() ?: itemObj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()) else null
                     }
-                    val userNote = obj["personal_note"]?.jsonPrimitive?.contentOrNull
+                    val userNote = (obj["personal_note"]?.jsonPrimitive?.contentOrNull
                         ?: obj["note"]?.jsonPrimitive?.contentOrNull
                         ?: obj["comment"]?.jsonPrimitive?.contentOrNull
                         ?: obj["review"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["personal_note"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["note"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["comment"]?.jsonPrimitive?.contentOrNull
-                        ?: itemObj["review"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["review"]?.jsonPrimitive?.contentOrNull)?.take(5000)
                     // Determine if this item is watched.
                     // We check explicit watched/seen/status fields first.
                     // If none of those fields are present in the JSON at all, we assume
@@ -297,6 +299,18 @@ class BackupRepository @Inject constructor(
                     }
                     val finalWatchedEps = if (watchedEpsMap.isNotEmpty()) watchedEpsMap.mapValues { it.value.sorted() } else null
 
+                    val rawWatchedDate = obj["watched_at"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["watchedAt"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["watched_date"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["date"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["log_date"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["watched_at"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["watchedAt"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["watched_date"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["date"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["log_date"]?.jsonPrimitive?.contentOrNull
+                    val parsedWatchedDate = parseAndNormalizeWatchedDate(rawWatchedDate)
+
                     async {
                         try {
                             if (!imdbId.isNullOrBlank() && imdbId.startsWith("tt")) {
@@ -313,7 +327,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = userRating,
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,
-                                        watchedAt = java.time.Instant.now().toString(),
+                                        watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -331,7 +345,7 @@ class BackupRepository @Inject constructor(
                                     personalRating = userRating,
                                     personalNote = userNote,
                                     watchedEpisodes = finalWatchedEps,
-                                    watchedAt = java.time.Instant.now().toString(),
+                                    watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
@@ -350,7 +364,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = userRating,
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,
-                                        watchedAt = java.time.Instant.now().toString(),
+                                        watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -364,7 +378,7 @@ class BackupRepository @Inject constructor(
                 }
                 val results = deferreds.awaitAll().filterNotNull()
                 if (results.isNotEmpty()) {
-                    processAndSaveImportedItems(results)
+                    processAndSaveImportedItems(results, keepLatestWatchDate)
                     count += results.size
                 }
                 kotlinx.coroutines.delay(300)
@@ -403,7 +417,30 @@ class BackupRepository @Inject constructor(
         return result
     }
 
-    suspend fun migrateCsvStream(inputStream: InputStream): Int = withContext(Dispatchers.IO) {
+    private fun parseAndNormalizeWatchedDate(rawDate: String?): String? {
+        if (rawDate.isNullOrBlank()) return null
+        val trimmed = rawDate.trim()
+        try {
+            java.time.Instant.parse(trimmed)
+            return trimmed
+        } catch (_: Exception) {}
+
+        try {
+            val cleanDate = trimmed.replace("/", "-").take(10)
+            val localDate = java.time.LocalDate.parse(cleanDate)
+            return localDate.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toString()
+        } catch (_: Exception) {}
+
+        try {
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val localDateTime = java.time.LocalDateTime.parse(trimmed, formatter)
+            return localDateTime.toInstant(java.time.ZoneOffset.UTC).toString()
+        } catch (_: Exception) {}
+
+        return null
+    }
+
+    suspend fun migrateCsvStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
         var count = 0
         inputStream.bufferedReader().useLines { linesSequence ->
             val lines = linesSequence.filter { it.isNotBlank() }.iterator()
@@ -417,7 +454,14 @@ class BackupRepository @Inject constructor(
             // `letterboxd uri` excluded: it's a URL, handled separately below to extract slug as title fallback
             val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "show_title") }
             val letterboxdUriIdx = lowerHeaders.indexOfFirst { it == "letterboxd uri" }
-            val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date", "date", "watched date", "created date") }
+            val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date") }
+                .takeIf { it != -1 }
+                ?: lowerHeaders.indexOfFirst { (it == "date" || it == "created date") && !lowerHeaders.contains("watched date") && !lowerHeaders.contains("watched_date") && !lowerHeaders.contains("watched_at") }
+            val watchedDateIdx = lowerHeaders.indexOfFirst { it in listOf("watched date", "watched_date", "watched_at", "date watched", "date_watched", "log date", "diary date", "date rated", "date_rated") }
+                .takeIf { it != -1 }
+                ?: lowerHeaders.indexOfFirst { (it == "date" || it == "created date" || it == "created_at") && !lowerHeaders.contains("year") && !lowerHeaders.contains("release year") && !lowerHeaders.contains("release_year") }
+                .takeIf { it != -1 }
+                ?: lowerHeaders.indexOfFirst { it == "date" }
             val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media_type", "item_type", "contenttype") }
             val ratingIdx = lowerHeaders.indexOfFirst { it in listOf("rating", "your rating", "my rating", "score", "user rating", "rating10", "rating5", "user_rating", "personal_rating") }
             val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes") }
@@ -459,8 +503,10 @@ class BackupRepository @Inject constructor(
                     val tmdbVal = if (tmdbIdx != -1 && columns.size > tmdbIdx) columns[tmdbIdx]?.toLongOrNull() else null
                     val titleVal = if (titleIdx != -1 && columns.size > titleIdx) columns[titleIdx] else null
                     val yearVal = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
+                    val rawWatchedDateVal = if (watchedDateIdx != -1 && columns.size > watchedDateIdx) columns[watchedDateIdx] else null
+                    val parsedWatchedDate = parseAndNormalizeWatchedDate(rawWatchedDateVal)
                     val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx]?.toDoubleOrNull() else null
-                    val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx] else null
+                    val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx]?.take(5000) else null
                     
                     var typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
                     if (isYamtrack) {
@@ -508,7 +554,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = ratingVal,
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
-                                        watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
+                                        watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -526,7 +572,7 @@ class BackupRepository @Inject constructor(
                                     personalRating = ratingVal,
                                     personalNote = noteVal,
                                     watchedEpisodes = epsMap,
-                                    watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
+                                    watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
@@ -545,7 +591,7 @@ class BackupRepository @Inject constructor(
                                         personalRating = ratingVal,
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
-                                        watchedAt = if (watchedVal) java.time.Instant.now().toString() else null,
+                                        watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -560,7 +606,7 @@ class BackupRepository @Inject constructor(
                 
                 val results = deferreds.awaitAll().filterNotNull()
                 if (results.isNotEmpty()) {
-                    processAndSaveImportedItems(results)
+                    processAndSaveImportedItems(results, keepLatestWatchDate)
                     count += results.size
                 }
                 kotlinx.coroutines.delay(350)
@@ -569,7 +615,7 @@ class BackupRepository @Inject constructor(
         count
     }
 
-    private suspend fun processAndSaveImportedItems(itemsWithFolders: List<Pair<Movie, String?>>) {
+    private suspend fun processAndSaveImportedItems(itemsWithFolders: List<Pair<Movie, String?>>, keepLatestWatchDate: Boolean = true) {
         if (itemsWithFolders.isEmpty()) return
         
         // 1. Raggruppa per (id, mediaType) unificando puntate, voti e note tra righe multiple
@@ -592,12 +638,22 @@ class BackupRepository @Inject constructor(
                 m.watchedEpisodes?.forEach { (s, eps) -> combinedEps.getOrPut(s) { mutableSetOf() }.addAll(eps) }
                 val newEpsMap = if (combinedEps.isNotEmpty()) combinedEps.mapValues { it.value.sorted() } else null
 
+                val bestWatchedAt = when {
+                    existing.watchedAt != null && m.watchedAt != null -> if (keepLatestWatchDate) {
+                        if (existing.watchedAt!! > m.watchedAt!!) existing.watchedAt else m.watchedAt
+                    } else {
+                        if (existing.watchedAt!! < m.watchedAt!!) existing.watchedAt else m.watchedAt
+                    }
+                    else -> existing.watchedAt ?: m.watchedAt
+                }
+
                 mergedIncoming[key] = existing.copy(
                     watched = existing.watched || m.watched,
                     favorite = existing.favorite || m.favorite,
                     personalRating = existing.personalRating ?: m.personalRating,
-                    personalNote = if (!existing.personalNote.isNullOrBlank()) existing.personalNote else m.personalNote,
-                    watchedEpisodes = newEpsMap
+                    personalNote = (if (!existing.personalNote.isNullOrBlank()) existing.personalNote else m.personalNote)?.take(5000),
+                    watchedEpisodes = newEpsMap,
+                    watchedAt = bestWatchedAt
                 )
             }
         }
@@ -613,12 +669,22 @@ class BackupRepository @Inject constructor(
                 incoming.watchedEpisodes?.forEach { (s, eps) -> combinedEps.getOrPut(s) { mutableSetOf() }.addAll(eps) }
                 val newEpsMap = if (combinedEps.isNotEmpty()) combinedEps.mapValues { it.value.sorted() } else local.watchedEpisodes
 
+                val bestWatchedAt = when {
+                    local.watchedAt != null && incoming.watchedAt != null -> if (keepLatestWatchDate) {
+                        if (local.watchedAt!! > incoming.watchedAt!!) local.watchedAt else incoming.watchedAt
+                    } else {
+                        if (local.watchedAt!! < incoming.watchedAt!!) local.watchedAt else incoming.watchedAt
+                    }
+                    else -> local.watchedAt ?: incoming.watchedAt
+                }
+
                 val updated = local.copy(
                     watched = local.watched || incoming.watched,
                     favorite = local.favorite || incoming.favorite,
                     personalRating = local.personalRating ?: incoming.personalRating,
-                    personalNote = if (!local.personalNote.isNullOrBlank()) local.personalNote else incoming.personalNote,
+                    personalNote = (if (!local.personalNote.isNullOrBlank()) local.personalNote else incoming.personalNote)?.take(5000),
                     watchedEpisodes = newEpsMap,
+                    watchedAt = bestWatchedAt,
                     clientUpdatedAt = System.currentTimeMillis(),
                     syncStatus = if (local.syncStatus == "synced") "pending_update" else local.syncStatus
                 )

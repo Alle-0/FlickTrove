@@ -150,15 +150,28 @@ class PersonDetailViewModel @Inject constructor(
 
                     val hasCastMovie = cast.any { it.mediaType == "movie" }
                     val hasCastTv = cast.any { it.mediaType == "tv" }
-                    val hasCrewMovie = crew.any { it.mediaType == "movie" }
-                    val hasCrewTv = crew.any { it.mediaType == "tv" }
+
+                    val mainDept = person.knownForDepartment?.takeIf { it != "Acting" }
+                        ?: if (crew.any { it.department == "Directing" || it.job == "Director" }) "Directing"
+                        else crew.groupingBy { it.department }.eachCount().maxByOrNull { it.value }?.key
+
+                    val isMainDeptItem = { m: Movie ->
+                        mainDept != null && (m.department == mainDept || (mainDept == "Directing" && m.job == "Director"))
+                    }
+
+                    val hasDeptMovie = crew.any { it.mediaType == "movie" && isMainDeptItem(it) }
+                    val hasDeptTv = crew.any { it.mediaType == "tv" && isMainDeptItem(it) }
+                    val hasCrewMovie = crew.any { it.mediaType == "movie" && !isMainDeptItem(it) }
+                    val hasCrewTv = crew.any { it.mediaType == "tv" && !isMainDeptItem(it) }
 
                     val isPrimarilyCrew = person.knownForDepartment != null &&
                             person.knownForDepartment != "Acting" &&
-                            (hasCrewMovie || hasCrewTv)
+                            (hasDeptMovie || hasDeptTv || hasCrewMovie || hasCrewTv)
 
                     if (isPrimarilyCrew || (!hasCastMovie && !hasCastTv)) {
                         _activeTab.value = when {
+                            hasDeptMovie -> "dept_movie"
+                            hasDeptTv -> "dept_tv"
                             hasCrewMovie -> "crew_movie"
                             hasCrewTv -> "crew_tv"
                             hasCastMovie -> "cast_movie"
@@ -205,7 +218,7 @@ class PersonDetailViewModel @Inject constructor(
                         _person.value = offlinePerson
                         _error.value = null
                         if (_activeTab.value == "cast_movie" && personMovies.isEmpty() && personCrewMovies.isNotEmpty()) {
-                            _activeTab.value = "crew_movie"
+                            _activeTab.value = if (offlinePerson.knownForDepartment == "Directing") "dept_movie" else "crew_movie"
                         }
                     } else {
                         _error.value = ErrorMapper.map(e.message)

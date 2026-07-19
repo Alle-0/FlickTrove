@@ -252,6 +252,11 @@ data class Movie(
     @set:PropertyName("job")
     @ColumnInfo(name = "job") var job: String? = null,
 
+    @SerialName("department")
+    @get:PropertyName("department")
+    @set:PropertyName("department")
+    @ColumnInfo(name = "department") var department: String? = null,
+
     @SerialName("character")
     @get:PropertyName("character")
     @set:PropertyName("character")

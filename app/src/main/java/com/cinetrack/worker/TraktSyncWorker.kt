@@ -663,7 +663,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (local != null) {
                         // Merge rule: aggiorna nota solo se locale è vuota
                         if (local.personalNote.isNullOrBlank() && !item.notes.isNullOrBlank()) {
-                            noteUpdates.add(local.copy(personalNote = item.notes))
+                            noteUpdates.add(local.copy(personalNote = item.notes?.take(5000)))
                         }
                     } else {
                         // FIX: Se il film con la nota non esiste localmente, lo scarichiamo da TMDB
@@ -676,7 +676,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                 }
                                 
                                 var newMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
-                                newMovie = newMovie.copy(personalNote = item.notes)
+                                newMovie = newMovie.copy(personalNote = item.notes?.take(5000))
                                 noteUpdates.add(newMovie)
                                 
                                 delay(50)
