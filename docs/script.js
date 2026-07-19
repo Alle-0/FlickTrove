@@ -194,9 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typedEl) {
     const strings = [
       'true cinephiles.',
-      'visual perfection.',
-      'TMDB and Trakt sync.',
       '100% offline use.',
+      'visual perfection.',
+      'TMDB & Trakt sync.',
       'finding where to stream.',
       'you.'
     ];
@@ -204,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const TypedConstructor = typeof Typed !== 'undefined' ? Typed : window.Typed;
       new TypedConstructor('#typed-output', {
         strings: strings,
-        typeSpeed: 50,
-        backSpeed: 30,
-        backDelay: 2000,
+        typeSpeed: 45,
+        backSpeed: 25,
+        backDelay: 3500,
         loop: true
       });
     } else {
@@ -223,19 +223,39 @@ document.addEventListener('DOMContentLoaded', () => {
           typedEl.textContent = currentStr.substring(0, charIdx + 1);
           charIdx++;
         }
-        let typeSpeed = isDeleting ? 30 : 60;
+        let typeSpeed = isDeleting ? 25 : 45;
         if (!isDeleting && charIdx === currentStr.length) {
-          typeSpeed = 2000;
+          typeSpeed = 3500;
           isDeleting = true;
         } else if (isDeleting && charIdx === 0) {
           isDeleting = false;
           strIdx = (strIdx + 1) % strings.length;
-          typeSpeed = 300;
+          typeSpeed = 400;
         }
         setTimeout(typeLoop, typeSpeed);
       };
       setTimeout(typeLoop, 500);
     }
+  }
+
+  // 2.5 3D Mouse Parallax on Hero Visual Stage (Overlapping Smartphones)
+  const visualStage = document.querySelector('.hero-visual-stage');
+  const phoneMain = document.querySelector('.phone-mockup-main');
+  const phoneBg = document.querySelector('.phone-mockup-bg');
+  if (visualStage && phoneMain && phoneBg && window.innerWidth > 968) {
+    visualStage.addEventListener('mousemove', (e) => {
+      const rect = visualStage.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) - 0.5;
+      const y = ((e.clientY - rect.top) / rect.height) - 0.5;
+
+      phoneMain.style.transform = `rotate(${-3 + x * 8}deg) rotateX(${-y * 10}deg) translateZ(40px)`;
+      phoneBg.style.transform = `rotate(${6 - x * 6}deg) rotateX(${y * 8}deg) scale(0.92) translateZ(-20px)`;
+    });
+
+    visualStage.addEventListener('mouseleave', () => {
+      phoneMain.style.transform = '';
+      phoneBg.style.transform = '';
+    });
   }
 
   // 3. Cyberpunk Neon Click Shockwave Ripple
@@ -319,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastScrollY = window.scrollY;
   let scrollVelocity = 0;
   let smoothVelocity = 0;
+  let filmstripPos = 0;
   let heroScale = 1;
   let heroOpacity = 1;
   let heroBlur = 0;
@@ -369,14 +390,15 @@ document.addEventListener('DOMContentLoaded', () => {
     smoothVelocity += (scrollVelocity - smoothVelocity) * 0.12;
     scrollVelocity *= 0.85; // automatic decay when stopped
 
-    // 4.1.5 Cinematic Filmstrip Horizontal Scroll
+    // 4.1.5 Cinematic Filmstrip Continuous Right-to-Left Scroll with Velocity Acceleration
     if (filmstripHoles.length > 0) {
-      const scrollPos = window.scrollY * 0.55;
+      const scrollBoost = Math.abs(smoothVelocity) * 0.55;
+      filmstripPos -= (0.75 + scrollBoost);
       filmstripHoles.forEach((hole) => {
-        hole.style.backgroundPosition = `${scrollPos.toFixed(1)}px 0px`;
+        hole.style.backgroundPosition = `${filmstripPos.toFixed(2)}px 0px`;
       });
       filmstripTracks.forEach((track) => {
-        track.style.backgroundPosition = `${scrollPos.toFixed(1)}px 0px`;
+        track.style.backgroundPosition = `${filmstripPos.toFixed(2)}px 0px`;
       });
     }
 
