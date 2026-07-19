@@ -416,6 +416,9 @@
     <string name="search_collapse">Collapse</string>
     <string name="search_expand">Expand</string>
     <string name="search_tab_persons">PEOPLE</string>
+    <string name="search_tab_collections">COLLECTIONS</string>
+    <string name="collection_trending_title">ICONIC SAGAS &amp; COLLECTIONS</string>
+    <string name="collection_movies_count_format">%1$d MOVIES</string>
 
     <!-- Recommendations & Library Strings -->
     <string name="library_tab_title">Library</string>

@@ -97,6 +97,12 @@ interface TMDBService {
         @Query("page") page: Int = 1
     ): PersonSearchResponse
 
+    @GET("search/collection")
+    suspend fun searchCollection(
+        @Query("query") query: String,
+        @Query("page") page: Int = 1
+    ): CollectionSearchResponse
+
     @GET("search/keyword")
     suspend fun searchKeyword(
         @Query("query") query: String,

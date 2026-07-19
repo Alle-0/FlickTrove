@@ -244,7 +244,7 @@ fun SearchHeader(
                         sortConfig.selectedDecades.isNotEmpty() ||
                         sortConfig.sortType != "popularity"
 
-                if (preferences.showLayoutToggle && category != "person") {
+                if (preferences.showLayoutToggle && category != "person" && category != "collection") {
                     Box(modifier = Modifier.size(44.dp)) {
                         Box(
                             modifier = Modifier

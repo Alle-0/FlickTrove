@@ -129,6 +129,9 @@ data class SearchScreen(
                     onPersonClick = { personId ->
                         navigator.push(PersonDetailScreen(personId, null))
                     },
+                    onCollectionClick = { collectionId, collectionName ->
+                        navigator.push(CollectionDetailScreen(collectionId, collectionName))
+                    },
                     onDiscoverTrendingClick = { requestedType ->
                         DiscoverTab.requestedType = requestedType
                         navigator.popUntilRoot()
@@ -153,7 +156,8 @@ fun SearchScreenContent(
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
-    onPersonClick: (Long) -> Unit,
+    onPersonClick: (Long) -> Unit = {},
+    onCollectionClick: (Long, String?) -> Unit = { _, _ -> },
     onDiscoverTrendingClick: ((String) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
@@ -361,6 +365,7 @@ fun SearchScreenContent(
                                 animatedMovieIds = viewModel.animatedMovieIds,
                                 onMovieClick = onMovieClick,
                                 onPersonClick = onPersonClick,
+                                onCollectionClick = onCollectionClick,
                                 onDiscoverTrendingClick = onDiscoverTrendingClick,
                                 onToggleFavorite = { viewModel.toggleFavorite(it) },
                                 onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },

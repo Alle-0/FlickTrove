@@ -26,7 +26,19 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.PersonSearchResult
 import com.cinetrack.data.api.TMDBSearchResult
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import com.cinetrack.data.model.UserPreferences
+import coil.compose.AsyncImage
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.LocalImageQuality
+import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.card.MovieListCard
 import com.cinetrack.ui.components.card.PersonCard
@@ -473,6 +485,160 @@ fun LazyGridScope.searchTrendingPeopleSection(
     }
 }
 
+fun LazyGridScope.searchTrendingCollectionsSection(
+    trendingCollections: List<TMDBSearchResult>,
+    collectionSpan: Int,
+    keyboardController: SoftwareKeyboardController?,
+    onCollectionClick: (Long, String?) -> Unit
+) {
+    if (trendingCollections.isNotEmpty()) {
+        item(span = { GridItemSpan(12) }) {
+            Column {
+                Text(
+                    text = stringResource(R.string.collection_trending_title),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                )
+            }
+        }
+        items(
+            items = trendingCollections.take(8),
+            key = { "trending_collection_${it.id}" },
+            contentType = { "collection_result" },
+            span = { GridItemSpan(collectionSpan) }
+        ) { item ->
+            if (item is TMDBSearchResult.CollectionResult) {
+                CollectionCollageCard(
+                    collection = item,
+                    onClick = {
+                        keyboardController?.hide()
+                        onCollectionClick(item.id, item.name)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CollectionCollageCard(
+    collection: TMDBSearchResult.CollectionResult,
+    onClick: () -> Unit
+) {
+    val backdropUrl = buildTmdbImageUrl(collection.backdropPath ?: collection.posterPath, ImageType.BACKDROP, LocalImageQuality.current)
+    val posters = collection.partsPosterPaths
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(170.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        Color(0xFF1E1E24)
+                    )
+                )
+            )
+            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+            .bounceClick(scaleDown = 0.96f) { onClick() }
+    ) {
+        AsyncImage(
+            model = backdropUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 0.25f }
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.92f),
+                            Color.Black.copy(alpha = 0.75f),
+                            Color.Black.copy(alpha = 0.2f)
+                        )
+                    )
+                )
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 12.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                androidx.compose.material3.Surface(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.search_tab_collections).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp
+                        ),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = collection.displayTitle,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        fontSize = 20.sp
+                    ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy((-16).dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
+                val displayPosters = if (posters.isNotEmpty()) posters.take(3) else listOfNotNull(collection.posterPath)
+                displayPosters.forEachIndexed { index, path ->
+                    val posterUrl = buildTmdbImageUrl(path, ImageType.POSTER, LocalImageQuality.current)
+                    val rotation = when (index) {
+                        0 -> -5f
+                        1 -> 2f
+                        2 -> 7f
+                        else -> 0f
+                    }
+                    AsyncImage(
+                        model = posterUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(68.dp)
+                            .height(102.dp)
+                            .rotate(rotation)
+                            .shadow(6.dp, RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchResultsGridSection(
     results: List<TMDBSearchResult>,
@@ -484,12 +650,14 @@ fun LazyGridScope.searchResultsGridSection(
     columns: Int,
     movieSpan: Int,
     personSpan: Int,
+    collectionSpan: Int,
     cardWidth: Dp,
     personCardWidth: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     keyboardController: SoftwareKeyboardController?,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit,
+    onCollectionClick: (Long, String?) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit
@@ -500,8 +668,16 @@ fun LazyGridScope.searchResultsGridSection(
             is TMDBSearchResult.MovieResult -> "${item.id}_movie"
             is TMDBSearchResult.TvResult -> "${item.id}_tv"
             is TMDBSearchResult.PersonResult -> "${item.id}_person"
+            is TMDBSearchResult.CollectionResult -> "${item.id}_collection"
+            else -> "${item.id}_other"
         }},
-        span = { _, _ -> if (category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }
+        span = { _, _ ->
+            when (category) {
+                "person" -> GridItemSpan(personSpan)
+                "collection" -> GridItemSpan(collectionSpan)
+                else -> GridItemSpan(movieSpan)
+            }
+        }
     ) { index, item ->
         when (item) {
             is TMDBSearchResult.MovieResult -> {
@@ -584,6 +760,15 @@ fun LazyGridScope.searchResultsGridSection(
                     onClick = { 
                         keyboardController?.hide()
                         onPersonClick(item.id) 
+                    }
+                )
+            }
+            is TMDBSearchResult.CollectionResult -> {
+                CollectionCollageCard(
+                    collection = item,
+                    onClick = {
+                        keyboardController?.hide()
+                        onCollectionClick(item.id, item.name)
                     }
                 )
             }

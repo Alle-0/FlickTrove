@@ -19,6 +19,7 @@ class GetSearchUiStateUseCase @Inject constructor() {
         rawTrendingMovies: List<TMDBSearchResult>,
         rawTrendingTv: List<TMDBSearchResult>,
         rawTrendingPeople: List<TMDBSearchResult>,
+        rawTrendingCollections: List<TMDBSearchResult>,
         rawDynamicKeywords: List<FilterPill>,
         localMovies: List<Movie>,
         folders: List<FolderEntity>
@@ -27,6 +28,7 @@ class GetSearchUiStateUseCase @Inject constructor() {
         val trendingMovies = rawTrendingMovies.distinctBy { "${it.id}_${it.mediaType}" }
         val trendingTv = rawTrendingTv.distinctBy { "${it.id}_${it.mediaType}" }
         val trendingPeople = rawTrendingPeople.distinctBy { "${it.id}_${it.mediaType}" }
+        val trendingCollections = rawTrendingCollections.distinctBy { "${it.id}_${it.mediaType}" }
 
         val sortConfig = currentState.sortConfig
         val category = currentState.category
@@ -116,6 +118,7 @@ class GetSearchUiStateUseCase @Inject constructor() {
             trendingMovies = trendingMovies.toImmutableList(),
             trendingTv = trendingTv.toImmutableList(),
             trendingPeople = trendingPeople.toImmutableList(),
+            trendingCollections = trendingCollections.toImmutableList(),
             favorites = localMovies.toImmutableList(),
             folders = folders.toImmutableList(),
             movieFolderColors = immutableMovieFolderColors,
@@ -126,7 +129,7 @@ class GetSearchUiStateUseCase @Inject constructor() {
 
 fun List<TMDBSearchResult>.applyFilter(config: SortConfig): List<TMDBSearchResult> {
     return this.filter { result ->
-        if (result is TMDBSearchResult.PersonResult) return@filter true
+        if (result is TMDBSearchResult.PersonResult || result is TMDBSearchResult.CollectionResult) return@filter true
 
         val genreMatch = if (config.selectedGenres.isEmpty()) true else {
             val genreIds = when (result) {
@@ -178,4 +181,5 @@ val TMDBSearchResult.title: String
         is TMDBSearchResult.MovieResult -> title ?: ""
         is TMDBSearchResult.TvResult -> name ?: ""
         is TMDBSearchResult.PersonResult -> name
+        is TMDBSearchResult.CollectionResult -> name ?: ""
     }

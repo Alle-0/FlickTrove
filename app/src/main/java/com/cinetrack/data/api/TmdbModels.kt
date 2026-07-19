@@ -24,6 +24,14 @@ data class MultiSearchResponse(
     @SerialName("total_results") val totalResults: Int? = 0
 )
 
+@Serializable
+data class CollectionSearchResponse(
+    val results: List<TMDBSearchResult.CollectionResult>,
+    val page: Int? = 1,
+    @SerialName("total_pages") val totalPages: Int? = 1,
+    @SerialName("total_results") val totalResults: Int? = 0
+)
+
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("media_type")
@@ -76,6 +84,20 @@ sealed class TMDBSearchResult {
     ) : TMDBSearchResult() {
         override val mediaType: String get() = "person"
         override val displayTitle: String get() = name
+    }
+
+    @Serializable
+    @SerialName("collection")
+    data class CollectionResult(
+        override val id: Long,
+        val name: String? = null,
+        @SerialName("poster_path") val posterPath: String? = null,
+        @SerialName("backdrop_path") val backdropPath: String? = null,
+        val overview: String? = null,
+        val partsPosterPaths: List<String> = emptyList()
+    ) : TMDBSearchResult() {
+        override val mediaType: String get() = "collection"
+        override val displayTitle: String get() = name ?: ""
     }
 }
 

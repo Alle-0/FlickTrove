@@ -59,6 +59,7 @@ fun SearchContentGrid(
     animatedMovieIds: MutableSet<String>?,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit,
+    onCollectionClick: (Long, String?) -> Unit,
     onDiscoverTrendingClick: ((String) -> Unit)?,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
@@ -144,11 +145,12 @@ fun SearchContentGrid(
         ) {
             val movieSpan = 12 / columns
             val personSpan = 12 / personColumns
+            val collectionSpan = if (columns >= 3) 6 else 12
             val hasDiscoveryFilters = uiState.sortConfig.selectedGenres.isNotEmpty() ||
                     uiState.sortConfig.selectedKeywords.isNotEmpty() ||
                     uiState.sortConfig.selectedDecades.isNotEmpty() ||
                     uiState.sortConfig.sortType != "popularity"
-            val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person")
+            val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection")
 
             if (showEmptySearch) {
                 if (uiState.category == "movie") {
@@ -200,12 +202,27 @@ fun SearchContentGrid(
                         onPersonClick = onPersonClick
                     )
                 }
+
+                if (uiState.category == "collection") {
+                    searchTrendingCollectionsSection(
+                        trendingCollections = uiState.trendingCollections,
+                        collectionSpan = collectionSpan,
+                        keyboardController = keyboardController,
+                        onCollectionClick = onCollectionClick
+                    )
+                }
             } else {
                 if (uiState.results.isEmpty() && uiState.isLoading) {
                     items(
-                        if (uiState.category == "person") 16 else 12,
+                        if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else 12,
                         contentType = { "skeleton" },
-                        span = { if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }
+                        span = {
+                            when (uiState.category) {
+                                "person" -> GridItemSpan(personSpan)
+                                "collection" -> GridItemSpan(collectionSpan)
+                                else -> GridItemSpan(movieSpan)
+                            }
+                        }
                     ) {
                         MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth)
                     }
@@ -227,12 +244,14 @@ fun SearchContentGrid(
                     columns = columns,
                     movieSpan = movieSpan,
                     personSpan = personSpan,
+                    collectionSpan = collectionSpan,
                     cardWidth = cardWidth,
                     personCardWidth = personCardWidth,
                     animatedVisibilityScope = animatedVisibilityScope,
                     keyboardController = keyboardController,
                     onMovieClick = onMovieClick,
                     onPersonClick = onPersonClick,
+                    onCollectionClick = onCollectionClick,
                     onToggleFavorite = onToggleFavorite,
                     onLongPress = onLongPress,
                     onEmitMessage = onEmitMessage
@@ -240,9 +259,15 @@ fun SearchContentGrid(
 
                 if (uiState.isNextPageLoading) {
                     items(
-                        if (uiState.category == "person") 4 else columns,
+                        if (uiState.category == "person") 4 else if (uiState.category == "collection") 2 else columns,
                         contentType = { "skeleton" },
-                        span = { if (uiState.category == "person") GridItemSpan(personSpan) else GridItemSpan(movieSpan) }
+                        span = {
+                            when (uiState.category) {
+                                "person" -> GridItemSpan(personSpan)
+                                "collection" -> GridItemSpan(collectionSpan)
+                                else -> GridItemSpan(movieSpan)
+                            }
+                        }
                     ) {
                         MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth)
                     }

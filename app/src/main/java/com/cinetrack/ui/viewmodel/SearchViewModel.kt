@@ -11,6 +11,8 @@ import com.cinetrack.data.api.TMDBSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.api.TMDBService
 import com.cinetrack.ui.utils.ErrorMapper
@@ -38,6 +40,7 @@ data class SearchUiState(
     val trendingMovies: ImmutableList<TMDBSearchResult> = persistentListOf(),
     val trendingTv: ImmutableList<TMDBSearchResult> = persistentListOf(),
     val trendingPeople: ImmutableList<TMDBSearchResult> = persistentListOf(),
+    val trendingCollections: ImmutableList<TMDBSearchResult> = persistentListOf(),
     val isLoading: Boolean = false,
     val isNextPageLoading: Boolean = false,
     val isEndReached: Boolean = false,
@@ -71,7 +74,28 @@ class SearchViewModel @Inject constructor(
     private var rawTrendingMovies: List<TMDBSearchResult> = emptyList()
     private var rawTrendingTv: List<TMDBSearchResult> = emptyList()
     private var rawTrendingPeople: List<TMDBSearchResult> = emptyList()
+    private var rawTrendingCollections: List<TMDBSearchResult> = emptyList()
     private var rawDynamicKeywords: List<FilterPill> = emptyList()
+
+    private val partsSemaphore = kotlinx.coroutines.sync.Semaphore(5)
+
+    private suspend fun enrichCollectionsWithParts(
+        collections: List<TMDBSearchResult.CollectionResult>
+    ): List<TMDBSearchResult.CollectionResult> = kotlinx.coroutines.coroutineScope {
+        collections.map { col ->
+            async {
+                try {
+                    partsSemaphore.withPermit {
+                        val details = tmdbService.getCollectionDetails(col.id)
+                        val posters = details.parts.mapNotNull { it.posterPath }.take(4)
+                        col.copy(partsPosterPaths = posters)
+                    }
+                } catch (e: Exception) {
+                    col
+                }
+            }
+        }.awaitAll()
+    }
     
     private var localMovies: List<Movie> = emptyList()
     private var localFolders: List<FolderEntity> = emptyList()
@@ -87,6 +111,7 @@ class SearchViewModel @Inject constructor(
                 rawTrendingMovies = rawTrendingMovies,
                 rawTrendingTv = rawTrendingTv,
                 rawTrendingPeople = rawTrendingPeople,
+                rawTrendingCollections = rawTrendingCollections,
                 rawDynamicKeywords = rawDynamicKeywords,
                 localMovies = localMovies,
                 folders = localFolders
@@ -208,7 +233,7 @@ class SearchViewModel @Inject constructor(
         if (query.isEmpty()) {
             val config = _uiState.value.sortConfig
             val hasFilters = config.selectedGenres.isNotEmpty() || config.selectedKeywords.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "popularity"
-            if (hasFilters && category != "person") {
+            if (hasFilters && category != "person" && category != "collection") {
                 fetchDiscovery()
             } else {
                 rawResults = emptyList()
@@ -266,6 +291,11 @@ class SearchViewModel @Inject constructor(
                             }
                             totalPages = response.totalPages ?: 1
                         }
+                        "collection" -> {
+                            val response = tmdbService.searchCollection(query, page = page)
+                            newBatch = enrichCollectionsWithParts(response.results)
+                            totalPages = response.totalPages ?: 1
+                        }
                         else -> {
                             val response = tmdbService.searchMulti(query, page = page)
                             newBatch = response.results
@@ -289,7 +319,7 @@ class SearchViewModel @Inject constructor(
                     }
 
                     val filteredCount = accumulatedResults.applyFilter(_uiState.value.sortConfig).size
-                    if (_uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person" || filteredCount >= 40) {
+                    if (_uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person" || category == "collection" || filteredCount >= 40) {
                         break
                     }
                     page++
@@ -307,6 +337,7 @@ class SearchViewModel @Inject constructor(
                                 "movie" -> tmdbService.searchMovie(fallbackQuery, page = fallbackPage).results.map { it.toMovieResultInternal() }
                                 "tv" -> tmdbService.searchTV(fallbackQuery, page = fallbackPage).results.map { it.toTvResultInternal() }
                                 "person" -> tmdbService.searchPeople(fallbackQuery, page = fallbackPage).results.map { TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment) }
+                                "collection" -> enrichCollectionsWithParts(tmdbService.searchCollection(fallbackQuery, page = fallbackPage).results)
                                 else -> tmdbService.searchMulti(fallbackQuery, page = fallbackPage).results
                             }
                             
@@ -350,7 +381,7 @@ class SearchViewModel @Inject constructor(
 
     private suspend fun performLocalSearch(query: String, category: String): List<TMDBSearchResult> {
         if (query.isBlank()) return emptyList()
-        val mediaType = if (category == "person") "" else category
+        val mediaType = if (category == "person" || category == "collection") "" else category
         val results = repository.searchLocalMovies(query, mediaType)
         return results.map { localMovie ->
             when (localMovie.mediaType) {
@@ -402,7 +433,7 @@ class SearchViewModel @Inject constructor(
                 val category = _uiState.value.category
                 val config = _uiState.value.sortConfig
                 
-                if (category == "person") {
+                if (category == "person" || category == "collection") {
                     rawResults = emptyList()
                     applyStateFilters()
                     fetchTrending()
@@ -463,10 +494,26 @@ class SearchViewModel @Inject constructor(
                 val people = repository.getPopularPeople(1).take(6).map { 
                     TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                 }
+                val collections = try {
+                    coroutineScope {
+                        listOf("Marvel", "Star Wars", "Harry Potter", "Lord of the Rings", "Batman", "Spider-Man").map { saga ->
+                            async {
+                                try {
+                                    repository.searchCollection(saga, page = 1).firstOrNull()
+                                } catch (e: Exception) { null }
+                            }
+                        }.awaitAll().filterNotNull().take(6).let { cols ->
+                            enrichCollectionsWithParts(cols)
+                        }
+                    }
+                } catch (e: Exception) {
+                    emptyList()
+                }
                 
                 rawTrendingMovies = movies
                 rawTrendingTv = tv
                 rawTrendingPeople = people
+                rawTrendingCollections = collections
                 rawResults = emptyList()
                 applyStateFilters()
                 _uiState.update { it.copy(isEndReached = true) }
@@ -499,7 +546,7 @@ class SearchViewModel @Inject constructor(
                     val config = _uiState.value.sortConfig
                     val hasFilters = config.selectedGenres.isNotEmpty() || config.selectedKeywords.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "popularity"
                     
-                    if (query.isEmpty() && hasFilters && category != "person") {
+                    if (query.isEmpty() && hasFilters && category != "person" && category != "collection") {
                         val options = buildTmdbOptions(config, category)
 
                         when (category) {
@@ -537,6 +584,11 @@ class SearchViewModel @Inject constructor(
                                 }
                                 totalPages = response.totalPages ?: 1
                             }
+                            "collection" -> {
+                                val response = tmdbService.searchCollection(query, page = page)
+                                newBatch = enrichCollectionsWithParts(response.results)
+                                totalPages = response.totalPages ?: 1
+                            }
                             else -> {
                                 val response = tmdbService.searchMulti(query, page = page)
                                 newBatch = response.results
@@ -555,6 +607,7 @@ class SearchViewModel @Inject constructor(
                             is TMDBSearchResult.MovieResult -> "movie_${result.id}"
                             is TMDBSearchResult.TvResult -> "tv_${result.id}"
                             is TMDBSearchResult.PersonResult -> "person_${result.id}"
+                            is TMDBSearchResult.CollectionResult -> "collection_${result.id}"
                             else -> "other_${result.id}"
                         }
                     }
@@ -567,7 +620,7 @@ class SearchViewModel @Inject constructor(
                     }
 
                     val filteredFromThisBatch = newBatch.applyFilter(_uiState.value.sortConfig)
-                    if (filteredFromThisBatch.isNotEmpty() || _uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person") {
+                    if (filteredFromThisBatch.isNotEmpty() || _uiState.value.sortConfig.selectedGenres.isEmpty() || category == "person" || category == "collection") {
                         fetchedEnoughForNextBatch = true
                         break
                     }

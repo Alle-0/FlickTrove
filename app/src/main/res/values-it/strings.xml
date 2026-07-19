@@ -414,6 +414,9 @@
     <string name="search_collapse">Comprimi</string>
     <string name="search_expand">Espandi</string>
     <string name="search_tab_persons">PERSONE</string>
+    <string name="search_tab_collections">SAGHE</string>
+    <string name="collection_trending_title">SAGHE E COLLEZIONI ICONICHE</string>
+    <string name="collection_movies_count_format">%1$d FILM</string>
 
     <!-- Recommendations & Library Strings -->
     <string name="library_tab_title">Libreria</string>

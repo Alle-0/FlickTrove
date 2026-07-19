@@ -29,6 +29,7 @@ fun SearchCategorySelector(
         "movie" -> 0
         "tv" -> 1
         "person" -> 2
+        "collection" -> 3
         else -> 0
     }
     Box(
@@ -44,7 +45,7 @@ fun SearchCategorySelector(
         ))
          
         BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(4.dp)) {
-            val tabWidth = maxWidth / 3
+            val tabWidth = maxWidth / 4
             val tabWidthPx = with(LocalDensity.current) { tabWidth.toPx() }
             
             val offsetAnimatable = remember { Animatable(selectedIndex * tabWidthPx) }
@@ -71,11 +72,12 @@ fun SearchCategorySelector(
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             coroutineScope.launch {
-                                val targetIndex = (offsetAnimatable.value / tabWidthPx).roundToInt().coerceIn(0, 2)
+                                val targetIndex = (offsetAnimatable.value / tabWidthPx).roundToInt().coerceIn(0, 3)
                                 val categoryStr = when(targetIndex) {
                                     0 -> "movie"
                                     1 -> "tv"
-                                    else -> "person"
+                                    2 -> "person"
+                                    else -> "collection"
                                 }
                                 onCategoryChanged(categoryStr)
                                 
@@ -97,7 +99,7 @@ fun SearchCategorySelector(
                         onHorizontalDrag = { change: androidx.compose.ui.input.pointer.PointerInputChange, dragAmount: Float ->
                             change.consume()
                             coroutineScope.launch {
-                                val newVal = (offsetAnimatable.value + dragAmount).coerceIn(0f, tabWidthPx * 2)
+                                val newVal = (offsetAnimatable.value + dragAmount).coerceIn(0f, tabWidthPx * 3)
                                 offsetAnimatable.snapTo(newVal)
                             }
                         }
@@ -116,6 +118,7 @@ fun SearchCategorySelector(
                     CategoryTab(stringResource(R.string.folder_detail_tab_movies), category == "movie") { onCategoryChanged("movie") }
                     CategoryTab(stringResource(R.string.folder_detail_tab_tv), category == "tv") { onCategoryChanged("tv") }
                     CategoryTab(stringResource(R.string.search_tab_persons), category == "person") { onCategoryChanged("person") }
+                    CategoryTab(stringResource(R.string.search_tab_collections), category == "collection") { onCategoryChanged("collection") }
                 }
             }
         }

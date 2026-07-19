@@ -839,6 +839,7 @@ class MovieRepository @Inject constructor(
     suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id)
     suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber)
     suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = tmdbService.getCollectionDetails(id)
+    suspend fun searchCollection(query: String, page: Int = 1): List<TMDBSearchResult.CollectionResult> = tmdbService.searchCollection(query, page = page).results
     suspend fun searchPeople(query: String, page: Int = 1): List<PersonSearchResult> = tmdbService.searchPeople(query, page = page).results
     suspend fun getMoviesByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getMoviesByGenre(genreId, page = page).results
     suspend fun getTVShowsByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getTVShowsByGenre(genreId, page = page).results
