@@ -19,6 +19,9 @@ import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.ErrorMapper
 import com.cinetrack.ui.utils.UiText
+import com.cinetrack.util.toComposeColorOrNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
@@ -27,7 +30,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -88,6 +90,11 @@ class CollectionDetailViewModel @Inject constructor(
                                 val ambientColor = ColorUtils.darkenForAmbient(rawColor)
                                 val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
                                 _extractedColor.value = finalColor
+                                val r = (finalColor.red * 255).toInt().coerceIn(0, 255)
+                                val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
+                                val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
+                                val hexString = String.format("#%02X%02X%02X", r, g, b)
+                                repository.saveCachedColor("collection:${_collectionId.value}", hexString)
                             }
                         }
                     }
@@ -102,6 +109,12 @@ class CollectionDetailViewModel @Inject constructor(
         if (_collectionId.value == 0L && id != 0L) {
             _collectionId.value = id
             _collectionName = name
+            viewModelScope.launch {
+                val cachedHex = repository.getCachedColor("collection:$id")
+                if (cachedHex != null && _extractedColor.value == null) {
+                    _extractedColor.value = cachedHex.toComposeColorOrNull()
+                }
+            }
             fetchCollection(id)
         }
     }
@@ -162,16 +175,19 @@ class CollectionDetailViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
             try {
-                val details = repository.fetchCollectionDetails(id)
-                // Sort parts by release date chronologically so saga films are in correct viewing sequence!
-                val sortedParts = details.parts.sortedBy { movie ->
-                    movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                repository.getCollectionDetailsFlow(id).collect { details ->
+                    // Sort parts by release date chronologically so saga films are in correct viewing sequence!
+                    val sortedParts = details.parts.sortedBy { movie ->
+                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                    }
+                    _collection.value = details.copy(parts = sortedParts)
+                    _isLoading.value = false
                 }
-                _collection.value = details.copy(parts = sortedParts)
             } catch (e: Exception) {
-                _error.value = ErrorMapper.map(e.message)
-            } finally {
-                _isLoading.value = false
+                if (_collection.value == null) {
+                    _error.value = ErrorMapper.map(e.message)
+                    _isLoading.value = false
+                }
             }
         }
     }

@@ -76,3 +76,5 @@ Thumbs.db
 /screenshots/
 *.csv
 *backup*.json
+*.zip
+gdpr-data*

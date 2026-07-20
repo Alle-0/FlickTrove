@@ -43,6 +43,9 @@ import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.card.MovieListCard
+import com.cinetrack.ui.components.shared.CollectionCardSkeleton
+import com.cinetrack.ui.components.shared.MovieCardSkeleton
+import com.cinetrack.ui.components.shared.PersonCardSkeleton
 import com.cinetrack.ui.components.card.PersonCard
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
@@ -293,6 +296,7 @@ fun DiscoverMoreTrendingCard(
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchTrendingMoviesSection(
     trendingMovies: List<TMDBSearchResult>,
+    isLoading: Boolean,
     favorites: List<Movie>,
     movieFolderColors: Map<String, List<String>>,
     preferences: UserPreferences,
@@ -308,7 +312,7 @@ fun LazyGridScope.searchTrendingMoviesSection(
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
 ) {
-    if (trendingMovies.isNotEmpty()) {
+    if (trendingMovies.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
                 Text(
@@ -320,49 +324,59 @@ fun LazyGridScope.searchTrendingMoviesSection(
                 )
             }
         }
-        itemsIndexed(
-            items = trendingMovies.take(6),
-            key = { _, item -> "trending_movie_${item.id}" },
-            span = { _, _ -> GridItemSpan(movieSpan) }
-        ) { index, item ->
-            if (item is TMDBSearchResult.MovieResult) {
-                val baseMovie = Movie(
-                    id = item.id,
-                    mediaType = "movie",
-                    title = item.title,
-                    posterPath = item.posterPath,
-                    backdropPath = item.backdropPath,
-                    voteAverage = item.voteAverage,
-                    releaseDate = item.releaseDate,
-                    overview = item.overview,
-                    genreIds = item.genreIds
-                )
-                val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
-                val movie = movieStatus ?: baseMovie
-                val folderColors = remember(movie.id, movieFolderColors) {
-                    movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
+        if (trendingMovies.isNotEmpty()) {
+            itemsIndexed(
+                items = trendingMovies.take(6),
+                key = { _, item -> "trending_movie_${item.id}" },
+                span = { _, _ -> GridItemSpan(movieSpan) }
+            ) { index, item ->
+                if (item is TMDBSearchResult.MovieResult) {
+                    val baseMovie = Movie(
+                        id = item.id,
+                        mediaType = "movie",
+                        title = item.title,
+                        posterPath = item.posterPath,
+                        backdropPath = item.backdropPath,
+                        voteAverage = item.voteAverage,
+                        releaseDate = item.releaseDate,
+                        overview = item.overview,
+                        genreIds = item.genreIds
+                    )
+                    val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
+                    val movie = movieStatus ?: baseMovie
+                    val folderColors = remember(movie.id, movieFolderColors) {
+                        movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
+                    }
+                    SearchGridMovieItem(
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        columns = columns,
+                        cardWidth = cardWidth,
+                        showFolderBookmarks = preferences.showFolderBookmarks,
+                        hasAnimatedSet = animatedMovieIds,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        staggerIndex = index,
+                        keyboardController = keyboardController,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
                 }
-                SearchGridMovieItem(
-                    movie = movie,
-                    movieStatus = movieStatus,
-                    folderColors = folderColors,
-                    columns = columns,
-                    cardWidth = cardWidth,
-                    showFolderBookmarks = preferences.showFolderBookmarks,
-                    hasAnimatedSet = animatedMovieIds,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    staggerIndex = index,
-                    keyboardController = keyboardController,
-                    onMovieClick = onMovieClick,
-                    onToggleFavorite = onToggleFavorite,
-                    onLongPress = onLongPress,
-                    onEmitMessage = onEmitMessage
-                )
             }
-        }
-        if (onDiscoverMore != null) {
-            item(span = { GridItemSpan(12) }) {
-                DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+            if (onDiscoverMore != null) {
+                item(span = { GridItemSpan(12) }) {
+                    DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+                }
+            }
+        } else if (isLoading) {
+            items(
+                count = 6,
+                contentType = { "skeleton" },
+                span = { GridItemSpan(movieSpan) }
+            ) {
+                MovieCardSkeleton(width = cardWidth)
             }
         }
     }
@@ -371,6 +385,7 @@ fun LazyGridScope.searchTrendingMoviesSection(
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchTrendingTvSection(
     trendingTv: List<TMDBSearchResult>,
+    isLoading: Boolean,
     favorites: List<Movie>,
     movieFolderColors: Map<String, List<String>>,
     preferences: UserPreferences,
@@ -386,7 +401,7 @@ fun LazyGridScope.searchTrendingTvSection(
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
 ) {
-    if (trendingTv.isNotEmpty()) {
+    if (trendingTv.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
                 Text(
@@ -398,49 +413,59 @@ fun LazyGridScope.searchTrendingTvSection(
                 )
             }
         }
-        itemsIndexed(
-            items = trendingTv.take(6),
-            key = { _, item -> "trending_tv_${item.id}" },
-            span = { _, _ -> GridItemSpan(movieSpan) }
-        ) { index, item ->
-            if (item is TMDBSearchResult.TvResult) {
-                val baseMovie = Movie(
-                    id = item.id,
-                    mediaType = "tv",
-                    name = item.name,
-                    posterPath = item.posterPath,
-                    backdropPath = item.backdropPath,
-                    voteAverage = item.voteAverage,
-                    firstAirDate = item.firstAirDate,
-                    overview = item.overview,
-                    genreIds = item.genreIds
-                )
-                val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
-                val movie = movieStatus ?: baseMovie
-                val folderColors = remember(movie.id, movieFolderColors) {
-                    movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
+        if (trendingTv.isNotEmpty()) {
+            itemsIndexed(
+                items = trendingTv.take(6),
+                key = { _, item -> "trending_tv_${item.id}" },
+                span = { _, _ -> GridItemSpan(movieSpan) }
+            ) { index, item ->
+                if (item is TMDBSearchResult.TvResult) {
+                    val baseMovie = Movie(
+                        id = item.id,
+                        mediaType = "tv",
+                        name = item.name,
+                        posterPath = item.posterPath,
+                        backdropPath = item.backdropPath,
+                        voteAverage = item.voteAverage,
+                        firstAirDate = item.firstAirDate,
+                        overview = item.overview,
+                        genreIds = item.genreIds
+                    )
+                    val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
+                    val movie = movieStatus ?: baseMovie
+                    val folderColors = remember(movie.id, movieFolderColors) {
+                        movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
+                    }
+                    SearchGridMovieItem(
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        columns = columns,
+                        cardWidth = cardWidth,
+                        showFolderBookmarks = preferences.showFolderBookmarks,
+                        hasAnimatedSet = animatedMovieIds,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        staggerIndex = index,
+                        keyboardController = keyboardController,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
                 }
-                SearchGridMovieItem(
-                    movie = movie,
-                    movieStatus = movieStatus,
-                    folderColors = folderColors,
-                    columns = columns,
-                    cardWidth = cardWidth,
-                    showFolderBookmarks = preferences.showFolderBookmarks,
-                    hasAnimatedSet = animatedMovieIds,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    staggerIndex = index,
-                    keyboardController = keyboardController,
-                    onMovieClick = onMovieClick,
-                    onToggleFavorite = onToggleFavorite,
-                    onLongPress = onLongPress,
-                    onEmitMessage = onEmitMessage
-                )
             }
-        }
-        if (onDiscoverMore != null) {
-            item(span = { GridItemSpan(12) }) {
-                DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+            if (onDiscoverMore != null) {
+                item(span = { GridItemSpan(12) }) {
+                    DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+                }
+            }
+        } else if (isLoading) {
+            items(
+                count = 6,
+                contentType = { "skeleton" },
+                span = { GridItemSpan(movieSpan) }
+            ) {
+                MovieCardSkeleton(width = cardWidth)
             }
         }
     }
@@ -448,12 +473,13 @@ fun LazyGridScope.searchTrendingTvSection(
 
 fun LazyGridScope.searchTrendingPeopleSection(
     trendingPeople: List<TMDBSearchResult>,
+    isLoading: Boolean,
     personSpan: Int,
     personCardWidth: Dp,
     keyboardController: SoftwareKeyboardController?,
     onPersonClick: (Long) -> Unit
 ) {
-    if (trendingPeople.isNotEmpty()) {
+    if (trendingPeople.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
                 Text(
@@ -465,26 +491,36 @@ fun LazyGridScope.searchTrendingPeopleSection(
                 )
             }
         }
-        items(
-            items = trendingPeople.take(8),
-            key = { "trending_person_${it.id}" },
-            contentType = { "person_result" },
-            span = { GridItemSpan(personSpan) }
-        ) { item ->
-            if (item is TMDBSearchResult.PersonResult) {
-                PersonCard(
-                    person = PersonSearchResult(
-                        id = item.id,
-                        name = item.name,
-                        profilePath = item.profilePath,
-                        knownForDepartment = item.knownForDepartment
-                    ),
-                    width = personCardWidth,
-                    onClick = { 
-                        keyboardController?.hide()
-                        onPersonClick(item.id) 
-                    }
-                )
+        if (trendingPeople.isNotEmpty()) {
+            items(
+                items = trendingPeople.take(8),
+                key = { "trending_person_${it.id}" },
+                contentType = { "person_result" },
+                span = { GridItemSpan(personSpan) }
+            ) { item ->
+                if (item is TMDBSearchResult.PersonResult) {
+                    PersonCard(
+                        person = PersonSearchResult(
+                            id = item.id,
+                            name = item.name,
+                            profilePath = item.profilePath,
+                            knownForDepartment = item.knownForDepartment
+                        ),
+                        width = personCardWidth,
+                        onClick = { 
+                            keyboardController?.hide()
+                            onPersonClick(item.id) 
+                        }
+                    )
+                }
+            }
+        } else if (isLoading) {
+            items(
+                count = 8,
+                contentType = { "skeleton" },
+                span = { GridItemSpan(personSpan) }
+            ) {
+                PersonCardSkeleton(width = personCardWidth)
             }
         }
     }
@@ -492,11 +528,12 @@ fun LazyGridScope.searchTrendingPeopleSection(
 
 fun LazyGridScope.searchTrendingCollectionsSection(
     trendingCollections: List<TMDBSearchResult>,
+    isLoading: Boolean,
     collectionSpan: Int,
     keyboardController: SoftwareKeyboardController?,
     onCollectionClick: (Long, String?) -> Unit
 ) {
-    if (trendingCollections.isNotEmpty()) {
+    if (trendingCollections.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
                 Text(
@@ -508,20 +545,30 @@ fun LazyGridScope.searchTrendingCollectionsSection(
                 )
             }
         }
-        items(
-            items = trendingCollections.take(8),
-            key = { "trending_collection_${it.id}" },
-            contentType = { "collection_result" },
-            span = { GridItemSpan(collectionSpan) }
-        ) { item ->
-            if (item is TMDBSearchResult.CollectionResult) {
-                CollectionCollageCard(
-                    collection = item,
-                    onClick = {
-                        keyboardController?.hide()
-                        onCollectionClick(item.id, item.name)
-                    }
-                )
+        if (trendingCollections.isNotEmpty()) {
+            items(
+                items = trendingCollections.take(6),
+                key = { "trending_collection_${it.id}" },
+                contentType = { "collection_result" },
+                span = { GridItemSpan(collectionSpan) }
+            ) { item ->
+                if (item is TMDBSearchResult.CollectionResult) {
+                    CollectionCollageCard(
+                        collection = item,
+                        onClick = {
+                            keyboardController?.hide()
+                            onCollectionClick(item.id, item.name)
+                        }
+                    )
+                }
+            }
+        } else if (isLoading) {
+            items(
+                count = 6,
+                contentType = { "skeleton" },
+                span = { GridItemSpan(collectionSpan) }
+            ) {
+                CollectionCardSkeleton()
             }
         }
     }
@@ -538,10 +585,10 @@ fun CollectionCollageCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
+            .bounceClick(scaleDown = 0.96f) { onClick() }
             .clip(RoundedCornerShape(18.dp))
             .background(Color(0xFF14141E))
             .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
-            .bounceClick(scaleDown = 0.96f) { onClick() }
     ) {
         if (backdropUrl != null) {
             SubcomposeAsyncImage(

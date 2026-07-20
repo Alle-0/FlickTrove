@@ -25,24 +25,24 @@ fun buildTmdbImageUrl(path: String?, type: ImageType, quality: ImageQuality): St
 
     val size = when (type) {
         ImageType.POSTER -> when (quality) {
-            ImageQuality.LOW -> "w92"
-            ImageQuality.MEDIUM -> "w185" // or w342
-            ImageQuality.HIGH -> "w500" // or w780 / original
+            ImageQuality.LOW -> "w185"
+            ImageQuality.MEDIUM -> "w500"
+            ImageQuality.HIGH -> "original"
         }
         ImageType.BACKDROP -> when (quality) {
-            ImageQuality.LOW -> "w300"
-            ImageQuality.MEDIUM -> "w780"
-            ImageQuality.HIGH -> "w1280" // or original
+            ImageQuality.LOW -> "w780"
+            ImageQuality.MEDIUM -> "w1280"
+            ImageQuality.HIGH -> "original"
         }
         ImageType.PROFILE -> when (quality) {
-            ImageQuality.LOW -> "w45"
-            ImageQuality.MEDIUM -> "w185"
-            ImageQuality.HIGH -> "h632" // or original
+            ImageQuality.LOW -> "w185"
+            ImageQuality.MEDIUM -> "h632"
+            ImageQuality.HIGH -> "original"
         }
         ImageType.LOGO -> when (quality) {
-            ImageQuality.LOW -> "w92"
-            ImageQuality.MEDIUM -> "w154"
-            ImageQuality.HIGH -> "w300" // or w500
+            ImageQuality.LOW -> "w154"
+            ImageQuality.MEDIUM -> "w300"
+            ImageQuality.HIGH -> "original"
         }
     }
 

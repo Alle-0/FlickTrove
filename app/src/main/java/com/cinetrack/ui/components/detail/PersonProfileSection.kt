@@ -30,7 +30,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -171,9 +174,10 @@ fun PersonBioAndInfoSection(
         )
 
         person.biography?.let { bio ->
+            var hasOverflow by remember { mutableStateOf(false) }
             Column(
                 modifier = Modifier
-                    .bounceClick(scaleDown = 0.99f) { onToggleBio() }
+                    .then(if (hasOverflow || showFullBio) Modifier.bounceClick(scaleDown = 0.99f) { onToggleBio() } else Modifier)
             ) {
                 AnimatedContent(
                     targetState = showFullBio,
@@ -198,10 +202,15 @@ fun PersonBioAndInfoSection(
                         ),
                         color = Color.White.copy(alpha = 0.7f),
                         maxLines = if (targetExpanded) Int.MAX_VALUE else 4,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        onTextLayout = { result ->
+                            if (!targetExpanded && hasOverflow != result.hasVisualOverflow) {
+                                hasOverflow = result.hasVisualOverflow
+                            }
+                        }
                     )
                 }
-                if (bio.length > 200) {
+                if (hasOverflow || showFullBio) {
                     Text(
                         text = if (showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
                         style = MaterialTheme.typography.labelMedium.copy(

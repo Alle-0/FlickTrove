@@ -123,7 +123,7 @@ class StatsViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Lazily,
         initialValue = StatsUiState()
     )
 
@@ -131,13 +131,14 @@ class StatsViewModel @Inject constructor(
         _timeRange.value = range
     }
 
-    private fun formatDuration(minutes: Int): String {
+    private fun formatDuration(minutes: Int, language: String = "it"): String {
         if (minutes <= 0) return "0m"
         val days = minutes / 1440
         val hours = (minutes % 1440) / 60
         val mins = minutes % 60
+        val dayUnit = if (language.startsWith("it", ignoreCase = true)) "g" else "d"
         return when {
-            days > 0 -> "${days}g ${hours}h ${mins}m"
+            days > 0 -> "${days}$dayUnit ${hours}h ${mins}m"
             hours > 0 -> "${hours}h ${mins}m"
             else -> "${mins}m"
         }
@@ -271,13 +272,13 @@ class StatsViewModel @Inject constructor(
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
 
         return CalculatedStats(
-            totalTimeFormatted = formatDuration(movieMin + tvMin),
+            totalTimeFormatted = formatDuration(movieMin + tvMin, language),
             isEstimate = moviesEstimate || tvEstimate,
             moviesWatched = watchedMovies.size,
             moviesToWatch = allMovies.count { it.mediaType != "tv" && !it.watched && (it.favorite || it.reminder) },
             totalMinutes = movieMin + tvMin,
             movieMinutes = movieMin,
-            movieTimeFormatted = formatDuration(movieMin),
+            movieTimeFormatted = formatDuration(movieMin, language),
             moviesEstimate = moviesEstimate,
             longestMovie = longestMovie,
             longestMovieMinutes = longestMovie?.runtime ?: 0,
@@ -285,7 +286,7 @@ class StatsViewModel @Inject constructor(
             tvToWatch = allMovies.count { it.mediaType == "tv" && !it.watched && (it.favorite || it.reminder) },
             totalEpisodes = totalEpisodes,
             tvMinutes = tvMin,
-            tvTimeFormatted = formatDuration(tvMin),
+            tvTimeFormatted = formatDuration(tvMin, language),
             tvEstimate = tvEstimate,
             longestTV = longestTVStat?.first,
             longestTVMinutes = longestTVStat?.second ?: 0,

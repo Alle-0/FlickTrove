@@ -140,97 +140,97 @@ class PersonDetailViewModel @Inject constructor(
             val startTime = System.currentTimeMillis()
             _isLoading.value = true
             try {
-                val person = repository.getPersonDetails(id)
-                _person.value = person
-                _error.value = null
+                repository.getPersonDetailsFlow(id).collect { person ->
+                    _person.value = person
+                    _isLoading.value = false
+                    _error.value = null
 
-                if (_activeTab.value == "cast_movie") {
-                    val cast = person.combinedCredits?.cast.orEmpty()
-                    val crew = person.combinedCredits?.crew.orEmpty()
+                    if (_activeTab.value == "cast_movie") {
+                        val cast = person.combinedCredits?.cast.orEmpty()
+                        val crew = person.combinedCredits?.crew.orEmpty()
 
-                    val hasCastMovie = cast.any { it.mediaType == "movie" }
-                    val hasCastTv = cast.any { it.mediaType == "tv" }
+                        val hasCastMovie = cast.any { it.mediaType == "movie" }
+                        val hasCastTv = cast.any { it.mediaType == "tv" }
 
-                    val mainDept = person.knownForDepartment?.takeIf { it != "Acting" }
-                        ?: if (crew.any { it.department == "Directing" || it.job == "Director" }) "Directing"
-                        else crew.groupingBy { it.department }.eachCount().maxByOrNull { it.value }?.key
+                        val mainDept = person.knownForDepartment?.takeIf { it != "Acting" }
+                            ?: if (crew.any { it.department == "Directing" || it.job == "Director" }) "Directing"
+                            else crew.groupingBy { it.department }.eachCount().maxByOrNull { it.value }?.key
 
-                    val isMainDeptItem = { m: Movie ->
-                        mainDept != null && (m.department == mainDept || (mainDept == "Directing" && m.job == "Director"))
-                    }
-
-                    val hasDeptMovie = crew.any { it.mediaType == "movie" && isMainDeptItem(it) }
-                    val hasDeptTv = crew.any { it.mediaType == "tv" && isMainDeptItem(it) }
-                    val hasCrewMovie = crew.any { it.mediaType == "movie" && !isMainDeptItem(it) }
-                    val hasCrewTv = crew.any { it.mediaType == "tv" && !isMainDeptItem(it) }
-
-                    val isPrimarilyCrew = person.knownForDepartment != null &&
-                            person.knownForDepartment != "Acting" &&
-                            (hasDeptMovie || hasDeptTv || hasCrewMovie || hasCrewTv)
-
-                    if (isPrimarilyCrew || (!hasCastMovie && !hasCastTv)) {
-                        _activeTab.value = when {
-                            hasDeptMovie -> "dept_movie"
-                            hasDeptTv -> "dept_tv"
-                            hasCrewMovie -> "crew_movie"
-                            hasCrewTv -> "crew_tv"
-                            hasCastMovie -> "cast_movie"
-                            hasCastTv -> "cast_tv"
-                            else -> _activeTab.value
+                        val isMainDeptItem = { m: Movie ->
+                            mainDept != null && (m.department == mainDept || (mainDept == "Directing" && m.job == "Director"))
                         }
-                    } else if (!hasCastMovie && hasCastTv) {
-                        _activeTab.value = "cast_tv"
+
+                        val hasDeptMovie = crew.any { it.mediaType == "movie" && isMainDeptItem(it) }
+                        val hasDeptTv = crew.any { it.mediaType == "tv" && isMainDeptItem(it) }
+                        val hasCrewMovie = crew.any { it.mediaType == "movie" && !isMainDeptItem(it) }
+                        val hasCrewTv = crew.any { it.mediaType == "tv" && !isMainDeptItem(it) }
+
+                        val isPrimarilyCrew = person.knownForDepartment != null &&
+                                person.knownForDepartment != "Acting" &&
+                                (hasDeptMovie || hasDeptTv || hasCrewMovie || hasCrewTv)
+
+                        if (isPrimarilyCrew || (!hasCastMovie && !hasCastTv)) {
+                            _activeTab.value = when {
+                                hasDeptMovie -> "dept_movie"
+                                hasDeptTv -> "dept_tv"
+                                hasCrewMovie -> "crew_movie"
+                                hasCrewTv -> "crew_tv"
+                                hasCastMovie -> "cast_movie"
+                                hasCastTv -> "cast_tv"
+                                else -> _activeTab.value
+                            }
+                        } else if (!hasCastMovie && hasCastTv) {
+                            _activeTab.value = "cast_tv"
+                        }
                     }
                 }
             } catch (e: Exception) {
-                try {
-                    val localMovies = repository.getLocalMoviesFlow().first()
-                    var personName: String? = null
-                    val personMovies = mutableListOf<Movie>()
-                    val personCrewMovies = mutableListOf<Movie>()
+                if (_person.value == null) {
+                    try {
+                        val localMovies = repository.getLocalMoviesFlow().first()
+                        var personName: String? = null
+                        val personMovies = mutableListOf<Movie>()
+                        val personCrewMovies = mutableListOf<Movie>()
 
-                    for (m in localMovies) {
-                        val asCast = m.topCastData?.find { it.id == id }
-                        if (asCast != null) {
-                            if (personName == null) personName = asCast.name
-                            personMovies.add(m)
+                        for (m in localMovies) {
+                            val asCast = m.topCastData?.find { it.id == id }
+                            if (asCast != null) {
+                                if (personName == null) personName = asCast.name
+                                personMovies.add(m)
+                            }
+                            val asDirector = m.directorData?.find { it.id == id }
+                            if (asDirector != null || m.directorId == id) {
+                                if (personName == null) personName = asDirector?.name ?: m.directorName
+                                if (!personCrewMovies.contains(m)) personCrewMovies.add(m)
+                            }
                         }
-                        val asDirector = m.directorData?.find { it.id == id }
-                        if (asDirector != null || m.directorId == id) {
-                            if (personName == null) personName = asDirector?.name ?: m.directorName
-                            if (!personCrewMovies.contains(m)) personCrewMovies.add(m)
-                        }
-                    }
 
-                    if (personName != null || _profilePath != null) {
-                        val fallbackName = personName ?: context.getString(R.string.person_offline_default_name, id)
-                        val offlinePerson = Person(
-                            id = id,
-                            name = fallbackName,
-                            profilePath = _profilePath,
-                            knownForDepartment = if (personCrewMovies.size > personMovies.size) "Directing" else "Acting",
-                            biography = context.getString(R.string.person_offline_bio),
-                            combinedCredits = com.cinetrack.data.api.CombinedCredits(
-                                cast = personMovies,
-                                crew = personCrewMovies
+                        if (personName != null || _profilePath != null) {
+                            val fallbackName = personName ?: context.getString(R.string.person_offline_default_name, id)
+                            val offlinePerson = Person(
+                                id = id,
+                                name = fallbackName,
+                                profilePath = _profilePath,
+                                knownForDepartment = if (personCrewMovies.size > personMovies.size) "Directing" else "Acting",
+                                biography = context.getString(R.string.person_offline_bio),
+                                combinedCredits = com.cinetrack.data.api.CombinedCredits(
+                                    cast = personMovies,
+                                    crew = personCrewMovies
+                                )
                             )
-                        )
-                        _person.value = offlinePerson
-                        _error.value = null
-                        if (_activeTab.value == "cast_movie" && personMovies.isEmpty() && personCrewMovies.isNotEmpty()) {
-                            _activeTab.value = if (offlinePerson.knownForDepartment == "Directing") "dept_movie" else "crew_movie"
+                            _person.value = offlinePerson
+                            _error.value = null
+                            if (_activeTab.value == "cast_movie" && personMovies.isEmpty() && personCrewMovies.isNotEmpty()) {
+                                _activeTab.value = if (offlinePerson.knownForDepartment == "Directing") "dept_movie" else "crew_movie"
+                            }
+                        } else {
+                            _error.value = ErrorMapper.map(e.message)
                         }
-                    } else {
+                    } catch (fallbackEx: Exception) {
                         _error.value = ErrorMapper.map(e.message)
                     }
-                } catch (fallbackEx: Exception) {
-                    _error.value = ErrorMapper.map(e.message)
                 }
             } finally {
-                val timeTaken = System.currentTimeMillis() - startTime
-                if (timeTaken < 600L) {
-                    kotlinx.coroutines.delay(600L - timeTaken)
-                }
                 _isLoading.value = false
             }
         }

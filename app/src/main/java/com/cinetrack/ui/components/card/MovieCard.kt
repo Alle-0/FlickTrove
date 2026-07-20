@@ -207,7 +207,8 @@ fun MovieActionsPopup(
     onQuickNote: (Movie) -> Unit,
     onFolders: (Movie) -> Unit,
     onShare: (Movie) -> Unit,
-    onDelete: (Movie) -> Unit
+    onDelete: (Movie) -> Unit,
+    isSaved: Boolean = false
 ) {
     // Use MutableTransitionState to precisely track the AnimatedVisibility lifecycle
     val transitionState = remember { 
@@ -351,26 +352,28 @@ fun MovieActionsPopup(
                             onClick = { onDismiss(); onShare(movie) }
                         )
                         
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .animateEnterExit(
-                                enter = fadeIn(tween(300, delayMillis = 200))
+                        if (isSaved) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .animateEnterExit(
+                                    enter = fadeIn(tween(300, delayMillis = 200))
+                                )
+                                .background(Color.White.copy(alpha = 0.1f)))
+                            Spacer(modifier = Modifier.height(4.dp))
+                            
+                            MovieMenuItem(
+                                text = stringResource(R.string.card_delete),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
+                                iconColor = Color(0xFFE57373),
+                                isDestructive = true,
+                                modifier = Modifier.animateEnterExit(
+                                    enter = slideInVertically(tween(300, delayMillis = 240)) { it / 2 } + fadeIn(tween(300, delayMillis = 240))
+                                ),
+                                onClick = { onDismiss(); onDelete(movie) }
                             )
-                            .background(Color.White.copy(alpha = 0.1f)))
-                        Spacer(modifier = Modifier.height(4.dp))
-                        
-                        MovieMenuItem(
-                            text = stringResource(R.string.card_delete),
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                            iconColor = Color(0xFFE57373),
-                            isDestructive = true,
-                            modifier = Modifier.animateEnterExit(
-                                enter = slideInVertically(tween(300, delayMillis = 240)) { it / 2 } + fadeIn(tween(300, delayMillis = 240))
-                            ),
-                            onClick = { onDismiss(); onDelete(movie) }
-                        )
+                        }
                     }
                 }
             }
@@ -467,7 +470,12 @@ fun MovieCard(
                 scaleDown = 0.93f, 
                 requireUnconsumed = false,
                 onLongClick = { offset ->
-                    onLongPress(movie, offset, cardPosition[0])
+                    onLongPress(movie.apply {
+                        this.favorite = isFavorite
+                        this.watched = isWatched
+                        this.reminder = isReminder
+                        if (personalRating != null) this.personalRating = personalRating
+                    }, offset, cardPosition[0])
                 }
             ) { offset -> 
                 onPress(movie) 

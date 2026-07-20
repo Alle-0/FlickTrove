@@ -21,7 +21,7 @@ interface CacheDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDetail(detail: MovieDetailCacheEntity)
 
-    @Query("DELETE FROM movie_details_cache WHERE id NOT IN (SELECT id FROM movie_details_cache ORDER BY updated_at DESC LIMIT 50)")
+    @Query("DELETE FROM movie_details_cache WHERE id NOT IN (SELECT id FROM movie_details_cache ORDER BY updated_at DESC LIMIT 150)")
     suspend fun cleanupDetails()
 
     @Transaction

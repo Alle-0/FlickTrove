@@ -20,6 +20,8 @@ import com.cinetrack.util.TranslationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import com.cinetrack.util.toComposeColorOrNull
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,6 +65,13 @@ class MovieDetailViewModel @Inject constructor(
         if (movieId == 0L && id != 0L) {
             movieId = id
             mediaType = type
+            // Load cached accent color instantly if available
+            viewModelScope.launch {
+                val cachedHex = repository.getCachedColor("$type:$id")
+                if (cachedHex != null && _extractedColor.value == null) {
+                    _extractedColor.value = cachedHex.toComposeColorOrNull()
+                }
+            }
             // Trigger fetch
             viewModelScope.launch {
                 fetchFromTMDB(movieId, mediaType == "tv")
@@ -160,91 +169,97 @@ class MovieDetailViewModel @Inject constructor(
     private suspend fun fetchFromTMDB(id: Long, isTv: Boolean) {
         val startTime = System.currentTimeMillis()
         try {
-            val response = repository.fetchMovieDetails(id, isTv)
-            
-            // Trigger extra ratings fetch if we have IMDB ID
-            _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
-            val imdbId = response.externalIds?.imdbId
-            fetchExternalRatings(imdbId, id)
+            repository.getMovieDetailsFlow(id, isTv).collect { response ->
+                // Emit metadata immediately so Skeleton screen disappears in 0ms!
+                _metadata.value = response
 
-            // Update local DB if movie already exists (to sync missing release dates etc.)
-            viewModelScope.launch {
-                val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
-                if (localMovie != null) {
-                    val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
-                    val updatedMovie = localMovie.copy(
-                        genres = freshMovie.genres ?: localMovie.genres,
-                        runtime = freshMovie.runtime ?: localMovie.runtime,
-                        episodeRunTime = freshMovie.episodeRunTime ?: localMovie.episodeRunTime,
-                        tagline = freshMovie.tagline ?: localMovie.tagline,
-                        overview = freshMovie.overview ?: localMovie.overview,
-                        title = freshMovie.title ?: localMovie.title,
-                        name = freshMovie.name ?: localMovie.name,
-                        posterPath = freshMovie.posterPath ?: localMovie.posterPath,
-                        backdropPath = freshMovie.backdropPath ?: localMovie.backdropPath,
-                        voteAverage = freshMovie.voteAverage ?: localMovie.voteAverage,
-                        voteCount = freshMovie.voteCount ?: localMovie.voteCount,
-                        numberOfSeasons = freshMovie.numberOfSeasons ?: localMovie.numberOfSeasons,
-                        numberOfEpisodes = freshMovie.numberOfEpisodes ?: localMovie.numberOfEpisodes,
-                        revenue = freshMovie.revenue ?: localMovie.revenue,
-                        budget = freshMovie.budget ?: localMovie.budget,
-                        seasons = freshMovie.seasons ?: localMovie.seasons,
-                        releaseDate = freshMovie.releaseDate ?: localMovie.releaseDate,
-                        firstAirDate = freshMovie.firstAirDate ?: localMovie.firstAirDate,
-                        lastAirDate = freshMovie.lastAirDate ?: localMovie.lastAirDate,
-                        nextEpisodeAirDate = freshMovie.nextEpisodeAirDate ?: localMovie.nextEpisodeAirDate,
-                        nextEpisodeString = freshMovie.nextEpisodeString ?: localMovie.nextEpisodeString,
-                        releaseYear = freshMovie.releaseYear ?: localMovie.releaseYear,
-                        status = freshMovie.status ?: localMovie.status,
-                        imdbId = freshMovie.imdbId ?: localMovie.imdbId,
-                        topCastData = freshMovie.topCastData ?: localMovie.topCastData,
-                        directorData = freshMovie.directorData ?: localMovie.directorData,
-                        directorId = freshMovie.directorId ?: localMovie.directorId,
-                        directorName = freshMovie.directorName ?: localMovie.directorName,
-                        directorProfilePath = freshMovie.directorProfilePath ?: localMovie.directorProfilePath
-                    )
-                    repository.saveMovie(updatedMovie)
-                }
-            }
+                // Trigger extra ratings fetch if we have IMDB ID
+                _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
+                val imdbId = response.externalIds?.imdbId
+                fetchExternalRatings(imdbId, id)
 
-            // Fetch Collection if present
-            response.belongsToCollection?.id?.let { collectionId ->
+                // Update local DB if movie already exists (to sync missing release dates etc.)
                 viewModelScope.launch {
-                    try {
-                        val collectionResponse = repository.fetchCollectionDetails(collectionId)
-                        _collectionMovies.value = collectionResponse.parts
-                            .map { it.copy(mediaType = "movie") }
-                            .sortedBy { it.releaseDate ?: "9999-12-31" }
-                    } catch (e: Exception) {
-                        // Silent fail for collection
+                    val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
+                    if (localMovie != null) {
+                        val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                        val updatedMovie = localMovie.copy(
+                            genres = freshMovie.genres ?: localMovie.genres,
+                            runtime = freshMovie.runtime ?: localMovie.runtime,
+                            episodeRunTime = freshMovie.episodeRunTime ?: localMovie.episodeRunTime,
+                            tagline = freshMovie.tagline ?: localMovie.tagline,
+                            overview = freshMovie.overview ?: localMovie.overview,
+                            title = freshMovie.title ?: localMovie.title,
+                            name = freshMovie.name ?: localMovie.name,
+                            posterPath = freshMovie.posterPath ?: localMovie.posterPath,
+                            backdropPath = freshMovie.backdropPath ?: localMovie.backdropPath,
+                            voteAverage = freshMovie.voteAverage ?: localMovie.voteAverage,
+                            voteCount = freshMovie.voteCount ?: localMovie.voteCount,
+                            numberOfSeasons = freshMovie.numberOfSeasons ?: localMovie.numberOfSeasons,
+                            numberOfEpisodes = freshMovie.numberOfEpisodes ?: localMovie.numberOfEpisodes,
+                            revenue = freshMovie.revenue ?: localMovie.revenue,
+                            budget = freshMovie.budget ?: localMovie.budget,
+                            seasons = freshMovie.seasons ?: localMovie.seasons,
+                            releaseDate = freshMovie.releaseDate ?: localMovie.releaseDate,
+                            firstAirDate = freshMovie.firstAirDate ?: localMovie.firstAirDate,
+                            lastAirDate = freshMovie.lastAirDate ?: localMovie.lastAirDate,
+                            nextEpisodeAirDate = freshMovie.nextEpisodeAirDate ?: localMovie.nextEpisodeAirDate,
+                            nextEpisodeString = freshMovie.nextEpisodeString ?: localMovie.nextEpisodeString,
+                            releaseYear = freshMovie.releaseYear ?: localMovie.releaseYear,
+                            status = freshMovie.status ?: localMovie.status,
+                            imdbId = freshMovie.imdbId ?: localMovie.imdbId,
+                            topCastData = freshMovie.topCastData ?: localMovie.topCastData,
+                            directorData = freshMovie.directorData ?: localMovie.directorData,
+                            directorId = freshMovie.directorId ?: localMovie.directorId,
+                            directorName = freshMovie.directorName ?: localMovie.directorName,
+                            directorProfilePath = freshMovie.directorProfilePath ?: localMovie.directorProfilePath
+                        )
+                        repository.saveMovie(updatedMovie)
+                    }
+                }
+
+                // Fetch Collection if present
+                response.belongsToCollection?.id?.let { collectionId ->
+                    viewModelScope.launch {
+                        try {
+                            repository.getCollectionDetailsFlow(collectionId).collect { collectionResponse ->
+                                _collectionMovies.value = collectionResponse.parts
+                                    .map { it.copy(mediaType = "movie") }
+                                    .sortedBy { it.releaseDate ?: "9999-12-31" }
+                            }
+                        } catch (e: Exception) {
+                            // Silent fail for collection
+                        }
+                    }
+                }
+
+                // Preload accent color asynchronously across threads without delaying metadata emission
+                val targetPath = response.backdropPath ?: response.posterPath
+                if (targetPath != null && _extractedColor.value == null) {
+                    val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
+                    val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
+                    if (imageUrl != null) {
+                        viewModelScope.launch(Dispatchers.Default) {
+                            preloadAccentColor(imageUrl)
+                        }
                     }
                 }
             }
-
-            // Preload accent color BEFORE emitting metadata so Skeleton stays up until the color is ready
-            val targetPath = response.backdropPath ?: response.posterPath
-            if (targetPath != null && _extractedColor.value == null) {
-                val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
-                val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
-                if (imageUrl != null) {
-                    preloadAccentColor(imageUrl)
-                }
-            }
-
-            _metadata.value = response
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
             if (localMovie != null) {
+                _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
                 val targetPath = localMovie.customBackdropPath ?: localMovie.backdropPath ?: localMovie.posterPath
                 if (targetPath != null && _extractedColor.value == null && localMovie.accentColor == null) {
                     val imageType = if (localMovie.customBackdropPath != null || localMovie.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
                     val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
                     if (imageUrl != null) {
-                        preloadAccentColor(imageUrl)
+                        viewModelScope.launch(Dispatchers.Default) {
+                            preloadAccentColor(imageUrl)
+                        }
                     }
                 }
-                _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
             } else {
                 _error.value = e.stackTraceToString()
             }
@@ -668,6 +683,12 @@ class MovieDetailViewModel @Inject constructor(
                             val ambientColor = ColorUtils.darkenForAmbient(rawColor)
                             val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
                             _extractedColor.value = finalColor
+                            
+                            val r = (finalColor.red * 255).toInt().coerceIn(0, 255)
+                            val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
+                            val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
+                            val hexString = String.format("#%02X%02X%02X", r, g, b)
+                            repository.saveCachedColor("$mediaType:$movieId", hexString)
                         }
                     }
                 }
@@ -701,6 +722,7 @@ class MovieDetailViewModel @Inject constructor(
                                 val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
                                 val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
                                 val hexString = String.format("#%02X%02X%02X", r, g, b)
+                                repository.saveCachedColor("${movie.mediaType}:${movie.id}", hexString)
                                 val local = repository.getMovie(movie.id, movie.mediaType)
                                 if (local != null && (forceReload || local.accentColor == null || local.accentColor != hexString)) {
                                     repository.saveMovie(local.copy(accentColor = hexString))

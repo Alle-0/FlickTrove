@@ -32,33 +32,35 @@ fun GlobalMovieActions(
 
         // 1. Actions Popup
         if (manager.showActionsPopup) {
-        MovieActionsPopup(
-            movie = movie,
-            showMenu = true,
-            onDismiss = { manager.closeAll() },
-            pressOffset = manager.popupPressOffset,
-            cardPosition = manager.popupCardPosition,
-            hazeState = hazeState,
-            onQuickVote = { manager.openRating(it) },
-            onQuickNote = { manager.openNotes(it) },
-            onFolders = { manager.openFolders(it) },
-            onShare = { m ->
-                val shareTitle = m.title ?: m.name ?: ""
-                val shareType = if (m.mediaType == "tv") "tv" else "movie"
-                val url = "https://alle-0.github.io/FlickTrove/open.html?type=$shareType&id=${m.id}"
-                val sendIntent: android.content.Intent = android.content.Intent().apply {
-                    action = android.content.Intent.ACTION_SEND
-                    val body = context.getString(R.string.action_share_body, url)
-                    putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\n$body")
-                    type = "text/plain"
-                }
-                val shareIntent = android.content.Intent.createChooser(sendIntent, context.getString(R.string.action_share_title))
-                context.startActivity(shareIntent)
-                manager.closeAll()
-            },
-            onDelete = { manager.onDeleteCallback?.invoke(it) }
-        )
-    }
+            val isSaved = movie.favorite || movie.watched || movie.reminder || (movie.personalRating ?: 0.0) > 0.0 || !movie.personalNote.isNullOrEmpty() || manager.foldersList.any { manager.isItemInFolderCallback(movie, it.id) }
+            MovieActionsPopup(
+                movie = movie,
+                showMenu = true,
+                onDismiss = { manager.closeAll() },
+                pressOffset = manager.popupPressOffset,
+                cardPosition = manager.popupCardPosition,
+                hazeState = hazeState,
+                onQuickVote = { manager.openRating(it) },
+                onQuickNote = { manager.openNotes(it) },
+                onFolders = { manager.openFolders(it) },
+                onShare = { m ->
+                    val shareTitle = m.title ?: m.name ?: ""
+                    val shareType = if (m.mediaType == "tv") "tv" else "movie"
+                    val url = "https://alle-0.github.io/FlickTrove/open.html?type=$shareType&id=${m.id}"
+                    val sendIntent: android.content.Intent = android.content.Intent().apply {
+                        action = android.content.Intent.ACTION_SEND
+                        val body = context.getString(R.string.action_share_body, url)
+                        putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\n$body")
+                        type = "text/plain"
+                    }
+                    val shareIntent = android.content.Intent.createChooser(sendIntent, context.getString(R.string.action_share_title))
+                    context.startActivity(shareIntent)
+                    manager.closeAll()
+                },
+                onDelete = { manager.onDeleteCallback?.invoke(it) },
+                isSaved = isSaved
+            )
+        }
 
     // 2. Quick Rating Modal
     if (manager.showRatingDialog) {

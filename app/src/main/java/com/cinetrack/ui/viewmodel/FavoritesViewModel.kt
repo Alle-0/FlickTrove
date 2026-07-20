@@ -72,7 +72,7 @@ class FavoritesViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000), // Protect battery - Stop activity when inactive
+        started = SharingStarted.Lazily,
         initialValue = FavoritesUiState()
     )
 

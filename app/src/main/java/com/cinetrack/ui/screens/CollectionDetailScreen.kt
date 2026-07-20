@@ -26,6 +26,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.zIndex
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +42,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.R
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.detail.CollectionDetailSkeleton
 import com.cinetrack.ui.components.detail.DetailBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.MovieActionsState
@@ -149,9 +151,10 @@ fun CollectionDetailScreenContent(
             .haze(rootHazeState, style = HazeStyles.PremiumDark)
     ) {
         if (uiState.isLoading && uiState.collection == null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            CollectionDetailSkeleton(
+                cardWidth = cardWidth,
+                hazeState = backdropHazeState
+            )
         } else {
             val collection = uiState.collection
             val scrollState = rememberScrollState()
@@ -222,12 +225,12 @@ fun CollectionDetailScreenContent(
                         if (!overview.isNullOrBlank()) {
                             Spacer(modifier = Modifier.height(14.dp))
                             var isExpanded by remember { mutableStateOf(false) }
-                            val isExpandable = overview.length > 150
+                            var hasOverflow by remember { mutableStateOf(false) }
 
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .then(if (isExpandable) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
+                                    .then(if (hasOverflow || isExpanded) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
                             ) {
                                 AnimatedContent(
                                     targetState = isExpanded,
@@ -240,11 +243,16 @@ fun CollectionDetailScreenContent(
                                         ),
                                         color = Color.White.copy(alpha = 0.85f),
                                         maxLines = if (expanded) Int.MAX_VALUE else 4,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
+                                        onTextLayout = { result ->
+                                            if (!expanded && hasOverflow != result.hasVisualOverflow) {
+                                                hasOverflow = result.hasVisualOverflow
+                                            }
+                                        }
                                     )
                                 }
 
-                                if (isExpandable) {
+                                if (hasOverflow || isExpanded) {
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
                                         text = if (isExpanded) stringResource(R.string.overview_show_less) else stringResource(R.string.overview_show_more),
@@ -303,17 +311,19 @@ fun CollectionDetailScreenContent(
             }
         }
 
+        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .displayCutoutPadding()
-                .padding(top = 8.dp, start = 16.dp),
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -332,6 +342,44 @@ fun CollectionDetailScreenContent(
                         contentDescription = stringResource(R.string.detail_content_desc_back),
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .hazeGlass(
+                            state = backdropHazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = true
+                        )
+                        .bounceClick {
+                            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                val shareText = buildString {
+                                    append(uiState.collection?.name ?: "")
+                                    val overview = uiState.collection?.overview?.takeIf { it.isNotBlank() }
+                                    if (overview != null) {
+                                        append("\n\n")
+                                        append(if (overview.length > 200) overview.take(197) + "..." else overview)
+                                    }
+                                    val colId = uiState.collection?.id
+                                    if (colId != null) {
+                                        append("\n\nhttps://www.themoviedb.org/collection/$colId")
+                                    }
+                                }
+                                putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                            }
+                            context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_share),
+                        contentDescription = stringResource(R.string.detail_content_desc_share),
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

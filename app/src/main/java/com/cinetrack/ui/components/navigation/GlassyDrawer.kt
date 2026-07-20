@@ -45,32 +45,6 @@ fun GlassyDrawer(
     onNavigate: (String) -> Unit
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val notifPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (isGranted) {
-                com.cinetrack.util.NotificationHelper.showReleaseNotification(
-                    context = context,
-                    movieTitle = "Alien: Romulus (Test)",
-                    movieId = 945961L,
-                    mediaType = "movie",
-                    posterPath = "/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg"
-                )
-            }
-        }
-    )
-
-    val isTestEnvironment = remember {
-        com.cinetrack.BuildConfig.DEBUG ||
-        android.os.Build.FINGERPRINT.startsWith("generic") ||
-        android.os.Build.FINGERPRINT.startsWith("unknown") ||
-        android.os.Build.MODEL.contains("google_sdk") ||
-        android.os.Build.MODEL.contains("Emulator") ||
-        android.os.Build.MODEL.contains("Android SDK built for x86") ||
-        android.os.Build.HARDWARE.contains("goldfish") ||
-        android.os.Build.HARDWARE.contains("ranchu")
-    }
 
     Box(
         modifier = Modifier
@@ -84,20 +58,15 @@ fun GlassyDrawer(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            Color(0xFF121214).copy(alpha = 0.95f),
-                            Color(0xFF1E1E22).copy(alpha = 0.92f)
+                            Color(0xFF121214).copy(alpha = 0.98f),
+                            Color(0xFF1E1E22).copy(alpha = 0.96f)
                         )
                     ),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
                 )
                 .border(
                     width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.15f),
-                            Color.White.copy(alpha = 0.02f)
-                        )
-                    ),
+                    color = Color.White.copy(alpha = 0.15f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp)
                 )
         )
@@ -192,37 +161,6 @@ fun GlassyDrawer(
                 ) {
                     when (menuState) {
                         "MAIN" -> {
-                            // TEST NOTIFICATION BUTTON: Visible only in Emulator or Debug builds
-                            if (isTestEnvironment) {
-                                DrawerItem(
-                                    icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
-                                    label = "⚡ Test Notifica [DEBUG]",
-                                    isSelected = false,
-                                    onClick = {
-                                        if (com.cinetrack.util.NotificationHelper.hasNotificationPermission(context)) {
-                                            com.cinetrack.util.NotificationHelper.showReleaseNotification(
-                                                context = context,
-                                                movieTitle = "Alien: Romulus (Test)",
-                                                movieId = 945961L,
-                                                mediaType = "movie",
-                                                posterPath = "/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg"
-                                            )
-                                        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                                            notifPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                                        } else {
-                                            com.cinetrack.util.NotificationHelper.showReleaseNotification(
-                                                context = context,
-                                                movieTitle = "Alien: Romulus (Test)",
-                                                movieId = 945961L,
-                                                mediaType = "movie",
-                                                posterPath = "/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg"
-                                            )
-                                        }
-                                    },
-                                    accentColor = Color(0xFF00E5FF)
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                            }
                             SectionHeader(stringResource(R.string.discover_tab_title))
                             DrawerItem(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
@@ -355,7 +293,20 @@ private fun DrawerItem(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 1.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-            .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent)
+            .then(
+                if (isSelected) {
+                    Modifier
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                        .background(accentColor.copy(alpha = 0.2f))
+                        .border(
+                            width = 1.dp,
+                            color = accentColor.copy(alpha = 0.6f),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                        )
+                } else {
+                    Modifier.background(Color.Transparent)
+                }
+            )
             .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()

@@ -133,7 +133,12 @@ fun MovieListCard(
                 scaleDown = 0.95f, 
                 requireUnconsumed = false,
                 onLongClick = { offset -> 
-                    onLongPress(movie, offset, cardPosition[0]) 
+                    onLongPress(movie.apply {
+                        this.favorite = isFavorite
+                        this.watched = isWatched
+                        this.reminder = isReminder
+                        if (personalRating != null) this.personalRating = personalRating
+                    }, offset, cardPosition[0]) 
                 }
             ) { offset -> 
                 rippleState.trigger(offset)

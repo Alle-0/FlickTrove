@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +41,7 @@ import com.cinetrack.ui.viewmodel.PersonStat
 
 @Composable
 fun TotalTimeHeroCard(totalMinutes: Int) {
-    var currentMinutes by remember { mutableStateOf(0) }
+    var currentMinutes by rememberSaveable { mutableStateOf(0) }
     LaunchedEffect(totalMinutes) {
         currentMinutes = totalMinutes
     }
@@ -254,7 +255,7 @@ fun CountingText(
     suffixFontSize: androidx.compose.ui.unit.TextUnit = fontSize,
     textAlign: TextAlign? = null
 ) {
-    var currentValue by remember { mutableStateOf(0) }
+    var currentValue by rememberSaveable { mutableStateOf(0) }
     LaunchedEffect(target) {
         currentValue = target
     }

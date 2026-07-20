@@ -16,6 +16,12 @@ import com.cinetrack.data.local.dao.SearchHistoryDao
 import com.cinetrack.data.remote.FirebaseRemoteDataSource
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
+import com.cinetrack.data.local.entities.MovieDetailCacheEntity
+import com.cinetrack.data.local.entities.ColorCacheEntity
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.util.concurrent.ConcurrentHashMap
 import com.cinetrack.data.model.Folder
 import com.cinetrack.data.sync.SyncProgress
 import com.cinetrack.domain.UpdateEpisodesUseCase
@@ -56,6 +62,31 @@ class MovieRepository @Inject constructor(
 ) {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        coerceInputValues = true
+    }
+    private val memoryDetailsCache = ConcurrentHashMap<String, Any>()
+    private val memoryColorCache = ConcurrentHashMap<String, String>() // id -> hexColor
+
+    suspend fun getCachedColor(id: String): String? {
+        memoryColorCache[id]?.let { return it }
+        return try {
+            val entity = cacheDao.getColor(id)
+            entity?.colorHex?.also { memoryColorCache[id] = it }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun saveCachedColor(id: String, hexColor: String) {
+        memoryColorCache[id] = hexColor
+        try {
+            cacheDao.saveColor(ColorCacheEntity(id = id, colorHex = hexColor, ambientHex = hexColor, updatedAt = System.currentTimeMillis().toString()))
+        } catch (e: Exception) {}
+    }
 
     // --- Local Operations (Bunker: Room First) ---
     suspend fun getLocalMovies(): List<Movie> = favoriteDao.getAll()
@@ -790,9 +821,70 @@ class MovieRepository @Inject constructor(
     }
 
 
-    // --- Remote TMDb Operations ---
+    // --- Remote TMDb Operations (Stale-While-Revalidate & Caching) ---
+    fun getMovieDetailsFlow(id: Long, isTv: Boolean): Flow<com.cinetrack.data.api.MovieDetailResponse> = flow {
+        val mediaType = if (isTv) "tv" else "movie"
+        val cacheKey = "$mediaType:$id"
+
+        // 1. Instant 0ms memory check
+        val inMemory = memoryDetailsCache[cacheKey] as? com.cinetrack.data.api.MovieDetailResponse
+        if (inMemory != null) {
+            emit(inMemory)
+        } else {
+            // 2. Fast ~3ms Room disk check
+            try {
+                val cachedJson = cacheDao.getDetail(id, mediaType)
+                if (cachedJson != null) {
+                    val parsed = json.decodeFromString<com.cinetrack.data.api.MovieDetailResponse>(cachedJson)
+                    memoryDetailsCache[cacheKey] = parsed
+                    emit(parsed)
+                }
+            } catch (e: Exception) {
+                // Ignore disk parsing errors
+            }
+        }
+
+        // 3. Background network revalidation
+        try {
+            val freshResponse = if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
+            memoryDetailsCache[cacheKey] = freshResponse
+            try {
+                cacheDao.saveDetailWithLRU(
+                    MovieDetailCacheEntity(
+                        id = id,
+                        mediaType = mediaType,
+                        data = json.encodeToString(freshResponse),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                )
+            } catch (e: Exception) {
+                // Ignore room errors
+            }
+            emit(freshResponse)
+        } catch (e: Exception) {
+            if (memoryDetailsCache[cacheKey] == null) {
+                throw e
+            }
+        }
+    }.flowOn(Dispatchers.IO)
+
     suspend fun fetchMovieDetails(id: Long, isTv: Boolean): com.cinetrack.data.api.MovieDetailResponse {
-        return if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
+        val mediaType = if (isTv) "tv" else "movie"
+        val response = if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
+        memoryDetailsCache["$mediaType:$id"] = response
+        try {
+            cacheDao.saveDetailWithLRU(
+                MovieDetailCacheEntity(
+                    id = id,
+                    mediaType = mediaType,
+                    data = json.encodeToString(response),
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
+        } catch (e: Exception) {
+            // Ignore
+        }
+        return response
     }
 
     suspend fun searchMovies(query: String, page: Int = 1): List<Movie> = tmdbService.searchMovie(query, page = page).results
@@ -850,9 +942,87 @@ class MovieRepository @Inject constructor(
     
     suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, page = page).results
     suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, page = page).results
-    suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id)
+    fun getPersonDetailsFlow(id: Long): Flow<Person> = flow {
+        val cacheKey = "person:$id"
+        val inMemory = memoryDetailsCache[cacheKey] as? Person
+        if (inMemory != null) {
+            emit(inMemory)
+        } else {
+            try {
+                val cachedJson = cacheDao.getDetail(id, "person")
+                if (cachedJson != null) {
+                    val parsed = json.decodeFromString<Person>(cachedJson)
+                    memoryDetailsCache[cacheKey] = parsed
+                    emit(parsed)
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+        try {
+            val fresh = tmdbService.getPersonDetails(id)
+            memoryDetailsCache[cacheKey] = fresh
+            try {
+                cacheDao.saveDetailWithLRU(
+                    MovieDetailCacheEntity(id = id, mediaType = "person", data = json.encodeToString(fresh), updatedAt = System.currentTimeMillis())
+                )
+            } catch (e: Exception) {}
+            emit(fresh)
+        } catch (e: Exception) {
+            if (memoryDetailsCache[cacheKey] == null) throw e
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getPersonDetails(id: Long): Person {
+        val response = tmdbService.getPersonDetails(id)
+        memoryDetailsCache["person:$id"] = response
+        try {
+            cacheDao.saveDetailWithLRU(MovieDetailCacheEntity(id = id, mediaType = "person", data = json.encodeToString(response), updatedAt = System.currentTimeMillis()))
+        } catch (e: Exception) {}
+        return response
+    }
+
     suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber)
-    suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = tmdbService.getCollectionDetails(id)
+
+    fun getCollectionDetailsFlow(id: Long): Flow<com.cinetrack.data.api.CollectionResponse> = flow {
+        val cacheKey = "collection:$id"
+        val inMemory = memoryDetailsCache[cacheKey] as? com.cinetrack.data.api.CollectionResponse
+        if (inMemory != null) {
+            emit(inMemory)
+        } else {
+            try {
+                val cachedJson = cacheDao.getDetail(id, "collection")
+                if (cachedJson != null) {
+                    val parsed = json.decodeFromString<com.cinetrack.data.api.CollectionResponse>(cachedJson)
+                    memoryDetailsCache[cacheKey] = parsed
+                    emit(parsed)
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+        try {
+            val fresh = tmdbService.getCollectionDetails(id)
+            memoryDetailsCache[cacheKey] = fresh
+            try {
+                cacheDao.saveDetailWithLRU(
+                    MovieDetailCacheEntity(id = id, mediaType = "collection", data = json.encodeToString(fresh), updatedAt = System.currentTimeMillis())
+                )
+            } catch (e: Exception) {}
+            emit(fresh)
+        } catch (e: Exception) {
+            if (memoryDetailsCache[cacheKey] == null) throw e
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse {
+        val response = tmdbService.getCollectionDetails(id)
+        memoryDetailsCache["collection:$id"] = response
+        try {
+            cacheDao.saveDetailWithLRU(MovieDetailCacheEntity(id = id, mediaType = "collection", data = json.encodeToString(response), updatedAt = System.currentTimeMillis()))
+        } catch (e: Exception) {}
+        return response
+    }
     suspend fun getCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = fetchCollectionDetails(id)
     suspend fun getMovieDetail(id: Long, isTv: Boolean = false): com.cinetrack.data.api.MovieDetailResponse = fetchMovieDetails(id, isTv)
     suspend fun searchCollection(query: String, page: Int = 1): List<TMDBSearchResult.CollectionResult> = tmdbService.searchCollection(query, page = page).results

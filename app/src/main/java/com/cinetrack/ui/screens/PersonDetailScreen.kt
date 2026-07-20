@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -418,18 +419,83 @@ fun PersonDetailScreenContent(
             }
         }
 
+        val context = LocalContext.current
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .displayCutoutPadding()
-                .padding(top = 8.dp, start = 16.dp),
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
             contentAlignment = Alignment.TopStart
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .hazeGlass(
+                                state = localHazeState,
+                                shape = CircleShape,
+                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                useOffscreenStrategy = true
+                            )
+                            .bounceClick { onBackClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_left),
+                            contentDescription = stringResource(R.string.detail_content_desc_back),
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    val homeButtonVisible = detailStackDepth >= 3
+                    val homeButtonAlpha by animateFloatAsState(
+                        targetValue = if (homeButtonVisible) 1f else 0f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                        label = "HomeButtonAlpha"
+                    )
+                    val homeButtonScale by animateFloatAsState(
+                        targetValue = if (homeButtonVisible) 1f else 0.6f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+                        label = "HomeButtonScale"
+                    )
+                    if (homeButtonAlpha > 0.01f) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .graphicsLayer {
+                                    alpha = homeButtonAlpha
+                                    scaleX = homeButtonScale
+                                    scaleY = homeButtonScale
+                                }
+                                .hazeGlass(
+                                    state = localHazeState,
+                                    shape = CircleShape,
+                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                    useOffscreenStrategy = true
+                                )
+                                .bounceClick { onHomeClick() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_home),
+                                contentDescription = stringResource(R.string.detail_content_desc_home),
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -439,53 +505,33 @@ fun PersonDetailScreenContent(
                             blurRadius = HazeStyles.SmallGlassBlurRadius,
                             useOffscreenStrategy = true
                         )
-                        .bounceClick { onBackClick() },
+                        .bounceClick {
+                            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                val shareText = buildString {
+                                    append(uiState.person?.name ?: "")
+                                    uiState.person?.knownForDepartment?.let { dept ->
+                                        if (dept.isNotBlank()) append(" ($dept)")
+                                    }
+                                    val bio = uiState.person?.biography?.takeIf { it.isNotBlank() }
+                                    if (bio != null) {
+                                        append("\n\n")
+                                        append(if (bio.length > 200) bio.take(197) + "..." else bio)
+                                    }
+                                    append("\n\nhttps://www.themoviedb.org/person/${uiState.personId}")
+                                }
+                                putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                            }
+                            context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_left),
-                        contentDescription = stringResource(R.string.detail_content_desc_back),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_share),
+                        contentDescription = stringResource(R.string.detail_content_desc_share),
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
-                }
-
-                val homeButtonVisible = detailStackDepth >= 3
-                val homeButtonAlpha by animateFloatAsState(
-                    targetValue = if (homeButtonVisible) 1f else 0f,
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                    label = "HomeButtonAlpha"
-                )
-                val homeButtonScale by animateFloatAsState(
-                    targetValue = if (homeButtonVisible) 1f else 0.6f,
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
-                    label = "HomeButtonScale"
-                )
-                if (homeButtonAlpha > 0.01f) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .graphicsLayer {
-                                alpha = homeButtonAlpha
-                                scaleX = homeButtonScale
-                                scaleY = homeButtonScale
-                            }
-                            .hazeGlass(
-                                state = localHazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = true
-                            )
-                            .bounceClick { onHomeClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                            contentDescription = stringResource(R.string.detail_content_desc_home),
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
                 }
             }
         }

@@ -125,7 +125,13 @@ object StatsTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<StatsViewModel>()
+        val context = LocalContext.current
+        val activity = context as? androidx.activity.ComponentActivity
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<StatsViewModel>(activity)
+        } else {
+            getViewModel<StatsViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = com.cinetrack.ui.LocalHazeState.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow

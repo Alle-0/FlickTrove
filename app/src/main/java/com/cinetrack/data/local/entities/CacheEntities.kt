@@ -14,7 +14,7 @@ data class ColorCacheEntity(
 
 @Entity(tableName = "movie_details_cache", primaryKeys = ["id", "media_type"])
 data class MovieDetailCacheEntity(
-    val id: Int,
+    val id: Long,
     @ColumnInfo(name = "media_type") val mediaType: String,
     val data: String, // Full JSON blob from API
     @ColumnInfo(name = "updated_at") val updatedAt: Long

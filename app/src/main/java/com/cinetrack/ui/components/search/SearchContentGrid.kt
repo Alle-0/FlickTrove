@@ -40,7 +40,9 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.MovieActionsState
+import com.cinetrack.ui.components.shared.CollectionCardSkeleton
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
+import com.cinetrack.ui.components.shared.PersonCardSkeleton
 import com.cinetrack.ui.viewmodel.SearchUiState
 
 @Composable
@@ -156,6 +158,7 @@ fun SearchContentGrid(
                 if (uiState.category == "movie") {
                     searchTrendingMoviesSection(
                         trendingMovies = uiState.trendingMovies,
+                        isLoading = uiState.isLoading,
                         favorites = uiState.favorites,
                         movieFolderColors = uiState.movieFolderColors,
                         preferences = uiState.preferences,
@@ -176,6 +179,7 @@ fun SearchContentGrid(
                 if (uiState.category == "tv") {
                     searchTrendingTvSection(
                         trendingTv = uiState.trendingTv,
+                        isLoading = uiState.isLoading,
                         favorites = uiState.favorites,
                         movieFolderColors = uiState.movieFolderColors,
                         preferences = uiState.preferences,
@@ -196,6 +200,7 @@ fun SearchContentGrid(
                 if (uiState.category == "person") {
                     searchTrendingPeopleSection(
                         trendingPeople = uiState.trendingPeople,
+                        isLoading = uiState.isLoading,
                         personSpan = personSpan,
                         personCardWidth = personCardWidth,
                         keyboardController = keyboardController,
@@ -206,6 +211,7 @@ fun SearchContentGrid(
                 if (uiState.category == "collection") {
                     searchTrendingCollectionsSection(
                         trendingCollections = uiState.trendingCollections,
+                        isLoading = uiState.isLoading,
                         collectionSpan = collectionSpan,
                         keyboardController = keyboardController,
                         onCollectionClick = onCollectionClick
@@ -224,7 +230,11 @@ fun SearchContentGrid(
                             }
                         }
                     ) {
-                        MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth)
+                        when (uiState.category) {
+                            "person" -> PersonCardSkeleton(width = personCardWidth)
+                            "collection" -> CollectionCardSkeleton()
+                            else -> MovieCardSkeleton(width = cardWidth)
+                        }
                     }
                 }
 
@@ -269,7 +279,11 @@ fun SearchContentGrid(
                             }
                         }
                     ) {
-                        MovieCardSkeleton(width = if (uiState.category == "person") personCardWidth else cardWidth)
+                        when (uiState.category) {
+                            "person" -> PersonCardSkeleton(width = personCardWidth)
+                            "collection" -> CollectionCardSkeleton()
+                            else -> MovieCardSkeleton(width = cardWidth)
+                        }
                     }
                 }
             }

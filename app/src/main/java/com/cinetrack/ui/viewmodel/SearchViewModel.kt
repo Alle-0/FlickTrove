@@ -494,7 +494,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val movies = repository.getTrendingMovies(1).take(6).map { it.toMovieResultInternal() }
                 val tv = repository.getTrendingTV(1).take(6).map { it.toTvResultInternal() }
-                val people = repository.getPopularPeople(1).take(6).map { 
+                val people = repository.getPopularPeople(1).take(8).map { 
                     TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                 }
                 val collections = try {
@@ -517,7 +517,7 @@ class SearchViewModel @Inject constructor(
                             }
                         }.awaitAll().filterNotNull().distinctBy { it.id }
 
-                        val targetCount = 8
+                        val targetCount = 6
                         val finalCollections = if (extractedCollections.size >= targetCount) {
                             extractedCollections.take(targetCount)
                         } else {

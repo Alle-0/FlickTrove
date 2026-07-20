@@ -26,7 +26,7 @@ import com.cinetrack.data.local.entities.SearchHistoryEntity
         MovieDetailCacheEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -75,6 +75,13 @@ abstract class FlickTroveDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS movie_details_cache")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `movie_details_cache` (`id` INTEGER NOT NULL, `media_type` TEXT NOT NULL, `data` TEXT NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`, `media_type`))")
+            }
+        }
+
         fun getInstance(context: Context): FlickTroveDatabase {
             return instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
@@ -82,7 +89,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                 .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }
