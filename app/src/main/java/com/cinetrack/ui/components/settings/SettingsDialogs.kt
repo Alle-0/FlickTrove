@@ -143,7 +143,7 @@ fun BackupDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -220,7 +220,7 @@ fun ExternalMigrationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -315,7 +315,7 @@ fun RewatchMigrationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -392,7 +392,7 @@ fun YamtrackDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
         }
@@ -580,7 +580,7 @@ fun FeedbackDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        stringResource(R.string.settings_close),
+                        stringResource(R.string.settings_cancel),
                         color = Color.White.copy(alpha = 0.5f)
                     )
                 }
@@ -924,7 +924,7 @@ fun ColorSelectionDialog(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.settings_close), color = Color.White.copy(alpha = 0.5f))
+                        Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.5f))
                     }
                 }
             }

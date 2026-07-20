@@ -1,23 +1,30 @@
 package com.cinetrack.ui.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.zIndex
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,19 +38,21 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.detail.DetailBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.MovieActionsState
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.theme.PremiumBackground
+import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.viewmodel.CollectionDetailViewModel
+import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
-import com.cinetrack.ui.utils.UiText
-import com.cinetrack.ui.viewmodel.CollectionDetailViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlin.math.max
@@ -59,14 +68,15 @@ data class CollectionDetailScreen(
         val viewModel = getViewModel<CollectionDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-        val hazeState = remember { HazeState() }
+        val rootHazeState = remember { HazeState() }
+        val backdropHazeState = remember { HazeState() }
 
         LaunchedEffect(collectionId) {
             viewModel.initCollection(collectionId, collectionName)
         }
 
         MovieActionsWrapper(
-            hazeState = hazeState,
+            hazeState = rootHazeState,
             folders = uiState.folders,
             isItemInFolder = { movie, folderId ->
                 uiState.folders.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") ?: false
@@ -78,7 +88,8 @@ data class CollectionDetailScreen(
         ) { actionsState ->
             CollectionDetailScreenContent(
                 viewModel = viewModel,
-                hazeState = hazeState,
+                rootHazeState = rootHazeState,
+                backdropHazeState = backdropHazeState,
                 actionsState = actionsState,
                 onBack = { navigator.pop() },
                 onMovieClick = { movie ->
@@ -92,7 +103,8 @@ data class CollectionDetailScreen(
 @Composable
 fun CollectionDetailScreenContent(
     viewModel: CollectionDetailViewModel,
-    hazeState: HazeState,
+    rootHazeState: HazeState,
+    backdropHazeState: HazeState,
     actionsState: MovieActionsState,
     onBack: () -> Unit,
     onMovieClick: (com.cinetrack.data.model.Movie) -> Unit
@@ -100,169 +112,228 @@ fun CollectionDetailScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val columns = max(3, (screenWidth / 130.dp).toInt())
-    val cardWidth = (screenWidth - 32.dp - (12.dp * (columns - 1))) / columns
+    val columns = max(3, (screenWidth / 115.dp).toInt())
+    val cardWidth = (screenWidth - 32.dp - (12.dp * (columns - 1))) / columns - 1.5.dp
+
+    val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
+    val themePrimaryColor = MaterialTheme.colorScheme.primary
+    val fallbackAccentColor = remember(themePrimaryColor) { themePrimaryColor }
+    val rawAccentColor = extractedColor ?: fallbackAccentColor
+    val globalAccentColor = remember(rawAccentColor) { ColorUtils.ensureVividAccent(rawAccentColor) }
+
+    val baseDarkColor = remember { Color(0xFF161620) }
+    val targetBackgroundColor = if (uiState.collection != null) lerp(globalAccentColor, baseDarkColor, 0.68f) else baseDarkColor
+    val animatedBgColor by animateColorAsState(
+        targetValue = targetBackgroundColor,
+        animationSpec = tween(durationMillis = 800),
+        label = "backgroundColor"
+    )
+
+    val currentImageQuality = LocalImageQuality.current
+    LaunchedEffect(uiState.collection, currentImageQuality) {
+        val collection = uiState.collection
+        if (collection != null) {
+            val targetPath = collection.backdropPath ?: collection.posterPath
+            val imageType = if (collection.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
+            val imageUrl = buildTmdbImageUrl(targetPath, imageType, currentImageQuality)
+            if (imageUrl != null) {
+                viewModel.fetchAccentColor(imageUrl)
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .haze(hazeState)
+            .background(animatedBgColor)
+            .haze(rootHazeState, style = HazeStyles.PremiumDark)
     ) {
-        CinematicBackground(modifier = Modifier.fillMaxSize())
-
         if (uiState.isLoading && uiState.collection == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             val collection = uiState.collection
-            val backdropUrl = buildTmdbImageUrl(
-                path = collection?.backdropPath ?: collection?.posterPath,
-                type = ImageType.BACKDROP,
-                quality = LocalImageQuality.current
-            )
+            val scrollState = rememberScrollState()
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
-                contentPadding = PaddingValues(bottom = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
             ) {
-                // Hero Header Section
-                item(span = { GridItemSpan(columns) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                    ) {
-                        AsyncImage(
-                            model = backdropUrl,
-                            contentDescription = uiState.collectionName,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    DetailBackdrop(
+                        backdropPath = collection?.backdropPath ?: collection?.posterPath,
+                        posterPath = collection?.posterPath,
+                        accentColor = globalAccentColor,
+                        backgroundColor = animatedBgColor,
+                        modifier = Modifier.haze(backdropHazeState, style = HazeStyles.PremiumDark)
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .offset(y = (-140).dp)
+                        .padding(bottom = 60.dp)
+                ) {
+                    // Hero Header Section
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = uiState.collectionName ?: "Collezione",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 24.sp,
+                                lineHeight = 28.sp
+                            ),
+                            color = Color.White
                         )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Film Count Badge with true real-time Frosted Glass (hazeGlass)
+                        val totalMovies = collection?.parts?.size ?: 0
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = 0.3f),
-                                            Color.Black.copy(alpha = 0.7f),
-                                            MaterialTheme.colorScheme.background
-                                        )
-                                    )
+                                .hazeGlass(
+                                    state = backdropHazeState,
+                                    shape = RoundedCornerShape(14.dp),
+                                    containerColor = Color.Black.copy(alpha = 0.45f),
+                                    borderColor = Color.White.copy(alpha = 0.35f),
+                                    borderWidth = 1.dp
                                 )
-                        )
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(horizontal = 16.dp, vertical = 20.dp)
+                                .padding(horizontal = 12.dp, vertical = 5.dp)
                         ) {
-                            Text(
-                                text = uiState.collectionName ?: "Collezione",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White,
-                                    fontSize = 28.sp
-                                ),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            if (!collection?.overview.isNullOrBlank()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = collection?.overview ?: "",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 14.sp
-                                    ),
-                                    maxLines = 4,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                            val detailBadgeText = when {
+                                totalMovies == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
+                                totalMovies > 1 -> stringResource(R.string.collection_badge_movies_plural, totalMovies)
+                                else -> "SAGA"
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            val countText = stringResource(
-                                R.string.collection_movies_count_format,
-                                collection?.parts?.size ?: 0
+                            Text(
+                                text = detailBadgeText,
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp
                             )
-                            Surface(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(8.dp)
+                        }
+
+                        // Expandable Overview
+                        val overview = collection?.overview
+                        if (!overview.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(14.dp))
+                            var isExpanded by remember { mutableStateOf(false) }
+                            val isExpandable = overview.length > 150
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .then(if (isExpandable) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
                             ) {
-                                Text(
-                                    text = countText,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = MaterialTheme.colorScheme.primary,
+                                AnimatedContent(
+                                    targetState = isExpanded,
+                                    label = "overview_expand_collection"
+                                ) { expanded ->
+                                    Text(
+                                        text = overview,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            lineHeight = 20.sp
+                                        ),
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        maxLines = if (expanded) Int.MAX_VALUE else 4,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                if (isExpandable) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = if (isExpanded) stringResource(R.string.overview_show_less) else stringResource(R.string.overview_show_more),
+                                        color = globalAccentColor,
+                                        fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
-                                    ),
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                item(span = { GridItemSpan(columns) }) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                }
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                // Movies inside the collection
-                val parts = collection?.parts ?: emptyList()
-                itemsIndexed(parts, key = { _, movie -> movie.id }) { index, movie ->
-                    Box(modifier = Modifier.padding(horizontal = if (columns == 1) 16.dp else 0.dp)) {
-                        val folderColors = uiState.movieFolderColors[movie.id.toString()] ?: emptyList()
-                        val folderColorObjects = remember(folderColors) {
-                            folderColors.map { Color(android.graphics.Color.parseColor(it)) }
-                        }
-                        val fav = uiState.favorites.find { it.id == movie.id }
-                        val isFavorite = fav?.favorite == true
-                        val isWatched = fav?.watched == true
-                        val isReminder = fav?.reminder == true
+                    // Movies inside the collection, exactly 3 columns
+                    val parts = collection?.parts ?: emptyList()
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        parts.forEachIndexed { index, movie ->
+                            Box(modifier = Modifier.width(cardWidth)) {
+                                val folderColors = uiState.movieFolderColors[movie.id.toString()] ?: emptyList()
+                                val folderColorObjects = remember(folderColors) {
+                                    folderColors.map { Color(android.graphics.Color.parseColor(it)) }
+                                }
+                                val fav = uiState.favorites.find { it.id == movie.id }
+                                val isFavorite = fav?.favorite == true
+                                val isWatched = fav?.watched == true
+                                val isReminder = fav?.reminder == true
 
-                        MovieCard(
-                            movie = movie,
-                            cardWidth = cardWidth,
-                            isFavorite = isFavorite,
-                            isWatched = isWatched,
-                            isReminder = isReminder,
-                            folderColors = folderColorObjects,
-                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                            showBadges = uiState.preferences.showBadges,
-                            showAdvancedBadges = false,
-                            hazeState = hazeState,
-                            staggerIndex = index,
-                            onPress = { onMovieClick(movie) },
-                            onLongPress = { m, pressOffset, cardPos ->
-                                actionsState.onLongPress(m, pressOffset, cardPos)
+                                MovieCard(
+                                    movie = movie,
+                                    cardWidth = cardWidth,
+                                    isFavorite = isFavorite,
+                                    isWatched = isWatched,
+                                    isReminder = isReminder,
+                                    folderColors = folderColorObjects,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    showBadges = uiState.preferences.showBadges,
+                                    showAdvancedBadges = false,
+                                    hazeState = rootHazeState,
+                                    staggerIndex = index,
+                                    onPress = { onMovieClick(movie) },
+                                    onLongPress = { m, pressOffset, cardPos ->
+                                        actionsState.onLongPress(m, pressOffset, cardPos)
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
         }
 
-        // Top Back Button
         Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(start = 16.dp, top = 12.dp)
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.5f))
-                .hazeGlass(state = hazeState, shape = CircleShape)
+                .displayCutoutPadding()
+                .padding(top = 8.dp, start = 16.dp),
+            contentAlignment = Alignment.TopStart
         ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.fillMaxSize()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Indietro",
-                    tint = Color.White
-                )
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .hazeGlass(
+                            state = backdropHazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = true
+                        )
+                        .bounceClick { onBack() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                        contentDescription = stringResource(R.string.detail_content_desc_back),
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

@@ -26,7 +26,7 @@ import com.cinetrack.data.local.entities.SearchHistoryEntity
         MovieDetailCacheEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -57,7 +57,21 @@ abstract class FlickTroveDatabase : RoomDatabase() {
 
         private val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // No-op migration: remove FTS dependency and keep schema version progression clean.
+                try {
+                    db.execSQL("ALTER TABLE favorites ADD COLUMN department TEXT")
+                } catch (e: Exception) {
+                    // Ignore if column already exists
+                }
+            }
+        }
+
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                try {
+                    db.execSQL("ALTER TABLE favorites ADD COLUMN department TEXT")
+                } catch (e: Exception) {
+                    // Ignore if column already exists
+                }
             }
         }
 
@@ -68,7 +82,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
                 .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }

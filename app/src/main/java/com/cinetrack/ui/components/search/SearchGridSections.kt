@@ -36,12 +36,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import com.cinetrack.data.model.UserPreferences
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import com.cinetrack.ui.components.shared.ImagePlaceholder
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.card.MovieListCard
 import com.cinetrack.ui.components.card.PersonCard
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -528,40 +533,49 @@ fun CollectionCollageCard(
     onClick: () -> Unit
 ) {
     val backdropUrl = buildTmdbImageUrl(collection.backdropPath ?: collection.posterPath, ImageType.BACKDROP, LocalImageQuality.current)
-    val posters = collection.partsPosterPaths
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        Color(0xFF1E1E24)
-                    )
-                )
-            )
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+            .height(160.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xFF14141E))
+            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
             .bounceClick(scaleDown = 0.96f) { onClick() }
     ) {
-        AsyncImage(
-            model = backdropUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 0.25f }
-        )
+        if (backdropUrl != null) {
+            SubcomposeAsyncImage(
+                model = backdropUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = {
+                    ImagePlaceholder(
+                        title = null,
+                        mediaType = "movie",
+                        isBackdrop = true,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            )
+        } else {
+            ImagePlaceholder(
+                title = null,
+                mediaType = "movie",
+                isBackdrop = true,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.horizontalGradient(
+                    Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.92f),
-                            Color.Black.copy(alpha = 0.75f),
-                            Color.Black.copy(alpha = 0.2f)
+                            Color.Transparent,
+                            Color(0xFF09090F).copy(alpha = 0.55f),
+                            Color(0xFF09090F).copy(alpha = 0.95f)
                         )
                     )
                 )
@@ -569,70 +583,56 @@ fun CollectionCollageCard(
 
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 12.dp),
-                verticalArrangement = Arrangement.Center
+                    .padding(end = 12.dp)
             ) {
-                androidx.compose.material3.Surface(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(6.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.search_tab_collections).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = collection.displayTitle,
-                    style = MaterialTheme.typography.titleLarge.copy(
+                    style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Black,
                         color = Color.White,
-                        fontSize = 20.sp
+                        fontSize = 17.sp,
+                        lineHeight = 21.sp
                     ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy((-16).dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(end = 8.dp)
-            ) {
-                val displayPosters = if (posters.isNotEmpty()) posters.take(3) else listOfNotNull(collection.posterPath)
-                displayPosters.forEachIndexed { index, path ->
-                    val posterUrl = buildTmdbImageUrl(path, ImageType.POSTER, LocalImageQuality.current)
-                    val rotation = when (index) {
-                        0 -> -5f
-                        1 -> 2f
-                        2 -> 7f
-                        else -> 0f
-                    }
-                    AsyncImage(
-                        model = posterUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(68.dp)
-                            .height(102.dp)
-                            .rotate(rotation)
-                            .shadow(6.dp, RoundedCornerShape(8.dp))
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = Color(0xFF0F0F1A).copy(alpha = 0.82f),
+                        shape = RoundedCornerShape(20.dp)
                     )
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.35f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                val badgeText = when {
+                    collection.partsCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
+                    collection.partsCount > 1 -> stringResource(R.string.collection_badge_movies_plural, collection.partsCount)
+                    collection.partsPosterPaths.isNotEmpty() -> stringResource(R.string.collection_badge_movies_plus, collection.partsPosterPaths.size)
+                    else -> "SAGA"
                 }
+                Text(
+                    text = badgeText,
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.5.sp
+                )
             }
         }
     }

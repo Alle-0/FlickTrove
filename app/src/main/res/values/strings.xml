@@ -417,7 +417,7 @@
     <string name="search_expand">Expand</string>
     <string name="search_tab_persons">PEOPLE</string>
     <string name="search_tab_collections">COLLECTIONS</string>
-    <string name="collection_trending_title">ICONIC SAGAS &amp; COLLECTIONS</string>
+    <string name="collection_trending_title">Trending Sagas &amp; Collections</string>
     <string name="collection_movies_count_format">%1$d MOVIES</string>
 
     <!-- Recommendations & Library Strings -->
@@ -682,6 +682,7 @@
     <string name="settings_msg_restore_error">Restore error: invalid file</string>
     <string name="settings_msg_import_success">Successfully imported %1$d items</string>
     <string name="settings_msg_import_error">Migration error: check file format</string>
+    <string name="settings_msg_import_started">Import started in background…</string>
     <!-- ViewModels Shared Messages -->
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removed</string>
@@ -936,4 +937,12 @@
     <string name="import_rewatch_dialog_desc">The imported file may contain movies watched multiple times across different dates. Which watch date would you like to preserve for duplicate entries?</string>
     <string name="import_rewatch_keep_latest">Latest Date (Most Recent)</string>
     <string name="import_rewatch_keep_first">First Date (Historical)</string>
+
+    <!-- Collection Badge Strings -->
+    <string name="collection_badge_movies_plural">%1$d MOVIES</string>
+    <string name="collection_badge_movies_single">%1$d MOVIE</string>
+    <string name="collection_badge_movies_plus">%1$d+ MOVIES</string>
+
+    <string name="overview_show_more">Show more</string>
+    <string name="overview_show_less">Show less</string>
 </resources>

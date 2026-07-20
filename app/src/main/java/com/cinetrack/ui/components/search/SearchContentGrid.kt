@@ -145,7 +145,7 @@ fun SearchContentGrid(
         ) {
             val movieSpan = 12 / columns
             val personSpan = 12 / personColumns
-            val collectionSpan = if (columns >= 3) 6 else 12
+            val collectionSpan = 12
             val hasDiscoveryFilters = uiState.sortConfig.selectedGenres.isNotEmpty() ||
                     uiState.sortConfig.selectedKeywords.isNotEmpty() ||
                     uiState.sortConfig.selectedDecades.isNotEmpty() ||

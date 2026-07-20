@@ -1,7 +1,14 @@
 package com.cinetrack.ui.viewmodel
 
+import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.Coil
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.cinetrack.data.api.CollectionResponse
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.UserPreferences
@@ -9,18 +16,22 @@ import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.ErrorMapper
 import com.cinetrack.ui.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -43,7 +54,8 @@ class CollectionDetailViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _collectionId = MutableStateFlow<Long>(0L)
@@ -51,9 +63,40 @@ class CollectionDetailViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     private val _collection = MutableStateFlow<CollectionResponse?>(null)
     private val _error = MutableStateFlow<String?>(null)
+    private val _extractedColor = MutableStateFlow<Color?>(null)
+    val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
 
     val scrollState = androidx.compose.foundation.ScrollState(0)
     val animatedMovieIds = mutableSetOf<String>()
+
+    fun fetchAccentColor(imageUrl: String, forceReload: Boolean = false) {
+        if (forceReload || _extractedColor.value == null) {
+            viewModelScope.launch(Dispatchers.Default) {
+                try {
+                    val loader = Coil.imageLoader(context)
+                    val request = ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .allowHardware(false)
+                        .build()
+
+                    val result = loader.execute(request)
+                    if (result is SuccessResult) {
+                        val bitmap = result.drawable.toBitmap()
+                        if (bitmap.width > 0 && bitmap.height > 0) {
+                            val rawColor = ColorUtils.extractAverageColor(bitmap)
+                            if (rawColor != Color.Unspecified) {
+                                val ambientColor = ColorUtils.darkenForAmbient(rawColor)
+                                val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                                _extractedColor.value = finalColor
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore
+                }
+            }
+        }
+    }
 
     fun initCollection(id: Long, name: String?) {
         if (_collectionId.value == 0L && id != 0L) {

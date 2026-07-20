@@ -415,8 +415,8 @@
     <string name="search_expand">Espandi</string>
     <string name="search_tab_persons">PERSONE</string>
     <string name="search_tab_collections">SAGHE</string>
-    <string name="collection_trending_title">SAGHE E COLLEZIONI ICONICHE</string>
-    <string name="collection_movies_count_format">%1$d FILM</string>
+    <string name="collection_trending_title">Saghe e collezioni in tendenza</string>
+    <string name="collection_movies_count_format">%1$d film</string>
 
     <!-- Recommendations & Library Strings -->
     <string name="library_tab_title">Libreria</string>
@@ -680,6 +680,7 @@
     <string name="settings_msg_restore_error">Errore durante il ripristino: file non valido</string>
     <string name="settings_msg_import_success">Importati %1$d elementi con successo</string>
     <string name="settings_msg_import_error">Errore durante la migrazione: verifica il formato</string>
+    <string name="settings_msg_import_started">Importazione avviata in background…</string>
     <!-- ViewModels Shared Messages -->
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" rimosso</string>
@@ -933,4 +934,12 @@
     <string name="import_rewatch_dialog_desc">Il file importato potrebbe contenere film visti più volte in date diverse. Quale data di visione preferisci conservare per i film duplicati?</string>
     <string name="import_rewatch_keep_latest">Ultima data (Più recente)</string>
     <string name="import_rewatch_keep_first">Prima data (Storica)</string>
+
+    <!-- Collection Badge Strings -->
+    <string name="collection_badge_movies_plural">%1$d FILM</string>
+    <string name="collection_badge_movies_single">%1$d FILM</string>
+    <string name="collection_badge_movies_plus">%1$d+ FILM</string>
+
+    <string name="overview_show_more">Mostra altro</string>
+    <string name="overview_show_less">Mostra meno</string>
 </resources>

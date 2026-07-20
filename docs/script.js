@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'true cinephiles.',
       '100% offline use.',
       'visual perfection.',
-      'TMDB & Trakt sync.',
+      'seamless cloud sync.',
       'finding where to stream.',
       'you.'
     ];

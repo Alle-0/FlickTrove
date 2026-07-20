@@ -88,7 +88,10 @@ class SearchViewModel @Inject constructor(
                     partsSemaphore.withPermit {
                         val details = tmdbService.getCollectionDetails(col.id)
                         val posters = details.parts.mapNotNull { it.posterPath }.take(4)
-                        col.copy(partsPosterPaths = posters)
+                        col.copy(
+                            partsPosterPaths = posters,
+                            partsCount = details.parts.size
+                        )
                     }
                 } catch (e: Exception) {
                     col
@@ -496,15 +499,48 @@ class SearchViewModel @Inject constructor(
                 }
                 val collections = try {
                     coroutineScope {
-                        listOf("Marvel", "Star Wars", "Harry Potter", "Lord of the Rings", "Batman", "Spider-Man").map { saga ->
+                        val trendingMoviesList = (repository.getTrendingMovies(1) + repository.getTrendingMovies(2)).distinctBy { it.id }.take(35)
+                        val extractedCollections = trendingMoviesList.map { movie ->
                             async {
                                 try {
-                                    repository.searchCollection(saga, page = 1).firstOrNull()
+                                    partsSemaphore.withPermit {
+                                        repository.getMovieDetail(movie.id).belongsToCollection?.let { col ->
+                                            TMDBSearchResult.CollectionResult(
+                                                id = col.id,
+                                                name = col.name,
+                                                posterPath = col.posterPath,
+                                                backdropPath = col.backdropPath
+                                            )
+                                        }
+                                    }
                                 } catch (e: Exception) { null }
                             }
-                        }.awaitAll().filterNotNull().take(6).let { cols ->
-                            enrichCollectionsWithParts(cols)
+                        }.awaitAll().filterNotNull().distinctBy { it.id }
+
+                        val targetCount = 8
+                        val finalCollections = if (extractedCollections.size >= targetCount) {
+                            extractedCollections.take(targetCount)
+                        } else {
+                            val fallbackSagaIds = listOf(86311L, 10L, 1241L, 119L, 263L, 531241L, 9485L, 328L)
+                            val missingIds = fallbackSagaIds.filter { id -> extractedCollections.none { it.id == id } }.take(targetCount - extractedCollections.size)
+                            val fallbackCols = missingIds.map { id ->
+                                async {
+                                    try {
+                                        partsSemaphore.withPermit {
+                                            val details = repository.getCollectionDetails(id)
+                                            TMDBSearchResult.CollectionResult(
+                                                id = details.id,
+                                                name = details.name,
+                                                posterPath = details.posterPath,
+                                                backdropPath = details.backdropPath
+                                            )
+                                        }
+                                    } catch (e: Exception) { null }
+                                }
+                            }.awaitAll().filterNotNull()
+                            (extractedCollections + fallbackCols).distinctBy { it.id }.take(targetCount)
                         }
+                        enrichCollectionsWithParts(finalCollections)
                     }
                 } catch (e: Exception) {
                     emptyList()

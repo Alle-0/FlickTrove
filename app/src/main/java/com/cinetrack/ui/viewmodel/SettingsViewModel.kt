@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.Dispatchers
+import java.io.File
 import com.cinetrack.ui.components.common.CircularRevealOverlay
 
 @HiltViewModel
@@ -536,46 +538,62 @@ class SettingsViewModel @Inject constructor(
     }
 
     suspend fun getBackupData(): String? {
-        _isBackupLoading.value = true
         return try {
             backupRepository.exportData()
         } catch (e: Exception) {
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_export_error))
             null
-        } finally {
-            _isBackupLoading.value = false
         }
     }
 
     fun restoreData(json: String) {
-        viewModelScope.launch {
-            _isBackupLoading.value = true
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                backupRepository.importDataStream(json.byteInputStream())
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_success))
+                val tempFile = File(context.cacheDir, "restore_payload_${System.currentTimeMillis()}.tmp")
+                tempFile.writeText(json)
+                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
+                    .setInputData(
+                        androidx.work.workDataOf(
+                            "filePath" to tempFile.absolutePath,
+                            "isRestore" to true,
+                            "keepLatestWatchDate" to true
+                        )
+                    )
+                    .build()
+                androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                    "ExternalImportWork",
+                    androidx.work.ExistingWorkPolicy.REPLACE,
+                    workRequest
+                )
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_started))
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
-            } finally {
-                _isBackupLoading.value = false
             }
         }
     }
 
     fun migrateExternalData(fileContent: String, keepLatestWatchDate: Boolean = true) {
-        viewModelScope.launch {
-            _isBackupLoading.value = true
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val isJson = fileContent.trimStart().startsWith("[") || fileContent.trimStart().startsWith("{")
-                val count = if (isJson) {
-                    backupRepository.migrateTraktStream(fileContent.byteInputStream(), keepLatestWatchDate)
-                } else {
-                    backupRepository.migrateCsvStream(fileContent.byteInputStream(), keepLatestWatchDate)
-                }
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
+                val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
+                tempFile.writeText(fileContent)
+                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
+                    .setInputData(
+                        androidx.work.workDataOf(
+                            "filePath" to tempFile.absolutePath,
+                            "isRestore" to false,
+                            "keepLatestWatchDate" to keepLatestWatchDate
+                        )
+                    )
+                    .build()
+                androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                    "ExternalImportWork",
+                    androidx.work.ExistingWorkPolicy.REPLACE,
+                    workRequest
+                )
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_started))
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
-            } finally {
-                _isBackupLoading.value = false
             }
         }
     }
