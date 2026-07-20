@@ -551,10 +551,20 @@ class SettingsViewModel @Inject constructor(
             try {
                 val tempFile = File(context.cacheDir, "restore_payload_${System.currentTimeMillis()}.tmp")
                 tempFile.writeText(json)
+                restoreFile(tempFile.absolutePath)
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
+            }
+        }
+    }
+
+    fun restoreFile(filePath: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
                 val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
                     .setInputData(
                         androidx.work.workDataOf(
-                            "filePath" to tempFile.absolutePath,
+                            "filePath" to filePath,
                             "isRestore" to true,
                             "keepLatestWatchDate" to true
                         )
@@ -577,10 +587,20 @@ class SettingsViewModel @Inject constructor(
             try {
                 val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
                 tempFile.writeText(fileContent)
+                migrateExternalFile(tempFile.absolutePath, keepLatestWatchDate)
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
+            }
+        }
+    }
+
+    fun migrateExternalFile(filePath: String, keepLatestWatchDate: Boolean = true) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
                 val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
                     .setInputData(
                         androidx.work.workDataOf(
-                            "filePath" to tempFile.absolutePath,
+                            "filePath" to filePath,
                             "isRestore" to false,
                             "keepLatestWatchDate" to keepLatestWatchDate
                         )

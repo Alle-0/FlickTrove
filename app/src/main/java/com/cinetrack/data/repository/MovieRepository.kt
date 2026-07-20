@@ -801,6 +801,20 @@ class MovieRepository @Inject constructor(
         return results.firstOrNull()
     }
     
+    suspend fun searchMediaWithYear(query: String, year: String?, isTv: Boolean = false): Movie? {
+        val cleanQuery = query.trim()
+        val cleanYear = year?.trim()?.takeIf { it.isNotBlank() }
+        if (isTv) {
+            val tvResults = tmdbService.searchTV(cleanQuery, firstAirDateYear = cleanYear).results
+            val match = tvResults.firstOrNull() ?: if (cleanYear != null) tmdbService.searchTV(cleanQuery).results.firstOrNull() else null
+            return match?.copy(mediaType = "tv")
+        } else {
+            val movieResults = tmdbService.searchMovie(cleanQuery, year = cleanYear).results
+            val match = movieResults.firstOrNull() ?: if (cleanYear != null) tmdbService.searchMovie(cleanQuery).results.firstOrNull() else null
+            return match?.copy(mediaType = "movie")
+        }
+    }
+    
     suspend fun findByImdbId(imdbId: String): Movie? {
         val response = tmdbService.findByExternalId(imdbId, "imdb_id")
         val movieRes = response.movieResults?.firstOrNull()
@@ -839,6 +853,8 @@ class MovieRepository @Inject constructor(
     suspend fun getPersonDetails(id: Long): Person = tmdbService.getPersonDetails(id)
     suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber)
     suspend fun fetchCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = tmdbService.getCollectionDetails(id)
+    suspend fun getCollectionDetails(id: Long): com.cinetrack.data.api.CollectionResponse = fetchCollectionDetails(id)
+    suspend fun getMovieDetail(id: Long, isTv: Boolean = false): com.cinetrack.data.api.MovieDetailResponse = fetchMovieDetails(id, isTv)
     suspend fun searchCollection(query: String, page: Int = 1): List<TMDBSearchResult.CollectionResult> = tmdbService.searchCollection(query, page = page).results
     suspend fun searchPeople(query: String, page: Int = 1): List<PersonSearchResult> = tmdbService.searchPeople(query, page = page).results
     suspend fun getMoviesByGenre(genreId: Long, page: Int = 1): List<Movie> = tmdbService.getMoviesByGenre(genreId, page = page).results

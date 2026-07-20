@@ -101,6 +101,24 @@ class BackupRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
+    suspend fun importZipBackupStream(inputStream: InputStream) = withContext(Dispatchers.IO) {
+        java.util.zip.ZipInputStream(inputStream).use { zipStream ->
+            var entry = zipStream.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory && entry.name.lowercase().endsWith(".json")) {
+                    val entryBytes = zipStream.readBytes()
+                    java.io.ByteArrayInputStream(entryBytes).use { 
+                        importDataStream(it)
+                    }
+                    break
+                }
+                zipStream.closeEntry()
+                entry = zipStream.nextEntry
+            }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
     suspend fun migrateTraktStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
         val content = inputStream.bufferedReader().use { it.readText() }
         if (content.isBlank()) return@withContext 0
@@ -161,7 +179,7 @@ class BackupRepository @Inject constructor(
                         if (entry.key != "ratings" && entry.key != "settings" && entry.key != "categories") {
                             val valArray = entry.value as? JsonArray
                             if (valArray != null) {
-                                val isCustomList = entry.key !in listOf("movies", "shows", "items", "media", "series", "list", "data", "results", "episodes")
+                                val isCustomList = entry.key !in listOf("movies", "shows", "items", "media", "series", "list", "data", "results", "episodes", "seen_episodes", "followed_shows", "watched_episodes", "watched_movies", "watched", "watchlist", "diary", "history", "shows_list", "movies_list", "ratings", "reviews")
                                 valArray.forEach { el ->
                                     val obj = el as? JsonObject
                                     if (obj != null) {
@@ -351,7 +369,8 @@ class BackupRepository @Inject constructor(
                                 )
                                 Pair(m, folderName)
                             } else if (!title.isNullOrBlank()) {
-                                val tmdbMovie = movieRepository.searchMovieWithYear(title, year)
+                                val isTvMedia = finalWatchedEps != null || typeStr.contains("tv", ignoreCase = true) || typeStr.contains("show", ignoreCase = true) || typeStr.contains("series", ignoreCase = true)
+                                val tmdbMovie = movieRepository.searchMediaWithYear(title, year, isTv = isTvMedia)
                                 tmdbMovie?.let {
                                     val mediaType = if (finalWatchedEps != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")
                                     val m = Movie(
@@ -388,6 +407,44 @@ class BackupRepository @Inject constructor(
         }
         
         count
+    }
+
+    suspend fun migrateZipStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
+        var totalCount = 0
+        java.util.zip.ZipInputStream(inputStream).use { zipStream ->
+            var entry = zipStream.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory) {
+                    val name = entry.name.lowercase()
+                    if (!name.contains("__macosx") && !name.startsWith(".") && !name.substringAfterLast("/").startsWith(".")) {
+                        if (name.endsWith(".json") || name.endsWith(".csv") || name.endsWith(".txt") || !name.contains(".")) {
+                            try {
+                                val entryBytes = zipStream.readBytes()
+                                if (entryBytes.isNotEmpty()) {
+                                    val contentStart = entryBytes.decodeToString().take(100).trimStart()
+                                    val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
+                                    val count = if (isJson) {
+                                        java.io.ByteArrayInputStream(entryBytes).use { 
+                                            migrateTraktStream(it, keepLatestWatchDate) 
+                                        }
+                                    } else {
+                                        java.io.ByteArrayInputStream(entryBytes).use { 
+                                            migrateCsvStream(it, keepLatestWatchDate) 
+                                        }
+                                    }
+                                    totalCount += count
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("BackupRepository", "Error parsing zip entry: ${entry.name}", e)
+                            }
+                        }
+                    }
+                }
+                zipStream.closeEntry()
+                entry = zipStream.nextEntry
+            }
+        }
+        totalCount
     }
 
     private fun parseCsvLine(line: String): List<String> {
@@ -578,7 +635,8 @@ class BackupRepository @Inject constructor(
                                 )
                                 Pair(m, folderVal)
                             } else if (!titleVal.isNullOrBlank()) {
-                                val tmdbMovie = movieRepository.searchMovieWithYear(titleVal.trim(), yearVal?.trim())
+                                val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true)
+                                val tmdbMovie = movieRepository.searchMediaWithYear(titleVal.trim(), yearVal?.trim(), isTv = isTvMedia)
                                 tmdbMovie?.let {
                                     val mediaType = if (epsMap != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")
                                     val m = Movie(

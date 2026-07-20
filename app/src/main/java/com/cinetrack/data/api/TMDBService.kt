@@ -75,7 +75,8 @@ interface TMDBService {
     suspend fun searchTV(
         @Query("query") query: String,
 
-        @Query("page") page: Int = 1
+        @Query("page") page: Int = 1,
+        @Query("first_air_date_year") firstAirDateYear: String? = null
     ): SearchResponse
 
     @GET("search/multi")

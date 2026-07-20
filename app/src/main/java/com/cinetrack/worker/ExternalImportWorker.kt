@@ -80,16 +80,24 @@ class ExternalImportWorker @AssistedInject constructor(
             }
 
             if (isRestore) {
-                file.inputStream().use { backupRepository.importDataStream(it) }
+                if (isZipFile(file)) {
+                    file.inputStream().use { backupRepository.importZipBackupStream(it) }
+                } else {
+                    file.inputStream().use { backupRepository.importDataStream(it) }
+                }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_success))
                 showCompletionNotification(appContext.getString(R.string.settings_msg_restore_success), false)
             } else {
-                val contentStart = file.bufferedReader().use { it.readText().take(100).trimStart() }
-                val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
-                val count = if (isJson) {
-                    file.inputStream().use { backupRepository.migrateTraktStream(it, keepLatestWatchDate) }
+                val count = if (isZipFile(file)) {
+                    file.inputStream().use { backupRepository.migrateZipStream(it, keepLatestWatchDate) }
                 } else {
-                    file.inputStream().use { backupRepository.migrateCsvStream(it, keepLatestWatchDate) }
+                    val contentStart = file.bufferedReader().use { it.readText().take(100).trimStart() }
+                    val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
+                    if (isJson) {
+                        file.inputStream().use { backupRepository.migrateTraktStream(it, keepLatestWatchDate) }
+                    } else {
+                        file.inputStream().use { backupRepository.migrateCsvStream(it, keepLatestWatchDate) }
+                    }
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
                 val msgText = appContext.getString(R.string.settings_msg_import_success, count)
@@ -121,5 +129,19 @@ class ExternalImportWorker @AssistedInject constructor(
             .setAutoCancel(true)
             .build()
         notificationManager.notify(NOTIFICATION_ID_COMPLETE, notification)
+    }
+
+    private fun isZipFile(file: File): Boolean {
+        if (file.name.endsWith(".zip", ignoreCase = true)) return true
+        return try {
+            file.inputStream().use { stream ->
+                val buffer = ByteArray(4)
+                if (stream.read(buffer) == 4) {
+                    buffer[0] == 0x50.toByte() && buffer[1] == 0x4B.toByte()
+                } else false
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 }

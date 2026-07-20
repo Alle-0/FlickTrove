@@ -90,6 +90,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import java.io.OutputStreamWriter
+import java.io.File
 import coil.compose.AsyncImage
 import coil.imageLoader
 import kotlinx.coroutines.Dispatchers
@@ -338,7 +339,7 @@ fun SettingsScreenContent(
     var showLogoutConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
-    var pendingMigrationContent by remember { mutableStateOf<String?>(null) }
+    var pendingMigrationFilePath by remember { mutableStateOf<String?>(null) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -353,7 +354,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showDeepSyncConfirm || pendingMigrationContent != null
+                           showDeepSyncConfirm || pendingMigrationFilePath != null
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
@@ -391,7 +392,7 @@ fun SettingsScreenContent(
             showLogoutConfirm = false
             showBackupDialog = false
             showExternalMigrationDialog = false
-            pendingMigrationContent = null
+            pendingMigrationFilePath = null
         }
     }
 
@@ -423,8 +424,9 @@ fun SettingsScreenContent(
         uri?.let {
             try {
                 context.contentResolver.openInputStream(it)?.use { stream ->
-                    val json = stream.bufferedReader().use { reader -> reader.readText() }
-                    settingsViewModel.restoreData(json)
+                    val tempFile = File(context.cacheDir, "restore_payload_${System.currentTimeMillis()}.tmp")
+                    tempFile.outputStream().use { out -> stream.copyTo(out) }
+                    settingsViewModel.restoreFile(tempFile.absolutePath)
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
@@ -438,8 +440,9 @@ fun SettingsScreenContent(
         uri?.let {
             try {
                 context.contentResolver.openInputStream(it)?.use { stream ->
-                    val content = stream.bufferedReader().use { reader -> reader.readText() }
-                    pendingMigrationContent = content
+                    val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
+                    tempFile.outputStream().use { out -> stream.copyTo(out) }
+                    pendingMigrationFilePath = tempFile.absolutePath
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
@@ -708,7 +711,7 @@ fun SettingsScreenContent(
             },
             onImport = { 
                 showBackupDialog = false
-                importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
+                importLauncher.launch(arrayOf("application/json", "application/zip", "application/x-zip-compressed", "application/octet-stream", "*/*"))
             }
         )
 
@@ -718,25 +721,30 @@ fun SettingsScreenContent(
             onDismiss = { showExternalMigrationDialog = false },
             onImport = {
                 showExternalMigrationDialog = false
-                externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/octet-stream", "*/*"))
+                externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/zip", "application/x-zip-compressed", "application/octet-stream", "*/*"))
             }
         )
 
         SettingsRewatchMigrationDialog(
-            visible = pendingMigrationContent != null,
+            visible = pendingMigrationFilePath != null,
             activeHazeState = activeHazeState,
-            onDismiss = { pendingMigrationContent = null },
-            onKeepLatest = {
-                pendingMigrationContent?.let { content ->
-                    settingsViewModel.migrateExternalData(content, keepLatestWatchDate = true)
+            onDismiss = {
+                pendingMigrationFilePath?.let { path ->
+                    try { File(path).delete() } catch (_: Exception) {}
                 }
-                pendingMigrationContent = null
+                pendingMigrationFilePath = null
+            },
+            onKeepLatest = {
+                pendingMigrationFilePath?.let { path ->
+                    settingsViewModel.migrateExternalFile(path, keepLatestWatchDate = true)
+                }
+                pendingMigrationFilePath = null
             },
             onKeepFirst = {
-                pendingMigrationContent?.let { content ->
-                    settingsViewModel.migrateExternalData(content, keepLatestWatchDate = false)
+                pendingMigrationFilePath?.let { path ->
+                    settingsViewModel.migrateExternalFile(path, keepLatestWatchDate = false)
                 }
-                pendingMigrationContent = null
+                pendingMigrationFilePath = null
             }
         )
 
