@@ -339,7 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastScrollY = window.scrollY;
   let scrollVelocity = 0;
   let smoothVelocity = 0;
-  let filmstripPos = 0;
+  let filmstripPosLeft = 0;
+  let filmstripPosRight = 0;
   let heroScale = 1;
   let heroOpacity = 1;
   let heroBlur = 0;
@@ -390,15 +391,19 @@ document.addEventListener('DOMContentLoaded', () => {
     smoothVelocity += (scrollVelocity - smoothVelocity) * 0.12;
     scrollVelocity *= 0.85; // automatic decay when stopped
 
-    // 4.1.5 Cinematic Filmstrip Continuous Right-to-Left Scroll with Velocity Acceleration
-    if (filmstripHoles.length > 0) {
+    // 4.1.5 Cinematic Double Filmstrip Counter-Scrolling (Twin Reel Marquee)
+    const stripLeftElements = document.querySelectorAll('.strip-left .film-holes, .strip-left .film-line');
+    const stripRightElements = document.querySelectorAll('.strip-right .film-holes, .strip-right .film-line');
+    if (stripLeftElements.length > 0 || stripRightElements.length > 0) {
       const scrollBoost = Math.abs(smoothVelocity) * 0.55;
-      filmstripPos -= (0.75 + scrollBoost);
-      filmstripHoles.forEach((hole) => {
-        hole.style.backgroundPosition = `${filmstripPos.toFixed(2)}px 0px`;
+      filmstripPosLeft -= (0.75 + scrollBoost);
+      filmstripPosRight += (0.65 + scrollBoost * 0.9);
+
+      stripLeftElements.forEach((el) => {
+        el.style.backgroundPosition = `${filmstripPosLeft.toFixed(2)}px 0px`;
       });
-      filmstripTracks.forEach((track) => {
-        track.style.backgroundPosition = `${filmstripPos.toFixed(2)}px 0px`;
+      stripRightElements.forEach((el) => {
+        el.style.backgroundPosition = `${filmstripPosRight.toFixed(2)}px 0px`;
       });
     }
 
