@@ -395,9 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const stripLeftElements = document.querySelectorAll('.strip-left .film-holes, .strip-left .film-line');
     const stripRightElements = document.querySelectorAll('.strip-right .film-holes, .strip-right .film-line');
     if (stripLeftElements.length > 0 || stripRightElements.length > 0) {
-      const scrollBoost = Math.abs(smoothVelocity) * 0.55;
-      filmstripPosLeft -= (0.75 + scrollBoost);
-      filmstripPosRight += (0.65 + scrollBoost * 0.9);
+      const scrollBoost = Math.min(Math.abs(smoothVelocity) * 0.15, 1.2);
+      filmstripPosLeft -= (0.25 + scrollBoost);
+      filmstripPosRight += (0.18 + scrollBoost * 0.85);
 
       stripLeftElements.forEach((el) => {
         el.style.backgroundPosition = `${filmstripPosLeft.toFixed(2)}px 0px`;
