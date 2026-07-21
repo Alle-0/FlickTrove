@@ -144,7 +144,7 @@ object StatsTab : Tab {
         val yearPickerButtonBounds = remember { arrayOf<androidx.compose.ui.geometry.Rect?>(null) }
         val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
         val activeHazeState = hazeState ?: remember { HazeState() }
-        val scrollState = rememberScrollState()
+        val scrollState = viewModel.scrollState
 
         StatsScreenContent(
             viewModel = viewModel,
@@ -187,7 +187,7 @@ fun StatsScreenContent(
     viewModel: StatsViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
-    scrollState: androidx.compose.foundation.ScrollState = rememberScrollState(),
+    scrollState: androidx.compose.foundation.ScrollState = viewModel.scrollState,
     onToggleYearPicker: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onPersonClick: (Long, String?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {}

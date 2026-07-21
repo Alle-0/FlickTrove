@@ -70,6 +70,8 @@ class StatsViewModel @Inject constructor(
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository
 ) : ViewModel() {
 
+    val scrollState = androidx.compose.foundation.ScrollState(0)
+
     private val _timeRange = MutableStateFlow<TimeRange>(
         TimeRange.AllTime
     )
