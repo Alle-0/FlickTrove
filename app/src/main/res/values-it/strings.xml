@@ -241,7 +241,7 @@
     <!-- Backup dialog -->
     <string name="settings_export_backup">Esporta Backup</string>
     <string name="settings_restore_backup">Ripristina Backup</string>
-    <string name="settings_select_file">Seleziona file (JSON o CSV)</string>
+    <string name="settings_select_file">Seleziona file (JSON/CSV/ZIP)</string>
     <!-- Feedback dialog -->
     <string name="settings_send_message">Invia Messaggio</string>
     <!-- Color Dialog -->
@@ -259,6 +259,9 @@
     <!-- Dialogs -->
     <string name="settings_dialog_delete_account_title">Elimina Account</string>
     <string name="settings_dialog_delete_account_desc">Sei sicuro di voler procedere? Tutti i tuoi film salvati, valutazioni e cartelle verranno rimossi permanentemente dal cloud.</string>
+    <string name="settings_dialog_reauth_title">Conferma la tua identità</string>
+    <string name="settings_dialog_reauth_desc">Per sicurezza, inserisci la tua password per eliminare definitivamente l\'account.</string>
+    <string name="settings_dialog_reauth_password_hint">Password</string>
     <string name="settings_dialog_clear_cache_title">Svuota Cache</string>
     <string name="settings_dialog_clear_cache_desc">Tutti i poster e i loghi scaricati verranno rimossi. Dovranno essere ricaricati all\'apertura successiva.</string>
     <string name="settings_dialog_logout_title">Esci</string>
@@ -314,7 +317,8 @@
     <string name="settings_backup_restore_title">Backup e Ripristino</string>
     <string name="settings_backup_restore_desc">Esporta una copia dei tuoi dati (preferiti, cartelle e impostazioni) o ripristina da un file precedentemente salvato.</string>
     <string name="settings_external_migration_dialog_title">Importazione e Esportazione Universale</string>
-    <string name="settings_external_migration_dialog_desc">Importa il tuo storico da qualsiasi piattaforma o sito! Puoi caricare file da Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o qualsiasi file CSV/JSON personalizzato contenente titoli, ID o anni di uscita. Il motore intelligente di FlickTrove rileverà il formato e abbinerà automaticamente i tuoi film e serie TV!</string>
+    <string name="settings_external_migration_dialog_desc">Importa il tuo storico da qualsiasi piattaforma o sito! Puoi caricare file da Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o qualsiasi file CSV/JSON/ZIP personalizzato contenente titoli, ID o anni di uscita. Il motore intelligente di FlickTrove rileverà il formato e abbinerà automaticamente i tuoi film e serie TV!</string>
+    <string name="settings_import_tip_sync">Dopo l\'importazione, è consigliabile eseguire un \"Sincronizza dettagli mancanti\" dalle impostazioni.</string>
     <string name="settings_yamtrack_import">Importa da Yamtrack</string>
     <string name="settings_yamtrack_export">Esporta su Yamtrack</string>
     <string name="settings_yamtrack_section">Yamtrack</string>

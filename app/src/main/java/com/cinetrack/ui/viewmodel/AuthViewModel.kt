@@ -6,6 +6,7 @@ import com.cinetrack.data.repository.MovieRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import kotlinx.coroutines.tasks.await
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -25,6 +26,8 @@ sealed interface AuthState {
     object Authenticated : AuthState
     data class Success(val message: UiText) : AuthState
     data class Error(val message: UiText) : AuthState
+    // Signals that the user must re-enter their password before deletion can proceed
+    object NeedsReauth : AuthState
 }
 
 @HiltViewModel
@@ -219,11 +222,35 @@ class AuthViewModel @Inject constructor(
                         _processState.update { AuthState.Unauthenticated }
                         onComplete(true)
                     }
+                } else if (exception is FirebaseAuthRecentLoginRequiredException) {
+                    // Firebase requires fresh credentials: show reauth dialog
+                    _processState.update { AuthState.NeedsReauth }
+                    onComplete(false)
                 } else {
                     _processState.update { AuthState.Error(getErrorMessage(exception)) }
                     onComplete(false)
                 }
             }
+    }
+
+    fun deleteAccountWithReauth(password: String, onComplete: (Boolean) -> Unit) {
+        val user = auth.currentUser ?: return
+        val email = user.email ?: return
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_deleting)) }
+        viewModelScope.launch {
+            try {
+                val credential = EmailAuthProvider.getCredential(email, password)
+                user.reauthenticate(credential).await()
+                user.delete().await()
+                movieRepository.clearAllData()
+                auth.signOut()
+                _processState.update { AuthState.Unauthenticated }
+                onComplete(true)
+            } catch (e: Exception) {
+                _processState.update { AuthState.Error(getErrorMessage(e)) }
+                onComplete(false)
+            }
+        }
     }
 
     fun resetPassword(email: String) {

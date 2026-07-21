@@ -178,12 +178,12 @@ class MovieRepository @Inject constructor(
                     enqueue(TraktInstantWriteWorker.ACTION_ADD_RATING) {
                         putInt(TraktInstantWriteWorker.KEY_RATING, traktRating)
                     }
-                } else {
+                } else if (oldRating != null && (rating == null || rating == 0.0)) {
                     enqueue(TraktInstantWriteWorker.ACTION_REMOVE_RATING)
                 }
             }
 
-            // favorite changed (watchlist)
+            // favorite changed -> sync watchlist/favorite
             if (oldFav != movie.favorite) {
                 val action = if (movie.favorite) TraktInstantWriteWorker.ACTION_ADD_WATCHLIST
                              else                TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST
@@ -238,42 +238,66 @@ class MovieRepository @Inject constructor(
         }
     }
 
+    private val fetchingDetailsIds = java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+    private val fetchSemaphore = java.util.concurrent.Semaphore(3)
+
     fun fetchMissingDetailsAsync(movie: Movie) {
-        if (movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty()) {
+        val key = "${movie.mediaType}_${movie.id}"
+        val eps = movie.watchedEpisodes
+        val needsDetails = movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty()
+        val needsEpisodes = movie.mediaType == "tv" && movie.watched && (eps.isNullOrEmpty() || eps.values.sumOf { it.size } == 0)
+        if ((needsDetails || needsEpisodes) && fetchingDetailsIds.add(key)) {
+            val updateEpisodesUseCase = com.cinetrack.domain.UpdateEpisodesUseCase()
             repositoryScope.launch {
                 try {
-                    val isTv = movie.mediaType == "tv"
-                    val response = fetchMovieDetails(movie.id, isTv)
-                    val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
-                    
-                    favoriteDao.updateMetadata(
-                        id = movie.id,
-                        mediaType = movie.mediaType,
-                        runtime = freshMovie.runtime,
-                        episodeRunTime = freshMovie.episodeRunTime,
-                        genres = freshMovie.genres,
-                        topCastData = freshMovie.topCastData,
-                        directorData = freshMovie.directorData,
-                        directorId = freshMovie.directorId,
-                        directorName = freshMovie.directorName,
-                        directorProfilePath = freshMovie.directorProfilePath,
-                        seasons = freshMovie.seasons,
-                        numberOfSeasons = freshMovie.numberOfSeasons,
-                        numberOfEpisodes = freshMovie.numberOfEpisodes
-                    )
-                    
-                    // Fetch updated movie from DB to sync to Firebase
-                    val localMovie = favoriteDao.getById(movie.id, movie.mediaType)
-                    if (localMovie != null) {
-                        try {
-                            firebaseRemoteDataSource.setMovie(localMovie)
-                        } catch (e: Exception) {
-                            if (e is CancellationException) throw e
+                    fetchSemaphore.acquire()
+                    try {
+                        val isTv = movie.mediaType == "tv"
+                        val response = fetchMovieDetails(movie.id, isTv)
+                        val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                        
+                        favoriteDao.updateMetadata(
+                            id = movie.id,
+                            mediaType = movie.mediaType,
+                            runtime = freshMovie.runtime,
+                            episodeRunTime = freshMovie.episodeRunTime,
+                            genres = freshMovie.genres,
+                            topCastData = freshMovie.topCastData,
+                            directorData = freshMovie.directorData,
+                            directorId = freshMovie.directorId,
+                            directorName = freshMovie.directorName,
+                            directorProfilePath = freshMovie.directorProfilePath,
+                            seasons = freshMovie.seasons,
+                            numberOfSeasons = freshMovie.numberOfSeasons,
+                            numberOfEpisodes = freshMovie.numberOfEpisodes
+                        )
+                        
+                        var currentLocal = favoriteDao.getById(movie.id, movie.mediaType)
+                        val currentEps = currentLocal?.watchedEpisodes
+                        if (isTv && movie.watched && currentLocal != null && (currentEps.isNullOrEmpty() || currentEps.values.sumOf { it.size } == 0)) {
+                            val allWatched = updateEpisodesUseCase.markAllWatched(freshMovie).watchedEpisodes
+                            if (!allWatched.isNullOrEmpty()) {
+                                currentLocal = currentLocal.copy(watchedEpisodes = allWatched, progress = 1.0)
+                                favoriteDao.insert(currentLocal)
+                            }
                         }
+
+                        // Fetch updated movie from DB to sync to Firebase
+                        if (currentLocal != null) {
+                            try {
+                                firebaseRemoteDataSource.setMovie(currentLocal)
+                            } catch (e: Exception) {
+                                if (e is CancellationException) throw e
+                            }
+                        }
+                    } finally {
+                        fetchSemaphore.release()
                     }
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
                     android.util.Log.e("MovieRepository", "Failed to fetch missing details in background for ${movie.id}", e)
+                } finally {
+                    fetchingDetailsIds.remove(key)
                 }
             }
         }
@@ -291,10 +315,8 @@ class MovieRepository @Inject constructor(
     
         repositoryScope.launch {
             try {
-                // Firebase bulk update isn't strictly defined, so we can run them concurrently
-                updatedMovies.forEach { movie ->
-                    firebaseRemoteDataSource.setMovie(movie)
-                }
+                // Use batched setMoviesBulk to prevent Firestore SQLiteDocumentOverlayCache OOM
+                firebaseRemoteDataSource.setMoviesBulk(updatedMovies)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Firebase bulk sync failed", e)
@@ -521,19 +543,28 @@ class MovieRepository @Inject constructor(
     suspend fun pushPendingChanges() = kotlinx.coroutines.withContext(Dispatchers.IO) {
         // Push pending Movies
         val pendingMovies = favoriteDao.getPendingSync()
-        for (movie in pendingMovies) {
+        val toDelete = pendingMovies.filter { it.syncStatus == "pending_delete" }
+        val toSync = pendingMovies.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
+
+        for (movie in toDelete) {
             try {
-                if (movie.syncStatus == "pending_delete") {
-                    firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
-                    favoriteDao.deleteById(movie.id, movie.mediaType)
-                } else if (movie.syncStatus == "pending") {
-                    val syncedMovie = movie.copy(syncStatus = "synced")
-                    firebaseRemoteDataSource.setMovie(syncedMovie)
+                firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+                favoriteDao.deleteById(movie.id, movie.mediaType)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Failed to push pending delete movie ${movie.id}", e)
+            }
+        }
+
+        if (toSync.isNotEmpty()) {
+            try {
+                firebaseRemoteDataSource.setMoviesBulk(toSync)
+                for (movie in toSync) {
                     favoriteDao.updateSyncStatus(movie.id, movie.mediaType, "synced")
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending movie ${movie.id}", e)
+                android.util.Log.e("MovieRepository", "Failed to push pending movies bulk", e)
             }
         }
         
@@ -899,7 +930,14 @@ class MovieRepository @Inject constructor(
         if (isTv) {
             val tvResults = tmdbService.searchTV(cleanQuery, firstAirDateYear = cleanYear).results
             val match = tvResults.firstOrNull() ?: if (cleanYear != null) tmdbService.searchTV(cleanQuery).results.firstOrNull() else null
-            return match?.copy(mediaType = "tv")
+            return match?.let {
+                try {
+                    val details = fetchMovieDetails(it.id, true)
+                    com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "tv")
+                } catch (e: Exception) {
+                    it.copy(mediaType = "tv")
+                }
+            }
         } else {
             val movieResults = tmdbService.searchMovie(cleanQuery, year = cleanYear).results
             val match = movieResults.firstOrNull() ?: if (cleanYear != null) tmdbService.searchMovie(cleanQuery).results.firstOrNull() else null

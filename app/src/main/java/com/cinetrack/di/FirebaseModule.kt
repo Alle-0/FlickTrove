@@ -24,9 +24,11 @@ object FirebaseModule {
     fun provideFirebaseFirestore(): FirebaseFirestore {
         val firestore = FirebaseFirestore.getInstance()
         
-        // Enabling native persistence as requested for "Granitic Stability"
+        // Enabling native persistence as requested for "Granitic Stability" with 50 MB bound
         val settings = firestoreSettings {
-            setLocalCacheSettings(persistentCacheSettings { })
+            setLocalCacheSettings(persistentCacheSettings {
+                setSizeBytes(52428800L) // 50 MB limit to prevent SQLiteDocumentOverlayCache OOM
+            })
         }
         firestore.firestoreSettings = settings
         

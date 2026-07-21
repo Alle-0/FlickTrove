@@ -242,7 +242,7 @@
     <!-- Backup dialog -->
     <string name="settings_export_backup">Export Backup</string>
     <string name="settings_restore_backup">Restore Backup</string>
-    <string name="settings_select_file">Select file (JSON or CSV)</string>
+    <string name="settings_select_file">Select file (JSON/CSV/ZIP)</string>
     <!-- Feedback dialog -->
     <string name="settings_send_message">Send Message</string>
     <!-- Color Dialog -->
@@ -260,6 +260,9 @@
     <!-- Dialogs -->
     <string name="settings_dialog_delete_account_title">Delete Account</string>
     <string name="settings_dialog_delete_account_desc">Are you sure you want to proceed? All your saved movies, ratings, and folders will be permanently removed from the cloud.</string>
+    <string name="settings_dialog_reauth_title">Confirm your identity</string>
+    <string name="settings_dialog_reauth_desc">For security, please enter your password to permanently delete your account.</string>
+    <string name="settings_dialog_reauth_password_hint">Password</string>
     <string name="settings_dialog_clear_cache_title">Clear Cache</string>
     <string name="settings_dialog_clear_cache_desc">All downloaded posters and logos will be removed. They will need to be reloaded on the next startup.</string>
     <string name="settings_dialog_logout_title">Logout</string>
@@ -316,7 +319,8 @@
     <string name="settings_backup_restore_desc">Export a copy of your data (favorites, folders, and settings) or restore from a previously saved file.</string>
     <string name="settings_external_migration_dialog_title">Universal Data Import &amp; Export</string>
     <string name="settings_start_migration">Start Import</string>
-    <string name="settings_external_migration_dialog_desc">Import your watch history from any platform or site! You can upload exports from Trakt.tv, Letterboxd, IMDb, TVTime, Serializd, or any custom CSV/JSON file containing titles, IDs, or release years. FlickTrove\'s smart engine will automatically detect format and match your movies and TV shows!</string>
+    <string name="settings_external_migration_dialog_desc">Import your watch history from any platform or site! You can upload exports from Trakt.tv, Letterboxd, IMDb, TVTime, Serializd, or any custom CSV/JSON/ZIP file containing titles, IDs, or release years. FlickTrove\'s smart engine will automatically detect format and match your movies and TV shows!</string>
+    <string name="settings_import_tip_sync">After import, it\'s recommended to run a "Sync Missing Details" from the settings.</string>
     <string name="settings_yamtrack_import">Import from Yamtrack</string>
     <string name="settings_yamtrack_export">Export to Yamtrack</string>
     <string name="settings_yamtrack_section">Yamtrack</string>

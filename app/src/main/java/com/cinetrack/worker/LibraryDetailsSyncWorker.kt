@@ -39,8 +39,9 @@ class LibraryDetailsSyncWorker(
 
         return try {
             val allMovies = favoriteDao.getAll()
-            val missingDetailsMovies = allMovies.filter { 
-                it.runtime == null || it.runtime == 0 || it.topCastData.isNullOrEmpty()
+            val missingDetailsMovies = allMovies.filter { movie ->
+                val eps = movie.watchedEpisodes
+                movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty() || (movie.mediaType == "tv" && movie.watched && (eps.isNullOrEmpty() || eps.values.sumOf { s -> s.size } == 0))
             }
 
             if (missingDetailsMovies.isEmpty()) {
@@ -49,6 +50,9 @@ class LibraryDetailsSyncWorker(
 
             val total = missingDetailsMovies.size
             Log.d("LibraryDetailsSync", "Found $total movies missing details")
+
+            val updateEpisodesUseCase = com.cinetrack.domain.UpdateEpisodesUseCase()
+            val updatedForFirebase = mutableListOf<com.cinetrack.data.model.Movie>()
 
             missingDetailsMovies.forEachIndexed { index, movie ->
                 try {
@@ -73,12 +77,25 @@ class LibraryDetailsSyncWorker(
                         numberOfEpisodes = freshMovie.numberOfEpisodes
                     )
                     
-                    val localMovie = favoriteDao.getById(movie.id, movie.mediaType)
-                    if (localMovie != null) {
-                        try {
-                            firebase.setMovie(localMovie)
-                        } catch (e: Exception) {
-                            if (e is CancellationException) throw e
+                    var currentLocal = favoriteDao.getById(movie.id, movie.mediaType)
+                    val currentEps = currentLocal?.watchedEpisodes
+                    if (isTv && movie.watched && currentLocal != null && (currentEps.isNullOrEmpty() || currentEps.values.sumOf { it.size } == 0)) {
+                        val allWatched = updateEpisodesUseCase.markAllWatched(freshMovie).watchedEpisodes
+                        if (!allWatched.isNullOrEmpty()) {
+                            currentLocal = currentLocal.copy(watchedEpisodes = allWatched, progress = 1.0)
+                            favoriteDao.insert(currentLocal)
+                        }
+                    }
+
+                    if (currentLocal != null) {
+                        updatedForFirebase.add(currentLocal)
+                        if (updatedForFirebase.size >= 25) {
+                            try {
+                                firebase.setMoviesBulk(updatedForFirebase.toList())
+                            } catch (e: Exception) {
+                                if (e is CancellationException) throw e
+                            }
+                            updatedForFirebase.clear()
                         }
                     }
                     
@@ -90,6 +107,15 @@ class LibraryDetailsSyncWorker(
                 }
             }
             
+            if (updatedForFirebase.isNotEmpty()) {
+                try {
+                    firebase.setMoviesBulk(updatedForFirebase)
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                }
+                updatedForFirebase.clear()
+            }
+
             setProgress(androidx.work.workDataOf("current" to total, "total" to total))
             Result.success()
         } catch (e: Exception) {

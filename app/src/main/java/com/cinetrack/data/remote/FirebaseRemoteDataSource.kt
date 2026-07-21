@@ -17,7 +17,12 @@ class FirebaseRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth
 ) {
     private val userId: String?
-        get() = auth.currentUser?.uid
+        get() = try {
+            auth.currentUser?.uid
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error accessing auth.currentUser: ${e.message}", e)
+            null
+        }
 
     private fun getFavoritesCollection(uid: String) =
         firestore.collection("users").document(uid).collection("favorite_movies")
@@ -35,9 +40,33 @@ class FirebaseRemoteDataSource @Inject constructor(
     suspend fun setMovie(movie: Movie) {
         val uid = userId ?: return
         val docId = "${movie.mediaType}_${movie.id}"
-        getFavoritesCollection(uid).document(docId)
-            .set(movie, SetOptions.merge())
-            .await()
+        try {
+            getFavoritesCollection(uid).document(docId)
+                .set(movie, SetOptions.merge())
+                .await()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error setting movie $docId: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Batch set movies in Firestore in chunks of 400 to prevent local overlay cache OOM.
+     */
+    suspend fun setMoviesBulk(movies: List<Movie>) {
+        val uid = userId ?: return
+        val collection = getFavoritesCollection(uid)
+        movies.chunked(400).forEach { chunk ->
+            try {
+                val batch = firestore.batch()
+                chunk.forEach { movie ->
+                    val docId = "${movie.mediaType}_${movie.id}"
+                    batch.set(collection.document(docId), movie, SetOptions.merge())
+                }
+                batch.commit().await()
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseRemoteDataSource", "Error committing batch of ${chunk.size} movies: ${e.message}", e)
+            }
+        }
     }
 
     suspend fun deleteMovie(movieId: Long, mediaType: String) {

@@ -329,6 +329,8 @@ fun SettingsScreenContent(
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showReauthDialog by remember { mutableStateOf(false) }
+    var reauthErrorMessage by remember { mutableStateOf<String?>(null) }
     var showColorDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
@@ -351,7 +353,7 @@ fun SettingsScreenContent(
         settingsViewModel.toggleNotifications(isGranted)
     }
 
-    val anyDialogVisible = showDeleteDialog || showColorDialog || showFeedbackDialog || 
+    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
                            showDeepSyncConfirm || pendingMigrationFilePath != null
@@ -385,6 +387,7 @@ fun SettingsScreenContent(
         settingsViewModel.closeDialogsEvent.collect {
             focusManager.clearFocus()
             showDeleteDialog = false
+            showReauthDialog = false
             showColorDialog = false
             showFeedbackDialog = false
             showBadgesInfoDialog = false
@@ -393,6 +396,14 @@ fun SettingsScreenContent(
             showBackupDialog = false
             showExternalMigrationDialog = false
             pendingMigrationFilePath = null
+        }
+    }
+
+    // When Firebase requires re-authentication before account deletion, show the reauth dialog
+    LaunchedEffect(authState) {
+        if (authState is AuthState.NeedsReauth) {
+            reauthErrorMessage = null
+            showReauthDialog = true
         }
     }
 
@@ -633,6 +644,31 @@ fun SettingsScreenContent(
                 showDeleteDialog = false
                 viewModel.deleteAccount {
                     // Navigation to LoginScreen is handled cleanly by LaunchedEffect observing AuthState.Unauthenticated
+                }
+            }
+        )
+
+        ReauthDeleteAccountDialog(
+            visible = showReauthDialog,
+            activeHazeState = activeHazeState,
+            errorMessage = reauthErrorMessage,
+            onDismiss = {
+                showReauthDialog = false
+                viewModel.resetProcessState()
+            },
+            onConfirm = { password ->
+                reauthErrorMessage = null
+                viewModel.deleteAccountWithReauth(password) { success ->
+                    if (!success) {
+                        // Keep dialog open and show the error from authState
+                        val state = viewModel.authState.value
+                        if (state is AuthState.Error) {
+                            reauthErrorMessage = (state.message as? com.cinetrack.ui.utils.UiText.StringResource)
+                                ?.let { context.getString(it.resId) }
+                                ?: (state.message as? com.cinetrack.ui.utils.UiText.DynamicString)?.value
+                                ?: "Incorrect password"
+                        }
+                    }
                 }
             }
         )

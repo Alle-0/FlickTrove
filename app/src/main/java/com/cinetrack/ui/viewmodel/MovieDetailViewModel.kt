@@ -193,6 +193,15 @@ class MovieDetailViewModel @Inject constructor(
                     val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
                     if (localMovie != null) {
                         val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                        var updatedEpisodes = localMovie.watchedEpisodes
+                        var updatedProgress = localMovie.progress
+                        if (isTv && localMovie.watched && (updatedEpisodes.isNullOrEmpty() || updatedEpisodes.values.sumOf { it.size } == 0)) {
+                            val allWatched = updateEpisodesUseCase.markAllWatched(freshMovie).watchedEpisodes
+                            if (!allWatched.isNullOrEmpty()) {
+                                updatedEpisodes = allWatched
+                                updatedProgress = 1.0
+                            }
+                        }
                         val updatedMovie = localMovie.copy(
                             genres = freshMovie.genres ?: localMovie.genres,
                             runtime = freshMovie.runtime ?: localMovie.runtime,
@@ -222,7 +231,9 @@ class MovieDetailViewModel @Inject constructor(
                             directorData = freshMovie.directorData ?: localMovie.directorData,
                             directorId = freshMovie.directorId ?: localMovie.directorId,
                             directorName = freshMovie.directorName ?: localMovie.directorName,
-                            directorProfilePath = freshMovie.directorProfilePath ?: localMovie.directorProfilePath
+                            directorProfilePath = freshMovie.directorProfilePath ?: localMovie.directorProfilePath,
+                            watchedEpisodes = updatedEpisodes,
+                            progress = updatedProgress
                         )
                         repository.saveMovie(updatedMovie)
                     }

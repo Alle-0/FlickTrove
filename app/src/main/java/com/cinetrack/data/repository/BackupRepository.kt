@@ -353,6 +353,13 @@ class BackupRepository @Inject constructor(
                                         mediaType = mediaType,
                                         title = it.title,
                                         name = it.name,
+                                        posterPath = it.posterPath,
+                                        backdropPath = it.backdropPath,
+                                        voteAverage = it.voteAverage,
+                                        overview = it.overview,
+                                        releaseDate = it.releaseDate,
+                                        firstAirDate = it.firstAirDate,
+                                        genreIds = it.genreIds,
                                         watched = isSeen,
                                         favorite = isFav,
                                         personalRating = userRating,
@@ -391,6 +398,13 @@ class BackupRepository @Inject constructor(
                                         mediaType = mediaType,
                                         title = it.title,
                                         name = it.name,
+                                        posterPath = it.posterPath,
+                                        backdropPath = it.backdropPath,
+                                        voteAverage = it.voteAverage,
+                                        overview = it.overview,
+                                        releaseDate = it.releaseDate,
+                                        firstAirDate = it.firstAirDate,
+                                        genreIds = it.genreIds,
                                         watched = isSeen,
                                         favorite = isFav,
                                         personalRating = userRating,
@@ -431,7 +445,8 @@ class BackupRepository @Inject constructor(
         var watchedAt: String? = null,
         var personalRating: Double? = null,
         var personalNote: String? = null,
-        val folders: MutableSet<String> = mutableSetOf()
+        val folders: MutableSet<String> = mutableSetOf(),
+        val watchedEpisodes: MutableMap<String, MutableSet<Int>> = mutableMapOf()
     )
 
     private suspend fun migrateTvTimeGdprZip(
@@ -501,15 +516,36 @@ class BackupRepository @Inject constructor(
 
         // 4. Parse tracking-prod-records-v2.csv (Series Tracking)
         zipEntries["tracking-prod-records-v2.csv"]?.let { bytes ->
-            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("updated_at,") }.forEach { line ->
-                val cols = parseCsvLine(line)
-                if (cols.size >= 16) {
-                    val updatedAt = parseAndNormalizeWatchedDate(cols[0])
-                    val isForLater = cols[9].trim().equals("true", ignoreCase = true) || cols[9].trim() == "1"
-                    val title = cols[11]
-                    val showId = cols[15]
-                    val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater, watchedAt = updatedAt)
-                    if (isForLater) item.isWatched = false
+            val lines = bytes.decodeToString().lineSequence().filter { it.isNotBlank() }.iterator()
+            if (lines.hasNext()) {
+                val headerLine = lines.next()
+                val headers = parseCsvLine(headerLine)
+                val lowerHeaders = headers.map { it.trim().lowercase() }
+                val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season_number", "season", "s") }
+                val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode_number", "episode", "e") }
+                val titleIdx = lowerHeaders.indexOfFirst { it in listOf("show_name", "series_name", "title") }.takeIf { it != -1 } ?: 11
+                val showIdIdx = lowerHeaders.indexOfFirst { it in listOf("tv_show_id", "show_id", "id") }.takeIf { it != -1 } ?: 15
+                val isForLaterIdx = lowerHeaders.indexOfFirst { it in listOf("is_for_later", "for_later") }.takeIf { it != -1 } ?: 9
+                val updatedAtIdx = lowerHeaders.indexOfFirst { it in listOf("updated_at", "date") }.takeIf { it != -1 } ?: 0
+
+                while (lines.hasNext()) {
+                    val line = lines.next()
+                    val cols = parseCsvLine(line)
+                    if (cols.size > kotlin.math.max(titleIdx, showIdIdx)) {
+                        val updatedAt = cols.getOrNull(updatedAtIdx)?.let { parseAndNormalizeWatchedDate(it) }
+                        val isForLater = cols.getOrNull(isForLaterIdx)?.trim()?.let { it.equals("true", ignoreCase = true) || it == "1" } ?: false
+                        val title = cols[titleIdx]
+                        val showId = cols[showIdIdx]
+                        val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater, watchedAt = updatedAt)
+                        if (isForLater) item.isWatched = false
+                        if (!isForLater && seasonIdx != -1 && episodeIdx != -1) {
+                            val sNum = cols.getOrNull(seasonIdx)?.trim()?.toIntOrNull()
+                            val eNum = cols.getOrNull(episodeIdx)?.trim()?.toIntOrNull()
+                            if (sNum != null && sNum > 0 && eNum != null && eNum > 0) {
+                                item.watchedEpisodes.getOrPut(sNum.toString()) { mutableSetOf() }.add(eNum)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -632,16 +668,41 @@ class BackupRepository @Inject constructor(
                         val tmdbResult = movieRepository.searchMediaWithYear(item.title, null, isTv = isTv)
                         tmdbResult?.let { tmdb ->
                             val finalMediaType = if (isTv) "tv" else (tmdb.mediaType ?: "movie")
+                            val seasonsList = tmdb.seasons
+                            val finalEps: Map<String, List<Int>>? = if (item.watchedEpisodes.isNotEmpty()) {
+                                item.watchedEpisodes.mapValues { it.value.sorted() }
+                            } else if (item.isWatched && seasonsList != null) {
+                                val allWatched = mutableMapOf<String, List<Int>>()
+                                val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+                                seasonsList.filter { (it.seasonNumber ?: 0) > 0 }.forEach { season ->
+                                    val count = tmdb.getReleasedEpisodeCountForSeason(season, todayIso, null, null)
+                                    if (count > 0) {
+                                        allWatched[(season.seasonNumber ?: 0).toString()] = (1..count).toList()
+                                    }
+                                }
+                                allWatched.takeIf { it.isNotEmpty() }
+                            } else null
                             val movieObj = Movie(
                                 id = tmdb.id,
                                 mediaType = finalMediaType,
                                 title = tmdb.title,
                                 name = tmdb.name,
+                                posterPath = tmdb.posterPath,
+                                backdropPath = tmdb.backdropPath,
+                                voteAverage = tmdb.voteAverage,
+                                overview = tmdb.overview,
+                                releaseDate = tmdb.releaseDate,
+                                firstAirDate = tmdb.firstAirDate,
+                                genreIds = tmdb.genreIds,
                                 watched = item.isWatched,
                                 favorite = item.isFavorite,
                                 personalRating = item.personalRating,
                                 personalNote = item.personalNote,
-                                watchedEpisodes = null,
+                                watchedEpisodes = finalEps,
+                                progress = if (finalMediaType == "tv" && item.isWatched) 1.0 else 0.0,
+                                seasons = tmdb.seasons,
+                                numberOfSeasons = tmdb.numberOfSeasons,
+                                numberOfEpisodes = tmdb.numberOfEpisodes,
                                 watchedAt = if (item.isWatched) (item.watchedAt ?: java.time.Instant.now().toString()) else null,
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()
@@ -936,6 +997,13 @@ class BackupRepository @Inject constructor(
                                         mediaType = mediaType,
                                         title = it.title,
                                         name = it.name,
+                                        posterPath = it.posterPath,
+                                        backdropPath = it.backdropPath,
+                                        voteAverage = it.voteAverage,
+                                        overview = it.overview,
+                                        releaseDate = it.releaseDate,
+                                        firstAirDate = it.firstAirDate,
+                                        genreIds = it.genreIds,
                                         watched = watchedVal,
                                         favorite = false,
                                         personalRating = ratingVal,
@@ -1002,6 +1070,13 @@ class BackupRepository @Inject constructor(
                 }
 
                 mergedIncoming[key] = existing.copy(
+                    posterPath = existing.posterPath ?: m.posterPath,
+                    backdropPath = existing.backdropPath ?: m.backdropPath,
+                    voteAverage = if (existing.voteAverage == 0.0 && m.voteAverage != 0.0) m.voteAverage else existing.voteAverage,
+                    overview = existing.overview ?: m.overview,
+                    releaseDate = existing.releaseDate ?: m.releaseDate,
+                    firstAirDate = existing.firstAirDate ?: m.firstAirDate,
+                    genreIds = existing.genreIds ?: m.genreIds,
                     watched = existing.watched || m.watched,
                     favorite = existing.favorite || m.favorite,
                     personalRating = existing.personalRating ?: m.personalRating,
@@ -1039,6 +1114,13 @@ class BackupRepository @Inject constructor(
                 }
 
                 val updated = local.copy(
+                    posterPath = local.posterPath ?: incoming.posterPath,
+                    backdropPath = local.backdropPath ?: incoming.backdropPath,
+                    voteAverage = if (local.voteAverage == 0.0 && incoming.voteAverage != 0.0) incoming.voteAverage else local.voteAverage,
+                    overview = local.overview ?: incoming.overview,
+                    releaseDate = local.releaseDate ?: incoming.releaseDate,
+                    firstAirDate = local.firstAirDate ?: incoming.firstAirDate,
+                    genreIds = local.genreIds ?: incoming.genreIds,
                     watched = local.watched || incoming.watched,
                     favorite = local.favorite || incoming.favorite,
                     personalRating = local.personalRating ?: incoming.personalRating,

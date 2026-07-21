@@ -208,181 +208,181 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             ) {
                 Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
                     val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
-                    Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
-                        CompositionLocalProvider(
-                            LocalAppPadding provides PaddingValues(bottom = 80.dp),
-                            LocalHazeState provides contentHazeState,
-                            LocalActiveFilterConfig provides activeFilterConfig,
-                            LocalFilterRequest provides { bounds ->
-                                filterButtonBounds = bounds
-                                isFilterModalVisible = true
-                            }
-                        ) {
+                    CompositionLocalProvider(
+                        LocalAppPadding provides PaddingValues(bottom = 80.dp),
+                        LocalHazeState provides contentHazeState,
+                        LocalActiveFilterConfig provides activeFilterConfig,
+                        LocalFilterRequest provides { bounds ->
+                            filterButtonBounds = bounds
+                            isFilterModalVisible = true
+                        }
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
                             CurrentTab()
-                        }
 
-                        // Top Bar Layer
-                        val title = when (currentTab) {
-                            is HomeTab -> stringResource(R.string.app_name)
-                            is VistiTab -> stringResource(R.string.main_tab_visti)
-                            is DiscoverTab -> stringResource(R.string.main_tab_discover)
-                            is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
-                            is StatsTab -> stringResource(R.string.main_tab_stats)
-                            is FoldersTab -> stringResource(R.string.main_tab_folders)
-                            is SettingsTab -> stringResource(R.string.main_tab_settings)
-                            is NewsTab -> stringResource(R.string.news_tab_title)
-                            is FolderDetailTab -> currentTab.folderName
-                            else -> stringResource(R.string.app_name)
-                        }
+                            // Top Bar Layer
+                            val title = when (currentTab) {
+                                is HomeTab -> stringResource(R.string.app_name)
+                                is VistiTab -> stringResource(R.string.main_tab_visti)
+                                is DiscoverTab -> stringResource(R.string.main_tab_discover)
+                                is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
+                                is StatsTab -> stringResource(R.string.main_tab_stats)
+                                is FoldersTab -> stringResource(R.string.main_tab_folders)
+                                is SettingsTab -> stringResource(R.string.main_tab_settings)
+                                is NewsTab -> stringResource(R.string.news_tab_title)
+                                is FolderDetailTab -> currentTab.folderName
+                                else -> stringResource(R.string.app_name)
+                            }
 
-                        val recommendationsViewModel: RecommendationsViewModel? = if (currentTab is RecommendationsTab && activity != null) {
-                            hiltViewModel(activity)
-                        } else null
+                            val recommendationsViewModel: RecommendationsViewModel? = if (currentTab is RecommendationsTab && activity != null) {
+                                hiltViewModel(activity)
+                            } else null
 
-                        Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
-                            var discoverHasActiveFilters = false
-                            var discoverGridColumns: Int? = null
-                            var discoverOnLayoutToggleClick: (() -> Unit)? = null
+                            Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
+                                var discoverHasActiveFilters = false
+                                var discoverGridColumns: Int? = null
+                                var discoverOnLayoutToggleClick: (() -> Unit)? = null
 
-                            if (currentTab is DiscoverTab && activity != null) {
-                                val discoverVm = hiltViewModel<DiscoverViewModel>(activity)
-                                val discoverUiStateForBar by discoverVm.uiState.collectAsStateWithLifecycle()
-                                discoverHasActiveFilters = discoverUiStateForBar.sortConfig.selectedGenres.isNotEmpty() ||
-                                    discoverUiStateForBar.sortConfig.selectedProviders.isNotEmpty() ||
-                                    discoverUiStateForBar.sortConfig.selectedDecades.isNotEmpty()
-                                if (discoverUiStateForBar.preferences.showLayoutToggle) {
-                                    val cols = if (discoverUiStateForBar.preferences.gridColumns in 1..4) discoverUiStateForBar.preferences.gridColumns else 3
-                                    discoverGridColumns = cols
-                                    discoverOnLayoutToggleClick = {
-                                        discoverVm.updateGridColumns(nextGridColumns(cols))
+                                if (currentTab is DiscoverTab && activity != null) {
+                                    val discoverVm = hiltViewModel<DiscoverViewModel>(activity)
+                                    val discoverUiStateForBar by discoverVm.uiState.collectAsStateWithLifecycle()
+                                    discoverHasActiveFilters = discoverUiStateForBar.sortConfig.selectedGenres.isNotEmpty() ||
+                                        discoverUiStateForBar.sortConfig.selectedProviders.isNotEmpty() ||
+                                        discoverUiStateForBar.sortConfig.selectedDecades.isNotEmpty()
+                                    if (discoverUiStateForBar.preferences.showLayoutToggle) {
+                                        val cols = if (discoverUiStateForBar.preferences.gridColumns in 1..4) discoverUiStateForBar.preferences.gridColumns else 3
+                                        discoverGridColumns = cols
+                                        discoverOnLayoutToggleClick = {
+                                            discoverVm.updateGridColumns(nextGridColumns(cols))
+                                        }
                                     }
                                 }
+
+                                GlassyTopBar(
+                                    title = title,
+                                    hazeState = contentHazeState,
+                                    isDimmed = isSettingsDialogOpen,
+                                    onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
+                                    onMenuClick = { scope.launch { drawerState.open() } },
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
+                                    onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
+                                    indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
+                                    onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                                    onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
+                                    hasActiveFilters = discoverHasActiveFilters,
+                                    onLayoutToggleClick = discoverOnLayoutToggleClick,
+                                    layoutColumns = discoverGridColumns,
+                                    notificationCount = updatesUiState.notificationCount,
+                                    hasAppUpdateBadge = hasAppUpdateBadge
+                                )
                             }
 
-                            GlassyTopBar(
-                                title = title,
-                                hazeState = contentHazeState,
-                                isDimmed = isSettingsDialogOpen,
+                            // Bottom Bar & Search FAB Layer
+                            MainBottomBarOverlay(
+                                currentTab = currentTab,
+                                contentHazeState = contentHazeState,
+                                isSettingsDialogOpen = isSettingsDialogOpen,
                                 onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
-                                onMenuClick = { scope.launch { drawerState.open() } },
-                                onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
-                                onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
-                                indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                                onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
-                                onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
-                                hasActiveFilters = discoverHasActiveFilters,
-                                onLayoutToggleClick = discoverOnLayoutToggleClick,
-                                layoutColumns = discoverGridColumns,
-                                notificationCount = updatesUiState.notificationCount,
-                                hasAppUpdateBadge = hasAppUpdateBadge
+                                onNavigate = { routeStr ->
+                                    when (routeStr) {
+                                        "index" -> tabNavigator.current = HomeTab
+                                        "visti" -> tabNavigator.current = VistiTab
+                                        "stats" -> tabNavigator.current = StatsTab
+                                    }
+                                }
+                            )
+
+                            MainSearchFab(
+                                currentTab = currentTab,
+                                contentHazeState = contentHazeState,
+                                onSearchClick = { offset ->
+                                    searchOverlay?.invoke(offset, null, null, null, null)
+                                }
                             )
                         }
 
-                        // Bottom Bar & Search FAB Layer
-                        MainBottomBarOverlay(
-                            currentTab = currentTab,
-                            contentHazeState = contentHazeState,
-                            isSettingsDialogOpen = isSettingsDialogOpen,
-                            onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
-                            onNavigate = { routeStr ->
-                                when (routeStr) {
-                                    "index" -> tabNavigator.current = HomeTab
-                                    "visti" -> tabNavigator.current = VistiTab
-                                    "stats" -> tabNavigator.current = StatsTab
-                                }
+                        // --- FOLDER OPTIONS MODAL ---
+                        var rememberedShowFolderOptions by remember { mutableStateOf(false) }
+                        var isFolderMenuVisible by remember { mutableStateOf(false) }
+
+                        LaunchedEffect(showFolderOptions, currentTab) {
+                            if (showFolderOptions && currentTab is FolderDetailTab) {
+                                rememberedShowFolderOptions = true
+                                isFolderMenuVisible = true
+                            } else if (rememberedShowFolderOptions) {
+                                isFolderMenuVisible = false
+                                kotlinx.coroutines.delay(200)
+                                rememberedShowFolderOptions = false
                             }
-                        )
-
-                        MainSearchFab(
-                            currentTab = currentTab,
-                            contentHazeState = contentHazeState,
-                            onSearchClick = { offset ->
-                                searchOverlay?.invoke(offset, null, null, null, null)
-                            }
-                        )
-                    }
-
-                    // --- FOLDER OPTIONS MODAL ---
-                    var rememberedShowFolderOptions by remember { mutableStateOf(false) }
-                    var isFolderMenuVisible by remember { mutableStateOf(false) }
-
-                    LaunchedEffect(showFolderOptions, currentTab) {
-                        if (showFolderOptions && currentTab is FolderDetailTab) {
-                            rememberedShowFolderOptions = true
-                            isFolderMenuVisible = true
-                        } else if (rememberedShowFolderOptions) {
-                            isFolderMenuVisible = false
-                            kotlinx.coroutines.delay(200)
-                            rememberedShowFolderOptions = false
                         }
-                    }
 
-                    if (rememberedShowFolderOptions) {
-                        MainFolderOptionsMenu(
-                            visible = isFolderMenuVisible,
-                            offset = folderOptionsOffset,
-                            hazeState = contentHazeState,
-                            onDismiss = { showFolderOptions = false },
-                            onRename = {
-                                showFolderOptions = false
-                                folderEditMode = FolderEditMode.NAME
-                                showFolderEditDialog = true
-                            },
-                            onChangeColor = {
-                                showFolderOptions = false
-                                folderEditMode = FolderEditMode.COLOR
-                                showFolderEditDialog = true
-                            },
-                            onDelete = {
-                                showFolderOptions = false
-                                showFolderDeleteConfirm = true
-                            }
+                        if (rememberedShowFolderOptions) {
+                            MainFolderOptionsMenu(
+                                visible = isFolderMenuVisible,
+                                offset = folderOptionsOffset,
+                                hazeState = contentHazeState,
+                                onDismiss = { showFolderOptions = false },
+                                onRename = {
+                                    showFolderOptions = false
+                                    folderEditMode = FolderEditMode.NAME
+                                    showFolderEditDialog = true
+                                },
+                                onChangeColor = {
+                                    showFolderOptions = false
+                                    folderEditMode = FolderEditMode.COLOR
+                                    showFolderEditDialog = true
+                                },
+                                onDelete = {
+                                    showFolderOptions = false
+                                    showFolderDeleteConfirm = true
+                                }
+                            )
+                        }
+
+                        // Modals
+                        MainModalsContainer(
+                            screen = this@MainScreen,
+                            currentTab = currentTab,
+                            activity = activity,
+                            isFilterModalVisible = isFilterModalVisible,
+                            isYearPickerVisible = isYearPickerVisible,
+                            filterButtonBounds = filterButtonBounds,
+                            yearPickerButtonBounds = yearPickerButtonBounds,
+                            globalHazeState = globalHazeState,
+                            onFilterModalDismiss = { isFilterModalVisible = false },
+                            onYearPickerDismiss = { isYearPickerVisible = false }
+                        )
+
+                        // Global Dialogs & Overlays
+                        MainGlobalDialogs(
+                            screen = this@MainScreen,
+                            currentTab = currentTab,
+                            tabNavigator = tabNavigator,
+                            rootNavigator = rootNavigator,
+                            activity = activity,
+                            globalHazeState = globalHazeState,
+                            settingsViewModel = settingsViewModel,
+                            updatesViewModel = updatesViewModel,
+                            showExitConfirmation = showExitConfirmation,
+                            onExitConfirmationChange = { showExitConfirmation = it },
+                            showFolderEditDialog = showFolderEditDialog,
+                            onFolderEditDialogChange = { showFolderEditDialog = it },
+                            folderEditMode = folderEditMode,
+                            showFolderDeleteConfirm = showFolderDeleteConfirm,
+                            onFolderDeleteConfirmChange = { showFolderDeleteConfirm = it },
+                            updatesOverlayOffset = updatesOverlayOffset,
+                            onUpdatesOverlayClose = { updatesOverlayOffsetX = null; updatesOverlayOffsetY = null },
+                            onOverlayClosing = { isOverlayClosing = true },
+                            showSurpriseMeOverlay = showSurpriseMeOverlay,
+                            onSurpriseMeClose = { showSurpriseMeOverlay = false },
+                            updateInfo = updateInfo,
+                            dismissedUpdateVersion = dismissedUpdateVersion,
+                            ignoredUpdateVersion = ignoredUpdateVersion,
+                            lastSeenAppVersion = lastSeenAppVersion,
+                            hasSeenOnboarding = hasSeenOnboarding
                         )
                     }
-
-                    // Modals
-                    MainModalsContainer(
-                        screen = this@MainScreen,
-                        currentTab = currentTab,
-                        activity = activity,
-                        isFilterModalVisible = isFilterModalVisible,
-                        isYearPickerVisible = isYearPickerVisible,
-                        filterButtonBounds = filterButtonBounds,
-                        yearPickerButtonBounds = yearPickerButtonBounds,
-                        globalHazeState = globalHazeState,
-                        onFilterModalDismiss = { isFilterModalVisible = false },
-                        onYearPickerDismiss = { isYearPickerVisible = false }
-                    )
-
-                    // Global Dialogs & Overlays
-                    MainGlobalDialogs(
-                        screen = this@MainScreen,
-                        currentTab = currentTab,
-                        tabNavigator = tabNavigator,
-                        rootNavigator = rootNavigator,
-                        activity = activity,
-                        globalHazeState = globalHazeState,
-                        settingsViewModel = settingsViewModel,
-                        updatesViewModel = updatesViewModel,
-                        showExitConfirmation = showExitConfirmation,
-                        onExitConfirmationChange = { showExitConfirmation = it },
-                        showFolderEditDialog = showFolderEditDialog,
-                        onFolderEditDialogChange = { showFolderEditDialog = it },
-                        folderEditMode = folderEditMode,
-                        showFolderDeleteConfirm = showFolderDeleteConfirm,
-                        onFolderDeleteConfirmChange = { showFolderDeleteConfirm = it },
-                        updatesOverlayOffset = updatesOverlayOffset,
-                        onUpdatesOverlayClose = { updatesOverlayOffsetX = null; updatesOverlayOffsetY = null },
-                        onOverlayClosing = { isOverlayClosing = true },
-                        showSurpriseMeOverlay = showSurpriseMeOverlay,
-                        onSurpriseMeClose = { showSurpriseMeOverlay = false },
-                        updateInfo = updateInfo,
-                        dismissedUpdateVersion = dismissedUpdateVersion,
-                        ignoredUpdateVersion = ignoredUpdateVersion,
-                        lastSeenAppVersion = lastSeenAppVersion,
-                        hasSeenOnboarding = hasSeenOnboarding
-                    )
                 }
             }
         }

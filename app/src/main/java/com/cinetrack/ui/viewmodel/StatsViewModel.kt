@@ -162,7 +162,8 @@ class StatsViewModel @Inject constructor(
         // TV
         var tvEstimate = false
         val tvStats = watchedTV.map { m ->
-            val watchedCount = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+            val watchedCount = m.watchedEpisodes?.values?.sumOf { it.size }?.takeIf { it > 0 }
+                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
             var avgRunTime = m.episodeRunTime?.firstOrNull() ?: 45
             if (avgRunTime > 240) {
                 val totalEps = m.numberOfEpisodes?.takeIf { it > 0 } ?: 1
@@ -174,7 +175,10 @@ class StatsViewModel @Inject constructor(
         }
         val tvMin = tvStats.sumOf { it.second }
         val longestTVStat = tvStats.maxByOrNull { it.second }
-        val totalEpisodes = watchedTV.sumOf { it.watchedEpisodes?.values?.sumOf { it.size } ?: 0 }
+        val totalEpisodes = watchedTV.sumOf { m ->
+            m.watchedEpisodes?.values?.sumOf { it.size }?.takeIf { it > 0 }
+                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
+        }
 
         // Genres
         val genreCounts = mutableMapOf<String, Int>()
