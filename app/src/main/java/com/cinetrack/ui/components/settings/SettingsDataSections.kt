@@ -118,6 +118,7 @@ fun SettingsSyncBackupSection(
     val traktNeedsReconnect by settingsViewModel.traktNeedsReconnect.collectAsStateWithLifecycle()
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
+    val externalImportWorkInfo by settingsViewModel.externalImportWorkInfo.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_sync_backup),
@@ -129,8 +130,48 @@ fun SettingsSyncBackupSection(
             title = stringResource(R.string.settings_external_migration),
             description = stringResource(R.string.settings_external_migration_desc),
             onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                onShowExternalMigrationDialog()
+                if (externalImportWorkInfo?.state != WorkInfo.State.RUNNING) {
+                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                    onShowExternalMigrationDialog()
+                }
+            },
+            customContent = {
+                if (externalImportWorkInfo != null && externalImportWorkInfo!!.state == WorkInfo.State.RUNNING) {
+                    val progressData = externalImportWorkInfo!!.progress
+                    val current = progressData.getInt("current", 0)
+                    val total = progressData.getInt("total", 0)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (total > 0) {
+                        Text(
+                            text = "$current / $total",
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = { current.toFloat() / total.toFloat() },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.settings_processing),
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    }
+                }
             }
         )
 

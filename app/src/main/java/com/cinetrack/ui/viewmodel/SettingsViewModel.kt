@@ -157,6 +157,11 @@ class SettingsViewModel @Inject constructor(
         .map { it.firstOrNull() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val externalImportWorkInfo = androidx.work.WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkFlow("ExternalImportWork")
+        .map { it.firstOrNull() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     fun syncTraktNow() {
         if (!isTraktLoggedIn.value) return
         viewModelScope.launch {

@@ -848,6 +848,7 @@ class MovieRepository @Inject constructor(
         try {
             val freshResponse = if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
             memoryDetailsCache[cacheKey] = freshResponse
+            emit(freshResponse)
             try {
                 cacheDao.saveDetailWithLRU(
                     MovieDetailCacheEntity(
@@ -860,7 +861,6 @@ class MovieRepository @Inject constructor(
             } catch (e: Exception) {
                 // Ignore room errors
             }
-            emit(freshResponse)
         } catch (e: Exception) {
             if (memoryDetailsCache[cacheKey] == null) {
                 throw e
@@ -962,12 +962,12 @@ class MovieRepository @Inject constructor(
         try {
             val fresh = tmdbService.getPersonDetails(id)
             memoryDetailsCache[cacheKey] = fresh
+            emit(fresh)
             try {
                 cacheDao.saveDetailWithLRU(
                     MovieDetailCacheEntity(id = id, mediaType = "person", data = json.encodeToString(fresh), updatedAt = System.currentTimeMillis())
                 )
             } catch (e: Exception) {}
-            emit(fresh)
         } catch (e: Exception) {
             if (memoryDetailsCache[cacheKey] == null) throw e
         }
@@ -1004,12 +1004,12 @@ class MovieRepository @Inject constructor(
         try {
             val fresh = tmdbService.getCollectionDetails(id)
             memoryDetailsCache[cacheKey] = fresh
+            emit(fresh)
             try {
                 cacheDao.saveDetailWithLRU(
                     MovieDetailCacheEntity(id = id, mediaType = "collection", data = json.encodeToString(fresh), updatedAt = System.currentTimeMillis())
                 )
             } catch (e: Exception) {}
-            emit(fresh)
         } catch (e: Exception) {
             if (memoryDetailsCache[cacheKey] == null) throw e
         }

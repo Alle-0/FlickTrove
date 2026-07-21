@@ -22,6 +22,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,7 +91,17 @@ object FoldersTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<FoldersViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<FoldersViewModel>(activity)
+        } else {
+            getViewModel<FoldersViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val tabNavigator = LocalTabNavigator.current

@@ -78,25 +78,34 @@ class ExternalImportWorker @AssistedInject constructor(
             } catch (e: Exception) {
                 // Ignore if foreground service permission is not available or not required
             }
+            try {
+                setProgress(androidx.work.workDataOf("current" to 0, "total" to 0))
+            } catch (_: Exception) {}
+
+            val progressCallback: suspend (Int, Int) -> Unit = { current, total ->
+                try {
+                    setProgress(androidx.work.workDataOf("current" to current, "total" to total))
+                } catch (_: Exception) {}
+            }
 
             if (isRestore) {
                 if (isZipFile(file)) {
-                    file.inputStream().use { backupRepository.importZipBackupStream(it) }
+                    file.inputStream().use { backupRepository.importZipBackupStream(it, progressCallback) }
                 } else {
-                    file.inputStream().use { backupRepository.importDataStream(it) }
+                    file.inputStream().use { backupRepository.importDataStream(it, progressCallback) }
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_success))
                 showCompletionNotification(appContext.getString(R.string.settings_msg_restore_success), false)
             } else {
                 val count = if (isZipFile(file)) {
-                    file.inputStream().use { backupRepository.migrateZipStream(it, keepLatestWatchDate) }
+                    file.inputStream().use { backupRepository.migrateZipStream(it, keepLatestWatchDate, progressCallback) }
                 } else {
                     val contentStart = file.bufferedReader().use { it.readText().take(100).trimStart() }
                     val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
                     if (isJson) {
-                        file.inputStream().use { backupRepository.migrateTraktStream(it, keepLatestWatchDate) }
+                        file.inputStream().use { backupRepository.migrateTraktStream(it, keepLatestWatchDate, progressCallback) }
                     } else {
-                        file.inputStream().use { backupRepository.migrateCsvStream(it, keepLatestWatchDate) }
+                        file.inputStream().use { backupRepository.migrateCsvStream(it, keepLatestWatchDate, progressCallback) }
                     }
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))

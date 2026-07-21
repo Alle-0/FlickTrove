@@ -54,14 +54,21 @@ class BackupRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun importDataStream(inputStream: InputStream) = withContext(Dispatchers.IO) {
+    suspend fun importDataStream(
+        inputStream: InputStream,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ) = withContext(Dispatchers.IO) {
         val backup = json.decodeFromStream<BackupData>(inputStream)
         
         // Restore Favorites (Smart Merge)
         if (backup.favorites.isNotEmpty()) {
+            val total = backup.favorites.size
             val localFavoritesMap = favoriteDao.getAll().associateBy { "${it.mediaType}_${it.id}" }
             
-            val mergedFavorites = backup.favorites.map { importedMovie ->
+            val mergedFavorites = backup.favorites.mapIndexed { index, importedMovie ->
+                if ((index + 1) % 5 == 0 || (index + 1) == total) {
+                    onProgress(index + 1, total)
+                }
                 val localMovie = localFavoritesMap["${importedMovie.mediaType}_${importedMovie.id}"]
                 if (localMovie != null) {
                     val combinedEps = mutableMapOf<String, MutableSet<Int>>()
@@ -101,14 +108,17 @@ class BackupRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    suspend fun importZipBackupStream(inputStream: InputStream) = withContext(Dispatchers.IO) {
+    suspend fun importZipBackupStream(
+        inputStream: InputStream,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ) = withContext(Dispatchers.IO) {
         java.util.zip.ZipInputStream(inputStream).use { zipStream ->
             var entry = zipStream.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory && entry.name.lowercase().endsWith(".json")) {
                     val entryBytes = zipStream.readBytes()
                     java.io.ByteArrayInputStream(entryBytes).use { 
-                        importDataStream(it)
+                        importDataStream(it, onProgress)
                     }
                     break
                 }
@@ -118,8 +128,11 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    suspend fun migrateTraktStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
+    suspend fun migrateTraktStream(
+        inputStream: InputStream,
+        keepLatestWatchDate: Boolean = true,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ): Int = withContext(Dispatchers.IO) {
         val content = inputStream.bufferedReader().use { it.readText() }
         if (content.isBlank()) return@withContext 0
         var count = 0
@@ -145,7 +158,7 @@ class BackupRepository @Inject constructor(
                 )
             }
             if (moviesToInsert.isNotEmpty()) {
-                processAndSaveImportedItems(moviesToInsert.map { Pair(it, null) }, keepLatestWatchDate)
+                processAndSaveImportedItems(moviesToInsert.map { Pair(it, null) }, keepLatestWatchDate, onProgress)
                 return@withContext moviesToInsert.size
             }
         } catch (e: Exception) {
@@ -397,7 +410,7 @@ class BackupRepository @Inject constructor(
                 }
                 val results = deferreds.awaitAll().filterNotNull()
                 if (results.isNotEmpty()) {
-                    processAndSaveImportedItems(results, keepLatestWatchDate)
+                    processAndSaveImportedItems(results, keepLatestWatchDate, onProgress)
                     count += results.size
                 }
                 kotlinx.coroutines.delay(300)
@@ -409,7 +422,11 @@ class BackupRepository @Inject constructor(
         count
     }
 
-    suspend fun migrateZipStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
+    suspend fun migrateZipStream(
+        inputStream: InputStream,
+        keepLatestWatchDate: Boolean = true,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ): Int = withContext(Dispatchers.IO) {
         var totalCount = 0
         java.util.zip.ZipInputStream(inputStream).use { zipStream ->
             var entry = zipStream.nextEntry
@@ -425,11 +442,11 @@ class BackupRepository @Inject constructor(
                                     val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
                                     val count = if (isJson) {
                                         java.io.ByteArrayInputStream(entryBytes).use { 
-                                            migrateTraktStream(it, keepLatestWatchDate) 
+                                            migrateTraktStream(it, keepLatestWatchDate, onProgress) 
                                         }
                                     } else {
                                         java.io.ByteArrayInputStream(entryBytes).use { 
-                                            migrateCsvStream(it, keepLatestWatchDate) 
+                                            migrateCsvStream(it, keepLatestWatchDate, onProgress) 
                                         }
                                     }
                                     totalCount += count
@@ -497,7 +514,11 @@ class BackupRepository @Inject constructor(
         return null
     }
 
-    suspend fun migrateCsvStream(inputStream: InputStream, keepLatestWatchDate: Boolean = true): Int = withContext(Dispatchers.IO) {
+    suspend fun migrateCsvStream(
+        inputStream: InputStream,
+        keepLatestWatchDate: Boolean = true,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ): Int = withContext(Dispatchers.IO) {
         var count = 0
         inputStream.bufferedReader().useLines { linesSequence ->
             val lines = linesSequence.filter { it.isNotBlank() }.iterator()
@@ -664,7 +685,7 @@ class BackupRepository @Inject constructor(
                 
                 val results = deferreds.awaitAll().filterNotNull()
                 if (results.isNotEmpty()) {
-                    processAndSaveImportedItems(results, keepLatestWatchDate)
+                    processAndSaveImportedItems(results, keepLatestWatchDate, onProgress)
                     count += results.size
                 }
                 kotlinx.coroutines.delay(350)
@@ -673,7 +694,11 @@ class BackupRepository @Inject constructor(
         count
     }
 
-    private suspend fun processAndSaveImportedItems(itemsWithFolders: List<Pair<Movie, String?>>, keepLatestWatchDate: Boolean = true) {
+    private suspend fun processAndSaveImportedItems(
+        itemsWithFolders: List<Pair<Movie, String?>>,
+        keepLatestWatchDate: Boolean = true,
+        onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
+    ) {
         if (itemsWithFolders.isEmpty()) return
         
         // 1. Raggruppa per (id, mediaType) unificando puntate, voti e note tra righe multiple
@@ -717,7 +742,13 @@ class BackupRepository @Inject constructor(
         }
 
         // 2. Unisci con il database locale e salva in favoriteDao
+        val totalToSave = mergedIncoming.size
+        var currentSaved = 0
         for (incoming in mergedIncoming.values) {
+            currentSaved++
+            if (currentSaved % 5 == 0 || currentSaved == totalToSave) {
+                onProgress(currentSaved, totalToSave)
+            }
             val local = favoriteDao.getById(incoming.id, incoming.mediaType ?: "movie")
             if (local == null) {
                 favoriteDao.insert(incoming)

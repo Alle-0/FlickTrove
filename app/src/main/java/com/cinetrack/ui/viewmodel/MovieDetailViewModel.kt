@@ -170,16 +170,34 @@ class MovieDetailViewModel @Inject constructor(
         val startTime = System.currentTimeMillis()
         try {
             repository.getMovieDetailsFlow(id, isTv).collect { response ->
-                // Emit metadata immediately so Skeleton screen disappears in 0ms!
+                // Preload image & accent color while keeping skeleton displayed on first opening
+                val targetPath = response.backdropPath ?: response.posterPath
+                if (targetPath != null && (_metadata.value == null || _extractedColor.value == null)) {
+                    val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
+                    val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
+                    if (imageUrl != null) {
+                        preloadAccentColor(imageUrl)
+                    }
+                }
+
+                // Ensure skeleton is displayed for a minimum smooth duration on initial opening
+                if (_metadata.value == null) {
+                    val timeTaken = System.currentTimeMillis() - startTime
+                    if (timeTaken < 400L) {
+                        kotlinx.coroutines.delay(400L - timeTaken)
+                    }
+                }
+
+                // Emit metadata cleanly after initial image and color are ready
                 _metadata.value = response
 
-                // Trigger extra ratings fetch if we have IMDB ID
-                _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
-                val imdbId = response.externalIds?.imdbId
-                fetchExternalRatings(imdbId, id)
+                // Start caching and secondary background syncs AFTER initial display
+                viewModelScope.launch(Dispatchers.IO) {
+                    _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
+                    val imdbId = response.externalIds?.imdbId
+                    fetchExternalRatings(imdbId, id)
 
-                // Update local DB if movie already exists (to sync missing release dates etc.)
-                viewModelScope.launch {
+                    // Update local DB if movie already exists (to sync missing release dates etc.)
                     val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
                     if (localMovie != null) {
                         val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
@@ -216,11 +234,9 @@ class MovieDetailViewModel @Inject constructor(
                         )
                         repository.saveMovie(updatedMovie)
                     }
-                }
 
-                // Fetch Collection if present
-                response.belongsToCollection?.id?.let { collectionId ->
-                    viewModelScope.launch {
+                    // Fetch Collection if present
+                    response.belongsToCollection?.id?.let { collectionId ->
                         try {
                             repository.getCollectionDetailsFlow(collectionId).collect { collectionResponse ->
                                 _collectionMovies.value = collectionResponse.parts
@@ -232,41 +248,22 @@ class MovieDetailViewModel @Inject constructor(
                         }
                     }
                 }
-
-                // Preload accent color asynchronously across threads without delaying metadata emission
-                val targetPath = response.backdropPath ?: response.posterPath
-                if (targetPath != null && _extractedColor.value == null) {
-                    val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
-                    val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
-                    if (imageUrl != null) {
-                        viewModelScope.launch(Dispatchers.Default) {
-                            preloadAccentColor(imageUrl)
-                        }
-                    }
-                }
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
             if (localMovie != null) {
-                _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
                 val targetPath = localMovie.customBackdropPath ?: localMovie.backdropPath ?: localMovie.posterPath
-                if (targetPath != null && _extractedColor.value == null && localMovie.accentColor == null) {
+                if (targetPath != null && (_metadata.value == null || _extractedColor.value == null)) {
                     val imageType = if (localMovie.customBackdropPath != null || localMovie.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
                     val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
                     if (imageUrl != null) {
-                        viewModelScope.launch(Dispatchers.Default) {
-                            preloadAccentColor(imageUrl)
-                        }
+                        preloadAccentColor(imageUrl)
                     }
                 }
+                _metadata.value = com.cinetrack.data.mapper.MovieMapper.mapMovieToResponse(localMovie)
             } else {
                 _error.value = e.stackTraceToString()
-            }
-        } finally {
-            val timeTaken = System.currentTimeMillis() - startTime
-            if (timeTaken < 600L) {
-                kotlinx.coroutines.delay(600L - timeTaken)
             }
         }
     }
@@ -666,8 +663,7 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     private suspend fun preloadAccentColor(imageUrl: String) {
-        if (_extractedColor.value != null) return
-        kotlinx.coroutines.withTimeoutOrNull(900L) {
+        kotlinx.coroutines.withTimeoutOrNull(1200L) {
             try {
                 val loader = Coil.imageLoader(context)
                 val request = ImageRequest.Builder(context)
@@ -675,7 +671,7 @@ class MovieDetailViewModel @Inject constructor(
                     .allowHardware(false)
                     .build()
                 val result = loader.execute(request)
-                if (result is SuccessResult) {
+                if (_extractedColor.value == null && result is SuccessResult) {
                     val bitmap = result.drawable.toBitmap()
                     if (bitmap.width > 0 && bitmap.height > 0) {
                         val rawColor = ColorUtils.extractAverageColor(bitmap)
@@ -688,7 +684,9 @@ class MovieDetailViewModel @Inject constructor(
                             val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
                             val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
                             val hexString = String.format("#%02X%02X%02X", r, g, b)
-                            repository.saveCachedColor("$mediaType:$movieId", hexString)
+                            viewModelScope.launch(Dispatchers.IO) {
+                                repository.saveCachedColor("$mediaType:$movieId", hexString)
+                            }
                         }
                     }
                 }

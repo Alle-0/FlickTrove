@@ -172,10 +172,17 @@ class CollectionDetailViewModel @Inject constructor(
     private fun fetchCollection(id: Long) {
         _collectionId.value = id
         viewModelScope.launch {
+            val startTime = System.currentTimeMillis()
             _isLoading.value = true
             _error.value = null
             try {
                 repository.getCollectionDetailsFlow(id).collect { details ->
+                    if (_collection.value == null) {
+                        val timeTaken = System.currentTimeMillis() - startTime
+                        if (timeTaken < 400L) {
+                            kotlinx.coroutines.delay(400L - timeTaken)
+                        }
+                    }
                     // Sort parts by release date chronologically so saga films are in correct viewing sequence!
                     val sortedParts = details.parts.sortedBy { movie ->
                         movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"

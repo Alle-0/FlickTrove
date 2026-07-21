@@ -208,7 +208,7 @@
     <string name="settings_sync_backup">Sincronizzazione e Backup</string>
     <string name="settings_smart_merge">Lo Smart Merge unirà i dati proteggendo sempre i tuoi voti e note locali.</string>
     <string name="settings_external_migration">Importazione / Esportazione Universale</string>
-    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tutti i CSV/JSON</string>
+    <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tutti i CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
     <string name="settings_trakt_sync_desc">App ➔ Trakt: Istantaneo\nTrakt ➔ App: 24h</string>
     <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>

@@ -63,7 +63,17 @@ object NewsTab : Tab {
 
     @Composable
     override fun Content() {
-        val viewModel = getViewModel<NewsViewModel>()
+        val context = LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        val viewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<NewsViewModel>(activity)
+        } else {
+            getViewModel<NewsViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
 

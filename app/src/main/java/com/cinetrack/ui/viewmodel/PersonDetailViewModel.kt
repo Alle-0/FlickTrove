@@ -141,6 +141,12 @@ class PersonDetailViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 repository.getPersonDetailsFlow(id).collect { person ->
+                    if (_person.value == null) {
+                        val timeTaken = System.currentTimeMillis() - startTime
+                        if (timeTaken < 400L) {
+                            kotlinx.coroutines.delay(400L - timeTaken)
+                        }
+                    }
                     _person.value = person
                     _isLoading.value = false
                     _error.value = null
