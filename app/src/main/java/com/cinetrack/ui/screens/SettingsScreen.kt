@@ -631,10 +631,8 @@ fun SettingsScreenContent(
             onDismiss = { showDeleteDialog = false },
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.deleteAccount { success ->
-                    if (success) {
-                        onLoggedOut()
-                    }
+                viewModel.deleteAccount {
+                    // Navigation to LoginScreen is handled cleanly by LaunchedEffect observing AuthState.Unauthenticated
                 }
             }
         )
