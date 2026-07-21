@@ -144,11 +144,13 @@ object StatsTab : Tab {
         val yearPickerButtonBounds = remember { arrayOf<androidx.compose.ui.geometry.Rect?>(null) }
         val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
         val activeHazeState = hazeState ?: remember { HazeState() }
+        val scrollState = rememberScrollState()
 
         StatsScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
             hazeState = activeHazeState,
+            scrollState = scrollState,
             onToggleYearPicker = { visible, bounds ->
                 isYearPickerVisible = visible
                 yearPickerButtonBounds[0] = bounds
@@ -185,6 +187,7 @@ fun StatsScreenContent(
     viewModel: StatsViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
+    scrollState: androidx.compose.foundation.ScrollState = rememberScrollState(),
     onToggleYearPicker: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
     onPersonClick: (Long, String?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {}
@@ -240,7 +243,7 @@ fun StatsScreenContent(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .verticalScroll(rememberScrollState())
+                                        .verticalScroll(scrollState)
                                 ) {
                                     // Top safe area spacer
                                     Spacer(Modifier.height(paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp))

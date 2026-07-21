@@ -454,10 +454,17 @@ fun SettingsScreenContent(
 
 
 
-    // If logout or delete succeeds, navigate back to login
+    // If logout or delete succeeds, navigate back to login; if error, show toast
     LaunchedEffect(authState) {
-        if (authState is AuthState.Unauthenticated) {
-            onLoggedOut()
+        when (val state = authState) {
+            is AuthState.Unauthenticated -> {
+                onLoggedOut()
+            }
+            is AuthState.Error -> {
+                settingsViewModel.emitToast(state.message)
+                viewModel.clearError()
+            }
+            else -> {}
         }
     }
 
@@ -624,8 +631,10 @@ fun SettingsScreenContent(
             onDismiss = { showDeleteDialog = false },
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.deleteAccount { _ ->
-                    // Navigation handled by LaunchedEffect(authState)
+                viewModel.deleteAccount { success ->
+                    if (success) {
+                        onLoggedOut()
+                    }
                 }
             }
         )

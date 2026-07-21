@@ -623,4 +623,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun emitToast(uiText: UiText) {
+        actionFeedbackManager.emit(uiText)
+    }
+
 }

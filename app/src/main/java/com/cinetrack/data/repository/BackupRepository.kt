@@ -422,43 +422,309 @@ class BackupRepository @Inject constructor(
         count
     }
 
+    private data class TvTimeItemData(
+        val id: String?,
+        val title: String,
+        val mediaType: String,
+        var isWatched: Boolean,
+        var isFavorite: Boolean = false,
+        var watchedAt: String? = null,
+        var personalRating: Double? = null,
+        var personalNote: String? = null,
+        val folders: MutableSet<String> = mutableSetOf()
+    )
+
+    private suspend fun migrateTvTimeGdprZip(
+        zipEntries: Map<String, ByteArray>,
+        keepLatestWatchDate: Boolean,
+        onProgress: suspend (Int, Int) -> Unit
+    ): Int = withContext(Dispatchers.IO) {
+        val itemsMap = mutableMapOf<String, TvTimeItemData>()
+
+        fun addItem(id: String?, title: String, mediaType: String, isWatched: Boolean, watchedAt: String? = null, isFavorite: Boolean = false): TvTimeItemData {
+            val cleanTitle = title.trim()
+            if (cleanTitle.isBlank()) return TvTimeItemData(null, "", mediaType, isWatched)
+            val key = if (!id.isNullOrBlank()) "${mediaType}_${id.trim()}" else "${mediaType}_${cleanTitle.lowercase()}"
+            val existing = itemsMap.values.find { (it.id != null && it.id == id) || (it.title.equals(cleanTitle, ignoreCase = true) && it.mediaType == mediaType) }
+            if (existing != null) {
+                if (isWatched) existing.isWatched = true
+                if (isFavorite) existing.isFavorite = true
+                if (watchedAt != null && existing.watchedAt == null) existing.watchedAt = watchedAt
+                return existing
+            }
+            val newItem = TvTimeItemData(id = id?.trim(), title = cleanTitle, mediaType = mediaType, isWatched = isWatched, isFavorite = isFavorite, watchedAt = watchedAt)
+            itemsMap[key] = newItem
+            return newItem
+        }
+
+        // 1. Parse followed_tv_show.csv
+        zipEntries["followed_tv_show.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("user_id,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 7) {
+                    val title = cols[5]
+                    val showId = cols[6]
+                    val updatedAt = cols.getOrNull(7)?.let { parseAndNormalizeWatchedDate(it) }
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = true, watchedAt = updatedAt)
+                }
+            }
+        }
+
+        // 2. Parse user_tv_show_data.csv
+        zipEntries["user_tv_show_data.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("tv_show_id,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 5) {
+                    val showId = cols[0]
+                    val isFav = cols[2].trim() == "1" || cols[2].trim().equals("true", ignoreCase = true)
+                    val epsSeen = cols[3].trim().toIntOrNull() ?: 0
+                    val title = cols[4]
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = epsSeen > 0, isFavorite = isFav)
+                }
+            }
+        }
+
+        // 3. Parse user_show_special_status.csv (To Watch / Status)
+        zipEntries["user_show_special_status.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("created_at,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 6) {
+                    val title = cols[2]
+                    val showId = cols[4]
+                    val status = cols[5].trim().lowercase()
+                    val isForLater = status == "for_later" || status == "watchlist" || status == "planned"
+                    val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater)
+                    if (isForLater) item.isWatched = false
+                }
+            }
+        }
+
+        // 4. Parse tracking-prod-records-v2.csv (Series Tracking)
+        zipEntries["tracking-prod-records-v2.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("updated_at,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 16) {
+                    val updatedAt = parseAndNormalizeWatchedDate(cols[0])
+                    val isForLater = cols[9].trim().equals("true", ignoreCase = true) || cols[9].trim() == "1"
+                    val title = cols[11]
+                    val showId = cols[15]
+                    val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater, watchedAt = updatedAt)
+                    if (isForLater) item.isWatched = false
+                }
+            }
+        }
+
+        // 5. Parse tracking-prod-records.csv (Movies Tracking)
+        zipEntries["tracking-prod-records.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("watch_count,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 6) {
+                    val title = cols[5]
+                    if (title.isNotBlank()) {
+                        val updatedAt = cols.getOrNull(10)?.let { parseAndNormalizeWatchedDate(it) } ?: parseAndNormalizeWatchedDate(cols.getOrNull(4))
+                        addItem(id = null, title = title, mediaType = "movie", isWatched = true, watchedAt = updatedAt)
+                    }
+                }
+            }
+        }
+
+        // 6. Parse comments-prod-comments.csv (Notes/Reviews)
+        zipEntries["comments-prod-comments.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("inappropriate_count,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 24) {
+                    val noteText = cols[6].trim()
+                    val movieName = cols[22].trim()
+                    val seriesName = cols[23].trim()
+                    val title = if (movieName.isNotBlank()) movieName else seriesName
+                    if (title.isNotBlank() && noteText.isNotBlank()) {
+                        val isTv = cols[5].trim().equals("series", ignoreCase = true) || cols[5].trim().equals("show", ignoreCase = true) || seriesName.isNotBlank()
+                        val mediaType = if (isTv) "tv" else "movie"
+                        val match = itemsMap.values.find { it.title.equals(title, ignoreCase = true) && (if (isTv) it.mediaType == "tv" else true) }
+                            ?: addItem(id = null, title = title, mediaType = mediaType, isWatched = true)
+                        match.personalNote = if (match.personalNote.isNullOrBlank()) noteText else "${match.personalNote}\n\n$noteText"
+                    }
+                }
+            }
+        }
+
+        // 7. Parse ratings-live-votes.csv & ratings-3-prod-episode_votes.csv (Ratings)
+        fun extractTvTimeScore(voteKey: String): Double? {
+            val suffix = voteKey.substringAfterLast("-").trim().toIntOrNull() ?: return null
+            return when (suffix) {
+                29 -> 10.0 // Mindblown / Awesome
+                3 -> 8.0   // Good / Happy
+                28 -> 7.0  // Emotional / Sad
+                2 -> 6.0   // Neutral / Okay
+                1 -> 4.0   // Bad
+                else -> if (suffix in 1..10) suffix.toDouble() else null
+            }
+        }
+
+        zipEntries["ratings-live-votes.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("uuid,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 4) {
+                    val voteKey = cols[2]
+                    val movieName = cols[3].trim()
+                    val score = extractTvTimeScore(voteKey)
+                    if (movieName.isNotBlank() && score != null) {
+                        val match = itemsMap.values.find { it.title.equals(movieName, ignoreCase = true) }
+                            ?: addItem(id = null, title = movieName, mediaType = "movie", isWatched = true)
+                        if (match.personalRating == null || score > (match.personalRating ?: 0.0)) {
+                            match.personalRating = score
+                        }
+                    }
+                }
+            }
+        }
+
+        zipEntries["ratings-3-prod-episode_votes.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("user_id,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 4) {
+                    val voteKey = cols[1]
+                    val seriesName = cols[3].trim()
+                    val score = extractTvTimeScore(voteKey)
+                    if (seriesName.isNotBlank() && score != null) {
+                        val match = itemsMap.values.find { it.title.equals(seriesName, ignoreCase = true) && it.mediaType == "tv" }
+                            ?: addItem(id = null, title = seriesName, mediaType = "tv", isWatched = true)
+                        if (match.personalRating == null || score > (match.personalRating ?: 0.0)) {
+                            match.personalRating = score
+                        }
+                    }
+                }
+            }
+        }
+
+        // 8. Parse lists-prod-lists.csv (Custom Folders / Lists)
+        zipEntries["lists-prod-lists.csv"]?.let { bytes ->
+            bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("name,") }.forEach { line ->
+                val cols = parseCsvLine(line)
+                if (cols.size >= 3) {
+                    val folderName = cols[0].trim()
+                    val objectsStr = cols[2]
+                    if (folderName.isNotBlank() && objectsStr.isNotBlank()) {
+                        val idMatches = Regex("id:(\\d+)").findAll(objectsStr)
+                        for (m in idMatches) {
+                            val idStr = m.groupValues[1]
+                            val match = itemsMap.values.find { it.id == idStr }
+                            if (match != null) {
+                                match.folders.add(folderName)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 9. Resolve all items against TMDB and save
+        val allItems = itemsMap.values.filter { it.title.isNotBlank() }
+        var savedCount = 0
+        val totalToProcess = allItems.size
+        
+        val chunks = allItems.chunked(15)
+        for (chunk in chunks) {
+            val deferreds = chunk.map { item ->
+                async {
+                    try {
+                        val isTv = item.mediaType == "tv"
+                        val tmdbResult = movieRepository.searchMediaWithYear(item.title, null, isTv = isTv)
+                        tmdbResult?.let { tmdb ->
+                            val finalMediaType = if (isTv) "tv" else (tmdb.mediaType ?: "movie")
+                            val movieObj = Movie(
+                                id = tmdb.id,
+                                mediaType = finalMediaType,
+                                title = tmdb.title,
+                                name = tmdb.name,
+                                watched = item.isWatched,
+                                favorite = item.isFavorite,
+                                personalRating = item.personalRating,
+                                personalNote = item.personalNote,
+                                watchedEpisodes = null,
+                                watchedAt = if (item.isWatched) (item.watchedAt ?: java.time.Instant.now().toString()) else null,
+                                syncStatus = "pending",
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                            val foldersList = item.folders.toList()
+                            if (foldersList.isNotEmpty()) {
+                                foldersList.map { fname -> Pair(movieObj, fname) }
+                            } else {
+                                listOf(Pair(movieObj, null))
+                            }
+                        }
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }
+            
+            val batchPairs = deferreds.awaitAll().filterNotNull().flatten()
+            if (batchPairs.isNotEmpty()) {
+                processAndSaveImportedItems(batchPairs, keepLatestWatchDate) { _, _ -> }
+                savedCount += batchPairs.distinctBy { Pair(it.first.id, it.first.mediaType) }.size
+            }
+            onProgress(savedCount, totalToProcess)
+            kotlinx.coroutines.delay(300)
+        }
+        
+        savedCount
+    }
+
     suspend fun migrateZipStream(
         inputStream: InputStream,
         keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
     ): Int = withContext(Dispatchers.IO) {
-        var totalCount = 0
+        val zipEntries = mutableMapOf<String, ByteArray>()
         java.util.zip.ZipInputStream(inputStream).use { zipStream ->
             var entry = zipStream.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
-                    val name = entry.name.lowercase()
-                    if (!name.contains("__macosx") && !name.startsWith(".") && !name.substringAfterLast("/").startsWith(".")) {
+                    val name = entry.name.lowercase().substringAfterLast("/")
+                    if (!name.contains("__macosx") && !name.startsWith(".")) {
                         if (name.endsWith(".json") || name.endsWith(".csv") || name.endsWith(".txt") || !name.contains(".")) {
                             try {
-                                val entryBytes = zipStream.readBytes()
-                                if (entryBytes.isNotEmpty()) {
-                                    val contentStart = entryBytes.decodeToString().take(100).trimStart()
-                                    val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
-                                    val count = if (isJson) {
-                                        java.io.ByteArrayInputStream(entryBytes).use { 
-                                            migrateTraktStream(it, keepLatestWatchDate, onProgress) 
-                                        }
-                                    } else {
-                                        java.io.ByteArrayInputStream(entryBytes).use { 
-                                            migrateCsvStream(it, keepLatestWatchDate, onProgress) 
-                                        }
-                                    }
-                                    totalCount += count
+                                val bytes = zipStream.readBytes()
+                                if (bytes.isNotEmpty()) {
+                                    zipEntries[name] = bytes
                                 }
                             } catch (e: Exception) {
-                                android.util.Log.e("BackupRepository", "Error parsing zip entry: ${entry.name}", e)
+                                android.util.Log.e("BackupRepository", "Error reading zip entry: ${entry.name}", e)
                             }
                         }
                     }
                 }
                 zipStream.closeEntry()
                 entry = zipStream.nextEntry
+            }
+        }
+
+        val isTvTimeGdpr = zipEntries.keys.any { 
+            it == "followed_tv_show.csv" || it == "tracking-prod-records-v2.csv" || it == "user_show_special_status.csv" || it == "user_tv_show_data.csv"
+        }
+
+        if (isTvTimeGdpr) {
+            return@withContext migrateTvTimeGdprZip(zipEntries, keepLatestWatchDate, onProgress)
+        }
+
+        var totalCount = 0
+        for ((name, entryBytes) in zipEntries) {
+            try {
+                val contentStart = entryBytes.decodeToString().take(100).trimStart()
+                val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
+                val count = if (isJson) {
+                    java.io.ByteArrayInputStream(entryBytes).use { 
+                        migrateTraktStream(it, keepLatestWatchDate, onProgress) 
+                    }
+                } else {
+                    java.io.ByteArrayInputStream(entryBytes).use { 
+                        migrateCsvStream(it, keepLatestWatchDate, onProgress) 
+                    }
+                }
+                totalCount += count
+            } catch (e: Exception) {
+                android.util.Log.e("BackupRepository", "Error parsing zip entry: $name", e)
             }
         }
         totalCount
@@ -530,7 +796,7 @@ class BackupRepository @Inject constructor(
             // Common Headers
             val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst") }
             // `letterboxd uri` excluded: it's a URL, handled separately below to extract slug as title fallback
-            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "show_title") }
+            val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "show_title", "tv_show_name", "series_name") }
             val letterboxdUriIdx = lowerHeaders.indexOfFirst { it == "letterboxd uri" }
             val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date") }
                 .takeIf { it != -1 }
@@ -542,7 +808,7 @@ class BackupRepository @Inject constructor(
                 ?: lowerHeaders.indexOfFirst { it == "date" }
             val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media_type", "item_type", "contenttype") }
             val ratingIdx = lowerHeaders.indexOfFirst { it in listOf("rating", "your rating", "my rating", "score", "user rating", "rating10", "rating5", "user_rating", "personal_rating") }
-            val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes") }
+            val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes", "text", "message") }
             val watchedIdx = lowerHeaders.indexOfFirst { it in listOf("watched", "seen", "status", "watched status", "watched_status") }
             val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season", "season number", "season_number", "s", "season_num") }
             val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode", "episode number", "episode_number", "e", "episode_num", "ep") }
@@ -554,7 +820,7 @@ class BackupRepository @Inject constructor(
 
             // Universal TMDB ID - prioritize Yamtrack's `media_id` if present
             val tmdbIdx = if (yamtrackMediaIdIdx != -1) yamtrackMediaIdIdx 
-                          else lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid") }
+                          else lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid", "tv_show_id", "s_id", "id_show") }
             
             val isYamtrack = yamtrackMediaIdIdx != -1
             
@@ -597,7 +863,12 @@ class BackupRepository @Inject constructor(
 
                     var watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
                         val w = columns[watchedIdx]?.trim()?.lowercase()
-                        w == "1" || w == "true" || w == "yes" || w == "watched" || w == "completed"
+                        when (w) {
+                            "1", "true", "yes", "watched", "completed", "watching", "seen", "up_to_date" -> true
+                            "0", "false", "no", "planned", "for_later", "watchlist", "to_watch", "to watch" -> false
+                            "dropped", "paused" -> return@mapNotNull null
+                            else -> true
+                        }
                     } else true
 
                     if (isYamtrack && watchedIdx != -1 && columns.size > watchedIdx) {
@@ -656,7 +927,7 @@ class BackupRepository @Inject constructor(
                                 )
                                 Pair(m, folderVal)
                             } else if (!titleVal.isNullOrBlank()) {
-                                val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true)
+                                val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true) || lowerHeaders.any { it == "tv_show_name" || it == "series_name" || it == "tv_show_id" || it == "s_id" || it == "id_show" }
                                 val tmdbMovie = movieRepository.searchMediaWithYear(titleVal.trim(), yearVal?.trim(), isTv = isTvMedia)
                                 tmdbMovie?.let {
                                     val mediaType = if (epsMap != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")

@@ -58,6 +58,10 @@ import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlin.math.max
+import coil.imageLoader
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class CollectionDetailScreen(
     val collectionId: Long,
@@ -132,6 +136,7 @@ fun CollectionDetailScreenContent(
     )
 
     val currentImageQuality = LocalImageQuality.current
+    val scope = rememberCoroutineScope()
     LaunchedEffect(uiState.collection, currentImageQuality) {
         val collection = uiState.collection
         if (collection != null) {
@@ -355,23 +360,56 @@ fun CollectionDetailScreenContent(
                             useOffscreenStrategy = true
                         )
                         .bounceClick {
-                            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                val shareText = buildString {
-                                    append(uiState.collection?.name ?: "")
-                                    val overview = uiState.collection?.overview?.takeIf { it.isNotBlank() }
-                                    if (overview != null) {
-                                        append("\n\n")
-                                        append(if (overview.length > 200) overview.take(197) + "..." else overview)
+                            scope.launch(Dispatchers.IO) {
+                                val collection = uiState.collection
+                                val targetPath = collection?.posterPath ?: collection?.backdropPath
+                                val imageUrl = buildTmdbImageUrl(
+                                    targetPath,
+                                    ImageType.POSTER,
+                                    currentImageQuality
+                                )
+                                val fileUri = if (imageUrl != null) {
+                                    val request = coil.request.ImageRequest.Builder(context)
+                                        .data(imageUrl).build()
+                                    val result = context.imageLoader.execute(request)
+                                    if (result is coil.request.SuccessResult) {
+                                        val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                        val imagesDir = java.io.File(context.cacheDir, "images")
+                                        imagesDir.mkdirs()
+                                        val file = java.io.File(imagesDir, "share_collection.jpg")
+                                        val fos = java.io.FileOutputStream(file)
+                                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                                        fos.close()
+                                        androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                                    } else null
+                                } else null
+
+                                withContext(Dispatchers.Main) {
+                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                        val shareText = buildString {
+                                            append(uiState.collection?.name ?: "")
+                                            val overview = uiState.collection?.overview?.takeIf { it.isNotBlank() }
+                                            if (overview != null) {
+                                                append("\n\n")
+                                                append(if (overview.length > 200) overview.take(197) + "..." else overview)
+                                            }
+                                            val colId = uiState.collection?.id
+                                            if (colId != null) {
+                                                append("\n\nhttps://www.themoviedb.org/collection/$colId")
+                                            }
+                                        }
+                                        putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                                        if (fileUri != null) {
+                                            putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                            type = "image/jpeg"
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        } else {
+                                            type = "text/plain"
+                                        }
                                     }
-                                    val colId = uiState.collection?.id
-                                    if (colId != null) {
-                                        append("\n\nhttps://www.themoviedb.org/collection/$colId")
-                                    }
+                                    context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
                                 }
-                                putExtra(android.content.Intent.EXTRA_TEXT, shareText)
                             }
-                            context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
                         },
                     contentAlignment = Alignment.Center
                 ) {

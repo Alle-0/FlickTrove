@@ -180,14 +180,6 @@ class MovieDetailViewModel @Inject constructor(
                     }
                 }
 
-                // Ensure skeleton is displayed for a minimum smooth duration on initial opening
-                if (_metadata.value == null) {
-                    val timeTaken = System.currentTimeMillis() - startTime
-                    if (timeTaken < 400L) {
-                        kotlinx.coroutines.delay(400L - timeTaken)
-                    }
-                }
-
                 // Emit metadata cleanly after initial image and color are ready
                 _metadata.value = response
 

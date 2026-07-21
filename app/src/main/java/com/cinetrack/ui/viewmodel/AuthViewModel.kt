@@ -191,7 +191,12 @@ class AuthViewModel @Inject constructor(
     fun deleteAccount(onComplete: (Boolean) -> Unit) {
         val user = auth.currentUser
         if (user == null) {
-            onComplete(false)
+            viewModelScope.launch {
+                movieRepository.clearAllData()
+                auth.signOut()
+                _processState.update { AuthState.Unauthenticated }
+                onComplete(true)
+            }
             return
         }
 
@@ -201,13 +206,23 @@ class AuthViewModel @Inject constructor(
             .addOnSuccessListener {
                 viewModelScope.launch {
                     movieRepository.clearAllData()
-                    _processState.update { null }
+                    auth.signOut()
+                    _processState.update { AuthState.Unauthenticated }
                     onComplete(true)
                 }
             }
             .addOnFailureListener { exception ->
-                _processState.update { AuthState.Error(getErrorMessage(exception)) }
-                onComplete(false)
+                if (user.isAnonymous) {
+                    viewModelScope.launch {
+                        movieRepository.clearAllData()
+                        auth.signOut()
+                        _processState.update { AuthState.Unauthenticated }
+                        onComplete(true)
+                    }
+                } else {
+                    _processState.update { AuthState.Error(getErrorMessage(exception)) }
+                    onComplete(false)
+                }
             }
     }
 
