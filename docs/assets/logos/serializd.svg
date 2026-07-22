@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Serializd official purple background -->
+  <rect width="100" height="100" rx="22" fill="#5B21B6"/>
+  <!-- Official Serializd "S" lettermark with geometric sharp corners -->
+  <path d="
+    M30 28 H62 Q70 28 70 36 V44 Q70 50 64 52 L38 60 Q32 62 32 68 V72 Q32 78 38 78 H70
+    M30 52 H56
+  " stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

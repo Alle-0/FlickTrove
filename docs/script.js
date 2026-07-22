@@ -345,6 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let heroOpacity = 1;
   let heroBlur = 0;
 
+  // 3D Circular Orbit Carousel State
+  let carouselAutoAngle = 0;
+  let isCarouselHovered = false;
+  let currentCarouselSpeed = 1.0;
+  let lastFrameTimestamp = performance.now();
+
   window.addEventListener('scroll', () => {
     const currentScrollY = window.scrollY;
     scrollVelocity = currentScrollY - lastScrollY;
@@ -359,12 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   deckDots.forEach((dot, idx) => {
     dot.addEventListener('click', () => {
-      if (scrollDeckSection && scrollCards.length > 1) {
-        const totalScrollableHeight = scrollDeckSection.offsetHeight - window.innerHeight;
+      if (scrollDeckSection && scrollCards.length > 0) {
+        const rect = scrollDeckSection.getBoundingClientRect();
+        const totalScrollableHeight = rect.height - window.innerHeight;
         if (totalScrollableHeight > 0) {
-          const targetProgress = idx / (scrollCards.length - 1);
-          const targetScrollY = scrollDeckSection.offsetTop + (targetProgress * totalScrollableHeight);
-          window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, scrollCards.length)) * totalScrollableHeight + 5;
+          window.scrollTo({ top: targetTop, behavior: 'smooth' });
         }
       }
     });
@@ -372,16 +378,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   scrollCards.forEach((card, idx) => {
     card.addEventListener('click', () => {
-      if (scrollDeckSection && idx < scrollCards.length - 1) {
-        const totalScrollableHeight = scrollDeckSection.offsetHeight - window.innerHeight;
+      if (scrollDeckSection && scrollCards.length > 0 && card.style.pointerEvents !== 'auto') {
+        const rect = scrollDeckSection.getBoundingClientRect();
+        const totalScrollableHeight = rect.height - window.innerHeight;
         if (totalScrollableHeight > 0) {
-          const targetStep = idx + 1;
-          const targetProgress = targetStep / (scrollCards.length - 1);
-          const targetScrollY = scrollDeckSection.offsetTop + (targetProgress * totalScrollableHeight);
-          window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, scrollCards.length)) * totalScrollableHeight + 5;
+          window.scrollTo({ top: targetTop, behavior: 'smooth' });
         }
-      } else if (scrollDeckSection && idx === scrollCards.length - 1) {
-        window.scrollTo({ top: scrollDeckSection.offsetTop, behavior: 'smooth' });
       }
     });
   });
@@ -464,7 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 4.3 Scroll-Controlled 3D Cinematic Deck of 9 Cards
+    // 4.3 Sticky Scrollytelling Card Stack (Clean Layered Transitions without 3D Orbit)
+    let activeIdx = 0;
+    const isMobileDeck = window.innerWidth <= 768;
     if (scrollDeckSection && scrollCards.length > 0) {
       const rect = scrollDeckSection.getBoundingClientRect();
       const windowHeight = window.innerHeight;
@@ -476,82 +481,52 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const numCards = scrollCards.length;
-      const totalSteps = numCards - 1;
-      const currentStep = progress * totalSteps;
-
-      const activeIdx = Math.floor(currentStep);
-      const stepP = currentStep - activeIdx; // 0.0 to 1.0 within current step
-
-      // Dwell zone: 55% of each step is locked motionless for comfortable reading.
-      // 45% is the smooth swipe transition to the next card.
-      const dwell = 0.55;
-      const trans = 1.0 - dwell;
-      const t = stepP <= dwell ? 0 : (stepP - dwell) / trans; // 0 during dwell, 0->1 during transition
-
-      const isMobileDeck = window.innerWidth <= 768;
+      const exactCardPos = progress * (numCards - 1);
+      activeIdx = Math.min(numCards - 1, Math.max(0, Math.round(exactCardPos)));
 
       scrollCards.forEach((card, i) => {
-        let effectiveOffset;
-        if (i < activeIdx) {
-          effectiveOffset = -1; // Already dealt away
-        } else if (i === activeIdx) {
-          effectiveOffset = -t; // 0 (frozen in reading zone!), then moves 0 -> -1 during transition
+        const dist = i - exactCardPos;
+        const absDist = Math.abs(dist);
+
+        let translateY = 0;
+        let scale = 1;
+        let opacity = 1;
+        let zIndex = 10;
+        let pointerEvents = 'none';
+
+        if (absDist <= 0.35) {
+          // Card in absolute center view
+          translateY = dist * 20;
+          scale = 1 - absDist * 0.05;
+          opacity = 1;
+          zIndex = 100 - Math.round(absDist * 20);
+          if (i === activeIdx) pointerEvents = 'auto';
+        } else if (dist > 0.35) {
+          // Cards waiting below: stacked cleanly with a slight downward shift and depth scale
+          const stackDist = dist - 0.35;
+          translateY = 7 + stackDist * 40;
+          scale = Math.max(0.75, 0.98 - stackDist * 0.08);
+          opacity = Math.max(0, 1 - stackDist * 1.2);
+          zIndex = Math.max(1, 80 - Math.round(dist * 15));
         } else {
-          const baseDepth = i - activeIdx;
-          effectiveOffset = baseDepth - t; // e.g. Card 1 rests at depth 1, then moves 1 -> 0 during transition
+          // Cards scrolled past above: sliding smoothly upward out of view
+          const pastDist = Math.abs(dist) - 0.35;
+          translateY = -7 - pastDist * 80;
+          scale = Math.max(0.75, 0.98 - pastDist * 0.08);
+          opacity = Math.max(0, 1 - pastDist * 1.5);
+          zIndex = Math.max(1, 80 - Math.round(Math.abs(dist) * 15));
         }
 
-        if (effectiveOffset <= -0.98) {
-          // Dealt away off screen - Nascondiamo completamente dal compositing GPU su mobile
-          card.style.transform = `translate3d(125%, 20%, 0) scale(0.85)`;
-          card.style.opacity = '0';
-          card.style.visibility = 'hidden';
-          card.style.zIndex = '0';
-          card.style.pointerEvents = 'none';
-        } else if (effectiveOffset < 0) {
-          // Currently dealing out!
-          card.style.visibility = 'visible';
-          const p = -effectiveOffset; // goes from 0 to 1
-          const translateY = p * 15;
-          const translateX = p * 125;
-          const rotate = isMobileDeck ? 0 : (p * 18);
-          const scale = 1 - p * 0.15;
-          const opacity = p < 0.35 ? 1 : Math.max(0, 1 - ((p - 0.35) / 0.65));
+        card.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+        card.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+        card.style.opacity = opacity.toFixed(3);
+        card.style.zIndex = `${zIndex}`;
+        card.style.pointerEvents = pointerEvents;
 
-          card.style.transform = `translate3d(${translateX.toFixed(1)}%, ${translateY.toFixed(1)}%, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
-          card.style.opacity = opacity.toFixed(3);
-          card.style.zIndex = `${numCards + 5}`;
-          card.style.pointerEvents = 'none';
-        } else if (effectiveOffset === 0) {
-          // Active top card locked in reading zone!
-          card.style.visibility = 'visible';
-          card.style.transform = `translate3d(0, 0, 0) scale(1)`;
-          card.style.opacity = '1';
-          card.style.zIndex = `${numCards}`;
-          card.style.pointerEvents = 'auto';
+        if (i === activeIdx) {
+          card.style.boxShadow = '0 30px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(45, 212, 191, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
         } else {
-          // Waiting in the deck behind the top card!
-          const maxStack = isMobileDeck ? 1.8 : 5;
-          const depth = effectiveOffset;
-
-          if (isMobileDeck && depth > 2.0) {
-            // Su mobile non disegniamo più di 2 carte impilate dietro per risparmiare il 75% della GPU
-            card.style.visibility = 'hidden';
-            card.style.opacity = '0';
-            card.style.pointerEvents = 'none';
-          } else {
-            card.style.visibility = 'visible';
-            const clampedDepth = Math.min(depth, maxStack);
-            const translateY = clampedDepth * (isMobileDeck ? 16 : 22);
-            const scale = Math.max(0.75, 1 - clampedDepth * 0.045);
-            const rotate = isMobileDeck ? 0 : (((i % 2 === 0) ? -1 : 1) * clampedDepth * 2.2);
-            const opacity = Math.max(0.1, 1 - clampedDepth * 0.45);
-
-            card.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) rotate(${rotate.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
-            card.style.opacity = opacity.toFixed(3);
-            card.style.zIndex = `${Math.max(1, numCards - Math.floor(effectiveOffset))}`;
-            card.style.pointerEvents = effectiveOffset <= 0.2 ? 'auto' : 'none';
-          }
+          card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.95)';
         }
       });
       // Effetto Simbionte a Scatto (Snapping Gooey Metaball & Elastic Stretch)
@@ -1195,4 +1170,192 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
   initSpringMagneticButtons();
+
+  // 5. Holographic Stage 3D Circular Orbit Carousel & Dynamic Color Extraction Engine
+  const initHolographicCoverStage = () => {
+    const coverCards = Array.from(document.querySelectorAll('.holographic-cover-card'));
+    const stageBg = document.getElementById('stage-ambient-bg');
+    const stageContainer = document.querySelector('.holographic-stage-container');
+    if (!coverCards.length || !stageBg || !stageContainer) return;
+
+    let stageAngle = 0;
+    let isStageHovered = false;
+    let stageSpeed = 1.0;
+    let lastStageTs = performance.now();
+
+    stageContainer.addEventListener('mouseenter', () => { isStageHovered = true; });
+    stageContainer.addEventListener('mouseleave', () => { isStageHovered = false; });
+    stageContainer.addEventListener('touchstart', () => { isStageHovered = true; }, { passive: true });
+    stageContainer.addEventListener('touchend', () => {
+      setTimeout(() => { isStageHovered = false; }, 3000);
+    }, { passive: true });
+
+    coverCards.forEach((card, idx) => {
+      card.addEventListener('mouseenter', () => {
+        isStageHovered = true;
+        const color1 = card.getAttribute('data-color-1') || '#2DD4BF';
+        const color2 = card.getAttribute('data-color-2') || '#BB86FC';
+        stageBg.style.setProperty('--stage-glow-color', color1);
+        card.style.setProperty('--card-glow', `${color1}66`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        isStageHovered = false;
+        stageBg.style.setProperty('--stage-glow-color', 'rgba(45, 212, 191, 0.18)');
+      });
+
+      card.addEventListener('click', () => {
+        // Bring clicked card directly to front (0 degrees)
+        const targetCardAngle = (idx * 360 / coverCards.length);
+        let diff = (360 - targetCardAngle) - stageAngle;
+        while (diff > 180) diff -= 360;
+        while (diff < -180) diff += 360;
+        stageAngle = (stageAngle + diff + 3600) % 360;
+      });
+    });
+
+    const animateStage3D = () => {
+      const nowTs = performance.now();
+      let deltaSec = (nowTs - lastStageTs) / 1000;
+      lastStageTs = nowTs;
+      if (deltaSec > 0.1 || deltaSec < 0) deltaSec = 0.016;
+
+      const targetSpeed = isStageHovered ? 0.08 : 1.0;
+      stageSpeed += (targetSpeed - stageSpeed) * Math.min(1, deltaSec * 6);
+      stageAngle = (stageAngle + (15 * stageSpeed * deltaSec)) % 360;
+
+      const numCards = coverCards.length;
+      const isMobile = window.innerWidth <= 768;
+
+      const rect = stageContainer.getBoundingClientRect();
+      const stageCenterY = rect.top + rect.height / 2;
+      const windowCenterY = window.innerHeight / 2;
+      const verticalOffsetNorm = (windowCenterY - stageCenterY) / window.innerHeight;
+      const scrollRotateX = Math.max(-35, Math.min(35, verticalOffsetNorm * -45));
+
+      coverCards.forEach((card, i) => {
+        let angleDeg = (stageAngle + (i * 360 / numCards)) % 360;
+        if (angleDeg > 180) angleDeg -= 360;
+        if (angleDeg < -180) angleDeg += 360;
+
+        const rad = angleDeg * Math.PI / 180;
+        const cosVal = Math.cos(rad); // 1 (front) to -1 (back)
+        const sinVal = Math.sin(rad); // 0 (front) -> 1 (right) -> 0 (back) -> -1 (left)
+
+        // depthNorm smoothly ranges from 1.0 (in front) to 0.0 (in back)
+        const depthNorm = (cosVal + 1) / 2;
+
+        const radiusX = isMobile ? 160 : 340;
+        const radiusZ = isMobile ? 200 : 350;
+
+        const translateX = sinVal * radiusX;
+        const translateZ = cosVal * radiusZ;
+        const translateY = (1 - cosVal) * (isMobile ? -8 : -16);
+
+        const rotateY = sinVal * (isMobile ? 18 : 34);
+        const rotateX = scrollRotateX + (1 - cosVal) * 5;
+
+        const scale = isMobile
+          ? (0.70 + depthNorm * 0.30)
+          : (0.65 + depthNorm * 0.38);
+
+        const opacity = isMobile
+          ? Math.max(0.25, (0.3 + depthNorm * 0.7))
+          : Math.max(0.2, (0.25 + depthNorm * 0.75));
+
+        const zIndex = Math.round(depthNorm * 100) + 10;
+
+        card.style.transform = `translate3d(${translateX.toFixed(1)}px, ${translateY.toFixed(1)}px, ${translateZ.toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) rotateX(${rotateX.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+        card.style.opacity = opacity.toFixed(3);
+        card.style.zIndex = `${zIndex}`;
+        card.style.pointerEvents = depthNorm > 0.65 ? 'auto' : 'none';
+
+        if (depthNorm > 0.9) {
+          card.style.boxShadow = `0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px ${card.style.getPropertyValue('--card-glow') || 'rgba(45, 212, 191, 0.35)'}`;
+        } else {
+          card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.9)';
+        }
+      });
+
+      requestAnimationFrame(animateStage3D);
+    };
+
+    requestAnimationFrame(animateStage3D);
+  };
+
+  // ==========================================
+  // DYNAMIC EXACT SYNAPSE BEAMS CONNECTION
+  // ==========================================
+  const initCyberMigrationSynapses = () => {
+    const stage = document.getElementById('synapse-stage-container');
+    const svg = document.getElementById('electric-beams-svg');
+    const reactor = document.getElementById('flicktrove-core-reactor');
+    if (!stage || !svg || !reactor) return;
+
+    const sockets = [
+      { id: 'tvtime', socket: document.getElementById('socket-tvtime'), side: 'left' },
+      { id: 'trakt', socket: document.getElementById('socket-trakt'), side: 'left' },
+      { id: 'letterboxd', socket: document.getElementById('socket-letterboxd'), side: 'right' },
+      { id: 'imdb', socket: document.getElementById('socket-imdb'), side: 'right' }
+    ];
+
+    const updateBeams = () => {
+      const stageRect = stage.getBoundingClientRect();
+      if (stageRect.width === 0 || stageRect.height === 0) return;
+
+      svg.setAttribute('viewBox', `0 0 ${stageRect.width} ${stageRect.height}`);
+
+      const reactorRect = reactor.getBoundingClientRect();
+      const reactorCenterX = reactorRect.left + reactorRect.width / 2 - stageRect.left;
+      const reactorCenterY = reactorRect.top + reactorRect.height / 2 - stageRect.top;
+      const reactorRadius = reactorRect.width / 2 - 4; // connect right to the outer ring edge
+
+      sockets.forEach(item => {
+        if (!item.socket) return;
+        const sockRect = item.socket.getBoundingClientRect();
+        const startX = sockRect.left + sockRect.width / 2 - stageRect.left;
+        const startY = sockRect.top + sockRect.height / 2 - stageRect.top;
+
+        // Calculate exact point on the reactor ring circumference towards the socket
+        const dx = startX - reactorCenterX;
+        const dy = startY - reactorCenterY;
+        const angle = Math.atan2(dy, dx);
+        const endX = reactorCenterX + Math.cos(angle) * reactorRadius;
+        const endY = reactorCenterY + Math.sin(angle) * reactorRadius;
+
+        // Cubic Bezier control points for smooth S-curve (horizontal on desktop, vertical on mobile)
+        const isMobileSynapse = window.innerWidth <= 850 || stageRect.width <= 850;
+        let c1x, c1y, c2x, c2y;
+        if (isMobileSynapse) {
+          const controlOffsetY = Math.abs(endY - startY) * 0.45;
+          c1x = startX;
+          c1y = startY < endY ? startY + controlOffsetY : startY - controlOffsetY;
+          c2x = endX;
+          c2y = startY < endY ? endY - controlOffsetY : endY + controlOffsetY;
+        } else {
+          const controlOffsetX = Math.abs(endX - startX) * 0.45;
+          c1x = item.side === 'left' ? startX + controlOffsetX : startX - controlOffsetX;
+          c1y = startY;
+          c2x = item.side === 'left' ? endX - controlOffsetX : endX + controlOffsetX;
+          c2y = endY;
+        }
+
+        const pathData = `M ${startX.toFixed(1)} ${startY.toFixed(1)} C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${endX.toFixed(1)} ${endY.toFixed(1)}`;
+
+        const pathEl = document.getElementById(`line-${item.id}`);
+        const motionEl = document.getElementById(`bolt-motion-${item.id}`);
+        if (pathEl) pathEl.setAttribute('d', pathData);
+        if (motionEl) motionEl.setAttribute('path', pathData);
+      });
+    };
+
+    updateBeams();
+    window.addEventListener('resize', updateBeams);
+    setTimeout(updateBeams, 100);
+    setTimeout(updateBeams, 500);
+    setTimeout(updateBeams, 1500);
+  };
+  initCyberMigrationSynapses();
+
+  initHolographicCoverStage();
 });

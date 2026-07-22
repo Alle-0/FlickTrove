@@ -69,7 +69,7 @@
   ]
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=38">
+  <link rel="stylesheet" href="styles.css?v=39">
   <!-- Favicons and App Icons for Googlebot & Browsers -->
   <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
@@ -242,6 +242,380 @@
       </div>
     </section>
 
+    <!-- ==========================================================================
+         UNIVERSAL IMPORT & SMART MERGE BANNER
+         ========================================================================== -->
+    <section id="universal-import-section" class="universal-import-section">
+      <div class="cyber-migration-hub">
+        <!-- Top Sleek Header -->
+        <div class="hub-header">
+          <div class="import-badge border-rotate-glow">
+            <span class="badge-dot pulse-teal"></span>
+            <span>UNIVERSAL 1-CLICK MIGRATION ENGINE</span>
+          </div>
+          <h2 class="blur-word-reveal">Switching Apps? <span class="gradient-teal">Electric Synapse Sync</span></h2>
+          <p class="blur-word-reveal">Bring your entire watch history from TV Time, Trakt, Letterboxd, IMDb and others
+            directly into FlickTrove.</p>
+        </div>
+
+        <!-- Electric Synapse Stage -->
+        <div class="synapse-stage" id="synapse-stage-container">
+          <!-- SVG Electric Beams Background spanning full stage -->
+          <svg class="electric-beams-svg" id="electric-beams-svg" viewBox="0 0 1000 400" preserveAspectRatio="none">
+            <defs>
+              <filter id="electric-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3.5" result="blur1" />
+                <feGaussianBlur stdDeviation="1.5" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <linearGradient id="beam-tvtime" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFC800" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
+              </linearGradient>
+              <linearGradient id="beam-trakt" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ED1C24" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
+              </linearGradient>
+              <linearGradient id="beam-letterboxd" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#00E054" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
+              </linearGradient>
+              <linearGradient id="beam-imdb" x1="100%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#F5C518" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
+              </linearGradient>
+            </defs>
+
+            <!-- Electric Path Lines -->
+            <path class="electric-line" id="line-tvtime" d="M 0 0" stroke="url(#beam-tvtime)" stroke-width="2.5"
+              fill="none" filter="url(#electric-glow)" />
+            <path class="electric-line" id="line-trakt" d="M 0 0" stroke="url(#beam-trakt)" stroke-width="2.5"
+              fill="none" filter="url(#electric-glow)" />
+            <path class="electric-line" id="line-letterboxd" d="M 0 0" stroke="url(#beam-letterboxd)" stroke-width="2.5"
+              fill="none" filter="url(#electric-glow)" />
+            <path class="electric-line" id="line-imdb" d="M 0 0" stroke="url(#beam-imdb)" stroke-width="2.5" fill="none"
+              filter="url(#electric-glow)" />
+
+            <!-- Animated Electric Pulses -->
+            <circle class="electric-bolt bolt-tvtime" r="5.5" fill="#FFC800" filter="url(#electric-glow)">
+              <animateMotion id="bolt-motion-tvtime" path="M 0 0" dur="1.8s" repeatCount="indefinite" />
+            </circle>
+            <circle class="electric-bolt bolt-trakt" r="5.5" fill="#ED1C24" filter="url(#electric-glow)">
+              <animateMotion id="bolt-motion-trakt" path="M 0 0" dur="2.1s" repeatCount="indefinite" />
+            </circle>
+            <circle class="electric-bolt bolt-letterboxd" r="5.5" fill="#00E054" filter="url(#electric-glow)">
+              <animateMotion id="bolt-motion-letterboxd" path="M 0 0" dur="1.9s" repeatCount="indefinite" />
+            </circle>
+            <circle class="electric-bolt bolt-imdb" r="5.5" fill="#F5C518" filter="url(#electric-glow)">
+              <animateMotion id="bolt-motion-imdb" path="M 0 0" dur="2.3s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+
+          <!-- Left Apps Column / Arc -->
+          <div class="synapse-nodes left-nodes">
+            <div class="node-chip chip-tvtime" id="chip-node-tvtime" data-app="TV Time" data-color="#FFC800">
+              <span class="chip-icon chip-bg-tvtime"><img src="https://cdn.simpleicons.org/tvtime/000000"
+                  alt="TV Time"></span>
+              <div class="chip-info"><strong>TV Time</strong><span>Full History &amp; Shows</span></div>
+              <div class="node-socket left-socket" id="socket-tvtime"></div>
+            </div>
+            <div class="node-chip chip-trakt" id="chip-node-trakt" data-app="Trakt.tv" data-color="#ED1C24">
+              <span class="chip-icon chip-bg-trakt"><img src="https://cdn.simpleicons.org/trakt/FFFFFF"
+                  alt="Trakt.tv"></span>
+              <div class="chip-info"><strong>Trakt.tv</strong><span>Watchlist &amp; Ratings</span></div>
+              <div class="node-socket left-socket" id="socket-trakt"></div>
+            </div>
+          </div>
+
+          <!-- Central FlickTrove Core -->
+          <div class="synapse-center-area">
+            <div class="flicktrove-core" id="flicktrove-core-reactor">
+              <div class="core-rings">
+                <div class="ring ring-outer"></div>
+                <div class="ring ring-inner"></div>
+              </div>
+              <div class="core-logo">
+                <img src="assets/icon-512.png" alt="FlickTrove Core"
+                  onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-weight:900;font-size:1.4rem;color:#2DD4BF;\'>FT</span>';">
+              </div>
+              <div class="core-label">FLICKTROVE CORE</div>
+            </div>
+          </div>
+
+          <!-- Right Apps Column / Arc -->
+          <div class="synapse-nodes right-nodes">
+            <div class="node-chip chip-letterboxd" id="chip-node-letterboxd" data-app="Letterboxd" data-color="#00E054">
+              <div class="node-socket right-socket" id="socket-letterboxd"></div>
+              <span class="chip-icon chip-bg-letterboxd"><img src="https://cdn.simpleicons.org/letterboxd/FFFFFF"
+                  alt="Letterboxd"></span>
+              <div class="chip-info"><strong>Letterboxd</strong><span>Diary &amp; Reviews</span></div>
+            </div>
+            <div class="node-chip chip-imdb" id="chip-node-imdb" data-app="IMDb" data-color="#F5C518">
+              <div class="node-socket right-socket" id="socket-imdb"></div>
+              <span class="chip-icon chip-bg-imdb"><img src="https://cdn.simpleicons.org/imdb/000000" alt="IMDb"></span>
+              <div class="chip-info"><strong>IMDb</strong><span>Ratings &amp; Lists</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Compact Universal & Smart Merge Bar -->
+        <div class="synapse-footer-bar">
+          <div class="universal-pill-node chip-universal" data-app="CSV / JSON / ZIP" data-color="#2DD4BF">
+            <span class="chip-icon chip-bg-universal">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2DD4BF" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="9" y1="13" x2="15" y2="13" />
+                <line x1="9" y1="17" x2="15" y2="17" />
+              </svg>
+            </span>
+            <div class="chip-info"><strong>Universal CSV / JSON / ZIP</strong><span>Custom Backups &amp; Archives</span>
+            </div>
+            <span class="chip-status">1-Click Import</span>
+          </div>
+
+          <div class="smart-merge-compact">
+            <span class="merge-shield-icon"><img src="assets/icons/scudo_privacy.svg" alt="Shield"
+                style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);" /></span>
+            <div class="merge-info">
+              <strong>Intelligent Smart Merge Protection</strong>
+              <span>Automatically combines external histories with your existing library without duplicates.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         CINEMATIC HOLOGRAPHIC COVER STAGE & DYNAMIC COLOR SHOWCASE (NO MARQUEE)
+         ========================================================================== -->
+    <section id="cinematic-stage-section" class="cinematic-stage-section">
+      <div class="stage-ambient-background" id="stage-ambient-bg"></div>
+
+      <div class="section-header">
+        <div class="import-badge border-rotate-glow" style="margin-bottom: 1rem;">
+          <span class="badge-dot pulse-teal"></span>
+          <span>COIL DYNAMIC COLOR EXTRACTION</span>
+        </div>
+        <h2 class="blur-word-reveal">Your Library, <span class="gradient-teal">Alive with Color</span></h2>
+        <p class="blur-word-reveal">Hover over any title below. FlickTrove analyzes the artwork in real time and
+          transforms your entire UI palette to match the mood of what you're watching.</p>
+      </div>
+
+      <div class="holographic-stage-container">
+        <!-- Cover 1: Dune -->
+        <div class="holographic-cover-card" data-color-1="#FFB300" data-color-2="#FF6D00" data-title="Dune: Part Two"
+          data-palette="Desert Amber">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+            alt="Dune: Part Two" loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-ribbon-bookmark">
+            <div class="ribbon-holes">
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+            </div>
+          </div>
+          <div class="card-top-badge">HOT</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Dune: Part Two</h4>
+                <span class="tag-pill teal">★ 8.5</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:20px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 2: Spider-Verse -->
+        <div class="holographic-cover-card" data-color-1="#FF007F" data-color-2="#2979FF"
+          data-title="Spider-Man: Across the Spider-Verse" data-palette="Neon Magenta">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"
+            alt="Spider-Man: Across the Spider-Verse" loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-top-badge">NEW</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Across the Spider-Verse</h4>
+                <span class="tag-pill teal">★ 9.0</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 3: Blade Runner 2049 -->
+        <div class="holographic-cover-card" data-color-1="#00E5FF" data-color-2="#FF3D00" data-title="Blade Runner 2049"
+          data-palette="Cyber Cyan">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg"
+            alt="Blade Runner 2049" loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Blade Runner 2049</h4>
+                <span class="tag-pill teal">★ 7.5</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 4: The Bear -->
+        <div class="holographic-cover-card" data-color-1="#64B5F6" data-color-2="#FFC107" data-title="The Bear"
+          data-palette="Kitchen Steel">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/eKfVzzEazSIjJMrw9ADa2x8ksLz.jpg" alt="The Bear"
+            loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-ribbon-bookmark">
+            <div class="ribbon-holes">
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+            </div>
+          </div>
+          <div class="card-top-badge">HOT</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>The Bear</h4>
+                <span class="tag-pill teal">★ 8.5</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 5: Interstellar -->
+        <div class="holographic-cover-card" data-color-1="#FFD54F" data-color-2="#4527A0" data-title="Interstellar"
+          data-palette="Cosmic Gold">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Interstellar"
+            loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-top-badge">MASTERPIECE</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Interstellar</h4>
+                <span class="tag-pill teal">★ 8.5</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 6: Oppenheimer -->
+        <div class="holographic-cover-card" data-color-1="#FF6D00" data-color-2="#FFAB00" data-title="Oppenheimer"
+          data-palette="Atomic Fire">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="Oppenheimer"
+            loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-ribbon-bookmark">
+            <div class="ribbon-holes">
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+            </div>
+          </div>
+          <div class="card-top-badge">HOT</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Oppenheimer</h4>
+                <span class="tag-pill teal">★ 9.5</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 7: Succession -->
+        <div class="holographic-cover-card" data-color-1="#00E676" data-color-2="#1B5E20" data-title="Succession"
+          data-palette="Emerald Trust">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg" alt="Succession"
+            loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Succession</h4>
+                <span class="tag-pill teal">★ 7.0</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover 8: Arcane -->
+        <div class="holographic-cover-card" data-color-1="#2979FF" data-color-2="#00E5FF" data-title="Arcane"
+          data-palette="Hextech Neon">
+          <div class="cover-glow"></div>
+          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/abf8tHznhSvl9BAElD2cQeRr7do.jpg" alt="Arcane"
+            loading="lazy" onerror="this.src='assets/icon-512.png'">
+          <div class="card-ribbon-bookmark">
+            <div class="ribbon-holes">
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
+            </div>
+          </div>
+          <div class="card-top-badge">NEW</div>
+          <div class="cover-overlay">
+            <div></div>
+            <div class="card-bottom-bar">
+              <div class="card-title-area">
+                <h4>Arcane</h4>
+                <span class="tag-pill teal">★ 7.0</span>
+              </div>
+              <div class="card-watch-circle">
+                <img src="assets/icons/eye.svg" alt="Watch"
+                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Interactive Cinema Energy Pipeline & Flow Construction Diagram -->
     <section id="flow-pipeline-section" class="flow-pipeline-section">
       <div class="section-header">
@@ -301,53 +675,6 @@
               <p>Instant access to millions of movies, TV series, actors, and ratings updated in real time from the
                 world's best cinematic databases.</p>
               <div class="node-status-badge"><span class="status-pulse teal"></span> ALWAYS UP TO DATE</div>
-            </div>
-
-            <!-- Node 2: Adaptive Engine -->
-            <div class="flow-node-card" data-node="2">
-              <div class="node-icon-wrapper border-rotate-glow purple-glow">
-                <!-- Real Icon: palette.svg -->
-                <svg class="flow-construct-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path class="construct-path"
-                    d="M18.6955 10.168C18.7141 9.96174 18.7238 9.75662 18.7261 9.54954C18.7317 9.03642 18.043 8.96647 17.8507 9.44223C17.7298 9.74122 17.5922 10.0454 17.4092 10.4225C17.2884 10.6715 17.0861 10.8692 16.8588 11.0272C16.8301 11.0471 16.802 11.0673 16.7745 11.0875C16.1049 11.5807 16.4722 12.5447 17.2692 12.782L17.3531 12.8069C17.6727 12.9021 18.0129 12.744 18.1428 12.4369"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  <path class="construct-path delay-draw-1"
-                    d="M13.9434 16.4625L14.6317 14.9484C14.8699 14.4246 15.4875 14.193 16.0113 14.4312C16.5351 14.6693 16.7667 15.287 16.5286 15.8108L15.6098 17.8318L14.519 20.2311C14.2809 20.7549 13.6632 20.9865 13.1394 20.7483C12.6156 20.5102 12.384 19.8925 12.6222 19.3687L12.7539 19.0791"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  <path class="construct-path delay-draw-1" d="M17.191 7C16.0009 5.83084 15.5208 5.73659 14.191 5.5"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path class="construct-path delay-draw-2"
-                    d="M10.691 5C7.53776 5.11797 6.50384 5.5 5.50384 6C1.29863 8.1026 0.900754 12.0828 4.191 15.5"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path class="construct-path delay-draw-2" d="M7.19101 18C8.10966 18.5386 8.61942 18.8625 9.69101 19"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path class="construct-path"
-                    d="M18.191 18C18.338 17.9823 18.4768 17.9661 18.6094 17.9508C20.1479 17.773 21.4733 15.7681 20.1285 15"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path class="construct-path"
-                    d="M13.5038 13C13.0038 13 13.0429 11.9444 13.191 11.5C13.3392 11.0556 13.691 10.5 14.191 10.5"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path class="construct-fill"
-                    d="M11.5552 16.3375L10.5553 16.3201C10.5578 16.1778 10.6409 16.1447 10.5838 16.1839C10.5287 16.2219 10.4013 16.275 10.2155 16.2717L10.1981 17.2716L10.1806 18.2714C10.7351 18.2811 11.2816 18.1316 11.7177 17.8315C12.1518 17.5327 12.5433 17.0261 12.555 16.355L11.5552 16.3375ZM10.1981 17.2716L10.2155 16.2717C10.0297 16.2685 9.90426 16.211 9.85051 16.1711C9.79486 16.1299 9.87672 16.1659 9.87423 16.3082L8.87438 16.2908L7.87454 16.2733C7.86282 16.9444 8.23638 17.4643 8.65981 17.7781C9.08513 18.0932 9.62611 18.2617 10.1806 18.2714L10.1981 17.2716ZM8.87438 16.2908L9.87423 16.3082C9.87175 16.4505 9.78869 16.4836 9.84574 16.4444C9.90085 16.4064 10.0283 16.3533 10.214 16.3566L10.2315 15.3567L10.2489 14.3569C9.69444 14.3472 9.14791 14.4967 8.71185 14.7969C8.27773 15.0956 7.88625 15.6022 7.87454 16.2733L8.87438 16.2908ZM10.2315 15.3567L10.214 16.3566C10.3998 16.3598 10.5253 16.4173 10.579 16.4572C10.6347 16.4984 10.5528 16.4624 10.5553 16.3201L11.5552 16.3375L12.555 16.355C12.5667 15.6839 12.1932 15.164 11.7697 14.8502C11.3444 14.5351 10.8034 14.3666 10.2489 14.3569L10.2315 15.3567Z"
-                    fill="currentColor" />
-                  <path class="construct-fill"
-                    d="M9.07065 13.7903L8.07126 13.8252C8.06629 13.683 8.14751 13.6456 8.09259 13.6878C8.03953 13.7285 7.91508 13.7882 7.72939 13.7947L7.76429 14.7941L7.79919 15.7935C8.35344 15.7741 8.89139 15.5962 9.31115 15.2737C9.72904 14.9526 10.0935 14.4262 10.07 13.7554L9.07065 13.7903ZM7.76429 14.7941L7.72939 13.7947C7.5437 13.8012 7.41538 13.7503 7.35962 13.7134C7.30189 13.6751 7.38551 13.7067 7.39048 13.849L6.39109 13.8839L5.3917 13.9188C5.41512 14.5896 5.81538 15.0892 6.25465 15.3804C6.69588 15.6729 7.24494 15.8128 7.79919 15.7935L7.76429 14.7941ZM6.39109 13.8839L7.39048 13.849C7.39545 13.9913 7.31423 14.0287 7.36916 13.9864C7.42221 13.9457 7.54666 13.886 7.73235 13.8795L7.69745 12.8801L7.66255 11.8807C7.1083 11.9001 6.57035 12.078 6.15059 12.4005C5.7327 12.7216 5.36828 13.248 5.3917 13.9188L6.39109 13.8839ZM7.69745 12.8801L7.73235 13.8795C7.91804 13.873 8.04636 13.9239 8.10212 13.9609C8.15985 13.9991 8.07623 13.9675 8.07126 13.8252L9.07065 13.7903L10.07 13.7554C10.0466 13.0846 9.64636 12.585 9.20709 12.2938C8.76586 12.0013 8.2168 11.8614 7.66255 11.8807L7.69745 12.8801Z"
-                    fill="currentColor" />
-                  <path class="construct-fill"
-                    d="M7.3885 10.4574L6.38865 10.4749C6.38617 10.3326 6.46803 10.2966 6.41238 10.3378C6.35862 10.3776 6.23314 10.4352 6.04737 10.4384L6.06482 11.4382L6.08227 12.4381C6.63678 12.4284 7.17775 12.2599 7.60308 11.9447C8.02651 11.631 8.40006 11.1111 8.38835 10.44L7.3885 10.4574ZM6.06482 11.4382L6.04737 10.4384C5.8616 10.4416 5.73419 10.3885 5.67907 10.3506C5.62202 10.3113 5.70508 10.3444 5.70757 10.4868L4.70772 10.5042L3.70787 10.5217C3.71958 11.1928 4.11106 11.6993 4.54518 11.9981C4.98124 12.2982 5.52777 12.4478 6.08227 12.4381L6.06482 11.4382ZM4.70772 10.5042L5.70757 10.4868C5.71005 10.6291 5.62819 10.6651 5.68384 10.6238C5.7376 10.584 5.86308 10.5265 6.04885 10.5232L6.0314 9.5234L6.01395 8.52355C5.45944 8.53323 4.91847 8.70174 4.49314 9.0169C4.06971 9.33065 3.69616 9.85058 3.70787 10.5217L4.70772 10.5042ZM6.0314 9.5234L6.04885 10.5232C6.23462 10.52 6.36203 10.5731 6.41714 10.611C6.4742 10.6503 6.39114 10.6172 6.38865 10.4749L7.3885 10.4574L8.38835 10.44C8.37664 9.76888 7.98516 9.2623 7.55104 8.96352C7.11498 8.6634 6.56845 8.51387 6.01395 8.52355L6.0314 9.5234Z"
-                    fill="currentColor" />
-                  <path class="construct-fill"
-                    d="M9.90398 7.95699L8.90459 7.99188C8.89962 7.84963 8.98084 7.81223 8.92592 7.85443C8.87287 7.89519 8.74841 7.95488 8.56272 7.96137L8.59762 8.96076L8.63252 9.96015C9.18677 9.94079 9.72473 9.76286 10.1445 9.44033C10.5624 9.11924 10.9268 8.59287 10.9034 7.92209L9.90398 7.95699ZM8.59762 8.96076L8.56272 7.96137C8.37703 7.96785 8.24872 7.91698 8.19295 7.88002C8.13522 7.84176 8.21885 7.8734 8.22382 8.01566L7.22442 8.05056L6.22503 8.08546C6.24846 8.75624 6.64871 9.25591 7.08798 9.54707C7.52922 9.83953 8.07827 9.9795 8.63252 9.96015L8.59762 8.96076ZM7.22442 8.05056L8.22382 8.01566C8.22878 8.15792 8.14757 8.19532 8.20249 8.15312C8.25554 8.11235 8.38 8.05266 8.56568 8.04618L8.53079 7.04679L8.49589 6.0474C7.94163 6.06675 7.40368 6.24468 6.98392 6.56721C6.56604 6.8883 6.20161 7.41467 6.22503 8.08546L7.22442 8.05056ZM8.53079 7.04679L8.56568 8.04618C8.75137 8.03969 8.87969 8.09056 8.93546 8.12752C8.99319 8.16579 8.90956 8.13414 8.90459 7.99188L9.90398 7.95699L10.9034 7.92209C10.8799 7.2513 10.4797 6.75164 10.0404 6.46048C9.59919 6.16801 9.05014 6.02804 8.49589 6.0474L8.53079 7.04679Z"
-                    fill="currentColor" />
-                  <path class="construct-path delay-draw-2"
-                    d="M12.7437 7.17944C13.3932 7.09968 13.7894 7.46897 13.8273 7.77545C13.865 8.08201 13.57 8.53709 12.9202 8.61688C12.2703 8.69667 11.874 8.32646 11.8364 8.0199C11.7991 7.71334 12.0941 7.25919 12.7437 7.17944Z"
-                    stroke="currentColor" />
-                </svg>
-              </div>
-              <h4>Living Color Atmosphere</h4>
-              <p>The interface intelligently adapts its glowing color palette in real time to match the poster of
-                whatever movie or show you are viewing.</p>
-              <div class="node-status-badge"><span class="status-pulse purple"></span> DYNAMIC THEMING</div>
             </div>
 
             <!-- Node 3: Local Database & Performance -->
@@ -422,8 +749,8 @@
               </div>
             </div>
             <h3>Discover & Smart Search</h3>
-            <p>Explore popular movies, TV series, now playing theatrical releases, and upcoming titles. Search instantly
-              across the global cinema landscape and discover where movies and shows are trending today.</p>
+            <p>Explore popular movies, TV series, and upcoming releases. Search instantly and discover what is trending
+              today.</p>
             <div class="card-visual-widget widget-catalog">
               <div class="widget-search-bar">
                 <img src="assets/icons/lente.svg" alt="">
@@ -447,8 +774,8 @@
               </div>
             </div>
             <h3>My Folders & Custom Colors</h3>
-            <p>Organize your watchlist into custom folders. Personalize each collection with glowing neon colors and
-              sleek glass-like themes to match your taste.</p>
+            <p>Organize your watchlist into custom folders. Personalize each collection with all the colors you want.
+            </p>
             <div class="card-visual-widget widget-palette">
               <div class="palette-swatch" style="--swatch-color: #2DD4BF;"><span>NeonTeal</span></div>
               <div class="palette-swatch" style="--swatch-color: #FF4081;"><span>NeonPink</span></div>
@@ -465,8 +792,7 @@
               </div>
             </div>
             <h3>Release & Episode Reminders</h3>
-            <p>Receive instant push notifications the exact moment a new theatrical movie is released or a new episode
-              of your tracked series airs.</p>
+            <p>Receive instant push notifications the exact moment a new movie is released or a new episode airs.</p>
             <div class="card-visual-widget widget-alert">
               <div class="alert-box">
                 <div class="alert-icon-wrap">🔔</div>
@@ -487,8 +813,7 @@
               </div>
             </div>
             <h3>Your List & Cinema Stats</h3>
-            <p>Track your watched movies, favorite episodes, and total viewing hours. Filter your list by status and
-              analyze your cinema habits over time.</p>
+            <p>Track your watched movies, favorite episodes, and total viewing hours.</p>
             <div class="card-visual-widget widget-stats">
               <div class="stat-mini">
                 <strong>342</strong>
@@ -516,7 +841,7 @@
             </div>
             <h3>Where to Watch</h3>
             <p>See instantly where titles are available to stream, rent, or buy on legal platforms including NOW,
-              Mediaset Infinity, Netflix, and Disney+.</p>
+              Netflix, and Disney+.</p>
             <div class="card-visual-widget widget-providers">
               <div class="provider-grid">
                 <span class="provider-chip chip-netflix">Netflix</span>
@@ -537,8 +862,8 @@
               </div>
             </div>
             <h3>Upcoming Releases & News</h3>
-            <p>Stay updated with an interactive timeline tracking upcoming series premieres, seasonal air dates, and
-              entertainment news.</p>
+            <p>Stay updated with an interactive timeline tracking series premieres, air dates, and entertainment news.
+            </p>
             <div class="card-visual-widget widget-timeline">
               <div class="timeline-row">
                 <div class="time-badge">TONIGHT</div>
@@ -565,8 +890,8 @@
               </div>
             </div>
             <h3>Season & Episode Tracker</h3>
-            <p>Keep track of every single episode you watch. Mark entire seasons or individual episodes, and pick up
-              right where you left off.</p>
+            <p>Keep track of every episode you watch. Mark entire seasons or single episodes, and pick up right where
+              you left off.</p>
             <div class="card-visual-widget widget-progress">
               <div class="progress-top">
                 <span>The Bear • Season 3 (Episodes Watched)</span>
@@ -607,8 +932,7 @@
               </div>
             </div>
             <h3>Cloud & Device Sync</h3>
-            <p>Keep your movie diary backed up and seamlessly synchronized across all your Android smartphones, tablets,
-              and TVs. Connect your Trakt account if you want live sync of watch lists.</p>
+            <p>Keep your movie diary backed up and synchronized across all your Android devices and TVs.</p>
             <div class="card-visual-widget widget-sync">
               <div class="sync-status">
                 <span class="sync-indicator"></span>
@@ -628,8 +952,8 @@
               </div>
             </div>
             <h3>Instant & Offline Access</h3>
-            <p>Your entire movie diary, ratings, and custom collections are stored directly on your phone. Browse, add,
-              and manage your watchlist lightning-fast even without an internet connection.</p>
+            <p>Your entire library is stored directly on your phone. Browse, add, and manage your watchlist
+              lightning-fast even without internet.</p>
             <div class="card-visual-widget widget-offline">
               <div class="offline-top">
                 <span class="offline-pill">✈️ AIRPLANE MODE ON</span>
