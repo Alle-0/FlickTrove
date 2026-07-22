@@ -214,6 +214,7 @@ fun SearchContentGrid(
                         isLoading = uiState.isLoading,
                         collectionSpan = collectionSpan,
                         keyboardController = keyboardController,
+                        favorites = uiState.favorites,
                         onCollectionClick = onCollectionClick
                     )
                 }

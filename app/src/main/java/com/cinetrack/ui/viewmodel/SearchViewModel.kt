@@ -90,7 +90,8 @@ class SearchViewModel @Inject constructor(
                         val posters = details.parts.mapNotNull { it.posterPath }.take(4)
                         col.copy(
                             partsPosterPaths = posters,
-                            partsCount = details.parts.size
+                            partsCount = details.parts.size,
+                            partsIds = details.parts.map { it.id }
                         )
                     }
                 } catch (e: Exception) {

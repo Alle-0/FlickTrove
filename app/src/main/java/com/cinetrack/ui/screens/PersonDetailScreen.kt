@@ -47,10 +47,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.imageLoader
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -433,6 +435,7 @@ fun PersonDetailScreenContent(
         val context = LocalContext.current
         Box(
             modifier = Modifier
+                .zIndex(100f)
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .displayCutoutPadding()
@@ -449,23 +452,32 @@ fun PersonDetailScreenContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .hazeGlass(
-                                state = localHazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = true
-                            )
-                            .bounceClick { onBackClick() },
+                        modifier = Modifier.size(44.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_left),
-                            contentDescription = stringResource(R.string.detail_content_desc_back),
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(
+                                    state = localHazeState,
+                                    shape = CircleShape,
+                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                    useOffscreenStrategy = true
+                                )
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .bounceClick { onBackClick() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_left),
+                                contentDescription = stringResource(R.string.detail_content_desc_back),
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
 
                     val homeButtonVisible = detailStackDepth >= 3
@@ -487,93 +499,109 @@ fun PersonDetailScreenContent(
                                     alpha = homeButtonAlpha
                                     scaleX = homeButtonScale
                                     scaleY = homeButtonScale
-                                }
-                                .hazeGlass(
-                                    state = localHazeState,
-                                    shape = CircleShape,
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                    useOffscreenStrategy = true
-                                )
-                                .bounceClick { onHomeClick() },
+                                },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                                contentDescription = stringResource(R.string.detail_content_desc_home),
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .hazeGlass(
+                                        state = localHazeState,
+                                        shape = CircleShape,
+                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                        useOffscreenStrategy = true
+                                    )
                             )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClick { onHomeClick() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_home),
+                                    contentDescription = stringResource(R.string.detail_content_desc_home),
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
                 }
 
                 Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .hazeGlass(
-                            state = localHazeState,
-                            shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = true
-                        )
-                        .bounceClick {
-                            scope.launch(Dispatchers.IO) {
-                                val imageUrl = buildTmdbImageUrl(
-                                    uiState.person?.profilePath,
-                                    ImageType.PROFILE,
-                                    currentImageQuality
-                                )
-                                val fileUri = if (imageUrl != null) {
-                                    val request = coil.request.ImageRequest.Builder(context)
-                                        .data(imageUrl).build()
-                                    val result = context.imageLoader.execute(request)
-                                    if (result is coil.request.SuccessResult) {
-                                        val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
-                                        val imagesDir = java.io.File(context.cacheDir, "images")
-                                        imagesDir.mkdirs()
-                                        val file = java.io.File(imagesDir, "share_person.jpg")
-                                        val fos = java.io.FileOutputStream(file)
-                                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
-                                        fos.close()
-                                        androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                    } else null
-                                } else null
-
-                                withContext(Dispatchers.Main) {
-                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                        val shareText = buildString {
-                                            append(uiState.person?.name ?: "")
-                                            uiState.person?.knownForDepartment?.let { dept ->
-                                                if (dept.isNotBlank()) append(" ($dept)")
-                                            }
-                                            val bio = uiState.person?.biography?.takeIf { it.isNotBlank() }
-                                            if (bio != null) {
-                                                append("\n\n")
-                                                append(if (bio.length > 200) bio.take(197) + "..." else bio)
-                                            }
-                                            append("\n\nhttps://www.themoviedb.org/person/${uiState.personId}")
-                                        }
-                                        putExtra(android.content.Intent.EXTRA_TEXT, shareText)
-                                        if (fileUri != null) {
-                                            putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
-                                            type = "image/jpeg"
-                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        } else {
-                                            type = "text/plain"
-                                        }
-                                    }
-                                    context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
-                                }
-                            }
-                        },
+                    modifier = Modifier.size(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_share),
-                        contentDescription = stringResource(R.string.detail_content_desc_share),
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeGlass(
+                                state = localHazeState,
+                                shape = CircleShape,
+                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                useOffscreenStrategy = true
+                            )
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .bounceClick {
+                                scope.launch(Dispatchers.IO) {
+                                    val imageUrl = buildTmdbImageUrl(
+                                        uiState.person?.profilePath,
+                                        ImageType.PROFILE,
+                                        currentImageQuality
+                                    )
+                                    val fileUri = if (imageUrl != null) {
+                                        val request = coil.request.ImageRequest.Builder(context)
+                                            .data(imageUrl).build()
+                                        val result = context.imageLoader.execute(request)
+                                        if (result is coil.request.SuccessResult) {
+                                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                            val imagesDir = java.io.File(context.cacheDir, "images")
+                                            imagesDir.mkdirs()
+                                            val file = java.io.File(imagesDir, "share_person.jpg")
+                                            val fos = java.io.FileOutputStream(file)
+                                            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                                            fos.close()
+                                            androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                                        } else null
+                                    } else null
+
+                                    withContext(Dispatchers.Main) {
+                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            val personName = uiState.person?.name ?: ""
+                                            val dept = uiState.person?.knownForDepartment?.takeIf { it.isNotBlank() }
+                                            val displayName = if (dept != null) "$personName ($dept)" else personName
+                                            val bioSnippet = uiState.person?.biography?.takeIf { it.isNotBlank() }?.let { bio ->
+                                                if (bio.length > 200) bio.take(197) + "..." else bio
+                                            }
+                                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=person&id=${uiState.personId}"
+                                            val body = if (bioSnippet != null) "$bioSnippet\n\n$link" else link
+                                            val shareText = context.getString(R.string.detail_share_text, displayName, body)
+                                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                                            if (fileUri != null) {
+                                                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                                type = "image/jpeg"
+                                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            } else {
+                                                type = "text/plain"
+                                            }
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_share),
+                            contentDescription = stringResource(R.string.detail_content_desc_share),
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }

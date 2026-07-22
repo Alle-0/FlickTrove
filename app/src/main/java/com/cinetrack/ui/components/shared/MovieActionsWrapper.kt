@@ -7,6 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.entities.FolderEntity
+import com.cinetrack.R
 import dev.chrisbanes.haze.HazeState
 
 /**
@@ -72,10 +73,11 @@ fun MovieActionsWrapper(
                 val url = "https://alle-0.github.io/FlickTrove/open.html?type=$shareType&id=${m.id}"
                 val sendIntent: android.content.Intent = android.content.Intent().apply {
                     action = android.content.Intent.ACTION_SEND
-                    putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\nGuarda su FlickTrove: $url")
+                    val body = context.getString(R.string.action_share_body, url)
+                    putExtra(android.content.Intent.EXTRA_TEXT, "🎬 $shareTitle\n$body")
                     type = "text/plain"
                 }
-                val shareIntent = android.content.Intent.createChooser(sendIntent, null)
+                val shareIntent = android.content.Intent.createChooser(sendIntent, context.getString(R.string.action_share_title))
                 context.startActivity(shareIntent)
             }
         )

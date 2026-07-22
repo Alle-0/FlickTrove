@@ -7,6 +7,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.geometry.Offset
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import com.cinetrack.ui.screens.CollectionDetailScreen
 import com.cinetrack.ui.screens.DiscoverTab
 import com.cinetrack.ui.screens.MovieDetailScreen
 import com.cinetrack.ui.screens.PersonDetailScreen
@@ -47,8 +48,11 @@ fun MainDeepLinkHandler(
                 val id   = uri.getQueryParameter("id")?.toLongOrNull()
                 
                 if (id != null) {
-                    if (type == "person") rootNavigator.push(PersonDetailScreen(id, null))
-                    else rootNavigator.push(MovieDetailScreen(id, type))
+                    when (type) {
+                        "person" -> rootNavigator.push(PersonDetailScreen(id, null))
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(id, null))
+                        else -> rootNavigator.push(MovieDetailScreen(id, type))
+                    }
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
                 // Trakt OAuth callback: flicktrove://auth?code=XXXXX&state=YYYYY
@@ -58,15 +62,18 @@ fun MainDeepLinkHandler(
                     settingsViewModel.exchangeTraktCode(code, returnedState)
                 }
             } else if (isCustomScheme) {
-                val type = uri.getQueryParameter("type") ?: "movie"
-                val idStr = uri.getQueryParameter("id")
-                val id = idStr?.toLongOrNull()
+                val pathSegments = uri.pathSegments
+                val typeFromPath = if (pathSegments.size >= 2) pathSegments[0] else null
+                val idFromPath = if (pathSegments.size >= 2) pathSegments[1].toLongOrNull() else null
+
+                val type = uri.getQueryParameter("type") ?: typeFromPath ?: "movie"
+                val id = uri.getQueryParameter("id")?.toLongOrNull() ?: idFromPath
 
                 if (id != null) {
-                    if (type == "person") {
-                        rootNavigator.push(PersonDetailScreen(id, null))
-                    } else {
-                        rootNavigator.push(MovieDetailScreen(id, type))
+                    when (type) {
+                        "person" -> rootNavigator.push(PersonDetailScreen(id, null))
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(id, null))
+                        else -> rootNavigator.push(MovieDetailScreen(id, type))
                     }
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "search") {

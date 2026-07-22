@@ -16,34 +16,40 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PillProgressBorder(
-    width: Dp,
-    height: Dp,
     progress: Float, // 0.0 to 1.0
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    width: Dp = Dp.Unspecified,
+    height: Dp = Dp.Unspecified,
+    strokeWidth: Dp = 2.dp
 ) {
     val pathMeasure = remember { PathMeasure() }
-    
-    Canvas(modifier = modifier.size(width, height)) {
-        val strokeWidth = 3.dp.toPx()
-        val radius = (height.toPx() / 2) - (strokeWidth / 2)
-        val w = width.toPx()
-        val h = height.toPx()
+    val canvasModifier = if (width != Dp.Unspecified && height != Dp.Unspecified) {
+        modifier.size(width, height)
+    } else {
+        modifier
+    }
+
+    Canvas(modifier = canvasModifier) {
+        val strokeWidthPx = strokeWidth.toPx()
+        val radius = (size.height / 2f) - (strokeWidthPx / 2f)
+        val w = size.width
+        val h = size.height
 
         // Create the full pill path
         val fullPath = Path().apply {
             // Start from middle-top to follow a natural clockwise movement
-            moveTo(radius + strokeWidth / 2, strokeWidth / 2)
-            lineTo(w - radius - strokeWidth / 2, strokeWidth / 2)
+            moveTo(radius + strokeWidthPx / 2f, strokeWidthPx / 2f)
+            lineTo(w - radius - strokeWidthPx / 2f, strokeWidthPx / 2f)
             arcTo(
-                rect = Rect(w - 2 * radius - strokeWidth / 2, strokeWidth / 2, w - strokeWidth / 2, h - strokeWidth / 2),
+                rect = Rect(w - 2 * radius - strokeWidthPx / 2f, strokeWidthPx / 2f, w - strokeWidthPx / 2f, h - strokeWidthPx / 2f),
                 startAngleDegrees = -90f,
                 sweepAngleDegrees = 180f,
                 forceMoveTo = false
             )
-            lineTo(radius + strokeWidth / 2, h - strokeWidth / 2)
+            lineTo(radius + strokeWidthPx / 2f, h - strokeWidthPx / 2f)
             arcTo(
-                rect = Rect(strokeWidth / 2, strokeWidth / 2, 2 * radius + strokeWidth / 2, h - strokeWidth / 2),
+                rect = Rect(strokeWidthPx / 2f, strokeWidthPx / 2f, 2 * radius + strokeWidthPx / 2f, h - strokeWidthPx / 2f),
                 startAngleDegrees = 90f,
                 sweepAngleDegrees = 180f,
                 forceMoveTo = false
@@ -54,8 +60,8 @@ fun PillProgressBorder(
         // Draw background track
         drawPath(
             path = fullPath,
-            color = Color.White.copy(alpha = 0.05f),
-            style = Stroke(width = strokeWidth)
+            color = Color.White.copy(alpha = 0.2f),
+            style = Stroke(width = strokeWidthPx)
         )
 
         if (progress > 0f) {
@@ -67,7 +73,7 @@ fun PillProgressBorder(
             drawPath(
                 path = segmentPath,
                 color = color,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
             )
         }
     }

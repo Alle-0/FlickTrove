@@ -69,6 +69,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.toComposeColor
+import com.cinetrack.ui.components.common.PillProgressBorder
+import com.cinetrack.ui.utils.ColorUtils
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -531,6 +533,7 @@ fun LazyGridScope.searchTrendingCollectionsSection(
     isLoading: Boolean,
     collectionSpan: Int,
     keyboardController: SoftwareKeyboardController?,
+    favorites: List<Movie> = emptyList(),
     onCollectionClick: (Long, String?) -> Unit
 ) {
     if (trendingCollections.isNotEmpty() || isLoading) {
@@ -555,6 +558,7 @@ fun LazyGridScope.searchTrendingCollectionsSection(
                 if (item is TMDBSearchResult.CollectionResult) {
                     CollectionCollageCard(
                         collection = item,
+                        favorites = favorites,
                         onClick = {
                             keyboardController?.hide()
                             onCollectionClick(item.id, item.name)
@@ -577,6 +581,7 @@ fun LazyGridScope.searchTrendingCollectionsSection(
 @Composable
 fun CollectionCollageCard(
     collection: TMDBSearchResult.CollectionResult,
+    favorites: List<Movie> = emptyList(),
     onClick: () -> Unit
 ) {
     val backdropUrl = buildTmdbImageUrl(collection.backdropPath ?: collection.posterPath, ImageType.BACKDROP, LocalImageQuality.current)
@@ -654,6 +659,16 @@ fun CollectionCollageCard(
                 )
             }
 
+            val totalCount = collection.partsCount
+            val watchedCount = remember(collection.partsIds, favorites) {
+                if (collection.partsIds.isNotEmpty()) {
+                    collection.partsIds.count { partId -> favorites.find { it.id == partId }?.watched == true }
+                } else 0
+            }
+            val progress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
+            val accentColor = MaterialTheme.colorScheme.primary
+            val globalAccentColor = remember(accentColor) { ColorUtils.ensureVividAccent(accentColor) }
+
             Box(
                 modifier = Modifier
                     .background(
@@ -664,12 +679,17 @@ fun CollectionCollageCard(
                         width = 1.dp,
                         color = Color.White.copy(alpha = 0.35f),
                         shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
+                PillProgressBorder(
+                    progress = progress,
+                    color = globalAccentColor,
+                    modifier = Modifier.matchParentSize()
+                )
                 val badgeText = when {
-                    collection.partsCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
-                    collection.partsCount > 1 -> stringResource(R.string.collection_badge_movies_plural, collection.partsCount)
+                    totalCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
+                    totalCount > 1 -> stringResource(R.string.collection_badge_movies_plural, totalCount)
                     collection.partsPosterPaths.isNotEmpty() -> stringResource(R.string.collection_badge_movies_plus, collection.partsPosterPaths.size)
                     else -> "SAGA"
                 }
@@ -678,7 +698,8 @@ fun CollectionCollageCard(
                     color = Color.White,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 11.sp,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 0.5.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
         }
@@ -813,6 +834,7 @@ fun LazyGridScope.searchResultsGridSection(
             is TMDBSearchResult.CollectionResult -> {
                 CollectionCollageCard(
                     collection = item,
+                    favorites = favorites,
                     onClick = {
                         keyboardController?.hide()
                         onCollectionClick(item.id, item.name)

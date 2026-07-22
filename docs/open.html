@@ -362,14 +362,12 @@
   const divider     = document.getElementById('divider');
 
   // --- Type label ---
-  const typeLabels = { movie: 'Film', tv: 'Serie TV', person: 'Persona' };
+  const typeLabels = { movie: 'Film', tv: 'Serie TV', person: 'Persona', collection: 'Collezione' };
   typeBadge.textContent = typeLabels[type] || 'Contenuto';
 
   // --- Deep link intent URL (custom scheme, still works if app is installed) ---
   if (id) {
-    const scheme = type === 'person'
-      ? `flicktrove://media/person/${id}`
-      : `flicktrove://media/${type}/${id}`;
+    const scheme = `flicktrove://media/${type}/${id}`;
     btnOpenApp.href = scheme;
     btnOpenApp.style.display = 'flex';
     divider.style.display = 'flex';
@@ -384,6 +382,7 @@
       if (type === 'movie')  endpoint = `/movie/${id}?language=it-IT`;
       if (type === 'tv')     endpoint = `/tv/${id}?language=it-IT`;
       if (type === 'person') endpoint = `/person/${id}?language=it-IT`;
+      if (type === 'collection') endpoint = `/collection/${id}?language=it-IT`;
 
       // Try TMDB without auth (public endpoints return limited data but title is available)
       const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
@@ -402,12 +401,13 @@
       titleEl.style.width  = '';
       titleEl.style.height = '';
 
-      // Meta (year + genres or known_for)
+      // Meta (year + genres or known_for or collection parts)
       let metaText = '';
       if (data.release_date) metaText = data.release_date.slice(0,4);
       if (data.first_air_date) metaText = data.first_air_date.slice(0,4);
       if (data.genres?.length) metaText += (metaText ? ' · ' : '') + data.genres.slice(0,2).map(g => g.name).join(', ');
       if (data.known_for_department) metaText = data.known_for_department;
+      if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} film nella collezione`;
       metaEl.textContent = metaText;
       metaEl.classList.remove('skeleton');
       metaEl.style.width  = '';

@@ -95,7 +95,8 @@ sealed class TMDBSearchResult {
         @SerialName("backdrop_path") val backdropPath: String? = null,
         val overview: String? = null,
         val partsPosterPaths: List<String> = emptyList(),
-        val partsCount: Int = 0
+        val partsCount: Int = 0,
+        val partsIds: List<Long> = emptyList()
     ) : TMDBSearchResult() {
         override val mediaType: String get() = "collection"
         override val displayTitle: String get() = name ?: ""

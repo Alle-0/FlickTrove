@@ -9,6 +9,7 @@ import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.cinetrack.R
 import com.cinetrack.data.api.CollectionResponse
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.UserPreferences
@@ -36,7 +37,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CollectionDetailUiState(
@@ -200,8 +200,40 @@ class CollectionDetailViewModel @Inject constructor(
     }
 
     fun toggleFavorite(movie: Movie) {
+        val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            cycleMovieStatusUseCase(movie)
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                val previousState = current.copy()
+
+                if (current.watched) {
+                    return@launch
+                }
+
+                cycleMovieStatusUseCase(current)
+
+                val updated = repository.getMovie(movie.id, movie.mediaType)
+                val actionMsgRes = when {
+                    updated == null -> R.string.msg_action_removed
+                    updated.watched -> R.string.msg_action_watched
+                    updated.favorite -> R.string.msg_action_favorite
+                    updated.reminder -> R.string.msg_action_reminder
+                    else -> R.string.msg_action_updated
+                }
+
+                actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
+                    viewModelScope.launch {
+                        try {
+                            repository.saveMovie(previousState)
+                        } catch (e: Exception) {
+                            // ignore nested error
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // ignore
+            }
         }
     }
 
@@ -230,6 +262,23 @@ class CollectionDetailViewModel @Inject constructor(
                 folder.itemIds + compositeId
             }
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
+        }
+    }
+
+    fun deleteMovie(movie: Movie) {
+        viewModelScope.launch {
+            try {
+                repository.deleteMovie(movie)
+                actionFeedbackManager.emit(UiText.StringResource(com.cinetrack.R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
+                    try {
+                        repository.saveMovie(movie)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(com.cinetrack.R.string.msg_error_removing))
+            }
         }
     }
 }

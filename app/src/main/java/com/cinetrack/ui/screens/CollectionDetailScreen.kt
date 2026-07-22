@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.imageLoader
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -42,6 +43,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.R
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.common.PillProgressBorder
 import com.cinetrack.ui.components.detail.CollectionDetailSkeleton
 import com.cinetrack.ui.components.detail.DetailBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -87,7 +89,7 @@ data class CollectionDetailScreen(
             isItemInFolder = { movie, folderId ->
                 uiState.folders.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") ?: false
             },
-            onDelete = { /* Collection detail usually doesn't delete */ },
+            onDelete = { viewModel.deleteMovie(it) },
             onUpdateRating = { movie, rating -> viewModel.updateRating(movie, rating) },
             onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
             onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
@@ -153,7 +155,6 @@ fun CollectionDetailScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(animatedBgColor)
-            .haze(rootHazeState, style = HazeStyles.PremiumDark)
     ) {
         if (uiState.isLoading && uiState.collection == null) {
             CollectionDetailSkeleton(
@@ -167,6 +168,7 @@ fun CollectionDetailScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .haze(rootHazeState, style = HazeStyles.PremiumDark)
                     .verticalScroll(scrollState)
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -198,7 +200,7 @@ fun CollectionDetailScreenContent(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Film Count Badge with true real-time Frosted Glass (hazeGlass)
+                        // Film Count Badge with true real-time Frosted Glass
                         val totalMovies = collection?.parts?.size ?: 0
                         Box(
                             modifier = Modifier
@@ -209,7 +211,7 @@ fun CollectionDetailScreenContent(
                                     borderColor = Color.White.copy(alpha = 0.35f),
                                     borderWidth = 1.dp
                                 )
-                                .padding(horizontal = 12.dp, vertical = 5.dp)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             val detailBadgeText = when {
                                 totalMovies == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
@@ -305,9 +307,11 @@ fun CollectionDetailScreenContent(
                                     hazeState = rootHazeState,
                                     staggerIndex = index,
                                     onPress = { onMovieClick(movie) },
+                                    onAction = { viewModel.toggleFavorite(movie) },
                                     onLongPress = { m, pressOffset, cardPos ->
                                         actionsState.onLongPress(m, pressOffset, cardPos)
-                                    }
+                                    },
+                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
                                 )
                             }
                         }
@@ -319,6 +323,7 @@ fun CollectionDetailScreenContent(
         val context = LocalContext.current
         Box(
             modifier = Modifier
+                .zIndex(100f)
                 .fillMaxWidth()
                 .statusBarsPadding()
                 .displayCutoutPadding()
@@ -331,94 +336,108 @@ fun CollectionDetailScreenContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .hazeGlass(
-                            state = backdropHazeState,
-                            shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = true
-                        )
-                        .bounceClick { onBack() },
+                    modifier = Modifier.size(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                        contentDescription = stringResource(R.string.detail_content_desc_back),
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeGlass(
+                                state = rootHazeState,
+                                shape = CircleShape,
+                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                useOffscreenStrategy = true
+                            )
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .bounceClick { onBack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                            contentDescription = stringResource(R.string.detail_content_desc_back),
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .hazeGlass(
-                            state = backdropHazeState,
-                            shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = true
-                        )
-                        .bounceClick {
-                            scope.launch(Dispatchers.IO) {
-                                val collection = uiState.collection
-                                val targetPath = collection?.posterPath ?: collection?.backdropPath
-                                val imageUrl = buildTmdbImageUrl(
-                                    targetPath,
-                                    ImageType.POSTER,
-                                    currentImageQuality
-                                )
-                                val fileUri = if (imageUrl != null) {
-                                    val request = coil.request.ImageRequest.Builder(context)
-                                        .data(imageUrl).build()
-                                    val result = context.imageLoader.execute(request)
-                                    if (result is coil.request.SuccessResult) {
-                                        val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
-                                        val imagesDir = java.io.File(context.cacheDir, "images")
-                                        imagesDir.mkdirs()
-                                        val file = java.io.File(imagesDir, "share_collection.jpg")
-                                        val fos = java.io.FileOutputStream(file)
-                                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
-                                        fos.close()
-                                        androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                    } else null
-                                } else null
-
-                                withContext(Dispatchers.Main) {
-                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                        val shareText = buildString {
-                                            append(uiState.collection?.name ?: "")
-                                            val overview = uiState.collection?.overview?.takeIf { it.isNotBlank() }
-                                            if (overview != null) {
-                                                append("\n\n")
-                                                append(if (overview.length > 200) overview.take(197) + "..." else overview)
-                                            }
-                                            val colId = uiState.collection?.id
-                                            if (colId != null) {
-                                                append("\n\nhttps://www.themoviedb.org/collection/$colId")
-                                            }
-                                        }
-                                        putExtra(android.content.Intent.EXTRA_TEXT, shareText)
-                                        if (fileUri != null) {
-                                            putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
-                                            type = "image/jpeg"
-                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        } else {
-                                            type = "text/plain"
-                                        }
-                                    }
-                                    context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
-                                }
-                            }
-                        },
+                    modifier = Modifier.size(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_share),
-                        contentDescription = stringResource(R.string.detail_content_desc_share),
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeGlass(
+                                state = rootHazeState,
+                                shape = CircleShape,
+                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                useOffscreenStrategy = true
+                            )
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .bounceClick {
+                                scope.launch(Dispatchers.IO) {
+                                    val collection = uiState.collection
+                                    val targetPath = collection?.posterPath ?: collection?.backdropPath
+                                    val imageUrl = buildTmdbImageUrl(
+                                        targetPath,
+                                        ImageType.POSTER,
+                                        currentImageQuality
+                                    )
+                                    val fileUri = if (imageUrl != null) {
+                                        val request = coil.request.ImageRequest.Builder(context)
+                                            .data(imageUrl).build()
+                                        val result = context.imageLoader.execute(request)
+                                        if (result is coil.request.SuccessResult) {
+                                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                            val imagesDir = java.io.File(context.cacheDir, "images")
+                                            imagesDir.mkdirs()
+                                            val file = java.io.File(imagesDir, "share_collection.jpg")
+                                            val fos = java.io.FileOutputStream(file)
+                                            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                                            fos.close()
+                                            androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                                        } else null
+                                    } else null
+
+                                    withContext(Dispatchers.Main) {
+                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            val collectionName = uiState.collection?.name ?: ""
+                                            val overviewSnippet = uiState.collection?.overview?.takeIf { it.isNotBlank() }?.let { overview ->
+                                                if (overview.length > 200) overview.take(197) + "..." else overview
+                                            }
+                                            val colId = uiState.collection?.id
+                                            val link = if (colId != null) "https://alle-0.github.io/FlickTrove/open.html?type=collection&id=$colId" else ""
+                                            val body = if (overviewSnippet != null) "$overviewSnippet\n\n$link" else link
+                                            val shareText = context.getString(R.string.detail_share_text, collectionName, body)
+                                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                                            if (fileUri != null) {
+                                                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                                type = "image/jpeg"
+                                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            } else {
+                                                type = "text/plain"
+                                            }
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_share),
+                            contentDescription = stringResource(R.string.detail_content_desc_share),
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }

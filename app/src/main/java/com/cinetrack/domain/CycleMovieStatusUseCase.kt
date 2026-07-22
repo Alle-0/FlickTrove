@@ -9,28 +9,48 @@ class CycleMovieStatusUseCase @Inject constructor(
     private val updateEpisodesUseCase: UpdateEpisodesUseCase
 ) {
     suspend operator fun invoke(movie: Movie) {
-        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus START: id=${movie.id}, title=${movie.title ?: movie.name}, watched=${movie.watched}, fav=${movie.favorite}, rem=${movie.reminder}, released=${movie.isReleased}, mediaType=${movie.mediaType}")
+        val local = repository.getMovie(movie.id, movie.mediaType)
+        val current = if (local != null) {
+            movie.copy(
+                watched = local.watched,
+                favorite = local.favorite,
+                reminder = local.reminder,
+                watchedEpisodes = local.watchedEpisodes,
+                numberOfEpisodes = local.numberOfEpisodes ?: movie.numberOfEpisodes,
+                personalRating = local.personalRating,
+                personalNote = local.personalNote,
+                watchedAt = local.watchedAt
+            )
+        } else {
+            movie.copy(
+                watched = false,
+                favorite = false,
+                reminder = false
+            )
+        }
+
+        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus START: id=${current.id}, title=${current.title ?: current.name}, watched=${current.watched}, fav=${current.favorite}, rem=${current.reminder}, released=${current.isReleased}, mediaType=${current.mediaType}")
         
         val updated = when {
             // Case 1: State: Watched (Check) -> Idempotent (Stay Watched)
-            movie.watched -> {
+            current.watched -> {
                 android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Watched -> Stay Watched] (Action ignored)")
-                movie
+                current
             }
             
             // Case 2: State: To See (Eye/Bell) -> Next step
-            movie.favorite || movie.reminder -> {
-                if (movie.isReleased) {
+            current.favorite || current.reminder -> {
+                if (current.isReleased) {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [To See -> Watched] (isReleased=true)")
                     // Released: Move to Watched (Check)
-                    if (movie.mediaType == "tv") {
-                        updateEpisodesUseCase.markAllWatched(movie).copy(
+                    if (current.mediaType == "tv") {
+                        updateEpisodesUseCase.markAllWatched(current).copy(
                             favorite = false,
                             reminder = false, // Explicitly clear both
                             clientUpdatedAt = System.currentTimeMillis()
                         )
                     } else {
-                        movie.copy(
+                        current.copy(
                             favorite = false,
                             reminder = false,
                             watched = true,
@@ -41,7 +61,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                 } else {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [To See -> Untracked] (isReleased=false, toggling OFF reminder)")
                     // Unreleased: Toggle OFF reminder
-                    movie.copy(
+                    current.copy(
                         favorite = false,
                         reminder = false,
                         watched = false,
@@ -52,9 +72,9 @@ class CycleMovieStatusUseCase @Inject constructor(
             
             // Case 3: State: Untracked (+) -> Move to To See (Eye/Bell)
             else -> {
-                if (movie.isReleased) {
+                if (current.isReleased) {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Untracked -> To See (Eye)] (isReleased=true)")
-                    movie.copy(
+                    current.copy(
                         favorite = true,
                         reminder = false,
                         watched = false,
@@ -62,7 +82,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                     )
                 } else {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Untracked -> To See (Bell)] (isReleased=false)")
-                    movie.copy(
+                    current.copy(
                         favorite = false,
                         reminder = true,
                         watched = false,
@@ -75,7 +95,7 @@ class CycleMovieStatusUseCase @Inject constructor(
         android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: [${updated.title}] isReleased=${updated.isReleased} (date=${updated.releaseDate})")
         android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus END: id=${updated.id}, watched=${updated.watched}, fav=${updated.favorite}, rem=${updated.reminder}")
         
-        if (updated != movie) {
+        if (updated != current) {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Saving updated movie")
             repository.saveMovie(updated)
             // Trigger background fetch for missing metadata (runtime, cast) using partial update to avoid race conditions

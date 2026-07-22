@@ -903,10 +903,10 @@
     <!-- Update & WhatsNew Dialogs -->
     <string name="whats_new_title">App Aggiornata!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Nuova interfaccia Glassmorphism con effetto Haze Blur reale
-• Pallino di notifica aggiornamento app integrato nel menu e impostazioni
-• Sistema promemoria e notifiche separato per Film e Serie TV
-• Miglioramenti alle prestazioni generali e fix di stabilità</string>
+    <string name="whats_new_fallback_notes">• Nuovi pulsanti circolari fluttuanti (Indietro, Home, Condividi) sopra i contenuti con effetto vetro nitido
+• Rimbalzo al tocco (bounce click) perfezionato e applicato solo all\'icona interna per un feedback elegante
+• Risolto il problema di sfocatura (blur) che copriva le icone nei dettagli di Collezioni e Persone
+• Ottimizzazioni generali e miglioramenti all\'interfaccia utente</string>
     <string name="whats_new_section_title">NOVITÀ PRINCIPALI</string>
     <string name="whats_new_btn_start">Ottimo, Iniziamo!</string>
 
