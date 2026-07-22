@@ -337,6 +337,9 @@ fun VistiScreenContent(
                         selectedIndex = selectedIndex,
                         onOptionClick = { index ->
                             viewModel.onTabChanged(if (index == 0) "movie" else "tv")
+                            scope.launch {
+                                if (index == 0) viewModel.movieGridState.scrollToItem(0) else viewModel.tvGridState.scrollToItem(0)
+                            }
                         }
                     )
                 }

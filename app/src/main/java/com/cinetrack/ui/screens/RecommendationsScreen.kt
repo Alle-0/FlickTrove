@@ -1,4 +1,4 @@
-﻿package com.cinetrack.ui.screens
+package com.cinetrack.ui.screens
 
 import androidx.compose.ui.res.stringResource
 
@@ -151,6 +151,7 @@ fun RecommendationsScreenContent(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyGridState = viewModel.lazyGridState
+    val scope = rememberCoroutineScope()
     
     val localHazeState = hazeState ?: remember { dev.chrisbanes.haze.HazeState() }
     
@@ -545,6 +546,7 @@ fun RecommendationsScreenContent(
                     selectedIndex = selectedIndex,
                     onOptionClick = { index ->
                         viewModel.onMediaTypeChanged(if (index == 0) "movie" else "tv")
+                        scope.launch { lazyGridState.scrollToItem(0) }
                     },
                     modifier = Modifier
                 )

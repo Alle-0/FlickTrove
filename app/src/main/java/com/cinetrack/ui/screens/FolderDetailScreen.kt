@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -131,6 +132,7 @@ fun FolderDetailScreenContent(
     val activeFilterConfig = com.cinetrack.ui.LocalActiveFilterConfig.current
     
     val lazyGridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
 
     val successStateForScroll = uiState as? FolderDetailUiState.Success
     val currentActiveTab = successStateForScroll?.activeTab ?: "all"
@@ -415,6 +417,7 @@ fun FolderDetailScreenContent(
                                         selectedIndex = selectedIndex,
                                         onOptionClick = { index ->
                                             viewModel.onTabChanged(when(index) { 1 -> "movie"; 2 -> "tv"; else -> "all" })
+                                            scope.launch { lazyGridState.scrollToItem(0) }
                                         }
                                     )
                                 }

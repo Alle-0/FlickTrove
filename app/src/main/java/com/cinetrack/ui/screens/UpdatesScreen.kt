@@ -13,6 +13,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -128,6 +130,11 @@ fun UpdatesScreen(
     var isCalendarView by rememberSaveable { mutableStateOf(false) }
     var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
     var showMonthPicker by remember { mutableStateOf(false) }
+
+    val remindersListState = rememberLazyListState()
+    LaunchedEffect(remindersCategoryTab) {
+        remindersListState.scrollToItem(0)
+    }
 
     LaunchedEffect(isMeasured) {
         if (isMeasured && !hasRevealed) {
@@ -260,6 +267,7 @@ fun UpdatesScreen(
                                             )
                                         } else {
                                             LazyColumn(
+                                                state = remindersListState,
                                                 modifier = Modifier.fillMaxSize(),
                                                 contentPadding = PaddingValues(
                                                     start = 16.dp, 
@@ -335,6 +343,7 @@ fun UpdatesScreen(
                                             selectedIndex = remindersCategoryTab,
                                             onOptionClick = { index ->
                                                 remindersCategoryTab = index
+                                                scope.launch { remindersListState.scrollToItem(0) }
                                             }
                                         )
                                     }
