@@ -405,10 +405,15 @@ fun MediaTimeCard(
     longestPosterPath: String? = null,
     onLongestItemClick: (() -> Unit)? = null
 ) {
-    val h = longestDurationMinutes / 60
+    val d = longestDurationMinutes / 1440
+    val h = (longestDurationMinutes % 1440) / 60
     val m = longestDurationMinutes % 60
     val durText = buildString {
-        if (h > 0) append("${h}h ${m}m") else append("${m}m")
+        when {
+            d > 0 -> append(stringResource(R.string.stats_dhm, d, h, m))
+            h > 0 -> append(stringResource(R.string.stats_hm, h, m))
+            else -> append(stringResource(R.string.stats_m, m))
+        }
         if (longestSuffix != null) append(" $longestSuffix")
     }
 

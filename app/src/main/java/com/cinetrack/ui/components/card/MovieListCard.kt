@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import com.cinetrack.ui.components.shared.LocalMovieActions
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -77,6 +79,7 @@ fun MovieListCard(
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val movieActions = LocalMovieActions.current
     val cardPosition = remember { arrayOf(Offset.Zero) }
     val cardSize = remember { arrayOf(androidx.compose.ui.unit.IntSize.Zero) }
 
@@ -96,9 +99,10 @@ fun MovieListCard(
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
     val isVisible = hasAnimated.value || isScrollItem
 
+    val isExploding = movieActions.explodingMovie?.id == movie.id
     val cardAlpha by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
+        targetValue = if (isExploding) 0f else (if (isVisible) 1f else 0f),
+        animationSpec = if (isExploding) snap() else tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
         label = "alpha"
     )
 
@@ -133,6 +137,7 @@ fun MovieListCard(
                 scaleDown = 0.95f, 
                 requireUnconsumed = false,
                 onLongClick = { offset -> 
+                    movieActions.updatePopupCardSize(Size(cardSize[0].width.toFloat(), cardSize[0].height.toFloat()))
                     onLongPress(movie.apply {
                         this.favorite = isFavorite
                         this.watched = isWatched

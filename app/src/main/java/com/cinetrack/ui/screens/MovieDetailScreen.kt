@@ -503,6 +503,7 @@ fun MovieDetailScreenContent(
                                         recommendedMovies = state.recommendations,
                                         currentId = activeMovie.id,
                                         accentColor = accentColor,
+                                        backgroundColor = animatedBgColor,
                                         onMovieClick = onMovieClick,
                                         onLongPress = actionsState.onLongPress,
                                         onAction = { movie -> viewModel.onEvent(DetailEvent.CycleStatus(movie)) },

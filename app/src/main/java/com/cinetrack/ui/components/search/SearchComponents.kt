@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -53,12 +54,15 @@ fun RowScope.CategoryTab(text: String, isSelected: Boolean, onClick: () -> Unit)
             ) { onClick() },
         contentAlignment = Alignment.Center
     ) {
+        val isLongText = text.length > 8
         Text(
             text = text,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             fontSize = 11.sp,
             fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.sp
+            letterSpacing = if (isLongText) (-0.3).sp else 0.5.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

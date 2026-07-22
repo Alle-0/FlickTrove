@@ -99,6 +99,31 @@ fun BackupDialog(
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 
+                // Tip: sync missing details after import
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.settings_import_tip_sync),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                
                 val isExportEnabled = !isBackupLoading
                 Box(
                     modifier = Modifier
@@ -234,9 +259,9 @@ fun ExternalMigrationDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.Black)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = MaterialTheme.colorScheme.onPrimary)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_select_file), fontWeight = FontWeight.Bold, color = Color.Black)
+                        Text(stringResource(R.string.settings_select_file), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
 
@@ -314,7 +339,7 @@ fun RewatchMigrationDialog(
                     Text(
                         stringResource(R.string.import_rewatch_keep_latest),
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
 

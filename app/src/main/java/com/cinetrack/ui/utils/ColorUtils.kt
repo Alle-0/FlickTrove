@@ -2,6 +2,7 @@ package com.cinetrack.ui.utils
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import android.graphics.Color as AndroidColor
 import kotlin.math.floor
@@ -209,5 +210,14 @@ object ColorUtils {
         hsv[1] = min(1f, hsv[1] * 0.95f)
 
         return Color(AndroidColor.HSVToColor(hsv))
+    }
+
+    /**
+     * Calcola il colore del testo/icone di contrasto per uno sfondo [color].
+     * Se la luminanza del colore di accento è alta (es. Teal, Giallo, Rosa chiaro), restituisce DeepBlack.
+     * Se è bassa o media (es. Blu, Viola, Rosso, Verde scuro), restituisce Color.White per garantire la massima visibilità.
+     */
+    fun contentColorForAccent(color: Color): Color {
+        return if (color.luminance() > 0.38f) Color(0xFF000000) else Color.White
     }
 }

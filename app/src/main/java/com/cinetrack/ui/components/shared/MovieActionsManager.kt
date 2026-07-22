@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.entities.FolderEntity
 
@@ -33,6 +34,18 @@ class MovieActionsManager {
         private set
         
     var popupCardPosition by mutableStateOf(Offset.Zero)
+        private set
+
+    var popupCardSize by mutableStateOf(Size(350f, 525f))
+        private set
+
+    var explodingMovie by mutableStateOf<Movie?>(null)
+        private set
+
+    var explodingCardPosition by mutableStateOf(Offset.Zero)
+        private set
+
+    var explodingCardSize by mutableStateOf(Size(350f, 525f))
         private set
 
     var onDeleteCallback by mutableStateOf<((Movie) -> Unit)?>(null)
@@ -71,11 +84,40 @@ class MovieActionsManager {
         showActionsPopup = false
     }
     
-    fun openActionsPopup(movie: Movie, pressOffset: Offset, cardPosition: Offset) {
+    fun updatePopupCardSize(size: Size) {
+        if (size.width > 0 && size.height > 0) {
+            popupCardSize = size
+        }
+    }
+
+    fun openActionsPopup(
+        movie: Movie, 
+        pressOffset: Offset, 
+        cardPosition: Offset, 
+        cardSize: Size = popupCardSize
+    ) {
         activeMovie = movie
         popupPressOffset = pressOffset
         popupCardPosition = cardPosition
+        if (cardSize.width > 0 && cardSize.height > 0) {
+            popupCardSize = cardSize
+        }
         showActionsPopup = true
+    }
+
+    fun startCardExplosion(movie: Movie) {
+        val currentPosition = popupCardPosition
+        val currentSize = popupCardSize
+        closeAll()
+        explodingMovie = movie
+        explodingCardPosition = currentPosition
+        explodingCardSize = currentSize
+    }
+
+    fun finishCardExplosion(movie: Movie) {
+        if (explodingMovie?.id == movie.id) {
+            explodingMovie = null
+        }
     }
     
     fun setupCallbacks(

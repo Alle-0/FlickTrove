@@ -42,7 +42,7 @@ fun CategoryButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        contentColor = if (isSelected) Color.Black else Color.White.copy(alpha = 0.6f),
+        contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else Color.White.copy(alpha = 0.6f),
         shape = CircleShape,
         modifier = Modifier
             .height(36.dp)
@@ -174,11 +174,13 @@ fun CategoryTabSelector(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
+                        val isLongTitle = title.length > 8
                         Text(
                             text = title.uppercase(),
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.5.sp,
+                            letterSpacing = if (isLongTitle) (-0.3).sp else 0.5.sp,
                             color = textColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

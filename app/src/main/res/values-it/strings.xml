@@ -20,6 +20,9 @@
     <string name="home_unreleased">In arrivo</string>
     <string name="home_tab_movies">FILM</string>
     <string name="home_tab_tv_series">SERIE TV</string>
+    <string name="updates_tab_all">TUTTI</string>
+    <string name="updates_tab_new_releases">NUOVE USCITE</string>
+    <string name="updates_tab_ongoing_episodes">EPISODI SERIE</string>
     <string name="home_cd_change_layout">Cambia Layout</string>
     <string name="home_cd_filters">Filtri</string>
 

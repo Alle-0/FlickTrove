@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
+import com.cinetrack.ui.utils.ColorUtils
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -208,7 +209,7 @@ fun QuickFolderModal(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
                     ),
-                    color = Color.Black
+                    color = ColorUtils.contentColorForAccent(accentColor)
                 )
             }
         }

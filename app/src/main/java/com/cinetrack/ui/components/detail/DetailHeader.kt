@@ -497,6 +497,7 @@ fun RatingPill(
     val bottomPadding = vPadding
     
     val pillRadius = 48.dp
+    val pillContentColor = ColorUtils.contentColorForAccent(accentColor)
     
     Box(
         modifier = modifier
@@ -520,13 +521,13 @@ fun RatingPill(
                     contentDescription = "TMDB Logo",
                     modifier = Modifier.height(11.dp),
                     contentScale = ContentScale.Fit,
-                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.Black.copy(alpha = 0.9f))
+                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(pillContentColor.copy(alpha = 0.9f))
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                     contentDescription = null,
-                    tint = Color.Black.copy(alpha = 0.9f),
+                    tint = pillContentColor.copy(alpha = 0.9f),
                     modifier = Modifier.size(10.dp)
                 )
                 Spacer(modifier = Modifier.width(3.dp))
@@ -534,7 +535,7 @@ fun RatingPill(
                     text = String.format("%.1f", voteAverage),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.Black.copy(alpha = 0.9f)
+                    color = pillContentColor.copy(alpha = 0.9f)
                 )
             }
         }
@@ -545,7 +546,7 @@ fun RatingPill(
             fontSize = 7.sp,
             lineHeight = 7.sp,
             fontWeight = FontWeight.Black,
-            color = Color.Black.copy(alpha = 0.4f),
+            color = pillContentColor.copy(alpha = 0.4f),
             modifier = Modifier
                 .graphicsLayer {
                     // Precise offset

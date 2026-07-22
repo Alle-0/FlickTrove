@@ -23,15 +23,25 @@ fun GlobalMovieActions(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val movie = manager.activeMovie ?: return
+    val movie = manager.activeMovie ?: manager.explodingMovie ?: return
 
     Box(modifier = modifier) {
         androidx.activity.compose.BackHandler(enabled = manager.isAnyModalOpen) {
             manager.closeAll()
         }
 
+        if (manager.explodingMovie != null) {
+            CardExplosionOverlay(
+                movie = manager.explodingMovie!!,
+                cardPosition = manager.explodingCardPosition,
+                cardSize = manager.explodingCardSize,
+                onPopComplete = { m -> manager.onDeleteCallback?.invoke(m) },
+                onExplosionFinished = { m -> manager.finishCardExplosion(m) }
+            )
+        }
+
         // 1. Actions Popup
-        if (manager.showActionsPopup) {
+        if (manager.showActionsPopup && manager.activeMovie != null) {
             val isSaved = movie.favorite || movie.watched || movie.reminder || (movie.personalRating ?: 0.0) > 0.0 || !movie.personalNote.isNullOrEmpty() || manager.foldersList.any { manager.isItemInFolderCallback(movie, it.id) }
             MovieActionsPopup(
                 movie = movie,
@@ -57,7 +67,7 @@ fun GlobalMovieActions(
                     context.startActivity(shareIntent)
                     manager.closeAll()
                 },
-                onDelete = { manager.onDeleteCallback?.invoke(it) },
+                onDelete = { manager.startCardExplosion(it) },
                 isSaved = isSaved
             )
         }

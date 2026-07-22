@@ -1,5 +1,12 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -190,7 +197,7 @@ fun SearchHeader(
                                 decorationBox = { innerTextField ->
                                     Box(contentAlignment = Alignment.CenterStart) {
                                         if (query.isEmpty()) {
-                                            val hasLayoutButton = preferences.showLayoutToggle && category != "person"
+                                            val hasLayoutButton = preferences.showLayoutToggle && category != "person" && category != "collection"
                                             val placeholderText = when {
                                                 sortConfig.selectedGenres.isNotEmpty() -> {
                                                     val gid = sortConfig.selectedGenres.first()
@@ -232,84 +239,111 @@ fun SearchHeader(
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                 modifier = Modifier
                                     .size(14.dp)
-                                    .bounceClick(scaleDown = 0.8f) { onClearQuery() }
+                                    .bounceClick(scaleDown = 0.8f) {
+                                        onTextFieldValueChange(TextFieldValue(""))
+                                        onClearQuery()
+                                        focusRequester.requestFocus()
+                                        keyboardController?.show()
+                                    }
                             )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                val hasActiveFilters = sortConfig.selectedGenres.isNotEmpty() ||
-                        sortConfig.selectedKeywords.isNotEmpty() ||
-                        sortConfig.selectedProviders.isNotEmpty() ||
-                        sortConfig.selectedDecades.isNotEmpty() ||
-                        sortConfig.sortType != "popularity"
-
-                if (preferences.showLayoutToggle && category != "person" && category != "collection") {
-                    Box(modifier = Modifier.size(44.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick(scaleDown = 0.92f) {
-                                    val nextColumns = nextGridColumns(preferences.gridColumns)
-                                    onLayoutToggleClick(nextColumns)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = layoutToggleIcon(preferences.gridColumns),
-                                contentDescription = stringResource(R.string.search_content_desc_layout),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val position = layoutCoordinates.positionInWindow()
-                            onFilterBoundsMeasured(
-                                Rect(
-                                    position.x,
-                                    position.y,
-                                    position.x + layoutCoordinates.size.width,
-                                    position.y + layoutCoordinates.size.height
-                                )
-                            )
-                        }
+                AnimatedVisibility(
+                    visible = category != "person" && category != "collection",
+                    enter = expandHorizontally(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        ),
+                        expandFrom = Alignment.End
+                    ) + fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)),
+                    exit = shrinkHorizontally(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        ),
+                        shrinkTowards = Alignment.End
+                    ) + fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
-                            .then(
-                                if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape)
-                                else Modifier
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick {
-                                keyboardController?.hide()
-                                onFilterClick()
-                            },
-                        contentAlignment = Alignment.Center
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                            contentDescription = stringResource(R.string.folder_detail_filters),
-                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        val hasActiveFilters = sortConfig.selectedGenres.isNotEmpty() ||
+                                sortConfig.selectedKeywords.isNotEmpty() ||
+                                sortConfig.selectedProviders.isNotEmpty() ||
+                                sortConfig.selectedDecades.isNotEmpty() ||
+                                sortConfig.sortType != "popularity"
+
+                        if (preferences.showLayoutToggle) {
+                            Box(modifier = Modifier.size(44.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .bounceClick(scaleDown = 0.92f) {
+                                            val nextColumns = nextGridColumns(preferences.gridColumns)
+                                            onLayoutToggleClick(nextColumns)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = layoutToggleIcon(preferences.gridColumns),
+                                        contentDescription = stringResource(R.string.search_content_desc_layout),
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .onGloballyPositioned { layoutCoordinates ->
+                                    val position = layoutCoordinates.positionInWindow()
+                                    onFilterBoundsMeasured(
+                                        Rect(
+                                            position.x,
+                                            position.y,
+                                            position.x + layoutCoordinates.size.width,
+                                            position.y + layoutCoordinates.size.height
+                                        )
+                                    )
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                                    .then(
+                                        if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape)
+                                        else Modifier
+                                    )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClick {
+                                        keyboardController?.hide()
+                                        onFilterClick()
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                                    contentDescription = stringResource(R.string.folder_detail_filters),
+                                    tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

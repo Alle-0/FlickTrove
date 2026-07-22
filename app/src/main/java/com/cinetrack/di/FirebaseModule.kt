@@ -4,7 +4,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.firestore.memoryCacheSettings
-import com.google.firebase.firestore.persistentCacheSettings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,11 +23,10 @@ object FirebaseModule {
     fun provideFirebaseFirestore(): FirebaseFirestore {
         val firestore = FirebaseFirestore.getInstance()
         
-        // Enabling native persistence as requested for "Granitic Stability" with 50 MB bound
+        // Use memory cache settings to eliminate background SQLiteRemoteDocumentCache Protobuf decoding OOM.
+        // Room (favoriteDao/folderDao) serves as our permanent local bunker.
         val settings = firestoreSettings {
-            setLocalCacheSettings(persistentCacheSettings {
-                setSizeBytes(52428800L) // 50 MB limit to prevent SQLiteDocumentOverlayCache OOM
-            })
+            setLocalCacheSettings(memoryCacheSettings {})
         }
         firestore.firestoreSettings = settings
         

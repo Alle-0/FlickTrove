@@ -121,7 +121,7 @@ fun MainGlobalDialogs(
                         .bounceClick { onExitConfirmationChange(false); activity?.finish() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.main_exit_confirm), color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.main_exit_confirm), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                 }
             }
         }

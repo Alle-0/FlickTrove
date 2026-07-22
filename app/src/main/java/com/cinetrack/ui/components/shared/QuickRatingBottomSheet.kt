@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
+import com.cinetrack.ui.utils.ColorUtils
 import androidx.compose.ui.graphics.vector.ImageVector
 
 import androidx.compose.ui.res.vectorResource
@@ -191,7 +192,7 @@ fun QuickRatingModal(
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Black
                         ),
-                        color = Color.Black
+                        color = ColorUtils.contentColorForAccent(accentColor)
                     )
                 }
             }

@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.detail
 
 import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
+import com.cinetrack.ui.utils.ColorUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -205,7 +206,7 @@ fun RatingPickerBox(
             ) {
                 Text(
                     if (rating > 0) stringResource(R.string.dialog_rating_save) else stringResource(R.string.dialog_rating_remove),
-                    color = if (rating > 0) Color.Black else Color.White,
+                    color = if (rating > 0) ColorUtils.contentColorForAccent(accentColor) else Color.White,
                     fontWeight = FontWeight.Black,
                     fontSize = 13.sp
                 )
@@ -545,7 +546,7 @@ fun NoteEditorBox(
                     .background(accentColor),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.personal_save_note), color = Color.Black, fontWeight = FontWeight.Black, fontSize = 13.sp)
+                Text(stringResource(R.string.personal_save_note), color = ColorUtils.contentColorForAccent(accentColor), fontWeight = FontWeight.Black, fontSize = 13.sp)
             }
         }
     }

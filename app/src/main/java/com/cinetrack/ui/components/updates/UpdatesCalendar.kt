@@ -43,7 +43,7 @@ import java.util.Locale
 
 @Composable
 fun UpdatesCalendarView(
-    reminders: List<Movie>,
+    reminders: List<ReminderItem>,
     paddingValues: PaddingValues,
     onMovieClick: (Movie) -> Unit,
     currentMonth: java.time.YearMonth,
@@ -54,7 +54,7 @@ fun UpdatesCalendarView(
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     
     val remindersByDate = remember(reminders) {
-        reminders.groupBy { it.releaseDate ?: it.firstAirDate ?: "" }
+        reminders.groupBy { it.arrivalDate }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -64,18 +64,16 @@ fun UpdatesCalendarView(
                 start = 16.dp, 
                 end = 16.dp, 
                 bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                top = 124.dp 
+                top = 180.dp 
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
                 CalendarWidget(
                     currentMonth = currentMonth,
                     onMonthChanged = onMonthChanged,
                     selectedDate = selectedDate,
-                    onDateSelected = { 
-                        selectedDate = if (selectedDate == it) null else it 
-                    },
+                    onDateSelected = { selectedDate = it },
                     remindersByDate = remindersByDate,
                     onShowMonthPicker = onShowMonthPicker,
                     internalHazeState = internalHazeState
@@ -109,15 +107,15 @@ fun UpdatesCalendarView(
                         modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
                     )
                 }
-                items(displayedReminders, key = { it.id.toString() + it.mediaType + "_cal_rem" }) { movie ->
+                items(displayedReminders, key = { it.id + "_cal_rem" }) { item ->
                     androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                         UpdateCard(
-                            movie = movie,
-                            label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(movie.releaseDate ?: movie.firstAirDate)),
+                            movie = item.movie,
+                            label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)) + item.episodeInfo,
                             iconRes = R.drawable.ic_bell_piena,
                             color = MaterialTheme.colorScheme.primary,
                             onAction = { /* Optional: toggle reminder */ },
-                            onPress = { onMovieClick(movie) }
+                            onPress = { onMovieClick(item.movie) }
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
@@ -145,7 +143,7 @@ fun CalendarWidget(
     onMonthChanged: (YearMonth) -> Unit,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
-    remindersByDate: Map<String, List<Movie>>,
+    remindersByDate: Map<String, List<ReminderItem>>,
     onShowMonthPicker: () -> Unit,
     internalHazeState: HazeState? = null
 ) {
@@ -275,7 +273,7 @@ fun CalendarWidget(
                                 ) {
                                     Text(
                                         text = currentDay.toString(),
-                                        color = if (isSelected) Color.White else if (hasReminders) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f),
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else if (hasReminders) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.8f),
                                         fontSize = 15.sp,
                                         fontWeight = if (isSelected || hasReminders || isToday) FontWeight.Bold else FontWeight.Normal
                                     )
@@ -284,7 +282,7 @@ fun CalendarWidget(
                                             modifier = Modifier
                                                 .padding(top = 2.dp)
                                                 .size(4.dp)
-                                                .background(if (isSelected) Color.White else MaterialTheme.colorScheme.primary, CircleShape)
+                                                .background(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary, CircleShape)
                                         )
                                     }
                                 }

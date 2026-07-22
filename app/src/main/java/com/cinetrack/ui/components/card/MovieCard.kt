@@ -36,8 +36,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.ContentScale
+import com.cinetrack.ui.components.shared.LocalMovieActions
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -414,7 +416,9 @@ fun MovieCard(
     val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val movieActions = LocalMovieActions.current
     val cardPosition = remember { arrayOf(Offset.Zero) }
+    val cardSize = remember { arrayOf(Size.Zero) }
 
     val rippleState = rememberCardRippleState()
 
@@ -432,9 +436,10 @@ fun MovieCard(
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
     val isVisible = hasAnimated.value || isScrollItem
 
+    val isExploding = movieActions.explodingMovie?.id == movie.id
     val cardAlpha by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
+        targetValue = if (isExploding) 0f else (if (isVisible) 1f else 0f),
+        animationSpec = if (isExploding) snap() else tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
         label = "alpha"
     )
 
@@ -463,6 +468,7 @@ fun MovieCard(
             }
             .onGloballyPositioned { coordinates ->
                 cardPosition[0] = coordinates.positionInWindow()
+                cardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
             .clip(RoundedCornerShape(28.dp))
             .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
@@ -470,6 +476,7 @@ fun MovieCard(
                 scaleDown = 0.93f, 
                 requireUnconsumed = false,
                 onLongClick = { offset ->
+                    movieActions.updatePopupCardSize(cardSize[0])
                     onLongPress(movie.apply {
                         this.favorite = isFavorite
                         this.watched = isWatched

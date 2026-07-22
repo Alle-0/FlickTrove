@@ -23,4 +23,4 @@ data class FilterModalConfig(
     val onSortConfigChanged: (com.cinetrack.data.model.SortConfig) -> Unit
 )
 
-val LocalActiveFilterConfig = compositionLocalOf<MutableState<FilterModalConfig?>> { error("No LocalActiveFilterConfig provided") }
+val LocalActiveFilterConfig = compositionLocalOf<MutableState<FilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }

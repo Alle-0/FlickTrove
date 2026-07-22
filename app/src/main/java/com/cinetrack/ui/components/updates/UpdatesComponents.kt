@@ -262,3 +262,132 @@ fun formatReleaseDate(dateStr: String?): String {
         dateStr
     }
 }
+
+fun Movie.getEffectiveArrivalDate(today: String): String? {
+    if (this.mediaType == "movie") {
+        val rDate = this.releaseDate
+        return if (!rDate.isNullOrBlank() && rDate > today) rDate else null
+    } else {
+        // TV Series
+        val fDate = this.firstAirDate
+        if (!fDate.isNullOrBlank() && fDate > today) {
+            return fDate
+        }
+        val nDate = this.nextEpisodeAirDate
+        if (!nDate.isNullOrBlank() && nDate > today) {
+            return nDate
+        }
+        val futureEpisodeDates = mutableListOf<String>()
+        this.seasons?.forEach { season ->
+            val sDate = season.airDate
+            if (!sDate.isNullOrBlank() && sDate > today) {
+                futureEpisodeDates.add(sDate)
+            }
+            season.episodes?.forEach { episode ->
+                val epDate = episode.airDate
+                if (!epDate.isNullOrBlank() && epDate > today) {
+                    futureEpisodeDates.add(epDate)
+                }
+            }
+        }
+        return futureEpisodeDates.minOrNull()
+    }
+}
+
+data class ReminderItem(
+    val id: String,
+    val movie: Movie,
+    val arrivalDate: String,
+    val episodeInfo: String,
+    val isOngoingSeriesEpisode: Boolean
+)
+
+fun Movie.generateReminderItems(today: String): List<ReminderItem> {
+    val isEligible = this.reminder || (this.mediaType == "tv" && (this.favorite || !this.watched))
+    if (!isEligible) return emptyList()
+
+    if (this.mediaType == "movie") {
+        val rDate = this.releaseDate
+        return if (!rDate.isNullOrBlank() && rDate > today) {
+            listOf(
+                ReminderItem(
+                    id = "${this.id}_${rDate}_mov",
+                    movie = this,
+                    arrivalDate = rDate,
+                    episodeInfo = "",
+                    isOngoingSeriesEpisode = false
+                )
+            )
+        } else {
+            emptyList()
+        }
+    } else {
+        // TV Series
+        val isPremiered = !this.firstAirDate.isNullOrBlank() && this.firstAirDate!! <= today
+        if (!isPremiered) {
+            // Not yet released or brand new series
+            val arrivalDate = this.firstAirDate ?: this.nextEpisodeAirDate
+            return if (!arrivalDate.isNullOrBlank() && arrivalDate > today) {
+                val epInfo = if (!this.nextEpisodeString.isNullOrBlank()) " • ${this.nextEpisodeString}" else " • S01E01"
+                listOf(
+                    ReminderItem(
+                        id = "${this.id}_${arrivalDate}_tv_new",
+                        movie = this,
+                        arrivalDate = arrivalDate,
+                        episodeInfo = epInfo,
+                        isOngoingSeriesEpisode = false
+                    )
+                )
+            } else {
+                emptyList()
+            }
+        } else {
+            // Already premiered: ongoing series -> return all future episodes!
+            val items = mutableListOf<ReminderItem>()
+            val seenDatesAndEps = mutableSetOf<String>()
+
+            this.seasons?.forEach { season ->
+                season.episodes?.forEach { episode ->
+                    val epDate = episode.airDate
+                    if (!epDate.isNullOrBlank() && epDate > today) {
+                        val sNum = season.seasonNumber.toString().padStart(2, '0')
+                        val eNum = episode.episodeNumber.toString().padStart(2, '0')
+                        val epString = "S${sNum}E${eNum}"
+                        val key = "${epDate}_$epString"
+                        if (seenDatesAndEps.add(key)) {
+                            items.add(
+                                ReminderItem(
+                                    id = "${this.id}_${epDate}_$epString",
+                                    movie = this,
+                                    arrivalDate = epDate,
+                                    episodeInfo = " • $epString",
+                                    isOngoingSeriesEpisode = true
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Fallback / supplement if nextEpisodeAirDate is available and not already in items
+            val nDate = this.nextEpisodeAirDate
+            if (!nDate.isNullOrBlank() && nDate > today) {
+                val alreadyAdded = items.any { it.arrivalDate == nDate }
+                if (!alreadyAdded) {
+                    val epString = if (!this.nextEpisodeString.isNullOrBlank()) " • ${this.nextEpisodeString}" else ""
+                    items.add(
+                        ReminderItem(
+                            id = "${this.id}_${nDate}_next",
+                            movie = this,
+                            arrivalDate = nDate,
+                            episodeInfo = epString,
+                            isOngoingSeriesEpisode = true
+                        )
+                    )
+                }
+            }
+
+            return items.sortedBy { it.arrivalDate }
+        }
+    }
+}

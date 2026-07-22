@@ -20,6 +20,9 @@
     <string name="home_unreleased">Unreleased</string>
     <string name="home_tab_movies">MOVIES</string>
     <string name="home_tab_tv_series">TV SERIES</string>
+    <string name="updates_tab_all">ALL</string>
+    <string name="updates_tab_new_releases">NEW RELEASES</string>
+    <string name="updates_tab_ongoing_episodes">SERIES EPISODES</string>
     <string name="home_cd_change_layout">Change Layout</string>
     <string name="home_cd_filters">Filters</string>
 

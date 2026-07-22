@@ -105,8 +105,20 @@ fun UpdatesScreen(
     val movies = uiState.movies
     val newEpisodes = movies.filter { (it.newEpisodesFound ?: 0) > 0 }
     val releasedRecently = movies.filter { it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0 }
-    val futureReminders = movies.filter { it.reminder && (it.releaseDate ?: it.firstAirDate ?: "") > today }
-        .sortedBy { it.releaseDate ?: it.firstAirDate }
+    var remindersCategoryTab by rememberSaveable { mutableIntStateOf(0) }
+
+    val rawFutureReminders = remember(movies, today) {
+        movies.flatMap { it.generateReminderItems(today) }
+            .sortedBy { it.arrivalDate }
+    }
+
+    val futureReminders = remember(rawFutureReminders, remindersCategoryTab) {
+        when (remindersCategoryTab) {
+            1 -> rawFutureReminders.filter { !it.isOngoingSeriesEpisode }
+            2 -> rawFutureReminders.filter { it.isOngoingSeriesEpisode }
+            else -> rawFutureReminders
+        }
+    }
 
     val pagerState = rememberPagerState(pageCount = { 2 })
     var isMeasured by remember { mutableStateOf(false) }
@@ -212,11 +224,6 @@ fun UpdatesScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .haze(
-                            state = internalHazeState,
-                            style = HazeStyles.PremiumDark
-                        )
-                        
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -225,63 +232,125 @@ fun UpdatesScreen(
                     ) { pageIndex ->
                         if (pageIndex == 1) {
                             // REMINDERS VIEW
-                            AnimatedContent(
-                                targetState = isCalendarView,
-                                transitionSpec = {
-                                    fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
-                                },
-                                label = "CalendarViewToggle"
-                            ) { showCalendar ->
-                                if (showCalendar) {
-                                    UpdatesCalendarView(
-                                        reminders = futureReminders,
-                                        paddingValues = paddingValues,
-                                        onMovieClick = onMovieClick,
-                                        currentMonth = currentMonth,
-                                        onMonthChanged = { currentMonth = it },
-                                        onShowMonthPicker = { showMonthPicker = true },
-                                        internalHazeState = internalHazeState
-                                    )
-                                } else {
-                                    LazyColumn(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentPadding = PaddingValues(
-                                            start = 16.dp, 
-                                            end = 16.dp, 
-                                            bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                                            top = 124.dp 
-                                        ),
-                                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        if (futureReminders.isEmpty()) {
-                                            item {
-                                                Box(
-                                                    modifier = Modifier.fillParentMaxSize(), 
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
-                                                }
-                                            }
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .haze(
+                                            state = internalHazeState,
+                                            style = HazeStyles.PremiumDark
+                                        )
+                                ) {
+                                    AnimatedContent(
+                                        targetState = isCalendarView,
+                                        transitionSpec = {
+                                            fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
+                                        },
+                                        label = "CalendarViewToggle"
+                                    ) { showCalendar ->
+                                        if (showCalendar) {
+                                            UpdatesCalendarView(
+                                                reminders = futureReminders,
+                                                paddingValues = paddingValues,
+                                                onMovieClick = onMovieClick,
+                                                currentMonth = currentMonth,
+                                                onMonthChanged = { currentMonth = it },
+                                                onShowMonthPicker = { showMonthPicker = true },
+                                                internalHazeState = internalHazeState
+                                            )
                                         } else {
-                                            items(futureReminders, key = { it.id.toString() + it.mediaType + "_rem" }, contentType = { "movie" }) { movie ->
-                                                androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                    UpdateCard(
-                                                        movie = movie,
-                                                        label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(movie.releaseDate ?: movie.firstAirDate)),
-                                                        iconRes = R.drawable.ic_bell_piena,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        onAction = { /* Optional: toggle reminder */ },
-                                                        onPress = { onMovieClick(movie) }
-                                                    )
+                                            LazyColumn(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentPadding = PaddingValues(
+                                                    start = 16.dp, 
+                                                    end = 16.dp, 
+                                                    bottom = paddingValues.calculateBottomPadding() + 80.dp, 
+                                                    top = 180.dp 
+                                                ),
+                                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                                            ) {
+                                                if (futureReminders.isEmpty()) {
+                                                    item {
+                                                        Box(
+                                                            modifier = Modifier.fillParentMaxSize(), 
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
+                                                        }
+                                                    }
+                                                } else {
+                                                    items(futureReminders, key = { it.id + "_rem" }, contentType = { "movie" }) { item ->
+                                                        androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                            UpdateCard(
+                                                                movie = item.movie,
+                                                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)) + item.episodeInfo,
+                                                                iconRes = R.drawable.ic_bell_piena,
+                                                                color = MaterialTheme.colorScheme.primary,
+                                                                onAction = { /* Optional: toggle reminder */ },
+                                                                onPress = { onMovieClick(item.movie) }
+                                                            )
+                                                        }
+                                                    }
                                                 }
-                                            }
                                         }
+                                }
+                            }
+                        }
+
+                        if (rawFutureReminders.isNotEmpty() || remindersCategoryTab != 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopCenter)
+                                            .fillMaxWidth()
+                                            .statusBarsPadding()
+                                            .displayCutoutPadding()
+                                            .padding(top = 78.dp)
+                                            .padding(horizontal = 24.dp)
+                                            .zIndex(9f),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Spacer(
+                                            modifier = Modifier
+                                                .matchParentSize()
+                                                .hazeGlass(
+                                                    state = internalHazeState,
+                                                    shape = CircleShape,
+                                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                    useOffscreenStrategy = false
+                                                )
+                                        )
+                                        val options = listOf(
+                                            stringResource(R.string.updates_tab_all),
+                                            stringResource(R.string.updates_tab_new_releases),
+                                            stringResource(R.string.updates_tab_ongoing_episodes)
+                                        )
+                                        val counts = listOf(
+                                            rawFutureReminders.size,
+                                            rawFutureReminders.count { !it.isOngoingSeriesEpisode },
+                                            rawFutureReminders.count { it.isOngoingSeriesEpisode }
+                                        )
+                                        com.cinetrack.ui.components.common.CategoryTabSelector(
+                                            options = options,
+                                            counts = counts,
+                                            selectedIndex = remindersCategoryTab,
+                                            onOptionClick = { index ->
+                                                remindersCategoryTab = index
+                                            }
+                                        )
                                     }
                                 }
                             }
                         } else {
                             // MAIN NOTIFICATIONS VIEW
-                            LazyColumn(
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .haze(
+                                        state = internalHazeState,
+                                        style = HazeStyles.PremiumDark
+                                    )
+                            ) {
+                                LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
                                     start = 20.dp, 
@@ -419,6 +488,7 @@ fun UpdatesScreen(
                             }
                         }
                     }
+                    }
                 }
 
                 // 2. Fixed Header (Layered on top of content)
@@ -524,6 +594,8 @@ fun UpdatesScreen(
                     }
                 } // end inner Box (statusBarsPadding)
             } // end outer Box (hazeGlass header)
+
+
         } // end Box(fillMaxSize)
         
         // Dialog OVERLAY - Outside the haze capturing scope to avoid blurring its own text

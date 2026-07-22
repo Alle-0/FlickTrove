@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.shared
 
 import androidx.compose.ui.res.stringResource
+import com.cinetrack.ui.utils.ColorUtils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -412,7 +413,7 @@ fun QuickNoteModal(
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Black
                         ),
-                        color = Color.Black
+                        color = ColorUtils.contentColorForAccent(accentColor)
                     )
                 }
             }

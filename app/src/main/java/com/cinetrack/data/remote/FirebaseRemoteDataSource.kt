@@ -5,6 +5,7 @@ import com.cinetrack.data.model.Folder
 import com.cinetrack.data.local.entities.FolderEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.tasks.await
@@ -50,12 +51,12 @@ class FirebaseRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Batch set movies in Firestore in chunks of 400 to prevent local overlay cache OOM.
+     * Batch set movies in Firestore in smaller chunks of 40 to prevent local overlay cache and Protobuf serialization OOM.
      */
     suspend fun setMoviesBulk(movies: List<Movie>) {
         val uid = userId ?: return
         val collection = getFavoritesCollection(uid)
-        movies.chunked(400).forEach { chunk ->
+        movies.chunked(40).forEach { chunk ->
             try {
                 val batch = firestore.batch()
                 chunk.forEach { movie ->
@@ -84,17 +85,38 @@ class FirebaseRemoteDataSource @Inject constructor(
             return emptyList()
         }
         
-        android.util.Log.d("FirebaseRemoteDataSource", "Fetching favorites for UID: $uid")
-        val snapshot = getFavoritesCollection(uid).get(Source.SERVER).await()
+        android.util.Log.d("FirebaseRemoteDataSource", "Fetching favorites for UID: $uid in paginated chunks to prevent OOM")
         val list = mutableListOf<Movie>()
-        for (doc in snapshot.documents) {
+        var lastSnapshot: com.google.firebase.firestore.DocumentSnapshot? = null
+        val pageSize = 35L
+
+        while (true) {
             try {
-                val movie = doc.toObject(Movie::class.java)
-                if (movie != null) {
-                    list.add(movie)
+                var query = getFavoritesCollection(uid)
+                    .orderBy(FieldPath.documentId())
+                    .limit(pageSize)
+                if (lastSnapshot != null) {
+                    query = query.startAfter(lastSnapshot)
                 }
+
+                val snapshot = query.get(Source.SERVER).await()
+                if (snapshot.isEmpty) break
+
+                for (doc in snapshot.documents) {
+                    try {
+                        val movie = doc.toObject(Movie::class.java)
+                        if (movie != null) {
+                            list.add(movie)
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing movie document ${doc.id}: ${e.message}", e)
+                    }
+                }
+                lastSnapshot = snapshot.documents.lastOrNull()
+                if (snapshot.size() < pageSize.toInt()) break
             } catch (e: Exception) {
-                android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing movie document ${doc.id}: ${e.message}", e)
+                android.util.Log.e("FirebaseRemoteDataSource", "Error during paginated fetch of favorites: ${e.message}", e)
+                break
             }
         }
         return list

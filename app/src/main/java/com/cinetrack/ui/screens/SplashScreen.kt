@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.ui.viewmodel.AuthState
@@ -23,6 +25,8 @@ import com.cinetrack.ui.viewmodel.AuthViewModel
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 
 class SplashScreen : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
