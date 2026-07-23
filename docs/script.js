@@ -351,10 +351,39 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCarouselSpeed = 1.0;
   let lastFrameTimestamp = performance.now();
 
+  let snapTimeout;
   window.addEventListener('scroll', () => {
     const currentScrollY = window.scrollY;
     scrollVelocity = currentScrollY - lastScrollY;
     lastScrollY = currentScrollY;
+
+    // Magnetic Snap Logic
+    clearTimeout(snapTimeout);
+    snapTimeout = setTimeout(() => {
+      if (scrollDeckSection && scrollCards.length > 0) {
+        const rect = scrollDeckSection.getBoundingClientRect();
+        // Check if deck is active in viewport
+        if (rect.top <= 0 && rect.bottom >= window.innerHeight) {
+          const totalScrollableHeight = rect.height - window.innerHeight;
+          if (totalScrollableHeight > 0) {
+            const progress = Math.max(0, Math.min(1, -rect.top / totalScrollableHeight));
+            const numCards = scrollCards.length;
+            const exactCardPos = progress * (numCards - 1);
+            const nearestIdx = Math.round(exactCardPos);
+            
+            // Snap to the nearest card
+            const targetTop = window.scrollY + rect.top + (nearestIdx / Math.max(1, numCards - 1)) * totalScrollableHeight;
+            if (Math.abs(window.scrollY - targetTop) > 5) {
+              if (window.lenis) {
+                window.lenis.scrollTo(targetTop, { duration: 0.8, easing: (t) => 1 - Math.pow(1 - t, 4) });
+              } else {
+                window.scrollTo({ top: targetTop, behavior: 'smooth' });
+              }
+            }
+          }
+        }
+      }
+    }, 200);
   }, { passive: true });
 
   const scrollCards = Array.from(document.querySelectorAll('.deck-scroll-card'));
@@ -369,8 +398,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const rect = scrollDeckSection.getBoundingClientRect();
         const totalScrollableHeight = rect.height - window.innerHeight;
         if (totalScrollableHeight > 0) {
-          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, scrollCards.length)) * totalScrollableHeight + 5;
-          window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          const numCards = scrollCards.length;
+          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, numCards - 1)) * totalScrollableHeight;
+          if (window.lenis) {
+            window.lenis.scrollTo(targetTop, { duration: 1.0 });
+          } else {
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          }
         }
       }
     });
@@ -382,8 +416,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const rect = scrollDeckSection.getBoundingClientRect();
         const totalScrollableHeight = rect.height - window.innerHeight;
         if (totalScrollableHeight > 0) {
-          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, scrollCards.length)) * totalScrollableHeight + 5;
-          window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          const numCards = scrollCards.length;
+          const targetTop = window.scrollY + rect.top + (idx / Math.max(1, numCards - 1)) * totalScrollableHeight;
+          if (window.lenis) {
+            window.lenis.scrollTo(targetTop, { duration: 1.0 });
+          } else {
+            window.scrollTo({ top: targetTop, behavior: 'smooth' });
+          }
         }
       }
     });
@@ -1191,12 +1230,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     coverCards.forEach((card, idx) => {
+      const color1 = card.getAttribute('data-color-1') || '#2DD4BF';
+      const color2 = card.getAttribute('data-color-2') || '#BB86FC';
+      const color3 = card.getAttribute('data-color-3') || color1;
+      card.style.setProperty('--card-glow-1', `${color1}AA`);
+      card.style.setProperty('--card-glow-2', `${color2}AA`);
+      card.style.setProperty('--card-glow-3', `${color3}AA`);
+
       card.addEventListener('mouseenter', () => {
         isStageHovered = true;
-        const color1 = card.getAttribute('data-color-1') || '#2DD4BF';
-        const color2 = card.getAttribute('data-color-2') || '#BB86FC';
         stageBg.style.setProperty('--stage-glow-color', color1);
-        card.style.setProperty('--card-glow', `${color1}66`);
       });
 
       card.addEventListener('mouseleave', () => {
@@ -1271,9 +1314,9 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.pointerEvents = depthNorm > 0.65 ? 'auto' : 'none';
 
         if (depthNorm > 0.9) {
-          card.style.boxShadow = `0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px ${card.style.getPropertyValue('--card-glow') || 'rgba(45, 212, 191, 0.35)'}`;
+          card.classList.add('is-front');
         } else {
-          card.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.9)';
+          card.classList.remove('is-front');
         }
       });
 
