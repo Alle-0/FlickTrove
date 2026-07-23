@@ -44,6 +44,7 @@ fun SettingsUILayoutSection(
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
+    val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
@@ -140,6 +141,25 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
+            }
+        )
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+            title = stringResource(R.string.settings_split_dropped),
+            description = stringResource(R.string.settings_split_dropped_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showSplitDroppedHome,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleSplitDroppedHome(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleSplitDroppedHome(!showSplitDroppedHome)
             }
         )
         SettingsItem(

@@ -139,6 +139,41 @@ class FirebaseRemoteDataSource @Inject constructor(
             .await()
     }
 
+    /**
+     * Wipes all user data (movies and folders) from Firestore.
+     */
+    suspend fun wipeAllCloudData() {
+        val uid = userId ?: return
+
+        // Wipe movies in batches
+        try {
+            val moviesSnapshot = getFavoritesCollection(uid).get().await()
+            moviesSnapshot.documents.chunked(400).forEach { chunk ->
+                val batch = firestore.batch()
+                chunk.forEach { doc ->
+                    batch.delete(doc.reference)
+                }
+                batch.commit().await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error wiping cloud movies: ${e.message}", e)
+        }
+
+        // Wipe folders in batches
+        try {
+            val foldersSnapshot = getFoldersCollection(uid).get().await()
+            foldersSnapshot.documents.chunked(400).forEach { chunk ->
+                val batch = firestore.batch()
+                chunk.forEach { doc ->
+                    batch.delete(doc.reference)
+                }
+                batch.commit().await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error wiping cloud folders: ${e.message}", e)
+        }
+    }
+
     suspend fun fetchAllFolders(): List<Folder> {
         val uid = userId
         if (uid == null) return emptyList()

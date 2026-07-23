@@ -45,7 +45,7 @@ sealed class DetailUiState {
 }
 
 enum class WatchState {
-    NONE, BOOKMARKED, WATCHED
+    NONE, BOOKMARKED, WATCHED, DROPPED
 }
 
 data class ExternalRatings(

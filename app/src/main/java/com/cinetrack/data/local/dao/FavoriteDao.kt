@@ -12,36 +12,7 @@ interface FavoriteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(movies: List<Movie>)
 
-    @Query("""
-        UPDATE favorites 
-        SET runtime = :runtime, 
-            episode_run_time = :episodeRunTime, 
-            genres = :genres, 
-            top_cast_data = :topCastData, 
-            director_data = :directorData, 
-            director_id = :directorId, 
-            director_name = :directorName, 
-            director_profile_path = :directorProfilePath,
-            seasons = :seasons,
-            number_of_seasons = :numberOfSeasons,
-            number_of_episodes = :numberOfEpisodes
-        WHERE id = :id AND media_type = :mediaType
-    """)
-    suspend fun updateMetadata(
-        id: Long, 
-        mediaType: String,
-        runtime: Int?,
-        episodeRunTime: List<Int>?,
-        genres: List<com.cinetrack.data.model.Genre>?,
-        topCastData: List<com.cinetrack.data.model.PersonData>?,
-        directorData: List<com.cinetrack.data.model.PersonData>?,
-        directorId: Long?,
-        directorName: String?,
-        directorProfilePath: String?,
-        seasons: List<com.cinetrack.data.model.Season>?,
-        numberOfSeasons: Int?,
-        numberOfEpisodes: Int?
-    )
+
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun importIgnore(movies: List<Movie>)

@@ -377,7 +377,8 @@ fun SettingsAccountSection(
     vibrationEnabled: Boolean,
     onLoginClick: () -> Unit,
     onShowLogoutConfirm: () -> Unit,
-    onShowDeleteDialog: () -> Unit
+    onShowDeleteDialog: () -> Unit,
+    onShowWipeSelectionDialog: () -> Unit
 ) {
     val context = LocalContext.current
     val isGuest = user?.isAnonymous == true
@@ -399,6 +400,17 @@ fun SettingsAccountSection(
                 } else {
                     onLoginClick()
                 }
+            }
+        )
+        
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
+            title = stringResource(id = R.string.settings_dialog_wipe_data_title),
+            description = stringResource(id = R.string.settings_wipe_data_desc),
+            tint = Color(0xFFFF9800),
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                onShowWipeSelectionDialog()
             }
         )
         

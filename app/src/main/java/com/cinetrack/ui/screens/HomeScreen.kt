@@ -250,6 +250,7 @@ fun HomeScreenContent(
                 }
 
                 val unreleasedTitle = stringResource(id = R.string.home_unreleased)
+                val droppedTitle = stringResource(id = R.string.home_dropped)
                 LazyVerticalGrid(
                     state = currentGridState,
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -263,13 +264,24 @@ fun HomeScreenContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    val sections = if (uiState.preferences.showSplitReleasesHome) {
-                        listOf(
-                            "" to uiState.releasedMovies,
-                            unreleasedTitle to uiState.unreleasedMovies
-                        ).filter { it.second.isNotEmpty() }
+                    val sections = if (uiState.activeTab == "tv") {
+                        if (uiState.preferences.showSplitDroppedHome) {
+                            listOf(
+                                "" to uiState.activeTvShows,
+                                droppedTitle to uiState.droppedTvShows
+                            ).filter { it.second.isNotEmpty() }
+                        } else {
+                            listOf("" to uiState.movies)
+                        }
                     } else {
-                        listOf("" to uiState.movies)
+                        if (uiState.preferences.showSplitReleasesHome) {
+                            listOf(
+                                "" to uiState.releasedMovies,
+                                unreleasedTitle to uiState.unreleasedMovies
+                            ).filter { it.second.isNotEmpty() }
+                        } else {
+                            listOf("" to uiState.movies)
+                        }
                     }
 
                     sections.forEachIndexed { sectionIndex, (title, items) ->

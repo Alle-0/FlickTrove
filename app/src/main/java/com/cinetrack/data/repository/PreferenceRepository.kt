@@ -38,6 +38,7 @@ class PreferenceRepository @Inject constructor(
         val APP_THEME = stringPreferencesKey("app_theme")
         val CONTENT_LANGUAGE = stringPreferencesKey("content_language")
         val SHOW_SPLIT_RELEASES_HOME = booleanPreferencesKey("show_split_releases_home")
+        val SHOW_SPLIT_DROPPED_HOME = booleanPreferencesKey("show_split_dropped_home")
         val SHOW_APP_ENTRY_ANIMATION = booleanPreferencesKey("show_app_entry_animation")
         val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
@@ -75,6 +76,7 @@ class PreferenceRepository @Inject constructor(
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
+                showSplitDroppedHome = preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] ?: true,
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
@@ -160,6 +162,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateShowSplitDroppedHome(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] = show
+        }
+    }
+
     suspend fun updateShowAppEntryAnimation(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = show
@@ -197,6 +205,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
             preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = prefs.showSplitReleasesHome
+            preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] = prefs.showSplitDroppedHome
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = prefs.showAppEntryAnimation
             preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp

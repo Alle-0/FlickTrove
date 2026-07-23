@@ -86,7 +86,7 @@ class TVUpdateWorker(
                         repository.saveMovie(updated)
 
                         // Notify only if there are genuinely released new episodes and the user wants it
-                        if (releasedNewEps > 0 && notifEnabled && hasPermission) {
+                        if (releasedNewEps > 0 && notifEnabled && hasPermission && !show.dropped) {
                             NotificationHelper.showNewEpisodesNotificationSync(
                                 context = applicationContext,
                                 showTitle = show.title ?: show.name ?: "Serie TV",

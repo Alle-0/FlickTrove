@@ -6,6 +6,7 @@ import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.BackupData
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.importers.TraktJsonImporter
+import com.cinetrack.data.repository.importers.TraktZipImporter
 import com.cinetrack.data.repository.importers.TvTimeGdprImporter
 import com.cinetrack.data.repository.importers.UniversalCsvImporter
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,7 @@ class BackupRepository @Inject constructor(
     private val folderDao: FolderDao,
     private val preferenceRepository: PreferenceRepository,
     private val traktJsonImporter: TraktJsonImporter,
+    private val traktZipImporter: TraktZipImporter,
     private val universalCsvImporter: UniversalCsvImporter,
     private val tvTimeGdprImporter: TvTimeGdprImporter
 ) {
@@ -181,6 +183,13 @@ class BackupRepository @Inject constructor(
             return@withContext migrateTvTimeGdprZip(zipEntries, keepLatestWatchDate, onProgress)
         }
 
+        // Dedicated Trakt export handler: processes each file with the correct semantics
+        if (traktZipImporter.isTraktExport(zipEntries.keys)) {
+            return@withContext traktZipImporter.import(zipEntries) { items ->
+                processAndSaveImportedItems(items, keepLatestWatchDate, onProgress)
+            }
+        }
+
         var totalCount = 0
         for ((name, entryBytes) in zipEntries) {
             try {
@@ -262,6 +271,7 @@ class BackupRepository @Inject constructor(
                     genreIds = existing.genreIds ?: m.genreIds,
                     watched = existing.watched || m.watched,
                     favorite = existing.favorite || m.favorite,
+                    dropped = existing.dropped || m.dropped,
                     personalRating = existing.personalRating ?: m.personalRating,
                     personalNote = (if (!existing.personalNote.isNullOrBlank()) existing.personalNote else m.personalNote)?.take(5000),
                     watchedEpisodes = newEpsMap,
@@ -308,6 +318,7 @@ class BackupRepository @Inject constructor(
                     genreIds = local.genreIds ?: incoming.genreIds,
                     watched = local.watched || incoming.watched,
                     favorite = local.favorite || incoming.favorite,
+                    dropped = local.dropped || incoming.dropped,
                     personalRating = local.personalRating ?: incoming.personalRating,
                     personalNote = (if (!local.personalNote.isNullOrBlank()) local.personalNote else incoming.personalNote)?.take(5000),
                     watchedEpisodes = newEpsMap,

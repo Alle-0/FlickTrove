@@ -61,6 +61,10 @@ class GetHomeUiStateUseCase @Inject constructor() {
             val unreleased = partitionResult.first
             val released = partitionResult.second
 
+            val tvPartitionResult = sorted.partition { it.dropped }
+            val droppedTv = tvPartitionResult.first
+            val activeTv = tvPartitionResult.second
+
             val today = LocalDate.now().toString()
             val notificationCount = toWatchMovies.count { movie ->
                 val isNewEpisode = (movie.newEpisodesFound ?: 0) > 0
@@ -83,6 +87,8 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 movies = sorted.toImmutableList(),
                 releasedMovies = released.toImmutableList(),
                 unreleasedMovies = unreleased.toImmutableList(),
+                activeTvShows = activeTv.toImmutableList(),
+                droppedTvShows = droppedTv.toImmutableList(),
                 movieCount = movieCount,
                 tvCount = tvCount,
                 isLoading = false,

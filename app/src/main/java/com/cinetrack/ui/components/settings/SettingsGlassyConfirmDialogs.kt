@@ -507,6 +507,87 @@ fun BadgesInfoDialog(
         }
     }
 }
+@Composable
+fun WipeDataConfirmDialog(
+    visible: Boolean,
+    title: String,
+    description: String,
+    buttonText: String,
+    activeHazeState: HazeState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(200)),
+        exit = fadeOut(tween(200)),
+        modifier = Modifier.zIndex(100f)
+    ) {
+        val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == EnterExitState.Visible) 1f else 0f }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 400.dp)
+                    .fillMaxWidth(0.85f)
+                    .hazeGlass(
+                        state = activeHazeState, alpha = alpha,
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                    .clickable(enabled = false) {}
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.ic_trash),
+                        null,
+                        tint = Color(0xFFFF9800),
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        }
+                        Button(
+                            onClick = onConfirm,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF9800)
+                            )
+                        ) {
+                            Text(buttonText, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun LogoutConfirmDialog(
@@ -735,6 +816,107 @@ fun SettingsLoadingOverlay(
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun WipeDataSelectionDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    onDismiss: () -> Unit,
+    onSelectLocal: () -> Unit,
+    onSelectTotal: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(200)),
+        exit = fadeOut(tween(200)),
+        modifier = Modifier.zIndex(100f)
+    ) {
+        val alpha by transition.animateFloat(transitionSpec = { tween(200) }, label = "blurAlpha") { if (it == EnterExitState.Visible) 1f else 0f }
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 400.dp)
+                    .fillMaxWidth(0.85f)
+                    .hazeGlass(
+                        state = activeHazeState, alpha = alpha,
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                    .clickable(enabled = false) {}
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.ic_trash),
+                        null,
+                        tint = Color(0xFFFF9800),
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        stringResource(id = R.string.settings_dialog_wipe_data_title),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        stringResource(id = R.string.settings_wipe_data_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = onSelectLocal,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 8.dp)) {
+                                Text(stringResource(id = R.string.settings_wipe_local_data_title), fontWeight = FontWeight.Bold)
+                                Text(stringResource(id = R.string.settings_wipe_local_data_desc), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                            }
+                        }
+                        
+                        Button(
+                            onClick = onSelectTotal,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF9800).copy(alpha = 0.2f),
+                                contentColor = Color(0xFFFF9800)
+                            )
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 8.dp)) {
+                                Text(stringResource(id = R.string.settings_wipe_total_data_title), fontWeight = FontWeight.Bold)
+                                Text(stringResource(id = R.string.settings_wipe_total_data_desc), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                            }
+                        }
+                        
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                        }
+                    }
+                }
             }
         }
     }

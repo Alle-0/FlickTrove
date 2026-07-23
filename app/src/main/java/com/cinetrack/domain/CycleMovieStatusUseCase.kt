@@ -47,6 +47,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                         updateEpisodesUseCase.markAllWatched(current).copy(
                             favorite = false,
                             reminder = false, // Explicitly clear both
+                            dropped = false,
                             clientUpdatedAt = System.currentTimeMillis()
                         )
                     } else {
@@ -55,6 +56,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                             reminder = false,
                             watched = true,
                             watchedAt = java.time.Instant.now().toString(),
+                            dropped = false,
                             clientUpdatedAt = System.currentTimeMillis()
                         )
                     }
@@ -65,6 +67,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                         favorite = false,
                         reminder = false,
                         watched = false,
+                        dropped = false,
                         clientUpdatedAt = System.currentTimeMillis()
                     )
                 }
@@ -78,6 +81,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                         favorite = true,
                         reminder = false,
                         watched = false,
+                        dropped = false,
                         clientUpdatedAt = System.currentTimeMillis()
                     )
                 } else {
@@ -86,6 +90,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                         favorite = false,
                         reminder = true,
                         watched = false,
+                        dropped = false,
                         clientUpdatedAt = System.currentTimeMillis()
                     )
                 }

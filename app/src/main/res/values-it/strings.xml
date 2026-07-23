@@ -18,6 +18,7 @@
     <string name="home_empty_list">La tua lista è vuota</string>
     <string name="home_no_results">Nessun risultato</string>
     <string name="home_unreleased">In arrivo</string>
+    <string name="home_dropped">Abbandonate</string>
     <string name="home_tab_movies">FILM</string>
     <string name="home_tab_tv_series">SERIE TV</string>
     <string name="updates_tab_all">TUTTI</string>
@@ -165,6 +166,8 @@
     <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
     <string name="settings_split_home">Divisione uscite Home</string>
     <string name="settings_split_home_desc">Separa i titoli già usciti da quelli in arrivo nella Home</string>
+    <string name="settings_split_dropped">Separa serie abbandonate</string>
+    <string name="settings_split_dropped_desc">Sposta le serie tv abbandonate in fondo alla lista</string>
     <string name="settings_language">Lingua dell\'App</string>
     <string name="settings_language_desc">Le modifiche richiederanno un riavvio</string>
     <string name="settings_language_system">Sistema</string>
@@ -269,6 +272,21 @@
     <string name="settings_dialog_clear_cache_desc">Tutti i poster e i loghi scaricati verranno rimossi. Dovranno essere ricaricati all\'apertura successiva.</string>
     <string name="settings_dialog_logout_title">Esci</string>
     <string name="settings_dialog_logout_desc">Sei sicuro di voler uscire dal tuo account? Dovrai effettuare nuovamente l\'accesso per sincronizzare i tuoi dati.</string>
+    <string name="settings_wipe_local_data_title">Elimina Dati App (Sicuro)</string>
+    <string name="settings_wipe_local_data_desc">Cancella tutti i dati dal tuo dispositivo. I dati sul cloud rimarranno intatti.</string>
+    <string name="settings_dialog_wipe_data_title">Elimina Dati</string>
+    <string name="settings_wipe_data_desc">Scegli come eliminare i tuoi dati:</string>
+    <string name="settings_dialog_wipe_local_data_title">Elimina Dati Locali</string>
+    <string name="settings_dialog_wipe_local_data_desc">Vuoi eliminare il database locale? I dati sul cloud non verranno toccati e saranno riscaricati in seguito.</string>
+    <string name="settings_yes_wipe_local">Elimina Dati Locali</string>
+    
+    <string name="settings_wipe_total_data_title">Elimina Dati Cloud</string>
+    <string name="settings_wipe_total_data_desc">Elimina tutti i tuoi dati sia dal dispositivo che dal cloud</string>
+    <string name="settings_dialog_wipe_total_data_title">Elimina Tutti i Dati</string>
+    <string name="settings_dialog_wipe_total_data_desc">Sei sicuro di voler cancellare tutto? Questo eliminerà permanentemente la tua libreria dal cloud e dal dispositivo. Non si può annullare.</string>
+    <string name="settings_yes_wipe_total">Elimina Tutto</string>
+    <string name="settings_account_deleted_success">Account eliminato con successo</string>
+    <string name="settings_action_success">Operazione completata con successo</string>
     <string name="settings_login">Accedi</string>
     <!-- Badges -->
     <string name="settings_badge_new">NEW</string>
@@ -668,6 +686,7 @@
     <string name="settings_msg_badge">Badge %1$s</string>
     <string name="settings_msg_layout_btn">Pulsante layout %1$s</string>
     <string name="settings_msg_releases_split">Divisione uscite %1$s</string>
+    <string name="settings_msg_dropped_split">Divisione abbandonate %1$s</string>
     <string name="settings_msg_logo_anim">Animazione logo %1$s</string>
     <string name="settings_msg_notifications">Notifiche %1$s</string>
     <string name="settings_msg_vibration">Vibrazione %1$s</string>
@@ -764,6 +783,7 @@
     <string name="action_select_episodes">SELEZIONA PUNTATE</string>
     <string name="action_mark_as_watched">SEGNA COME VISTO</string>
     <string name="action_watched">VISTO</string>
+    <string name="action_dropped">ABBANDONATA</string>
     <string name="action_completed">COMPLETATA</string>
     <string name="action_percent_watched">%1$d%% VISTO</string>
 
@@ -859,6 +879,7 @@
     <string name="msg_action_favorite">\"%1$s\" aggiunto a Da Vedere</string>
     <string name="msg_action_reminder">\"%1$s\" promemoria impostato</string>
     <string name="msg_action_updated">\"%1$s\" aggiornato</string>
+    <string name="msg_action_dropped">\"%1$s\" droppato</string>
 
     <!-- Detail Actions -->
 
@@ -934,6 +955,9 @@
     <string name="onboarding_slide4_title">I tuoi dati sono tuoi</string>
     <string name="onboarding_slide4_sub">BACKUP LOCALE &amp; TRAKT SYNC</string>
     <string name="onboarding_slide4_desc">Esporta e importa i tuoi backup locali in formato JSON in un secondo, oppure collega il tuo account Trakt per la sincronizzazione automatica.</string>
+    <string name="onboarding_slide5_title">Serie Interrotte</string>
+    <string name="onboarding_slide5_sub">NASCONDI LE SERIE ABBANDONATE</string>
+    <string name="onboarding_slide5_desc">Hai abbandonato una serie a metà? Segnala come \'Dropped\' così non riceverai più notifiche per i nuovi episodi, pur mantenendo traccia di quelli già visti!</string>
     <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
 
     <!-- Rewatch Import Dialog -->

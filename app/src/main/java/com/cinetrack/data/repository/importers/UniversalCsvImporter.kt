@@ -97,12 +97,13 @@ class UniversalCsvImporter @Inject constructor(
                     }
 
                     val isWatchlistFile = fileName != null && (fileName.contains("watchlist") || fileName.contains("to_watch") || fileName.contains("planned") || fileName.contains("for_later"))
+                    var droppedVal = false
                     var watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
                         val w = columns[watchedIdx]?.trim()?.lowercase()
                         when (w) {
                             "1", "true", "yes", "watched", "completed", "watching", "seen", "up_to_date" -> true
                             "0", "false", "no", "planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere" -> false
-                            "dropped", "paused" -> return@mapNotNull null
+                            "dropped", "paused" -> { droppedVal = true; false }
                             else -> !isWatchlistFile
                         }
                     } else !isWatchlistFile
@@ -111,7 +112,7 @@ class UniversalCsvImporter @Inject constructor(
                         watchedVal = when (columns[watchedIdx]) {
                             "Completed" -> true
                             "Planned", "Watching" -> false
-                            "Dropped", "Paused" -> return@mapNotNull null
+                            "Dropped", "Paused" -> { droppedVal = true; false }
                             else -> false
                         }
                     }
@@ -145,7 +146,8 @@ class UniversalCsvImporter @Inject constructor(
                                         title = it.title,
                                         name = it.name,
                                         watched = watchedVal,
-                                        favorite = favVal,
+                                        favorite = favVal || droppedVal,
+                                        dropped = droppedVal,
                                         personalRating = ratingVal,
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
@@ -163,7 +165,8 @@ class UniversalCsvImporter @Inject constructor(
                                     title = titleVal ?: "Unknown ($tmdbVal)",
                                     name = if (mediaType == "tv") titleVal else null,
                                     watched = watchedVal,
-                                    favorite = favVal,
+                                    favorite = favVal || droppedVal,
+                                    dropped = droppedVal,
                                     personalRating = ratingVal,
                                     personalNote = noteVal,
                                     watchedEpisodes = epsMap,

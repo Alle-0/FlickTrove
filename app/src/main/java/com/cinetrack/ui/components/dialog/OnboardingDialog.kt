@@ -82,6 +82,13 @@ fun OnboardingDialog(
                 descriptionRes = R.string.onboarding_slide4_desc,
                 iconRes = R.drawable.ic_link,
                 imageRes = R.drawable.onboarding_img_4
+            ),
+            OnboardingSlide(
+                titleRes = R.string.onboarding_slide5_title,
+                subtitleRes = R.string.onboarding_slide5_sub,
+                descriptionRes = R.string.onboarding_slide5_desc,
+                iconRes = R.drawable.ic_x,
+                imageRes = R.drawable.onboarding_img_5
             )
         )
     }

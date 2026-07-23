@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the box/container part of the packing/unpacking icon (no arrow) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path android:pathData="M17.5 10L21.5 7" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+  <path android:pathData="M15 10H16.5C17.8807 10 19 11.1193 19 12.5V14" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+  <path android:pathData="M5 16V17.5C5 18.8807 6.11929 20 7.5 20H16.5C17.8807 20 19 18.8807 19 17.5" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round"/>
+  <path android:pathData="M5 12.5C5 11.1193 6.11929 10 7.5 10H9" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round"/>
+  <path android:pathData="M2.5 7L6.5 10" android:strokeColor="#000000" android:strokeWidth="2" android:strokeLineCap="round"/>
+</vector>

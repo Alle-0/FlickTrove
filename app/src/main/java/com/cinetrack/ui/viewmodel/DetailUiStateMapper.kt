@@ -110,7 +110,8 @@ class DetailUiStateMapper @Inject constructor(
                     watchedEpisodes = local.watchedEpisodes,
                     watchedAt = local.watchedAt,
                     personalRating = local.personalRating,
-                    personalNote = local.personalNote
+                    personalNote = local.personalNote,
+                    dropped = local.dropped
                 )
             } else this
         }
@@ -133,6 +134,7 @@ class DetailUiStateMapper @Inject constructor(
             isFavorite = finalMovie.favorite,
             isWatched = finalMovie.watched,
             watchState = when {
+                finalMovie.dropped -> WatchState.DROPPED
                 finalMovie.watched -> WatchState.WATCHED
                 finalMovie.favorite || finalMovie.reminder -> WatchState.BOOKMARKED
                 else -> WatchState.NONE

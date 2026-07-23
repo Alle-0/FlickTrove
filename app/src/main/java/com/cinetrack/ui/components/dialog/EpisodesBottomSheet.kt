@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.*
@@ -29,7 +31,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +51,7 @@ import com.cinetrack.ui.viewmodel.DetailUiState
 import com.cinetrack.ui.viewmodel.DetailEvent
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
+import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -88,6 +93,7 @@ fun EpisodesBottomSheet(
     
     val seasonDetails = successState?.seasonDetails ?: emptyMap<Int, Season>()
     val loadingSeason = successState?.loadingSeason ?: false
+    val isDropped = successState?.watchState == WatchState.DROPPED
     
     var selectedSeasonNumber by remember { 
         mutableStateOf(
@@ -276,6 +282,7 @@ fun EpisodesBottomSheet(
                     BulkAction(
                         isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
                         onToggle = { 
+                            if (isDropped) return@BulkAction
                             val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
                             val nextWatched = if (currentWatched.size >= targetEps.size) {
                                 emptyList()
@@ -285,6 +292,7 @@ fun EpisodesBottomSheet(
                             localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
                         },
                         onLongClick = {
+                            if (isDropped) return@BulkAction
                             localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to targetEps)
                         }
                     )
@@ -344,6 +352,7 @@ fun EpisodesBottomSheet(
                             episode = episode,
                             isWatched = (localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList<Int>()).contains(episode.episodeNumber),
                             onToggle = { 
+                                if (isDropped) return@EpisodeCard
                                 val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()]?.toMutableList() ?: mutableListOf()
                                 if (currentWatched.contains(episode.episodeNumber)) {
                                     currentWatched.remove(episode.episodeNumber)
@@ -596,15 +605,33 @@ private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                // Titolo
-                Text(
-                    text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
-                    fontWeight = FontWeight.Black,
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    lineHeight = 24.sp
-                )
+                // Titolo e X
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f).padding(end = 16.dp),
+                        lineHeight = 24.sp
+                    )
+                    
+                    Surface(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .bounceClick { onDismiss() },
+                        color = Color.White.copy(alpha = 0.06f),
+                        shape = CircleShape
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                        }
+                    }
+                }
 
                 // Immagine (se presente)
                 if (!episode.stillPath.isNullOrEmpty()) {
@@ -683,38 +710,53 @@ private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                 }
 
                 // Trama
-                if (!episode.overview.isNullOrEmpty()) {
-                    Text(
-                        text = episode.overview,
-                        fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.7f),
-                        lineHeight = 20.sp,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-                } else {
-                    Text(
-                        text = stringResource(R.string.detail_no_overview),
-                        fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.4f),
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-                }
-
-                // Bottone di chiusura
+                val scrollState = rememberScrollState()
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 240.dp)
+                        .drawWithContent {
+                            drawContent()
+                            val showTop = scrollState.value > 0
+                            val showBottom = scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
+                            
+                            if (showTop) {
+                                drawRect(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(Color(0xFF1A1A1C), Color.Transparent),
+                                        startY = 0f,
+                                        endY = 24.dp.toPx()
+                                    )
+                                )
+                            }
+                            if (showBottom) {
+                                drawRect(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, Color(0xFF1A1A1C)),
+                                        startY = size.height - 24.dp.toPx(),
+                                        endY = size.height
+                                    )
+                                )
+                            }
+                        }
                 ) {
-                    TextButton(
-                        onClick = onDismiss,
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-                    ) {
+                    if (!episode.overview.isNullOrEmpty()) {
                         Text(
-                            text = stringResource(R.string.settings_close).uppercase(),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
+                            text = episode.overview,
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                            lineHeight = 20.sp,
+                            modifier = Modifier
+                                .verticalScroll(scrollState)
+                                .padding(vertical = 12.dp)
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.detail_no_overview),
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            modifier = Modifier.padding(vertical = 12.dp)
                         )
                     }
                 }

@@ -14,6 +14,7 @@ import com.cinetrack.data.repository.SettingsRepository
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -220,6 +221,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showSplitReleasesHome }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showSplitDroppedHome: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showSplitDroppedHome }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val showAppEntryAnimation: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showAppEntryAnimation }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -306,10 +311,21 @@ class SettingsViewModel @Inject constructor(
 
     fun toggleSplitReleasesHome(enabled: Boolean) {
         viewModelScope.launch {
+            val currentPrefs = preferenceRepository.userPreferencesFlow.first()
             preferenceRepository.updateShowSplitReleasesHome(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_releases_split, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleSplitDroppedHome(enabled: Boolean) {
+        viewModelScope.launch {
+            val currentPrefs = preferenceRepository.userPreferencesFlow.first()
+            preferenceRepository.updateShowSplitDroppedHome(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dropped_split, context.getString(statusRes)))
         }
     }
 
@@ -583,6 +599,39 @@ class SettingsViewModel @Inject constructor(
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_started))
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
+            }
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            try {
+                auth.currentUser?.delete()?.await()
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_account_deleted_success))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to delete account"))
+            }
+        }
+    }
+
+    fun wipeLocalData() {
+        viewModelScope.launch {
+            try {
+                movieRepository.wipeLocalData()
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_action_success))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to wipe local data"))
+            }
+        }
+    }
+
+    fun wipeTotalData() {
+        viewModelScope.launch {
+            try {
+                movieRepository.wipeTotalData()
+                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_action_success))
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to wipe total data"))
             }
         }
     }

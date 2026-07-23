@@ -132,6 +132,11 @@ data class Movie(
     @set:PropertyName("reminder")
     var reminder: Boolean = false,
     
+    @get:PropertyName("dropped")
+    @set:PropertyName("dropped")
+    @ColumnInfo(name = "dropped", defaultValue = "0")
+    var dropped: Boolean = false,
+    
     @SerialName("personal_rating")
     @get:Exclude
     @set:Exclude

@@ -88,6 +88,20 @@ class MovieRepository @Inject constructor(
         } catch (e: Exception) {}
     }
 
+    suspend fun wipeLocalData() {
+        favoriteDao.clearAll()
+        folderDao.clearAll()
+        widgetNotifier.notifyWidgetUpdated()
+    }
+
+    suspend fun wipeTotalData() {
+        // Wipe cloud data
+        firebaseRemoteDataSource.wipeAllCloudData()
+        
+        // Wipe local data
+        wipeLocalData()
+    }
+
     // --- Local Operations (Bunker: Room First) ---
     suspend fun getLocalMovies(): List<Movie> = favoriteDao.getAll()
     
@@ -256,23 +270,32 @@ class MovieRepository @Inject constructor(
                         val response = fetchMovieDetails(movie.id, isTv)
                         val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
                         
-                        favoriteDao.updateMetadata(
-                            id = movie.id,
-                            mediaType = movie.mediaType,
-                            runtime = freshMovie.runtime,
-                            episodeRunTime = freshMovie.episodeRunTime,
-                            genres = freshMovie.genres,
-                            topCastData = freshMovie.topCastData,
-                            directorData = freshMovie.directorData,
-                            directorId = freshMovie.directorId,
-                            directorName = freshMovie.directorName,
-                            directorProfilePath = freshMovie.directorProfilePath,
-                            seasons = freshMovie.seasons,
-                            numberOfSeasons = freshMovie.numberOfSeasons,
-                            numberOfEpisodes = freshMovie.numberOfEpisodes
-                        )
-                        
                         var currentLocal = favoriteDao.getById(movie.id, movie.mediaType)
+                        if (currentLocal != null) {
+                            currentLocal = currentLocal.copy(
+                                runtime = freshMovie.runtime ?: currentLocal.runtime,
+                                episodeRunTime = freshMovie.episodeRunTime ?: currentLocal.episodeRunTime,
+                                genres = freshMovie.genres ?: currentLocal.genres,
+                                topCastData = freshMovie.topCastData ?: currentLocal.topCastData,
+                                directorData = freshMovie.directorData ?: currentLocal.directorData,
+                                directorId = freshMovie.directorId ?: currentLocal.directorId,
+                                directorName = freshMovie.directorName ?: currentLocal.directorName,
+                                directorProfilePath = freshMovie.directorProfilePath ?: currentLocal.directorProfilePath,
+                                seasons = freshMovie.seasons ?: currentLocal.seasons,
+                                numberOfSeasons = freshMovie.numberOfSeasons ?: currentLocal.numberOfSeasons,
+                                numberOfEpisodes = freshMovie.numberOfEpisodes ?: currentLocal.numberOfEpisodes,
+                                posterPath = freshMovie.posterPath ?: currentLocal.posterPath,
+                                backdropPath = freshMovie.backdropPath ?: currentLocal.backdropPath,
+                                overview = freshMovie.overview ?: currentLocal.overview,
+                                firstAirDate = freshMovie.firstAirDate ?: currentLocal.firstAirDate,
+                                releaseDate = freshMovie.releaseDate ?: currentLocal.releaseDate,
+                                releaseYear = freshMovie.releaseYear ?: currentLocal.releaseYear,
+                                status = freshMovie.status ?: currentLocal.status,
+                                voteAverage = freshMovie.voteAverage ?: currentLocal.voteAverage,
+                                voteCount = freshMovie.voteCount ?: currentLocal.voteCount
+                            )
+                            favoriteDao.insert(currentLocal)
+                        }
                         val currentEps = currentLocal?.watchedEpisodes
                         if (isTv && movie.watched && currentLocal != null && (currentEps.isNullOrEmpty() || currentEps.values.sumOf { it.size } == 0)) {
                             val allWatched = updateEpisodesUseCase.markAllWatched(freshMovie).watchedEpisodes

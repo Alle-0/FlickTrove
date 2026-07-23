@@ -43,15 +43,30 @@ class TraktJsonImporter @Inject constructor(
             val moviesToInsert = items.mapNotNull { item ->
                 val tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: return@mapNotNull null
                 val mediaType = if (item.movie != null) "movie" else "tv"
+                
+                val isEpisode = item.type == "episode" || item.episode != null
+                var isShowWatched = item.watched == true
+                if (!isEpisode && item.watchedAt != null) {
+                    isShowWatched = true
+                }
+                
+                val finalWatchedEps = if (isEpisode && item.episode?.season != null && item.episode?.number != null) {
+                    mapOf(item.episode.season.toString() to listOf(item.episode.number))
+                } else null
+
+                val isDropped = item.dropped == true
+                    || item.status?.lowercase()?.let { it == "dropped" || it == "paused" } == true
                 Movie(
                     id = tmdbId,
                     mediaType = mediaType,
                     title = item.movie?.title ?: item.show?.title ?: "Unknown ($tmdbId)",
                     name = if (mediaType == "tv") (item.show?.title ?: "Unknown ($tmdbId)") else null,
-                    watched = item.watched == true || item.watchedAt != null,
-                    favorite = false,
+                    watched = isShowWatched,
+                    favorite = isDropped,  // keep dropped items visible in-list
+                    dropped = isDropped,
                     personalRating = item.rating?.toDouble(),
                     personalNote = item.notes?.take(5000),
+                    watchedEpisodes = finalWatchedEps,
                     watchedAt = parseAndNormalizeWatchedDate(item.watchedAt),
                     syncStatus = "pending",
                     clientUpdatedAt = System.currentTimeMillis()
@@ -181,12 +196,21 @@ class TraktJsonImporter @Inject constructor(
                         || itemObj["status"]?.jsonPrimitive?.contentOrNull?.lowercase()
                             ?.let { it == "watched" || it == "completed" || it == "seen" } == true
                     val isSeen = if (hasWatchedField) explicitSeen else if (isWatchlistFile) false else true
+                    val isDropped = obj["dropped"]?.jsonPrimitive?.booleanOrNull == true
+                        || itemObj["dropped"]?.jsonPrimitive?.booleanOrNull == true
+                        || obj["status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "dropped" || it == "paused" } == true
+                        || obj["watch_status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "dropped" || it == "paused" } == true
+                        || itemObj["status"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                            ?.let { it == "dropped" || it == "paused" } == true
                     var isFav = obj["favorite"]?.jsonPrimitive?.booleanOrNull == true
                         || obj["fav"]?.jsonPrimitive?.booleanOrNull == true
                         || obj["starred"]?.jsonPrimitive?.booleanOrNull == true
                         || itemObj["favorite"]?.jsonPrimitive?.booleanOrNull == true
                         || itemObj["fav"]?.jsonPrimitive?.booleanOrNull == true
                         || itemObj["starred"]?.jsonPrimitive?.booleanOrNull == true
+                        || isDropped  // dropped items stay visible in the list
 
                     val rawFolder = obj["folder"]?.jsonPrimitive?.contentOrNull
                         ?: obj["list_name"]?.jsonPrimitive?.contentOrNull
@@ -263,6 +287,7 @@ class TraktJsonImporter @Inject constructor(
                                         genreIds = it.genreIds,
                                         watched = isSeen,
                                         favorite = isFav,
+                                        dropped = isDropped,
                                         personalRating = userRating,
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,
@@ -281,6 +306,7 @@ class TraktJsonImporter @Inject constructor(
                                     name = if (mediaType == "tv") title else null,
                                     watched = isSeen,
                                     favorite = isFav,
+                                    dropped = isDropped,
                                     personalRating = userRating,
                                     personalNote = userNote,
                                     watchedEpisodes = finalWatchedEps,
@@ -308,6 +334,7 @@ class TraktJsonImporter @Inject constructor(
                                         genreIds = it.genreIds,
                                         watched = isSeen,
                                         favorite = isFav,
+                                        dropped = isDropped,
                                         personalRating = userRating,
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,

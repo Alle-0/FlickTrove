@@ -18,6 +18,7 @@
     <string name="home_empty_list">Your list is empty</string>
     <string name="home_no_results">No results</string>
     <string name="home_unreleased">Unreleased</string>
+    <string name="home_dropped">Dropped</string>
     <string name="home_tab_movies">MOVIES</string>
     <string name="home_tab_tv_series">TV SERIES</string>
     <string name="updates_tab_all">ALL</string>
@@ -165,6 +166,8 @@
     <string name="settings_layout_toggle_desc">Shows a button to change the number of columns in Home</string>
     <string name="settings_split_home">Split Home Releases</string>
     <string name="settings_split_home_desc">Separates released titles from upcoming ones in Home</string>
+    <string name="settings_split_dropped">Separate Dropped Series</string>
+    <string name="settings_split_dropped_desc">Moves dropped series to the bottom of the TV Shows section</string>
     <string name="settings_use_movie_logo">Use Official Logos</string>
     <string name="settings_use_movie_logo_desc">In details, shows the original title logo instead of text, when available.</string>
     <string name="settings_language">App Language</string>
@@ -270,6 +273,21 @@
     <string name="settings_dialog_clear_cache_desc">All downloaded posters and logos will be removed. They will need to be reloaded on the next startup.</string>
     <string name="settings_dialog_logout_title">Logout</string>
     <string name="settings_dialog_logout_desc">Are you sure you want to log out? You will need to log in again to sync your data.</string>
+    <string name="settings_wipe_local_data_title">Wipe App Data (Safe)</string>
+    <string name="settings_wipe_local_data_desc">Clear all data from your device. Cloud data remains intact.</string>
+    <string name="settings_dialog_wipe_data_title">Wipe Data</string>
+    <string name="settings_wipe_data_desc">Choose how you want to wipe your data:</string>
+    <string name="settings_dialog_wipe_local_data_title">Wipe Local Data</string>
+    <string name="settings_dialog_wipe_local_data_desc">Are you sure you want to clear your local database? Your cloud data will not be affected and will be re-downloaded.</string>
+    <string name="settings_yes_wipe_local">Wipe Local Data</string>
+    
+    <string name="settings_wipe_total_data_title">Wipe Cloud Data</string>
+    <string name="settings_wipe_total_data_desc">Delete all your data from both device and cloud</string>
+    <string name="settings_dialog_wipe_total_data_title">Wipe All Data</string>
+    <string name="settings_dialog_wipe_total_data_desc">Are you sure you want to delete everything? This will permanently erase your library from the cloud and this device. This action cannot be undone.</string>
+    <string name="settings_yes_wipe_total">Wipe All Data</string>
+    <string name="settings_account_deleted_success">Account successfully deleted</string>
+    <string name="settings_action_success">Operation completed successfully</string>
     <string name="settings_login">Login</string>
     <!-- Badges -->
     <string name="settings_badge_new">NEW</string>
@@ -670,6 +688,7 @@
     <string name="settings_msg_badge">Badge %1$s</string>
     <string name="settings_msg_layout_btn">Layout button %1$s</string>
     <string name="settings_msg_releases_split">Releases split %1$s</string>
+    <string name="settings_msg_dropped_split">Dropped split %1$s</string>
     <string name="settings_msg_logo_anim">Logo animation %1$s</string>
     <string name="settings_msg_notifications">Notifications %1$s</string>
     <string name="settings_msg_vibration">Vibration %1$s</string>
@@ -759,6 +778,7 @@
     <string name="action_select_episodes">SELECT EPISODES</string>
     <string name="action_mark_as_watched">MARK AS WATCHED</string>
     <string name="action_watched">WATCHED</string>
+    <string name="action_dropped">DROPPED</string>
     <string name="action_completed">COMPLETED</string>
     <string name="action_percent_watched">%1$d%% WATCHED</string>
 
@@ -863,6 +883,7 @@
     <string name="msg_action_favorite">\"%1$s\" added to To Watch</string>
     <string name="msg_action_reminder">\"%1$s\" reminder set</string>
     <string name="msg_action_updated">\"%1$s\" updated</string>
+    <string name="msg_action_dropped">\"%1$s\" dropped</string>
     <!-- Episodes -->
     <string name="episodes_info_desc">Episode Information</string>
     <string name="episodes_long_press_info">Long press an episode for more info</string>
@@ -937,6 +958,9 @@
     <string name="onboarding_slide4_title">Your Data Belongs to You</string>
     <string name="onboarding_slide4_sub">LOCAL BACKUP &amp; TRAKT SYNC</string>
     <string name="onboarding_slide4_desc">Export and import local JSON backups in a second, or connect your Trakt account for automatic sync.</string>
+    <string name="onboarding_slide5_title">Dropped Series</string>
+    <string name="onboarding_slide5_sub">HIDE ABANDONED SHOWS</string>
+    <string name="onboarding_slide5_desc">Dropped a show midway? Mark it as \'Dropped\' so it stops bothering you for unwatched episodes while still keeping track of what you\'ve seen.</string>
     <string name="settings_review_tutorial">Replay Welcome Tutorial</string>
 
     <!-- Rewatch Import Dialog -->

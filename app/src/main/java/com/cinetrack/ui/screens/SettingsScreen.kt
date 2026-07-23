@@ -59,6 +59,7 @@ import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.viewmodel.*
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.settings.*
+import com.cinetrack.ui.components.settings.WipeDataSelectionDialog
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
@@ -339,6 +340,9 @@ fun SettingsScreenContent(
 
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 90.dp
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    var showWipeSelectionDialog by remember { mutableStateOf(false) }
+    var showWipeLocalDataConfirm by remember { mutableStateOf(false) }
+    var showWipeTotalDataConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
     var pendingMigrationFilePath by remember { mutableStateOf<String?>(null) }
@@ -354,7 +358,7 @@ fun SettingsScreenContent(
     }
 
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showFeedbackDialog || 
-                           showCacheConfirm || showLogoutConfirm || showBackupDialog || 
+                           showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
                            showDeepSyncConfirm || pendingMigrationFilePath != null
 
@@ -584,7 +588,8 @@ fun SettingsScreenContent(
                             vibrationEnabled = vibrationEnabled,
                             onLoginClick = onLoginClick,
                             onShowLogoutConfirm = { showLogoutConfirm = true },
-                            onShowDeleteDialog = { showDeleteDialog = true }
+                            onShowDeleteDialog = { showDeleteDialog = true },
+                            onShowWipeSelectionDialog = { showWipeSelectionDialog = true }
                         )
                     }
 
@@ -711,8 +716,46 @@ fun SettingsScreenContent(
                 viewModel.logout()
             }
         )
+        
+        WipeDataSelectionDialog(
+            visible = showWipeSelectionDialog,
+            activeHazeState = activeHazeState,
+            onDismiss = { showWipeSelectionDialog = false },
+            onSelectLocal = {
+                showWipeSelectionDialog = false
+                showWipeLocalDataConfirm = true
+            },
+            onSelectTotal = {
+                showWipeSelectionDialog = false
+                showWipeTotalDataConfirm = true
+            }
+        )
 
+        WipeDataConfirmDialog(
+            visible = showWipeLocalDataConfirm,
+            title = stringResource(id = R.string.settings_dialog_wipe_local_data_title),
+            description = stringResource(id = R.string.settings_dialog_wipe_local_data_desc),
+            buttonText = stringResource(id = R.string.settings_yes_wipe_local),
+            activeHazeState = activeHazeState,
+            onDismiss = { showWipeLocalDataConfirm = false },
+            onConfirm = {
+                showWipeLocalDataConfirm = false
+                settingsViewModel.wipeLocalData()
+            }
+        )
 
+        WipeDataConfirmDialog(
+            visible = showWipeTotalDataConfirm,
+            title = stringResource(id = R.string.settings_dialog_wipe_total_data_title),
+            description = stringResource(id = R.string.settings_dialog_wipe_total_data_desc),
+            buttonText = stringResource(id = R.string.settings_yes_wipe_total),
+            activeHazeState = activeHazeState,
+            onDismiss = { showWipeTotalDataConfirm = false },
+            onConfirm = {
+                showWipeTotalDataConfirm = false
+                settingsViewModel.wipeTotalData()
+            }
+        )
 
 
 

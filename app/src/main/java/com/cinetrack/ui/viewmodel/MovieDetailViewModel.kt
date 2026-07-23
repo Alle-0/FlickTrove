@@ -415,10 +415,13 @@ class MovieDetailViewModel @Inject constructor(
     private fun syncWatchedEpisodes(episodes: Map<String, List<Int>>) {
         val state = uiState.value as? DetailUiState.Success ?: return
         val movie = state.movieEntry
+        val currentWatched = movie.watchedEpisodes ?: emptyMap()
+        if (episodes == currentWatched) return
+        
         val castedMap = episodes.mapKeys { it.key.toIntOrNull() ?: 0 }
         
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase.batchUpdate(movie, castedMap)
+            val updated = updateEpisodesUseCase.batchUpdate(movie, castedMap).copy(dropped = false)
             repository.saveMovie(updated)
         }
     }
@@ -538,19 +541,20 @@ class MovieDetailViewModel @Inject constructor(
         val title = previousMovie.title ?: previousMovie.name ?: ""
         viewModelScope.launch {
             val updated = when (watchState) {
-                WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null)
+                WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
+                WatchState.DROPPED -> previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
                 WatchState.BOOKMARKED -> {
                     if (previousMovie.isReleased) {
-                        previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null)
+                        previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
                     } else {
-                        previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null)
+                        previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
                     }
                 }
                 WatchState.WATCHED -> {
                     if (mediaType == "tv") {
-                        updateEpisodesUseCase.markAllWatched(previousMovie)
+                        updateEpisodesUseCase.markAllWatched(previousMovie).copy(dropped = false)
                     } else {
-                        previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = java.time.Instant.now().toString())
+                        previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = java.time.Instant.now().toString(), dropped = false)
                     }
                 }
             }
@@ -558,6 +562,7 @@ class MovieDetailViewModel @Inject constructor(
 
             val actionMsgRes = when (watchState) {
                 WatchState.NONE -> R.string.msg_action_removed
+                WatchState.DROPPED -> R.string.msg_action_dropped
                 WatchState.BOOKMARKED -> if (previousMovie.isReleased) R.string.msg_action_favorite else R.string.msg_action_reminder
                 WatchState.WATCHED -> R.string.msg_action_watched
             }
@@ -597,7 +602,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase(movie, seasonNumber, currentWatched)
+            val updated = updateEpisodesUseCase(movie, seasonNumber, currentWatched).copy(dropped = false)
             repository.saveMovie(updated)
         }
     }
@@ -614,7 +619,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase(movie, seasonNumber, newEpisodes)
+            val updated = updateEpisodesUseCase(movie, seasonNumber, newEpisodes).copy(dropped = false)
             repository.saveMovie(updated)
         }
     }

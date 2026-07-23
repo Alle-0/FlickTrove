@@ -29,6 +29,8 @@ data class HomeUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
     val releasedMovies: ImmutableList<Movie> = persistentListOf(),
     val unreleasedMovies: ImmutableList<Movie> = persistentListOf(),
+    val activeTvShows: ImmutableList<Movie> = persistentListOf(),
+    val droppedTvShows: ImmutableList<Movie> = persistentListOf(),
     val movieCount: Int = 0,
     val tvCount: Int = 0,
     val isLoading: Boolean = true,

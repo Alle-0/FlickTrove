@@ -21,6 +21,7 @@ class TvTimeGdprImporter @Inject constructor(
         var isWatched: Boolean,
         var isFavorite: Boolean = false,
         var isForLater: Boolean = false,
+        var isDropped: Boolean = false,
         var watchedAt: String? = null,
         var personalRating: Double? = null,
         var personalNote: String? = null,
@@ -43,7 +44,8 @@ class TvTimeGdprImporter @Inject constructor(
             isWatched: Boolean,
             watchedAt: String? = null,
             isFavorite: Boolean = false,
-            isForLater: Boolean = false
+            isForLater: Boolean = false,
+            isDropped: Boolean = false
         ): TvTimeItemData {
             val cleanTitle = title.trim()
             if (cleanTitle.isBlank()) return TvTimeItemData(null, "", mediaType, isWatched)
@@ -68,8 +70,9 @@ class TvTimeGdprImporter @Inject constructor(
                 title = cleanTitle,
                 mediaType = mediaType,
                 isWatched = if (isForLater) false else isWatched,
-                isFavorite = isFavorite || (isForLater && !isWatched),
+                isFavorite = isFavorite || (isForLater && !isWatched) || isDropped,
                 isForLater = if (isWatched) false else isForLater,
+                isDropped = isDropped,
                 watchedAt = watchedAt
             )
             itemsMap[key] = newItem
@@ -111,8 +114,9 @@ class TvTimeGdprImporter @Inject constructor(
                     val title = cols[2]
                     val showId = cols[4]
                     val status = cols[5].trim().lowercase()
-                    val isForLater = status.isNotBlank() && status !in listOf("archived", "dropped", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
-                    addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater, isForLater = isForLater)
+                    val isDropped = status == "dropped" || status == "paused"
+                    val isForLater = !isDropped && status.isNotBlank() && status !in listOf("archived", "dropped", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater && !isDropped, isForLater = isForLater, isDropped = isDropped)
                 }
             }
         }
@@ -545,6 +549,7 @@ class TvTimeGdprImporter @Inject constructor(
                                 genreIds = tmdb.genreIds,
                                 watched = finalWatched,
                                 favorite = finalFav,
+                                dropped = item.isDropped,
                                 personalRating = item.personalRating,
                                 personalNote = item.personalNote,
                                 watchedEpisodes = finalEps,
