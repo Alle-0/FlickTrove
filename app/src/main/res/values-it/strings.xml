@@ -957,7 +957,7 @@
     <string name="onboarding_slide4_desc">Esporta e importa i tuoi backup locali in formato JSON in un secondo, oppure collega il tuo account Trakt per la sincronizzazione automatica.</string>
     <string name="onboarding_slide5_title">Serie Interrotte</string>
     <string name="onboarding_slide5_sub">NASCONDI LE SERIE ABBANDONATE</string>
-    <string name="onboarding_slide5_desc">Hai abbandonato una serie a metà? Segnala come \'Dropped\' così non riceverai più notifiche per i nuovi episodi, pur mantenendo traccia di quelli già visti!</string>
+    <string name="onboarding_slide5_desc">Hai abbandonato una serie a metà? Fai swipe verso l\'alto sul cestino per segnarla come \'Dropped\' così non riceverai più notifiche per i nuovi episodi, pur mantenendo traccia di quelli già visti!</string>
     <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
 
     <!-- Rewatch Import Dialog -->

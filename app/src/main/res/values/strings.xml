@@ -960,7 +960,7 @@
     <string name="onboarding_slide4_desc">Export and import local JSON backups in a second, or connect your Trakt account for automatic sync.</string>
     <string name="onboarding_slide5_title">Dropped Series</string>
     <string name="onboarding_slide5_sub">HIDE ABANDONED SHOWS</string>
-    <string name="onboarding_slide5_desc">Dropped a show midway? Mark it as \'Dropped\' so it stops bothering you for unwatched episodes while still keeping track of what you\'ve seen.</string>
+    <string name="onboarding_slide5_desc">Dropped a show midway? Swipe up on the delete button to mark it as \'Dropped\' so it stops bothering you for unwatched episodes while still keeping track of what you\'ve seen.</string>
     <string name="settings_review_tutorial">Replay Welcome Tutorial</string>
 
     <!-- Rewatch Import Dialog -->
