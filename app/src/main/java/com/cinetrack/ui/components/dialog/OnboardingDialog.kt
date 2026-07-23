@@ -87,7 +87,7 @@ fun OnboardingDialog(
                 titleRes = R.string.onboarding_slide5_title,
                 subtitleRes = R.string.onboarding_slide5_sub,
                 descriptionRes = R.string.onboarding_slide5_desc,
-                iconRes = R.drawable.ic_x,
+                iconRes = R.drawable.ic_drop_box,
                 imageRes = R.drawable.onboarding_img_5,
                 verticalBias = 1f
             )
