@@ -1504,8 +1504,9 @@ body.drawer-open {
   #features-card-deck.features-grid {
     flex: 1 !important;
     min-height: 0 !important;
-    max-height: 650px !important;
-    height: auto !important;
+    max-height: calc(100dvh - 200px) !important;
+    /* Sottrae lo spazio esatto per il titolo in alto e i pallini */
+    height: 100% !important;
     width: 100% !important;
     max-width: calc(100vw - 3rem) !important;
     margin: 0 auto !important;
@@ -1520,6 +1521,10 @@ body.drawer-open {
     box-sizing: border-box !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    max-height: 100% !important;
+    height: 100% !important;
+    padding-bottom: 2rem !important;
+    /* Aggiunge un po' di spazio vuoto in fondo per eleganza */
   }
 
   .card-visual-widget {
@@ -1583,6 +1588,23 @@ body.drawer-open {
     align-content: stretch !important;
     flex-direction: row !important;
     align-items: center;
+  }
+
+  .card-visual-widget.widget-catalog-recreation {
+    max-width: 100%;
+    overflow: hidden;
+    /* Impedisce alla riga delle tab di "sfondare" il bordo destro */
+    padding-bottom: 3rem !important;
+    /* Crea uno spazio vuoto sotto "Trending Now" per non farlo sembrare mozzato */
+  }
+
+  .app-tabs-container {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .filtri {
+    display: none !important;
   }
 }
 
@@ -5127,4 +5149,358 @@ section {
   font-weight: 800;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+}
+
+
+/* 1. Impedisce al testo della barra di ricerca di andare a capo */
+.app-search-input span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 2. Ricalibra le dimensioni del widget Catalog per i telefoni */
+@media (max-width: 600px) {
+
+  /* Recupera spazio orizzontale riducendo il padding interno */
+  .widget-catalog-recreation {
+    padding: 1rem !important;
+  }
+
+  /* Riduce i bottoni laterali (back e filtri) */
+  .app-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Proporziona la barra di ricerca centrale */
+  .app-search-input {
+    height: 36px !important;
+    padding: 0 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Rimpicciolisce le chips delle ricerche recenti */
+  .app-chip {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+
+  /* 1. VIEWPORT: Rimuoviamo il padding laterale che spingeva le card a destra */
+  .features-sticky-viewport {
+    height: 100dvh !important;
+    padding: 75px 0 1rem 0 !important;
+    /* 0 padding laterale, gestiamo le card singolarmente */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    /* Uccide definitivamente le scrollbar della pagina extra */
+    box-sizing: border-box !important;
+  }
+
+  /* 2. HEADER E PALLINI: Rimpiccioliamo il titolo per fare più spazio vitale alla card */
+  .features-sticky-viewport .section-header {
+    flex-shrink: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 1.2rem !important;
+    /* Rimettiamo il padding qui per il testo */
+  }
+
+  .features-sticky-viewport .section-header h2 {
+    font-size: 2rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .features-sticky-viewport .section-header p {
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+    margin: 0 auto !important;
+  }
+
+  .deck-sidebar-dots {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    flex-shrink: 0 !important;
+    margin: 0.5rem auto !important;
+  }
+
+  /* 3. IL CONTENITORE: Occupa l'esatto spazio verticale rimanente */
+  #features-card-deck.features-grid {
+    position: relative !important;
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 4. LA CARD: Perfettamente al centro e SENZA scroll interno */
+  .deck-scroll-card {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    /* Ancorata a sinistra... */
+    right: 0 !important;
+    /* ...ancorata a destra... */
+    margin: 0 auto !important;
+    /* ...centrata perfettamente al millimetro! */
+
+    width: calc(100vw - 2.4rem) !important;
+    /* Lascia esattamente 1.2rem di margine per lato */
+    height: auto !important;
+    /* Si adatta al suo contenuto */
+    max-height: 100% !important;
+    /* Non supera mai il fondo dello schermo */
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    padding: 1.25rem 1rem !important;
+
+    overflow: hidden !important;
+    /* BLOCCO TOTALE DELLO SCROLL INTERNO come richiesto */
+    box-sizing: border-box !important;
+  }
+
+  /* 5. WIDGET INTERNO: Se lo schermo è davvero minuscolo, il widget scuro si adatterà */
+  .card-text-content {
+    flex: 0 0 auto !important;
+  }
+
+  .card-visual-widget {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* --- Nasconde completamente le card inattive che sbucano dal fondo --- */
+  .deck-scroll-card[style*="pointer-events: none"] {
+    opacity: 0 !important;
+  }
+
+  /* Assicura che la card in primo piano sia sempre visibile */
+  .deck-scroll-card[style*="pointer-events: auto"] {
+    opacity: 1 !important;
+  }
+
+  /* Aggiunge una dissolvenza morbida quando la card inattiva diventa attiva */
+  .deck-scroll-card {
+    transition: opacity 0.35s ease !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* 1. Rimuoviamo la linea verticale centrale illuminata che spreca spazio */
+  .pipeline-nodes-grid::before {
+    display: none !important;
+  }
+
+  /* 2. Riduciamo drasticamente lo spazio vuoto tra le due card */
+  .pipeline-nodes-grid {
+    gap: 0.8rem !important;
+  }
+
+  /* 3. Trasformiamo la card: da un blocco verticale a una griglia orizzontale compatta */
+  .flow-node-card {
+    display: grid !important;
+    grid-template-columns: 46px 1fr !important;
+    /* Icona a sinistra fissa, testo a destra */
+    gap: 0.2rem 1rem !important;
+    padding: 1rem !important;
+    text-align: left !important;
+    align-items: center !important;
+  }
+
+  /* 4. Rimpiccioliamo l'icona e la blocchiamo nella prima colonna a sinistra */
+  .flow-node-card .node-icon-wrapper {
+    grid-column: 1 !important;
+    grid-row: 1 / 4 !important;
+    /* L'icona occupa l'altezza di tutte e 3 le righe di testo */
+    width: 46px !important;
+    height: 46px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .flow-node-card .node-icon-wrapper svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* 5. Titolo più piccolo e compatto */
+  .flow-node-card h4 {
+    grid-column: 2 !important;
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+  }
+
+  /* 6. Testo descrittivo: piccolo e leggibile per intero (nessun troncamento) */
+  .flow-node-card p {
+    grid-column: 2 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+
+    /* Regole per mostrare tutto il testo su più righe naturalmente */
+    display: block !important;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+
+  /* 7. Il badge si allinea a sinistra sotto il testo e diventa minuscolo */
+  .flow-node-card .node-status-badge {
+    grid-column: 2 !important;
+    justify-self: flex-start !important;
+    margin-top: 0.2rem !important;
+    padding: 3px 8px !important;
+    font-size: 0.6rem !important;
+  }
+
+  .flow-node-card:hover {
+    scale: 1 !important;
+  }
+
+  /* --- Rimpicciolisce TUTTI i titoli e sottotitoli del sito su mobile --- */
+  .section-header {
+    margin-bottom: 2rem !important;
+  }
+
+  .section-header h2 {
+    font-size: 2rem !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .section-header p {
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    margin: 0 auto !important;
+    max-width: 90% !important;
+  }
+
+  /* Eccezione: togliamo il margine inferiore solo per il titolo sopra le card */
+  .features-sticky-viewport .section-header {
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* 1. KILLER DEL LAG: Niente blur, ma ricreiamo la luce con un gradiente perfetto */
+  .stage-ambient-background {
+    filter: none !important;
+
+    /* Resettiamo i bordi che lo schiacciavano facendolo diventare un ovale */
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    /* Lo facciamo diventare un cerchio gigante che copre lo schermo */
+    width: 150vw !important;
+    height: 150vw !important;
+    transform: translate(-50%, -50%) !important;
+
+    /* Usiamo il gradiente per creare la sfocatura (costo zero per la GPU!) */
+    background: radial-gradient(circle, var(--stage-glow-color, rgba(45, 212, 191, 0.15)) 0%, transparent 60%) !important;
+  }
+
+  /* 2. Semplifichiamo le ombre di base delle card in movimento */
+  .holographic-cover-card {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* 3. Semplifichiamo le ombre della card in primo piano. 
+     Passiamo da 4 livelli di ombra pesantissimi a 2 (uno scuro e un alone colorato) */
+  .holographic-cover-card.is-front,
+  .holographic-cover-card:active {
+    box-shadow:
+      0 15px 35px rgba(0, 0, 0, 0.9),
+      0 0 35px var(--card-glow-1, rgba(45, 212, 191, 0.3)) !important;
+  }
+
+  /* 4. Rimuoviamo l'ombra inutile dal segnalibro che pesa in rendering */
+  .card-ribbon-bookmark {
+    box-shadow: none !important;
+  }
+
+  /* 5. Evitiamo che il browser cerchi di fare antialiasing eccessivo sui bordi */
+  .holographic-stage-container {
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(0);
+    /* Forza l'accelerazione hardware pulita */
+  }
+
+  /* 1. Trasforma la navbar in una pillola fluttuante */
+  .navbar {
+    top: 12px !important;
+    left: 12px !important;
+    width: calc(100% - 24px) !important;
+    border-radius: 100px !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  /* 2. Abbassa il menu laterale per farlo partire esattamente sotto la nuova pillola */
+  .mobile-drawer {
+    top: 88px !important;
+    /* 12px (spazio) + 66px (altezza navbar) + 10px (margine extra) */
+    height: calc(100dvh - 88px) !important;
+    max-height: calc(100dvh - 88px) !important;
+    border-top-left-radius: 28px !important;
+    /* Arrotondiamo anche l'angolo del menu per coerenza */
+  }
+
+  /* 1. Riduciamo l'imbottitura generale gigante del footer */
+  .footer {
+    padding: 2.5rem 1.25rem 1.5rem !important;
+  }
+
+  /* 2. Trasformiamo la colonna singola infinita in una griglia compatta a 2 colonne */
+  .footer-content {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.5rem 1rem !important;
+    /* Spazio verticale e orizzontale ridotto */
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* 3. Il logo e la bio prendono tutta la prima riga in alto */
+  .footer-col:first-child {
+    grid-column: 1 / -1 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* 4. Rimpiccioliamo i testi e gli spazi tra i link */
+  .footer-col h4 {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.95rem !important;
+  }
+
+  .footer-col p {
+    font-size: 0.85rem !important;
+    max-width: 100% !important;
+  }
+
+  .footer-links li {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .footer-links a {
+    font-size: 0.85rem !important;
+  }
+
+  /* 5. Centriamo il copyright in basso */
+  .footer-bottom {
+    padding-top: 1.5rem !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
 }
