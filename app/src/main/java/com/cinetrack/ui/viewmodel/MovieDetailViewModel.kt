@@ -362,12 +362,8 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     private fun deleteMovieItem(movie: Movie) {
-        val title = movie.displayName
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_deleted, title)) {
-                repository.saveMovie(movie)
-            }
         }
     }
 
@@ -444,22 +440,16 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun deleteMovie() {
+    private    fun deleteMovie() {
         val state = uiState.value as? DetailUiState.Success ?: return
         val movie = state.movieEntry
-        val title = movie.displayName
         viewModelScope.launch {
             repository.deleteMovie(movie)
-            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_deleted, title)) {
-                repository.saveMovie(movie)
-            }
         }
     }
 
     private fun toggleFavorite() {
         val state = uiState.value as? DetailUiState.Success ?: return
-        val title = state.movieEntry.displayName
-        val previousState = state.movieEntry.copy()
 
         // IDEMPOTENCY CHECK: If already watched, do nothing
         if (state.movieEntry.watched) {
@@ -469,23 +459,11 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
-            val actionMsgRes = when {
-                updated == null -> R.string.msg_action_removed
-                updated.watched -> R.string.msg_action_watched
-                updated.favorite -> R.string.msg_action_favorite
-                updated.reminder -> R.string.msg_action_reminder
-                else -> R.string.msg_action_updated
-            }
-            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
-                repository.saveMovie(previousState)
-            }
         }
     }
 
     private fun toggleWatched() {
         val state = uiState.value as? DetailUiState.Success ?: return
-        val title = state.movieEntry.displayName
-        val previousState = state.movieEntry.copy()
 
         // IDEMPOTENCY CHECK: If already watched, do nothing
         if (state.movieEntry.watched) {
@@ -495,22 +473,10 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             cycleMovieStatusUseCase(state.movieEntry)
             val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
-            val actionMsgRes = when {
-                updated == null -> R.string.msg_action_removed
-                updated.watched -> R.string.msg_action_watched
-                updated.favorite -> R.string.msg_action_favorite
-                updated.reminder -> R.string.msg_action_reminder
-                else -> R.string.msg_action_updated
-            }
-            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
-                repository.saveMovie(previousState)
-            }
         }
     }
 
     private fun cycleStatus(movie: Movie) {
-        val title = movie.title ?: movie.name ?: ""
-        val previousState = movie.copy()
         viewModelScope.launch {
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
@@ -522,23 +488,12 @@ class MovieDetailViewModel @Inject constructor(
 
             cycleMovieStatusUseCase(current)
             val updated = repository.getMovie(movie.id, movie.mediaType)
-            val actionMsgRes = when {
-                updated == null -> R.string.msg_action_removed
-                updated.watched -> R.string.msg_action_watched
-                updated.favorite -> R.string.msg_action_favorite
-                updated.reminder -> R.string.msg_action_reminder
-                else -> R.string.msg_action_updated
-            }
-            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
-                repository.saveMovie(previousState)
-            }
         }
     }
 
     private fun setWatchState(watchState: WatchState) {
         val state = uiState.value as? DetailUiState.Success ?: return
         val previousMovie = state.movieEntry
-        val title = previousMovie.title ?: previousMovie.name ?: ""
         viewModelScope.launch {
             val updated = when (watchState) {
                 WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
@@ -559,17 +514,6 @@ class MovieDetailViewModel @Inject constructor(
                 }
             }
             repository.saveMovie(updated)
-
-            val actionMsgRes = when (watchState) {
-                WatchState.NONE -> R.string.msg_action_removed
-                WatchState.DROPPED -> R.string.msg_action_dropped
-                WatchState.BOOKMARKED -> if (previousMovie.isReleased) R.string.msg_action_favorite else R.string.msg_action_reminder
-                WatchState.WATCHED -> R.string.msg_action_watched
-            }
-            
-            actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
-                repository.saveMovie(previousMovie)
-            }
         }
     }
 

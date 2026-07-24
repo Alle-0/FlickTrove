@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -429,10 +430,28 @@ private fun SeasonSelector(
 
     LazyRow(
         state = lazyListState,
-        contentPadding = PaddingValues(horizontal = 28.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
-            .padding(bottom = 16.dp)
+            .padding(bottom = 16.dp, start = 12.dp, end = 12.dp)
+            .graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen)
+            .drawWithContent {
+                drawContent()
+                val fadePx = 16.dp.toPx()
+                val width = size.width
+                val ratio = if (width > 0) fadePx / width else 0f
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        0f to Color.Transparent,
+                        ratio to Color.Black,
+                        1f - ratio to Color.Black,
+                        1f to Color.Transparent,
+                        startX = 0f,
+                        endX = width
+                    ),
+                    blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                )
+            }
     ) {
         items(seasons, key = { it }, contentType = { "season_chip" }) { seasonNum ->
             val isActive = selectedSeason == seasonNum

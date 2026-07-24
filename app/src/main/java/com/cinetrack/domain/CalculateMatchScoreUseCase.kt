@@ -7,34 +7,59 @@ class CalculateMatchScoreUseCase @Inject constructor() {
     operator fun invoke(currentMovie: Movie, localMovies: List<Movie>): Int? {
         val watchedMovies = localMovies.filter { it.watched || it.favorite }
         if (watchedMovies.size < 5) return null
-        
-        val genreAffinities = mutableMapOf<Long, Float>()
+
+        val genreScores = mutableMapOf<Long, Float>()
+        val genreCounts = mutableMapOf<Long, Int>()
+
+        // 1. Calcoliamo i pesi con penalità per i film brutti
         watchedMovies.forEach { m ->
-            val rating = m.personalRating
-            val ratingWeight = if (rating != null && rating > 0) {
-                (rating.toFloat() / 10f) * 2f
-            } else if (m.favorite) 1.5f else 1.0f
-            
+            val rating = m.personalRating // <--- ASSEGNAZIONE LOCALE (IMMUTABILE)
+
+            val ratingWeight = when {
+                rating != null && rating > 0 -> {
+                    // Usa la variabile locale 'rating' al posto di 'm.personalRating'
+                    (rating.toFloat() - 6f) / 4f
+                }
+                m.favorite -> 1.0f // Un preferito vale come un bel 10/10
+                else -> 0.2f // Solo visto (senza voto/non preferito) indica un leggero interesse
+            }
+
             m.genres?.forEach { g ->
                 val id = g.id.toLong()
-                genreAffinities[id] = (genreAffinities[id] ?: 0f) + ratingWeight
+                genreScores[id] = (genreScores[id] ?: 0f) + ratingWeight
+                genreCounts[id] = (genreCounts[id] ?: 0) + 1
             }
         }
-        
-        val maxAffinity = genreAffinities.values.maxOrNull() ?: 1f
+
+        // 2. Calcoliamo l'AFFINITÀ MEDIA per genere (risolve il problema quantità vs qualità)
+        val genreAffinities = genreScores.mapValues { (id, totalScore) ->
+            totalScore / genreCounts[id]!! 
+        }
+
+        val maxAffinity = genreAffinities.values.maxOrNull()?.coerceAtLeast(0.1f) ?: 1f
         var matchBonus = 0f
+        
         val currentMovieGenres = currentMovie.genres ?: emptyList()
         if (currentMovieGenres.isNotEmpty()) {
             val avgAffinity = currentMovieGenres.sumOf { g ->
                 (genreAffinities[g.id.toLong()] ?: 0f).toDouble()
             } / currentMovieGenres.size
-            matchBonus = ((avgAffinity / maxAffinity) * 25f).toFloat() 
+            
+            // Il bonus personale ora vale fino a 40 punti (più impatto personale!)
+            // Se avgAffinity è negativa (odia quei generi), il bonus sarà negativo
+            matchBonus = ((avgAffinity / maxAffinity) * 40f).toFloat()
         }
-        
+
+        // 3. Ribilanciamo TMDb e il pavimento
         val tmdbRating = currentMovie.voteAverage ?: 0.0
-        val baseScore = 60f + (tmdbRating / 10f) * 14f
-        
+        // Il base score ora va da 40 (TMDb = 0) a 60 (TMDb = 10)
+        val baseScore = 40f + (tmdbRating / 10f) * 20f 
+
+        // Punteggio finale: max 100% (60 da TMDb + 40 da affinità personale)
         val finalScore = (baseScore + matchBonus).toInt()
-        return finalScore.coerceIn(50, 99)
+        
+        // Coerce tra 10% e 99%. 
+        // Se un utente odia i generi, un match del 30-40% rende l'idea di "Evitalo!"
+        return finalScore.coerceIn(10, 99)
     }
 }

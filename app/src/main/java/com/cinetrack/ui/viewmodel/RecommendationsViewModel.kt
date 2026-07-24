@@ -7,11 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
+import com.cinetrack.domain.CalculateMatchScoreUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import com.cinetrack.util.toComposeColor
@@ -37,6 +41,7 @@ data class RecommendationsUiState(
 @HiltViewModel
 class RecommendationsViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
+    private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -53,7 +58,6 @@ class RecommendationsViewModel @Inject constructor(
     
     private var currentPage = 1
     private var currentTopSourceIds: List<Long> = emptyList()
-
 
     val uiState: StateFlow<RecommendationsUiState> = combine(
         combine(
@@ -244,6 +248,13 @@ class RecommendationsViewModel @Inject constructor(
                     favorites.filter { it.mediaType == "tv" }
                 }
 
+                // Se non ha tra i preferiti nessun elemento di questo tipo, interrompiamo
+                if (matchingFavs.isEmpty()) {
+                    _recommendedMovies.value = emptyList()
+                    _isEndReached.value = true
+                    return
+                }
+
                 // Base recommendations on movies the user actually liked.
                 val goodCandidates = matchingFavs.filter { movie ->
                     (movie.personalRating ?: 0.0) >= 7.0 ||
@@ -260,13 +271,8 @@ class RecommendationsViewModel @Inject constructor(
                         .thenByDescending { it.voteAverage ?: 0.0 }
                 ).take(20)
 
-                // To ensure variety, pick 1 seed from the absolute Top 20, and 2 random seeds from the rest of the good pool
-                val seed1 = topPool.randomOrNull()
-                val remainingPool = pool.filter { it.id != seed1?.id }
-                val otherSeeds = remainingPool.shuffled().take(2)
-
-                val topItems = listOfNotNull(seed1) + otherSeeds
-                
+                // Scegliamo 3 seed casuali rigorosamente dai top 20 (evita film scarsi!)
+                val topItems = topPool.shuffled().take(3)
                 currentTopSourceIds = topItems.map { it.id }
             }
 
@@ -281,29 +287,52 @@ class RecommendationsViewModel @Inject constructor(
             val localCompositeIds = favorites.map { "${it.mediaType}_${it.id}" }.toSet()
             val existingIds = _recommendedMovies.value.map { it.id }.toSet()
 
-            currentTopSourceIds.forEach { sourceId ->
-                val data = if (type == "movie") {
-                    repository.getMovieRecommendations(sourceId, page = page)
-                } else {
-                    repository.getTVRecommendations(sourceId, page = page)
-                }
-                results.addAll(
-                    data.filter { movie ->
-                        val compositeId = "${type}_${movie.id}"
-                        !localCompositeIds.contains(compositeId) && !existingIds.contains(movie.id)
-                    }.map { it.copy(mediaType = type) }
-                )
+            // Utilizziamo coroutineScope e async per fare le 3 chiamate API in parallelo!
+            val rawData = coroutineScope {
+                currentTopSourceIds.map { sourceId ->
+                    async {
+                        if (type == "movie") {
+                            repository.getMovieRecommendations(sourceId, page = page)
+                        } else {
+                            repository.getTVRecommendations(sourceId, page = page)
+                        }
+                    }
+                }.awaitAll().flatten() // Aspettiamo che finiscano tutte assieme e appiattiamo le liste
             }
+
+            results.addAll(
+                rawData.filter { movie ->
+                    val compositeId = "${type}_${movie.id}"
+                    !localCompositeIds.contains(compositeId) && !existingIds.contains(movie.id)
+                }.map { it.copy(mediaType = type) }
+            )
 
             if (results.isEmpty()) {
                 if (page > 1) _isEndReached.value = true
                 else _recommendedMovies.value = emptyList()
             } else {
-                val newMovies = results.distinctBy { it.id }.shuffled()
+                // 1. Applichiamo il nostro scudo al 65%
+                var newMovies = results.distinctBy { it.id }
+                    .filter { movie ->
+                        val score = calculateMatchScoreUseCase(movie, favorites)
+                        score == null || score >= 65 
+                    }
+                
+                // 2. IL SALVAVITA: Se il filtro ha ucciso TUTTI i film, mostriamo comunque 
+                // i migliori 10 di questa infornata invece di dare schermo bianco!
+                if (newMovies.isEmpty() && results.isNotEmpty()) {
+                    newMovies = results.distinctBy { it.id }
+                        .sortedByDescending { calculateMatchScoreUseCase(it, favorites) ?: 0 }
+                        .take(10)
+                }
+
+                // 3. Mescoliamo i sopravvissuti
+                newMovies = newMovies.shuffled()
+                
                 if (isAppend) {
                     _recommendedMovies.value = (_recommendedMovies.value + newMovies).distinctBy { it.id }
                 } else {
-                    _recommendedMovies.value = newMovies.take(30)
+                    _recommendedMovies.value = newMovies
                 }
             }
             
@@ -315,26 +344,6 @@ class RecommendationsViewModel @Inject constructor(
         } finally {
             _isLoading.value = false
             _isNextPageLoading.value = false
-        }
-    }
-
-    private fun mapMovieGenreToTV(genreId: Long): Long {
-        return when (genreId) {
-            28L -> 10759L // Action -> Action & Adventure
-            12L -> 10759L // Adventure -> Action & Adventure
-            878L -> 10765L // Sci-Fi -> Sci-Fi & Fantasy
-            14L -> 10765L // Fantasy -> Sci-Fi & Fantasy
-            10752L -> 10768L // War -> War & Politics
-            else -> genreId
-        }
-    }
-
-    private fun mapTVGenreToMovie(genreId: Long): Long {
-        return when (genreId) {
-            10759L -> 28L // Action & Adventure -> Action
-            10765L -> 878L // Sci-Fi & Fantasy -> Sci-Fi
-            10768L -> 10752L // War & Politics -> War
-            else -> genreId
         }
     }
 
