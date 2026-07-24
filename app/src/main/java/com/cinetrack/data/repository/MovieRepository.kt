@@ -1000,6 +1000,25 @@ class MovieRepository @Inject constructor(
         }
         return null
     }
+
+    suspend fun findByTvdbId(tvdbId: String): Movie? {
+        val response = tmdbService.findByExternalId(tvdbId, "tvdb_id")
+        val tvRes = response.tvResults?.firstOrNull()
+        if (tvRes != null) {
+            return Movie(
+                id = tvRes.id,
+                mediaType = "tv",
+                name = tvRes.name,
+                posterPath = tvRes.posterPath,
+                backdropPath = tvRes.backdropPath,
+                voteAverage = tvRes.voteAverage,
+                firstAirDate = tvRes.firstAirDate,
+                genreIds = tvRes.genreIds,
+                overview = tvRes.overview
+            )
+        }
+        return null
+    }
     
     suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, page = page).results
     suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, page = page).results
