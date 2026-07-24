@@ -5504,3 +5504,19 @@ section {
     text-align: center !important;
   }
 }
+
+@media (max-width: 768px) {
+
+  *,
+  ::before,
+  ::after {
+    /* Ottimizza le prestazioni globali del rendering grafico */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck-scroll-card,
+  .screenshot-item,
+  .hero-visual-stage {
+    will-change: transform, opacity;
+  }
+}

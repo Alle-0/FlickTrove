@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const numCards = scrollCards.length;
             const exactCardPos = progress * (numCards - 1);
             const nearestIdx = Math.round(exactCardPos);
-            
+
             // Snap to the nearest card
             const targetTop = window.scrollY + rect.top + (nearestIdx / Math.max(1, numCards - 1)) * totalScrollableHeight;
             if (Math.abs(window.scrollY - targetTop) > 5) {
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const baseHeight = isMobileDeck ? 10 : 20;
           const thumbWidth = activeThumb.offsetWidth || baseWidth;
           const thumbHeight = activeThumb.offsetHeight || baseHeight;
-          
+
           const leftPos = targetX - (baseWidth / 2);
           const topPos = targetY - (baseHeight / 2);
 
@@ -587,18 +587,18 @@ document.addEventListener('DOMContentLoaded', () => {
           if (activeThumb.dataset.lastIdx !== String(activeIdx)) {
             const oldIdx = parseInt(activeThumb.dataset.lastIdx || '0', 10);
             activeThumb.dataset.lastIdx = String(activeIdx);
-            
+
             const distanceSteps = Math.abs(activeIdx - oldIdx) || 1;
             if (isMobileDeck) {
               // Allungamento elastico orizzontale per la barra pallini bottom (mobile)
               const stretchWidth = baseWidth + Math.min(28, distanceSteps * 12);
               const stretchScaleY = 0.65;
               const stretchLeftPos = targetX - (stretchWidth / 2);
-              
+
               activeThumb.style.width = `${stretchWidth}px`;
               activeThumb.style.height = `${baseHeight}px`;
               activeThumb.style.transform = `translate3d(${stretchLeftPos.toFixed(1)}px, ${topPos.toFixed(1)}px, 0) scaleY(${stretchScaleY})`;
-              
+
               clearTimeout(activeThumb.snapTimeout);
               activeThumb.snapTimeout = setTimeout(() => {
                 activeThumb.style.width = `${baseWidth}px`;
@@ -610,11 +610,11 @@ document.addEventListener('DOMContentLoaded', () => {
               const stretchHeight = baseHeight + Math.min(32, distanceSteps * 14);
               const stretchScaleX = 0.65;
               const stretchTopPos = targetY - (stretchHeight / 2);
-              
+
               activeThumb.style.width = `${baseWidth}px`;
               activeThumb.style.height = `${stretchHeight}px`;
               activeThumb.style.transform = `translate3d(${leftPos.toFixed(1)}px, ${stretchTopPos.toFixed(1)}px, 0) scaleX(${stretchScaleX})`;
-              
+
               clearTimeout(activeThumb.snapTimeout);
               activeThumb.snapTimeout = setTimeout(() => {
                 activeThumb.style.width = `${baseWidth}px`;
@@ -940,6 +940,7 @@ footerLinks.forEach(link => {
    INTERACTIVE CINEMA DUST CANVAS ENGINE
    ========================================= */
 const initCinemaDustCanvas = () => {
+  if (window.innerWidth <= 768) return;
   if (window.__cinemaDustInitialized) return;
   const canvas = document.getElementById('cyber-canvas');
   if (!canvas) return;
