@@ -39,15 +39,17 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val maxAffinity = genreAffinities.values.maxOrNull()?.coerceAtLeast(0.1f) ?: 1f
         var matchBonus = 0f
         
-        val currentMovieGenres = currentMovie.genres ?: emptyList()
-        if (currentMovieGenres.isNotEmpty()) {
-            val avgAffinity = currentMovieGenres.sumOf { g ->
-                (genreAffinities[g.id.toLong()] ?: 0f).toDouble()
-            } / currentMovieGenres.size
+        // RECUPERIAMO GLI ID DA ENTRAMBE LE FONTI (genres oppure genreIds)
+        val currentMovieGenreIds = currentMovie.genres?.map { it.id.toLong() }
+            ?: currentMovie.genreIds?.map { it.toLong() } // Sostituisci "genreIds" con il nome esatto della tua variabile in Movie.kt!
+            ?: emptyList()
+
+        if (currentMovieGenreIds.isNotEmpty()) {
+            val avgAffinity = currentMovieGenreIds.sumOf { id ->
+                (genreAffinities[id] ?: 0f).toDouble()
+            } / currentMovieGenreIds.size
             
-            // Il bonus personale ora vale fino a 40 punti (più impatto personale!)
-            // Se avgAffinity è negativa (odia quei generi), il bonus sarà negativo
-            matchBonus = ((avgAffinity / maxAffinity) * 40f).toFloat()
+            matchBonus = ((avgAffinity / maxAffinity) * 40f).toFloat() 
         }
 
         // 3. Ribilanciamo TMDb e il pavimento
