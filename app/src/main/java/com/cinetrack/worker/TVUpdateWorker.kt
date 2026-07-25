@@ -56,7 +56,20 @@ class TVUpdateWorker(
                     val newLastAirDate = latest.lastEpisodeToAir?.airDate ?: latest.lastAirDate
                     val oldLastAirDate = show.lastAirDate
 
-                    if (latestEps > currentEps || show.nextEpisodeAirDate != newNextEpAirDate || newLastAirDate != oldLastAirDate) {
+                    var updatedSeasons = latest.seasons
+                    val targetSeasonNum = latest.nextEpisodeToAir?.seasonNumber
+                        ?: latest.seasons?.firstOrNull { !it.airDate.isNullOrBlank() && it.airDate >= today }?.seasonNumber
+
+                    if (targetSeasonNum != null && targetSeasonNum > 0) {
+                        try {
+                            val detailedSeason = repository.fetchSeasonDetails(show.id, targetSeasonNum)
+                            updatedSeasons = updatedSeasons?.map { if (it.seasonNumber == targetSeasonNum) detailedSeason else it }
+                        } catch (e: Exception) {
+                            if (e is kotlinx.coroutines.CancellationException) throw e
+                        }
+                    }
+
+                    if (latestEps > currentEps || show.nextEpisodeAirDate != newNextEpAirDate || newLastAirDate != oldLastAirDate || updatedSeasons != show.seasons) {
                         // Case 1: TMDB database expanded with new episodes that are already released
                         val addedAndReleasedEps = if (currentEps > 0 && latestEps > currentEps && !isNextEpInFuture) {
                             val airedEps = calculateAiredEpisodes(latest)
@@ -81,7 +94,8 @@ class TVUpdateWorker(
                             lastAirDate = newLastAirDate ?: show.lastAirDate,
                             status = latest.status,
                             nextEpisodeAirDate = newNextEpAirDate,
-                            nextEpisodeString = newNextEpString
+                            nextEpisodeString = newNextEpString,
+                            seasons = updatedSeasons ?: show.seasons
                         )
                         repository.saveMovie(updated)
 

@@ -166,8 +166,8 @@
     <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
     <string name="settings_split_home">Divisione uscite Home</string>
     <string name="settings_split_home_desc">Separa i titoli già usciti da quelli in arrivo nella Home</string>
-    <string name="settings_split_dropped">Separa serie abbandonate</string>
-    <string name="settings_split_dropped_desc">Sposta le serie tv abbandonate in fondo alla lista</string>
+    <string name="settings_split_dropped">Mostra serie abbandonate</string>
+    <string name="settings_split_dropped_desc">Mostra le serie tv abbandonate in fondo alla lista (se disattivato, verranno nascoste del tutto)</string>
     <string name="settings_language">Lingua dell\'App</string>
     <string name="settings_language_desc">Le modifiche richiederanno un riavvio</string>
     <string name="settings_language_system">Sistema</string>

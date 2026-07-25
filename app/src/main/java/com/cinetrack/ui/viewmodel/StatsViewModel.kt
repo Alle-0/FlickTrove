@@ -81,7 +81,7 @@ class StatsViewModel @Inject constructor(
         _timeRange,
         preferenceRepository.userPreferencesFlow.map { it.contentLanguage }.distinctUntilChanged()
     ) { movies, range, contentLanguage ->
-        val watchedMovies = movies.filter { it.watched }
+        val watchedMovies = movies.filter { it.watched || (it.mediaType == "tv" && it.dropped) }
         // Build the list of years from watchedAt only — never releaseDate.
         // This ensures the year picker shows years when the user actually watched things.
         val years = watchedMovies.mapNotNull { movie ->
@@ -147,7 +147,7 @@ class StatsViewModel @Inject constructor(
     }
 
     private fun calculateStats(movies: List<Movie>, allMovies: List<Movie>, language: String): CalculatedStats {
-        val watched = movies.filter { it.watched }
+        val watched = movies.filter { it.watched || (it.mediaType == "tv" && it.dropped) }
         val watchedMovies = watched.filter { it.mediaType != "tv" }
         val watchedTV = watched.filter { it.mediaType == "tv" }
 
@@ -281,7 +281,7 @@ class StatsViewModel @Inject constructor(
             totalTimeFormatted = formatDuration(movieMin + tvMin, language),
             isEstimate = moviesEstimate || tvEstimate,
             moviesWatched = watchedMovies.size,
-            moviesToWatch = allMovies.count { it.mediaType != "tv" && !it.watched && (it.favorite || it.reminder) },
+            moviesToWatch = allMovies.count { it.mediaType != "tv" && !it.watched && !it.dropped && (it.favorite || it.reminder) },
             totalMinutes = movieMin + tvMin,
             movieMinutes = movieMin,
             movieTimeFormatted = formatDuration(movieMin, language),
@@ -289,7 +289,7 @@ class StatsViewModel @Inject constructor(
             longestMovie = longestMovie,
             longestMovieMinutes = longestMovie?.runtime ?: 0,
             tvWatched = watchedTV.size,
-            tvToWatch = allMovies.count { it.mediaType == "tv" && !it.watched && (it.favorite || it.reminder) },
+            tvToWatch = allMovies.count { it.mediaType == "tv" && !it.watched && !it.dropped && (it.favorite || it.reminder) },
             totalEpisodes = totalEpisodes,
             tvMinutes = tvMin,
             tvTimeFormatted = formatDuration(tvMin, language),

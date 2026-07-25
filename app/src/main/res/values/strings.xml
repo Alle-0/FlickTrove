@@ -166,8 +166,8 @@
     <string name="settings_layout_toggle_desc">Shows a button to change the number of columns in Home</string>
     <string name="settings_split_home">Split Home Releases</string>
     <string name="settings_split_home_desc">Separates released titles from upcoming ones in Home</string>
-    <string name="settings_split_dropped">Separate Dropped Series</string>
-    <string name="settings_split_dropped_desc">Moves dropped series to the bottom of the TV Shows section</string>
+    <string name="settings_split_dropped">Show Dropped Series</string>
+    <string name="settings_split_dropped_desc">Shows dropped series at the bottom of the TV Shows section (if disabled, they will be completely hidden)</string>
     <string name="settings_use_movie_logo">Use Official Logos</string>
     <string name="settings_use_movie_logo_desc">In details, shows the original title logo instead of text, when available.</string>
     <string name="settings_language">App Language</string>

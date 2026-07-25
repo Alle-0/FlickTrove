@@ -45,22 +45,33 @@ class TvTimeGdprImporter @Inject constructor(
             watchedAt: String? = null,
             isFavorite: Boolean = false,
             isForLater: Boolean = false,
-            isDropped: Boolean = false
+            isDropped: Boolean = false,
+            isExplicitlyNotWatched: Boolean = false
         ): TvTimeItemData {
             val cleanTitle = title.trim()
             if (cleanTitle.isBlank()) return TvTimeItemData(null, "", mediaType, isWatched)
             val key = if (!id.isNullOrBlank()) "${mediaType}_${id.trim()}" else "${mediaType}_${cleanTitle.lowercase()}"
             val existing = itemsMap.values.find { (it.id != null && it.id == id) || (it.title.equals(cleanTitle, ignoreCase = true) && it.mediaType == mediaType) }
             if (existing != null) {
-                if (isWatched && !isForLater) {
-                    if (mediaType != "tv" || !existing.isForLater) {
+                if (isDropped) {
+                    existing.isDropped = true
+                    existing.isWatched = false
+                    existing.isForLater = false
+                } else if (isWatched && !isForLater) {
+                    if (mediaType != "tv" || (!existing.isForLater && !existing.isDropped)) {
                         existing.isWatched = true
                         existing.isForLater = false
+                        existing.isDropped = false
                     }
                 } else if (isForLater && (!existing.isWatched || mediaType == "tv")) {
                     existing.isForLater = true
                     existing.isWatched = false
+                    existing.isDropped = false
+                } else if (isExplicitlyNotWatched) {
+                    existing.isWatched = false
+                    if (!existing.isDropped) existing.isForLater = true
                 }
+                
                 if (isFavorite || (isForLater && (!existing.isWatched || mediaType == "tv"))) existing.isFavorite = true
                 if (watchedAt != null && existing.watchedAt == null) existing.watchedAt = watchedAt
                 return existing
@@ -69,9 +80,9 @@ class TvTimeGdprImporter @Inject constructor(
                 id = id?.trim(),
                 title = cleanTitle,
                 mediaType = mediaType,
-                isWatched = if (isForLater) false else isWatched,
-                isFavorite = isFavorite || (isForLater && !isWatched) || isDropped,
-                isForLater = if (isWatched) false else isForLater,
+                isWatched = if (isForLater || isDropped || isExplicitlyNotWatched) false else isWatched,
+                isFavorite = isFavorite || (isForLater && !isWatched),
+                isForLater = if (isWatched || isDropped) false else (isForLater || isExplicitlyNotWatched),
                 isDropped = isDropped,
                 watchedAt = watchedAt
             )
@@ -101,7 +112,7 @@ class TvTimeGdprImporter @Inject constructor(
                     val isFav = cols[2].trim() == "1" || cols[2].trim().equals("true", ignoreCase = true)
                     val epsSeen = cols[3].trim().toIntOrNull() ?: 0
                     val title = cols[4]
-                    addItem(id = showId, title = title, mediaType = "tv", isWatched = epsSeen > 0, isFavorite = isFav)
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = epsSeen > 0, isFavorite = isFav, isExplicitlyNotWatched = epsSeen == 0)
                 }
             }
         }
@@ -136,9 +147,10 @@ class TvTimeGdprImporter @Inject constructor(
                         val movieId = cols.getOrNull(idIdx)?.trim()
                         val status = if (statusIdx != -1) cols.getOrNull(statusIdx)?.trim()?.lowercase() ?: "" else cols.lastOrNull()?.trim()?.lowercase() ?: ""
                         val isForLater = status in listOf("for_later", "watchlist", "planned", "to_watch", "da vedere", "not_started", "to_see", "unwatched")
-                        val isWatched = status in listOf("archived", "dropped", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
-                        if (isForLater || isWatched) {
-                            addItem(id = movieId, title = title, mediaType = "movie", isWatched = isWatched, isForLater = isForLater)
+                        val isDropped = status in listOf("dropped", "paused")
+                        val isWatched = status in listOf("archived", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
+                        if (isForLater || isWatched || isDropped) {
+                            addItem(id = movieId, title = title, mediaType = "movie", isWatched = isWatched, isForLater = isForLater, isDropped = isDropped)
                         }
                     }
                 }
@@ -163,9 +175,11 @@ class TvTimeGdprImporter @Inject constructor(
                         val watchCount = if (watchCountIdx != -1) cols.getOrNull(watchCountIdx)?.trim()?.toIntOrNull() else null
                         val isForLaterStr = if (isForLaterIdx != -1) cols.getOrNull(isForLaterIdx)?.trim()?.lowercase() ?: "" else ""
                         val statusVal = if (statusIdx != -1) cols.getOrNull(statusIdx)?.trim()?.lowercase() ?: "" else ""
+                        val isDropped = statusVal in listOf("dropped", "paused")
                         val isForLater = isForLaterStr in listOf("true", "1") || statusVal in listOf("for_later", "watchlist", "planned", "to_watch", "da vedere", "not_started", "to_see") || (watchCount != null && watchCount == 0)
-                        val isWatched = (watchCount != null && watchCount > 0) || statusVal in listOf("watched", "completed", "seen", "archived") || (!isForLater && isForLaterStr == "false") || (!isForLater && watchCount == null && isForLaterStr.isBlank() && statusVal.isBlank())
-                        addItem(id = movieId, title = title, mediaType = "movie", isWatched = isWatched, isFavorite = isFav || isForLater, isForLater = isForLater)
+                        val isWatched = (watchCount != null && watchCount > 0) || statusVal in listOf("watched", "completed", "seen", "archived") || (!isForLater && isForLaterStr == "false" && !isDropped) || (!isForLater && !isDropped && watchCount == null && isForLaterStr.isBlank() && statusVal.isBlank())
+                        val isExplicitlyNotWatched = watchCount != null && watchCount == 0
+                        addItem(id = movieId, title = title, mediaType = "movie", isWatched = isWatched, isFavorite = isFav || isForLater, isForLater = isForLater, isDropped = isDropped, isExplicitlyNotWatched = isExplicitlyNotWatched)
                     }
                 }
             }
@@ -509,13 +523,13 @@ class TvTimeGdprImporter @Inject constructor(
                                     Pair(false, 0.0)
                                 } else if (finalEps != null && finalEps.isNotEmpty() && totalReleasedEps > 0) {
                                     val isCompleted = watchedEpsCount >= totalReleasedEps
-                                    if (isCompleted && !item.isForLater) {
+                                    if (isCompleted && !item.isForLater && !item.isDropped) {
                                         Pair(true, 1.0)
                                     } else {
                                         val p = (watchedEpsCount.toDouble() / totalReleasedEps).coerceIn(0.001, 0.999)
                                         Pair(false, p)
                                     }
-                                } else if (item.isWatched && !item.isForLater && watchedEpsCount > 0) {
+                                } else if (item.isWatched && !item.isForLater && !item.isDropped && watchedEpsCount > 0) {
                                     Pair(true, 1.0)
                                 } else {
                                     Pair(false, 0.0)

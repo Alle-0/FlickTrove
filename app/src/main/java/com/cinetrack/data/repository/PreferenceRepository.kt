@@ -76,7 +76,7 @@ class PreferenceRepository @Inject constructor(
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
-                showSplitDroppedHome = preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] ?: true,
+                showSplitDroppedHome = preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] ?: false,
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,

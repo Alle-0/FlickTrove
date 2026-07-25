@@ -39,7 +39,7 @@ class GetHomeUiStateUseCase @Inject constructor() {
         ) { toWatchMovies, folders, prefs, query, tab ->
             
             val movieCount = toWatchMovies.count { it.mediaType != "tv" }
-            val tvCount = toWatchMovies.count { it.mediaType == "tv" }
+            val tvCount = toWatchMovies.count { it.mediaType == "tv" && !it.dropped }
 
             val filtered = toWatchMovies.asSequence()
                 .filter { if (tab == "movie") it.mediaType != "tv" else it.mediaType == "tv" }

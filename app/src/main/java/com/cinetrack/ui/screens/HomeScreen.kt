@@ -271,7 +271,7 @@ fun HomeScreenContent(
                                 droppedTitle to uiState.droppedTvShows
                             ).filter { it.second.isNotEmpty() }
                         } else {
-                            listOf("" to uiState.movies)
+                            listOf("" to uiState.activeTvShows)
                         }
                     } else {
                         if (uiState.preferences.showSplitReleasesHome) {

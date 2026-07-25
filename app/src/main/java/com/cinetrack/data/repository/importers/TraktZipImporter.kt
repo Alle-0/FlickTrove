@@ -41,10 +41,13 @@ class TraktZipImporter @Inject constructor(
         val ratingsMap = buildRatingsMap(zipEntries)
         val (episodeMap, lastWatchedByShow) = buildEpisodeMap(zipEntries)
         val hiddenShowsSet = buildHiddenShowsSet(zipEntries)
+        val listsMap = buildListsMap(zipEntries)
 
         count += parseWatchedMovies(zipEntries, ratingsMap, onBatchReady)
         count += parseWatchedShows(zipEntries, ratingsMap, episodeMap, lastWatchedByShow, hiddenShowsSet, onBatchReady)
         count += parseWatchlist(zipEntries, ratingsMap, onBatchReady)
+        count += parseFavorites(zipEntries, ratingsMap, onBatchReady)
+        count += parseCustomLists(zipEntries, ratingsMap, listsMap, onBatchReady)
 
         count
     }
@@ -305,6 +308,148 @@ class TraktZipImporter @Inject constructor(
                                 clientUpdatedAt = System.currentTimeMillis()
                             )
                             Pair(movie, null)
+                        }
+                    }
+                    val results = deferreds.awaitAll().filterNotNull()
+                    if (results.isNotEmpty()) {
+                        onBatchReady(results)
+                        count += results.size
+                    }
+                    delay(300)
+                }
+            } catch (e: Exception) {}
+        }
+        count
+    }
+
+    private fun buildListsMap(zipEntries: Map<String, ByteArray>): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        val listEntry = zipEntries.entries.find { it.key.equals("lists-lists.json", ignoreCase = true) || it.key.equals("lists_lists.json", ignoreCase = true) }
+        listEntry?.let { entry ->
+            runCatching {
+                (json.parseToJsonElement(entry.value.decodeToString()) as? JsonArray)?.forEach { el ->
+                    val obj = el as? JsonObject ?: return@forEach
+                    val name = obj["name"]?.jsonPrimitive?.contentOrNull ?: return@forEach
+                    val ids = obj["ids"]?.jsonObject ?: return@forEach
+                    val slug = ids["slug"]?.jsonPrimitive?.contentOrNull
+                    val traktId = ids["trakt"]?.jsonPrimitive?.contentOrNull ?: ids["trakt"]?.jsonPrimitive?.intOrNull?.toString()
+                    if (slug != null) map[slug] = name
+                    if (traktId != null) map[traktId] = name
+                }
+            }
+        }
+        return map
+    }
+
+    private suspend fun parseFavorites(
+        zipEntries: Map<String, ByteArray>,
+        ratingsMap: Map<Long, Double>,
+        onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
+    ): Int = withContext(Dispatchers.IO) {
+        var count = 0
+        val entries = zipEntries.filterKeys { it.equals("lists-favorites.json", ignoreCase = true) || it.equals("lists_favorites.json", ignoreCase = true) }.values
+
+        for (bytes in entries) {
+            try {
+                val elements = (json.parseToJsonElement(bytes.decodeToString()) as? JsonArray)?.toList() ?: emptyList()
+                val chunks = elements.chunked(20)
+                for (chunk in chunks) {
+                    val deferreds = chunk.mapNotNull { el ->
+                        async {
+                            val obj = el as? JsonObject ?: return@async null
+                            val type = obj["type"]?.jsonPrimitive?.contentOrNull ?: "movie"
+                            val mediaObj = (if (type == "show") obj["show"]?.jsonObject else obj["movie"]?.jsonObject) ?: return@async null
+                            val idsObj = mediaObj["ids"]?.jsonObject ?: return@async null
+                            val isTv = type == "show"
+
+                            val tmdbId = resolveTmdbId(idsObj, mediaObj, isTv) ?: return@async null
+                            val title = mediaObj["title"]?.jsonPrimitive?.contentOrNull ?: "Unknown ($tmdbId)"
+                            val year = mediaObj["year"]?.jsonPrimitive?.contentOrNull
+                            val mediaType = if (isTv) "tv" else "movie"
+
+                            val movie = Movie(
+                                id = tmdbId,
+                                mediaType = mediaType,
+                                title = title,
+                                name = if (isTv) title else null,
+                                watched = false,
+                                favorite = true,
+                                personalRating = ratingsMap[tmdbId],
+                                releaseYear = year,
+                                syncStatus = "pending",
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                            Pair(movie, "Favorites")
+                        }
+                    }
+                    val results = deferreds.awaitAll().filterNotNull()
+                    if (results.isNotEmpty()) {
+                        onBatchReady(results)
+                        count += results.size
+                    }
+                    delay(300)
+                }
+            } catch (e: Exception) {}
+        }
+        count
+    }
+
+    private suspend fun parseCustomLists(
+        zipEntries: Map<String, ByteArray>,
+        ratingsMap: Map<Long, Double>,
+        listsMap: Map<String, String>,
+        onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
+    ): Int = withContext(Dispatchers.IO) {
+        var count = 0
+        val listEntries = zipEntries.filterKeys {
+            (it.startsWith("lists-") || it.startsWith("lists_")) &&
+            !it.contains("watchlist") && !it.contains("lists.json") && 
+            !it.contains("collaborations") && !it.contains("favorites")
+        }
+
+        for ((fileName, bytes) in listEntries) {
+            try {
+                var listName = "Custom List"
+                val parts = fileName.substringBeforeLast(".json").split("-", "_")
+                val foundName = listsMap.entries.find { (key, _) -> fileName.contains(key) }?.value
+                if (foundName != null) {
+                    listName = foundName
+                } else {
+                    val startIdx = if (parts.size > 2 && parts[0] == "lists" && parts[1] == "list") 3 else 1
+                    if (parts.size > startIdx) {
+                        listName = parts.subList(startIdx, parts.size).joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                    }
+                }
+
+                val elements = (json.parseToJsonElement(bytes.decodeToString()) as? JsonArray)?.toList() ?: emptyList()
+                val chunks = elements.chunked(20)
+                for (chunk in chunks) {
+                    val deferreds = chunk.mapNotNull { el ->
+                        async {
+                            val obj = el as? JsonObject ?: return@async null
+                            val type = obj["type"]?.jsonPrimitive?.contentOrNull ?: "movie"
+                            val mediaObj = (if (type == "show") obj["show"]?.jsonObject else obj["movie"]?.jsonObject) ?: return@async null
+                            val idsObj = mediaObj["ids"]?.jsonObject ?: return@async null
+                            val isTv = type == "show"
+
+                            val tmdbId = resolveTmdbId(idsObj, mediaObj, isTv) ?: return@async null
+                            val title = mediaObj["title"]?.jsonPrimitive?.contentOrNull ?: "Unknown ($tmdbId)"
+                            val year = mediaObj["year"]?.jsonPrimitive?.contentOrNull
+                            val mediaType = if (isTv) "tv" else "movie"
+
+                            val movie = Movie(
+                                id = tmdbId,
+                                mediaType = mediaType,
+                                title = title,
+                                name = if (isTv) title else null,
+                                watched = false,
+                                favorite = false,
+                                personalRating = ratingsMap[tmdbId],
+                                releaseYear = year,
+                                syncStatus = "pending",
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                            Pair(movie, listName)
                         }
                     }
                     val results = deferreds.awaitAll().filterNotNull()

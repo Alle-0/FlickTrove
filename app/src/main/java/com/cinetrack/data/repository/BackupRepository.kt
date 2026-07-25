@@ -234,8 +234,26 @@ class BackupRepository @Inject constructor(
         val mergedIncoming = mutableMapOf<String, Movie>()
         val itemFolderMap = mutableMapOf<String, MutableSet<String>>()
 
+        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        val todayIso = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+
         // 1. Unisci i duplicati all'interno dell'importazione stessa
         for ((m, folder) in itemsWithFolders) {
+            val year = m.releaseYear?.toIntOrNull()
+            val isUnreleased = when {
+                !m.releaseDate.isNullOrBlank() -> m.releaseDate!!.take(10) > todayIso
+                !m.firstAirDate.isNullOrBlank() -> m.firstAirDate!!.take(10) > todayIso
+                year != null -> year > currentYear
+                else -> false
+            }
+
+            if (isUnreleased) {
+                m.watched = false
+                m.reminder = true
+                m.progress = 0.0
+                m.watchedEpisodes = emptyMap()
+            }
+
             val key = "${m.mediaType ?: "movie"}_${m.id}"
             if (folder != null && folder.isNotBlank()) {
                 itemFolderMap.getOrPut(folder.trim()) { mutableSetOf() }.add(key)
@@ -272,6 +290,7 @@ class BackupRepository @Inject constructor(
                     watched = existing.watched || m.watched,
                     favorite = existing.favorite || m.favorite,
                     dropped = existing.dropped || m.dropped,
+                    reminder = existing.reminder || m.reminder,
                     personalRating = existing.personalRating ?: m.personalRating,
                     personalNote = (if (!existing.personalNote.isNullOrBlank()) existing.personalNote else m.personalNote)?.take(5000),
                     watchedEpisodes = newEpsMap,
@@ -319,6 +338,7 @@ class BackupRepository @Inject constructor(
                     watched = local.watched || incoming.watched,
                     favorite = local.favorite || incoming.favorite,
                     dropped = local.dropped || incoming.dropped,
+                    reminder = local.reminder || incoming.reminder,
                     personalRating = local.personalRating ?: incoming.personalRating,
                     personalNote = (if (!local.personalNote.isNullOrBlank()) local.personalNote else incoming.personalNote)?.take(5000),
                     watchedEpisodes = newEpsMap,
