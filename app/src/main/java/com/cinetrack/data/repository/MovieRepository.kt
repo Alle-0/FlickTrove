@@ -987,6 +987,36 @@ class MovieRepository @Inject constructor(
             return match?.copy(mediaType = "movie")
         }
     }
+
+    suspend fun searchMediaList(query: String, isTv: Boolean = false): List<Movie> = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val cleanQuery = query.trim()
+        if (cleanQuery.isBlank()) return@withContext emptyList()
+
+        try {
+            if (isTv) {
+                // Prendiamo solo i primi 5 risultati per non sovraccaricare le API
+                val tvResults = tmdbService.searchTV(cleanQuery).results.take(5)
+                
+                // Usiamo async per scaricare i dettagli in parallelo ed evitare rallentamenti nell'import
+                tvResults.map { basicResult ->
+                    kotlinx.coroutines.async {
+                        try {
+                            val details = fetchMovieDetails(basicResult.id, true)
+                            com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "tv")
+                        } catch (e: Exception) {
+                            basicResult.copy(mediaType = "tv")
+                        }
+                    }
+                }.awaitAll()
+            } else {
+                // Per i film basta il risultato base
+                val movieResults = tmdbService.searchMovie(cleanQuery).results.take(5)
+                movieResults.map { it.copy(mediaType = "movie") }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
     
     suspend fun findByImdbId(imdbId: String): Movie? {
         val response = tmdbService.findByExternalId(imdbId, "imdb_id")

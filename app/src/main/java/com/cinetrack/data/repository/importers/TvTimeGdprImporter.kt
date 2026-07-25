@@ -488,7 +488,25 @@ class TvTimeGdprImporter @Inject constructor(
                 async {
                     try {
                         val isTv = item.mediaType == "tv"
-                        val tmdbResult = try { movieRepository.searchMediaWithYear(item.title, null, isTv = isTv) } catch (e: Exception) { null }
+                        val tmdbResult = try {
+                            var result: Movie? = null
+    
+                            // Calcola qual è la stagione più alta che l'utente ha visto
+                            val maxSeasonWatched = if (isTv && item.watchedEpisodes.isNotEmpty()) {
+                                item.watchedEpisodes.keys.maxOfOrNull { it.toIntOrNull() ?: 0 } ?: 0
+                            } else 0
+
+                            val searchResults = movieRepository.searchMediaList(item.title, isTv = isTv)
+                            if (searchResults.isNotEmpty()) {
+                                result = searchResults.firstOrNull { tmdbMovie ->
+                                    val tmdbSeasons = tmdbMovie.numberOfSeasons ?: 1
+                                    maxSeasonWatched == 0 || tmdbSeasons >= maxSeasonWatched
+                                } ?: searchResults.first() 
+                            }
+                            result
+                        } catch (e: Exception) { 
+                            null 
+                        }
                         val tmdb = tmdbResult ?: Movie(
                             id = item.id?.toLongOrNull()?.takeIf { it > 0 } ?: (kotlin.math.abs(item.title.hashCode()).toLong().coerceAtLeast(1000000L)),
                             mediaType = item.mediaType,
