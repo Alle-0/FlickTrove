@@ -270,6 +270,23 @@ class MovieRepository @Inject constructor(
                         val response = fetchMovieDetails(movie.id, isTv)
                         val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
                         
+                        if (isTv) {
+                            val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                            var updatedSeasons = freshMovie.seasons
+                            val targetSeasonNum = response.nextEpisodeToAir?.seasonNumber
+                                ?: response.seasons?.firstOrNull { !it.airDate.isNullOrBlank() && it.airDate >= today }?.seasonNumber
+
+                            if (targetSeasonNum != null && targetSeasonNum > 0) {
+                                try {
+                                    val detailedSeason = fetchSeasonDetails(movie.id, targetSeasonNum)
+                                    updatedSeasons = updatedSeasons?.map { if (it.seasonNumber == targetSeasonNum) detailedSeason else it }
+                                    freshMovie.seasons = updatedSeasons
+                                } catch (e: Exception) {
+                                    if (e is kotlinx.coroutines.CancellationException) throw e
+                                }
+                            }
+                        }
+                        
                         var currentLocal = favoriteDao.getById(movie.id, movie.mediaType)
                         if (currentLocal != null) {
                             currentLocal = currentLocal.copy(
