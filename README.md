@@ -202,6 +202,9 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
   <a href="https://www.paypal.me/AlessandroBasile0" target="_blank">
     <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" />
   </a>
+  
+  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B4H123UU65)
+  
 </div>
 
 <br>
