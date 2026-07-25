@@ -132,17 +132,32 @@ class UpdateEpisodesUseCase @Inject constructor() {
             allWatched["0"] = it
         }
 
+        val totalWatched = allWatched.filter { it.key != "0" }.values.sumOf { it.size }
+        val totalEpisodes = movie.effectiveTotalEpisodes
+        val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
         val now = dateFormat.format(Date())
+
         return movie.copy(
             watchedEpisodes = allWatched,
-            progress = 1.0,
-            watched = true,
-            favorite = false,
-            reminder = false,
-            newEpisodesFound = 0,
-            watchedAt = movie.watchedAt ?: now,
+            progress = progressVal,
+            mediaType = "tv",
             lastSyncDate = now,
-            mediaType = "tv"
-        )
+            newEpisodesFound = 0
+        ).let { nextMovie ->
+            if (totalEpisodes > 0 && totalWatched >= totalEpisodes) {
+                nextMovie.copy(
+                    watched = true,
+                    favorite = false,
+                    reminder = false,
+                    watchedAt = movie.watchedAt ?: now
+                )
+            } else {
+                nextMovie.copy(
+                    watched = false,
+                    favorite = true,
+                    reminder = false
+                )
+            }
+        }
     }
 }

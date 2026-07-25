@@ -95,7 +95,9 @@ class TVUpdateWorker(
                             status = latest.status,
                             nextEpisodeAirDate = newNextEpAirDate,
                             nextEpisodeString = newNextEpString,
-                            seasons = updatedSeasons ?: show.seasons
+                            seasons = updatedSeasons ?: show.seasons,
+                            watched = if (releasedNewEps > 0) false else show.watched,
+                            favorite = if (releasedNewEps > 0) true else show.favorite
                         )
                         repository.saveMovie(updated)
 

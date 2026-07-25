@@ -303,7 +303,7 @@ data class ReminderItem(
 )
 
 fun Movie.generateReminderItems(today: String): List<ReminderItem> {
-    val isEligible = this.reminder || (this.mediaType == "tv" && (this.favorite || !this.watched))
+    val isEligible = this.reminder || (this.mediaType == "tv" && !this.dropped)
     if (!isEligible) return emptyList()
 
     if (this.mediaType == "movie") {
