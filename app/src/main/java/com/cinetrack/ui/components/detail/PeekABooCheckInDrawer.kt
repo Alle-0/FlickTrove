@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -194,7 +196,7 @@ fun PeekABooCheckInDrawer(
             Box(
                 modifier = Modifier
                     .width(320.dp)
-                    .fillMaxHeight(0.78f)
+                    .wrapContentHeight()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -204,7 +206,7 @@ fun PeekABooCheckInDrawer(
                 // Background Layer
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .matchParentSize()
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp),
@@ -216,12 +218,12 @@ fun PeekABooCheckInDrawer(
 
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Header and Content
-                    Column(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -387,57 +389,90 @@ fun PeekABooCheckInDrawer(
                                             }
                                         }
                                     } else {
-                                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                            Text("No cast available", color = Color.White.copy(alpha = 0.5f))
+                                        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                                            Text(stringResource(R.string.checkin_no_cast), color = Color.White.copy(alpha = 0.5f))
                                         }
                                     }
                                 }
                             }
                         } // ends AnimatedContent
-                    } // ends Column(modifier = Modifier.weight(1f))
+                    } // ends inner content Column
 
-                    // Next / Save row with Pagination Dots
+                    // Bottom area: Pagination Dots + Buttons
                     Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                    ) {
+                        // Pagination dots
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 10.dp)
                         ) {
-                            // Pagination dots
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(bottom = 12.dp)
+                            repeat(2) { index ->
+                                val isCurrent = currentPage == index
+                                val isDone = currentPage > index
+                                val color by animateColorAsState(
+                                    targetValue = if (isCurrent || isDone) accentColor else Color.White.copy(alpha = 0.2f),
+                                    label = "dotColor"
+                                )
+                                val width by animateDpAsState(
+                                    targetValue = if (isCurrent) 16.dp else 6.dp,
+                                    label = "dotWidth"
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .height(6.dp)
+                                        .width(width)
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            currentPage = index
+                                        }
+                                )
+                            }
+                        }
+
+                        // Back + Save / Next buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Back button (only visible on page 2)
+                            AnimatedVisibility(
+                                visible = currentPage == 1,
+                                enter = fadeIn() + expandHorizontally(),
+                                exit = fadeOut() + shrinkHorizontally()
                             ) {
-                                repeat(2) { index ->
-                                    val isSelected = currentPage == index
-                                    val color by animateColorAsState(
-                                        targetValue = if (isSelected) accentColor else Color.White.copy(alpha = 0.2f),
-                                        label = "dotColor"
-                                    )
-                                    val width by animateDpAsState(
-                                        targetValue = if (isSelected) 16.dp else 6.dp,
-                                        label = "dotWidth"
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .height(6.dp)
-                                            .width(width)
-                                            .clip(CircleShape)
-                                            .background(color)
-                                            .clickable(
-                                                interactionSource = remember { MutableInteractionSource() },
-                                                indication = null
-                                            ) {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                currentPage = index
-                                            }
+                                Box(
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .width(40.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.White.copy(alpha = 0.1f))
+                                        .bounceClick(scaleDown = 0.95f) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            currentPage = 0
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                                        contentDescription = "Back",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
 
-                            // Save / Next Button
+                            // Next / Save button
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .weight(1f)
                                     .height(40.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
@@ -457,13 +492,14 @@ fun PeekABooCheckInDrawer(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (currentPage == 0) "Next" else stringResource(R.string.checkin_save_diary),
+                                    text = if (currentPage == 0) stringResource(R.string.checkin_next) else stringResource(R.string.checkin_save_diary),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0B0F19)
                                 )
                             }
                         }
+                    }
                 }
             }
         }

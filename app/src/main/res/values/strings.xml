@@ -984,6 +984,8 @@
     <string name="checkin_mvp_actor">MVP Character</string>
     <string name="checkin_skip">Skip</string>
     <string name="checkin_save_diary">Save to Flow</string>
+    <string name="checkin_next">Next</string>
+    <string name="checkin_no_cast">No cast available</string>
     <string name="checkin_vibe_tab">Vibe</string>
     
     <string name="checkin_vibe_masterpiece">Masterpiece</string>

@@ -981,6 +981,8 @@
     <string name="checkin_mvp_actor">Personaggio MVP</string>
     <string name="checkin_skip">Salta</string>
     <string name="checkin_save_diary">Salva nel Flow</string>
+    <string name="checkin_next">Avanti</string>
+    <string name="checkin_no_cast">Nessun cast disponibile</string>
     <string name="checkin_vibe_tab">Vibe</string>
 
     <string name="checkin_vibe_masterpiece">Capolavoro</string>
