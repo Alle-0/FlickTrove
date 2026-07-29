@@ -260,13 +260,18 @@ class MovieRepository @Inject constructor(
                 val newMvp = movie.favoriteActorId
                 val oldMvp = oldMovie?.favoriteActorId
 
-                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp) {
+                val oldRating = oldMovie?.personalRating
+                val newRating = movie.personalRating
+
+                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp || newRating != oldRating) {
                     firebaseRemoteDataSource.updateGlobalMovieStats(
                         compositeId = movie.compositeId,
                         addedVibes = addedVibes.toList(),
                         removedVibes = removedVibes.toList(),
                         newMvp = newMvp,
-                        oldMvp = oldMvp
+                        oldMvp = oldMvp,
+                        newRating = newRating,
+                        oldRating = oldRating
                     )
                 }
             } catch (e: Exception) {

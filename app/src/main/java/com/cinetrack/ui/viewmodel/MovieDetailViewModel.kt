@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.data.repository.TvdbRepository
+
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.components.detail.*
 import com.cinetrack.ui.theme.FlickTroveTheme
@@ -54,6 +56,7 @@ class MovieDetailViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val translationManager: TranslationManager,
     private val detailUiStateMapper: DetailUiStateMapper,
+    private val tvdbRepository: TvdbRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -85,6 +88,31 @@ class MovieDetailViewModel @Inject constructor(
                     _globalStats.value = stats
                 }
             }
+
+            // Fetch TVDB Character Images when metadata is loaded
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                _metadata.collect { tmdbResponse ->
+                    if (tmdbResponse != null) {
+                        try {
+                            if (mediaType == "tv") {
+                                val tvdbId = tmdbResponse.externalIds?.tvdbId?.toString()
+                                if (!tvdbId.isNullOrEmpty()) {
+                                    _characterImages.value = tvdbRepository.getSeriesCharacterImagesMap(tvdbId)
+                                }
+                            } else {
+                                val title = tmdbResponse.title ?: tmdbResponse.name
+                                val releaseDate = tmdbResponse.releaseDate ?: tmdbResponse.firstAirDate
+                                val year = releaseDate?.take(4)
+                                if (!title.isNullOrEmpty() && !year.isNullOrEmpty()) {
+                                    _characterImages.value = tvdbRepository.getMovieCharacterImagesMap(title, year)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -94,6 +122,7 @@ class MovieDetailViewModel @Inject constructor(
     private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.model.Season>>(emptyMap())
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
     private val _traktComments = MutableStateFlow<List<com.cinetrack.data.api.TraktComment>>(emptyList())
+    private val _characterImages = MutableStateFlow<Map<String, String>>(emptyMap())
     private val _error = MutableStateFlow<String?>(null)
     
     data class TranslationState(
@@ -145,34 +174,34 @@ class MovieDetailViewModel @Inject constructor(
             Triple(seasonD, collectionM, errorMsg)
         }
 
-        val metadataFlow = combine(
-            flow1,
-            flow2,
-            _traktComments
-        ) { groupA, groupB, traktComms ->
-            val (metadata, external, loadingS) = groupA
-            val (seasonD, collectionM, errorMsg) = groupB
-            MetadataState(metadata, external, loadingS, seasonD, collectionM, errorMsg, traktComms)
+        val flow3 = combine(
+            _traktComments,
+            _characterImages
+        ) { comments, charImages ->
+            Pair(comments, charImages)
         }
 
         return combine(
-            metadataFlow,
+            flow1,
+            flow2,
+            flow3,
             repository.getLocalMoviesFlow(),
             repository.getFoldersFlow()
-        ) { meta, localMovies, folders ->
+        ) { f1, f2, f3, localMovies, folders ->
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                 detailUiStateMapper.mapToState(
                     movieId = movieId,
                     mediaType = mediaType,
-                    metadata = meta.metadata,
-                    externalRatings = meta.external,
-                    loadingSeason = meta.loadingS,
-                    seasonDetails = meta.seasonD,
-                    collectionMovies = meta.collectionM,
-                    errorMsg = meta.errorMsg,
-                    traktComments = meta.traktComments,
+                    metadata = f1.first,
+                    externalRatings = f1.second,
+                    loadingSeason = f1.third,
+                    seasonDetails = f2.first,
+                    collectionMovies = f2.second,
+                    errorMsg = f2.third,
+                    traktComments = f3.first,
                     localMovies = localMovies,
-                    folders = folders
+                    folders = folders,
+                    characterImages = f3.second
                 )
             }
         }

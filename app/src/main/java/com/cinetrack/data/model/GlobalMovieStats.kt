@@ -11,6 +11,14 @@ data class GlobalMovieStats(
     @set:PropertyName("total_mvps")
     var totalMvps: Long = 0,
 
+    @get:PropertyName("total_rating")
+    @set:PropertyName("total_rating")
+    var totalRating: Double = 0.0,
+
+    @get:PropertyName("rating_count")
+    @set:PropertyName("rating_count")
+    var ratingCount: Long = 0,
+
     @get:PropertyName("vibes")
     @set:PropertyName("vibes")
     var vibes: Map<String, Long> = emptyMap(),

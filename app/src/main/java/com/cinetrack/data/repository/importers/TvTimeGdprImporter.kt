@@ -516,12 +516,17 @@ class TvTimeGdprImporter @Inject constructor(
                                 item.watchedEpisodes.keys.maxOfOrNull { it.toIntOrNull() ?: 0 } ?: 0
                             } else 0
 
-                            // NUOVA LOGICA: Estrae anno se presente (es. "ONE PIECE (2023)") per evitare incroci
-                            val yearMatch = Regex("\\((\\d{4})\\)").find(item.title)
-                            val itemYear = yearMatch?.groupValues?.get(1)?.toIntOrNull()
-                            val cleanSearchTitle = item.title.replace(Regex("\\(\\d{4}\\)"), "").trim()
+                            if (isTv && !item.id.isNullOrBlank()) {
+                                result = movieRepository.findByTvdbId(item.id)
+                            }
 
-                            val searchResults = movieRepository.searchMediaList(cleanSearchTitle, isTv = isTv)
+                            if (result == null) {
+                                // NUOVA LOGICA: Estrae anno se presente (es. "ONE PIECE (2023)") per evitare incroci
+                                val yearMatch = Regex("\\((\\d{4})\\)").find(item.title)
+                                val itemYear = yearMatch?.groupValues?.get(1)?.toIntOrNull()
+                                val cleanSearchTitle = item.title.replace(Regex("\\(\\d{4}\\)"), "").trim()
+
+                                val searchResults = movieRepository.searchMediaList(cleanSearchTitle, isTv = isTv)
                             if (searchResults.isNotEmpty()) {
                                 
                                 if (isTv && searchResults.size > 1) {
@@ -548,7 +553,8 @@ class TvTimeGdprImporter @Inject constructor(
                                     } ?: searchResults.first() 
                                 }
                             }
-                            result
+                        }
+                        result
                         } catch (e: Exception) { 
                             null 
                         }

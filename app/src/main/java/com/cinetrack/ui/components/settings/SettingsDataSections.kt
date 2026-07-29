@@ -498,6 +498,10 @@ fun SettingsSupportSection(
                 text = stringResource(R.string.settings_omdb_notice)
             )
             AttributionRow(
+                brand = "TheTVDB",
+                text = stringResource(R.string.settings_tvdb_notice)
+            )
+            AttributionRow(
                 brand = "Trakt.tv",
                 text = stringResource(R.string.settings_trakt_notice)
             )

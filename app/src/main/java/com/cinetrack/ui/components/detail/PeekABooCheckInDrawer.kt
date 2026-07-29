@@ -103,6 +103,7 @@ fun PeekABooCheckInDrawer(
     movie: com.cinetrack.data.model.Movie? = null,
     globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
     cast: List<CastMember>,
+    characterImages: Map<String, String> = emptyMap(),
     accentColor: Color,
     hazeState: HazeState,
     onSave: (vibes: List<String>, mvp: CastMember?) -> Unit,
@@ -196,7 +197,7 @@ fun PeekABooCheckInDrawer(
             Box(
                 modifier = Modifier
                     .width(320.dp)
-                    .fillMaxHeight(0.72f)
+                    .wrapContentHeight()
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -206,7 +207,7 @@ fun PeekABooCheckInDrawer(
                 // Background Layer
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .matchParentSize()
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp),
@@ -218,12 +219,11 @@ fun PeekABooCheckInDrawer(
 
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 20.dp)
                 ) {
                     // Header and Content
-                    Column(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -269,11 +269,11 @@ fun PeekABooCheckInDrawer(
                                 }.using(SizeTransform(clip = false))
                             },
                             label = "Page Transition",
-                            modifier = Modifier.weight(1f).fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                         ) { page ->
                             if (page == 0) {
                                 // Page 1: Vibe Grid
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxSize()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                     ALL_VIBES.chunked(3).forEach { rowVibes ->
                                         Row(
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -302,7 +302,7 @@ fun PeekABooCheckInDrawer(
                                                 val added = currentVibes - originalVibes
                                                 val removed = originalVibes - currentVibes
                                                 val projectedTotalVibes = maxOf(0L, baselineTotal + added.size - removed.size)
-                                                var baselineVibeCount = globalStats?.vibes?.get(vibe.code) ?: 0L
+                                                var baselineVibeCount = maxOf(0L, globalStats?.vibes?.get(vibe.code) ?: 0L)
                                                 
                                                 if (originalVibes.contains(vibe.code) && baselineVibeCount == 0L) {
                                                     baselineVibeCount = 1L
@@ -342,7 +342,7 @@ fun PeekABooCheckInDrawer(
                                 }
                             } else {
                                 // Page 2: MVP Cast Section
-                                Column(modifier = Modifier.fillMaxSize()) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
                                     if (cast.isNotEmpty()) {
                                         Text(
                                             text = stringResource(R.string.checkin_mvp_actor),
@@ -360,7 +360,8 @@ fun PeekABooCheckInDrawer(
                                             verticalArrangement = Arrangement.spacedBy(12.dp),
                                             contentPadding = PaddingValues(horizontal = 2.dp, vertical = 12.dp),
                                             modifier = Modifier
-                                                .weight(1f)
+                                                .fillMaxWidth()
+                                                .height(300.dp)
                                                 .graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen)
                                                 .drawWithContent {
                                                     drawContent()
@@ -377,10 +378,13 @@ fun PeekABooCheckInDrawer(
                                         ) {
                                             items(cast.take(24), key = { it.id }) { actor ->
                                                 val isMvp = selectedMvp?.id == actor.id
+                                                val charName = actor.character?.lowercase()?.trim()
+                                                val charImageUrl = charName?.let { characterImages[it] }
                                                 CastMvpChip(
                                                     actor = actor,
                                                     isMvp = isMvp,
                                                     accentColor = accentColor,
+                                                    characterImageUrl = charImageUrl,
                                                     onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                         selectedMvp = if (isMvp) null else actor
@@ -646,6 +650,7 @@ private fun CastMvpChip(
     actor: CastMember,
     isMvp: Boolean,
     accentColor: Color,
+    characterImageUrl: String? = null,
     onClick: () -> Unit
 ) {
     val scale by animateFloatAsState(
@@ -703,7 +708,14 @@ private fun CastMvpChip(
                 )
             }
 
-            if (!actor.profilePath.isNullOrBlank()) {
+            if (!characterImageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = characterImageUrl,
+                    contentDescription = actor.character,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clip(CircleShape)
+                )
+            } else if (!actor.profilePath.isNullOrBlank()) {
                 AsyncImage(
                     model = buildTmdbImageUrl(actor.profilePath, ImageType.PROFILE, ImageQuality.LOW),
                     contentDescription = actor.name,

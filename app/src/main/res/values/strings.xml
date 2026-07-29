@@ -235,6 +235,7 @@
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
     <string name="settings_omdb_notice">Additional data and ratings provided by OMDb API.</string>
+    <string name="settings_tvdb_notice">Series metadata provided by TheTVDB.</string>
     <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
     <string name="settings_made_with">Developed with </string>
     <string name="settings_for_lovers"> for movie lovers</string>
@@ -790,6 +791,7 @@
     <string name="action_label_updated">updated</string>
 
     <!-- Personal Zone Actions -->
+    <string name="personal_zone_global_rating">FLICKTROVE RATING</string>
     <string name="personal_zone_rate">RATE</string>
     <string name="personal_zone_note">NOTE</string>
     <string name="personal_zone_empty">EMPTY</string>

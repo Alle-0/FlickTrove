@@ -321,6 +321,7 @@ fun AttributionRow(
                     when (brand) {
                         "TMDB" -> Color(0xFF032541)
                         "OMDb API" -> Color(0xFFF5C518)
+                        "TheTVDB" -> Color(0xFF31B057)
                         "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
                         else -> Color.White.copy(alpha = 0.05f)
                     }
@@ -338,12 +339,16 @@ fun AttributionRow(
                     contentScale = ContentScale.Fit
                 )
             } else {
-                // Stylized Fallback for OMDb or missing logos
+                // Stylized Fallback for OMDb, TheTVDB, or missing logos
                 Text(
-                    text = if (brand == "OMDb API") "OMDb" else brand.take(1),
+                    text = when (brand) {
+                        "OMDb API" -> "OMDb"
+                        "TheTVDB" -> "TVDB"
+                        else -> brand.take(1)
+                    },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = if (brand == "OMDb API") 10.sp else 14.sp
+                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB") 10.sp else 14.sp
                     ),
                     color = if (brand == "OMDb API") Color.Black else Color.White
                 )

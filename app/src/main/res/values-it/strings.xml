@@ -795,6 +795,7 @@
     <string name="action_label_updated">aggiornato</string>
 
     <!-- Personal Zone Actions -->
+    <string name="personal_zone_global_rating">VOTO FLICKTROVE</string>
     <string name="personal_zone_rate">VALUTA</string>
     <string name="personal_zone_note">NOTA</string>
     <string name="personal_zone_empty">VUOTO</string>

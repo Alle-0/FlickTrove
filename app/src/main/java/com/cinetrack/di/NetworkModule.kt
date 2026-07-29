@@ -7,6 +7,9 @@ import com.cinetrack.data.api.NewsService
 import com.cinetrack.data.api.GithubService
 import com.cinetrack.data.api.TraktAuthInterceptor
 import com.cinetrack.data.api.TraktAuthenticator
+import com.cinetrack.data.api.TvdbApi
+import com.cinetrack.data.api.TvdbAuthInterceptor
+import com.cinetrack.data.api.TvdbAuthenticator
 import com.cinetrack.util.Keys
 import dagger.Module
 import dagger.Provides
@@ -140,6 +143,36 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("tvdb_okhttp")
+    fun provideTvdbOkHttpClient(
+        @Named("trakt_okhttp") baseOkHttp: OkHttpClient, // or a new builder
+        tvdbAuthInterceptor: TvdbAuthInterceptor,
+        tvdbAuthenticator: TvdbAuthenticator
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            // We can just use the same timeouts as the default OkHttp
+            .addInterceptor(tvdbAuthInterceptor)
+            .authenticator(tvdbAuthenticator)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("tvdb_retrofit")
+    fun provideTvdbRetrofit(
+        json: Json,
+        @Named("tvdb_okhttp") okHttpClient: OkHttpClient
+    ): Retrofit {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api4.thetvdb.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
     fun provideTMDBService(@Named("tmdb_retrofit") retrofit: Retrofit): TMDBService = retrofit.create(TMDBService::class.java)
 
     @Provides
@@ -171,6 +204,10 @@ object NetworkModule {
 
     @Provides
     fun provideNewsService(@Named("news_retrofit") retrofit: Retrofit): NewsService = retrofit.create(NewsService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTvdbService(@Named("tvdb_retrofit") retrofit: Retrofit): TvdbApi = retrofit.create(TvdbApi::class.java)
 
     @Provides
     @Singleton

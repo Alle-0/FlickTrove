@@ -35,12 +35,14 @@ android {
         val omdbKey = localProps.getProperty("OMDB_API_KEY", "")
         val traktKey = localProps.getProperty("TRAKT_API_KEY", "")
         val traktSecret = localProps.getProperty("TRAKT_CLIENT_SECRET", "")
+        val tvdbKey = localProps.getProperty("TVDB_API_KEY", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
         buildConfigField("String", "OMDB_API_KEY", "\"$omdbKey\"")
         buildConfigField("String", "TRAKT_API_KEY", "\"$traktKey\"")
         buildConfigField("String", "TRAKT_CLIENT_SECRET", "\"$traktSecret\"")
+        buildConfigField("String", "TVDB_API_KEY", "\"$tvdbKey\"")
     }
 
     signingConfigs {

@@ -472,6 +472,7 @@ fun MovieDetailScreenContent(
                                         movie = activeMovie,
                                         accentColor = accentColor,
                                         hazeState = localHazeState,
+                                        globalStats = globalStats,
                                         onRate = { viewModel.onEvent(DetailEvent.Rate(it)) },
                                         onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) },
                                         onCheckInClick = { 
@@ -595,6 +596,7 @@ fun MovieDetailScreenContent(
                 movie = cachedSuccess!!.movieEntry,
                 globalStats = globalStats,
                 cast = checkInCast,
+                characterImages = cachedSuccess!!.characterImages,
                 accentColor = checkInAccent,
                 hazeState = rootHazeState,
                 onSave = { vibes, mvp ->

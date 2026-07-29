@@ -225,7 +225,9 @@ class FirebaseRemoteDataSource @Inject constructor(
         addedVibes: List<String>,
         removedVibes: List<String>,
         newMvp: Long?,
-        oldMvp: Long?
+        oldMvp: Long?,
+        newRating: Double? = null,
+        oldRating: Double? = null
     ) {
         val docRef = getGlobalMovieStats(compositeId)
         try {
@@ -233,49 +235,63 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val snapshot = transaction.get(docRef)
                 
                 if (snapshot.exists()) {
-                    val data = mutableMapOf<String, Any>()
+                    val updates = mutableMapOf<String, Any>()
                     var needsUpdate = false
                     
-                    val vibesUpdate = mutableMapOf<String, Any>()
                     var totalVibesDelta = 0L
                     addedVibes.forEach { vibe ->
-                        vibesUpdate[vibe] = com.google.firebase.firestore.FieldValue.increment(1)
+                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(1)
                         totalVibesDelta++
                     }
                     removedVibes.forEach { vibe ->
-                        vibesUpdate[vibe] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(-1)
                         totalVibesDelta--
                     }
-                    if (vibesUpdate.isNotEmpty()) {
-                        data["vibes"] = vibesUpdate
-                        needsUpdate = true
-                    }
+                    if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty()) needsUpdate = true
                     
                     if (totalVibesDelta != 0L) {
-                        data["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
+                        updates["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
                     }
                     
-                    val mvpsUpdate = mutableMapOf<String, Any>()
                     var totalMvpDelta = 0L
                     if (newMvp != null && newMvp != oldMvp) {
-                        mvpsUpdate[newMvp.toString()] = com.google.firebase.firestore.FieldValue.increment(1)
+                        updates["mvps.$newMvp"] = com.google.firebase.firestore.FieldValue.increment(1)
                         totalMvpDelta++
                     }
                     if (oldMvp != null && oldMvp != newMvp) {
-                        mvpsUpdate[oldMvp.toString()] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        updates["mvps.$oldMvp"] = com.google.firebase.firestore.FieldValue.increment(-1)
                         totalMvpDelta--
                     }
-                    if (mvpsUpdate.isNotEmpty()) {
-                        data["mvps"] = mvpsUpdate
-                        needsUpdate = true
-                    }
+                    if (newMvp != oldMvp) needsUpdate = true
                     
                     if (totalMvpDelta != 0L) {
-                        data["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
+                        updates["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
+                    }
+                    
+                    var ratingDelta = 0.0
+                    var countDelta = 0L
+
+                    if (newRating != oldRating) {
+                        if (oldRating != null && oldRating > 0.0) {
+                            ratingDelta -= oldRating
+                            countDelta -= 1L
+                        }
+                        if (newRating != null && newRating > 0.0) {
+                            ratingDelta += newRating
+                            countDelta += 1L
+                        }
+                        needsUpdate = true
+                    }
+
+                    if (ratingDelta != 0.0) {
+                        updates["total_rating"] = com.google.firebase.firestore.FieldValue.increment(ratingDelta)
+                    }
+                    if (countDelta != 0L) {
+                        updates["rating_count"] = com.google.firebase.firestore.FieldValue.increment(countDelta)
                     }
                     
                     if (needsUpdate) {
-                        transaction.set(docRef, data, com.google.firebase.firestore.SetOptions.merge())
+                        transaction.update(docRef, updates)
                     }
                 } else {
                     val initialData = mutableMapOf<String, Any>()
@@ -296,6 +312,11 @@ class FirebaseRemoteDataSource @Inject constructor(
                     if (mvpsMap.isNotEmpty()) {
                         initialData["mvps"] = mvpsMap
                         initialData["total_mvps"] = 1L
+                    }
+                    
+                    if (newRating != null && newRating > 0.0) {
+                        initialData["total_rating"] = newRating
+                        initialData["rating_count"] = 1L
                     }
                     
                     if (initialData.isNotEmpty()) {

@@ -43,6 +43,7 @@ fun DetailPersonalZone(
     onNoteUpdate: (String) -> Unit,
     onCheckInClick: () -> Unit = {},
     hazeState: HazeState? = null,
+    globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
     modifier: Modifier = Modifier
 ) {
     var expandedAction by remember { mutableStateOf<String?>(null) } // "rate" or "note"
@@ -88,17 +89,23 @@ fun DetailPersonalZone(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            val hasVibe = !movie.emotionalVibes.isNullOrBlank() || movie.favoriteActorId != null
+            val vibeValueText = if (hasVibe) stringResource(R.string.personal_zone_saved) else stringResource(R.string.personal_zone_empty)
+            val canVibe = movie.watched
+            
             PersonalAction(
-                label = stringResource(R.string.personal_zone_rate),
-                value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
-                hasValue = (expandedAction == "rate" || previewRating > 0),
-                isRateAction = true,
-                icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                label = stringResource(R.string.personal_zone_vibe),
+                value = vibeValueText,
+                hasValue = hasVibe,
+                isRateAction = false,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                 accentColor = accentColor,
-                isActive = expandedAction == "rate",
-                onClick = { expandedAction = if (expandedAction == "rate") null else "rate" },
+                isActive = false,
+                enabled = canVibe,
+                onClick = { if (canVibe) onCheckInClick() },
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
+
             val hasText = !movie.personalNote.isNullOrBlank()
             val noteValueText = when {
                 hasText && hasAudio -> stringResource(R.string.personal_zone_text_audio)
@@ -125,21 +132,55 @@ fun DetailPersonalZone(
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
         ) {
-            val hasVibe = !movie.emotionalVibes.isNullOrBlank() || movie.favoriteActorId != null
-            val vibeValueText = if (hasVibe) stringResource(R.string.personal_zone_saved) else stringResource(R.string.personal_zone_empty)
-            val canVibe = movie.watched
-            
+            val globalRating = if (globalStats != null && globalStats.ratingCount > 0) {
+                globalStats.totalRating / globalStats.ratingCount
+            } else {
+                movie.voteAverage
+            }
+            val globalRatingText = if (globalRating != null && globalRating > 0) String.format(java.util.Locale.US, "%.1f", globalRating) else "—"
             PersonalAction(
-                label = stringResource(R.string.personal_zone_vibe),
-                value = vibeValueText,
-                hasValue = hasVibe,
-                isRateAction = false,
-                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                label = stringResource(R.string.personal_zone_rate),
+                value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
+                hasValue = (expandedAction == "rate" || previewRating > 0),
+                isRateAction = true,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                 accentColor = accentColor,
-                isActive = false,
-                enabled = canVibe,
-                onClick = { if (canVibe) onCheckInClick() },
-                modifier = Modifier.weight(1f).fillMaxHeight()
+                isActive = expandedAction == "rate",
+                onClick = { expandedAction = if (expandedAction == "rate") null else "rate" },
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                trailingContent = {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(end = 16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.personal_zone_global_rating),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White.copy(alpha = 0.4f),
+                            lineHeight = 10.sp
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_people),
+                                contentDescription = null,
+                                tint = if (globalRating != null && globalRating > 0) accentColor else Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = globalRatingText,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Black,
+                                color = if (globalRating != null && globalRating > 0) accentColor else Color.White.copy(alpha = 0.6f),
+                                lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
             )
         }
 
@@ -205,7 +246,8 @@ private fun PersonalAction(
     isActive: Boolean,
     enabled: Boolean = true,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable (RowScope.() -> Unit)? = null
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     var isPressed by remember { mutableStateOf(false) }
@@ -252,7 +294,7 @@ private fun PersonalAction(
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -301,6 +343,12 @@ private fun PersonalAction(
                         else -> 14.sp
                     }
                 )
+            }
+            if (trailingContent != null) {
+                Spacer(modifier = Modifier.weight(1f))
+                trailingContent()
+            } else {
+                Spacer(modifier = Modifier.width(16.dp)) // Maintain padding for non-trailing actions
             }
         }
     }

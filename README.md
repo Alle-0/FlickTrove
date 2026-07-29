@@ -83,6 +83,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
 - 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
+- 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
 - 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
 
 ---
@@ -151,7 +152,7 @@ Design is the true crown jewel of FlickTrove.
 
 ## <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
-For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, OMDB, Trakt) have been excluded from this repository.
+For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, TheTVDB, OMDB, Trakt) have been excluded from this repository.
 
 Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
 
@@ -225,7 +226,10 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 **Credits & Useful Resources:**
 
 - 🎬 [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
+- 📺 [TheTVDB API](https://thetvdb.com/api-information) - For advanced TV show metadata
 - 🛡️ [Shields.io](https://shields.io) - For README badges
+
+> *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 
 <br>
 

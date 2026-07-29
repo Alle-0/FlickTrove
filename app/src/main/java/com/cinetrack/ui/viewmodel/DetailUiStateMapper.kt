@@ -26,7 +26,8 @@ class DetailUiStateMapper @Inject constructor(
         errorMsg: String?,
         traktComments: List<TraktComment>,
         localMovies: List<Movie>,
-        folders: List<FolderEntity>
+        folders: List<FolderEntity>,
+        characterImages: Map<String, String>
     ): DetailUiState {
         if (errorMsg != null && metadata == null) return DetailUiState.Error(errorMsg)
         if (metadata == null) return DetailUiState.Loading
@@ -177,7 +178,8 @@ class DetailUiStateMapper @Inject constructor(
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
-            traktComments = traktComments.toImmutableList()
+            traktComments = traktComments.toImmutableList(),
+            characterImages = characterImages.toImmutableMap()
         )
     }
 }

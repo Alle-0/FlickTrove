@@ -96,6 +96,7 @@ data class UserPreferences(
     val showAppEntryAnimation: Boolean = true,
     val useMovieLogo: Boolean = true,
     val lastSyncTimestamp: Long = 0L,
-    val defaultStartTab: String = "home"
+    val defaultStartTab: String = "home",
+    val tvdbJwtToken: String = ""
 )
 

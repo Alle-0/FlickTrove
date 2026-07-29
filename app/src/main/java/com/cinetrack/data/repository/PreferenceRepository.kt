@@ -43,6 +43,7 @@ class PreferenceRepository @Inject constructor(
         val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         val DEFAULT_START_TAB = stringPreferencesKey("default_start_tab")
+        val TVDB_JWT_TOKEN = stringPreferencesKey("tvdb_jwt_token")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -80,7 +81,8 @@ class PreferenceRepository @Inject constructor(
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
-                defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home"
+                defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home",
+                tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: ""
             )
         }
 
@@ -210,6 +212,13 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
             preferences[PreferencesKeys.DEFAULT_START_TAB] = prefs.defaultStartTab
+            preferences[PreferencesKeys.TVDB_JWT_TOKEN] = prefs.tvdbJwtToken
+        }
+    }
+
+    suspend fun updateTvdbJwtToken(token: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TVDB_JWT_TOKEN] = token
         }
     }
 
