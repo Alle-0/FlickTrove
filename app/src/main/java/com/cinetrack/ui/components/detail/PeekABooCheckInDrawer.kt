@@ -196,7 +196,7 @@ fun PeekABooCheckInDrawer(
             Box(
                 modifier = Modifier
                     .width(320.dp)
-                    .wrapContentHeight()
+                    .fillMaxHeight(0.72f)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -206,7 +206,7 @@ fun PeekABooCheckInDrawer(
                 // Background Layer
                 Box(
                     modifier = Modifier
-                        .matchParentSize()
+                        .fillMaxSize()
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp),
@@ -218,12 +218,12 @@ fun PeekABooCheckInDrawer(
 
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 20.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Header and Content
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
