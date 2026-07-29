@@ -233,41 +233,49 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val snapshot = transaction.get(docRef)
                 
                 if (snapshot.exists()) {
-                    val updates = mutableMapOf<String, Any>()
+                    val data = mutableMapOf<String, Any>()
                     var needsUpdate = false
                     
+                    val vibesUpdate = mutableMapOf<String, Any>()
                     var totalVibesDelta = 0L
                     addedVibes.forEach { vibe ->
-                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(1)
+                        vibesUpdate[vibe] = com.google.firebase.firestore.FieldValue.increment(1)
                         totalVibesDelta++
                     }
                     removedVibes.forEach { vibe ->
-                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        vibesUpdate[vibe] = com.google.firebase.firestore.FieldValue.increment(-1)
                         totalVibesDelta--
                     }
-                    if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty()) needsUpdate = true
-                    
-                    if (totalVibesDelta != 0L) {
-                        updates["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
+                    if (vibesUpdate.isNotEmpty()) {
+                        data["vibes"] = vibesUpdate
+                        needsUpdate = true
                     }
                     
+                    if (totalVibesDelta != 0L) {
+                        data["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
+                    }
+                    
+                    val mvpsUpdate = mutableMapOf<String, Any>()
                     var totalMvpDelta = 0L
                     if (newMvp != null && newMvp != oldMvp) {
-                        updates["mvps.$newMvp"] = com.google.firebase.firestore.FieldValue.increment(1)
+                        mvpsUpdate[newMvp.toString()] = com.google.firebase.firestore.FieldValue.increment(1)
                         totalMvpDelta++
                     }
                     if (oldMvp != null && oldMvp != newMvp) {
-                        updates["mvps.$oldMvp"] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        mvpsUpdate[oldMvp.toString()] = com.google.firebase.firestore.FieldValue.increment(-1)
                         totalMvpDelta--
                     }
-                    if (newMvp != oldMvp) needsUpdate = true
+                    if (mvpsUpdate.isNotEmpty()) {
+                        data["mvps"] = mvpsUpdate
+                        needsUpdate = true
+                    }
                     
                     if (totalMvpDelta != 0L) {
-                        updates["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
+                        data["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
                     }
                     
                     if (needsUpdate) {
-                        transaction.update(docRef, updates)
+                        transaction.set(docRef, data, com.google.firebase.firestore.SetOptions.merge())
                     }
                 } else {
                     val initialData = mutableMapOf<String, Any>()

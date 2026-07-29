@@ -1,6 +1,10 @@
 package com.cinetrack.ui.components.detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -110,6 +114,7 @@ fun PeekABooCheckInDrawer(
     // Drawer state machine
     var isPeeking by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
+    var currentPage by remember { mutableIntStateOf(0) }
 
     // Local selection state initialized from movie if present
     var selectedVibes by remember(movie?.emotionalVibes) { 
@@ -134,11 +139,13 @@ fun PeekABooCheckInDrawer(
                 ALL_VIBES.find { it.code == clean || it.emoji == emojiPart }
             }?.toSet() ?: emptySet()
             selectedMvp = cast.find { it.id == movie?.favoriteActorId }
+            currentPage = 0
             isExpanded = startExpanded
             isPeeking = true
         } else {
             isPeeking = false
             isExpanded = false
+            currentPage = 0
         }
     }
 
@@ -248,172 +255,215 @@ fun PeekABooCheckInDrawer(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        AnimatedContent(
+                            targetState = currentPage,
+                            transitionSpec = {
+                                if (targetState > initialState) {
+                                    slideInHorizontally { width -> width } + fadeIn() togetherWith
+                                            slideOutHorizontally { width -> -width } + fadeOut()
+                                } else {
+                                    slideInHorizontally { width -> -width } + fadeIn() togetherWith
+                                            slideOutHorizontally { width -> width } + fadeOut()
+                                }.using(SizeTransform(clip = false))
+                            },
+                            label = "Page Transition",
+                            modifier = Modifier.weight(1f).fillMaxWidth()
+                        ) { page ->
+                            if (page == 0) {
+                                // Page 1: Vibe Grid
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxSize()) {
+                                    ALL_VIBES.chunked(3).forEach { rowVibes ->
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            rowVibes.forEach { vibe ->
+                                                val isSelected = selectedVibes.contains(vibe)
+                                                val scale by animateFloatAsState(
+                                                    targetValue = if (isSelected) 1.08f else 1.0f,
+                                                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                                                    label = "vibeScale"
+                                                )
+                                                val isDisabled = !isSelected && selectedVibes.size >= 3
+                                                val originalVibes = remember(movie?.emotionalVibes) {
+                                                    movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                                                }
+                                                val currentVibes = selectedVibes.map { it.code }.toSet()
+                                                val missingOriginalVibes = originalVibes.count { 
+                                                    (globalStats?.vibes?.get(it) ?: 0L) == 0L 
+                                                }
+                                                val baseGlobalTotal = maxOf(
+                                                    globalStats?.totalVibes ?: 0L,
+                                                    globalStats?.vibes?.values?.filter { it > 0 }?.sum() ?: 0L
+                                                )
+                                                val baselineTotal = baseGlobalTotal + missingOriginalVibes
+                                                val added = currentVibes - originalVibes
+                                                val removed = originalVibes - currentVibes
+                                                val projectedTotalVibes = maxOf(0L, baselineTotal + added.size - removed.size)
+                                                var baselineVibeCount = globalStats?.vibes?.get(vibe.code) ?: 0L
+                                                
+                                                if (originalVibes.contains(vibe.code) && baselineVibeCount == 0L) {
+                                                    baselineVibeCount = 1L
+                                                }
+                                                
+                                                val totalVibes = projectedTotalVibes
+                                                var vibeCount = baselineVibeCount
+                                                if (added.contains(vibe.code)) vibeCount++
+                                                if (removed.contains(vibe.code)) vibeCount--
+                                                vibeCount = maxOf(0L, vibeCount)
+                                                val realPercentage = if (totalVibes > 0) ((vibeCount.toFloat() / totalVibes) * 100).toInt() else 0
 
-                        // Vibe Grid
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ALL_VIBES.chunked(3).forEach { rowVibes ->
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    rowVibes.forEach { vibe ->
-                                        val isSelected = selectedVibes.contains(vibe)
-                                        val scale by animateFloatAsState(
-                                            targetValue = if (isSelected) 1.08f else 1.0f,
-                                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                                            label = "vibeScale"
-                                        )
-                                        val isDisabled = !isSelected && selectedVibes.size >= 3
-                                        // Determine original state (what we think the DB already has from us)
-                                        val originalVibes = remember(movie?.emotionalVibes) {
-                                            movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
-                                        }
-                                        
-                                        // Determine current un-saved state
-                                        val currentVibes = selectedVibes.map { it.code }.toSet()
-                                        
-                                        // Calculate global baseline total ONCE (outside the vibe loop)
-                                        // We compensate for lagged/corrupted globalStats by injecting ALL our missing votes.
-                                        val missingOriginalVibes = originalVibes.count { 
-                                            (globalStats?.vibes?.get(it) ?: 0L) == 0L 
-                                        }
-                                        val baseGlobalTotal = maxOf(
-                                            globalStats?.totalVibes ?: 0L,
-                                            globalStats?.vibes?.values?.filter { it > 0 }?.sum() ?: 0L
-                                        )
-                                        val baselineTotal = baseGlobalTotal + missingOriginalVibes
-                                        
-                                        // Calculate total additions and removals
-                                        val added = currentVibes - originalVibes
-                                        val removed = originalVibes - currentVibes
-                                        val projectedTotalVibes = maxOf(0L, baselineTotal + added.size - removed.size)
-                                        var baselineVibeCount = globalStats?.vibes?.get(vibe.code) ?: 0L
-                                        
-                                        if (originalVibes.contains(vibe.code) && baselineVibeCount == 0L) {
-                                            baselineVibeCount = 1L
-                                        }
-                                        
-                                        // 5. Project final total vibes
-                                        val totalVibes = projectedTotalVibes
-                                        
-                                        // 6. Project specific vibe count
-                                        var vibeCount = baselineVibeCount
-                                        if (added.contains(vibe.code)) vibeCount++
-                                        if (removed.contains(vibe.code)) vibeCount--
-                                        vibeCount = maxOf(0L, vibeCount)
-
-                                        // Note: we'll pass percentage via a dedicated param to VibeChip or just override it
-                                        val realPercentage = if (totalVibes > 0) ((vibeCount.toFloat() / totalVibes) * 100).toInt() else 0
-
-                                        VibeChip(
-                                            modifier = Modifier.weight(1f),
-                                            vibe = vibe.copy(percentage = realPercentage), // override with real percentage
-                                            isSelected = isSelected,
-                                            isDisabled = isDisabled,
-                                            scale = scale,
-                                            accentColor = accentColor,
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                selectedVibes = if (isSelected) {
-                                                    selectedVibes - vibe
-                                                } else {
-                                                    if (selectedVibes.size < 3) selectedVibes + vibe else selectedVibes
+                                                VibeChip(
+                                                    modifier = Modifier.weight(1f),
+                                                    vibe = vibe.copy(percentage = realPercentage),
+                                                    isSelected = isSelected,
+                                                    isDisabled = isDisabled,
+                                                    scale = scale,
+                                                    accentColor = accentColor,
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        selectedVibes = if (isSelected) {
+                                                            selectedVibes - vibe
+                                                        } else {
+                                                            if (selectedVibes.size < 3) selectedVibes + vibe else selectedVibes
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                            if (rowVibes.size < 3) {
+                                                repeat(3 - rowVibes.size) {
+                                                    Spacer(modifier = Modifier.weight(1f))
                                                 }
                                             }
-                                        )
-                                    }
-                                    if (rowVibes.size < 3) {
-                                        repeat(3 - rowVibes.size) {
-                                            Spacer(modifier = Modifier.weight(1f))
                                         }
                                     }
                                 }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // MVP Cast Section
-                        if (cast.isNotEmpty()) {
-                            Text(
-                                text = stringResource(R.string.checkin_mvp_actor),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 2.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.9f)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(4),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 12.dp),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen)
-                                    .drawWithContent {
-                                        drawContent()
-                                        drawRect(
-                                            brush = Brush.verticalGradient(
-                                                0f to Color.Transparent,
-                                                0.1f to Color.Black,
-                                                0.9f to Color.Black,
-                                                1f to Color.Transparent
+                            } else {
+                                // Page 2: MVP Cast Section
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    if (cast.isNotEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.checkin_mvp_actor),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontWeight = FontWeight.Black,
+                                                letterSpacing = 2.sp
                                             ),
-                                            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                                            color = Color.White.copy(alpha = 0.9f)
                                         )
-                                    }
-                            ) {
-                                items(cast.take(24), key = { it.id }) { actor ->
-                                    val isMvp = selectedMvp?.id == actor.id
-                                    CastMvpChip(
-                                        actor = actor,
-                                        isMvp = isMvp,
-                                        accentColor = accentColor,
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            selectedMvp = if (isMvp) null else actor
+                                        Spacer(modifier = Modifier.height(10.dp))
+
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Fixed(4),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 12.dp),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen)
+                                                .drawWithContent {
+                                                    drawContent()
+                                                    drawRect(
+                                                        brush = Brush.verticalGradient(
+                                                            0f to Color.Transparent,
+                                                            0.1f to Color.Black,
+                                                            0.9f to Color.Black,
+                                                            1f to Color.Transparent
+                                                        ),
+                                                        blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                                                    )
+                                                }
+                                        ) {
+                                            items(cast.take(24), key = { it.id }) { actor ->
+                                                val isMvp = selectedMvp?.id == actor.id
+                                                CastMvpChip(
+                                                    actor = actor,
+                                                    isMvp = isMvp,
+                                                    accentColor = accentColor,
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        selectedMvp = if (isMvp) null else actor
+                                                    }
+                                                )
+                                            }
                                         }
+                                    } else {
+                                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                            Text("No cast available", color = Color.White.copy(alpha = 0.5f))
+                                        }
+                                    }
+                                }
+                            }
+                        } // ends AnimatedContent
+                    } // ends Column(modifier = Modifier.weight(1f))
+
+                    // Next / Save row with Pagination Dots
+                    Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Pagination dots
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            ) {
+                                repeat(2) { index ->
+                                    val isSelected = currentPage == index
+                                    val color by animateColorAsState(
+                                        targetValue = if (isSelected) accentColor else Color.White.copy(alpha = 0.2f),
+                                        label = "dotColor"
+                                    )
+                                    val width by animateDpAsState(
+                                        targetValue = if (isSelected) 16.dp else 6.dp,
+                                        label = "dotWidth"
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .height(6.dp)
+                                            .width(width)
+                                            .clip(CircleShape)
+                                            .background(color)
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                currentPage = index
+                                            }
                                     )
                                 }
                             }
-                        }
-                    }
 
-                    // Save row
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Save
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
+                            // Save / Next Button
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
+                                        )
                                     )
+                                    .bounceClick(scaleDown = 0.95f) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (currentPage == 0) {
+                                            currentPage = 1
+                                        } else {
+                                            onSave(selectedVibes.map { it.code }, selectedMvp)
+                                            dismissAll()
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (currentPage == 0) "Next" else stringResource(R.string.checkin_save_diary),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0B0F19)
                                 )
-                                .bounceClick(scaleDown = 0.95f) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onSave(selectedVibes.map { it.code }, selectedMvp)
-                                    dismissAll()
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.checkin_save_diary),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0B0F19)
-                            )
+                            }
                         }
-                    }
                 }
             }
         }
