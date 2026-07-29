@@ -41,6 +41,7 @@ fun DetailPersonalZone(
     accentColor: Color,
     onRate: (Double?) -> Unit,
     onNoteUpdate: (String) -> Unit,
+    onCheckInClick: () -> Unit = {},
     hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
@@ -118,6 +119,29 @@ fun DetailPersonalZone(
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
         }
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+        ) {
+            val hasVibe = !movie.emotionalVibes.isNullOrBlank() || movie.favoriteActorId != null
+            val vibeValueText = if (hasVibe) stringResource(R.string.personal_zone_saved) else stringResource(R.string.personal_zone_empty)
+            val canVibe = movie.watched
+            
+            PersonalAction(
+                label = stringResource(R.string.personal_zone_vibe),
+                value = vibeValueText,
+                hasValue = hasVibe,
+                isRateAction = false,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                accentColor = accentColor,
+                isActive = false,
+                enabled = canVibe,
+                onClick = { if (canVibe) onCheckInClick() },
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            )
+        }
 
         AnimatedVisibility(
             visible = expandedAction != null,
@@ -179,6 +203,7 @@ private fun PersonalAction(
     icon: ImageVector,
     accentColor: Color,
     isActive: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -196,6 +221,7 @@ private fun PersonalAction(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                alpha = if (enabled) 1f else 0.4f
             }
             .clip(RoundedCornerShape(50))
             .background(
@@ -207,19 +233,21 @@ private fun PersonalAction(
                 color = if (isActive) accentColor.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(50)
             )
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                        isPressed = true
-                        try {
-                            awaitRelease()
-                        } finally {
-                            isPressed = false
-                        }
-                    },
-                    onTap = { onClick() }
-                )
+            .pointerInput(enabled) {
+                if (enabled) {
+                    detectTapGestures(
+                        onPress = {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            isPressed = true
+                            try {
+                                awaitRelease()
+                            } finally {
+                                isPressed = false
+                            }
+                        },
+                        onTap = { onClick() }
+                    )
+                }
             },
         contentAlignment = Alignment.CenterStart
     ) {

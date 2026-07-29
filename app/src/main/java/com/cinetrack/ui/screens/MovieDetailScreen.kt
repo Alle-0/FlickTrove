@@ -175,10 +175,14 @@ fun MovieDetailScreenContent(
     var showFolderPicker by remember { mutableStateOf(false) }
     var showRatingInfoDialog by remember { mutableStateOf(false) }
     var showCoverSelectionSheet by remember { mutableStateOf(false) }
+    var showCheckInDrawer by remember { mutableStateOf(false) }
+    var forceExpandCheckIn by remember { mutableStateOf(false) }
+    var previousWatchState by remember { mutableStateOf<WatchState?>(null) }
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
     val useMovieLogo by viewModel.useMovieLogo.collectAsStateWithLifecycle()
+    val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -189,6 +193,8 @@ fun MovieDetailScreenContent(
     androidx.activity.compose.BackHandler(enabled = true) {
         if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
+        } else if (showCheckInDrawer) {
+            showCheckInDrawer = false
         } else if (showRatingInfoDialog) {
             showRatingInfoDialog = false
         } else if (showTranslationPrompt != null) {
@@ -206,6 +212,26 @@ fun MovieDetailScreenContent(
     
     val currentImageQuality = LocalImageQuality.current
     // Estrazione colore dinamica se accentColor è nullo nel database
+    // Detect NONE/BOOKMARKED → WATCHED transition to trigger the peek-a-boo drawer
+    LaunchedEffect(uiState) {
+        val currentWatchState = (uiState as? DetailUiState.Success)?.watchState
+        if (currentWatchState == WatchState.WATCHED && previousWatchState != null && previousWatchState != WatchState.WATCHED) {
+            forceExpandCheckIn = false
+            showCheckInDrawer = true
+        }
+        if (currentWatchState != null) {
+            previousWatchState = currentWatchState
+        }
+    }
+
+    // Dismiss peek-a-boo drawer when user scrolls
+    val isScrollInProgress = scrollState.isScrollInProgress
+    LaunchedEffect(isScrollInProgress) {
+        if (isScrollInProgress && showCheckInDrawer) {
+            showCheckInDrawer = false
+        }
+    }
+
     LaunchedEffect(uiState, currentImageQuality) {
         val currentState = uiState
         if (currentState is DetailUiState.Success) {
@@ -294,7 +320,8 @@ fun MovieDetailScreenContent(
             onToggleFolder = { movie, folder -> viewModel.onEvent(DetailEvent.ToggleMovieFolderMembership(movie, folder)) },
             onDelete = { movie -> viewModel.onEvent(DetailEvent.DeleteMovieItem(movie)) }
         ) { actionsState ->
-            Box(modifier = Modifier.fillMaxSize().background(PremiumBackground).background(animatedBgColor).haze(rootHazeState, style = HazeStyles.PremiumDark)) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().background(PremiumBackground).background(animatedBgColor).haze(rootHazeState, style = HazeStyles.PremiumDark)) {
         
         AnimatedContent(
             targetState = when (uiState) {
@@ -446,7 +473,11 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         hazeState = localHazeState,
                                         onRate = { viewModel.onEvent(DetailEvent.Rate(it)) },
-                                        onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) }
+                                        onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) },
+                                        onCheckInClick = { 
+                                            forceExpandCheckIn = true
+                                            showCheckInDrawer = true 
+                                        }
                                     )
 
                                     Spacer(modifier = Modifier.height(40.dp))
@@ -548,7 +579,30 @@ fun MovieDetailScreenContent(
                 }
             }
         }
+        } // End of haze Box
 
+
+        // Peek-a-boo Check-in Drawer (non-invasive, optional)
+        if (cachedSuccess != null) {
+            val checkInCast = cachedSuccess!!.cast
+            val checkInAccent = com.cinetrack.ui.utils.ColorUtils.ensureVividAccent(
+                cachedSuccess!!.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
+            )
+
+            PeekABooCheckInDrawer(
+                visible = showCheckInDrawer,
+                startExpanded = forceExpandCheckIn,
+                movie = cachedSuccess!!.movieEntry,
+                globalStats = globalStats,
+                cast = checkInCast,
+                accentColor = checkInAccent,
+                hazeState = rootHazeState,
+                onSave = { vibes, mvp ->
+                    viewModel.onEvent(DetailEvent.SaveCheckIn(vibes, mvp))
+                },
+                onDismiss = { showCheckInDrawer = false }
+            )
+        }
 
         // Morphing Top Bar (pill → folder picker modal)
         val successState = uiState as? DetailUiState.Success

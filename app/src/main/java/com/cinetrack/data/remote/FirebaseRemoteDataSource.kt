@@ -215,5 +215,89 @@ class FirebaseRemoteDataSource @Inject constructor(
             null
         }
     }
+    // --- Global Movie Stats ---
+
+    fun getGlobalMovieStats(compositeId: String) =
+        firestore.collection("global_movie_stats").document(compositeId)
+
+    suspend fun updateGlobalMovieStats(
+        compositeId: String,
+        addedVibes: List<String>,
+        removedVibes: List<String>,
+        newMvp: Long?,
+        oldMvp: Long?
+    ) {
+        val docRef = getGlobalMovieStats(compositeId)
+        try {
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(docRef)
+                
+                if (snapshot.exists()) {
+                    val updates = mutableMapOf<String, Any>()
+                    var needsUpdate = false
+                    
+                    var totalVibesDelta = 0L
+                    addedVibes.forEach { vibe ->
+                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(1)
+                        totalVibesDelta++
+                    }
+                    removedVibes.forEach { vibe ->
+                        updates["vibes.$vibe"] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        totalVibesDelta--
+                    }
+                    if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty()) needsUpdate = true
+                    
+                    if (totalVibesDelta != 0L) {
+                        updates["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
+                    }
+                    
+                    var totalMvpDelta = 0L
+                    if (newMvp != null && newMvp != oldMvp) {
+                        updates["mvps.$newMvp"] = com.google.firebase.firestore.FieldValue.increment(1)
+                        totalMvpDelta++
+                    }
+                    if (oldMvp != null && oldMvp != newMvp) {
+                        updates["mvps.$oldMvp"] = com.google.firebase.firestore.FieldValue.increment(-1)
+                        totalMvpDelta--
+                    }
+                    if (newMvp != oldMvp) needsUpdate = true
+                    
+                    if (totalMvpDelta != 0L) {
+                        updates["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
+                    }
+                    
+                    if (needsUpdate) {
+                        transaction.update(docRef, updates)
+                    }
+                } else {
+                    val initialData = mutableMapOf<String, Any>()
+                    
+                    val vibesMap = mutableMapOf<String, Long>()
+                    addedVibes.forEach { vibe -> vibesMap[vibe] = 1L }
+                    
+                    if (vibesMap.isNotEmpty()) {
+                        initialData["vibes"] = vibesMap
+                        initialData["total_vibes"] = vibesMap.size.toLong()
+                    }
+                    
+                    val mvpsMap = mutableMapOf<String, Long>()
+                    if (newMvp != null) {
+                        mvpsMap[newMvp.toString()] = 1L
+                    }
+                    
+                    if (mvpsMap.isNotEmpty()) {
+                        initialData["mvps"] = mvpsMap
+                        initialData["total_mvps"] = 1L
+                    }
+                    
+                    if (initialData.isNotEmpty()) {
+                        transaction.set(docRef, initialData)
+                    }
+                }
+            }.await()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error updating global stats for $compositeId", e)
+        }
+    }
 }
 

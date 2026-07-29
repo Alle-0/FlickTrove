@@ -32,7 +32,12 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.theme.OnSurfaceMuted
 import com.cinetrack.ui.utils.bounceClick
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.ui.graphics.graphicsLayer
 fun Color.toArgb(): Int {
     return (alpha * 255.0f + 0.5f).toInt() shl 24 or
             (red * 255.0f + 0.5f).toInt() shl 16 or
@@ -46,18 +51,41 @@ fun SettingsSection(
     subtitle: String? = null,
     icon: ImageVector? = null,
     footerText: String? = null,
+    initiallyExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    var isExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(initiallyExpanded) }
+    val arrowRotation by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isExpanded) 90f else 0f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        ),
+        label = "arrowRotation"
+    )
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = 12.dp)
+            .clip(RoundedCornerShape(32.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(32.dp)
+            )
     ) {
-        // Section Header
+        // Section Header (Clickable for Accordion)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 12.dp),
+                .clickable {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    isExpanded = !isExpanded
+                }
+                .padding(horizontal = 16.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Thick elegant vertical bar with accent color
@@ -76,24 +104,24 @@ fun SettingsSection(
                     )
             )
             
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             
             if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null, // L'accessibilità è gestita dal testo adiacente
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
             }
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title.uppercase(),
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.5.sp,
-                        fontSize = 12.sp
+                        fontSize = 13.sp
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -106,24 +134,39 @@ fun SettingsSection(
                     )
                 }
             }
+            
+            Icon(
+                painter = painterResource(id = R.drawable.ic_right),
+                contentDescription = "Expand",
+                tint = OnSurfaceMuted,
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                        rotationZ = arrowRotation
+                    }
+            )
         }
         
-        // Items Container - Grouped Card
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color.White.copy(alpha = 0.06f))
-                .border(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(32.dp)
+        // Items Container - Animated Visibility
+        androidx.compose.animation.AnimatedVisibility(
+            visible = isExpanded,
+            enter = androidx.compose.animation.expandVertically(
+                animationSpec = androidx.compose.animation.core.spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
                 )
+            ) + androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.shrinkVertically(
+                animationSpec = androidx.compose.animation.core.spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                )
+            ) + androidx.compose.animation.fadeOut()
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(start = 12.dp, end = 12.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 content()
@@ -413,6 +456,125 @@ fun SettingsActionButton(
         }
         if (text != null) {
             Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = tint)
+        }
+    }
+}
+
+@Composable
+fun DonationBanner(
+    modifier: Modifier = Modifier
+) {
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    val haptic = LocalHapticFeedback.current
+    
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(24.dp)
+            )
+            .padding(20.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Icon container
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFFFF5E5B),
+                                    Color(0xFFFF8B89)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Favorite,
+                        contentDescription = "Support",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(id = R.string.settings_support_flicktrove),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = androidx.compose.ui.res.stringResource(id = R.string.settings_support_dev_desc),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            lineHeight = 16.sp
+                        ),
+                        color = OnSurfaceMuted
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Ko-fi Button
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFF5E5B).copy(alpha = 0.2f))
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://ko-fi.com/alle0")
+                        }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ko-fi",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFFFF5E5B)
+                    )
+                }
+                
+                // PayPal Button
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF0079C1).copy(alpha = 0.2f))
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://paypal.me/alle0")
+                        }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "PayPal",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFF0079C1)
+                    )
+                }
+            }
         }
     }
 }

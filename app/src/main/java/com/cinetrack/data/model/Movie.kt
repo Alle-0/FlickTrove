@@ -277,7 +277,7 @@ data class Movie(
     @get:PropertyName("accent_color_static")
     @set:PropertyName("accent_color_static")
     @ColumnInfo(name = "accent_color_static") var accentColorStatic: String? = null,
-    
+
     // System Fields
     @SerialName("last_sync_date")
     @get:Exclude
@@ -314,7 +314,32 @@ data class Movie(
     @SerialName("client_updated_at")
     @get:PropertyName("client_updated_at")
     @set:PropertyName("client_updated_at")
-    @ColumnInfo(name = "client_updated_at") var clientUpdatedAt: Long = 0L
+    @ColumnInfo(name = "client_updated_at") var clientUpdatedAt: Long = 0L,
+
+    // --- Emotional Check-In (Peek-a-boo) ---
+    @Transient
+    @get:PropertyName("emotional_vibes")
+    @set:PropertyName("emotional_vibes")
+    @ColumnInfo(name = "emotional_vibes")
+    var emotionalVibes: String? = null, // comma-separated codes e.g. "MASTERPIECE,MIND_BLOWING"
+
+    @Transient
+    @get:PropertyName("favorite_actor_id")
+    @set:PropertyName("favorite_actor_id")
+    @ColumnInfo(name = "favorite_actor_id")
+    var favoriteActorId: Long? = null,
+
+    @Transient
+    @get:PropertyName("favorite_actor_name")
+    @set:PropertyName("favorite_actor_name")
+    @ColumnInfo(name = "favorite_actor_name")
+    var favoriteActorName: String? = null,
+
+    @Transient
+    @get:PropertyName("favorite_actor_profile_path")
+    @set:PropertyName("favorite_actor_profile_path")
+    @ColumnInfo(name = "favorite_actor_profile_path")
+    var favoriteActorProfilePath: String? = null
 ) {
     // --- Computed Properties ---
 
@@ -525,6 +550,8 @@ data class Movie(
 
         return totalCount
     }
+
+    // --- Emotional Check-In (Peek-a-boo) – local only, not synced to Firestore or kotlinx.serialization ---
 
     // --- Firestore Resilient Deserialization Proxies ---
 

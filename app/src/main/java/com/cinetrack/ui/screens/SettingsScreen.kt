@@ -516,6 +516,10 @@ fun SettingsScreenContent(
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                  ) {
+                    item {
+                        DonationBanner(modifier = Modifier.padding(bottom = 16.dp))
+                    }
+
                     // Section: Interfaccia e Layout
                     item {
                         SettingsUILayoutSection(

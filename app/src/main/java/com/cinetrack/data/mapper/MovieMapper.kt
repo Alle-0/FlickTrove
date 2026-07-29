@@ -14,7 +14,11 @@ object MovieMapper {
             response.runtime
         }
         
-        val region = if (Locale.getDefault().language == "it") "IT" else "US"
+        // Get the device's actual country code (e.g. IT, FR, DE, GB). 
+        // If the country is somehow missing from the locale, fallback to a sensible default based on language, or US.
+        val locale = Locale.getDefault()
+        val region = locale.country.takeIf { it.isNotBlank() }
+            ?: if (locale.language == "it") "IT" else "US"
         
         val regionalReleaseDate = if (type == "movie") {
             val regionalReleases = response.releaseDates?.results?.find { it.iso31661 == region }?.releaseDates

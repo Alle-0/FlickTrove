@@ -42,8 +42,10 @@ class MovieUpdateWorker(
                     var needsUpdate = false
                     var updatedMovie = movie
 
-                    if (latest.releaseDate != movie.releaseDate) {
-                        updatedMovie = updatedMovie.copy(releaseDate = latest.releaseDate)
+                    val mappedLatest = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(latest, movie.mediaType)
+
+                    if (mappedLatest.releaseDate != movie.releaseDate) {
+                        updatedMovie = updatedMovie.copy(releaseDate = mappedLatest.releaseDate)
                         needsUpdate = true
                     }
                     if (latest.status != movie.status) {

@@ -279,7 +279,7 @@
     <string name="settings_dialog_wipe_local_data_title">Elimina Dati Locali</string>
     <string name="settings_dialog_wipe_local_data_desc">Vuoi eliminare il database locale? I dati sul cloud non verranno toccati e saranno riscaricati in seguito.</string>
     <string name="settings_yes_wipe_local">Elimina Dati Locali</string>
-    
+
     <string name="settings_wipe_total_data_title">Elimina Dati Cloud</string>
     <string name="settings_wipe_total_data_desc">Elimina tutti i tuoi dati sia dal dispositivo che dal cloud</string>
     <string name="settings_dialog_wipe_total_data_title">Elimina Tutti i Dati</string>
@@ -801,6 +801,8 @@
     <string name="personal_zone_text_audio">TESTO/AUDIO</string>
     <string name="personal_zone_text">TESTO</string>
     <string name="personal_zone_audio">AUDIO</string>
+    <string name="personal_zone_vibe">VIBE</string>
+    <string name="personal_zone_saved">SALVATO</string>
     <string name="personal_record_voice">REGISTRA VOCE</string>
     <string name="personal_recording">REGISTRANDO...</string>
     <string name="personal_note_placeholder">Aggiungi una nota personale...</string>
@@ -973,4 +975,26 @@
 
     <string name="overview_show_more">Mostra altro</string>
     <string name="overview_show_less">Mostra meno</string>
+
+    <!-- Peek-a-boo Check-In -->
+    <string name="checkin_how_did_it_make_you_feel">Come ti ha fatto sentire?</string>
+    <string name="checkin_mvp_actor">Personaggio MVP</string>
+    <string name="checkin_skip">Salta</string>
+    <string name="checkin_save_diary">Salva nel Flow</string>
+    <string name="checkin_vibe_tab">Vibe</string>
+
+    <string name="checkin_vibe_masterpiece">Capolavoro</string>
+    <string name="checkin_vibe_mind_blowing">Sconvolto</string>
+    <string name="checkin_vibe_in_tears">In lacrime</string>
+    <string name="checkin_vibe_feels_good">Bellissimo</string>
+    <string name="checkin_vibe_comfort">Accogliente</string>
+    <string name="checkin_vibe_meh">Così così</string>
+    <string name="checkin_vibe_disappointed">Deluso</string>
+    <string name="checkin_vibe_funny">Divertente</string>
+    <string name="checkin_vibe_scary">Spaventoso</string>
+    <string name="checkin_vibe_boring">Noioso</string>
+    <string name="checkin_vibe_weird">Assurdo</string>
+    <string name="checkin_vibe_action">Gasato</string>
+    <string name="settings_support_flicktrove">Supporta FlickTrove</string>
+    <string name="settings_support_dev_desc">Supporta lo sviluppo e mantieni l\'app senza pubblicità!</string>
 </resources>

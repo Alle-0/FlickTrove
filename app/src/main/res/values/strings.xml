@@ -796,6 +796,8 @@
     <string name="personal_zone_text_audio">TEXT/AUDIO</string>
     <string name="personal_zone_text">TEXT</string>
     <string name="personal_zone_audio">AUDIO</string>
+    <string name="personal_zone_vibe">VIBE</string>
+    <string name="personal_zone_saved">SAVED</string>
     <string name="personal_record_voice">RECORD VOICE</string>
     <string name="personal_recording">RECORDING...</string>
     <string name="personal_note_placeholder">Add a personal note...</string>
@@ -976,4 +978,26 @@
 
     <string name="overview_show_more">Show more</string>
     <string name="overview_show_less">Show less</string>
+
+    <!-- Peek-a-boo Check-In -->
+    <string name="checkin_how_did_it_make_you_feel">How did it make you feel?</string>
+    <string name="checkin_mvp_actor">MVP Character</string>
+    <string name="checkin_skip">Skip</string>
+    <string name="checkin_save_diary">Save to Flow</string>
+    <string name="checkin_vibe_tab">Vibe</string>
+    
+    <string name="checkin_vibe_masterpiece">Masterpiece</string>
+    <string name="checkin_vibe_mind_blowing">Mind-Blowing</string>
+    <string name="checkin_vibe_in_tears">In Tears</string>
+    <string name="checkin_vibe_feels_good">Feels Good</string>
+    <string name="checkin_vibe_comfort">Cozy</string>
+    <string name="checkin_vibe_meh">Meh</string>
+    <string name="checkin_vibe_disappointed">Disappointed</string>
+    <string name="checkin_vibe_funny">Funny</string>
+    <string name="checkin_vibe_scary">Scary</string>
+    <string name="checkin_vibe_boring">Boring</string>
+    <string name="checkin_vibe_weird">Weird</string>
+    <string name="checkin_vibe_action">Hyped</string>
+    <string name="settings_support_flicktrove">Support FlickTrove</string>
+    <string name="settings_support_dev_desc">Support development and keep the app ad-free!</string>
 </resources>

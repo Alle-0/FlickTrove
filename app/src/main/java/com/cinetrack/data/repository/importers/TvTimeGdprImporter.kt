@@ -19,6 +19,7 @@ class TvTimeGdprImporter @Inject constructor(
         val title: String,
         val mediaType: String,
         var isWatched: Boolean,
+        var isExplicitlyCompleted: Boolean = false,
         var isFavorite: Boolean = false,
         var isForLater: Boolean = false,
         var isDropped: Boolean = false,
@@ -46,23 +47,36 @@ class TvTimeGdprImporter @Inject constructor(
             isFavorite: Boolean = false,
             isForLater: Boolean = false,
             isDropped: Boolean = false,
-            isExplicitlyNotWatched: Boolean = false
+            isExplicitlyNotWatched: Boolean = false,
+            isExplicitlyCompleted: Boolean = false
         ): TvTimeItemData {
             val cleanTitle = title.trim()
             if (cleanTitle.isBlank()) return TvTimeItemData(null, "", mediaType, isWatched)
+            
             val key = if (!id.isNullOrBlank()) "${mediaType}_${id.trim()}" else "${mediaType}_${cleanTitle.lowercase()}"
-            val existing = itemsMap.values.find { (it.id != null && it.id == id) || (it.title.equals(cleanTitle, ignoreCase = true) && it.mediaType == mediaType) }
+            
+            val existing = itemsMap.values.find { existingItem ->
+                if (!existingItem.id.isNullOrBlank() && !id.isNullOrBlank()) {
+                    existingItem.id == id 
+                } else {
+                    existingItem.title.equals(cleanTitle, ignoreCase = true) && existingItem.mediaType == mediaType
+                }
+            }
+
             if (existing != null) {
                 if (isDropped) {
                     existing.isDropped = true
                     existing.isWatched = false
+                    existing.isExplicitlyCompleted = false
                     existing.isForLater = false
-                } else if (isWatched && !isForLater) {
-                    if (mediaType != "tv" || (!existing.isForLater && !existing.isDropped)) {
-                        existing.isWatched = true
-                        existing.isForLater = false
-                        existing.isDropped = false
-                    }
+                } else if (isExplicitlyCompleted && !isForLater) {
+                    existing.isExplicitlyCompleted = true
+                    existing.isForLater = false
+                    existing.isDropped = false
+                } else if (isWatched && !isForLater && mediaType != "tv") {
+                    existing.isWatched = true
+                    existing.isForLater = false
+                    existing.isDropped = false
                 } else if (isForLater && (!existing.isWatched || mediaType == "tv")) {
                     existing.isForLater = true
                     existing.isWatched = false
@@ -80,9 +94,10 @@ class TvTimeGdprImporter @Inject constructor(
                 id = id?.trim(),
                 title = cleanTitle,
                 mediaType = mediaType,
-                isWatched = if (isForLater || isDropped || isExplicitlyNotWatched) false else isWatched,
+                isWatched = if (isForLater || isDropped || isExplicitlyNotWatched) false else (isWatched && mediaType != "tv"),
+                isExplicitlyCompleted = isExplicitlyCompleted && !isForLater && !isDropped,
                 isFavorite = isFavorite || (isForLater && !isWatched),
-                isForLater = if (isWatched || isDropped) false else (isForLater || isExplicitlyNotWatched),
+                isForLater = if (isWatched || isDropped || isExplicitlyCompleted) false else (isForLater || isExplicitlyNotWatched),
                 isDropped = isDropped,
                 watchedAt = watchedAt
             )
@@ -98,7 +113,7 @@ class TvTimeGdprImporter @Inject constructor(
                     val title = cols[5]
                     val showId = cols[6]
                     val updatedAt = cols.getOrNull(7)?.let { parseAndNormalizeWatchedDate(it) }
-                    addItem(id = showId, title = title, mediaType = "tv", isWatched = true, watchedAt = updatedAt)
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = false, isFavorite = true, watchedAt = updatedAt)
                 }
             }
         }
@@ -112,12 +127,12 @@ class TvTimeGdprImporter @Inject constructor(
                     val isFav = cols[2].trim() == "1" || cols[2].trim().equals("true", ignoreCase = true)
                     val epsSeen = cols[3].trim().toIntOrNull() ?: 0
                     val title = cols[4]
-                    addItem(id = showId, title = title, mediaType = "tv", isWatched = epsSeen > 0, isFavorite = isFav, isExplicitlyNotWatched = epsSeen == 0)
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = false, isFavorite = isFav, isExplicitlyNotWatched = epsSeen == 0)
                 }
             }
         }
 
-        // 3. Parse user_show_special_status.csv (To Watch / Status)
+        // 3. Parse user_show_special_status.csv
         zipEntries["user_show_special_status.csv"]?.let { bytes ->
             bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("created_at,") }.forEach { line ->
                 val cols = parseCsvLine(line)
@@ -126,13 +141,14 @@ class TvTimeGdprImporter @Inject constructor(
                     val showId = cols[4]
                     val status = cols[5].trim().lowercase()
                     val isDropped = status == "dropped" || status == "paused"
+                    val isExplicitlyCompleted = status in listOf("archived", "watched", "completed", "seen")
                     val isForLater = !isDropped && status.isNotBlank() && status !in listOf("archived", "dropped", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
-                    addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater && !isDropped, isForLater = isForLater, isDropped = isDropped)
+                    addItem(id = showId, title = title, mediaType = "tv", isWatched = false, isExplicitlyCompleted = isExplicitlyCompleted, isForLater = isForLater, isDropped = isDropped)
                 }
             }
         }
 
-        // 3b. Parse user_movie_special_status.csv & user_movie_data.csv if present
+        // 3b. Parse user_movie_special_status.csv & user_movie_data.csv
         zipEntries["user_movie_special_status.csv"]?.let { bytes ->
             val records = parseCsvRecords(bytes.decodeToString())
             if (records.isNotEmpty()) {
@@ -185,7 +201,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 4. Parse tracking-prod-records-v2.csv (Series Tracking)
+        // 4. Parse tracking-prod-records-v2.csv
         zipEntries["tracking-prod-records-v2.csv"]?.let { bytes ->
             val lines = bytes.decodeToString().lineSequence().filter { it.isNotBlank() }.iterator()
             if (lines.hasNext()) {
@@ -207,7 +223,7 @@ class TvTimeGdprImporter @Inject constructor(
                         val isForLater = cols.getOrNull(isForLaterIdx)?.trim()?.let { it.equals("true", ignoreCase = true) || it == "1" } ?: false
                         val title = cols[titleIdx]
                         val showId = cols[showIdIdx]
-                        val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = !isForLater, watchedAt = updatedAt, isForLater = isForLater)
+                        val item = addItem(id = showId, title = title, mediaType = "tv", isWatched = false, watchedAt = updatedAt, isForLater = isForLater, isFavorite = !isForLater)
                         if (!isForLater && seasonIdx != -1 && episodeIdx != -1) {
                             val sNum = cols.getOrNull(seasonIdx)?.trim()?.toIntOrNull()
                             val eNum = cols.getOrNull(episodeIdx)?.trim()?.toIntOrNull()
@@ -220,7 +236,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 5. Parse tracking-prod-records.csv (Movies Tracking)
+        // 5. Parse tracking-prod-records.csv
         zipEntries["tracking-prod-records.csv"]?.let { bytes ->
             val records = parseCsvRecords(bytes.decodeToString())
             if (records.isNotEmpty()) {
@@ -250,7 +266,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 5b. Scan only dedicated watchlist or to-watch CSV files in the zip
+        // 5b. Watchlists files
         zipEntries.forEach { (fileName, bytes) ->
             if (fileName.endsWith(".csv", ignoreCase = true)) {
                 val lowerName = fileName.lowercase()
@@ -302,8 +318,13 @@ class TvTimeGdprImporter @Inject constructor(
                         val showName = cols[showNameIdx]
                         val showId = cols[showIdIdx]
                         if (sNum != null && sNum > 0 && eNum != null && eNum > 0 && showName.isNotBlank()) {
-                            val match = itemsMap.values.find { (showId.isNotBlank() && it.id == showId) || (it.title.equals(showName, ignoreCase = true) && it.mediaType == "tv") }
-                                ?: addItem(id = showId, title = showName, mediaType = "tv", isWatched = true)
+                            val match = itemsMap.values.find { existingItem ->
+                                if (showId.isNotBlank() && !existingItem.id.isNullOrBlank()) {
+                                    existingItem.id == showId
+                                } else {
+                                    existingItem.title.equals(showName, ignoreCase = true) && existingItem.mediaType == "tv"
+                                }
+                            } ?: addItem(id = showId, title = showName, mediaType = "tv", isWatched = false, isFavorite = true)
                             match.watchedEpisodes.getOrPut(sNum.toString()) { mutableSetOf() }.add(eNum)
                         }
                     }
@@ -311,7 +332,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 6. Parse comments-prod-comments.csv (Notes/Reviews)
+        // 6. Parse comments-prod-comments.csv
         zipEntries["comments-prod-comments.csv"]?.let { bytes ->
             val records = parseCsvRecords(bytes.decodeToString())
             if (records.isNotEmpty()) {
@@ -336,7 +357,7 @@ class TvTimeGdprImporter @Inject constructor(
                             val isTv = parentType == "series" || parentType == "show" || parentType == "tv" || seriesName.isNotBlank()
                             val mediaType = if (isTv) "tv" else "movie"
                             val match = itemsMap.values.find { it.title.equals(title, ignoreCase = true) && (if (isTv) it.mediaType == "tv" else true) }
-                                ?: addItem(id = null, title = title, mediaType = mediaType, isWatched = true)
+                                ?: addItem(id = null, title = title, mediaType = mediaType, isWatched = !isTv, isFavorite = isTv)
                             
                             val sNum = cols.getOrNull(seasonIdx)?.trim()?.toIntOrNull()
                             val eNum = cols.getOrNull(episodeIdx)?.trim()?.toIntOrNull()
@@ -353,15 +374,15 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 7. Parse ratings-live-votes.csv & ratings-3-prod-episode_votes.csv (Ratings)
+        // 7. Parse ratings
         fun extractTvTimeScore(voteKey: String): Double? {
             val suffix = voteKey.substringAfterLast("-").trim().toIntOrNull() ?: return null
             return when (suffix) {
-                29 -> 10.0 // Mindblown / Awesome
-                3 -> 8.0   // Good / Happy
-                28 -> 7.0  // Emotional / Sad
-                2 -> 6.0   // Neutral / Okay
-                1 -> 4.0   // Bad
+                29 -> 10.0
+                3 -> 8.0
+                28 -> 7.0
+                2 -> 6.0
+                1 -> 4.0
                 else -> if (suffix in 1..10) suffix.toDouble() else null
             }
         }
@@ -393,7 +414,7 @@ class TvTimeGdprImporter @Inject constructor(
                     val score = extractTvTimeScore(voteKey)
                     if (seriesName.isNotBlank() && score != null) {
                         val match = itemsMap.values.find { it.title.equals(seriesName, ignoreCase = true) && it.mediaType == "tv" }
-                            ?: addItem(id = null, title = seriesName, mediaType = "tv", isWatched = true)
+                            ?: addItem(id = null, title = seriesName, mediaType = "tv", isWatched = false, isFavorite = true)
                         if (match.personalRating == null || score > (match.personalRating ?: 0.0)) {
                             match.personalRating = score
                         }
@@ -402,7 +423,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 8. Parse lists-prod-lists.csv (Custom Folders / Lists)
+        // 8. Parse lists-prod-lists.csv
         zipEntries["lists-prod-lists.csv"]?.let { bytes ->
             bytes.decodeToString().lineSequence().filter { it.isNotBlank() && !it.startsWith("name,") }.forEach { line ->
                 val cols = parseCsvLine(line)
@@ -442,7 +463,7 @@ class TvTimeGdprImporter @Inject constructor(
                                         id = idStr,
                                         title = title ?: (idStr ?: ""),
                                         mediaType = mediaType,
-                                        isWatched = !isWatchlistFolder,
+                                        isWatched = !isWatchlistFolder && mediaType != "tv",
                                         isForLater = isWatchlistFolder
                                     )
                                     newItem.folders.add(folderName)
@@ -477,7 +498,7 @@ class TvTimeGdprImporter @Inject constructor(
             }
         }
 
-        // 9. Resolve all items against TMDB and save
+        // 9. TMDB Resolve
         val allItems = itemsMap.values.filter { it.title.isNotBlank() }
         var savedCount = 0
         val totalToProcess = allItems.size
@@ -491,22 +512,47 @@ class TvTimeGdprImporter @Inject constructor(
                         val tmdbResult = try {
                             var result: Movie? = null
     
-                            // Calcola qual è la stagione più alta che l'utente ha visto
                             val maxSeasonWatched = if (isTv && item.watchedEpisodes.isNotEmpty()) {
                                 item.watchedEpisodes.keys.maxOfOrNull { it.toIntOrNull() ?: 0 } ?: 0
                             } else 0
 
-                            val searchResults = movieRepository.searchMediaList(item.title, isTv = isTv)
+                            // NUOVA LOGICA: Estrae anno se presente (es. "ONE PIECE (2023)") per evitare incroci
+                            val yearMatch = Regex("\\((\\d{4})\\)").find(item.title)
+                            val itemYear = yearMatch?.groupValues?.get(1)?.toIntOrNull()
+                            val cleanSearchTitle = item.title.replace(Regex("\\(\\d{4}\\)"), "").trim()
+
+                            val searchResults = movieRepository.searchMediaList(cleanSearchTitle, isTv = isTv)
                             if (searchResults.isNotEmpty()) {
-                                result = searchResults.firstOrNull { tmdbMovie ->
-                                    val tmdbSeasons = tmdbMovie.numberOfSeasons ?: 1
-                                    maxSeasonWatched == 0 || tmdbSeasons >= maxSeasonWatched
-                                } ?: searchResults.first() 
+                                
+                                if (isTv && searchResults.size > 1) {
+                                    if (itemYear != null) {
+                                        // Cerca la serie con l'anno corrispondente (il Live Action)
+                                        result = searchResults.find { 
+                                            it.firstAirDate?.startsWith(itemYear.toString()) == true ||
+                                            it.releaseDate?.startsWith(itemYear.toString()) == true
+                                        }
+                                    } 
+                                    
+                                    if (result == null) {
+                                        // Per l'Anime (senza anno) o se fallisce, prende il più vecchio e con più stagioni
+                                        result = searchResults.filter { 
+                                            (it.numberOfSeasons ?: 1) >= maxSeasonWatched 
+                                        }.minByOrNull { it.firstAirDate ?: "9999-99-99" }
+                                    }
+                                }
+
+                                if (result == null) {
+                                    result = searchResults.firstOrNull { tmdbMovie ->
+                                        val tmdbSeasons = tmdbMovie.numberOfSeasons ?: 1
+                                        maxSeasonWatched == 0 || tmdbSeasons >= maxSeasonWatched
+                                    } ?: searchResults.first() 
+                                }
                             }
                             result
                         } catch (e: Exception) { 
                             null 
                         }
+                        
                         val tmdb = tmdbResult ?: Movie(
                             id = item.id?.toLongOrNull()?.takeIf { it > 0 } ?: (kotlin.math.abs(item.title.hashCode()).toLong().coerceAtLeast(1000000L)),
                             mediaType = item.mediaType,
@@ -517,12 +563,20 @@ class TvTimeGdprImporter @Inject constructor(
                             syncStatus = "pending",
                             clientUpdatedAt = System.currentTimeMillis()
                         )
+                        
                         tmdb.let { tmdb ->
                             val finalMediaType = if (isTv) "tv" else (tmdb.mediaType ?: "movie")
                             val seasonsList = tmdb.seasons
+                            
+                            // Mappa 1:1 dal CSV, filtrando numeri episodio fuori range TMDB per stagione.
                             val finalEps: Map<String, List<Int>>? = if (item.watchedEpisodes.isNotEmpty()) {
-                                item.watchedEpisodes.mapValues { it.value.sorted() }
-                            } else if (item.isWatched && seasonsList != null) {
+                                item.watchedEpisodes.mapNotNull { (seasonKey, eps) ->
+                                    val season = seasonsList?.find { (it.seasonNumber ?: 0).toString() == seasonKey }
+                                    val maxEp = season?.episodeCount?.takeIf { it > 0 }
+                                    val valid = if (maxEp != null) eps.filter { it in 1..maxEp } else eps.filter { it > 0 }
+                                    if (valid.isNotEmpty()) seasonKey to valid.sorted() else null
+                                }.toMap().takeIf { it.isNotEmpty() }
+                            } else if (item.isExplicitlyCompleted && seasonsList != null) {
                                 val allWatched = mutableMapOf<String, List<Int>>()
                                 val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
                                 seasonsList.filter { (it.seasonNumber ?: 0) > 0 }.forEach { season ->
@@ -534,28 +588,38 @@ class TvTimeGdprImporter @Inject constructor(
                                 allWatched.takeIf { it.isNotEmpty() }
                             } else null
 
-                            val totalReleasedEps = tmdb.effectiveTotalEpisodes
                             val watchedEpsCount = finalEps?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+                            val totalReleasedEps = tmdb.effectiveTotalEpisodes
+                            
+                            // CALCOLO COMPLETAMENTO RIGOROSO
                             val (finalWatched, finalProgress) = if (finalMediaType == "tv") {
                                 if (item.isForLater && watchedEpsCount == 0) {
                                     Pair(false, 0.0)
-                                } else if (finalEps != null && finalEps.isNotEmpty() && totalReleasedEps > 0) {
-                                    val isCompleted = watchedEpsCount >= totalReleasedEps
+                                } else if (watchedEpsCount > 0) {
+                                    // Controllo matematico: è completata solo se gli episodi visti coprono tutti quelli rilasciati
+                                    // MA con una salvaguardia se TMDB manda dati palesemente rotti (es. totalReleasedEps = 1 ma visti 1000)
+                                    val isCompleted = if (totalReleasedEps > 0) {
+                                        watchedEpsCount >= totalReleasedEps && (watchedEpsCount - totalReleasedEps < 5)
+                                    } else false
+
                                     if (isCompleted && !item.isForLater && !item.isDropped) {
                                         Pair(true, 1.0)
                                     } else {
-                                        val p = (watchedEpsCount.toDouble() / totalReleasedEps).coerceIn(0.001, 0.999)
+                                        val p = if (totalReleasedEps > 0) {
+                                            (watchedEpsCount.toDouble() / totalReleasedEps).coerceIn(0.001, 0.999)
+                                        } else {
+                                            0.5 // Fallback se TMDB non comunica gli episodi
+                                        }
                                         Pair(false, p)
                                     }
-                                } else if (item.isWatched && !item.isForLater && !item.isDropped && watchedEpsCount > 0) {
-                                    Pair(true, 1.0)
                                 } else {
-                                    Pair(false, 0.0)
+                                    if (item.isExplicitlyCompleted && !item.isForLater && !item.isDropped) Pair(true, 1.0) else Pair(false, 0.0)
                                 }
                             } else {
+                                // Film
                                 if (item.isForLater) Pair(false, 0.0) else Pair(item.isWatched, if (item.isWatched) 1.0 else 0.0)
                             }
-
+                            
                             val isWatchlistFolder = item.folders.any { fname ->
                                 fname.equals("watchlist", ignoreCase = true) ||
                                 fname.equals("to watch", ignoreCase = true) ||
@@ -564,9 +628,9 @@ class TvTimeGdprImporter @Inject constructor(
                                 fname.equals("planned", ignoreCase = true) ||
                                 fname.equals("to_watch", ignoreCase = true)
                             }
-                            val isItemWatchlist = item.isForLater || isWatchlistFolder || (!finalWatched && watchedEpsCount == 0 && !item.isWatched)
-                            val finalFav = item.isFavorite || (if (!finalWatched && isItemWatchlist) true else false)
-
+                            val isItemWatchlist = item.isForLater || isWatchlistFolder || (!finalWatched && watchedEpsCount == 0 && !item.isExplicitlyCompleted)
+                            val finalFav = item.isFavorite || (if (!finalWatched && isItemWatchlist) true else false) || (!finalWatched && watchedEpsCount > 0)
+                            
                             val movieObj = Movie(
                                 id = tmdb.id,
                                 mediaType = finalMediaType,

@@ -31,6 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -41,6 +43,7 @@ import androidx.work.workDataOf
 import androidx.work.WorkManager
 import androidx.work.BackoffPolicy
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.channels.awaitClose
 import com.cinetrack.worker.TraktInstantWriteWorker
 
 @Singleton
@@ -136,7 +139,12 @@ class MovieRepository @Inject constructor(
         val oldMovie = favoriteDao.getById(movie.id, movie.mediaType)
 
         // 1. Update Room immediately
-        favoriteDao.insert(movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()))
+        val updatedMovie = movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis())
+        updatedMovie.emotionalVibes = movie.emotionalVibes
+        updatedMovie.favoriteActorId = movie.favoriteActorId
+        updatedMovie.favoriteActorName = movie.favoriteActorName
+        updatedMovie.favoriteActorProfilePath = movie.favoriteActorProfilePath
+        favoriteDao.insert(updatedMovie)
         
         // Notify Widget of changes
         widgetNotifier.notifyWidgetUpdated()
@@ -242,6 +250,25 @@ class MovieRepository @Inject constructor(
         repositoryScope.launch {
             try {
                 firebaseRemoteDataSource.setMovie(movie)
+                
+                val oldVibes = oldMovie?.emotionalVibes?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                val newVibes = movie.emotionalVibes?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                
+                val addedVibes = newVibes - oldVibes
+                val removedVibes = oldVibes - newVibes
+                
+                val newMvp = movie.favoriteActorId
+                val oldMvp = oldMovie?.favoriteActorId
+
+                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp) {
+                    firebaseRemoteDataSource.updateGlobalMovieStats(
+                        compositeId = movie.compositeId,
+                        addedVibes = addedVibes.toList(),
+                        removedVibes = removedVibes.toList(),
+                        newMvp = newMvp,
+                        oldMvp = oldMvp
+                    )
+                }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Firebase sync failed for ${movie.id}", e)
@@ -997,9 +1024,9 @@ class MovieRepository @Inject constructor(
                 // Prendiamo solo i primi 5 risultati per non sovraccaricare le API
                 val tvResults = tmdbService.searchTV(cleanQuery).results.take(5)
                 
-                // Usiamo async per scaricare i dettagli in parallelo ed evitare rallentamenti nell'import
+                // Usiamo async (ora importato correttamente) per scaricare in parallelo
                 tvResults.map { basicResult ->
-                    kotlinx.coroutines.async {
+                    async {
                         try {
                             val details = fetchMovieDetails(basicResult.id, true)
                             com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "tv")
@@ -1310,6 +1337,27 @@ class MovieRepository @Inject constructor(
         }
 
         return (traktComments + tmdbReviews).distinctBy { it.comment?.take(40) }
+    }
+
+    // --- Global Stats ---
+    fun getGlobalMovieStatsFlow(movieId: Long, mediaType: String): Flow<com.cinetrack.data.model.GlobalMovieStats?> {
+        val compositeId = "${mediaType}_${movieId}"
+        return callbackFlow {
+            val listener = firebaseRemoteDataSource.getGlobalMovieStats(compositeId)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        trySend(null)
+                        return@addSnapshotListener
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        val stats = snapshot.toObject(com.cinetrack.data.model.GlobalMovieStats::class.java)
+                        trySend(stats)
+                    } else {
+                        trySend(com.cinetrack.data.model.GlobalMovieStats())
+                    }
+                }
+            awaitClose { listener.remove() }
+        }
     }
 }
 

@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 12,
-    "identityHash": "5a6c6bf0949cc648f293bf3a645ad643",
+    "version": 13,
+    "identityHash": "04eb44d1199d997cc762e2d9228a3ad5",
     "entities": [
       {
         "tableName": "favorites",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `media_type` TEXT NOT NULL, `imdb_id` TEXT, `title` TEXT, `name` TEXT, `poster_path` TEXT, `backdrop_path` TEXT, `custom_backdrop_path` TEXT, `vote_average` REAL, `vote_count` INTEGER, `overview` TEXT, `release_date` TEXT, `first_air_date` TEXT, `next_episode_air_date` TEXT, `next_episode_string` TEXT, `last_air_date` TEXT, `release_year` TEXT, `status` TEXT, `tagline` TEXT, `runtime` INTEGER, `episode_run_time` TEXT, `favorite` INTEGER NOT NULL, `watched` INTEGER NOT NULL, `reminder` INTEGER NOT NULL, `dropped` INTEGER NOT NULL DEFAULT 0, `personal_rating` REAL, `personal_note` TEXT, `watched_at` TEXT, `updated_at` TEXT, `seasons` TEXT, `number_of_seasons` INTEGER, `number_of_episodes` INTEGER, `watched_episodes` TEXT, `new_episodes_found` INTEGER, `progress` REAL, `genres` TEXT, `genre_ids` TEXT, `streaming_provider_ids` TEXT, `genre_names_string` TEXT, `revenue` INTEGER, `budget` INTEGER, `is_upcoming` INTEGER, `director_name` TEXT, `director_profile_path` TEXT, `director_id` INTEGER, `director_data` TEXT, `short_cast_string` TEXT, `top_cast_data` TEXT, `job` TEXT, `department` TEXT, `character` TEXT, `accent_color` TEXT, `accent_color_static` TEXT, `emotional_vibes` TEXT, `favorite_character_id` INTEGER, `favorite_character_name` TEXT, `favorite_actor_profile_path` TEXT, `last_sync_date` TEXT, `created_at` TEXT, `migrated_at` TEXT, `_touched` INTEGER, `stats_enriched` INTEGER, `sync_status` TEXT NOT NULL, `client_updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`, `media_type`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `media_type` TEXT NOT NULL, `imdb_id` TEXT, `title` TEXT, `name` TEXT, `poster_path` TEXT, `backdrop_path` TEXT, `custom_backdrop_path` TEXT, `vote_average` REAL, `vote_count` INTEGER, `overview` TEXT, `release_date` TEXT, `first_air_date` TEXT, `next_episode_air_date` TEXT, `next_episode_string` TEXT, `last_air_date` TEXT, `release_year` TEXT, `status` TEXT, `tagline` TEXT, `runtime` INTEGER, `episode_run_time` TEXT, `favorite` INTEGER NOT NULL, `watched` INTEGER NOT NULL, `reminder` INTEGER NOT NULL, `dropped` INTEGER NOT NULL DEFAULT 0, `personal_rating` REAL, `personal_note` TEXT, `watched_at` TEXT, `emotional_vibes` TEXT, `favorite_actor_id` INTEGER, `favorite_actor_name` TEXT, `favorite_actor_profile_path` TEXT, `updated_at` TEXT, `seasons` TEXT, `number_of_seasons` INTEGER, `number_of_episodes` INTEGER, `watched_episodes` TEXT, `new_episodes_found` INTEGER, `progress` REAL, `genres` TEXT, `genre_ids` TEXT, `streaming_provider_ids` TEXT, `genre_names_string` TEXT, `revenue` INTEGER, `budget` INTEGER, `is_upcoming` INTEGER, `director_name` TEXT, `director_profile_path` TEXT, `director_id` INTEGER, `director_data` TEXT, `short_cast_string` TEXT, `top_cast_data` TEXT, `job` TEXT, `department` TEXT, `character` TEXT, `accent_color` TEXT, `accent_color_static` TEXT, `last_sync_date` TEXT, `created_at` TEXT, `migrated_at` TEXT, `_touched` INTEGER, `stats_enriched` INTEGER, `sync_status` TEXT NOT NULL, `client_updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`, `media_type`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -178,6 +178,30 @@
             "notNull": false
           },
           {
+            "fieldPath": "emotionalVibes",
+            "columnName": "emotional_vibes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "favoriteActorId",
+            "columnName": "favorite_actor_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "favoriteActorName",
+            "columnName": "favorite_actor_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "favoriteActorProfilePath",
+            "columnName": "favorite_actor_profile_path",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "updatedAt",
             "columnName": "updated_at",
             "affinity": "TEXT",
@@ -324,30 +348,6 @@
           {
             "fieldPath": "accentColorStatic",
             "columnName": "accent_color_static",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "emotionalVibes",
-            "columnName": "emotional_vibes",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "favoriteCharacterId",
-            "columnName": "favorite_character_id",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "favoriteCharacterName",
-            "columnName": "favorite_character_name",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "favoriteActorProfilePath",
-            "columnName": "favorite_actor_profile_path",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -595,7 +595,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5a6c6bf0949cc648f293bf3a645ad643')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '04eb44d1199d997cc762e2d9228a3ad5')"
     ]
   }
 }

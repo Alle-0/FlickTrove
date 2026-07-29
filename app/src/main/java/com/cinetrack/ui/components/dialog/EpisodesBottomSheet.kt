@@ -253,10 +253,10 @@ fun EpisodesBottomSheet(
 
                 // Season Selector
                 val seasons = successState?.details?.seasons?.mapNotNull { it.seasonNumber } ?: (1..(movie.numberOfSeasons ?: 1)).toList()
-                val completedSeasons = seasons.filter { seasonNum ->
-                    val watchedCount = localWatchedEpisodes[seasonNum.toString()]?.size ?: 0
-                    val totalCount = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }?.episodeCount ?: 0
-                    totalCount > 0 && watchedCount >= totalCount
+                val completedSeasons = seasons.mapNotNull { seasonNum ->
+                    val seasonData = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }
+                        ?: seasonDetails[seasonNum]
+                    if (seasonData != null && isSeasonFullyWatched(localWatchedEpisodes, seasonNum, seasonData)) seasonNum else null
                 }.toSet()
 
                 SeasonSelector(
@@ -557,13 +557,28 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
             Column(modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 16.dp)) {
-                Text(
-                    stringResource(R.string.episodes_episode_n, episode.episodeNumber),
-                    color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.5.sp
-                )
+                val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+                val isUnreleased = !episode.airDate.isNullOrBlank() && episode.airDate > todayIso
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.episodes_episode_n, episode.episodeNumber),
+                        color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
+                    )
+                    
+                    if (isUnreleased) {
+                        Text(
+                            " • " + com.cinetrack.ui.components.updates.formatReleaseDate(episode.airDate),
+                            color = Color(0xFFF9A825), // A nice amber color
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.5.sp
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     episode.name,
@@ -592,16 +607,22 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
 }
 
 private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, currentSeasonNumber: Int, seasonData: Season): Boolean {
-    val watched = localWatchedEpisodes[currentSeasonNumber.toString()] ?: emptyList()
+    val watched = localWatchedEpisodes[currentSeasonNumber.toString()]?.toSet() ?: emptySet()
+    if (watched.isEmpty()) return false
     val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
-    val releasedCount = seasonData.episodes?.count { ep ->
+    val releasedEps = seasonData.episodes?.filter { ep ->
         val epDate = ep.airDate
         if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
         else if (!seasonData.airDate.isNullOrBlank()) seasonData.airDate.take(10) <= todayIso
         else true
-    } ?: 0
-    val total = if (releasedCount > 0) releasedCount else (seasonData.episodes?.size ?: 0)
-    return total > 0 && watched.size >= total
+    }?.map { it.episodeNumber }
+    
+    if (releasedEps != null) {
+        return releasedEps.isNotEmpty() && releasedEps.all { it in watched }
+    } else {
+        val total = seasonData.episodeCount ?: 0
+        return total > 0 && watched.size >= total
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

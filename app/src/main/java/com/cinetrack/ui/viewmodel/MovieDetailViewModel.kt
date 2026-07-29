@@ -43,6 +43,8 @@ import com.cinetrack.ui.navigation.DetailRoute
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
+import com.cinetrack.ui.components.detail.EmotionalVibe
+import com.cinetrack.data.api.CastMember
 
 @HiltViewModel
 class MovieDetailViewModel @Inject constructor(
@@ -76,6 +78,13 @@ class MovieDetailViewModel @Inject constructor(
             viewModelScope.launch {
                 fetchFromTMDB(movieId, mediaType == "tv")
             }
+            
+            // Listen to global stats
+            viewModelScope.launch {
+                repository.getGlobalMovieStatsFlow(movieId, mediaType).collect { stats ->
+                    _globalStats.value = stats
+                }
+            }
         }
     }
 
@@ -100,6 +109,9 @@ class MovieDetailViewModel @Inject constructor(
 
     private val _extractedColor = MutableStateFlow<Color?>(null)
     val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
+    
+    private val _globalStats = MutableStateFlow<com.cinetrack.data.model.GlobalMovieStats?>(null)
+    val globalStats = _globalStats.asStateFlow()
 
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
@@ -324,6 +336,7 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.ToggleFolderMembership -> toggleFolderMembership(event.folder)
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
+            is DetailEvent.SaveCheckIn -> saveCheckIn(event.vibes, event.mvpActor)
         }
     }
 
@@ -342,13 +355,27 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
+    private fun saveCheckIn(vibes: List<String>, mvpActor: com.cinetrack.data.api.CastMember?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val local = repository.getMovie(movieId, mediaType)
+            val current = local ?: (uiState.value as? DetailUiState.Success)?.movieEntry ?: return@launch
+            
+            current.emotionalVibes = if (vibes.isEmpty()) null else vibes.joinToString(",")
+            current.favoriteActorId = mvpActor?.id
+            current.favoriteActorName = mvpActor?.name
+            current.favoriteActorProfilePath = mvpActor?.profilePath
+            
+            repository.saveMovie(current)
+        }
+    }
+
     private fun updateMovieRating(movie: Movie, rating: Double?) {
         viewModelScope.launch {
             val effectiveRating = if (rating == 0.0) null else rating
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
-            val updated = current.copy(personalRating = effectiveRating)
-            repository.saveMovie(updated)
+            current.personalRating = effectiveRating
+            repository.saveMovie(current)
         }
     }
 
@@ -356,8 +383,8 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
-            val updated = current.copy(personalNote = note)
-            repository.saveMovie(updated)
+            current.personalNote = note
+            repository.saveMovie(current)
         }
     }
 

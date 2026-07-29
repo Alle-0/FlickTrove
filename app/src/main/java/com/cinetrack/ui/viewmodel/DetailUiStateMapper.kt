@@ -65,10 +65,16 @@ class DetailUiStateMapper @Inject constructor(
             directorName = freshMovie.directorName ?: movie.directorName,
             directorProfilePath = freshMovie.directorProfilePath ?: movie.directorProfilePath,
             accentColor = freshMovie.accentColor ?: movie.accentColor
-        ) ?: freshMovie
+        )?.also {
+            it.emotionalVibes = movie.emotionalVibes
+            it.favoriteActorId = movie.favoriteActorId
+            it.favoriteActorName = movie.favoriteActorName
+            it.favoriteActorProfilePath = movie.favoriteActorProfilePath
+        } ?: freshMovie
         var effectiveWatchedEpisodes = effectiveMovie.watchedEpisodes
         val totalEpisodes = effectiveMovie.effectiveTotalEpisodes
-        if (mediaType == "tv" && effectiveMovie.watched && (effectiveWatchedEpisodes.isNullOrEmpty() || effectiveWatchedEpisodes.values.sumOf { it.size } == 0)) {
+        if (mediaType == "tv" && effectiveMovie.watched && (effectiveMovie.progress ?: 0.0) >= 1.0 &&
+            (effectiveWatchedEpisodes.isNullOrEmpty() || effectiveWatchedEpisodes.values.sumOf { it.size } == 0)) {
             val allWatched = mutableMapOf<String, List<Int>>()
             val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
             var nextEpSeason: Int? = null
@@ -94,7 +100,11 @@ class DetailUiStateMapper @Inject constructor(
         }
         val watchedEpisodesCount = effectiveWatchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
         val progress = if (mediaType == "tv") {
-            if (effectiveMovie.watched) 1.0f else if (totalEpisodes > 0) (watchedEpisodesCount.toFloat() / totalEpisodes).coerceIn(0f, 1f) else 0f
+            when {
+                totalEpisodes > 0 -> (watchedEpisodesCount.toFloat() / totalEpisodes).coerceIn(0f, 1f)
+                effectiveMovie.watched -> 1.0f
+                else -> 0f
+            }
         } else 0f
     
         val localMoviesMap = localMovies.associateBy { "${it.mediaType}_${it.id}" }
