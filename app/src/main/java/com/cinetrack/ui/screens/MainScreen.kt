@@ -12,6 +12,13 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -227,7 +234,38 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         }
                     ) {
                         Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
-                            CurrentTab()
+                            AnimatedContent(
+                                targetState = currentTab,
+                                transitionSpec = {
+                                    val targetDepth = when (targetState) {
+                                        is HomeTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
+                                        is FolderDetailTab -> 2
+                                        else -> 0
+                                    }
+                                    val initialDepth = when (initialState) {
+                                        is HomeTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
+                                        is FolderDetailTab -> 2
+                                        else -> 0
+                                    }
+
+                                    if (targetDepth > initialDepth) {
+                                        slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) togetherWith
+                                                slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
+                                    } else if (targetDepth < initialDepth) {
+                                        slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) togetherWith
+                                                slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { it })
+                                    } else {
+                                        fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                                    }
+                                },
+                                label = "TabTransition"
+                            ) { tab ->
+                                tabNavigator.saveableState("currentTab", tab) {
+                                    tab.Content()
+                                }
+                            }
 
                             // Top Bar Layer
                             val title = when (currentTab) {
