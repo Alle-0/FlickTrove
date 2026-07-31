@@ -226,7 +226,7 @@ private fun RowScope.NavItem(
         }
         
         Text(
-            text = label,
+            text = label.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontSize = 9.sp,
             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
