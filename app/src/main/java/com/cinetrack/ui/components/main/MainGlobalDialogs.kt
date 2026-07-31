@@ -142,12 +142,6 @@ fun MainGlobalDialogs(
                 onSave = { newName, newColor ->
                     foldersViewModel.updateFolder(folder.copy(name = newName, color = newColor))
                     onFolderEditDialogChange(false)
-                    val tab = currentTab as FolderDetailTab
-                    tabNavigator.current = FolderDetailTab(
-                        folderId = tab.folderId,
-                        folderName = if (folderEditMode == FolderEditMode.NAME) newName else tab.folderName,
-                        folderColor = if (folderEditMode == FolderEditMode.COLOR) newColor else tab.folderColor
-                    )
                 }
             )
         }
