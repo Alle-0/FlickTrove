@@ -232,9 +232,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             isFilterModalVisible = true
                         }
                     ) {
-                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState).haze(contentHazeState)) {
-                            AnimatedContent(
-                                targetState = currentTab,
+                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
+                            Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
+                                AnimatedContent(
+                                    targetState = currentTab,
                                 transitionSpec = {
                                     val targetDepth = when (targetState) {
                                         is HomeTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
