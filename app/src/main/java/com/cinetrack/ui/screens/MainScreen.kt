@@ -266,6 +266,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     tab.Content()
                                 }
                             }
+                        }
 
                             // Top Bar Layer
                             val title = when (currentTab) {
