@@ -226,14 +226,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
                     CompositionLocalProvider(
                         LocalAppPadding provides PaddingValues(bottom = 80.dp),
-                        LocalHazeState provides contentHazeState,
                         LocalActiveFilterConfig provides activeFilterConfig,
                         LocalFilterRequest provides { bounds ->
                             filterButtonBounds = bounds
                             isFilterModalVisible = true
                         }
                     ) {
-                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
+                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState).haze(contentHazeState)) {
                             AnimatedContent(
                                 targetState = currentTab,
                                 transitionSpec = {

@@ -23,6 +23,8 @@ fun CinematicBackground(
     accentColor: Color? = null
 ) {
     val baseTint = accentColor ?: MaterialTheme.colorScheme.primary
+    val isAmoled = MaterialTheme.colorScheme.background == Color.Black
+    val alphaFactor = if (isAmoled) 0.15f else 1.0f
 
 
     Canvas(modifier = modifier.fillMaxSize().background(backgroundColor)) {
@@ -34,8 +36,8 @@ fun CinematicBackground(
         val radius1 = w * 0.55f
         drawCircle(
             brush = Brush.radialGradient(
-                0.0f to baseTint.copy(alpha = 0.22f),
-                0.6f to baseTint.copy(alpha = 0.08f),
+                0.0f to baseTint.copy(alpha = 0.22f * alphaFactor),
+                0.6f to baseTint.copy(alpha = 0.08f * alphaFactor),
                 1.0f to Color.Transparent,
                 center = center1,
                 radius = radius1
@@ -49,8 +51,8 @@ fun CinematicBackground(
         val radius2 = w * 0.5f
         drawCircle(
             brush = Brush.radialGradient(
-                0.0f to baseTint.copy(alpha = 0.18f),
-                0.6f to baseTint.copy(alpha = 0.06f),
+                0.0f to baseTint.copy(alpha = 0.18f * alphaFactor),
+                0.6f to baseTint.copy(alpha = 0.06f * alphaFactor),
                 1.0f to Color.Transparent,
                 center = center2,
                 radius = radius2

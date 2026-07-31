@@ -82,7 +82,7 @@ fun MainFolderOptionsMenu(
                 modifier = Modifier
                     .width(200.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp))
+                    .then(if (visible) Modifier.hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp)) else Modifier)
             ) {
                 Row(
                     modifier = Modifier
