@@ -262,7 +262,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 },
                                 label = "TabTransition"
                             ) { tab ->
-                                tabNavigator.saveableState("currentTab", tab) {
+                                tabNavigator.saveableState(tab::class.simpleName ?: "tab", tab) {
                                     tab.Content()
                                 }
                             }
