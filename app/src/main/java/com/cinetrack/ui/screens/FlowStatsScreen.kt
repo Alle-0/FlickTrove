@@ -90,7 +90,7 @@ object FlowStatsTab : Tab {
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                         .padding(
-                            top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 80.dp,
+                            top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 100.dp,
                             bottom = paddingValues.calculateBottomPadding() + 120.dp,
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -100,7 +100,17 @@ object FlowStatsTab : Tab {
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp, vertical = 20.dp)
                     ) {
-
+                        val titleText = when (val range = flowUiState.timeRange) {
+                            is com.cinetrack.ui.viewmodel.TimeRange.AllTime -> stringResource(R.string.flow_stats_all_time)
+                            is com.cinetrack.ui.viewmodel.TimeRange.Year -> stringResource(R.string.flow_stats_year, range.year.toString())
+                        }
+                        
+                        Text(
+                            text = titleText,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        )
 
                         YearSelectionButton(
                             currentRange = flowUiState.timeRange,

@@ -1055,6 +1055,8 @@
     <string name="flow_empty_desc">Aggiungi più film e serie tv ai tuoi Visti per generare il tuo Flow personalizzato.</string>
     <string name="flow_stats_empty_title">Nessuna statistica</string>
     <string name="flow_stats_empty_desc">Continua a guardare e valutare titoli per visualizzare le statistiche del tuo Flow.</string>
+    <string name="flow_stats_all_time">Flow stat di sempre</string>
+    <string name="flow_stats_year">Flow stat %1$s</string>
     <string name="stat_hours_watched">Ore Viste</string>
     <string name="stat_completed_titles">Titoli Completati</string>
     <string name="stat_avg_rating">Voto Medio</string>
