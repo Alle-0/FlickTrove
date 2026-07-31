@@ -73,7 +73,7 @@ fun GeneralStatsCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "GENERAL STATS",
+                    text = "General stats",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,

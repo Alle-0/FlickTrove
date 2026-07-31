@@ -32,7 +32,7 @@
     <string name="main_tab_discover">Discover</string>
     <string name="main_tab_recommendations">Recommended for you</string>
     <string name="main_tab_stats">Statistics</string>
-    <string name="main_tab_folders">MY FOLDERS</string>
+    <string name="main_tab_folders">My folders</string>
     <string name="main_tab_settings">Settings</string>
     <string name="main_cd_search">Search</string>
     <string name="main_folder_rename">Rename Folder</string>
@@ -844,10 +844,10 @@
     <string name="rating_tvma_desc">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17.</string>
 
     <!-- Bottom Bar -->
-    <string name="bottom_bar_to_watch">TO WATCH</string>
-    <string name="bottom_bar_watched">WATCHED</string>
-    <string name="bottom_bar_stats">STATS</string>
-    <string name="bottom_bar_account">ACCOUNT</string>
+    <string name="bottom_bar_to_watch">To watch</string>
+    <string name="bottom_bar_watched">Watched</string>
+    <string name="bottom_bar_stats">Stats</string>
+    <string name="bottom_bar_account">Account</string>
 
     <!-- Technical Info -->
     <string name="detail_tech_release_date">RELEASE DATE</string>

@@ -32,7 +32,7 @@
     <string name="main_tab_discover">Scopri</string>
     <string name="main_tab_recommendations">Consigliati per te</string>
     <string name="main_tab_stats">Statistiche</string>
-    <string name="main_tab_folders">LE MIE CARTELLE</string>
+    <string name="main_tab_folders">Le mie cartelle</string>
     <string name="main_tab_settings">Impostazioni</string>
     <string name="main_cd_search">Cerca</string>
     <string name="main_folder_rename">Rinomina Cartella</string>
@@ -839,9 +839,10 @@
     <string name="rating_tvma_desc">Programma specificamente progettato per essere visionato da adulti e potrebbe essere inappropriato per minori di 17 anni.</string>
 
     <!-- Bottom Bar -->
-    <string name="bottom_bar_to_watch">DA VEDERE</string>
-    <string name="bottom_bar_watched">VISTI</string>
-    <string name="bottom_bar_stats">STATISTICHE</string>
+    <string name="bottom_bar_to_watch">Da vedere</string>
+    <string name="bottom_bar_watched">Visti</string>
+    <string name="bottom_bar_stats">Statistiche</string>
+    <string name="bottom_bar_account">Account</string>
 
     <!-- Technical Info -->
     <string name="detail_tech_release_date">DATA USCITA</string>

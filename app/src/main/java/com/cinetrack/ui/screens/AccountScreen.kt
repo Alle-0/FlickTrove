@@ -433,242 +433,243 @@ object AccountTab : Tab {
                     Spacer(modifier = Modifier.height(32.dp))
                 }
             }
-            val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
-            if (showNameDialog) {
-                    val focusManager = LocalFocusManager.current
-                    var isCheckingName by remember { mutableStateOf(false) }
-                    var nameError by remember { mutableStateOf<String?>(null) }
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) { 
-                                focusManager.clearFocus()
-                                showNameDialog = false 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .widthIn(max = 400.dp)
-                                .fillMaxWidth(0.85f)
-                                .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                                .clickable(
-                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    focusManager.clearFocus()
-                                }
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(24.dp)
-                            ) {
-                                Text(
-                                    stringResource(R.string.account_change_name_title),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    stringResource(R.string.account_name_changes_left, 2 - nameChangesCount),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                OutlinedTextField(
-                                    value = nameInput,
-                                    onValueChange = { 
-                                        if (it.length <= 20) {
-                                            nameInput = it
-                                            if (it.isNotEmpty() && it.length < 3) {
-                                                nameError = context.getString(R.string.account_error_name_short)
-                                            } else if (validator.containsOffensiveWords(it)) {
-                                                nameError = context.getString(R.string.account_error_name_profanity)
-                                            } else {
-                                                nameError = null
-                                            }
-                                        }
-                                    },
-                                    label = { Text(stringResource(R.string.account_new_name_label)) },
-                                    singleLine = true,
-                                    isError = nameError != null,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                                
-                                if (nameError != null) {
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = nameError!!,
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Start
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.height(32.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(48.dp)
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .bounceClick { showNameDialog = false },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
-                                    }
-                                    
-                                    val isSaveEnabled = nameChangesCount < 2 && nameInput.isNotBlank() && nameInput != currentDisplayName && !isCheckingName && nameError == null
-                                    
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(48.dp)
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .background(
-                                                if (isSaveEnabled) MaterialTheme.colorScheme.primary 
-                                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                                            )
-                                            .bounceClick {
-                                                if (!isSaveEnabled) return@bounceClick
-                                                focusManager.clearFocus()
-                                                
-                                                if (nameInput.length < 3) {
-                                                    nameError = context.getString(R.string.account_error_name_short)
-                                                    return@bounceClick
-                                                }
-                                                
-                                                if (validator.containsOffensiveWords(nameInput)) {
-                                                    nameError = context.getString(R.string.account_error_name_profanity)
-                                                    return@bounceClick
-                                                }
-                                                
-                                                isCheckingName = true
-                                                Firebase.firestore.collection("users")
-                                                    .whereEqualTo("displayName", nameInput)
-                                                    .get()
-                                                    .addOnSuccessListener { snapshot ->
-                                                        isCheckingName = false
-                                                        if (!snapshot.isEmpty) {
-                                                            nameError = context.getString(R.string.account_error_name_taken)
-                                                        } else {
-                                                            val newCount = nameChangesCount + 1
-                                                            prefs.edit().putInt("changes_${currentUser?.uid}", newCount).apply()
-                                                            nameChangesCount = newCount
-                                                            currentDisplayName = nameInput
-                                                            currentUser?.updateProfile(userProfileChangeRequest { 
-                                                                displayName = nameInput 
-                                                            })?.addOnSuccessListener {
-                                                                Firebase.firestore.collection("users").document(currentUser.uid)
-                                                                    .set(mapOf("displayName" to nameInput), SetOptions.merge())
-                                                            }
-                                                            showNameDialog = false
-                                                        }
-                                                    }
-                                                    .addOnFailureListener {
-                                                        isCheckingName = false
-                                                        nameError = context.getString(R.string.account_error_checking_name)
-                                                    }
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (isCheckingName) {
-                                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
-                                        } else {
-                                            Text(
-                                                stringResource(R.string.account_save), 
-                                                fontWeight = FontWeight.Bold, 
-                                                color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
 
-                    }
-                }
-            if (showGuestAuthDialog) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) { 
-                                showGuestAuthDialog = false 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .widthIn(max = 400.dp)
-                                .fillMaxWidth(0.85f)
-                                .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                                .clickable(
-                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                    indication = null
-                                ) { }
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(24.dp)
-                            ) {
-                                Text(
-                                    stringResource(R.string.auth_guest_prompt_title),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    stringResource(R.string.auth_guest_prompt_desc),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(24.dp))
-                                
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    TextButton(onClick = { showGuestAuthDialog = false }) {
-                                        Text(stringResource(R.string.auth_guest_dialog_cancel), color = Color.White.copy(alpha = 0.7f))
-                                    }
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    TextButton(onClick = { 
-                                        showGuestAuthDialog = false 
-                                        parentNavigator.push(com.cinetrack.ui.screens.LoginScreen())
-                                    }) {
-                                        Text(stringResource(R.string.auth_create_account), color = Color(0xFF80DEEA), fontWeight = FontWeight.Bold)
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
             // Removed local AvatarSelectionModal usage
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp) // Avoid bottom bar
             )
+        }
+        val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
+        if (showNameDialog) {
+                val focusManager = LocalFocusManager.current
+                var isCheckingName by remember { mutableStateOf(false) }
+                var nameError by remember { mutableStateOf<String?>(null) }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .clickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null
+                        ) { 
+                            focusManager.clearFocus()
+                            showNameDialog = false 
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .widthIn(max = 400.dp)
+                            .fillMaxWidth(0.85f)
+                            .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                focusManager.clearFocus()
+                            }
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.account_change_name_title),
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                stringResource(R.string.account_name_changes_left, 2 - nameChangesCount),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            OutlinedTextField(
+                                value = nameInput,
+                                onValueChange = { 
+                                    if (it.length <= 20) {
+                                        nameInput = it
+                                        if (it.isNotEmpty() && it.length < 3) {
+                                            nameError = context.getString(R.string.account_error_name_short)
+                                        } else if (validator.containsOffensiveWords(it)) {
+                                            nameError = context.getString(R.string.account_error_name_profanity)
+                                        } else {
+                                            nameError = null
+                                        }
+                                    }
+                                },
+                                label = { Text(stringResource(R.string.account_new_name_label)) },
+                                singleLine = true,
+                                isError = nameError != null,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            
+                            if (nameError != null) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = nameError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Start
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(32.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .bounceClick { showNameDialog = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                                }
+                                
+                                val isSaveEnabled = nameChangesCount < 2 && nameInput.isNotBlank() && nameInput != currentDisplayName && !isCheckingName && nameError == null
+                                
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(
+                                            if (isSaveEnabled) MaterialTheme.colorScheme.primary 
+                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                        )
+                                        .bounceClick {
+                                            if (!isSaveEnabled) return@bounceClick
+                                            focusManager.clearFocus()
+                                            
+                                            if (nameInput.length < 3) {
+                                                nameError = context.getString(R.string.account_error_name_short)
+                                                return@bounceClick
+                                            }
+                                            
+                                            if (validator.containsOffensiveWords(nameInput)) {
+                                                nameError = context.getString(R.string.account_error_name_profanity)
+                                                return@bounceClick
+                                            }
+                                            
+                                            isCheckingName = true
+                                            Firebase.firestore.collection("users")
+                                                .whereEqualTo("displayName", nameInput)
+                                                .get()
+                                                .addOnSuccessListener { snapshot ->
+                                                    isCheckingName = false
+                                                    if (!snapshot.isEmpty) {
+                                                        nameError = context.getString(R.string.account_error_name_taken)
+                                                    } else {
+                                                        val newCount = nameChangesCount + 1
+                                                        prefs.edit().putInt("changes_${currentUser?.uid}", newCount).apply()
+                                                        nameChangesCount = newCount
+                                                        currentDisplayName = nameInput
+                                                        currentUser?.updateProfile(userProfileChangeRequest { 
+                                                            displayName = nameInput 
+                                                        })?.addOnSuccessListener {
+                                                            Firebase.firestore.collection("users").document(currentUser.uid)
+                                                                .set(mapOf("displayName" to nameInput), SetOptions.merge())
+                                                        }
+                                                        showNameDialog = false
+                                                    }
+                                                }
+                                                .addOnFailureListener {
+                                                    isCheckingName = false
+                                                    nameError = context.getString(R.string.account_error_checking_name)
+                                                }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isCheckingName) {
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                                    } else {
+                                        Text(
+                                            stringResource(R.string.account_save), 
+                                            fontWeight = FontWeight.Bold, 
+                                            color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        if (showGuestAuthDialog) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .clickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null
+                        ) { 
+                            showGuestAuthDialog = false 
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .widthIn(max = 400.dp)
+                            .fillMaxWidth(0.85f)
+                            .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) { }
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.auth_guest_prompt_title),
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                stringResource(R.string.auth_guest_prompt_desc),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                TextButton(onClick = { showGuestAuthDialog = false }) {
+                                    Text(stringResource(R.string.auth_guest_dialog_cancel), color = Color.White.copy(alpha = 0.7f))
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                TextButton(onClick = { 
+                                    showGuestAuthDialog = false 
+                                    parentNavigator.push(com.cinetrack.ui.screens.LoginScreen())
+                                }) {
+                                    Text(stringResource(R.string.auth_create_account), color = Color(0xFF80DEEA), fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
         }
     }
 }

@@ -241,8 +241,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is SettingsTab -> stringResource(R.string.main_tab_settings)
                                 is NewsTab -> stringResource(R.string.news_tab_title)
                                 is FolderDetailTab -> currentTab.folderName
-                                is FlowTab -> "FLOW"
-                                is FlowStatsTab -> "FLOW STATS"
+                                is FlowTab -> "Flow"
+                                is FlowStatsTab -> "Flow stats"
                                 else -> stringResource(R.string.app_name)
                             }
 
