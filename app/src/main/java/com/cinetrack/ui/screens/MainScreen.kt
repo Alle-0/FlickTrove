@@ -19,6 +19,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -250,7 +252,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         else -> 0
                                     }
 
-                                    if (targetDepth > initialDepth) {
+                                    if (targetState::class == initialState::class) {
+                                        // Same tab class (e.g. rename of FolderDetailTab): no animation
+                                        EnterTransition.None togetherWith ExitTransition.None
+                                    } else if (targetDepth > initialDepth) {
                                         slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) togetherWith
                                                 slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
                                     } else if (targetDepth < initialDepth) {
@@ -262,7 +267,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 },
                                 label = "TabTransition"
                             ) { tab ->
-                                tabNavigator.saveableState(tab::class.simpleName ?: "tab", tab) {
+                                val key = when (tab) {
+                                    is FolderDetailTab -> "FolderDetailTab_${tab.folderId}"
+                                    else -> tab::class.simpleName ?: "tab"
+                                }
+                                tabNavigator.saveableState(key, tab) {
                                     tab.Content()
                                 }
                             }
