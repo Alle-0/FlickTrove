@@ -1053,6 +1053,7 @@
 
     <string name="persona_title_wanderer">The Wanderer</string>
     <string name="persona_desc_wanderer">Your Flow is diverse and unpredictable. You go where the wind takes you.</string>
+    <string name="dashboard_general_stats">GENERAL STATS</string>
     <string name="dashboard_my_folders">MY FOLDERS</string>
     <string name="dashboard_your_flow">YOUR FLOW</string>
     <string name="stat_hours_watched">Hours Watched</string>

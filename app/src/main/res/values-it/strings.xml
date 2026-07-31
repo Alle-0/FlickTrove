@@ -1048,6 +1048,7 @@
 
     <string name="persona_title_wanderer">Il Viaggiatore</string>
     <string name="persona_desc_wanderer">Il tuo Flow è vario e imprevedibile. Vai dove ti porta il vento.</string>
+    <string name="dashboard_general_stats">STATISTICHE GENERALI</string>
     <string name="dashboard_my_folders">LE MIE CARTELLE</string>
     <string name="dashboard_your_flow">IL TUO FLOW</string>
     <string name="stat_hours_watched">Ore Viste</string>
