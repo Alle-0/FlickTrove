@@ -114,21 +114,53 @@ object FlowStatsTab : Tab {
 
                     // Flow Persona
                     val persona = flowUiState.flowPersona
-                    if (persona != null) {
-                        FlowPersonaSection(persona = persona)
-                        Spacer(modifier = Modifier.height(32.dp))
-                    }
-                    
-                    // Top Vibes
-                    if (flowUiState.topVibes.isNotEmpty()) {
-                        TopVibesSection(vibes = flowUiState.topVibes)
-                        Spacer(modifier = Modifier.height(24.dp))
-                    }
-                    
-                    // Top MVPs
-                    if (flowUiState.topMvps.isNotEmpty()) {
-                        TopMvpsSection(mvps = flowUiState.topMvps)
-                        Spacer(modifier = Modifier.height(24.dp))
+                    if (persona == null && flowUiState.topVibes.isEmpty() && flowUiState.topMvps.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .padding(top = 100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_stat),
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = stringResource(R.string.flow_stats_empty_title),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(R.string.flow_stats_empty_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        if (persona != null) {
+                            FlowPersonaSection(persona = persona)
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
+                        
+                        // Top Vibes
+                        if (flowUiState.topVibes.isNotEmpty()) {
+                            TopVibesSection(vibes = flowUiState.topVibes)
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+                        
+                        // Top MVPs
+                        if (flowUiState.topMvps.isNotEmpty()) {
+                            TopMvpsSection(mvps = flowUiState.topMvps)
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
                     }
                 }
             }

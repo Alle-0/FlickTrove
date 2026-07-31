@@ -84,30 +84,62 @@ object FlowTab : Tab {
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
                     ) {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(
-                                top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 100.dp
-                            ),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(
-                                items = flowUiState.movies,
-                                key = { it.compositeId }
-                            ) { movie ->
-                                // Use Box to avoid clipping overlapping MVP card in the grid item
-                                Box(modifier = Modifier.animateItem(fadeInSpec = tween(300), placementSpec = tween(300), fadeOutSpec = tween(300))) {
-                                    FlowMovieCard(
-                                        movie = movie,
-                                        cardWidth = 160.dp,
-                                        hazeState = activeHazeState,
-                                        onPress = { selectedMovie ->
-                                            parentNavigator.push(MovieDetailScreen(selectedMovie.id, selectedMovie.mediaType))
-                                        }
+                        if (flowUiState.movies.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 24.dp)
+                                    .padding(top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp),
+                                contentAlignment = Alignment.TopCenter
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 80.dp)) {
+                                    Icon(
+                                        painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_sparkle),
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(48.dp)
                                     )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = stringResource(R.string.flow_empty_title),
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.flow_empty_desc),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color.White.copy(alpha = 0.6f),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                contentPadding = PaddingValues(
+                                    top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp,
+                                    bottom = paddingValues.calculateBottomPadding() + 100.dp
+                                ),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(
+                                    items = flowUiState.movies,
+                                    key = { it.compositeId }
+                                ) { movie ->
+                                    // Use Box to avoid clipping overlapping MVP card in the grid item
+                                    Box(modifier = Modifier.animateItem(fadeInSpec = tween(300), placementSpec = tween(300), fadeOutSpec = tween(300))) {
+                                        FlowMovieCard(
+                                            movie = movie,
+                                            cardWidth = 160.dp,
+                                            hazeState = activeHazeState,
+                                            onPress = { selectedMovie ->
+                                                parentNavigator.push(MovieDetailScreen(selectedMovie.id, selectedMovie.mediaType))
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }

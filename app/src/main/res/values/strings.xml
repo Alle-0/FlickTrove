@@ -1056,6 +1056,10 @@
     <string name="dashboard_general_stats">GENERAL STATS</string>
     <string name="dashboard_my_folders">MY FOLDERS</string>
     <string name="dashboard_your_flow">YOUR FLOW</string>
+    <string name="flow_empty_title">Your Flow is empty</string>
+    <string name="flow_empty_desc">Add more movies and TV shows to your Watched list to generate your personalized Flow.</string>
+    <string name="flow_stats_empty_title">No stats yet</string>
+    <string name="flow_stats_empty_desc">Keep watching and rating titles to see your Flow stats.</string>
     <string name="stat_hours_watched">Hours Watched</string>
     <string name="stat_completed_titles">Completed Titles</string>
     <string name="stat_avg_rating">Avg. Rating</string>
