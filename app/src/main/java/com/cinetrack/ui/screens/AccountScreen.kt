@@ -419,7 +419,7 @@ object AccountTab : Tab {
                             hazeState = backgroundHazeState,
                             onViewAllClick = { tabNavigator.current = FoldersTab },
                             onFolderClick = { folder -> 
-                                tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.description ?: "") 
+                                tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color) 
                             }
                         )
 
