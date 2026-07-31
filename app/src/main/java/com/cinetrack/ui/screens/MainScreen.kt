@@ -67,6 +67,9 @@ import com.cinetrack.ui.viewmodel.UndoViewModel
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.util.AppUpdateInfo
 import com.cinetrack.util.toComposeColor
+import com.cinetrack.ui.screens.StatsTab
+import com.cinetrack.ui.screens.FlowTab
+import com.cinetrack.ui.screens.FlowStatsTab
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
@@ -149,6 +152,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     scope.launch { drawerState.close() }
                 } else if (currentTab is FolderDetailTab) {
                     tabNavigator.current = FoldersTab
+                } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) {
+                    tabNavigator.current = AccountTab
                 } else {
                     showExitConfirmation = true
                 }
@@ -180,7 +185,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             is VistiTab -> "visti"
                             is RecommendationsTab -> "recommendations"
                             is FoldersTab -> "my_folders"
-                            is StatsTab -> "stats"
+                            is AccountTab -> "account"
                             is SettingsTab -> "settings"
                             is NewsTab -> "news"
                             else -> null
@@ -193,7 +198,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     "my_folders" -> tabNavigator.current = FoldersTab
                                     "recommendations" -> tabNavigator.current = RecommendationsTab
                                     "settings" -> tabNavigator.current = SettingsTab
-                                    "stats" -> tabNavigator.current = StatsTab
+                                    "account" -> tabNavigator.current = AccountTab
                                     "visti" -> tabNavigator.current = VistiTab
                                     "popular_movies", "now_playing_movies", "upcoming_movies", "popular_tv", "airing_today_tv", "on_the_air_tv" -> {
                                         DiscoverTab.requestedType = routeStr
@@ -230,11 +235,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is VistiTab -> stringResource(R.string.main_tab_visti)
                                 is DiscoverTab -> stringResource(R.string.main_tab_discover)
                                 is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
-                                is StatsTab -> stringResource(R.string.main_tab_stats)
+                                is AccountTab -> stringResource(R.string.bottom_bar_account)
                                 is FoldersTab -> stringResource(R.string.main_tab_folders)
+                                is StatsTab -> stringResource(R.string.bottom_bar_stats)
                                 is SettingsTab -> stringResource(R.string.main_tab_settings)
                                 is NewsTab -> stringResource(R.string.news_tab_title)
                                 is FolderDetailTab -> currentTab.folderName
+                                is FlowTab -> "FLOW"
+                                is FlowStatsTab -> "FLOW STATS"
                                 else -> stringResource(R.string.app_name)
                             }
 
@@ -268,10 +276,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     isDimmed = isSettingsDialogOpen,
                                     onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                     onMenuClick = { scope.launch { drawerState.open() } },
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else null,
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) { { tabNavigator.current = AccountTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                                    onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is StatsTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                                    onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
                                     hasActiveFilters = discoverHasActiveFilters,
@@ -292,7 +300,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     when (routeStr) {
                                         "index" -> tabNavigator.current = HomeTab
                                         "visti" -> tabNavigator.current = VistiTab
-                                        "stats" -> tabNavigator.current = StatsTab
+                                        "account" -> tabNavigator.current = AccountTab
                                     }
                                 }
                             )

@@ -29,7 +29,7 @@ object MovieMapper {
             response.releaseDate
         }
 
-        val topCast = response.credits?.cast?.take(15)?.distinctBy { it.id }?.map { 
+        val topCast = response.credits?.cast?.distinctBy { it.id }?.map { 
             com.cinetrack.data.model.PersonData(id = it.id, name = it.name, profilePath = it.profilePath) 
         }
 

@@ -23,6 +23,9 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete'")
     fun getAllFlow(): Flow<List<Movie>>
 
+    @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete' AND ((emotional_vibes IS NOT NULL AND emotional_vibes != '' AND emotional_vibes != '[]') OR favorite_actor_id IS NOT NULL)")
+    fun getFlowMoviesFlow(): Flow<List<Movie>>
+
     @Query(
         "SELECT * FROM favorites " +
         "WHERE sync_status != 'pending_delete' " +

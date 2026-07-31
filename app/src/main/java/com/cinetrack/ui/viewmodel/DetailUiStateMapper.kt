@@ -71,6 +71,7 @@ class DetailUiStateMapper @Inject constructor(
             it.favoriteActorId = movie.favoriteActorId
             it.favoriteActorName = movie.favoriteActorName
             it.favoriteActorProfilePath = movie.favoriteActorProfilePath
+            it.favoriteActorCharacter = movie.favoriteActorCharacter
         } ?: freshMovie
         var effectiveWatchedEpisodes = effectiveMovie.watchedEpisodes
         val totalEpisodes = effectiveMovie.effectiveTotalEpisodes
@@ -153,7 +154,7 @@ class DetailUiStateMapper @Inject constructor(
             watchedProgress = progress,
             matchPercentage = matchScore,
             directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
-            cast = (metadata.credits?.cast?.take(15)?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
+            cast = (metadata.credits?.cast?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
             streamingProviders = (metadata.watchProviders?.results?.get(watchRegion)?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
             buyRentProviders = ((metadata.watchProviders?.results?.get(watchRegion)?.buy ?: emptyList()) + 
                                (metadata.watchProviders?.results?.get(watchRegion)?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),

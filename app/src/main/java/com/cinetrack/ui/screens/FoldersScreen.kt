@@ -146,7 +146,6 @@ fun FoldersScreenContent(
                 .fillMaxSize()
                 .haze(state = activeHazeState)
         ) {
-            // --- FOREGROUND LAYER (SHARP CONTENT) ---
             if (folders.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -190,7 +189,7 @@ fun FoldersScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
+                        top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp,
                         bottom = paddingValues.calculateBottomPadding() + 32.dp
                     ),
                     modifier = Modifier.fillMaxSize(),

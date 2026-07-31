@@ -99,7 +99,7 @@ data class FolderDetailTab(
             },
             onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onBack = { 
-                // We'll handle this back navigation by resetting the tab in MainScreen or via BackHandler here
+                navigator.pop()
             }
         )
     }
@@ -392,12 +392,12 @@ fun FolderDetailScreenContent(
                                 .padding(horizontal = 24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
+                              val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
                             
                             Box(
                                 modifier = Modifier
                                     .wrapContentSize()
-                                    .padding(end = rightControlsInset),
+                                    .padding(end = rightControlsInset, start = 44.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {

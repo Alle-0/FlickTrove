@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
@@ -38,6 +39,19 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import com.cinetrack.ui.components.card.PersonCard
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import com.cinetrack.ui.components.shared.FlickTroveBottomSheet
+import com.cinetrack.ui.utils.blockBottomSheetVerticalDrag
+import com.cinetrack.ui.utils.rememberBottomSheetNestedScrollConnection
+import com.cinetrack.ui.utils.verticalFadingEdges
+import dev.chrisbanes.haze.HazeState
 
 /**
  * DetailCast
@@ -50,12 +64,21 @@ fun DetailCast(
     directors: List<CrewMember>,
     cast: List<CastMember>,
     accentColor: Color,
+    hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     onPersonClick: (Long, String?) -> Unit,
+    onSheetStateChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (directors.isEmpty() && cast.isEmpty()) return
+
+    var showAllDirectors by remember { mutableStateOf(false) }
+    var showAllCast by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showAllDirectors, showAllCast) {
+        onSheetStateChange(showAllDirectors || showAllCast)
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         // REGIA SECTION
@@ -68,22 +91,39 @@ fun DetailCast(
                 }
             }
 
-            Text(
-                text = stringResource(R.string.detail_director),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 3.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { showAllDirectors = true }
+                    .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.detail_director),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 3.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_right),
+                    contentDescription = "See All",
+                    tint = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
 
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
-                items(groupedDirectors, key = { "dir-${it.id}" }, contentType = { "person" }) { person ->
+                items(groupedDirectors.take(15), key = { "dir-${it.id}" }, contentType = { "person" }) { person ->
                     PersonCard(
                         id = person.id,
                         name = person.name,
@@ -109,22 +149,39 @@ fun DetailCast(
                 }
             }
 
-            Text(
-                text = stringResource(R.string.detail_cast),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 3.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { showAllCast = true }
+                    .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.detail_cast),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 3.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_right),
+                    contentDescription = "See All",
+                    tint = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
 
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
-                items(groupedCast, key = { "cast-${it.id}" }, contentType = { "person" }) { person ->
+                items(groupedCast.take(15), key = { "cast-${it.id}" }, contentType = { "person" }) { person ->
                     PersonCard(
                         id = person.id,
                         name = person.name,
@@ -134,6 +191,107 @@ fun DetailCast(
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         onClick = { onPersonClick(person.id, person.profilePath) }
+                    )
+                }
+            }
+        }
+        }
+    
+
+    if (showAllDirectors && directors.isNotEmpty()) {
+        val groupedDirectors = directors.groupBy { it.id }.map { (_, members) ->
+            val first = members.first()
+            val combinedJobs = members.map { it.job }.distinct().joinToString(" / ")
+            BottomSheetPerson(first.id, first.name, combinedJobs, first.profilePath)
+        }
+        PeopleBottomSheet(
+            title = stringResource(R.string.detail_director),
+            people = groupedDirectors,
+            accentColor = accentColor,
+            hazeState = hazeState,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            onDismiss = { showAllDirectors = false },
+            onPersonClick = onPersonClick
+        )
+    }
+
+    if (showAllCast && cast.isNotEmpty()) {
+        val groupedCast = cast.groupBy { it.id }.map { (_, members) ->
+            val first = members.first()
+            val combinedCharacters = members.mapNotNull { it.character }.distinct().filter { it.isNotBlank() }.joinToString(" / ")
+            BottomSheetPerson(first.id, first.name, combinedCharacters.ifBlank { "-" }, first.profilePath)
+        }
+        PeopleBottomSheet(
+            title = stringResource(R.string.detail_cast),
+            people = groupedCast,
+            accentColor = accentColor,
+            hazeState = hazeState,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            onDismiss = { showAllCast = false },
+            onPersonClick = onPersonClick
+        )
+    }
+}
+
+data class BottomSheetPerson(val id: Long, val name: String, val subLabel: String, val profilePath: String?)
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@Composable
+fun PeopleBottomSheet(
+    title: String,
+    people: List<BottomSheetPerson>,
+    accentColor: Color,
+    hazeState: HazeState? = null,
+    sharedTransitionScope: SharedTransitionScope?,
+    animatedVisibilityScope: AnimatedVisibilityScope?,
+    onDismiss: () -> Unit,
+    onPersonClick: (Long, String?) -> Unit
+) {
+    FlickTroveBottomSheet(onDismissRequest = onDismiss, hazeState = hazeState) {
+        val nestedScrollConnection = rememberBottomSheetNestedScrollConnection()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(top = 16.dp, bottom = 48.dp)
+        ) {
+            Box(modifier = Modifier.fillMaxWidth().blockBottomSheetVerticalDrag()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            }
+
+            val gridState = rememberLazyGridState()
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Fixed(4),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 500.dp)
+                    .nestedScroll(nestedScrollConnection)
+                    .verticalFadingEdges(gridState, 32.dp, 32.dp)
+            ) {
+                items(people, key = { it.id }) { person ->
+                    PersonCard(
+                        id = person.id,
+                        name = person.name,
+                        subLabel = person.subLabel,
+                        imagePath = person.profilePath,
+                        accentColor = accentColor,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        showSubLabelContainer = false,
+                        onClick = { 
+                            onDismiss()
+                            onPersonClick(person.id, person.profilePath) 
+                        }
                     )
                 }
             }

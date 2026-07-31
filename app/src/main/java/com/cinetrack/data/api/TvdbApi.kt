@@ -21,5 +21,20 @@ interface TvdbApi {
     suspend fun getMovieExtended(@Path("id") id: String): TvdbExtendedResponse
 
     @GET("v4/series/{id}/extended")
-    suspend fun getSeriesExtended(@Path("id") id: String): TvdbExtendedResponse
+    suspend fun getSeriesExtended(
+        @Path("id") id: String,
+        @Query("meta") meta: String? = null
+    ): TvdbExtendedResponse
+
+    @GET("v4/series/{id}/episodes/default")
+    suspend fun getSeriesEpisodes(
+        @Path("id") id: String,
+        @Query("page") page: Int = 0
+    ): TvdbEpisodesResponse
+
+    @GET("v4/series/{id}/episodes/absolute")
+    suspend fun getSeriesEpisodesAbsolute(
+        @Path("id") id: String,
+        @Query("page") page: Int = 0
+    ): TvdbEpisodesResponse
 }

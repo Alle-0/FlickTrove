@@ -57,13 +57,19 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.geometry.Offset
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
+import com.cinetrack.ui.LocalHazeState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -137,23 +143,21 @@ object StatsTab : Tab {
             getViewModel<StatsViewModel>()
         }
         val paddingValues = LocalAppPadding.current
-        val hazeState = com.cinetrack.ui.LocalHazeState.current
+        val hazeState = LocalHazeState.current
+        val tabNavigator = LocalTabNavigator.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
         var isYearPickerVisible by remember { mutableStateOf(false) }
-        val yearPickerButtonBounds = remember { arrayOf<androidx.compose.ui.geometry.Rect?>(null) }
+        var yearPickerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
         val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
-        val activeHazeState = hazeState ?: remember { HazeState() }
-        val scrollState = viewModel.scrollState
 
         StatsScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
-            hazeState = activeHazeState,
-            scrollState = scrollState,
+            hazeState = hazeState,
             onToggleYearPicker = { visible, bounds ->
                 isYearPickerVisible = visible
-                yearPickerButtonBounds[0] = bounds
+                yearPickerButtonBounds = bounds
             },
             onPersonClick = { personId, profilePath ->
                 navigator.push(PersonDetailScreen(personId, profilePath))
@@ -168,8 +172,8 @@ object StatsTab : Tab {
             onDismiss = { isYearPickerVisible = false },
             currentRange = statsUiState.timeRange,
             availableYears = statsUiState.availableYears,
-            hazeState = activeHazeState,
-            triggerBounds = yearPickerButtonBounds[0],
+            hazeState = hazeState ?: remember { dev.chrisbanes.haze.HazeState() },
+            triggerBounds = yearPickerButtonBounds,
             onYearSelected = { year ->
                 viewModel.setTimeRange(TimeRange.Year(year))
                 isYearPickerVisible = false
@@ -254,16 +258,20 @@ fun StatsScreenContent(
                                             .fillMaxWidth()
                                             .padding(horizontal = 24.dp, vertical = 20.dp)
                                     ) {
-                                        Text(
-                                            text = when (val range = uiState.timeRange) {
-                                                is TimeRange.AllTime -> stringResource(R.string.stats_all_time)
-                                                is TimeRange.Year -> stringResource(R.string.stats_year_prefix, range.year)
-                                            },
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White,
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.align(Alignment.CenterStart)
-                                        )
+                                        ) {
+                                            Text(
+                                                text = when (val range = uiState.timeRange) {
+                                                    is TimeRange.AllTime -> stringResource(R.string.stats_all_time)
+                                                    is TimeRange.Year -> stringResource(R.string.stats_year_prefix, range.year)
+                                                },
+                                                style = MaterialTheme.typography.headlineSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
 
                                         // YearSelectionButton (Glassy Filter button style)
                                         YearSelectionButton(

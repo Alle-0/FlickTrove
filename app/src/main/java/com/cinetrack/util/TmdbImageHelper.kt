@@ -22,6 +22,7 @@ val LocalImageQuality = compositionLocalOf { ImageQuality.MEDIUM }
  */
 fun buildTmdbImageUrl(path: String?, type: ImageType, quality: ImageQuality): String? {
     if (path.isNullOrBlank()) return null
+    if (path.startsWith("http")) return path
 
     val size = when (type) {
         ImageType.POSTER -> when (quality) {

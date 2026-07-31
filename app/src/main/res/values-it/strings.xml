@@ -32,7 +32,7 @@
     <string name="main_tab_discover">Scopri</string>
     <string name="main_tab_recommendations">Consigliati per te</string>
     <string name="main_tab_stats">Statistiche</string>
-    <string name="main_tab_folders">Le mie cartelle</string>
+    <string name="main_tab_folders">LE MIE CARTELLE</string>
     <string name="main_tab_settings">Impostazioni</string>
     <string name="main_cd_search">Cerca</string>
     <string name="main_folder_rename">Rinomina Cartella</string>
@@ -1000,4 +1000,61 @@
     <string name="checkin_vibe_action">Gasato</string>
     <string name="settings_support_flicktrove">Supporta FlickTrove</string>
     <string name="settings_support_dev_desc">Supporta lo sviluppo e mantieni l\'app senza pubblicità!</string>
+    <string name="account_change_name_title">Cambia Nome</string>
+    <string name="account_name_changes_left">Hai ancora %d cambi di nome.</string>
+    <string name="account_new_name_label">Nuovo Nome</string>
+    <string name="account_save">Salva</string>
+    <string name="account_error_name_short">Il nome deve avere almeno 3 caratteri.</string>
+    <string name="account_error_name_profanity">Nome non valido.</string>
+    <string name="account_error_name_taken">Nome già in uso.</string>
+    <string name="account_error_checking_name">Errore nel controllo del nome.</string>
+    <string name="general_stats">STATISTICHE GENERALI</string>
+
+    <!-- Flow Persona Strings -->
+    <string name="your_flow_persona">LA TUA FLOW PERSONA</string>
+    <string name="flow_top_vibes">TOP VIBES</string>
+    <string name="flow_top_mvps">TOP MVPS</string>
+
+    <string name="persona_title_connoisseur">L\'Intenditore</string>
+    <string name="persona_desc_connoisseur">Cerchi solo il cinema di altissima qualità. Solo il meglio per il tuo Flow.</string>
+
+    <string name="persona_title_philosopher">Il Filosofo</string>
+    <string name="persona_desc_philosopher">Ami i film che stravolgono la realtà e ti fanno riflettere per giorni.</string>
+
+    <string name="persona_title_empath">L\'Empatico</string>
+    <string name="persona_desc_empath">Vivi ogni emozione profondamente. Il tuo Flow è un oceano di sentimenti.</string>
+
+    <string name="persona_title_adrenaline_junkie">L\'Adrenalinico</string>
+    <string name="persona_desc_adrenaline_junkie">Azione, velocità ed esplosioni. Il tuo Flow va a pura adrenalina.</string>
+
+    <string name="persona_title_comfort_seeker">L\'Amante del Relax</string>
+    <string name="persona_desc_comfort_seeker">Coperte, tè e film rassicuranti. Il tuo Flow è il tuo rifugio sicuro.</string>
+
+    <string name="persona_title_optimist">L\'Ottimista</string>
+    <string name="persona_desc_optimist">Guardi sempre il lato positivo. Il tuo Flow è pieno di gioia e calore.</string>
+
+    <string name="persona_title_jokester">L\'Animatore</string>
+    <string name="persona_desc_jokester">Sei qui per farti una bella risata. La commedia è il cuore del tuo Flow.</string>
+
+    <string name="persona_title_explorer">L\'Esploratore</string>
+    <string name="persona_desc_explorer">Più è strano, meglio è. Ti avventuri negli angoli più bizzarri del cinema.</string>
+
+    <string name="persona_title_thrill_seeker">L\'Amante del Brivido</string>
+    <string name="persona_desc_thrill_seeker">Adori la suspense e i salti sulla sedia. La paura è la tua benzina.</string>
+
+    <string name="persona_title_critic">Il Critico</string>
+    <string name="persona_desc_critic">Sei difficile da impressionare. Esigi la perfezione e nient\'altro.</string>
+
+    <string name="persona_title_wanderer">Il Viaggiatore</string>
+    <string name="persona_desc_wanderer">Il tuo Flow è vario e imprevedibile. Vai dove ti porta il vento.</string>
+    <string name="dashboard_my_folders">LE MIE CARTELLE</string>
+    <string name="dashboard_your_flow">IL TUO FLOW</string>
+    <string name="stat_hours_watched">Ore Viste</string>
+    <string name="stat_completed_titles">Titoli Completati</string>
+    <string name="stat_avg_rating">Voto Medio</string>
+    <string name="stat_movies_vs_series">Film vs Serie</string>
+    <string name="dashboard_no_folders_yet">Non hai ancora creato nessuna cartella.</string>
+    <string name="dashboard_your_flow_desc">Il tuo mix curato di scoperte e suggerimenti</string>
+    <string name="auth_guest_prompt_title">Account Richiesto</string>
+    <string name="auth_guest_prompt_desc">Devi creare un account per personalizzare il tuo profilo e avatar.</string>
 </resources>

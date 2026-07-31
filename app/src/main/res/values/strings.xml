@@ -32,7 +32,7 @@
     <string name="main_tab_discover">Discover</string>
     <string name="main_tab_recommendations">Recommended for you</string>
     <string name="main_tab_stats">Statistics</string>
-    <string name="main_tab_folders">My folders</string>
+    <string name="main_tab_folders">MY FOLDERS</string>
     <string name="main_tab_settings">Settings</string>
     <string name="main_cd_search">Search</string>
     <string name="main_folder_rename">Rename Folder</string>
@@ -281,7 +281,7 @@
     <string name="settings_dialog_wipe_local_data_title">Wipe Local Data</string>
     <string name="settings_dialog_wipe_local_data_desc">Are you sure you want to clear your local database? Your cloud data will not be affected and will be re-downloaded.</string>
     <string name="settings_yes_wipe_local">Wipe Local Data</string>
-    
+
     <string name="settings_wipe_total_data_title">Wipe Cloud Data</string>
     <string name="settings_wipe_total_data_desc">Delete all your data from both device and cloud</string>
     <string name="settings_dialog_wipe_total_data_title">Wipe All Data</string>
@@ -847,6 +847,7 @@
     <string name="bottom_bar_to_watch">TO WATCH</string>
     <string name="bottom_bar_watched">WATCHED</string>
     <string name="bottom_bar_stats">STATS</string>
+    <string name="bottom_bar_account">ACCOUNT</string>
 
     <!-- Technical Info -->
     <string name="detail_tech_release_date">RELEASE DATE</string>
@@ -989,7 +990,7 @@
     <string name="checkin_next">Next</string>
     <string name="checkin_no_cast">No cast available</string>
     <string name="checkin_vibe_tab">Vibe</string>
-    
+
     <string name="checkin_vibe_masterpiece">Masterpiece</string>
     <string name="checkin_vibe_mind_blowing">Mind-Blowing</string>
     <string name="checkin_vibe_in_tears">In Tears</string>
@@ -1004,4 +1005,62 @@
     <string name="checkin_vibe_action">Hyped</string>
     <string name="settings_support_flicktrove">Support FlickTrove</string>
     <string name="settings_support_dev_desc">Support development and keep the app ad-free!</string>
+    <string name="account_change_name_title">Change Name</string>
+    <string name="account_name_changes_left">You have %d name changes left.</string>
+    <string name="account_new_name_label">New Name</string>
+    <string name="account_save">Save</string>
+    <string name="account_error_name_short">Name must be at least 3 characters.</string>
+    <string name="account_error_name_profanity">Invalid name.</string>
+    <string name="account_error_name_taken">Name already taken.</string>
+    <string name="account_error_checking_name">Error checking name.</string>
+    <string name="account_remove_avatar">Remove Avatar</string>
+    <string name="general_stats">GENERAL STATS</string>
+    
+    <!-- Flow Persona Strings -->
+    <string name="your_flow_persona">YOUR FLOW PERSONA</string>
+    <string name="flow_top_vibes">TOP VIBES</string>
+    <string name="flow_top_mvps">TOP MVPS</string>
+
+    <string name="persona_title_connoisseur">The Connoisseur</string>
+    <string name="persona_desc_connoisseur">You seek out the highest quality cinema. Only the best for your Flow.</string>
+
+    <string name="persona_title_philosopher">The Philosopher</string>
+    <string name="persona_desc_philosopher">You love films that twist your reality and keep you thinking for days.</string>
+
+    <string name="persona_title_empath">The Empath</string>
+    <string name="persona_desc_empath">You feel everything deeply. Your Flow is an ocean of emotions.</string>
+
+    <string name="persona_title_adrenaline_junkie">The Adrenaline Junkie</string>
+    <string name="persona_desc_adrenaline_junkie">Action, speed, and explosions. Your Flow runs on pure adrenaline.</string>
+
+    <string name="persona_title_comfort_seeker">The Comfort Seeker</string>
+    <string name="persona_desc_comfort_seeker">Blankets, tea, and feel-good movies. Your Flow is your safe space.</string>
+
+    <string name="persona_title_optimist">The Optimist</string>
+    <string name="persona_desc_optimist">You look for the bright side. Your Flow is filled with joy and warmth.</string>
+
+    <string name="persona_title_jokester">The Jokester</string>
+    <string name="persona_desc_jokester">You\'re here for a good laugh. Comedy is the heartbeat of your Flow.</string>
+
+    <string name="persona_title_explorer">The Explorer</string>
+    <string name="persona_desc_explorer">The stranger, the better. You venture into the bizarre corners of cinema.</string>
+
+    <string name="persona_title_thrill_seeker">The Thrill Seeker</string>
+    <string name="persona_desc_thrill_seeker">You love the suspense and the jump scares. Fear is just fuel.</string>
+
+    <string name="persona_title_critic">The Critic</string>
+    <string name="persona_desc_critic">You are hard to impress. You demand perfection and nothing less.</string>
+
+    <string name="persona_title_wanderer">The Wanderer</string>
+    <string name="persona_desc_wanderer">Your Flow is diverse and unpredictable. You go where the wind takes you.</string>
+    <string name="dashboard_my_folders">MY FOLDERS</string>
+    <string name="dashboard_your_flow">YOUR FLOW</string>
+    <string name="stat_hours_watched">Hours Watched</string>
+    <string name="stat_completed_titles">Completed Titles</string>
+    <string name="stat_avg_rating">Avg. Rating</string>
+    <string name="stat_movies_vs_series">Movies vs Series</string>
+    <string name="dashboard_no_folders_yet">You haven\'t created any folders yet.</string>
+    <string name="dashboard_your_flow_desc">Your curated mix of discoveries and suggestions</string>
+    <string name="auth_guest_prompt_title">Account Required</string>
+    <string name="auth_guest_prompt_desc">You need to create an account to personalize your profile and avatar.</string>
 </resources>

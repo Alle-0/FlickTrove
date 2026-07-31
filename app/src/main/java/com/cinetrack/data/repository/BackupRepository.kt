@@ -9,8 +9,11 @@ import com.cinetrack.data.repository.importers.TraktJsonImporter
 import com.cinetrack.data.repository.importers.TraktZipImporter
 import com.cinetrack.data.repository.importers.TvTimeGdprImporter
 import com.cinetrack.data.repository.importers.UniversalCsvImporter
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -28,8 +31,11 @@ class BackupRepository @Inject constructor(
     private val traktJsonImporter: TraktJsonImporter,
     private val traktZipImporter: TraktZipImporter,
     private val universalCsvImporter: UniversalCsvImporter,
-    private val tvTimeGdprImporter: TvTimeGdprImporter
+    private val tvTimeGdprImporter: TvTimeGdprImporter,
+    private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
 ) {
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val json = Json { 
         ignoreUnknownKeys = true 
         encodeDefaults = true
@@ -310,6 +316,20 @@ class BackupRepository @Inject constructor(
             val local = favoriteDao.getById(incoming.id, incoming.mediaType ?: "movie")
             if (local == null) {
                 favoriteDao.insert(incoming)
+                val newRating = incoming.personalRating
+                if (newRating != null && newRating > 0.0) {
+                    repositoryScope.launch {
+                        firebaseRemoteDataSource.updateGlobalMovieStats(
+                            compositeId = incoming.compositeId,
+                            addedVibes = emptyList(),
+                            removedVibes = emptyList(),
+                            newMvp = null,
+                            oldMvp = null,
+                            newRating = newRating,
+                            oldRating = null
+                        )
+                    }
+                }
             } else {
                 val combinedEps = mutableMapOf<String, MutableSet<Int>>()
                 local.watchedEpisodes?.forEach { (s, eps) -> combinedEps.getOrPut(s) { mutableSetOf() }.addAll(eps) }
@@ -347,6 +367,22 @@ class BackupRepository @Inject constructor(
                     syncStatus = if (local.syncStatus == "synced") "pending_update" else local.syncStatus
                 )
                 favoriteDao.insert(updated)
+                
+                val newRating = updated.personalRating
+                val oldRating = local.personalRating
+                if (newRating != oldRating) {
+                    repositoryScope.launch {
+                        firebaseRemoteDataSource.updateGlobalMovieStats(
+                            compositeId = updated.compositeId,
+                            addedVibes = emptyList(),
+                            removedVibes = emptyList(),
+                            newMvp = null,
+                            oldMvp = null,
+                            newRating = newRating,
+                            oldRating = oldRating
+                        )
+                    }
+                }
             }
         }
 

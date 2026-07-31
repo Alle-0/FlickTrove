@@ -339,7 +339,13 @@ data class Movie(
     @get:PropertyName("favorite_actor_profile_path")
     @set:PropertyName("favorite_actor_profile_path")
     @ColumnInfo(name = "favorite_actor_profile_path")
-    var favoriteActorProfilePath: String? = null
+    var favoriteActorProfilePath: String? = null,
+
+    @Transient
+    @get:PropertyName("favorite_actor_character")
+    @set:PropertyName("favorite_actor_character")
+    @ColumnInfo(name = "favorite_actor_character")
+    var favoriteActorCharacter: String? = null
 ) {
     // --- Computed Properties ---
 

@@ -365,7 +365,7 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.ToggleFolderMembership -> toggleFolderMembership(event.folder)
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
-            is DetailEvent.SaveCheckIn -> saveCheckIn(event.vibes, event.mvpActor)
+            is DetailEvent.SaveCheckIn -> saveCheckIn(event.vibes, event.mvpActor, event.characterImageUrl)
         }
     }
 
@@ -384,7 +384,7 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun saveCheckIn(vibes: List<String>, mvpActor: com.cinetrack.data.api.CastMember?) {
+    private fun saveCheckIn(vibes: List<String>, mvpActor: com.cinetrack.data.api.CastMember?, characterImageUrl: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             val local = repository.getMovie(movieId, mediaType)
             val current = local ?: (uiState.value as? DetailUiState.Success)?.movieEntry ?: return@launch
@@ -392,7 +392,8 @@ class MovieDetailViewModel @Inject constructor(
             current.emotionalVibes = if (vibes.isEmpty()) null else vibes.joinToString(",")
             current.favoriteActorId = mvpActor?.id
             current.favoriteActorName = mvpActor?.name
-            current.favoriteActorProfilePath = mvpActor?.profilePath
+            current.favoriteActorProfilePath = characterImageUrl ?: mvpActor?.profilePath
+            current.favoriteActorCharacter = mvpActor?.character
             
             repository.saveMovie(current)
         }

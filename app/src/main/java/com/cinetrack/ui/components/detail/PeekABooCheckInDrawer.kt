@@ -12,6 +12,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -106,7 +108,7 @@ fun PeekABooCheckInDrawer(
     characterImages: Map<String, String> = emptyMap(),
     accentColor: Color,
     hazeState: HazeState,
-    onSave: (vibes: List<String>, mvp: CastMember?) -> Unit,
+    onSave: (vibes: List<String>, mvp: CastMember?, characterImageUrl: String?) -> Unit,
     onDismiss: () -> Unit,
     peekTimeoutMs: Long = 6000L,
     modifier: Modifier = Modifier
@@ -170,34 +172,32 @@ fun PeekABooCheckInDrawer(
     }
 
     val boxModifier = if (isExpanded) {
-        modifier.fillMaxSize().pointerInput(Unit) {
-            detectTapGestures(onTap = { dismissAll() })
-        }
+        modifier.fillMaxSize()
+            .zIndex(100f)
+            .background(Color.Black.copy(alpha = 0.5f))
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { dismissAll() })
+            }
     } else {
         modifier.fillMaxSize()
     }
 
-    Box(modifier = boxModifier) {
+    Box(modifier = boxModifier, contentAlignment = if (isExpanded) Alignment.Center else Alignment.TopStart) {
 
-        // ── EXPANDED PANEL ──────────────────────────────────────────────
+        // ── EXPANDED MODAL PANEL ──────────────────────────────────────────────
         AnimatedVisibility(
             visible = isExpanded,
-            enter = slideInHorizontally(
-                animationSpec = tween(300, easing = FastOutSlowInEasing),
-                initialOffsetX = { it }
-            ) + fadeIn(tween(200)),
-            exit = slideOutHorizontally(
-                animationSpec = tween(250, easing = FastOutLinearInEasing),
-                targetOffsetX = { it }
-            ) + fadeOut(tween(150)),
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(150)),
             modifier = Modifier
-                .align(Alignment.CenterEnd)
+                .align(Alignment.Center)
                 .zIndex(10f)
         ) {
             Box(
                 modifier = Modifier
-                    .width(320.dp)
+                    .width(340.dp)
                     .wrapContentHeight()
+                    .clip(RoundedCornerShape(20.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -210,7 +210,7 @@ fun PeekABooCheckInDrawer(
                         .matchParentSize()
                         .hazeGlass(
                             state = hazeState,
-                            shape = RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp),
+                            shape = RoundedCornerShape(20.dp),
                             containerColor = Color(0xFF080B14),
                             useOffscreenStrategy = true,
                             borderColor = accentColor.copy(alpha = 0.5f)
@@ -229,13 +229,21 @@ fun PeekABooCheckInDrawer(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = stringResource(R.string.checkin_how_did_it_make_you_feel),
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Black),
-                                color = Color.White,
-                                lineHeight = 16.sp,
+                            AnimatedContent(
+                                targetState = currentPage,
+                                label = "TitleAnimation",
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
+                                },
                                 modifier = Modifier.weight(1f)
-                            )
+                            ) { page ->
+                                Text(
+                                    text = if (page == 0) stringResource(R.string.checkin_how_did_it_make_you_feel) else stringResource(R.string.checkin_mvp_actor),
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Black),
+                                    color = Color.White,
+                                    lineHeight = 16.sp
+                                )
+                            }
                             // Close button
                             Box(
                                 modifier = Modifier
@@ -344,15 +352,6 @@ fun PeekABooCheckInDrawer(
                                 // Page 2: MVP Cast Section
                                 Column(modifier = Modifier.fillMaxWidth()) {
                                     if (cast.isNotEmpty()) {
-                                        Text(
-                                            text = stringResource(R.string.checkin_mvp_actor),
-                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                fontWeight = FontWeight.Black,
-                                                letterSpacing = 2.sp
-                                            ),
-                                            color = Color.White.copy(alpha = 0.9f)
-                                        )
-                                        Spacer(modifier = Modifier.height(10.dp))
 
                                         LazyVerticalGrid(
                                             columns = GridCells.Fixed(4),
@@ -379,7 +378,8 @@ fun PeekABooCheckInDrawer(
                                             items(cast.take(24), key = { it.id }) { actor ->
                                                 val isMvp = selectedMvp?.id == actor.id
                                                 val charName = actor.character?.lowercase()?.trim()
-                                                val charImageUrl = charName?.let { characterImages[it] }
+                                                val actorName = actor.name.lowercase().trim()
+                                                val charImageUrl = charName?.let { characterImages[it] } ?: characterImages[actorName]
                                                 CastMvpChip(
                                                     actor = actor,
                                                     isMvp = isMvp,
@@ -489,7 +489,12 @@ fun PeekABooCheckInDrawer(
                                         if (currentPage == 0) {
                                             currentPage = 1
                                         } else {
-                                            onSave(selectedVibes.map { it.code }, selectedMvp)
+                                            val finalCharImageUrl = selectedMvp?.let { mvp ->
+                                                val cName = mvp.character?.lowercase()?.trim()
+                                                val aName = mvp.name.lowercase().trim()
+                                                cName?.let { characterImages[it] } ?: characterImages[aName]
+                                            }
+                                            onSave(selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
                                             dismissAll()
                                         }
                                     },
@@ -663,7 +668,7 @@ private fun CastMvpChip(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(58.dp)
+            .width(64.dp)
             .scale(scale)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -675,13 +680,14 @@ private fun CastMvpChip(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
+                .width(64.dp)
+                .height(96.dp)
+                .clip(RoundedCornerShape(16.dp))
                 .background(Color.White.copy(alpha = 0.05f))
                 .border(
                     width = if (isMvp) 2.dp else 1.dp,
                     color = if (isMvp) mvpGold else Color.White.copy(alpha = 0.2f),
-                    shape = CircleShape
+                    shape = RoundedCornerShape(16.dp)
                 )
         ) {
             val initials = remember(actor.name) {
@@ -713,20 +719,21 @@ private fun CastMvpChip(
                     model = characterImageUrl,
                     contentDescription = actor.character,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
                 )
             } else if (!actor.profilePath.isNullOrBlank()) {
                 AsyncImage(
                     model = buildTmdbImageUrl(actor.profilePath, ImageType.PROFILE, ImageQuality.LOW),
                     contentDescription = actor.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
                 )
             }
         }
             if (isMvp) {
                 Box(
                     modifier = Modifier
+                        .padding(4.dp)
                         .size(18.dp)
                         .clip(CircleShape)
                         .background(mvpGold)

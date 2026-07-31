@@ -26,7 +26,7 @@ import com.cinetrack.data.local.entities.SearchHistoryEntity
         MovieDetailCacheEntity::class,
         SearchHistoryEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -97,14 +97,28 @@ abstract class FlickTroveDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                try { db.execSQL("ALTER TABLE favorites ADD COLUMN favorite_actor_character TEXT") } catch (e: Exception) { }
+            }
+        }
+
         fun getInstance(context: Context): FlickTroveDatabase {
             return instance ?: synchronized(this) {
+                try {
+                    val field = android.database.CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
+                    field.isAccessible = true
+                    field.set(null, 10 * 1024 * 1024) // 10MB
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
                 .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }

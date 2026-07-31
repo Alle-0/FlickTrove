@@ -139,8 +139,11 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         var searchInitialKeywordId by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<Long?>(null) }
         var searchInitialKeywordName by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var searchOverlaySourceScreenKey by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+        
+        val avatarSelectionState = remember { com.cinetrack.ui.components.account.AvatarSelectionState() }
 
         CompositionLocalProvider(
+            com.cinetrack.ui.components.account.LocalAvatarSelection provides avatarSelectionState,
             LocalMovieActions provides movieActionsManager,
             LocalVibrationEnabled provides vibrationEnabled,
             LocalDisabledBadges provides disabledBadges,
@@ -301,6 +304,19 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                         hazeState = globalHazeState,
                         modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)
                     )
+                    
+                    if (avatarSelectionState.isVisible) {
+                        Box(modifier = Modifier.fillMaxSize().zIndex(200000f)) {
+                            com.cinetrack.ui.components.account.AvatarSelectionModal(
+                                hazeState = globalHazeState,
+                                onDismissRequest = { avatarSelectionState.dismiss() },
+                                onCharacterSelected = { url, backdropUrl -> 
+                                    avatarSelectionState.onSelected?.invoke(url, backdropUrl)
+                                    avatarSelectionState.dismiss()
+                                }
+                            )
+                        }
+                    }
                 }
             }
             }

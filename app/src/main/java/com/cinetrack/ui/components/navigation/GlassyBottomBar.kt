@@ -109,12 +109,12 @@ fun GlassyBottomBar(
                 accentColor = accentColor
             )
             NavItem(
-                icon = ImageVector.vectorResource(id = R.drawable.ic_stat),
-                animatedIconRes = R.drawable.ic_stat_anim,
-                label = stringResource(R.string.bottom_bar_stats),
-                isSelected = selectedRoute == "stats",
+                icon = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                animatedIconRes = R.drawable.ic_persona_anim,
+                label = stringResource(R.string.bottom_bar_account),
+                isSelected = selectedRoute == "account",
                 enabled = !isDimmed,
-                onClick = { onNavigate("stats") },
+                onClick = { onNavigate("account") },
                 accentColor = accentColor
             )
         }

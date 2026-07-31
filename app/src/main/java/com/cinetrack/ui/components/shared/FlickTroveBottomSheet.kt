@@ -7,8 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
 import com.cinetrack.ui.components.glass.glassmorphic
+import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.HazeState
 
 /**
  * Base BottomSheet for FlickTrove that enforces glassmorphism and edge-to-edge behavior.
@@ -22,6 +27,7 @@ import com.cinetrack.ui.theme.HazeStyles
 fun FlickTroveBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    hazeState: HazeState? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -32,12 +38,7 @@ fun FlickTroveBottomSheet(
         sheetState = sheetState,
         containerColor = Color.Transparent,
         scrimColor = Color.Black.copy(alpha = 0.7f),
-        dragHandle = {
-            BottomSheetDefaults.DragHandle(
-                modifier = Modifier.padding(top = 12.dp),
-                color = Color.White.copy(alpha = 0.2f)
-            )
-        },
+        dragHandle = null,
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
     ) {
         androidx.compose.runtime.CompositionLocalProvider(
@@ -45,12 +46,13 @@ fun FlickTroveBottomSheet(
             androidx.compose.ui.platform.LocalConfiguration provides config
         ) {
             // The Surface below provides the glassmorphic background
+            val shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .glassmorphic(
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                    blurRadius = HazeStyles.GlassBlurRadius
+                .then(
+                    if (hazeState != null) Modifier.hazeGlass(state = hazeState, shape = shape)
+                    else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
                 ),
             color = Color.Transparent
         ) {
@@ -60,6 +62,21 @@ fun FlickTroveBottomSheet(
                     .navigationBarsPadding() // Safely handle system navigation
                     .padding(bottom = 24.dp) // Bottom spacing for aesthetics
             ) {
+                // Custom Drag Handle inside the surface
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, bottom = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 36.dp, height = 4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color.White.copy(alpha = 0.24f))
+                    )
+                }
+
                 content()
             }
             }

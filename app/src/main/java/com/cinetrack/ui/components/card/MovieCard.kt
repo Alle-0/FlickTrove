@@ -402,6 +402,7 @@ fun MovieCard(
     showFolderBookmarks: Boolean = true,
     showBadges: Boolean = true,
     showAdvancedBadges: Boolean = false,
+    showActionButton: Boolean = true,
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
     hasAnimatedSet: MutableSet<String>? = null,
@@ -598,10 +599,10 @@ fun MovieCard(
                     Text(
                         text = movie.title ?: movie.name ?: "",
                         color = Color.White.copy(alpha = 0.9f),
-                        fontSize = ((if (isLarge) 16 else 13) * multiplier).sp,
+                        fontSize = ((if (isLarge) 14.5f else 13f) * multiplier).sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
-                        lineHeight = ((if (isLarge) 19 else 16) * multiplier).sp,
+                        lineHeight = ((if (isLarge) 17.5f else 16f) * multiplier).sp,
                         overflow = TextOverflow.Ellipsis,
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
@@ -629,127 +630,130 @@ fun MovieCard(
 
                 val hintReminder = stringResource(R.string.card_hint_manage_reminder)
                 val hintEpisodes = stringResource(R.string.card_hint_manage_episodes)
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = if (isLarge) 12.dp else 8.dp, bottom = if (isLarge) 12.dp else 8.dp)
-                        .size(if (isLarge) 34.dp else 24.dp)
-                        .bounceClick(
-                            scaleDown = 0.85f,
-                            onLongClick = {}, // Block long press menu from opening
-                            vibrateOnLongClick = false,
-                            onPress = null
-                        ) {
-                            // Trigger ripple on the parent card from the button center on release
-                            val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
-                            val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
-                            rippleState.trigger(Offset(rippleX, rippleY))
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-
-                            val isReleased = movie.isReleased
-                            if (!isReleased) {
-                                if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                                else if (showActionHint) {
-                                    onMessage(hintReminder)
-                                }
-                            } else if (isTv) {
-                                if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                                else if (showActionHint) {
-                                    onMessage(hintEpisodes)
-                                }
-                            } else {
-                                // Normal behavior for released movies
-                                onAction(movie)
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
-                        if (progress > 0f) progress
-                        else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
-                            val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
-                            (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
-                        } else 0f
-                    }
-                    if (isTv && !isWatched && computedProgress > 0f) {
-                        MovieCircularProgress(progress = computedProgress)
-                    }
-
-                    val appAccent = MaterialTheme.colorScheme.primary
-                    val isReleased = movie.isReleased
-                    val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
-                    val isOcchio = isReleased && (isReminder || isFavorite)
-
-                    val actionBg = when {
-                        isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
-                        isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
-                        isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
-                        else -> HazeStyles.GlassColor.copy(alpha = 0.60f)
-                    }
-
-                    val actionBorder = when {
-                        isWatched -> appAccent
-                        isPromemoriaAttiva -> appAccent
-                        isOcchio -> HazeStyles.AccentYellow
-                        else -> HazeStyles.GlassBorderColor
-                    }.copy(alpha = 0.3f)
-
-                    val actionTint = when {
-                        isWatched -> appAccent
-                        isPromemoriaAttiva -> appAccent
-                        isOcchio -> HazeStyles.AccentYellow
-                        else -> Color.White
-                    }
-
+                
+                if (showActionButton) {
                     Box(
                         modifier = Modifier
-                            .size(if (isLarge) 30.dp else 22.dp)
-                            .background(color = actionBg, shape = CircleShape)
-                            .border(width = 1.dp, color = actionBorder, shape = CircleShape),
+                            .align(Alignment.BottomEnd)
+                            .padding(end = if (isLarge) 12.dp else 8.dp, bottom = if (isLarge) 12.dp else 8.dp)
+                            .size(if (isLarge) 34.dp else 24.dp)
+                            .bounceClick(
+                                scaleDown = 0.85f,
+                                onLongClick = {}, // Block long press menu from opening
+                                vibrateOnLongClick = false,
+                                onPress = null
+                            ) {
+                                // Trigger ripple on the parent card from the button center on release
+                                val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
+                                val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
+                                rippleState.trigger(Offset(rippleX, rippleY))
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+
+                                val isReleased = movie.isReleased
+                                if (!isReleased) {
+                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                    else if (showActionHint) {
+                                        onMessage(hintReminder)
+                                    }
+                                } else if (isTv) {
+                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                    else if (showActionHint) {
+                                        onMessage(hintEpisodes)
+                                    }
+                                } else {
+                                    // Normal behavior for released movies
+                                    onAction(movie)
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        val isBellOutlined = !isReleased && !(isReminder || isFavorite)
-                        
-                        val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
-                        var bellHasInitialized by remember { mutableStateOf(false) }
-                        
-                        LaunchedEffect(isReminder, isFavorite) {
-                            if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
-                                bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                                bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                            }
-                            bellHasInitialized = true
+                        val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
+                            if (progress > 0f) progress
+                            else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
+                                val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                                (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                            } else 0f
                         }
-                        
-                        val isTick = isWatched
-                        val isPlus = !isWatched && isReleased && !isOcchio
-                        val iconSizeModifier = Modifier.size(
-                            if (isLarge) {
-                                if (isTick) 13.dp else if (isPlus) 16.dp else if (isBellOutlined) 20.dp else 21.dp
-                            } else {
-                                if (isTick) 10.dp else if (isPlus) 12.dp else if (isBellOutlined) 15.5.dp else 17.dp
-                            }
-                        )
-                        
-                        Icon(
-                            imageVector = when {
-                                isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
-                                !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
-                                isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
-                                else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
-                            },
-                            contentDescription = "Action",
-                            tint = actionTint,
-                            modifier = iconSizeModifier.graphicsLayer {
-                                if (!isReleased && (isReminder || isFavorite)) {
-                                    rotationZ = bellRotation.value
-                                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
+                        if (isTv && !isWatched && computedProgress > 0f) {
+                            MovieCircularProgress(progress = computedProgress)
+                        }
+
+                        val appAccent = MaterialTheme.colorScheme.primary
+                        val isReleased = movie.isReleased
+                        val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
+                        val isOcchio = isReleased && (isReminder || isFavorite)
+
+                        val actionBg = when {
+                            isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
+                            isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
+                            isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
+                            else -> HazeStyles.GlassColor.copy(alpha = 0.60f)
+                        }
+
+                        val actionBorder = when {
+                            isWatched -> appAccent
+                            isPromemoriaAttiva -> appAccent
+                            isOcchio -> HazeStyles.AccentYellow
+                            else -> HazeStyles.GlassBorderColor
+                        }.copy(alpha = 0.3f)
+
+                        val actionTint = when {
+                            isWatched -> appAccent
+                            isPromemoriaAttiva -> appAccent
+                            isOcchio -> HazeStyles.AccentYellow
+                            else -> Color.White
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(if (isLarge) 30.dp else 22.dp)
+                                .background(color = actionBg, shape = CircleShape)
+                                .border(width = 1.dp, color = actionBorder, shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val isBellOutlined = !isReleased && !(isReminder || isFavorite)
+                            
+                            val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                            var bellHasInitialized by remember { mutableStateOf(false) }
+                            
+                            LaunchedEffect(isReminder, isFavorite) {
+                                if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
+                                    bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                                    bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                                    bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
                                 }
+                                bellHasInitialized = true
                             }
-                        )
+                            
+                            val isTick = isWatched
+                            val isPlus = !isWatched && isReleased && !isOcchio
+                            val iconSizeModifier = Modifier.size(
+                                if (isLarge) {
+                                    if (isTick) 13.dp else if (isPlus) 16.dp else if (isBellOutlined) 20.dp else 21.dp
+                                } else {
+                                    if (isTick) 10.dp else if (isPlus) 12.dp else if (isBellOutlined) 15.5.dp else 17.dp
+                                }
+                            )
+                            
+                            Icon(
+                                imageVector = when {
+                                    isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
+                                    !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
+                                    isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
+                                    else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
+                                },
+                                contentDescription = "Action",
+                                tint = actionTint,
+                                modifier = iconSizeModifier.graphicsLayer {
+                                    if (!isReleased && (isReminder || isFavorite)) {
+                                        rotationZ = bellRotation.value
+                                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }

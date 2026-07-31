@@ -20,7 +20,10 @@ class EmailValidatorUseCase @Inject constructor() {
         // Bestemmie e imprecazioni
         "porcodio", "diocane", "diocan", "porcamadonna", "dioporco", "diomerda",
         "canedio", "diocristo", "cristodio", "madonnaputtana", "madonnacagna",
-        "mortacci"
+        "mortacci",
+        // Inglese e altro
+        "fuck", "shit", "bitch", "cunt", "nigger", "nigga", "negro", "faggot", "whore", "slut", 
+        "asshole", "motherfucker", "dick", "pussy"
     )
 
     private fun normalizeText(text: String): String {
@@ -37,6 +40,7 @@ class EmailValidatorUseCase @Inject constructor() {
             .replace("+", "t")
             .replace("8", "b")
             .replace("2", "z")
+            .replace(Regex("[^a-z]"), "")
     }
 
     fun containsOffensiveWords(text: String): Boolean {

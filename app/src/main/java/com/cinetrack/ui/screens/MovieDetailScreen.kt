@@ -177,6 +177,7 @@ fun MovieDetailScreenContent(
     var showCoverSelectionSheet by remember { mutableStateOf(false) }
     var showCheckInDrawer by remember { mutableStateOf(false) }
     var forceExpandCheckIn by remember { mutableStateOf(false) }
+    var isDetailCastSheetOpen by remember { mutableStateOf(false) }
     var previousWatchState by remember { mutableStateOf<WatchState?>(null) }
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
@@ -487,9 +488,11 @@ fun MovieDetailScreenContent(
                                         directors = state.directors,
                                         cast = state.cast,
                                         accentColor = accentColor,
+                                        hazeState = localHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         animatedVisibilityScope = animatedVisibilityScope,
-                                        onPersonClick = onPersonClick
+                                        onPersonClick = onPersonClick,
+                                        onSheetStateChange = { isDetailCastSheetOpen = it }
                                     )
 
                                     Spacer(modifier = Modifier.height(40.dp))
@@ -546,7 +549,7 @@ fun MovieDetailScreenContent(
                                 }
                             }
 
-                            if (!showEpisodesSheet) {
+                            if (!showEpisodesSheet && !isDetailCastSheetOpen && !showCheckInDrawer) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -583,6 +586,21 @@ fun MovieDetailScreenContent(
         } // End of haze Box
 
 
+        // Morphing Top Bar (pill → folder picker modal)
+        val successState = uiState as? DetailUiState.Success
+        DetailMorphingTopBar(
+            successState = successState,
+            viewModel = viewModel,
+            localHazeState = localHazeState,
+            symbioteProgress = symbioteProgress,
+            detailStackDepth = detailStackDepth,
+            currentImageQuality = currentImageQuality,
+            showFolderPicker = showFolderPicker,
+            onFolderPickerChange = { showFolderPicker = it },
+            onBackClick = onBackClick,
+            onHomeClick = onHomeClick
+        )
+
         // Peek-a-boo Check-in Drawer (non-invasive, optional)
         if (cachedSuccess != null) {
             val checkInCast = cachedSuccess!!.cast
@@ -599,27 +617,12 @@ fun MovieDetailScreenContent(
                 characterImages = cachedSuccess!!.characterImages,
                 accentColor = checkInAccent,
                 hazeState = rootHazeState,
-                onSave = { vibes, mvp ->
-                    viewModel.onEvent(DetailEvent.SaveCheckIn(vibes, mvp))
+                onSave = { vibes, mvp, charUrl ->
+                    viewModel.onEvent(DetailEvent.SaveCheckIn(vibes, mvp, charUrl))
                 },
                 onDismiss = { showCheckInDrawer = false }
             )
         }
-
-        // Morphing Top Bar (pill → folder picker modal)
-        val successState = uiState as? DetailUiState.Success
-        DetailMorphingTopBar(
-            successState = successState,
-            viewModel = viewModel,
-            localHazeState = localHazeState,
-            symbioteProgress = symbioteProgress,
-            detailStackDepth = detailStackDepth,
-            currentImageQuality = currentImageQuality,
-            showFolderPicker = showFolderPicker,
-            onFolderPickerChange = { showFolderPicker = it },
-            onBackClick = onBackClick,
-            onHomeClick = onHomeClick
-        )
         } // end Box (fillMaxSize background)
     } // end MovieActionsWrapper
 

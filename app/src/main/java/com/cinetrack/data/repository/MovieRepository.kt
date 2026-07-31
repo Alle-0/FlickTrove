@@ -110,6 +110,8 @@ class MovieRepository @Inject constructor(
     
     fun getLocalMoviesFlow(): Flow<List<Movie>> = favoriteDao.getAllFlow()
 
+    fun getFlowMoviesFlow(): Flow<List<Movie>> = favoriteDao.getFlowMoviesFlow()
+
     suspend fun searchLocalMovies(query: String, mediaType: String = ""): List<Movie> {
         val normalized = query.trim().lowercase()
         if (normalized.isEmpty()) return emptyList()
@@ -144,6 +146,7 @@ class MovieRepository @Inject constructor(
         updatedMovie.favoriteActorId = movie.favoriteActorId
         updatedMovie.favoriteActorName = movie.favoriteActorName
         updatedMovie.favoriteActorProfilePath = movie.favoriteActorProfilePath
+        updatedMovie.favoriteActorCharacter = movie.favoriteActorCharacter
         favoriteDao.insert(updatedMovie)
         
         // Notify Widget of changes

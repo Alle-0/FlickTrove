@@ -34,6 +34,14 @@ class FoldersViewModel @Inject constructor(
             initialValue = persistentListOf()
         )
 
+    val allMovies = repository.getLocalMoviesFlow()
+        .map { it.toImmutableList() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = persistentListOf()
+        )
+
     fun createFolder(name: String, icon: String, color: String, description: String = "") {
         viewModelScope.launch {
             val newFolder = FolderEntity(
