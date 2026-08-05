@@ -407,9 +407,9 @@ fun SettingsAccountSection(
         
         if (!isGuest && !hasGoogle) {
             SettingsItem(
-                icon = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                icon = ImageVector.vectorResource(id = R.drawable.ic_google),
                 title = stringResource(R.string.settings_link_google),
-                tint = Color.White,
+                tint = Color.Unspecified,
                 onClick = {
                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                     onLinkGoogleClick()
