@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.FirebaseNetworkException
 import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.SetOptions
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
@@ -139,6 +142,11 @@ class AuthViewModel @Inject constructor(
             val credential = EmailAuthProvider.getCredential(email, password)
             currentUser.linkWithCredential(credential)
                 .addOnSuccessListener {
+                    val uid = auth.currentUser?.uid
+                    if (uid != null) {
+                        Firebase.firestore.collection("users").document(uid)
+                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                    }
                     viewModelScope.launch {
                         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                         movieRepository.syncWithFirebase(force = true) { syncProgress ->
@@ -154,6 +162,11 @@ class AuthViewModel @Inject constructor(
             // Normal sign up
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
+                    val uid = auth.currentUser?.uid
+                    if (uid != null) {
+                        Firebase.firestore.collection("users").document(uid)
+                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                    }
                     viewModelScope.launch {
                         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                         movieRepository.syncWithFirebase(force = true) { syncProgress ->
