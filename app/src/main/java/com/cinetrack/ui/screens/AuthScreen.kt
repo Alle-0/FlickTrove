@@ -472,9 +472,9 @@ fun AuthScreen(
                             Text(
                                 text = if (isLogin) stringResource(R.string.auth_switch_to_register)
                                        else stringResource(R.string.auth_switch_to_login),
-                                color = Color.White.copy(alpha = 0.85f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
+                                color = Color.White,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                         
@@ -490,9 +490,9 @@ fun AuthScreen(
                         ) {
                             Text(
                                 text = "Back",
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
