@@ -37,7 +37,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.LocalCafe
+import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 fun Color.toArgb(): Int {
     return (alpha * 255.0f + 0.5f).toInt() shl 24 or
             (red * 255.0f + 0.5f).toInt() shl 16 or
@@ -473,14 +481,42 @@ fun DonationBanner(
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val haptic = LocalHapticFeedback.current
     
+    // Heart pulse animation
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "heartPulse"
+    )
+    
+    // Glow effect background brush
+    val glowBrush = Brush.radialGradient(
+        colors = listOf(
+            Color(0xFFFF5E5B).copy(alpha = 0.15f),
+            Color.Transparent
+        ),
+        radius = 800f,
+        center = androidx.compose.ui.geometry.Offset(0f, 0f)
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.08f))
+            .background(Color(0xFF1E1E26))
+            .background(glowBrush) // Apply glow on top of base dark color
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.15f),
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFFF5E5B).copy(alpha = 0.5f),
+                        Color.White.copy(alpha = 0.05f)
+                    )
+                ),
                 shape = RoundedCornerShape(24.dp)
             )
             .padding(20.dp)
@@ -490,18 +526,23 @@ fun DonationBanner(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Icon container
+                // Animated Icon container
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(52.dp)
                         .clip(androidx.compose.foundation.shape.CircleShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
                                     Color(0xFFFF5E5B),
-                                    Color(0xFFFF8B89)
+                                    Color(0xFFFF2A25)
                                 )
                             )
+                        )
+                        .border(
+                            width = 2.dp,
+                            color = Color(0xFFFF8B89).copy(alpha = 0.5f),
+                            shape = androidx.compose.foundation.shape.CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -509,7 +550,9 @@ fun DonationBanner(
                         imageVector = Icons.Rounded.Favorite,
                         contentDescription = "Support",
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(26.dp)
+                            .scale(scale) // Apply pulse animation
                     )
                 }
                 
@@ -519,66 +562,98 @@ fun DonationBanner(
                     Text(
                         text = androidx.compose.ui.res.stringResource(id = R.string.settings_support_flicktrove),
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 0.5.sp
                         ),
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = androidx.compose.ui.res.stringResource(id = R.string.settings_support_dev_desc),
                         style = MaterialTheme.typography.bodySmall.copy(
                             lineHeight = 16.sp
                         ),
-                        color = OnSurfaceMuted
+                        color = Color.White.copy(alpha = 0.7f)
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Ko-fi Button
+                // Ko-fi Button (Primary)
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFFF5E5B).copy(alpha = 0.2f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFFFF5E5B),
+                                    Color(0xFFFF2A25)
+                                )
+                            )
+                        )
                         .clickable {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Ko-fi",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFFFF5E5B)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.LocalCafe, 
+                            contentDescription = null, 
+                            tint = Color.White, 
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Ko-fi",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                    }
                 }
                 
                 // PayPal Button
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF0079C1).copy(alpha = 0.2f))
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF0079C1),
+                                    Color(0xFF00457C)
+                                )
+                            )
+                        )
                         .clickable {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://paypal.me/alle0")
                         }
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "PayPal",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFF0079C1)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.CreditCard, 
+                            contentDescription = null, 
+                            tint = Color.White, 
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "PayPal",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }

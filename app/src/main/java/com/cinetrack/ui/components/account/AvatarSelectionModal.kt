@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -103,6 +104,13 @@ fun AvatarSelectionModal(
     val uploadError by viewModel.uploadError.collectAsStateWithLifecycle()
     
     val focusManager = LocalFocusManager.current
+
+    val context = LocalContext.current
+    LaunchedEffect(uploadError) {
+        if (uploadError != null) {
+            android.widget.Toast.makeText(context, uploadError, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
