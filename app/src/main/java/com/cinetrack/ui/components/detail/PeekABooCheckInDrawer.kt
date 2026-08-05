@@ -623,13 +623,13 @@ private fun VibeChip(
                 painter = androidx.compose.ui.res.painterResource(id = vibe.iconRes),
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = if (isSelected) accentColor else accentColor.copy(alpha = 0.5f)
+                tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f)
             )
             Text(
                 text = stringResource(vibe.labelRes),
                 fontSize = 9.sp,
                 lineHeight = 10.sp,
-                color = if (isSelected) accentColor else accentColor.copy(alpha = 0.6f),
+                color = if (isSelected) accentColor else Color.White.copy(alpha = 0.7f),
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

@@ -606,7 +606,7 @@ fun DonationBanner(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Rounded.LocalCafe, 
+                            painter = painterResource(id = R.drawable.ic_kofi), 
                             contentDescription = null, 
                             tint = Color.White, 
                             modifier = Modifier.size(18.dp)
@@ -642,7 +642,7 @@ fun DonationBanner(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Rounded.CreditCard, 
+                            painter = painterResource(id = R.drawable.ic_paypal), 
                             contentDescription = null, 
                             tint = Color.White, 
                             modifier = Modifier.size(18.dp)
