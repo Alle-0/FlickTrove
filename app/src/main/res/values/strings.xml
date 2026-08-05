@@ -1018,6 +1018,7 @@
     <string name="settings_support_dev_desc">Support development and keep the app ad-free!</string>
     <string name="account_change_name_title">Change Name</string>
     <string name="account_name_changes_left">You have %d name changes left.</string>
+    <string name="avatar_banned_message">You are not allowed to change your avatar.</string>
     <string name="account_new_name_label">New Name</string>
     <string name="account_save">Save</string>
     <string name="account_error_name_short">Name must be at least 3 characters.</string>

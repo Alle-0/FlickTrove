@@ -154,6 +154,7 @@ object AccountTab : Tab {
 
 
         var currentPhotoUrl by remember { mutableStateOf(currentUser?.photoUrl) }
+        var avatarBanned by remember { mutableStateOf(false) }
         var avatarBackdrop by remember(currentUser?.uid) { 
             mutableStateOf(prefs.getString("avatar_backdrop_${currentUser?.uid}", null)) 
         }
@@ -172,6 +173,24 @@ object AccountTab : Tab {
                                     displayName = firestoreName
                                 })
                             }
+
+                            val dbNameChanges = snapshot.getLong("nameChangesCount")?.toInt() ?: 0
+                            if (dbNameChanges > nameChangesCount) {
+                                nameChangesCount = dbNameChanges
+                                prefs.edit().putInt("changes_${currentUser.uid}", dbNameChanges).apply()
+                            }
+                            
+                            val firestorePhoto = snapshot.getString("photoUrl")
+                            val authPhoto = currentUser.photoUrl?.toString()
+                            if (firestorePhoto != authPhoto) {
+                                val newUri = firestorePhoto?.let { android.net.Uri.parse(it) }
+                                currentPhotoUrl = newUri
+                                currentUser.updateProfile(userProfileChangeRequest {
+                                    photoUri = newUri
+                                })
+                            }
+
+                            avatarBanned = snapshot.getBoolean("avatarBanned") ?: false
                             
                             val dbBackdrop = snapshot.getString("avatarBackdrop")
                             if (dbBackdrop != avatarBackdrop) {
@@ -372,6 +391,10 @@ object AccountTab : Tab {
                                         .bounceClick {
                                             if (currentUser == null || currentUser.isAnonymous) {
                                                 showGuestAuthDialog = true
+                                            } else if (avatarBanned) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(context.getString(R.string.avatar_banned_message))
+                                                }
                                             } else {
                                                 avatarSelection.show { newUrl, _ ->
                                                     val oldUrl = currentPhotoUrl
@@ -670,7 +693,10 @@ object AccountTab : Tab {
                                                             displayName = nameInput 
                                                         })?.addOnSuccessListener {
                                                             Firebase.firestore.collection("users").document(currentUser.uid)
-                                                                .set(mapOf("displayName" to nameInput), SetOptions.merge())
+                                                                .set(mapOf(
+                                                                    "displayName" to nameInput,
+                                                                    "nameChangesCount" to newCount
+                                                                ), SetOptions.merge())
                                                         }
                                                         showNameDialog = false
                                                     }
