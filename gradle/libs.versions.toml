@@ -34,6 +34,8 @@ uiautomator = "2.3.0"
 baselineprofile = "1.3.3"
 androidxTestExtJunit = "1.2.1"
 androidxTestEspresso = "3.6.1"
+credentials = "1.3.0"
+googleid = "1.1.1"
 
 [libraries]
 liquid = { group = "io.github.fletchmckee.liquid", name = "liquid", version.ref = "liquid" }
@@ -96,6 +98,10 @@ androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchm
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxTestEspresso" }
+
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

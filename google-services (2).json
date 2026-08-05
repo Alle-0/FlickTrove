@@ -1,0 +1,138 @@
+{
+  "project_info": {
+    "project_number": "535327046678",
+    "firebase_url": "https://cinetrack-app-909-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cinetrack-app-909",
+    "storage_bucket": "cinetrack-app-909.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535327046678:android:7d6d50f1152de1f068c937",
+        "android_client_info": {
+          "package_name": "com.cinetrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "535327046678-3irnse3214j4o1ctqo0i3b0bpjan49aq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cinetrack",
+            "certificate_hash": "9730c78f4bbe21d7b80e1e91a087de4cf8bd8570"
+          }
+        },
+        {
+          "client_id": "535327046678-kqiqpv0158k5ivqm32svfh8st1mltke5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cinetrack",
+            "certificate_hash": "d683306ed0dc8ba98a442e02d8ab59fef9d88d45"
+          }
+        },
+        {
+          "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNNh86lWLzueKRa38eoYwRsp-3ubgV9Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535327046678:android:c122978ba0ac55ca68c937",
+        "android_client_info": {
+          "package_name": "com.cinetrack.expo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "535327046678-5kgjslb5lqjm0cegrcl4929v996f1gi7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cinetrack.expo",
+            "certificate_hash": "d683306ed0dc8ba98a442e02d8ab59fef9d88d45"
+          }
+        },
+        {
+          "client_id": "535327046678-fc6ftg4jv1oeattvkqtlgk9hvn0cubdb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cinetrack.expo",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNNh86lWLzueKRa38eoYwRsp-3ubgV9Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535327046678:android:2162534023b33b5568c937",
+        "android_client_info": {
+          "package_name": "com.example.cinetrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "535327046678-u3njl5e24aj6pc3g8b04pnvqe3m4as1r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cinetrack",
+            "certificate_hash": "d683306ed0dc8ba98a442e02d8ab59fef9d88d45"
+          }
+        },
+        {
+          "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNNh86lWLzueKRa38eoYwRsp-3ubgV9Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -88,6 +88,11 @@ dependencies {
     implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.firebase.analytics.ktx)
 
+    // Google Sign-In (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.core.splashscreen)

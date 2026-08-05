@@ -58,6 +58,14 @@ import com.cinetrack.ui.viewmodel.AuthState
 import com.cinetrack.ui.viewmodel.AuthViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.compose.ui.platform.LocalContext
+import com.cinetrack.util.Keys
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
+import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -166,224 +174,313 @@ fun AuthScreen(
                     )
                 }
 
-                // ── Input Fields ──────────────────────────────────────────────
-                val isEmailValid = remember(email) {
-                    email.isEmpty() || (email.contains("@") && email.contains(".") && email.length > 5)
-                }
-                val isPasswordValid = remember(password) {
-                    password.isEmpty() || password.length >= 6
+                // ── UI States ──────────────────────────────────────────────
+                var showEmailAuth by remember { mutableStateOf(false) }
+                val context = LocalContext.current
+                val coroutineScope = rememberCoroutineScope()
+                
+                val handleGoogleSignIn = {
+                    coroutineScope.launch {
+                        try {
+                            val credentialManager = CredentialManager.create(context)
+                            val googleIdOption = GetGoogleIdOption.Builder()
+                                .setFilterByAuthorizedAccounts(false)
+                                .setServerClientId(Keys.getGoogleClientId())
+                                .setAutoSelectEnabled(false)
+                                .build()
+
+                            val request = GetCredentialRequest.Builder()
+                                .addCredentialOption(googleIdOption)
+                                .build()
+
+                            val result = credentialManager.getCredential(context, request)
+                            val credential = result.credential
+
+                            if (credential is androidx.credentials.CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                viewModel.signInWithGoogle(googleIdTokenCredential.idToken)
+                            } else {
+                                Log.e("AuthScreen", "Unexpected type of credential")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("AuthScreen", "Google Sign In Failed", e)
+                        }
+                    }
                 }
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                // ── Initial Buttons ───────────────────────────────────────────
+                AnimatedVisibility(
+                    visible = !showEmailAuth,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
                 ) {
-                    PremiumTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = stringResource(R.string.auth_email),
-                        icon = androidx.compose.material.icons.Icons.Default.Email,
-                        isError = !isEmailValid && email.isNotEmpty(),
-                        errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
-                        enabled = authState !is AuthState.Loading
-                    )
-
-                    PremiumTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = stringResource(R.string.auth_password),
-                        icon = androidx.compose.material.icons.Icons.Default.Lock,
-                        isError = !isPasswordValid && password.isNotEmpty(),
-                        errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
-                        isPassword = true,
-                        enabled = authState !is AuthState.Loading
-                    )
-
-                    // Password dimenticata
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        contentAlignment = Alignment.CenterEnd
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        // Continue with Email
                         Box(
                             modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
                                 .bounceClick(scaleDown = 0.96f) {
-                                    val targetEmail = email.trim()
-                                    viewModel.resetPassword(targetEmail)
+                                    showEmailAuth = true
                                 }
-                                .padding(vertical = 4.dp, horizontal = 4.dp)
+                                .background(PrimaryTeal, RoundedCornerShape(20.dp)),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                stringResource(R.string.auth_forgot_password),
-                                color = Color.White.copy(alpha = 0.4f),
-                                fontSize = 13.sp,
+                                text = stringResource(R.string.auth_login) + " / " + stringResource(R.string.auth_create_account),
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // Continue with Google
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .bounceClick(scaleDown = 0.96f) {
+                                    handleGoogleSignIn()
+                                }
+                                .background(Color.White, RoundedCornerShape(20.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.auth_continue_google),
+                                    color = Color.Black,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        // Divider
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(1.dp)
+                                    .background(Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.08f))))
+                            )
+                            Text(
+                                stringResource(R.string.auth_or_continue_with),
+                                modifier = Modifier.padding(horizontal = 20.dp),
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(1.dp)
+                                    .background(Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)))
+                            )
+                        }
+
+                        // Guest Button
+                        val isGuestUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .bounceClick(scaleDown = 0.96f) {
+                                    if (isGuestUser) {
+                                        navigator?.pop()
+                                    } else {
+                                        showGuestWarning = true
+                                    }
+                                }
+                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                if (isGuestUser) stringResource(R.string.auth_guest_dialog_cancel) else stringResource(R.string.auth_btn_guest),
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // ── Email Auth Form ───────────────────────────────────────────
+                AnimatedVisibility(
+                    visible = showEmailAuth,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column {
+                        val isEmailValid = remember(email) {
+                            email.isEmpty() || (email.contains("@") && email.contains(".") && email.length > 5)
+                        }
+                        val isPasswordValid = remember(password) {
+                            password.isEmpty() || password.length >= 6
+                        }
+
+                        PremiumTextField(
+                            value = email,
+                            onValueChange = { email = it },
+                            label = stringResource(R.string.auth_email),
+                            icon = androidx.compose.material.icons.Icons.Default.Email,
+                            isError = !isEmailValid && email.isNotEmpty(),
+                            errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
+                            enabled = authState !is AuthState.Loading
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        PremiumTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = stringResource(R.string.auth_password),
+                            icon = androidx.compose.material.icons.Icons.Default.Lock,
+                            isError = !isPasswordValid && password.isNotEmpty(),
+                            errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
+                            isPassword = true,
+                            enabled = authState !is AuthState.Loading
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .bounceClick(scaleDown = 0.96f) {
+                                        viewModel.resetPassword(email.trim())
+                                    }
+                                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                            ) {
+                                Text(
+                                    stringResource(R.string.auth_forgot_password),
+                                    color = Color.White.copy(alpha = 0.4f),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
+                        AnimatedVisibility(
+                            visible = isGuestUser,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp)
+                                    .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                    .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                    .padding(12.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Info,
+                                        contentDescription = null,
+                                        tint = PrimaryTeal,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = if (isLogin) 
+                                            stringResource(R.string.auth_guest_login_warning) 
+                                        else 
+                                            stringResource(R.string.auth_guest_signup_info),
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        lineHeight = 16.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        val canProceed = authState !is AuthState.Loading && email.isNotEmpty() && password.isNotEmpty()
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .bounceClick(enabled = canProceed) {
+                                    if (isLogin) viewModel.login(email, password)
+                                    else viewModel.signUp(email, password)
+                                }
+                                .background(
+                                    color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(20.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (authState is AuthState.Loading) {
+                                CircularProgressIndicator(
+                                    color = Color.Black,
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 3.dp
+                                )
+                            } else {
+                                Text(
+                                    text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
+                                    color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bounceClick(scaleDown = 0.96f) {
+                                    isLogin = !isLogin
+                                    password = ""
+                                }
+                                .padding(vertical = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (isLogin) stringResource(R.string.auth_switch_to_register)
+                                       else stringResource(R.string.auth_switch_to_login),
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        
+                        // Back to main options
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bounceClick(scaleDown = 0.96f) {
+                                    showEmailAuth = false
+                                }
+                                .padding(bottom = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Back",
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                     }
-
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // ── Info for Guest Users ──────────────────────────────────────
-                val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
-                
-                AnimatedVisibility(
-                    visible = isGuestUser,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                            .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                            .padding(12.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.Info,
-                                contentDescription = null,
-                                tint = PrimaryTeal,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = if (isLogin) 
-                                    stringResource(R.string.auth_guest_login_warning) 
-                                else 
-                                    stringResource(R.string.auth_guest_signup_info),
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // ── Main Action Button ────────────────────────────────────────
-                val canProceed = authState !is AuthState.Loading &&
-                    email.isNotEmpty() && password.isNotEmpty()
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .bounceClick(enabled = canProceed) {
-                            if (isLogin) viewModel.login(email, password)
-                            else viewModel.signUp(email, password)
-                        }
-                        .background(
-                            color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(20.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (authState is AuthState.Loading) {
-                        CircularProgressIndicator(
-                            color = Color.Black,
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 3.dp
-                        )
-                    } else {
-                        Text(
-                            text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
-                            color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // ── Toggle Login/SignUp ───────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .bounceClick(scaleDown = 0.96f) {
-                            isLogin = !isLogin
-                            password = "" // reset password when switching
-                        }
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (isLogin) stringResource(R.string.auth_switch_to_register)
-                               else stringResource(R.string.auth_switch_to_login),
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                // ── Divider ───────────────────────────────────────────────────
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color.Transparent, Color.White.copy(alpha = 0.08f))
-                                )
-                            )
-                    )
-                    Text(
-                        stringResource(R.string.auth_or),
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
-                    )
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)
-                                )
-                            )
-                    )
-                }
-
-                // ── Guest / Cancel Button ──────────────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .bounceClick(scaleDown = 0.96f) {
-                            if (isGuestUser) {
-                                navigator?.pop()
-                            } else {
-                                showGuestWarning = true
-                            }
-                        }
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.05f),
-                            shape = RoundedCornerShape(20.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        if (isGuestUser) stringResource(R.string.auth_guest_dialog_cancel) else stringResource(R.string.auth_guest_continue),
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

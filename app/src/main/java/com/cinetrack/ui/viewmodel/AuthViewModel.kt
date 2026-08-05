@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.repository.MovieRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import kotlinx.coroutines.tasks.await
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -164,6 +165,74 @@ class AuthViewModel @Inject constructor(
                 .addOnSuccessListener {
                     val uid = auth.currentUser?.uid
                     if (uid != null) {
+                        Firebase.firestore.collection("users").document(uid)
+                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                    }
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        }
+                        _processState.update { null }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    _processState.update { AuthState.Error(getErrorMessage(exception)) }
+                }
+        }
+    }
+
+    fun signInWithGoogle(idToken: String) {
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_logging_in)) }
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        
+        val currentUser = auth.currentUser
+        if (currentUser != null && currentUser.isAnonymous) {
+            // Link anonymous account to Google
+            currentUser.linkWithCredential(credential)
+                .addOnSuccessListener {
+                    val uid = auth.currentUser?.uid
+                    if (uid != null) {
+                        Firebase.firestore.collection("users").document(uid)
+                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                    }
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        }
+                        _processState.update { AuthState.Authenticated }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    if (exception is FirebaseAuthUserCollisionException) {
+                        // The Google account is already linked to another Firebase account.
+                        // Sign in to that account instead and clear local guest data.
+                        viewModelScope.launch {
+                            movieRepository.clearAllData()
+                            auth.signInWithCredential(credential).addOnSuccessListener {
+                                viewModelScope.launch {
+                                    _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                    movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                        _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                    }
+                                    _processState.update { null }
+                                }
+                            }.addOnFailureListener { signInException ->
+                                _processState.update { AuthState.Error(getErrorMessage(signInException)) }
+                            }
+                        }
+                    } else {
+                        _processState.update { AuthState.Error(getErrorMessage(exception)) }
+                    }
+                }
+        } else {
+            // Normal Google Sign In
+            auth.signInWithCredential(credential)
+                .addOnSuccessListener { result ->
+                    val isNewUser = result.additionalUserInfo?.isNewUser == true
+                    val uid = auth.currentUser?.uid
+                    if (isNewUser && uid != null) {
                         Firebase.firestore.collection("users").document(uid)
                             .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
                     }

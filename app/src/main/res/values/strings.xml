@@ -118,6 +118,11 @@
     <string name="stats_n_movies">%d movies</string>
     <string name="stats_wrapped">%d WRAPPED</string>
     <string name="stats_filter_all">All</string>
+    <string name="auth_btn_login">Login</string>
+    <string name="auth_btn_signup">Sign Up</string>
+    <string name="auth_or_continue_with">OR CONTINUE WITH</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_btn_guest">Enter as Guest</string>
     <string name="quality_low">Low</string>
     <string name="quality_medium">Medium</string>
     <string name="quality_high">High</string>

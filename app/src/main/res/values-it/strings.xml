@@ -479,8 +479,11 @@
     <string name="auth_password">Password</string>
     <string name="auth_error_password_length">Minimo 6 caratteri</string>
     <string name="auth_forgot_password">Password dimenticata?</string>
-    <string name="auth_login">Accedi</string>
-    <string name="auth_create_account">Crea Account</string>
+    <string name="auth_btn_login">Accedi</string>
+    <string name="auth_btn_signup">Registrati</string>
+    <string name="auth_or_continue_with">OPPURE CONTINUA CON</string>
+    <string name="auth_continue_google">Continua con Google</string>
+    <string name="auth_btn_guest">Entra come Ospite</string>
     <string name="auth_switch_to_register">Non hai un account? Registrati</string>
     <string name="auth_switch_to_login">Hai già un account? Accedi</string>
     <string name="auth_or">OPPURE</string>
