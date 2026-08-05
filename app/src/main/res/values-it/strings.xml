@@ -243,6 +243,7 @@
     <string name="settings_confirm">Conferma</string>
     <string name="settings_got_it">Ho capito</string>
     <string name="settings_yes_logout">Sì, Esci</string>
+    <string name="settings_link_google">Collega Account Google</string>
     <string name="settings_close">Chiudi</string>
     <string name="avatar_selection_title_select_media">Seleziona un film o una serie</string>
     <string name="avatar_selection_title_choose_avatar">Scegli il tuo Avatar</string>
@@ -750,6 +751,7 @@
     <string name="msg_auth_offensive_email">L\'email contiene parole non consentite</string>
     <string name="msg_auth_fields_required">Email e password sono obbligatorie</string>
     <string name="msg_auth_logging_in">Accesso in corso...</string>
+    <string name="msg_auth_linking">Collegamento in corso...</string>
     <string name="msg_auth_syncing">Sincronizzazione account in corso...</string>
     <string name="msg_auth_creating_account">Creazione account...</string>
     <string name="msg_auth_guest_access">Accesso Ospite...</string>

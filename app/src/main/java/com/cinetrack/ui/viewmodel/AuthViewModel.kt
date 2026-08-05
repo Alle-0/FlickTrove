@@ -250,6 +250,32 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun linkGoogleAccount(idToken: String) {
+        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_linking)) }
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            currentUser.linkWithCredential(credential)
+                .addOnSuccessListener {
+                    viewModelScope.launch {
+                        _processState.update { AuthState.Success(UiText.DynamicString("Google account linked successfully!")) }
+                        kotlinx.coroutines.delay(1500)
+                        _processState.update { null }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    if (exception is FirebaseAuthUserCollisionException) {
+                        _processState.update { AuthState.Error(UiText.DynamicString("This Google account is already linked to another user.")) }
+                    } else {
+                        _processState.update { AuthState.Error(getErrorMessage(exception)) }
+                    }
+                }
+        } else {
+            _processState.update { AuthState.Error(UiText.DynamicString("User not logged in.")) }
+        }
+    }
+
     fun loginGuest() {
         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_guest_access)) }
         auth.signInAnonymously()

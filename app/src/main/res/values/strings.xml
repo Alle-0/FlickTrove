@@ -250,6 +250,7 @@
     <string name="settings_confirm">Confirm</string>
     <string name="settings_got_it">Got it</string>
     <string name="settings_yes_logout">Yes, Logout</string>
+    <string name="settings_link_google">Link Google Account</string>
     <string name="settings_close">Close</string>
     <string name="avatar_selection_title_select_media">Select a Movie or Show</string>
     <string name="avatar_selection_title_choose_avatar">Choose your Avatar</string>
@@ -755,6 +756,7 @@
     <string name="msg_auth_offensive_email">Email contains disallowed words</string>
     <string name="msg_auth_fields_required">Email and password are required</string>
     <string name="msg_auth_logging_in">Logging in...</string>
+    <string name="msg_auth_linking">Linking account...</string>
     <string name="msg_auth_syncing">Syncing account...</string>
     <string name="msg_auth_creating_account">Creating account...</string>
     <string name="msg_auth_guest_access">Guest access...</string>

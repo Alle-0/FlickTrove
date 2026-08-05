@@ -350,6 +350,33 @@ fun SettingsScreenContent(
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    
+    val handleGoogleLink = {
+        scope.launch {
+            try {
+                val credentialManager = androidx.credentials.CredentialManager.create(context)
+                val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(com.cinetrack.util.Keys.getGoogleClientId())
+                    .setAutoSelectEnabled(false)
+                    .build()
+
+                val request = androidx.credentials.GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(context, request)
+                val credential = result.credential
+
+                if (credential is androidx.credentials.CustomCredential && credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
+                    viewModel.linkGoogleAccount(googleIdTokenCredential.idToken)
+                }
+            } catch (e: Exception) {
+                // Log or handle error silently if dismissed
+            }
+        }
+    }
 
     // Runtime permission launcher for notifications (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -612,7 +639,8 @@ fun SettingsScreenContent(
                             onLoginClick = onLoginClick,
                             onShowLogoutConfirm = { showLogoutConfirm = true },
                             onShowDeleteDialog = { showDeleteDialog = true },
-                            onShowWipeSelectionDialog = { showWipeSelectionDialog = true }
+                            onShowWipeSelectionDialog = { showWipeSelectionDialog = true },
+                            onLinkGoogleClick = { handleGoogleLink() }
                         )
                     }
 

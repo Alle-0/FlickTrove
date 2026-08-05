@@ -378,11 +378,13 @@ fun SettingsAccountSection(
     onLoginClick: () -> Unit,
     onShowLogoutConfirm: () -> Unit,
     onShowDeleteDialog: () -> Unit,
-    onShowWipeSelectionDialog: () -> Unit
+    onShowWipeSelectionDialog: () -> Unit,
+    onLinkGoogleClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isGuest = user?.isAnonymous == true
     val email = user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.settings_guest)
+    val hasGoogle = user?.providerData?.any { it.providerId == "google.com" } == true
 
     SettingsSection(
         title = stringResource(R.string.settings_account),
@@ -402,6 +404,18 @@ fun SettingsAccountSection(
                 }
             }
         )
+        
+        if (!isGuest && !hasGoogle) {
+            SettingsItem(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                title = stringResource(R.string.settings_link_google),
+                tint = Color.White,
+                onClick = {
+                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                    onLinkGoogleClick()
+                }
+            )
+        }
         
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
