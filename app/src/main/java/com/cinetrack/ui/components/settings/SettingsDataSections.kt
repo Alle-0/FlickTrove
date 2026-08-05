@@ -462,6 +462,17 @@ fun SettingsSupportSection(
             }
         )
         SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_reddit),
+            title = "Community",
+            description = "Join the discussion on r/FlickTrove",
+            isExternal = true,
+            tint = Color(0xFFFF4500),
+            onClick = { 
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                uriHandler.openUri("https://www.reddit.com/r/FlickTrove") 
+            }
+        )
+        SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
             title = stringResource(R.string.settings_terms_service),
             isExternal = true,

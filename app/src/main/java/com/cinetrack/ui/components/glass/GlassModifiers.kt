@@ -78,9 +78,14 @@ fun Modifier.hazeGlass(
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
                         .hazeChild(state = state, shape = shape, style = finalStyle)
                 } else {
-                    Modifier
-                        .graphicsLayer(alpha = alpha)
-                        .hazeChild(state = state, shape = shape, style = finalStyle)
+                    if (alpha < 1f) {
+                        Modifier
+                            .graphicsLayer(alpha = alpha)
+                            .hazeChild(state = state, shape = shape, style = finalStyle)
+                    } else {
+                        Modifier
+                            .hazeChild(state = state, shape = shape, style = finalStyle)
+                    }
                 }
             } else {
                 val fallbackColor = containerColor ?: HazeStyles.GlassColor

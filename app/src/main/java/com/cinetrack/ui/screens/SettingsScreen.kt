@@ -86,6 +86,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
@@ -361,6 +362,24 @@ fun SettingsScreenContent(
                            showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
                            showDeepSyncConfirm || pendingMigrationFilePath != null
+
+    BackHandler(enabled = anyDialogVisible) {
+        focusManager.clearFocus()
+        showDeleteDialog = false
+        showReauthDialog = false
+        showColorDialog = false
+        showFeedbackDialog = false
+        showBadgesInfoDialog = false
+        showCacheConfirm = false
+        showLogoutConfirm = false
+        showBackupDialog = false
+        showExternalMigrationDialog = false
+        showDeepSyncConfirm = false
+        showWipeSelectionDialog = false
+        showWipeLocalDataConfirm = false
+        showWipeTotalDataConfirm = false
+        pendingMigrationFilePath = null
+    }
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     

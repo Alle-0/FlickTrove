@@ -92,6 +92,8 @@ class FlickTroveApplication : Application(), Configuration.Provider {
 
             // Refresh the home-screen widget daily so upcoming release dates
             // stay accurate even if TMDB updates them (e.g. a film is delayed).
+            // UPDATE (instead of KEEP) ensures the schedule is always refreshed
+            // even after app updates or reinstalls.
             val widgetRefreshRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.WidgetRefreshWorker>(
                 24, java.util.concurrent.TimeUnit.HOURS
             )
@@ -100,9 +102,16 @@ class FlickTroveApplication : Application(), Configuration.Provider {
 
             workManager.enqueueUniquePeriodicWork(
                 "WidgetDailyRefresh",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
                 widgetRefreshRequest
             )
+
+            // Also trigger an immediate one-shot update so the widget is always
+            // fresh right after app startup (avoids stale content between updates).
+            val immediateWidgetRefresh = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.WidgetRefreshWorker>()
+                .setConstraints(localConstraints)
+                .build()
+            workManager.enqueue(immediateWidgetRefresh)
         }
     }
 }

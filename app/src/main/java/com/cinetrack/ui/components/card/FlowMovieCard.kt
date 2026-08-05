@@ -82,9 +82,11 @@ fun FlowMovieCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 vibes.forEach { vibe ->
-                    Text(
-                        text = vibe.emoji,
-                        fontSize = 18.sp
+                    Icon(
+                        painter = painterResource(id = vibe.iconRes),
+                        contentDescription = null,
+                        tint = Color(vibe.colorHex),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -105,7 +107,7 @@ fun FlowMovieCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .width(72.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(Color.Black.copy(alpha = 0.6f))
                         .padding(4.dp)
                 ) {
@@ -117,15 +119,15 @@ fun FlowMovieCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(0.7f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                         )
                     } else {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(0.7f)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(Color.DarkGray),
                             contentAlignment = Alignment.Center
                         ) {

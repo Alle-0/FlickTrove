@@ -296,6 +296,7 @@ fun AttributionRow(
     val logoRes = when (brand) {
         "TMDB" -> R.drawable.ic_tmdb_logo
         "Trakt.tv" -> R.drawable.ic_trakt_logo
+        "TheTVDB" -> R.drawable.ic_tvdb_logo
         else -> null
     }
 

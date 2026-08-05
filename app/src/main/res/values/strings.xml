@@ -246,6 +246,17 @@
     <string name="settings_got_it">Got it</string>
     <string name="settings_yes_logout">Yes, Logout</string>
     <string name="settings_close">Close</string>
+    <string name="avatar_selection_title_select_media">Select a Movie or Show</string>
+    <string name="avatar_selection_title_choose_avatar">Choose your Avatar</string>
+    <string name="avatar_selection_search_placeholder">Search for a movie or TV show...</string>
+    <string name="avatar_selection_remove_avatar">Remove Avatar</string>
+    <string name="avatar_selection_remove_cover">Remove Cover</string>
+    <string name="avatar_selection_title_choose_cover">Select Cover</string>
+    <string name="avatar_selection_no_covers_found">No covers found</string>
+    <string name="avatar_selection_no_characters_found">No characters found.</string>
+    <string name="avatar_selection_back">Back</string>
+    <string name="avatar_selection_movie">Movie</string>
+    <string name="avatar_selection_tv_show">TV Show</string>
     <!-- Backup dialog -->
     <string name="settings_export_backup">Export Backup</string>
     <string name="settings_restore_backup">Restore Backup</string>
@@ -1010,6 +1021,7 @@
     <string name="account_new_name_label">New Name</string>
     <string name="account_save">Save</string>
     <string name="account_error_name_short">Name must be at least 3 characters.</string>
+    <string name="account_error_name_long">Name cannot exceed 20 characters.</string>
     <string name="account_error_name_profanity">Invalid name.</string>
     <string name="account_error_name_taken">Name already taken.</string>
     <string name="account_error_checking_name">Error checking name.</string>

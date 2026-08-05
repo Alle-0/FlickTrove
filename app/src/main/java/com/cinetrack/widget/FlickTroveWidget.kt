@@ -195,8 +195,17 @@ class FlickTroveWidget : GlanceAppWidget() {
                         )
                         val date = movie.releaseDate ?: movie.firstAirDate
                         if (!date.isNullOrEmpty()) {
+                            // Format the date with the locale from the selected app language
+                            val formattedDate = if (date.length >= 10) {
+                                try {
+                                    val dateObj = java.time.LocalDate.parse(date.take(10))
+                                    val locale = context.resources.configuration.locales[0]
+                                    val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+                                    dateObj.format(formatter)
+                                } catch (e: Exception) { date }
+                            } else date
                             Text(
-                                text = LocalContext.current.getString(R.string.widget_release_date_prefix, date),
+                                text = LocalContext.current.getString(R.string.widget_release_date_prefix, formattedDate),
                                 style = TextStyle(
                                     color = androidx.glance.color.ColorProvider(day = Color(0xFFAAAAAA), night = Color(0xFFAAAAAA)),
                                     fontSize = 12.sp,

@@ -25,8 +25,8 @@ android {
         applicationId = "com.cinetrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "3.5.1"
+        versionCode = 12
+        versionName = "3.5.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -36,6 +36,7 @@ android {
         val traktKey = localProps.getProperty("TRAKT_API_KEY", "")
         val traktSecret = localProps.getProperty("TRAKT_CLIENT_SECRET", "")
         val tvdbKey = localProps.getProperty("TVDB_API_KEY", "")
+        val supabaseUrl = localProps.getProperty("SUPABASE_URL", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
@@ -43,6 +44,7 @@ android {
         buildConfigField("String", "TRAKT_API_KEY", "\"$traktKey\"")
         buildConfigField("String", "TRAKT_CLIENT_SECRET", "\"$traktSecret\"")
         buildConfigField("String", "TVDB_API_KEY", "\"$tvdbKey\"")
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
     }
 
     signingConfigs {

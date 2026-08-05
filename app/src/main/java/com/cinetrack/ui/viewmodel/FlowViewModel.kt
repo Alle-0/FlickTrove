@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.cinetrack.ui.components.detail.ALL_VIBES
 
-data class VibeStat(val vibe: String, val emoji: String, val count: Int)
+data class VibeStat(val vibe: String, val emoji: String, val count: Int, val iconRes: Int? = null, val colorHex: Long? = null)
 data class MvpStat(
     val actorId: Long,
     val actorName: String,
@@ -35,6 +35,7 @@ data class FlowPersona(
     @StringRes val titleRes: Int,
     @StringRes val descriptionRes: Int,
     val emoji: String,
+    @androidx.annotation.DrawableRes val iconRes: Int,
     val colorHex: Long
 )
 
@@ -104,8 +105,9 @@ class FlowViewModel @Inject constructor(
                 }
                 val topVibes = vibeCounts.entries.map { entry ->
                     val code = entry.key
-                    val emoji = ALL_VIBES.find { it.code == code }?.emoji ?: "❓"
-                    VibeStat(code, emoji, entry.value) 
+                    val emotionalVibe = ALL_VIBES.find { it.code == code }
+                    val emoji = emotionalVibe?.emoji ?: "❓"
+                    VibeStat(code, emoji, entry.value, emotionalVibe?.iconRes, emotionalVibe?.colorHex) 
                 }.sortedByDescending { it.count }
                     
                 // Top MVPs
@@ -133,17 +135,19 @@ class FlowViewModel @Inject constructor(
                 // Calculate Flow Persona based on Top Vibe
                 val persona = topVibes.firstOrNull()?.vibe?.let { topVibe ->
                     when(topVibe) {
-                        "MASTERPIECE" -> FlowPersona(R.string.persona_title_connoisseur, R.string.persona_desc_connoisseur, "🍷", 0xFFFFD700)
-                        "MIND_BLOWING" -> FlowPersona(R.string.persona_title_philosopher, R.string.persona_desc_philosopher, "🌌", 0xFF9C27B0)
-                        "IN_TEARS" -> FlowPersona(R.string.persona_title_empath, R.string.persona_desc_empath, "💧", 0xFF2196F3)
-                        "HYPED" -> FlowPersona(R.string.persona_title_adrenaline_junkie, R.string.persona_desc_adrenaline_junkie, "⚡", 0xFFFF5722)
-                        "COZY" -> FlowPersona(R.string.persona_title_comfort_seeker, R.string.persona_desc_comfort_seeker, "🍵", 0xFFFF9800)
-                        "FEELS_GOOD" -> FlowPersona(R.string.persona_title_optimist, R.string.persona_desc_optimist, "☀️", 0xFFFFEB3B)
-                        "FUNNY" -> FlowPersona(R.string.persona_title_jokester, R.string.persona_desc_jokester, "🎭", 0xFFE91E63)
-                        "WEIRD" -> FlowPersona(R.string.persona_title_explorer, R.string.persona_desc_explorer, "🛸", 0xFF00BCD4)
-                        "SCARY" -> FlowPersona(R.string.persona_title_thrill_seeker, R.string.persona_desc_thrill_seeker, "🔪", 0xFFF44336)
-                        "MEH", "DISAPPOINTED", "BORING" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "🧐", 0xFF9E9E9E)
-                        else -> FlowPersona(R.string.persona_title_wanderer, R.string.persona_desc_wanderer, "🌿", 0xFF4CAF50)
+                        "MASTERPIECE" -> FlowPersona(R.string.persona_title_connoisseur, R.string.persona_desc_connoisseur, "🍷", R.drawable.ic_vibe_masterpiece, 0xFFFFD700)
+                        "MIND_BLOWING" -> FlowPersona(R.string.persona_title_philosopher, R.string.persona_desc_philosopher, "🌌", R.drawable.ic_vibe_mind_blowing, 0xFF9C27B0)
+                        "IN_TEARS" -> FlowPersona(R.string.persona_title_empath, R.string.persona_desc_empath, "💧", R.drawable.ic_vibe_in_tears, 0xFF2196F3)
+                        "HYPED" -> FlowPersona(R.string.persona_title_adrenaline_junkie, R.string.persona_desc_adrenaline_junkie, "⚡", R.drawable.ic_vibe_hyped, 0xFFFF5722)
+                        "COZY" -> FlowPersona(R.string.persona_title_comfort_seeker, R.string.persona_desc_comfort_seeker, "🍵", R.drawable.ic_vibe_cozy, 0xFFFF9800)
+                        "FEELS_GOOD" -> FlowPersona(R.string.persona_title_optimist, R.string.persona_desc_optimist, "☀️", R.drawable.ic_vibe_feels_good, 0xFFFFEB3B)
+                        "FUNNY" -> FlowPersona(R.string.persona_title_jokester, R.string.persona_desc_jokester, "🎭", R.drawable.ic_vibe_funny, 0xFFE91E63)
+                        "WEIRD" -> FlowPersona(R.string.persona_title_explorer, R.string.persona_desc_explorer, "🛸", R.drawable.ic_vibe_weird, 0xFF00BCD4)
+                        "SCARY" -> FlowPersona(R.string.persona_title_thrill_seeker, R.string.persona_desc_thrill_seeker, "🔪", R.drawable.ic_vibe_scary, 0xFFF44336)
+                        "MEH" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "🧐", R.drawable.ic_vibe_meh, 0xFF9E9E9E)
+                        "DISAPPOINTED" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😤", R.drawable.ic_vibe_disappointed, 0xFFE64A19)
+                        "BORING" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😴", R.drawable.ic_vibe_boring, 0xFF7986CB)
+                        else -> FlowPersona(R.string.persona_title_wanderer, R.string.persona_desc_wanderer, "🌿", R.drawable.ic_world, 0xFF4CAF50)
                     }
                 }
                 

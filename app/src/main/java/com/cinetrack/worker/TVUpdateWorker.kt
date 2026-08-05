@@ -89,15 +89,17 @@ class TVUpdateWorker(
 
                         val updated = show.copy(
                             numberOfEpisodes = latestEps,
-                            newEpisodesFound = (show.newEpisodesFound ?: 0) + releasedNewEps,
+                            // Don't accumulate new-episode count for dropped shows: they're ignored in UI and notifications
+                            newEpisodesFound = if (show.dropped) show.newEpisodesFound else (show.newEpisodesFound ?: 0) + releasedNewEps,
                             firstAirDate = latest.firstAirDate,
                             lastAirDate = newLastAirDate ?: show.lastAirDate,
                             status = latest.status,
                             nextEpisodeAirDate = newNextEpAirDate,
                             nextEpisodeString = newNextEpString,
                             seasons = updatedSeasons ?: show.seasons,
-                            watched = if (releasedNewEps > 0) false else show.watched,
-                            favorite = if (releasedNewEps > 0) true else show.favorite
+                            // Don't mark dropped shows as unwatched or favorite when new eps arrive
+                            watched = if (releasedNewEps > 0 && !show.dropped) false else show.watched,
+                            favorite = if (releasedNewEps > 0 && !show.dropped) true else show.favorite
                         )
                         repository.saveMovie(updated)
 

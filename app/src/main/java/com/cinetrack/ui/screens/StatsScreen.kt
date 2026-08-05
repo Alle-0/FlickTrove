@@ -143,7 +143,7 @@ object StatsTab : Tab {
             getViewModel<StatsViewModel>()
         }
         val paddingValues = LocalAppPadding.current
-        val hazeState = LocalHazeState.current
+        val activeHazeState = LocalHazeState.current ?: remember { dev.chrisbanes.haze.HazeState() }
         val tabNavigator = LocalTabNavigator.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
@@ -154,7 +154,7 @@ object StatsTab : Tab {
         StatsScreenContent(
             viewModel = viewModel,
             paddingValues = paddingValues,
-            hazeState = hazeState,
+            hazeState = activeHazeState,
             onToggleYearPicker = { visible, bounds ->
                 isYearPickerVisible = visible
                 yearPickerButtonBounds = bounds
@@ -172,7 +172,7 @@ object StatsTab : Tab {
             onDismiss = { isYearPickerVisible = false },
             currentRange = statsUiState.timeRange,
             availableYears = statsUiState.availableYears,
-            hazeState = hazeState ?: remember { dev.chrisbanes.haze.HazeState() },
+            hazeState = activeHazeState,
             triggerBounds = yearPickerButtonBounds,
             onYearSelected = { year ->
                 viewModel.setTimeRange(TimeRange.Year(year))
@@ -201,8 +201,6 @@ fun StatsScreenContent(
     val graphicsLayer = rememberGraphicsLayer()
     val context = LocalContext.current
     
-    // Local haze state to isolate background blur from foreground content
-    val activeHazeState = hazeState ?: remember { HazeState() }
     var isSharingStats by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -215,7 +213,7 @@ fun StatsScreenContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(activeHazeState, style = HazeStyles.PremiumDark)
+                    .haze(hazeState!!, style = HazeStyles.PremiumDark)
             ) {
                 CinematicBackground(
                     modifier = Modifier.fillMaxSize()
@@ -350,7 +348,7 @@ fun StatsScreenContent(
                                                                 isFavorite = movie.favorite,
                                                                 isReminder = movie.reminder,
                                                                 progress = (movie.progress ?: 0.0).toFloat(),
-                                                                hazeState = activeHazeState,
+                                                                hazeState = hazeState!!,
                                                                 onPress = { onMovieClick(movie) }
                                                             )
                                                         }

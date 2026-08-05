@@ -16,24 +16,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
 import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.CalculatedStats
-import com.cinetrack.util.ImageType
-import com.cinetrack.util.LocalImageQuality
-import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.foundation.border
 
@@ -41,20 +40,28 @@ import androidx.compose.foundation.border
 fun GeneralStatsCard(
     stats: CalculatedStats?,
     hazeState: HazeState,
+    backgroundLuminance: Float = 0f,
     onClick: () -> Unit
 ) {
+    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .hazeGlass(
-                state = hazeState,
-                shape = RoundedCornerShape(32.dp),
-                containerColor = Color.White.copy(alpha = 0.05f),
-                borderColor = Color.White.copy(alpha = 0.1f),
-                borderWidth = 1.dp
-            )
+            .clip(RoundedCornerShape(32.dp))
             .bounceClick { onClick() }
     ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(32.dp),
+                    containerColor = cardOverlay,
+                    borderColor = Color.White.copy(alpha = 0.1f),
+                    borderWidth = 1.dp,
+                    useOffscreenStrategy = false
+                )
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -68,7 +75,7 @@ fun GeneralStatsCard(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_stat),
                     contentDescription = "General Stats",
-                    tint = Color(0xFF80DEEA),
+                    tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -154,20 +161,28 @@ fun MyFoldersCard(
     folders: List<FolderEntity>,
     allMovies: List<Movie>,
     hazeState: HazeState,
+    backgroundLuminance: Float = 0f,
     onViewAllClick: () -> Unit,
     onFolderClick: (FolderEntity) -> Unit
 ) {
+    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .hazeGlass(
-                state = hazeState,
-                shape = RoundedCornerShape(32.dp),
-                containerColor = Color.White.copy(alpha = 0.05f),
-                borderColor = Color.White.copy(alpha = 0.1f),
-                borderWidth = 1.dp
-            )
+            .clip(RoundedCornerShape(32.dp))
     ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(32.dp),
+                    containerColor = cardOverlay,
+                    borderColor = Color.White.copy(alpha = 0.1f),
+                    borderWidth = 1.dp,
+                    useOffscreenStrategy = false
+                )
+        )
         Column(
             modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
         ) {
@@ -182,7 +197,7 @@ fun MyFoldersCard(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_cartella),
                     contentDescription = "My Folders",
-                    tint = Color(0xFF80DEEA),
+                    tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -218,7 +233,22 @@ fun MyFoldersCard(
             } else {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    0f to Color.Transparent,
+                                    0.05f to Color.Black,
+                                    0.95f to Color.Black,
+                                    1f to Color.Transparent
+                                ),
+                                blendMode = BlendMode.DstIn
+                            )
+                        }
                 ) {
                     items(folders) { folder ->
                         FolderPreviewItem(
@@ -239,84 +269,38 @@ fun FolderPreviewItem(
     allMovies: List<Movie>,
     onClick: () -> Unit
 ) {
-    // Find up to 3 poster paths for this folder
-    val posterPaths = folder.itemIds
-        .mapNotNull { id -> allMovies.find { it.id.toString() == id }?.posterPath }
-        .take(3)
-
-    val imageQuality = LocalImageQuality.current
+    val folderColorInt = try {
+        if (!folder.color.isNullOrBlank()) android.graphics.Color.parseColor(folder.color)
+        else android.graphics.Color.WHITE
+    } catch (e: Exception) {
+        android.graphics.Color.WHITE
+    }
+    val fColor = Color(folderColorInt)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.bounceClick { onClick() }.width(80.dp)
+        modifier = Modifier
+            .bounceClick { onClick() }
+            .width(64.dp)
     ) {
-        // Stack of posters
         Box(
             modifier = Modifier
-                .width(72.dp)
-                .height(72.dp), // Make it square
+                .size(56.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(fColor.copy(alpha = 0.15f))
+                .border(1.dp, fColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp)),
             contentAlignment = Alignment.Center
         ) {
-            if (posterPaths.isEmpty()) {
-                // Empty folder placeholder
-                val folderColorInt = try {
-                    if (!folder.color.isNullOrBlank()) android.graphics.Color.parseColor(folder.color) else android.graphics.Color.WHITE
-                } catch (e: Exception) {
-                    android.graphics.Color.WHITE
-                }
-                val fColor = Color(folderColorInt)
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(fColor.copy(alpha = 0.1f))
-                        .border(1.dp, fColor.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_cartella),
-                        contentDescription = null,
-                        tint = if (folderColorInt == android.graphics.Color.WHITE) Color.White.copy(alpha = 0.3f) else fColor.copy(alpha = 0.7f),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            } else {
-                posterPaths.forEachIndexed { index, path ->
-                    // Calculate offset for overlapping effect (e.g. middle poster is highest, back posters are scaled and offset)
-                    // For a simpler stack: 0 is left, 1 is right, 2 is front-center. Or just a fan.
-                    // Mockup shows a fan layout: left, right, and center is on top.
-                    
-                    val xOffset = when(index) {
-                        1 -> (-12).dp  // Second poster, left
-                        2 -> 12.dp   // Third poster, right
-                        else -> 0.dp // First poster, center
-                    }
-                    val scale = if (index == 0) 1f else 0.85f
-                    val zIndex = if (index == 0) 2f else 1f
-
-                    Box(
-                        modifier = Modifier
-                            .offset(x = xOffset)
-                            .zIndex(zIndex)
-                    ) {
-                        AsyncImage(
-                            model = buildTmdbImageUrl(path, ImageType.POSTER, imageQuality),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(42.dp)
-                                .height(63.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
-                        )
-                    }
-                }
-            }
+            Icon(
+                painter = painterResource(id = R.drawable.ic_cartella_piena),
+                contentDescription = folder.name,
+                tint = fColor,
+                modifier = Modifier.size(28.dp)
+            )
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = folder.name,
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
@@ -335,20 +319,28 @@ fun FolderPreviewItem(
 @Composable
 fun YourFlowCard(
     hazeState: HazeState,
+    backgroundLuminance: Float = 0f,
     onFlowClick: () -> Unit,
     onFlowStatsClick: () -> Unit
 ) {
+    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .hazeGlass(
-                state = hazeState,
-                shape = RoundedCornerShape(32.dp),
-                containerColor = Color.White.copy(alpha = 0.05f),
-                borderColor = Color.White.copy(alpha = 0.1f),
-                borderWidth = 1.dp
-            )
+            .clip(RoundedCornerShape(32.dp))
     ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(32.dp),
+                    containerColor = cardOverlay,
+                    borderColor = Color.White.copy(alpha = 0.1f),
+                    borderWidth = 1.dp,
+                    useOffscreenStrategy = false
+                )
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -414,13 +406,13 @@ fun YourFlowCard(
                             .padding(4.dp)
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF80DEEA).copy(alpha = 0.2f)),
+                            .background(Color.White.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_stat),
                             contentDescription = "Flow Stats",
-                            tint = Color(0xFF80DEEA),
+                            tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )
                     }

@@ -70,7 +70,8 @@ fun GlassyTopBar(
     indicatorColor: Color? = null,
     onLayoutToggleClick: (() -> Unit)? = null,
     layoutColumns: Int? = null,
-    hasAppUpdateBadge: Boolean = false
+    hasAppUpdateBadge: Boolean = false,
+    onEditBackdropClick: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -297,6 +298,25 @@ fun GlassyTopBar(
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                             contentDescription = "Ricarica",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                if (onEditBackdropClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = onEditBackdropClick
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_pencil),
+                            contentDescription = "Modifica Sfondo",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )

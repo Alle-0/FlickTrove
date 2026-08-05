@@ -217,7 +217,12 @@ fun FlowPersonaSection(persona: com.cinetrack.ui.viewmodel.FlowPersona) {
                     .background(Color(persona.colorHex).copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = persona.emoji, fontSize = 40.sp)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(id = persona.iconRes),
+                    contentDescription = null,
+                    tint = Color(persona.colorHex),
+                    modifier = Modifier.size(40.dp)
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -254,7 +259,7 @@ fun TopVibesSection(vibes: List<com.cinetrack.ui.viewmodel.VibeStat>) {
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(vibes.take(5)) { vibe ->
+        items(vibes) { vibe ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
@@ -264,7 +269,16 @@ fun TopVibesSection(vibes: List<com.cinetrack.ui.viewmodel.VibeStat>) {
                         .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = vibe.emoji, fontSize = 28.sp)
+                    if (vibe.iconRes != null && vibe.iconRes != 0) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = vibe.iconRes),
+                            contentDescription = vibe.vibe,
+                            modifier = Modifier.size(32.dp),
+                            tint = vibe.colorHex?.let { Color(it) } ?: Color.White
+                        )
+                    } else {
+                        Text(text = vibe.emoji, fontSize = 28.sp)
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "x${vibe.count}", color = Color.LightGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -282,8 +296,8 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
     ) {
         items(mvps.take(10)) { mvp ->
             val context = LocalContext.current
-            val imageUrl = mvp.profilePath?.let { "https://image.tmdb.org/t/p/w500$it" } 
-                ?: mvp.characterImageUrl?.let { "https://image.tmdb.org/t/p/w500$it" }
+            val imageUrl = mvp.profilePath?.takeIf { it.isNotBlank() && it != "null" }?.let { "https://image.tmdb.org/t/p/w500$it" } 
+                ?: mvp.characterImageUrl?.takeIf { it.isNotBlank() && it != "null" }?.let { "https://image.tmdb.org/t/p/w500$it" }
                 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -291,7 +305,7 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
             ) {
                 Box {
                     if (imageUrl != null) {
-                        AsyncImage(
+                        coil.compose.SubcomposeAsyncImage(
                             model = ImageRequest.Builder(context)
                                 .data(imageUrl)
                                 .crossfade(true)
@@ -301,7 +315,20 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
                             modifier = Modifier
                                 .size(76.dp)
                                 .clip(CircleShape)
-                                .border(2.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+                                .border(2.dp, Color.White.copy(alpha = 0.3f), CircleShape),
+                            error = {
+                                Box(
+                                    modifier = Modifier.fillMaxSize().background(Color.DarkGray),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = mvp.actorName.split(" ").filter { it.isNotBlank() }.take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString(""),
+                                        color = Color.White.copy(alpha = 0.5f),
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
                         )
                     } else {
                         Box(
@@ -312,11 +339,11 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
                                 .border(2.dp, Color.White.copy(alpha = 0.3f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_persona),
-                                contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.5f),
-                                modifier = Modifier.size(32.dp)
+                            Text(
+                                text = mvp.actorName.split(" ").filter { it.isNotBlank() }.take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString(""),
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
@@ -326,14 +353,16 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .offset(x = 4.dp, y = 4.dp)
+                            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF8100FF))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "x${mvp.count}",
-                            color = Color.White,
-                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
                     }

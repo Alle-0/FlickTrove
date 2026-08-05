@@ -232,4 +232,15 @@ object NetworkModule {
     @Provides
     @Named("trakt_api_key")
     fun provideTraktApiKey(): String = Keys.getTraktKey()
+
+    @Provides
+    @Singleton
+    fun provideSupabaseStorageApi(okHttpClient: OkHttpClient, json: Json): com.cinetrack.data.api.SupabaseStorageApi {
+        return Retrofit.Builder()
+            .baseUrl(Keys.getSupabaseUrl())
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(com.cinetrack.data.api.SupabaseStorageApi::class.java)
+    }
 }

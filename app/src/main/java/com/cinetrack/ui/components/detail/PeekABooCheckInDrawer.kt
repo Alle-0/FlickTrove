@@ -69,21 +69,21 @@ import kotlinx.coroutines.delay
 /**
  * Represents one selectable emotional reaction.
  */
-data class EmotionalVibe(val code: String, val emoji: String, @StringRes val labelRes: Int, val percentage: Int)
+data class EmotionalVibe(val code: String, val emoji: String, @StringRes val labelRes: Int, val percentage: Int, val iconRes: Int, val colorHex: Long)
 
 val ALL_VIBES = listOf(
-    EmotionalVibe("MASTERPIECE",  "🤩", R.string.checkin_vibe_masterpiece, 34),
-    EmotionalVibe("MIND_BLOWING", "🤯", R.string.checkin_vibe_mind_blowing, 21),
-    EmotionalVibe("IN_TEARS",     "😭", R.string.checkin_vibe_in_tears, 15),
-    EmotionalVibe("HYPED",        "🔥", R.string.checkin_vibe_action, 7),
-    EmotionalVibe("COZY",         "☕", R.string.checkin_vibe_comfort, 8),
-    EmotionalVibe("FEELS_GOOD",   "😊", R.string.checkin_vibe_feels_good, 12),
-    EmotionalVibe("FUNNY",        "😂", R.string.checkin_vibe_funny, 5),
-    EmotionalVibe("MEH",          "😐", R.string.checkin_vibe_meh, 3),
-    EmotionalVibe("WEIRD",        "🌀", R.string.checkin_vibe_weird, 2),
-    EmotionalVibe("SCARY",        "😱", R.string.checkin_vibe_scary, 1),
-    EmotionalVibe("DISAPPOINTED", "😤", R.string.checkin_vibe_disappointed, 1),
-    EmotionalVibe("BORING",       "😴", R.string.checkin_vibe_boring, 1)
+    EmotionalVibe("MASTERPIECE",  "🤩", R.string.checkin_vibe_masterpiece, 34, R.drawable.ic_vibe_masterpiece, 0xFFFFD700),
+    EmotionalVibe("MIND_BLOWING", "🤯", R.string.checkin_vibe_mind_blowing, 21, R.drawable.ic_vibe_mind_blowing, 0xFF9C27B0),
+    EmotionalVibe("IN_TEARS",     "😭", R.string.checkin_vibe_in_tears, 15, R.drawable.ic_vibe_in_tears, 0xFF2196F3),
+    EmotionalVibe("HYPED",        "🔥", R.string.checkin_vibe_action, 7, R.drawable.ic_vibe_hyped, 0xFFFF5722),
+    EmotionalVibe("COZY",         "☕", R.string.checkin_vibe_comfort, 8, R.drawable.ic_vibe_cozy, 0xFFFF9800),
+    EmotionalVibe("FEELS_GOOD",   "😊", R.string.checkin_vibe_feels_good, 12, R.drawable.ic_vibe_feels_good, 0xFFFFEB3B),
+    EmotionalVibe("FUNNY",        "😂", R.string.checkin_vibe_funny, 5, R.drawable.ic_vibe_funny, 0xFFE91E63),
+    EmotionalVibe("MEH",          "😐", R.string.checkin_vibe_meh, 3, R.drawable.ic_vibe_meh, 0xFF9E9E9E),
+    EmotionalVibe("WEIRD",        "🌀", R.string.checkin_vibe_weird, 2, R.drawable.ic_vibe_weird, 0xFF00BCD4),
+    EmotionalVibe("SCARY",        "😱", R.string.checkin_vibe_scary, 1, R.drawable.ic_vibe_scary, 0xFFF44336),
+    EmotionalVibe("DISAPPOINTED", "😤", R.string.checkin_vibe_disappointed, 1, R.drawable.ic_vibe_disappointed, 0xFFE64A19),
+    EmotionalVibe("BORING",       "😴", R.string.checkin_vibe_boring, 1, R.drawable.ic_vibe_boring, 0xFF7986CB)
 )
 
 /**
@@ -597,7 +597,7 @@ private fun VibeChip(
         modifier = modifier
             .scale(scale)
             .alpha(if (isDisabled) 0.3f else 1f)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(
                 if (isSelected) accentColor.copy(alpha = 0.18f)
                 else Color.White.copy(alpha = 0.06f)
@@ -605,7 +605,7 @@ private fun VibeChip(
             .border(
                 width = if (isSelected) 1.5.dp else 0.dp,
                 color = if (isSelected) accentColor else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(24.dp)
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -619,16 +619,17 @@ private fun VibeChip(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
         ) {
-            Text(
-                text = vibe.emoji, 
-                fontSize = 18.sp,
-                lineHeight = 18.sp
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(id = vibe.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = if (isSelected) accentColor else accentColor.copy(alpha = 0.5f)
             )
             Text(
                 text = stringResource(vibe.labelRes),
                 fontSize = 9.sp,
                 lineHeight = 10.sp,
-                color = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f),
+                color = if (isSelected) accentColor else accentColor.copy(alpha = 0.6f),
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

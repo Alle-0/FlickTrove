@@ -16,9 +16,12 @@ class TvdbRepository @Inject constructor(
      */
     suspend fun getMovieCharacterImagesMap(title: String, year: String): Map<String, String> {
         return try {
-            // 1. Search for the movie
+            // 1. Search for the movie by title + year
             val searchResponse = tvdbApi.search(query = title, year = year, type = "movie")
-            val tvdbId = searchResponse.data.firstOrNull()?.tvdb_id ?: return emptyMap()
+            // Fallback: if year-filtered search returns nothing, retry without year
+            val tvdbId = searchResponse.data.firstOrNull()?.tvdb_id
+                ?: tvdbApi.search(query = title, type = "movie").data.firstOrNull()?.tvdb_id
+                ?: return emptyMap()
 
             // 2. Fetch extended data
             val extendedResponse = tvdbApi.getMovieExtended(id = tvdbId)

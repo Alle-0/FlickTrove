@@ -244,6 +244,17 @@
     <string name="settings_got_it">Ho capito</string>
     <string name="settings_yes_logout">Sì, Esci</string>
     <string name="settings_close">Chiudi</string>
+    <string name="avatar_selection_title_select_media">Seleziona un film o una serie</string>
+    <string name="avatar_selection_title_choose_avatar">Scegli il tuo Avatar</string>
+    <string name="avatar_selection_search_placeholder">Cerca un film o una serie TV...</string>
+    <string name="avatar_selection_remove_avatar">Rimuovi Avatar</string>
+    <string name="avatar_selection_remove_cover">Rimuovi Copertina</string>
+    <string name="avatar_selection_title_choose_cover">Scegli Copertina</string>
+    <string name="avatar_selection_no_covers_found">Nessuna copertina trovata</string>
+    <string name="avatar_selection_no_characters_found">Nessun personaggio trovato.</string>
+    <string name="avatar_selection_back">Indietro</string>
+    <string name="avatar_selection_movie">Film</string>
+    <string name="avatar_selection_tv_show">Serie TV</string>
     <!-- Backup dialog -->
     <string name="settings_export_backup">Esporta Backup</string>
     <string name="settings_restore_backup">Ripristina Backup</string>
@@ -990,7 +1001,7 @@
     <string name="checkin_vibe_masterpiece">Capolavoro</string>
     <string name="checkin_vibe_mind_blowing">Sconvolto</string>
     <string name="checkin_vibe_in_tears">In lacrime</string>
-    <string name="checkin_vibe_feels_good">Bellissimo</string>
+    <string name="checkin_vibe_feels_good">Bello</string>
     <string name="checkin_vibe_comfort">Accogliente</string>
     <string name="checkin_vibe_meh">Così così</string>
     <string name="checkin_vibe_disappointed">Deluso</string>
@@ -1006,6 +1017,7 @@
     <string name="account_new_name_label">Nuovo Nome</string>
     <string name="account_save">Salva</string>
     <string name="account_error_name_short">Il nome deve avere almeno 3 caratteri.</string>
+    <string name="account_error_name_long">Il nome non può superare 20 caratteri.</string>
     <string name="account_error_name_profanity">Nome non valido.</string>
     <string name="account_error_name_taken">Nome già in uso.</string>
     <string name="account_error_checking_name">Errore nel controllo del nome.</string>

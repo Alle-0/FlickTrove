@@ -30,11 +30,11 @@ class UpdatesViewModel @Inject constructor(
         .map { movies ->
             val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
-                (it.newEpisodesFound ?: 0) > 0 || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped)
+                (!it.dropped && (it.newEpisodesFound ?: 0) > 0) || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped)
             }
                 .sortedByDescending { it.clientUpdatedAt }
             val unreadNotifCount = movies.count {
-                (it.newEpisodesFound ?: 0) > 0 || (it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0)
+                !it.dropped && ((it.newEpisodesFound ?: 0) > 0 || (it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0))
             }
             UpdatesUiState(
                 movies = updateList.toImmutableList(),

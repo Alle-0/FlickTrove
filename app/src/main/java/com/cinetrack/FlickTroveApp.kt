@@ -309,6 +309,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                         Box(modifier = Modifier.fillMaxSize().zIndex(200000f)) {
                             com.cinetrack.ui.components.account.AvatarSelectionModal(
                                 hazeState = globalHazeState,
+                                mode = avatarSelectionState.mode,
                                 onDismissRequest = { avatarSelectionState.dismiss() },
                                 onCharacterSelected = { url, backdropUrl -> 
                                     avatarSelectionState.onSelected?.invoke(url, backdropUrl)

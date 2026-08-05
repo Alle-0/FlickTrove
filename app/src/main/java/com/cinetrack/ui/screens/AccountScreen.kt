@@ -55,6 +55,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -123,6 +124,7 @@ object AccountTab : Tab {
         // Firebase User Info
         val currentUser = Firebase.auth.currentUser
         val context = androidx.compose.ui.platform.LocalContext.current
+        val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
         val prefs = remember { context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE) }
         
         var nameChangesCount by remember(currentUser?.uid) { 
@@ -143,10 +145,20 @@ object AccountTab : Tab {
                 }
             )
         }
+
+        // When editing name, show a live preview of the input across the UI
+        val displayedName by remember(showNameDialog, nameInput, currentDisplayName) {
+            derivedStateOf { if (showNameDialog) nameInput.ifBlank { currentDisplayName } else currentDisplayName }
+        }
         
 
 
-        // Admin-enforced name change sync
+        var currentPhotoUrl by remember { mutableStateOf(currentUser?.photoUrl) }
+        var avatarBackdrop by remember(currentUser?.uid) { 
+            mutableStateOf(prefs.getString("avatar_backdrop_${currentUser?.uid}", null)) 
+        }
+
+        // Admin-enforced name change & cross-device sync
         LaunchedEffect(currentUser?.uid) {
             if (currentUser != null && !currentUser.isAnonymous) {
                 Firebase.firestore.collection("users").document(currentUser.uid)
@@ -160,19 +172,33 @@ object AccountTab : Tab {
                                     displayName = firestoreName
                                 })
                             }
+                            
+                            val dbBackdrop = snapshot.getString("avatarBackdrop")
+                            if (dbBackdrop != avatarBackdrop) {
+                                avatarBackdrop = dbBackdrop
+                                if (dbBackdrop != null) {
+                                    prefs.edit().putString("avatar_backdrop_${currentUser.uid}", dbBackdrop).apply()
+                                } else {
+                                    prefs.edit().remove("avatar_backdrop_${currentUser.uid}").apply()
+                                }
+                            }
                         }
                     }
             }
         }
-        var currentPhotoUrl by remember { mutableStateOf(currentUser?.photoUrl) }
-        
-        var avatarBackdrop by remember(currentUser?.uid) { 
-            mutableStateOf(prefs.getString("avatar_backdrop_${currentUser?.uid}", null)) 
-        }
         var extractedColor by remember { mutableStateOf<Color?>(null) }
         var rawExtractedColor by remember { mutableStateOf<Color?>(null) }
+        
+        val baseDarkColor = remember { Color(0xFF161620) }
+        val targetBackgroundColor = if (extractedColor != null) {
+            val vividAccent = com.cinetrack.ui.utils.ColorUtils.ensureVividAccent(extractedColor!!)
+            androidx.compose.ui.graphics.lerp(vividAccent, baseDarkColor, 0.68f)
+        } else {
+            baseDarkColor
+        }
+        
         val animatedBgColor by animateColorAsState(
-            targetValue = extractedColor ?: Color(0xFF0F1115), 
+            targetValue = targetBackgroundColor, 
             animationSpec = tween(durationMillis = 800),
             label = "backgroundColor"
         )
@@ -254,14 +280,23 @@ object AccountTab : Tab {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
+                androidx.compose.runtime.CompositionLocalProvider(
+                    androidx.compose.foundation.LocalOverscrollFactory provides null
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
+                    ) {
                     // Top Spacer for Status Bar & padding + GlassyTopBar clearance
                     Spacer(Modifier.height(paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp))
                     
+                    // Capture delegated props into local vals (needed by name pill + dashboard cards)
+                    val snapshotRawColor = rawExtractedColor
+                    val snapshotBackdrop = avatarBackdrop
+                    val rawLuminance = snapshotRawColor?.luminance() ?: 0f
+
                     // User Profile Section
                     Row(
                         modifier = Modifier
@@ -272,34 +307,48 @@ object AccountTab : Tab {
                         // Avatar Container
                         Box(
                             modifier = Modifier
-                                .size(96.dp)
+                                .size(120.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Avatar
                             Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .border(2.dp, animatedBorderColor.copy(alpha = 0.8f), CircleShape),
+                                    .size(112.dp)
+                                    .hazeGlass(
+                                        state = backgroundHazeState,
+                                        shape = CircleShape,
+                                        containerColor = if (rawLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                        borderColor = if (rawLuminance > 0.35f) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.12f),
+                                        borderWidth = 1.dp,
+                                        blurRadius = com.cinetrack.ui.theme.HazeStyles.SmallGlassBlurRadius
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (currentPhotoUrl != null) {
-                                    AsyncImage(
-                                        model = currentPhotoUrl,
-                                        contentDescription = "Profile Picture",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_persona), // Assuming this icon exists
-                                        contentDescription = "Default Profile",
-                                        tint = Color.White.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(48.dp)
-                                    )
+                                Box(
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.1f))
+                                        .border(2.dp, animatedBorderColor.copy(alpha = 0.8f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (currentPhotoUrl != null) {
+                                        AsyncImage(
+                                            model = currentPhotoUrl,
+                                            contentDescription = "Profile Picture",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    } else {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_persona), // Assuming this icon exists
+                                            contentDescription = "Default Profile",
+                                            tint = Color.White.copy(alpha = 0.7f),
+                                            modifier = Modifier.size(48.dp)
+                                        )
+                                    }
                                 }
                             }
-                            
+
                             // Edit Pencil Icon
                             Box(
                                 modifier = Modifier
@@ -311,9 +360,8 @@ object AccountTab : Tab {
                                     .border(2.dp, Color(0xFF1E1E1E), CircleShape), // Assuming dark background color for stroke
                                 contentAlignment = Alignment.Center
                             ) {
-                                val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
-                                val primaryColor = MaterialTheme.colorScheme.primary
-                                val iconTint = if (primaryColor.luminance() > 0.5f) Color.Black else Color.White
+                                val baseColor = rawExtractedColor ?: MaterialTheme.colorScheme.primary
+                                val iconTint = if (baseColor.luminance() > 0.5f) Color.Black else Color.White
                                         
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_pencil),
@@ -325,31 +373,26 @@ object AccountTab : Tab {
                                             if (currentUser == null || currentUser.isAnonymous) {
                                                 showGuestAuthDialog = true
                                             } else {
-                                                avatarSelection.show { newUrl, backdropUrl ->
+                                                avatarSelection.show { newUrl, _ ->
                                                     val oldUrl = currentPhotoUrl
-                                                // Optimistic Update
-                                                currentPhotoUrl = newUrl?.let { Uri.parse(it) }
-                                                
-                                                avatarBackdrop = backdropUrl
-                                                if (backdropUrl != null) {
-                                                    prefs.edit().putString("avatar_backdrop_${currentUser?.uid}", backdropUrl).apply()
-                                                } else {
-                                                    prefs.edit().remove("avatar_backdrop_${currentUser?.uid}").apply()
-                                                }
-                                                
-                                                currentUser?.updateProfile(userProfileChangeRequest { 
-                                                    photoUri = newUrl?.let { Uri.parse(it) } 
-                                                })?.addOnSuccessListener {
-                                                    val updates = if (newUrl != null) mapOf("photoUrl" to newUrl) else mapOf("photoUrl" to null)
-                                                    Firebase.firestore.collection("users").document(currentUser.uid)
-                                                        .set(updates, SetOptions.merge())
-                                                }?.addOnFailureListener {
-                                                    // Rollback
-                                                    currentPhotoUrl = oldUrl
-                                                    scope.launch {
-                                                        snackbarHostState.showSnackbar("Failed to update avatar. Please try again.")
+                                                    // Optimistic Update
+                                                    currentPhotoUrl = newUrl?.let { Uri.parse(it) }
+                                                    
+                                                    currentUser?.updateProfile(userProfileChangeRequest { 
+                                                        photoUri = newUrl?.let { Uri.parse(it) } 
+                                                    })?.addOnSuccessListener {
+                                                        val updates = mutableMapOf<String, Any?>(
+                                                            "photoUrl" to newUrl
+                                                        )
+                                                        Firebase.firestore.collection("users").document(currentUser.uid)
+                                                            .set(updates, SetOptions.merge())
+                                                    }?.addOnFailureListener {
+                                                        // Rollback
+                                                        currentPhotoUrl = oldUrl
+                                                        scope.launch {
+                                                            snackbarHostState.showSnackbar("Failed to update avatar. Please try again.")
+                                                        }
                                                     }
-                                                }
                                                 }
                                             }
                                         }
@@ -359,44 +402,64 @@ object AccountTab : Tab {
                         
                         Spacer(modifier = Modifier.width(16.dp))
                         
-                        // Name
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .hazeGlass(
-                                    state = backgroundHazeState,
-                                    shape = RoundedCornerShape(50),
-                                    containerColor = Color.White.copy(alpha = 0.05f),
-                                    borderColor = Color.White.copy(alpha = 0.1f),
-                                    borderWidth = 1.dp
-                                )
-                                .clickable(
-                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    if (currentUser == null || currentUser.isAnonymous) {
-                                        showGuestAuthDialog = true
-                                    } else {
-                                        nameInput = currentDisplayName
-                                        showNameDialog = true
-                                    }
-                                }
-                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                        // Name Container
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterEnd
                         ) {
-                            Text(
-                                text = currentDisplayName,
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .hazeGlass(
+                                        state = backgroundHazeState,
+                                        shape = RoundedCornerShape(50),
+                                        // Stronger overlay when backdrop is light so pill has contrast
+                                        containerColor = if (rawLuminance > 0.35f)
+                                            Color.Black.copy(alpha = 0.4f)
+                                        else
+                                            Color.White.copy(alpha = 0.05f),
+                                        borderColor = Color.White.copy(alpha = 0.1f),
+                                        borderWidth = 1.dp
+                                    )
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        if (currentUser == null || currentUser.isAnonymous) {
+                                            showGuestAuthDialog = true
+                                        } else {
+                                            nameInput = currentDisplayName
+                                            showNameDialog = true
+                                        }
+                                    }
+                                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                            ) {
+                            val namePencilColor = Color(0xFFF0F0F0)
+                            val textShadow = androidx.compose.ui.graphics.Shadow(
+                                color = if (namePencilColor == Color(0xFF1A1A1A)) Color.White.copy(alpha = 0.3f)
+                                        else Color.Black.copy(alpha = 0.4f),
+                                offset = androidx.compose.ui.geometry.Offset(0f, 1f),
+                                blurRadius = 4f
                             )
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = displayedName,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = namePencilColor,
+                                    shadow = textShadow
+                                ),
+                                modifier = Modifier.weight(1f, fill = false),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_pencil),
                                 contentDescription = "Edit Name",
-                                tint = animatedBorderColor,
+                                tint = namePencilColor,
                                 modifier = Modifier.size(18.dp)
                             )
+                        }
                         }
                     }
 
@@ -410,6 +473,7 @@ object AccountTab : Tab {
                         GeneralStatsCard(
                             stats = statsUiState.stats,
                             hazeState = backgroundHazeState,
+                            backgroundLuminance = rawLuminance,
                             onClick = { tabNavigator.current = StatsTab }
                         )
                         
@@ -417,6 +481,7 @@ object AccountTab : Tab {
                             folders = folders,
                             allMovies = allMovies,
                             hazeState = backgroundHazeState,
+                            backgroundLuminance = rawLuminance,
                             onViewAllClick = { tabNavigator.current = FoldersTab },
                             onFolderClick = { folder -> 
                                 tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color) 
@@ -425,6 +490,7 @@ object AccountTab : Tab {
 
                         YourFlowCard(
                             hazeState = backgroundHazeState,
+                            backgroundLuminance = rawLuminance,
                             onFlowClick = { tabNavigator.current = FlowTab },
                             onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
                         )
@@ -432,8 +498,8 @@ object AccountTab : Tab {
                     
                     Spacer(modifier = Modifier.height(32.dp))
                 }
+                }
             }
-
             // Removed local AvatarSelectionModal usage
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -445,6 +511,9 @@ object AccountTab : Tab {
                 val focusManager = LocalFocusManager.current
                 var isCheckingName by remember { mutableStateOf(false) }
                 var nameError by remember { mutableStateOf<String?>(null) }
+                BackHandler(enabled = showNameDialog) {
+                    showNameDialog = false
+                }
                 
                 Box(
                     modifier = Modifier
@@ -489,30 +558,48 @@ object AccountTab : Tab {
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             
-                            OutlinedTextField(
-                                value = nameInput,
-                                onValueChange = { 
-                                    if (it.length <= 20) {
-                                        nameInput = it
-                                        if (it.isNotEmpty() && it.length < 3) {
-                                            nameError = context.getString(R.string.account_error_name_short)
-                                        } else if (validator.containsOffensiveWords(it)) {
-                                            nameError = context.getString(R.string.account_error_name_profanity)
+                            val maxNameLength = 20
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = nameInput,
+                                    onValueChange = {
+                                        val filtered = it.filterNot { char -> char.isWhitespace() }
+                                        if (filtered.length <= maxNameLength) {
+                                            nameInput = filtered
+                                            if (filtered.isNotEmpty() && filtered.length < 3) {
+                                                nameError = context.getString(R.string.account_error_name_short)
+                                            } else if (validator.containsOffensiveWords(filtered)) {
+                                                nameError = context.getString(R.string.account_error_name_profanity)
+                                            } else {
+                                                nameError = null
+                                            }
                                         } else {
-                                            nameError = null
+                                            nameError = context.getString(R.string.account_error_name_long)
                                         }
-                                    }
-                                },
-                                label = { Text(stringResource(R.string.account_new_name_label)) },
-                                singleLine = true,
-                                isError = nameError != null,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    },
+                                    label = { Text(stringResource(R.string.account_new_name_label)) },
+                                    singleLine = true,
+                                    isError = nameError != null,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
                                 )
-                            )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Text(
+                                        text = "${nameInput.length}/$maxNameLength",
+                                        color = Color.White.copy(alpha = 0.6f),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
                             
                             if (nameError != null) {
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -664,7 +751,7 @@ object AccountTab : Tab {
                                     showGuestAuthDialog = false 
                                     parentNavigator.push(com.cinetrack.ui.screens.LoginScreen())
                                 }) {
-                                    Text(stringResource(R.string.auth_create_account), color = Color(0xFF80DEEA), fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.auth_create_account), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

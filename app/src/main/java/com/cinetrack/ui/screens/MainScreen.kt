@@ -145,6 +145,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
         val initialTab = if (initialTabStr == "visti") VistiTab else HomeTab
 
+        val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
+        val currentUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
+        val prefs = remember { currentContext.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE) }
+
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
 
@@ -334,7 +338,22 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.notificationCount,
-                                    hasAppUpdateBadge = hasAppUpdateBadge
+                                    hasAppUpdateBadge = hasAppUpdateBadge,
+                                    onEditBackdropClick = if (currentTab is AccountTab) { 
+                                        {
+                                            if (currentUser != null && !currentUser.isAnonymous) {
+                                                avatarSelection.show(com.cinetrack.ui.components.account.AvatarSelectionMode.BACKDROP) { _, backdropUrl ->
+                                                    if (backdropUrl != null) {
+                                                        prefs.edit().putString("avatar_backdrop_${currentUser.uid}", backdropUrl).apply()
+                                                    } else {
+                                                        prefs.edit().remove("avatar_backdrop_${currentUser.uid}").apply()
+                                                    }
+                                                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
+                                                        .set(mapOf("avatarBackdrop" to backdropUrl), com.google.firebase.firestore.SetOptions.merge())
+                                                }
+                                            }
+                                        } 
+                                    } else null
                                 )
                             }
 

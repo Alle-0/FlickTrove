@@ -100,7 +100,9 @@ class MovieDetailViewModel @Inject constructor(
                                     _characterImages.value = tvdbRepository.getSeriesCharacterImagesMap(tvdbId)
                                 }
                             } else {
-                                val title = tmdbResponse.title ?: tmdbResponse.name
+                                // Use originalTitle (always English) to avoid mismatches when app is in Italian
+                                val title = tmdbResponse.originalTitle ?: tmdbResponse.originalName
+                                    ?: tmdbResponse.title ?: tmdbResponse.name
                                 val releaseDate = tmdbResponse.releaseDate ?: tmdbResponse.firstAirDate
                                 val year = releaseDate?.take(4)
                                 if (!title.isNullOrEmpty() && !year.isNullOrEmpty()) {
