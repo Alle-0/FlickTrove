@@ -354,7 +354,11 @@ fun SettingsScreenContent(
     val handleGoogleLink = {
         scope.launch {
             try {
-                val credentialManager = androidx.credentials.CredentialManager.create(context)
+                val activityContext = generateSequence(context) {
+                    (it as? android.content.ContextWrapper)?.baseContext
+                }.firstOrNull { it is android.app.Activity } ?: context
+
+                val credentialManager = androidx.credentials.CredentialManager.create(activityContext)
                 val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(com.cinetrack.util.Keys.getGoogleClientId())
@@ -365,15 +369,19 @@ fun SettingsScreenContent(
                     .addCredentialOption(googleIdOption)
                     .build()
 
-                val result = credentialManager.getCredential(context, request)
+                val result = credentialManager.getCredential(activityContext, request)
                 val credential = result.credential
 
                 if (credential is androidx.credentials.CustomCredential && credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
                     viewModel.linkGoogleAccount(googleIdTokenCredential.idToken)
+                } else {
+                    android.widget.Toast.makeText(context, "Unexpected credential type", android.widget.Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                // Log or handle error silently if dismissed
+                if (e !is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                    android.widget.Toast.makeText(context, "Google Sign In Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

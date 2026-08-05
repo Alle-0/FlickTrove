@@ -14,6 +14,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -182,7 +183,11 @@ fun AuthScreen(
                 val handleGoogleSignIn = {
                     coroutineScope.launch {
                         try {
-                            val credentialManager = CredentialManager.create(context)
+                            val activityContext = generateSequence(context) {
+                                (it as? android.content.ContextWrapper)?.baseContext
+                            }.firstOrNull { it is android.app.Activity } ?: context
+
+                            val credentialManager = CredentialManager.create(activityContext)
                             val googleIdOption = GetGoogleIdOption.Builder()
                                 .setFilterByAuthorizedAccounts(false)
                                 .setServerClientId(Keys.getGoogleClientId())
@@ -193,7 +198,7 @@ fun AuthScreen(
                                 .addCredentialOption(googleIdOption)
                                 .build()
 
-                            val result = credentialManager.getCredential(context, request)
+                            val result = credentialManager.getCredential(activityContext, request)
                             val credential = result.credential
 
                             if (credential is androidx.credentials.CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -201,9 +206,13 @@ fun AuthScreen(
                                 viewModel.signInWithGoogle(googleIdTokenCredential.idToken)
                             } else {
                                 Log.e("AuthScreen", "Unexpected type of credential")
+                                android.widget.Toast.makeText(context, "Unexpected credential type", android.widget.Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: Exception) {
                             Log.e("AuthScreen", "Google Sign In Failed", e)
+                            if (e !is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                                android.widget.Toast.makeText(context, "Google Sign In Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }
@@ -252,6 +261,12 @@ fun AuthScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
+                                androidx.compose.foundation.Image(
+                                    painter = painterResource(id = R.drawable.ic_google),
+                                    contentDescription = "Google Logo",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = stringResource(R.string.auth_continue_google),
                                     color = Color.Black,
