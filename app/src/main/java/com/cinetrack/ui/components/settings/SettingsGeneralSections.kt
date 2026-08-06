@@ -37,7 +37,8 @@ fun SettingsUILayoutSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
-    onShowBadgesInfo: () -> Unit
+    onShowBadgesInfo: () -> Unit,
+    onShowLanguageDialog: () -> Unit
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
@@ -226,50 +227,23 @@ fun SettingsUILayoutSection(
             icon = ImageVector.vectorResource(id = R.drawable.ic_world),
             title = stringResource(R.string.settings_language),
             description = stringResource(R.string.settings_language_desc),
-            trailing = { },
-            onClick = { },
-            customContent = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val options = listOf(
-                        Triple("system", stringResource(R.string.settings_language_system), contentLanguage == "system"),
-                        Triple("en", stringResource(R.string.settings_language_en), contentLanguage == "en"),
-                        Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it")
-                    )
-                    options.forEach { (value, label, isSelected) ->
-                        key(value) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                    .bounceClick { 
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        if (contentLanguage != value) {
-                                            settingsViewModel.updateContentLanguage(value) {
-                                                var actContext = context
-                                                while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
-                                                    actContext = (actContext as android.content.ContextWrapper).baseContext
-                                                }
-                                                (actContext as? android.app.Activity)?.recreate()
-                                            }
-                                        }
-                                    }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                                )
-                            }
-                        }
-                    }
+            trailing = {
+                val label = when(contentLanguage) {
+                    "system" -> stringResource(R.string.settings_language_system)
+                    "en" -> stringResource(R.string.settings_language_en)
+                    "it" -> stringResource(R.string.settings_language_it)
+                    "es" -> stringResource(R.string.settings_language_es)
+                    "fr" -> stringResource(R.string.settings_language_fr)
+                    "de" -> stringResource(R.string.settings_language_de)
+                    else -> contentLanguage
                 }
-            }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = currentAccentColor
+                )
+            },
+            onClick = { onShowLanguageDialog() }
         )
         // Start Screen
         SettingsItem(
@@ -340,7 +314,10 @@ fun SettingsLanguageSection(
                 val options = listOf(
                     Triple("system", stringResource(R.string.settings_language_system), contentLanguage == "system"),
                     Triple("en", stringResource(R.string.settings_language_en), contentLanguage == "en"),
-                    Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it")
+                    Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it"),
+                    Triple("es", stringResource(R.string.settings_language_es), contentLanguage == "es"),
+                    Triple("fr", stringResource(R.string.settings_language_fr), contentLanguage == "fr"),
+                    Triple("de", stringResource(R.string.settings_language_de), contentLanguage == "de")
                 )
                 options.forEach { (value, label, isSelected) ->
                     key(value) {

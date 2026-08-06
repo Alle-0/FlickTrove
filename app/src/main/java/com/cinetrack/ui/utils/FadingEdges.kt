@@ -124,3 +124,42 @@ fun Modifier.verticalFadingEdges(
             )
         }
     }
+
+/**
+ * Aggiunge bordi sfumati (fading edges) a sinistra e a destra a un contenitore scrollabile orizzontalmente.
+ */
+fun Modifier.horizontalFadingEdges(
+    lazyListState: androidx.compose.foundation.lazy.LazyListState,
+    leftEdgeWidth: Dp = 24.dp,
+    rightEdgeWidth: Dp = 24.dp
+): Modifier = this
+    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    .drawWithContent {
+        drawContent()
+        val leftColors = listOf(Color.Transparent, Color.Black)
+        val rightColors = listOf(Color.Black, Color.Transparent)
+        
+        val showLeft = lazyListState.canScrollBackward
+        val showRight = lazyListState.canScrollForward
+
+        if (showLeft && leftEdgeWidth > 0.dp) {
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    colors = leftColors,
+                    startX = 0f,
+                    endX = leftEdgeWidth.toPx()
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+        if (showRight && rightEdgeWidth > 0.dp) {
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    colors = rightColors,
+                    startX = size.width - rightEdgeWidth.toPx(),
+                    endX = size.width
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+    }

@@ -332,10 +332,15 @@ fun StatsScreenContent(
                                                             count = uiState.moviesInSelectedRange.size
                                                         )
                                                     }
+                                                    val rowState = androidx.compose.foundation.lazy.rememberLazyListState()
                                                     androidx.compose.foundation.lazy.LazyRow(
+                                                        state = rowState,
                                                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                                                         contentPadding = PaddingValues(horizontal = 16.dp),
-                                                        modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(top = 2.dp)
+                                                            .horizontalFadingEdges(rowState, leftEdgeWidth = 32.dp, rightEdgeWidth = 32.dp)
                                                     ) {
                                                         items(
                                                             items = uiState.moviesInSelectedRange,

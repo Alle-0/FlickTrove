@@ -292,7 +292,7 @@ fun AvatarSelectionModal(
                             Row(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
                                     .bounceClick { onCharacterSelected(null, null) }
                                     .padding(vertical = 12.dp, horizontal = 14.dp),
@@ -319,7 +319,7 @@ fun AvatarSelectionModal(
                                 Row(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(CircleShape)
                                         .background(Color.White.copy(alpha = 0.1f))
                                         .bounceClick { galleryLauncher.launch("image/*") }
                                         .padding(vertical = 12.dp, horizontal = 14.dp),
@@ -334,11 +334,13 @@ fun AvatarSelectionModal(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = "Import Avatar",
+                                        text = stringResource(R.string.avatar_selection_import_avatar),
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             color = Color.White,
                                             fontWeight = FontWeight.SemiBold
-                                        )
+                                        ),
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                     )
                                 }
                             }

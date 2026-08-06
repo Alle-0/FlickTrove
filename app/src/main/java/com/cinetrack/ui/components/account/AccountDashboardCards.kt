@@ -48,7 +48,6 @@ fun GeneralStatsCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
-            .bounceClick { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -70,7 +69,9 @@ fun GeneralStatsCard(
             // Header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bounceClick { onClick() }
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_stat),

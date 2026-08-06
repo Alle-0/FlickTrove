@@ -334,6 +334,7 @@ fun SettingsScreenContent(
     var showReauthDialog by remember { mutableStateOf(false) }
     var reauthErrorMessage by remember { mutableStateOf<String?>(null) }
     var showColorDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
@@ -393,7 +394,7 @@ fun SettingsScreenContent(
         settingsViewModel.toggleNotifications(isGranted)
     }
 
-    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showFeedbackDialog || 
+    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
                            showDeepSyncConfirm || pendingMigrationFilePath != null
@@ -403,6 +404,7 @@ fun SettingsScreenContent(
         showDeleteDialog = false
         showReauthDialog = false
         showColorDialog = false
+        showLanguageDialog = false
         showFeedbackDialog = false
         showBadgesInfoDialog = false
         showCacheConfirm = false
@@ -447,6 +449,7 @@ fun SettingsScreenContent(
             showDeleteDialog = false
             showReauthDialog = false
             showColorDialog = false
+            showLanguageDialog = false
             showFeedbackDialog = false
             showBadgesInfoDialog = false
             showCacheConfirm = false
@@ -580,7 +583,8 @@ fun SettingsScreenContent(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
-                            onShowBadgesInfo = { showBadgesInfoDialog = true }
+                            onShowBadgesInfo = { showBadgesInfoDialog = true },
+                            onShowLanguageDialog = { showLanguageDialog = true }
                         )
                     }
 
@@ -686,6 +690,7 @@ fun SettingsScreenContent(
                                 focusManager.clearFocus()
                                 showDeleteDialog = false
                                 showColorDialog = false
+                                showLanguageDialog = false
                                 showFeedbackDialog = false
                                 showBadgesInfoDialog = false
                                 showCacheConfirm = false
@@ -828,6 +833,28 @@ fun SettingsScreenContent(
                     kotlinx.coroutines.delay(350)
                     settingsViewModel.updateAccentColor(colorName, origin)
                 }
+            }
+        )
+
+        val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
+        SettingsLanguageSelectionDialog(
+            visible = showLanguageDialog,
+            activeHazeState = activeHazeState,
+            current = contentLanguage,
+            accentColor = currentAccentColor,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = { showLanguageDialog = false },
+            onSelect = { value ->
+                if (contentLanguage != value) {
+                    settingsViewModel.updateContentLanguage(value) {
+                        var actContext = context
+                        while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
+                            actContext = (actContext as android.content.ContextWrapper).baseContext
+                        }
+                        (actContext as? android.app.Activity)?.recreate()
+                    }
+                }
+                showLanguageDialog = false
             }
         )
 

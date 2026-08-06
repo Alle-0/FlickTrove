@@ -317,31 +317,26 @@ data class Movie(
     @ColumnInfo(name = "client_updated_at") var clientUpdatedAt: Long = 0L,
 
     // --- Emotional Check-In (Peek-a-boo) ---
-    @Transient
     @get:PropertyName("emotional_vibes")
     @set:PropertyName("emotional_vibes")
     @ColumnInfo(name = "emotional_vibes")
     var emotionalVibes: String? = null, // comma-separated codes e.g. "MASTERPIECE,MIND_BLOWING"
 
-    @Transient
     @get:PropertyName("favorite_actor_id")
     @set:PropertyName("favorite_actor_id")
     @ColumnInfo(name = "favorite_actor_id")
     var favoriteActorId: Long? = null,
 
-    @Transient
     @get:PropertyName("favorite_actor_name")
     @set:PropertyName("favorite_actor_name")
     @ColumnInfo(name = "favorite_actor_name")
     var favoriteActorName: String? = null,
 
-    @Transient
     @get:PropertyName("favorite_actor_profile_path")
     @set:PropertyName("favorite_actor_profile_path")
     @ColumnInfo(name = "favorite_actor_profile_path")
     var favoriteActorProfilePath: String? = null,
 
-    @Transient
     @get:PropertyName("favorite_actor_character")
     @set:PropertyName("favorite_actor_character")
     @ColumnInfo(name = "favorite_actor_character")

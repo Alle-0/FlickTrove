@@ -166,7 +166,7 @@ class TvTimeGdprImporter @Inject constructor(
                         val showId = cols.getOrNull(idIdx)?.trim()
                         val status = cols.getOrNull(statusIdx)?.trim()?.lowercase() ?: ""
                         val isDropped = status == "dropped" || status == "paused"
-                        val isExplicitlyCompleted = status in listOf("archived", "watched", "completed", "seen")
+                        val isExplicitlyCompleted = status in listOf("archived", "watched", "completed", "seen", "up_to_date")
                         val isForLater = !isDropped && status.isNotBlank() && status !in listOf("archived", "dropped", "watched", "completed", "seen", "ignored", "stopped", "up_to_date")
                         addItem(id = showId, title = title, mediaType = "tv", isWatched = false, isExplicitlyCompleted = isExplicitlyCompleted, isForLater = isForLater, isDropped = isDropped)
                     }
@@ -639,7 +639,7 @@ class TvTimeGdprImporter @Inject constructor(
                                     // Controllo matematico: è completata solo se gli episodi visti coprono tutti quelli rilasciati
                                     // MA con una salvaguardia se TMDB manda dati palesemente rotti (es. totalReleasedEps = 1 ma visti 1000)
                                     val isCompleted = if (totalReleasedEps > 0) {
-                                        watchedEpsCount >= totalReleasedEps && (watchedEpsCount - totalReleasedEps < 5)
+                                        watchedEpsCount >= (totalReleasedEps - 2).coerceAtLeast(1) && (watchedEpsCount - totalReleasedEps < 5)
                                     } else false
 
                                     if ((isCompleted || item.isExplicitlyCompleted) && !item.isForLater && !item.isDropped) {

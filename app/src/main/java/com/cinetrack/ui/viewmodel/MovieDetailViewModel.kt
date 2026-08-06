@@ -639,6 +639,11 @@ class MovieDetailViewModel @Inject constructor(
 
     fun requestTranslation(commentId: Long, text: String) {
         viewModelScope.launch {
+            // Update target language from user preferences before any model check
+            val prefs = preferenceRepository.userPreferencesFlow.first()
+            val systemLang = java.util.Locale.getDefault().language
+            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
+
             if (translationManager.isModelDownloaded()) {
                 // If model is already downloaded, translate immediately without prompt
                 translateComment(commentId, text, requireWifi = false)
@@ -657,6 +662,10 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _showTranslationPrompt.value = null
             _translationStates.update { it + (commentId to TranslationState(isTranslating = true)) }
+            // Ensure the target language is in sync with current user preferences
+            val prefs = preferenceRepository.userPreferencesFlow.first()
+            val systemLang = java.util.Locale.getDefault().language
+            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
             val success = translationManager.downloadModel(requireWifi)
             if (success) {
                 val translated = translationManager.translate(text)

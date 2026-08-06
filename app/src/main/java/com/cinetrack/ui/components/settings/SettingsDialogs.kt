@@ -982,3 +982,93 @@ fun ColorSelectionDialog(
         }
     }
 }
+
+@Composable
+fun LanguageSelectionDialog(
+    hazeState: dev.chrisbanes.haze.HazeState,
+    current: String,
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit,
+    accentColor: Color,
+    vibrationEnabled: Boolean,
+    alpha: Float = 1f
+) {
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .padding(24.dp)
+                .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(32.dp))
+                    .hazeGlass(state = hazeState, alpha = alpha, shape = RoundedCornerShape(32.dp), style = HazeStyles.glassmorphicDialog)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_language),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    val options = listOf(
+                        "system" to stringResource(R.string.settings_language_system),
+                        "en" to stringResource(R.string.settings_language_en),
+                        "it" to stringResource(R.string.settings_language_it),
+                        "es" to stringResource(R.string.settings_language_es),
+                        "fr" to stringResource(R.string.settings_language_fr),
+                        "de" to stringResource(R.string.settings_language_de)
+                    )
+                    
+                    options.forEach { (value, label) ->
+                        val isSelected = current == value
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .bounceClick {
+                                    if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                                    onSelect(value)
+                                }
+                                .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.05f))
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = onDismiss) {
+                            Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.7f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

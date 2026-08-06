@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.cinetrack.baselineprofile-mergeBenchmarkReleaseResources-2:/values-am/values-am.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\39338\\.gradle\\caches\\8.13\\transforms\\7fe913ea17c26c06d06674af5f6c16c7\\transformed\\core-1.9.0\\res\\values-am\\values-am.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    }
+                }
+            ]
+        }
+    ]
+}

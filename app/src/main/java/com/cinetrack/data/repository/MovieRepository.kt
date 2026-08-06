@@ -1090,17 +1090,22 @@ class MovieRepository @Inject constructor(
         val response = tmdbService.findByExternalId(tvdbId, "tvdb_id")
         val tvRes = response.tvResults?.firstOrNull()
         if (tvRes != null) {
-            return Movie(
-                id = tvRes.id,
-                mediaType = "tv",
-                name = tvRes.name,
-                posterPath = tvRes.posterPath,
-                backdropPath = tvRes.backdropPath,
-                voteAverage = tvRes.voteAverage,
-                firstAirDate = tvRes.firstAirDate,
-                genreIds = tvRes.genreIds,
-                overview = tvRes.overview
-            )
+            try {
+                val details = fetchMovieDetails(tvRes.id, true)
+                return com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "tv")
+            } catch (e: Exception) {
+                return Movie(
+                    id = tvRes.id,
+                    mediaType = "tv",
+                    name = tvRes.name,
+                    posterPath = tvRes.posterPath,
+                    backdropPath = tvRes.backdropPath,
+                    voteAverage = tvRes.voteAverage,
+                    firstAirDate = tvRes.firstAirDate,
+                    genreIds = tvRes.genreIds,
+                    overview = tvRes.overview
+                )
+            }
         }
         return null
     }
