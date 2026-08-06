@@ -22,9 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -120,6 +123,10 @@ object AccountTab : Tab {
         val foldersViewModel = hiltViewModel<FoldersViewModel>()
         val folders by foldersViewModel.folders.collectAsStateWithLifecycle()
         val allMovies by foldersViewModel.allMovies.collectAsStateWithLifecycle()
+
+        val settingsViewModel = hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
+        val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
         
         // Firebase User Info
         val currentUser = Firebase.auth.currentUser
@@ -134,6 +141,9 @@ object AccountTab : Tab {
         var showNewFolderDialog by remember { mutableStateOf(false) }
         var showGuestAuthDialog by remember { mutableStateOf(false) }
         var nameInput by remember { mutableStateOf("") }
+        var isCheckingNameLive by remember { mutableStateOf(false) }
+        var nameAvailable by remember { mutableStateOf<Boolean?>(null) }
+        var nameError by remember { mutableStateOf<String?>(null) }
 
         var currentDisplayName by remember(currentUser) {
             mutableStateOf(
@@ -149,6 +159,33 @@ object AccountTab : Tab {
         // When editing name, show a live preview of the input across the UI
         val displayedName by remember(showNameDialog, nameInput, currentDisplayName) {
             derivedStateOf { if (showNameDialog) nameInput.ifBlank { currentDisplayName } else currentDisplayName }
+        }
+
+        LaunchedEffect(nameInput) {
+            if (nameInput.isBlank() || nameInput == currentDisplayName) {
+                nameAvailable = null
+                return@LaunchedEffect
+            }
+            if (nameInput.length < 3) {
+                nameAvailable = null
+                return@LaunchedEffect
+            }
+            
+            isCheckingNameLive = true
+            kotlinx.coroutines.delay(500)
+            try {
+                val doc = com.google.firebase.ktx.Firebase.firestore.collection("usernames").document(nameInput.lowercase()).get().await()
+                nameAvailable = !doc.exists()
+                if (!nameAvailable!!) {
+                    nameError = context.getString(R.string.account_error_name_taken)
+                }
+            } catch(e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch(e: Exception) {
+                nameAvailable = false
+                nameError = e.localizedMessage
+            }
+            isCheckingNameLive = false
         }
         
 
@@ -499,24 +536,28 @@ object AccountTab : Tab {
                             backgroundLuminance = rawLuminance,
                             onClick = { tabNavigator.current = StatsTab }
                         )
-                        
-                        MyFoldersCard(
-                            folders = folders,
-                            allMovies = allMovies,
-                            hazeState = backgroundHazeState,
-                            backgroundLuminance = rawLuminance,
-                            onViewAllClick = { tabNavigator.current = FoldersTab },
-                            onFolderClick = { folder -> 
-                                tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color) 
-                            }
-                        )
 
-                        YourFlowCard(
-                            hazeState = backgroundHazeState,
-                            backgroundLuminance = rawLuminance,
-                            onFlowClick = { tabNavigator.current = FlowTab },
-                            onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
-                        )
+                        if (showMyFolders) {
+                            MyFoldersCard(
+                                folders = folders,
+                                allMovies = allMovies,
+                                hazeState = backgroundHazeState,
+                                backgroundLuminance = rawLuminance,
+                                onViewAllClick = { tabNavigator.current = FoldersTab },
+                                onFolderClick = { folder ->
+                                    tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
+                                }
+                            )
+                        }
+
+                        if (showYourFlow) {
+                            YourFlowCard(
+                                hazeState = backgroundHazeState,
+                                backgroundLuminance = rawLuminance,
+                                onFlowClick = { tabNavigator.current = FlowTab },
+                                onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
+                            )
+                        }
                     }
                     
                     Spacer(modifier = Modifier.height(32.dp))
@@ -533,7 +574,6 @@ object AccountTab : Tab {
         if (showNameDialog) {
                 val focusManager = LocalFocusManager.current
                 var isCheckingName by remember { mutableStateOf(false) }
-                var nameError by remember { mutableStateOf<String?>(null) }
                 BackHandler(enabled = showNameDialog) {
                     showNameDialog = false
                 }
@@ -602,13 +642,22 @@ object AccountTab : Tab {
                                     },
                                     label = { Text(stringResource(R.string.account_new_name_label)) },
                                     singleLine = true,
-                                    isError = nameError != null,
+                                    isError = nameError != null || nameAvailable == false,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(16.dp),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
                                         focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    )
+                                    ),
+                                    trailingIcon = {
+                                        if (isCheckingNameLive) {
+                                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp)
+                                        } else if (nameAvailable == true) {
+                                            Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = null, tint = Color.Green, modifier = Modifier.size(18.dp))
+                                        } else if (nameAvailable == false) {
+                                            Icon(imageVector = Icons.Rounded.Warning, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(18.dp))
+                                        }
+                                    }
                                 )
 
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -651,7 +700,7 @@ object AccountTab : Tab {
                                     Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
                                 }
                                 
-                                val isSaveEnabled = nameChangesCount < 2 && nameInput.isNotBlank() && nameInput != currentDisplayName && !isCheckingName && nameError == null
+                                val isSaveEnabled = nameChangesCount < 2 && nameInput.isNotBlank() && nameInput != currentDisplayName && !isCheckingName && nameError == null && nameAvailable == true
                                 
                                 Box(
                                     modifier = Modifier
@@ -676,35 +725,50 @@ object AccountTab : Tab {
                                                 return@bounceClick
                                             }
                                             
+                                            if (nameAvailable != true) {
+                                                nameError = context.getString(R.string.account_error_name_taken)
+                                                return@bounceClick
+                                            }
+                                            
                                             isCheckingName = true
-                                            Firebase.firestore.collection("users")
-                                                .whereEqualTo("displayName", nameInput)
-                                                .get()
-                                                .addOnSuccessListener { snapshot ->
-                                                    isCheckingName = false
-                                                    if (!snapshot.isEmpty) {
-                                                        nameError = context.getString(R.string.account_error_name_taken)
-                                                    } else {
-                                                        val newCount = nameChangesCount + 1
-                                                        prefs.edit().putInt("changes_${currentUser?.uid}", newCount).apply()
-                                                        nameChangesCount = newCount
-                                                        currentDisplayName = nameInput
-                                                        currentUser?.updateProfile(userProfileChangeRequest { 
-                                                            displayName = nameInput 
-                                                        })?.addOnSuccessListener {
-                                                            Firebase.firestore.collection("users").document(currentUser.uid)
-                                                                .set(mapOf(
-                                                                    "displayName" to nameInput,
-                                                                    "nameChangesCount" to newCount
-                                                                ), SetOptions.merge())
+                                            scope.launch {
+                                                try {
+                                                    val uid = currentUser?.uid ?: return@launch
+                                                    val batch = Firebase.firestore.batch()
+                                                    
+                                                    if (currentDisplayName != "Guest" && currentDisplayName != "User") {
+                                                        val oldUsernameRef = Firebase.firestore.collection("usernames").document(currentDisplayName.lowercase())
+                                                        val oldDoc = oldUsernameRef.get().await()
+                                                        if (oldDoc.exists() && oldDoc.getString("uid") == uid) {
+                                                            batch.delete(oldUsernameRef)
                                                         }
-                                                        showNameDialog = false
                                                     }
-                                                }
-                                                .addOnFailureListener {
-                                                    isCheckingName = false
+                                                    
+                                                    batch.set(Firebase.firestore.collection("usernames").document(nameInput.lowercase()), mapOf("uid" to uid))
+                                                    
+                                                    val newCount = nameChangesCount + 1
+                                                    batch.set(
+                                                        Firebase.firestore.collection("users").document(uid),
+                                                        mapOf("displayName" to nameInput, "nameChangesCount" to newCount),
+                                                        SetOptions.merge()
+                                                    )
+                                                    
+                                                    batch.commit().await()
+                                                    
+                                                    currentUser.updateProfile(com.google.firebase.auth.userProfileChangeRequest { 
+                                                        displayName = nameInput 
+                                                    })?.await()
+                                                    
+                                                    prefs.edit().putInt("changes_${uid}", newCount).apply()
+                                                    nameChangesCount = newCount
+                                                    currentDisplayName = nameInput
+                                                    showNameDialog = false
+                                                } catch(e: Exception) {
                                                     nameError = context.getString(R.string.account_error_checking_name)
+                                                } finally {
+                                                    isCheckingName = false
                                                 }
+                                            }
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {

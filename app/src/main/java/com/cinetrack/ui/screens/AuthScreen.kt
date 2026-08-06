@@ -8,6 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.animation.*
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
@@ -666,7 +669,8 @@ private fun PremiumTextField(
     isError: Boolean = false,
     errorText: String? = null,
     isPassword: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val isFloating = isFocused || value.isNotEmpty()
@@ -781,6 +785,10 @@ private fun PremiumTextField(
                     enabled = enabled,
                     singleLine = true
                 )
+                if (trailingIcon != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    trailingIcon()
+                }
             }
         }
 

@@ -175,6 +175,10 @@
     <string name="settings_split_dropped_desc">Shows dropped series at the bottom of the TV Shows section (if disabled, they will be completely hidden)</string>
     <string name="settings_use_movie_logo">Use Official Logos</string>
     <string name="settings_use_movie_logo_desc">In details, shows the original title logo instead of text, when available.</string>
+    <string name="settings_show_my_folders">My Folders Card</string>
+    <string name="settings_show_my_folders_desc">Shows the My Folders card on your profile dashboard.</string>
+    <string name="settings_show_your_flow">Your Flow Card</string>
+    <string name="settings_show_your_flow_desc">Shows the Your Flow card on your profile dashboard.</string>
     <string name="settings_language">App Language</string>
     <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>
@@ -708,6 +712,8 @@
     <string name="settings_msg_releases_split">Releases split %1$s</string>
     <string name="settings_msg_dropped_split">Dropped split %1$s</string>
     <string name="settings_msg_logo_anim">Logo animation %1$s</string>
+    <string name="settings_msg_my_folders">My Folders card %1$s</string>
+    <string name="settings_msg_your_flow">Your Flow card %1$s</string>
     <string name="settings_msg_notifications">Notifications %1$s</string>
     <string name="settings_msg_vibration">Vibration %1$s</string>
     <string name="settings_msg_dynamic_icon">Dynamic app icon %1$s</string>

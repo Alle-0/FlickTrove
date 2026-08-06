@@ -198,6 +198,10 @@
     <string name="settings_visual_effects_desc">Abilita sfocature e animazioni complesse</string>
     <string name="settings_use_movie_logo">Usa Loghi Ufficiali</string>
     <string name="settings_use_movie_logo_desc">Nei dettagli, mostra il logo originale del titolo al posto del testo, quando disponibile.</string>
+    <string name="settings_show_my_folders">Card Le Mie Cartelle</string>
+    <string name="settings_show_my_folders_desc">Mostra la card Le Mie Cartelle nel tuo profilo.</string>
+    <string name="settings_show_your_flow">Card Il Tuo Flow</string>
+    <string name="settings_show_your_flow_desc">Mostra la card Il Tuo Flow nel tuo profilo.</string>
     <!-- Notifications and Vibration -->
     <string name="settings_notifications_vibration">Notifiche e Vibrazione</string>
     <string name="settings_enable_notifications">Attiva Notifiche</string>
@@ -703,6 +707,8 @@
     <string name="settings_msg_releases_split">Divisione uscite %1$s</string>
     <string name="settings_msg_dropped_split">Divisione abbandonate %1$s</string>
     <string name="settings_msg_logo_anim">Animazione logo %1$s</string>
+    <string name="settings_msg_my_folders">Card Le Mie Cartelle %1$s</string>
+    <string name="settings_msg_your_flow">Card Il Tuo Flow %1$s</string>
     <string name="settings_msg_notifications">Notifiche %1$s</string>
     <string name="settings_msg_vibration">Vibrazione %1$s</string>
     <string name="settings_msg_dynamic_icon">Icona App Dinamica %1$s</string>

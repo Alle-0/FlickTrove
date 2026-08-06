@@ -252,6 +252,14 @@ class SettingsViewModel @Inject constructor(
     val titleTextSizeMultiplier: StateFlow<Float> = settingsRepository.titleTextSizeMultiplier
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1.0f)
 
+    val showMyFolders: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showMyFolders }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val showYourFlow: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showYourFlow }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null) {
@@ -335,6 +343,22 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_logo_anim, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleShowMyFolders(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowMyFolders(enabled)
+            val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_my_folders, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleShowYourFlow(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowYourFlow(enabled)
+            val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_your_flow, context.getString(statusRes)))
         }
     }
 

@@ -22,6 +22,7 @@ import com.cinetrack.ui.utils.UiText
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.auth.userProfileChangeRequest
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
@@ -60,6 +61,7 @@ class AuthViewModel @Inject constructor(
                     }
                     _processState.update { null }
                 }
+                ensureUsernameExists(user.uid, user.email, user.displayName)
             }
         }
     }
@@ -110,7 +112,11 @@ class AuthViewModel @Inject constructor(
             
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
+                    val uid = auth.currentUser?.uid
                     viewModelScope.launch {
+                        if (uid != null) {
+                            ensureUsernameExists(uid, email, auth.currentUser?.displayName)
+                        }
                         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                         movieRepository.syncWithFirebase(force = true) { syncProgress ->
                             _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
@@ -121,6 +127,62 @@ class AuthViewModel @Inject constructor(
                 .addOnFailureListener { exception ->
                     _processState.update { AuthState.Error(getErrorMessage(exception)) }
                 }
+        }
+    }
+
+    suspend fun isUsernameAvailable(username: String): Boolean {
+        if (username.isBlank() || username.length < 3) return false
+        return try {
+            val document = Firebase.firestore.collection("usernames").document(username.lowercase()).get().await()
+            !document.exists()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun generateUniqueUsername(baseName: String): String {
+        var currentName = baseName.replace(Regex("[^a-zA-Z0-9_]"), "")
+        if (currentName.length < 3) currentName = "User" + (100..999).random()
+        if (currentName.length > 15) currentName = currentName.substring(0, 15)
+        
+        var isAvailable = isUsernameAvailable(currentName)
+        var count = 1
+        var finalName = currentName
+        while (!isAvailable) {
+            val suffix = "_${(10..9999).random()}"
+            finalName = currentName.take(20 - suffix.length) + suffix
+            isAvailable = isUsernameAvailable(finalName)
+            count++
+            if (count > 10) break
+        }
+        return finalName
+    }
+
+    private suspend fun ensureUsernameExists(uid: String, fallbackEmail: String?, fallbackName: String?) {
+        try {
+            val userRef = Firebase.firestore.collection("users").document(uid)
+            val snapshot = userRef.get().await()
+            val hasDisplayName = snapshot.exists() && !snapshot.getString("displayName").isNullOrBlank()
+            
+            if (!hasDisplayName) {
+                val baseName = fallbackName?.takeIf { it.isNotBlank() } 
+                    ?: fallbackEmail?.substringBefore("@") 
+                    ?: "User"
+                val uniqueName = generateUniqueUsername(baseName)
+                
+                auth.currentUser?.updateProfile(com.google.firebase.auth.userProfileChangeRequest {
+                    displayName = uniqueName
+                })?.await()
+                
+                val batch = Firebase.firestore.batch()
+                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), com.google.firebase.firestore.SetOptions.merge())
+                
+                val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
+                batch.set(usernameRef, mapOf("uid" to uid))
+                batch.commit().await()
+            }
+        } catch (e: Exception) {
+            // Ignore
         }
     }
 
@@ -145,15 +207,32 @@ class AuthViewModel @Inject constructor(
                 .addOnSuccessListener {
                     val uid = auth.currentUser?.uid
                     if (uid != null) {
-                        Firebase.firestore.collection("users").document(uid)
-                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
-                    }
-                    viewModelScope.launch {
-                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        viewModelScope.launch {
+                            try {
+                                val baseName = email.substringBefore("@")
+                                val uniqueName = generateUniqueUsername(baseName)
+
+                                auth.currentUser?.updateProfile(userProfileChangeRequest {
+                                    displayName = uniqueName
+                                })?.await()
+                                
+                                val batch = Firebase.firestore.batch()
+                                val userRef = Firebase.firestore.collection("users").document(uid)
+                                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                
+                                val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
+                                batch.set(usernameRef, mapOf("uid" to uid))
+                                batch.commit().await()
+                            } catch (e: Exception) {
+                                // ignore
+                            }
+                            
+                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                            }
+                            _processState.update { AuthState.Authenticated }
                         }
-                        _processState.update { AuthState.Authenticated }
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -165,15 +244,32 @@ class AuthViewModel @Inject constructor(
                 .addOnSuccessListener {
                     val uid = auth.currentUser?.uid
                     if (uid != null) {
-                        Firebase.firestore.collection("users").document(uid)
-                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
-                    }
-                    viewModelScope.launch {
-                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        viewModelScope.launch {
+                            try {
+                                val baseName = email.substringBefore("@")
+                                val uniqueName = generateUniqueUsername(baseName)
+
+                                auth.currentUser?.updateProfile(userProfileChangeRequest {
+                                    displayName = uniqueName
+                                })?.await()
+                                
+                                val batch = Firebase.firestore.batch()
+                                val userRef = Firebase.firestore.collection("users").document(uid)
+                                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                
+                                val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
+                                batch.set(usernameRef, mapOf("uid" to uid))
+                                batch.commit().await()
+                            } catch (e: Exception) {
+                                // ignore
+                            }
+                            
+                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                            }
+                            _processState.update { null }
                         }
-                        _processState.update { null }
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -190,18 +286,38 @@ class AuthViewModel @Inject constructor(
         if (currentUser != null && currentUser.isAnonymous) {
             // Link anonymous account to Google
             currentUser.linkWithCredential(credential)
-                .addOnSuccessListener {
+                .addOnSuccessListener { result ->
+                    val isNewUser = result.additionalUserInfo?.isNewUser == true
                     val uid = auth.currentUser?.uid
                     if (uid != null) {
-                        Firebase.firestore.collection("users").document(uid)
-                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
-                    }
-                    viewModelScope.launch {
-                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        viewModelScope.launch {
+                            if (isNewUser) {
+                                val baseName = result.user?.displayName ?: "User"
+                                val uniqueName = generateUniqueUsername(baseName)
+                                
+                                try {
+                                    auth.currentUser?.updateProfile(userProfileChangeRequest {
+                                        displayName = uniqueName
+                                    })?.await()
+                                    
+                                    val batch = Firebase.firestore.batch()
+                                    val userRef = Firebase.firestore.collection("users").document(uid)
+                                    batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                    
+                                    val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
+                                    batch.set(usernameRef, mapOf("uid" to uid))
+                                    batch.commit().await()
+                                } catch (e: Exception) { }
+                            } else {
+                                ensureUsernameExists(uid, auth.currentUser?.email, result.user?.displayName)
+                            }
+                            
+                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                            }
+                            _processState.update { AuthState.Authenticated }
                         }
-                        _processState.update { AuthState.Authenticated }
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -210,8 +326,13 @@ class AuthViewModel @Inject constructor(
                         // Sign in to that account instead and clear local guest data.
                         viewModelScope.launch {
                             movieRepository.clearAllData()
-                            auth.signInWithCredential(credential).addOnSuccessListener {
+                            auth.signInWithCredential(credential).addOnSuccessListener { result ->
+                                val uid = auth.currentUser?.uid
                                 viewModelScope.launch {
+                                    if (uid != null) {
+                                        ensureUsernameExists(uid, auth.currentUser?.email, auth.currentUser?.displayName)
+                                    }
+                                    
                                     _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                                     movieRepository.syncWithFirebase(force = true) { syncProgress ->
                                         _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
@@ -232,16 +353,35 @@ class AuthViewModel @Inject constructor(
                 .addOnSuccessListener { result ->
                     val isNewUser = result.additionalUserInfo?.isNewUser == true
                     val uid = auth.currentUser?.uid
-                    if (isNewUser && uid != null) {
-                        Firebase.firestore.collection("users").document(uid)
-                            .set(mapOf("avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
-                    }
-                    viewModelScope.launch {
-                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                    if (uid != null) {
+                        viewModelScope.launch {
+                            if (isNewUser) {
+                                val baseName = result.user?.displayName ?: "User"
+                                val uniqueName = generateUniqueUsername(baseName)
+                                
+                                try {
+                                    auth.currentUser?.updateProfile(userProfileChangeRequest {
+                                        displayName = uniqueName
+                                    })?.await()
+                                    
+                                    val batch = Firebase.firestore.batch()
+                                    val userRef = Firebase.firestore.collection("users").document(uid)
+                                    batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                    
+                                    val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
+                                    batch.set(usernameRef, mapOf("uid" to uid))
+                                    batch.commit().await()
+                                } catch (e: Exception) { }
+                            } else {
+                                ensureUsernameExists(uid, auth.currentUser?.email, result.user?.displayName)
+                            }
+                            
+                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                            }
+                            _processState.update { null }
                         }
-                        _processState.update { null }
                     }
                 }
                 .addOnFailureListener { exception ->

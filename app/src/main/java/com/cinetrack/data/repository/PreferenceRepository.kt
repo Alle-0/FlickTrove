@@ -44,6 +44,8 @@ class PreferenceRepository @Inject constructor(
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         val DEFAULT_START_TAB = stringPreferencesKey("default_start_tab")
         val TVDB_JWT_TOKEN = stringPreferencesKey("tvdb_jwt_token")
+        val SHOW_MY_FOLDERS = booleanPreferencesKey("show_my_folders")
+        val SHOW_YOUR_FLOW = booleanPreferencesKey("show_your_flow")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -82,7 +84,9 @@ class PreferenceRepository @Inject constructor(
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
                 defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home",
-                tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: ""
+                tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: "",
+                showMyFolders = preferences[PreferencesKeys.SHOW_MY_FOLDERS] ?: true,
+                showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true
             )
         }
 
@@ -213,12 +217,26 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
             preferences[PreferencesKeys.DEFAULT_START_TAB] = prefs.defaultStartTab
             preferences[PreferencesKeys.TVDB_JWT_TOKEN] = prefs.tvdbJwtToken
+            preferences[PreferencesKeys.SHOW_MY_FOLDERS] = prefs.showMyFolders
+            preferences[PreferencesKeys.SHOW_YOUR_FLOW] = prefs.showYourFlow
         }
     }
 
     suspend fun updateTvdbJwtToken(token: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TVDB_JWT_TOKEN] = token
+        }
+    }
+
+    suspend fun updateShowMyFolders(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_MY_FOLDERS] = show
+        }
+    }
+
+    suspend fun updateShowYourFlow(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_YOUR_FLOW] = show
         }
     }
 

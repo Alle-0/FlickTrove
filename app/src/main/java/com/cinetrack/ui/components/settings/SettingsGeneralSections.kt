@@ -48,6 +48,8 @@ fun SettingsUILayoutSection(
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
+    val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
+    val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -70,6 +72,44 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleFolderBookmarks(!showFolderBookmarks)
+            }
+        )
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
+            title = stringResource(R.string.settings_show_my_folders),
+            description = stringResource(R.string.settings_show_my_folders_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showMyFolders,
+                    onCheckedChange = {
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleShowMyFolders(it)
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleShowMyFolders(!showMyFolders)
+            }
+        )
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+            title = stringResource(R.string.settings_show_your_flow),
+            description = stringResource(R.string.settings_show_your_flow_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showYourFlow,
+                    onCheckedChange = {
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleShowYourFlow(it)
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleShowYourFlow(!showYourFlow)
             }
         )
         SettingsItem(

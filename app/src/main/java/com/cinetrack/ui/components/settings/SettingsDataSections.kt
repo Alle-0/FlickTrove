@@ -383,8 +383,16 @@ fun SettingsAccountSection(
 ) {
     val context = LocalContext.current
     val isGuest = user?.isAnonymous == true
-    val email = user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.settings_guest)
     val hasGoogle = user?.providerData?.any { it.providerId == "google.com" } == true
+    val email = when {
+        isGuest -> stringResource(R.string.settings_guest)
+        hasGoogle -> user?.providerData
+            ?.firstOrNull { it.providerId == "google.com" }
+            ?.email?.takeIf { it.isNotBlank() }
+            ?: user?.email?.takeIf { it.isNotBlank() }
+            ?: stringResource(R.string.settings_guest)
+        else -> user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.settings_guest)
+    }
 
     SettingsSection(
         title = stringResource(R.string.settings_account),
