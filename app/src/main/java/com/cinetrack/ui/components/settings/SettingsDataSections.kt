@@ -111,7 +111,8 @@ fun SettingsSyncBackupSection(
     permissionLauncher: ManagedActivityResultLauncher<String, Boolean>,
     onShowExternalMigrationDialog: () -> Unit,
     onShowBackupDialog: () -> Unit,
-    onShowDeepSyncConfirm: () -> Unit
+    onShowDeepSyncConfirm: () -> Unit,
+    onShowUnmatchedItems: () -> Unit
 ) {
     val context = LocalContext.current
     val isTraktLoggedIn by settingsViewModel.isTraktLoggedIn.collectAsStateWithLifecycle()
@@ -172,6 +173,18 @@ fun SettingsSyncBackupSection(
                         )
                     }
                 }
+            }
+        )
+
+        // View Unmatched Items
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_error),
+            title = stringResource(R.string.unmatched_items_title),
+            description = stringResource(R.string.unmatched_items_desc),
+            tint = MaterialTheme.colorScheme.error,
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                onShowUnmatchedItems()
             }
         )
 
@@ -603,7 +616,7 @@ fun SettingsFooterSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Controlla aggiornamenti su GitHub",
+                        text = stringResource(R.string.settings_check_updates_github),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.65f)

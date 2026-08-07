@@ -640,6 +640,11 @@
     <string name="filter_genres">GENERI</string>
     <string name="filter_platforms">PIATTAFORME</string>
     <string name="filter_period">PERIODO</string>
+    <string name="filter_status">STATO</string>
+    <string name="filter_status_watching">In visione</string>
+    <string name="filter_status_not_started">Non iniziate</string>
+    <string name="filter_status_dropped">Abbandonate</string>
+    <string name="filter_status_up_to_date">In pari</string>
     <string name="filter_selected_subgenre">SOTTOGENERE SELEZIONATO</string>
     <string name="card_quick_rate">Voto rapido</string>
     <string name="card_quick_note">Nota rapida</string>
@@ -1093,4 +1098,20 @@
     <string name="dashboard_your_flow_desc">Il tuo mix curato di scoperte e suggerimenti</string>
     <string name="auth_guest_prompt_title">Account Richiesto</string>
     <string name="auth_guest_prompt_desc">Devi creare un account per personalizzare il tuo profilo e avatar.</string>
+    <string name="account_edit_profile">Modifica Profilo</string>
+    <string name="account_change_name_menu">Cambia Nome</string>
+    <string name="account_change_avatar_menu">Cambia Avatar</string>
+    <string name="account_change_cover_menu">Cambia Copertina</string>
+    <string name="settings_check_updates_github">Controlla aggiornamenti su GitHub</string>
+    <string name="account_error_max_name_changes">Hai raggiunto il limite di cambi nome.</string>
+    <string name="account_error_name_update_failed">Errore nel cambio del nome.</string>
+    <string name="account_guest_sync_title">Sincronizza Dati</string>
+    <string name="account_guest_sync_message">Accedi per sincronizzare i tuoi dati.</string>
+    <string name="unmatched_items_title">Scartati / Non Riconosciuti</string>
+    <string name="unmatched_items_desc">Visualizza i film e le serie non riconosciuti da TMDB durante l\'ultima importazione</string>
+    <string name="unmatched_items_count">%d elementi</string>
+    <string name="unmatched_items_empty">Nessun elemento scartato! ??</string>
 </resources>
+
+
+

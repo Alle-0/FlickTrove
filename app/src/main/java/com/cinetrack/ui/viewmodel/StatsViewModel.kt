@@ -81,7 +81,7 @@ class StatsViewModel @Inject constructor(
         _timeRange,
         preferenceRepository.userPreferencesFlow.map { it.contentLanguage }.distinctUntilChanged()
     ) { movies, range, contentLanguage ->
-        val watchedMovies = movies.filter { it.watched || (it.mediaType == "tv" && it.dropped) }
+        val watchedMovies = movies.filter { it.watched || (it.mediaType == "tv" && (it.dropped || !it.watchedEpisodes.isNullOrEmpty())) }
         // Build the list of years from watchedAt only — never releaseDate.
         // This ensures the year picker shows years when the user actually watched things.
         val years = watchedMovies.mapNotNull { movie ->
@@ -147,7 +147,7 @@ class StatsViewModel @Inject constructor(
     }
 
     private fun calculateStats(movies: List<Movie>, allMovies: List<Movie>, language: String): CalculatedStats {
-        val watched = movies.filter { it.watched || (it.mediaType == "tv" && it.dropped) }
+        val watched = movies.filter { it.watched || (it.mediaType == "tv" && (it.dropped || !it.watchedEpisodes.isNullOrEmpty())) }
         val watchedMovies = watched.filter { it.mediaType != "tv" }
         val watchedTV = watched.filter { it.mediaType == "tv" }
 

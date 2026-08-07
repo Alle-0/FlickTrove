@@ -53,6 +53,19 @@ class GetHomeUiStateUseCase @Inject constructor() {
                     }
                 }
                 .filter { prefs.homeSort.selectedProviders.isEmpty() || it.streamingProviderIds?.any { p -> p in prefs.homeSort.selectedProviders } == true }
+                .filter { movie ->
+                    prefs.homeSort.selectedStatuses.isEmpty() || 
+                    movie.mediaType != "tv" || 
+                    prefs.homeSort.selectedStatuses.any { status ->
+                        when (status) {
+                            "dropped" -> movie.dropped
+                            "not_started" -> !movie.dropped && (movie.progress ?: 0.0) == 0.0
+                            "watching" -> !movie.dropped && (movie.progress ?: 0.0) > 0.0
+                            "up_to_date" -> false // Se è in Home, non è mai 'up_to_date' (completato)
+                            else -> false
+                        }
+                    }
+                }
                 .toList()
 
             val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort)

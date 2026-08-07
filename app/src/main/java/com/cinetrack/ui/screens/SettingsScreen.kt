@@ -61,6 +61,7 @@ import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.settings.*
 import com.cinetrack.ui.components.settings.WipeDataSelectionDialog
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.dialog.UnmatchedItemsModal
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
 import androidx.compose.ui.res.vectorResource
@@ -399,6 +400,9 @@ fun SettingsScreenContent(
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
                            showDeepSyncConfirm || pendingMigrationFilePath != null
 
+    var showUnmatchedItemsModal by remember { mutableStateOf(false) }
+    val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
+
     BackHandler(enabled = anyDialogVisible) {
         focusManager.clearFocus()
         showDeleteDialog = false
@@ -415,6 +419,7 @@ fun SettingsScreenContent(
         showWipeSelectionDialog = false
         showWipeLocalDataConfirm = false
         showWipeTotalDataConfirm = false
+        var showUnmatchedItemsModal = false
         pendingMigrationFilePath = null
     }
 
@@ -638,7 +643,8 @@ fun SettingsScreenContent(
                             permissionLauncher = permissionLauncher,
                             onShowExternalMigrationDialog = { showExternalMigrationDialog = true },
                             onShowBackupDialog = { showBackupDialog = true },
-                            onShowDeepSyncConfirm = { showDeepSyncConfirm = true }
+                            onShowDeepSyncConfirm = { showDeepSyncConfirm = true },
+                            onShowUnmatchedItems = { showUnmatchedItemsModal = true }
                         )
                     }
 
@@ -697,6 +703,7 @@ fun SettingsScreenContent(
                                 showLogoutConfirm = false
                                 showBackupDialog = false
                                 showExternalMigrationDialog = false
+                                showUnmatchedItemsModal = false
                             }
                         )
                 )
@@ -920,10 +927,15 @@ fun SettingsScreenContent(
             }
         )
 
+        UnmatchedItemsModal(
+            isVisible = showUnmatchedItemsModal,
+            onClose = { showUnmatchedItemsModal = false },
+            movies = unmatchedMovies
+        )
+
         SettingsLoadingOverlay(
             visible = isBackupLoading,
             activeHazeState = activeHazeState
         )
     }
 }
-

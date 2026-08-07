@@ -27,6 +27,8 @@ import com.cinetrack.ui.viewmodel.HomeViewModel
 import com.cinetrack.ui.viewmodel.StatsViewModel
 import com.cinetrack.ui.viewmodel.TimeRange
 import com.cinetrack.ui.viewmodel.VistiViewModel
+import com.cinetrack.ui.viewmodel.SettingsViewModel
+import com.cinetrack.ui.components.account.AccountModals
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -56,6 +58,7 @@ fun MainModalsContainer(
                     sortConfig = homeUiState.sortConfig,
                     hazeState = globalHazeState,
                     triggerBounds = filterButtonBounds,
+                    category = homeUiState.activeTab,
                     onSortConfigChanged = { newConfig -> homeViewModel.updateSortConfig(newConfig); onFilterModalDismiss() },
                     onDismissRequest = onFilterModalDismiss
                 )
@@ -138,4 +141,11 @@ fun MainModalsContainer(
             }
         }
     }
+    
+    val settingsViewModel = if (activity != null) {
+        hiltViewModel<SettingsViewModel>(activity)
+    } else {
+        with(screen) { getViewModel<SettingsViewModel>() }
+    }
+    AccountModals(settingsViewModel = settingsViewModel, globalHazeState = globalHazeState)
 }

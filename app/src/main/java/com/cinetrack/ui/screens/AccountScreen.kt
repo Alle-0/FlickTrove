@@ -58,6 +58,9 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.vectorResource
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.window.Dialog
@@ -124,27 +127,25 @@ object AccountTab : Tab {
         val folders by foldersViewModel.folders.collectAsStateWithLifecycle()
         val allMovies by foldersViewModel.allMovies.collectAsStateWithLifecycle()
 
-        val settingsViewModel = hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        val context = androidx.compose.ui.platform.LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        val settingsViewModel = if (activity != null) {
+            hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
+        } else {
+            hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        }
         val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
         val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
         
         // Firebase User Info
         val currentUser = Firebase.auth.currentUser
-        val context = androidx.compose.ui.platform.LocalContext.current
         val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
         val prefs = remember { context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE) }
         
-        var nameChangesCount by remember(currentUser?.uid) { 
-            mutableIntStateOf(prefs.getInt("changes_${currentUser?.uid}", 0))
-        }
-        var showNameDialog by remember { mutableStateOf(false) }
-        var showNewFolderDialog by remember { mutableStateOf(false) }
-        var showGuestAuthDialog by remember { mutableStateOf(false) }
-        var nameInput by remember { mutableStateOf("") }
-        var isCheckingNameLive by remember { mutableStateOf(false) }
-        var nameAvailable by remember { mutableStateOf<Boolean?>(null) }
-        var nameError by remember { mutableStateOf<String?>(null) }
-
         var currentDisplayName by remember(currentUser) {
             mutableStateOf(
                 when {
@@ -155,39 +156,6 @@ object AccountTab : Tab {
                 }
             )
         }
-
-        // When editing name, show a live preview of the input across the UI
-        val displayedName by remember(showNameDialog, nameInput, currentDisplayName) {
-            derivedStateOf { if (showNameDialog) nameInput.ifBlank { currentDisplayName } else currentDisplayName }
-        }
-
-        LaunchedEffect(nameInput) {
-            if (nameInput.isBlank() || nameInput == currentDisplayName) {
-                nameAvailable = null
-                return@LaunchedEffect
-            }
-            if (nameInput.length < 3) {
-                nameAvailable = null
-                return@LaunchedEffect
-            }
-            
-            isCheckingNameLive = true
-            kotlinx.coroutines.delay(500)
-            try {
-                val doc = com.google.firebase.ktx.Firebase.firestore.collection("usernames").document(nameInput.lowercase()).get().await()
-                nameAvailable = !doc.exists()
-                if (!nameAvailable!!) {
-                    nameError = context.getString(R.string.account_error_name_taken)
-                }
-            } catch(e: kotlinx.coroutines.CancellationException) {
-                throw e
-            } catch(e: Exception) {
-                nameAvailable = false
-                nameError = e.localizedMessage
-            }
-            isCheckingNameLive = false
-        }
-        
 
 
         var currentPhotoUrl by remember { mutableStateOf(currentUser?.photoUrl) }
@@ -209,12 +177,6 @@ object AccountTab : Tab {
                                 currentUser.updateProfile(userProfileChangeRequest {
                                     displayName = firestoreName
                                 })
-                            }
-
-                            val dbNameChanges = snapshot.getLong("nameChangesCount")?.toInt() ?: 0
-                            if (dbNameChanges > nameChangesCount) {
-                                nameChangesCount = dbNameChanges
-                                prefs.edit().putInt("changes_${currentUser.uid}", dbNameChanges).apply()
                             }
                             
                             val firestorePhoto = snapshot.getString("photoUrl")
@@ -402,65 +364,11 @@ object AccountTab : Tab {
                                             modifier = Modifier.size(48.dp)
                                         )
                                     }
-                                }
-                            }
-
-                            // Edit Pencil Icon
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = (-2).dp, y = (-2).dp)
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(animatedBorderColor)
-                                    .border(2.dp, Color(0xFF1E1E1E), CircleShape), // Assuming dark background color for stroke
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val baseColor = rawExtractedColor ?: MaterialTheme.colorScheme.primary
-                                val iconTint = if (baseColor.luminance() > 0.5f) Color.Black else Color.White
-                                        
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_pencil),
-                                    contentDescription = "Edit photo",
-                                    tint = iconTint,
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .bounceClick {
-                                            if (currentUser == null || currentUser.isAnonymous) {
-                                                showGuestAuthDialog = true
-                                            } else if (avatarBanned) {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(context.getString(R.string.avatar_banned_message))
-                                                }
-                                            } else {
-                                                avatarSelection.show { newUrl, _ ->
-                                                    val oldUrl = currentPhotoUrl
-                                                    // Optimistic Update
-                                                    currentPhotoUrl = newUrl?.let { Uri.parse(it) }
-                                                    
-                                                    currentUser?.updateProfile(userProfileChangeRequest { 
-                                                        photoUri = newUrl?.let { Uri.parse(it) } 
-                                                    })?.addOnSuccessListener {
-                                                        val updates = mutableMapOf<String, Any?>(
-                                                            "photoUrl" to newUrl
-                                                        )
-                                                        Firebase.firestore.collection("users").document(currentUser.uid)
-                                                            .set(updates, SetOptions.merge())
-                                                    }?.addOnFailureListener {
-                                                        // Rollback
-                                                        currentPhotoUrl = oldUrl
-                                                        scope.launch {
-                                                            snackbarHostState.showSnackbar("Failed to update avatar. Please try again.")
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                )
                             }
                         }
+                    }
                         
-                        Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                         
                         // Name Container
                         Box(
@@ -481,17 +389,6 @@ object AccountTab : Tab {
                                         borderColor = Color.White.copy(alpha = 0.1f),
                                         borderWidth = 1.dp
                                     )
-                                    .clickable(
-                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                        indication = null
-                                    ) {
-                                        if (currentUser == null || currentUser.isAnonymous) {
-                                            showGuestAuthDialog = true
-                                        } else {
-                                            nameInput = currentDisplayName
-                                            showNameDialog = true
-                                        }
-                                    }
                                     .padding(horizontal = 24.dp, vertical = 8.dp)
                             ) {
                             val namePencilColor = Color(0xFFF0F0F0)
@@ -502,7 +399,7 @@ object AccountTab : Tab {
                                 blurRadius = 4f
                             )
                             Text(
-                                text = displayedName,
+                                text = currentDisplayName,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = namePencilColor,
@@ -511,13 +408,6 @@ object AccountTab : Tab {
                                 modifier = Modifier.weight(1f, fill = false),
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_pencil),
-                                contentDescription = "Edit Name",
-                                tint = namePencilColor,
-                                modifier = Modifier.size(18.dp)
                             )
                         }
                         }
@@ -570,284 +460,7 @@ object AccountTab : Tab {
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp) // Avoid bottom bar
             )
         }
-        val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
-        if (showNameDialog) {
-                val focusManager = LocalFocusManager.current
-                var isCheckingName by remember { mutableStateOf(false) }
-                BackHandler(enabled = showNameDialog) {
-                    showNameDialog = false
-                }
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable(
-                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                            indication = null
-                        ) { 
-                            focusManager.clearFocus()
-                            showNameDialog = false 
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = 400.dp)
-                            .fillMaxWidth(0.85f)
-                            .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                focusManager.clearFocus()
-                            }
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(24.dp)
-                        ) {
-                            Text(
-                                stringResource(R.string.account_change_name_title),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                stringResource(R.string.account_name_changes_left, 2 - nameChangesCount),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            val maxNameLength = 20
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                OutlinedTextField(
-                                    value = nameInput,
-                                    onValueChange = {
-                                        val filtered = it.filterNot { char -> char.isWhitespace() }
-                                        if (filtered.length <= maxNameLength) {
-                                            nameInput = filtered
-                                            if (filtered.isNotEmpty() && filtered.length < 3) {
-                                                nameError = context.getString(R.string.account_error_name_short)
-                                            } else if (validator.containsOffensiveWords(filtered)) {
-                                                nameError = context.getString(R.string.account_error_name_profanity)
-                                            } else {
-                                                nameError = null
-                                            }
-                                        } else {
-                                            nameError = context.getString(R.string.account_error_name_long)
-                                        }
-                                    },
-                                    label = { Text(stringResource(R.string.account_new_name_label)) },
-                                    singleLine = true,
-                                    isError = nameError != null || nameAvailable == false,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    trailingIcon = {
-                                        if (isCheckingNameLive) {
-                                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp)
-                                        } else if (nameAvailable == true) {
-                                            Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = null, tint = Color.Green, modifier = Modifier.size(18.dp))
-                                        } else if (nameAvailable == false) {
-                                            Icon(imageVector = Icons.Rounded.Warning, contentDescription = null, tint = Color(0xFFE57373), modifier = Modifier.size(18.dp))
-                                        }
-                                    }
-                                )
 
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Text(
-                                        text = "${nameInput.length}/$maxNameLength",
-                                        color = Color.White.copy(alpha = 0.6f),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                            
-                            if (nameError != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = nameError!!,
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(48.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .bounceClick { showNameDialog = false },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
-                                }
-                                
-                                val isSaveEnabled = nameChangesCount < 2 && nameInput.isNotBlank() && nameInput != currentDisplayName && !isCheckingName && nameError == null && nameAvailable == true
-                                
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(48.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(
-                                            if (isSaveEnabled) MaterialTheme.colorScheme.primary 
-                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                                        )
-                                        .bounceClick {
-                                            if (!isSaveEnabled) return@bounceClick
-                                            focusManager.clearFocus()
-                                            
-                                            if (nameInput.length < 3) {
-                                                nameError = context.getString(R.string.account_error_name_short)
-                                                return@bounceClick
-                                            }
-                                            
-                                            if (validator.containsOffensiveWords(nameInput)) {
-                                                nameError = context.getString(R.string.account_error_name_profanity)
-                                                return@bounceClick
-                                            }
-                                            
-                                            if (nameAvailable != true) {
-                                                nameError = context.getString(R.string.account_error_name_taken)
-                                                return@bounceClick
-                                            }
-                                            
-                                            isCheckingName = true
-                                            scope.launch {
-                                                try {
-                                                    val uid = currentUser?.uid ?: return@launch
-                                                    val batch = Firebase.firestore.batch()
-                                                    
-                                                    if (currentDisplayName != "Guest" && currentDisplayName != "User") {
-                                                        val oldUsernameRef = Firebase.firestore.collection("usernames").document(currentDisplayName.lowercase())
-                                                        val oldDoc = oldUsernameRef.get().await()
-                                                        if (oldDoc.exists() && oldDoc.getString("uid") == uid) {
-                                                            batch.delete(oldUsernameRef)
-                                                        }
-                                                    }
-                                                    
-                                                    batch.set(Firebase.firestore.collection("usernames").document(nameInput.lowercase()), mapOf("uid" to uid))
-                                                    
-                                                    val newCount = nameChangesCount + 1
-                                                    batch.set(
-                                                        Firebase.firestore.collection("users").document(uid),
-                                                        mapOf("displayName" to nameInput, "nameChangesCount" to newCount),
-                                                        SetOptions.merge()
-                                                    )
-                                                    
-                                                    batch.commit().await()
-                                                    
-                                                    currentUser.updateProfile(com.google.firebase.auth.userProfileChangeRequest { 
-                                                        displayName = nameInput 
-                                                    })?.await()
-                                                    
-                                                    prefs.edit().putInt("changes_${uid}", newCount).apply()
-                                                    nameChangesCount = newCount
-                                                    currentDisplayName = nameInput
-                                                    showNameDialog = false
-                                                } catch(e: Exception) {
-                                                    nameError = context.getString(R.string.account_error_checking_name)
-                                                } finally {
-                                                    isCheckingName = false
-                                                }
-                                            }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (isCheckingName) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
-                                    } else {
-                                        Text(
-                                            stringResource(R.string.account_save), 
-                                            fontWeight = FontWeight.Bold, 
-                                            color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-        if (showGuestAuthDialog) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable(
-                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                            indication = null
-                        ) { 
-                            showGuestAuthDialog = false 
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = 400.dp)
-                            .fillMaxWidth(0.85f)
-                            .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) { }
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(24.dp)
-                        ) {
-                            Text(
-                                stringResource(R.string.auth_guest_prompt_title),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                stringResource(R.string.auth_guest_prompt_desc),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.7f),
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                TextButton(onClick = { showGuestAuthDialog = false }) {
-                                    Text(stringResource(R.string.auth_guest_dialog_cancel), color = Color.White.copy(alpha = 0.7f))
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                TextButton(onClick = { 
-                                    showGuestAuthDialog = false 
-                                    parentNavigator.push(com.cinetrack.ui.screens.LoginScreen())
-                                }) {
-                                    Text(stringResource(R.string.auth_create_account), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                    }
-                }
-        }
     }
 }
 

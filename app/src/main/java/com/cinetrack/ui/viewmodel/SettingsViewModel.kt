@@ -12,6 +12,7 @@ import com.cinetrack.data.repository.BackupRepository
 import com.cinetrack.data.repository.FeedbackRepository
 import com.cinetrack.data.repository.SettingsRepository
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
@@ -51,6 +52,24 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val updateInfo = appUpdateManager.updateInfo
+
+    private val _showEditProfileMenu = MutableSharedFlow<Unit>()
+    val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
+
+    private val _showDashboardSettingsMenu = MutableSharedFlow<Unit>()
+    val showDashboardSettingsMenu = _showDashboardSettingsMenu.asSharedFlow()
+
+    fun triggerEditProfileMenu() {
+        viewModelScope.launch {
+            _showEditProfileMenu.emit(Unit)
+        }
+    }
+    
+    fun triggerDashboardSettingsMenu() {
+        viewModelScope.launch {
+            _showDashboardSettingsMenu.emit(Unit)
+        }
+    }
 
     init {
         checkForUpdates(false)
@@ -129,6 +148,14 @@ class SettingsViewModel @Inject constructor(
     fun clearPendingReveal() {
         _pendingReveal.value = null
     }
+
+    val unmatchedMovies: StateFlow<List<Movie>> = movieRepository.getLocalMoviesFlow()
+        .map { movies -> movies.filter { it.posterPath == null && it.overview == null } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _isAnyDialogOpen = MutableStateFlow(false)
     val isAnyDialogOpen = _isAnyDialogOpen.asStateFlow()

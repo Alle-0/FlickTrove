@@ -175,6 +175,7 @@ fun HomeFilterModal(
                             "genres" -> with(density) { 250.dp.toPx() }
                             "platforms" -> with(density) { 100.dp.toPx() }
                             "period" -> with(density) { 120.dp.toPx() }
+                            "status" -> with(density) { 120.dp.toPx() }
                             else -> 0f
                         }
                         
@@ -278,7 +279,8 @@ fun HomeFilterModal(
                                 val hasActiveFilters = localSortConfig.selectedGenres.isNotEmpty() ||
                                     localSortConfig.selectedKeywords.isNotEmpty() ||
                                     localSortConfig.selectedProviders.isNotEmpty() ||
-                                    localSortConfig.selectedDecades.isNotEmpty()
+                                    localSortConfig.selectedDecades.isNotEmpty() ||
+                                    localSortConfig.selectedStatuses.isNotEmpty()
                                 if (hasActiveFilters) {
                                     Row(
                                         modifier = Modifier
@@ -287,7 +289,8 @@ fun HomeFilterModal(
                                                     selectedGenres = emptyList(),
                                                     selectedKeywords = emptyList(),
                                                     selectedProviders = emptyList(),
-                                                    selectedDecades = emptyList()
+                                                    selectedDecades = emptyList(),
+                                                    selectedStatuses = emptyList()
                                                 )
                                             }
                                             .clip(RoundedCornerShape(24.dp))
@@ -394,6 +397,47 @@ fun HomeFilterModal(
                                                 iconRotation = -90f,
                                                 modifier = Modifier.weight(1f),
                                                 onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // --- STATUS SECTION (Only for TV) ---
+                            if (category == "tv") {
+                                ExpandableSection(
+                                    title = stringResource(R.string.filter_status),
+                                    isExpanded = expandedSection == "status",
+                                    badgeCount = localSortConfig.selectedStatuses.size,
+                                    onToggle = { expandedSection = if (expandedSection == "status") null else "status" }
+                                ) {
+                                    val statuses = if (!isVisti) {
+                                        listOf(
+                                            "watching" to stringResource(R.string.filter_status_watching),
+                                            "not_started" to stringResource(R.string.filter_status_not_started),
+                                            "dropped" to stringResource(R.string.filter_status_dropped)
+                                        )
+                                    } else {
+                                        listOf(
+                                            "up_to_date" to stringResource(R.string.filter_status_up_to_date)
+                                        )
+                                    }
+                                    
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        statuses.forEach { (statusId, label) ->
+                                            val isSelected = statusId in localSortConfig.selectedStatuses
+                                            FilterChip(
+                                                label = label.uppercase(),
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    val newList = if (isSelected) localSortConfig.selectedStatuses - statusId
+                                                               else localSortConfig.selectedStatuses + statusId
+                                                    localSortConfig = localSortConfig.copy(selectedStatuses = newList)
+                                                }
                                             )
                                         }
                                     }

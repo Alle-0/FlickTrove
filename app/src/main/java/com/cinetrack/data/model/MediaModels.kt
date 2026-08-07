@@ -60,7 +60,8 @@ data class SortConfig(
     val selectedGenres: List<Long> = emptyList(),
     val selectedProviders: List<Long> = emptyList(),
     val selectedDecades: List<String> = emptyList(),
-    val selectedKeywords: List<Long> = emptyList()
+    val selectedKeywords: List<Long> = emptyList(),
+    val selectedStatuses: List<String> = emptyList() // "dropped", "not_started", "watching", "up_to_date"
 )
 
 @Serializable

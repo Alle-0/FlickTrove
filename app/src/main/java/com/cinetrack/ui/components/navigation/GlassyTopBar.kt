@@ -71,7 +71,8 @@ fun GlassyTopBar(
     onLayoutToggleClick: (() -> Unit)? = null,
     layoutColumns: Int? = null,
     hasAppUpdateBadge: Boolean = false,
-    onEditBackdropClick: (() -> Unit)? = null
+    onEditBackdropClick: (() -> Unit)? = null,
+    onSettingsClick: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -298,6 +299,25 @@ fun GlassyTopBar(
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                             contentDescription = "Ricarica",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                if (onSettingsClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = onSettingsClick
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                            contentDescription = "Impostazioni",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )

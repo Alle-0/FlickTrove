@@ -342,17 +342,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onEditBackdropClick = if (currentTab is AccountTab) { 
                                         {
                                             if (currentUser != null && !currentUser.isAnonymous) {
-                                                avatarSelection.show(com.cinetrack.ui.components.account.AvatarSelectionMode.BACKDROP) { _, backdropUrl ->
-                                                    if (backdropUrl != null) {
-                                                        prefs.edit().putString("avatar_backdrop_${currentUser.uid}", backdropUrl).apply()
-                                                    } else {
-                                                        prefs.edit().remove("avatar_backdrop_${currentUser.uid}").apply()
-                                                    }
-                                                    com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(currentUser.uid)
-                                                        .set(mapOf("avatarBackdrop" to backdropUrl), com.google.firebase.firestore.SetOptions.merge())
-                                                }
+                                                settingsViewModel.triggerEditProfileMenu()
                                             }
                                         } 
+                                    } else null,
+                                    onSettingsClick = if (currentTab is AccountTab) {
+                                        {
+                                            settingsViewModel.triggerDashboardSettingsMenu()
+                                        }
                                     } else null
                                 )
                             }

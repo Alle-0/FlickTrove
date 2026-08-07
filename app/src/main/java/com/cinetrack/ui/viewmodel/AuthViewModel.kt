@@ -164,23 +164,30 @@ class AuthViewModel @Inject constructor(
             val snapshot = userRef.get().await()
             val hasDisplayName = snapshot.exists() && !snapshot.getString("displayName").isNullOrBlank()
             
+            val currentUser = auth.currentUser
+            val emailToSave = currentUser?.email ?: fallbackEmail ?: ""
+            val avatarToSave = currentUser?.photoUrl?.toString() ?: ""
+            
+            val batch = Firebase.firestore.batch()
+            // Always ensure email and avatar are up to date
+            batch.set(userRef, mapOf("email" to emailToSave, "photoUrl" to avatarToSave), com.google.firebase.firestore.SetOptions.merge())
+            
             if (!hasDisplayName) {
                 val baseName = fallbackName?.takeIf { it.isNotBlank() } 
                     ?: fallbackEmail?.substringBefore("@") 
                     ?: "User"
                 val uniqueName = generateUniqueUsername(baseName)
                 
-                auth.currentUser?.updateProfile(com.google.firebase.auth.userProfileChangeRequest {
+                currentUser?.updateProfile(com.google.firebase.auth.userProfileChangeRequest {
                     displayName = uniqueName
                 })?.await()
                 
-                val batch = Firebase.firestore.batch()
                 batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), com.google.firebase.firestore.SetOptions.merge())
                 
                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                 batch.set(usernameRef, mapOf("uid" to uid))
-                batch.commit().await()
             }
+            batch.commit().await()
         } catch (e: Exception) {
             // Ignore
         }

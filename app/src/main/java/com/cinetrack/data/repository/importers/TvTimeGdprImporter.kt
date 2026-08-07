@@ -603,14 +603,38 @@ class TvTimeGdprImporter @Inject constructor(
                             val finalMediaType = if (isTv) "tv" else (tmdb.mediaType ?: "movie")
                             val seasonsList = tmdb.seasons
                             
-                            // Mappa 1:1 dal CSV, filtrando numeri episodio fuori range TMDB per stagione.
-                            val finalEps: Map<String, List<Int>>? = if (item.watchedEpisodes.isNotEmpty()) {
-                                item.watchedEpisodes.mapNotNull { (seasonKey, eps) ->
-                                    val season = seasonsList?.find { (it.seasonNumber ?: 0).toString() == seasonKey }
-                                    val maxEp = season?.episodeCount?.takeIf { it > 0 }
-                                    val valid = if (maxEp != null) eps.filter { it in 1..maxEp } else eps.filter { it > 0 }
-                                    if (valid.isNotEmpty()) seasonKey to valid.sorted() else null
-                                }.toMap().takeIf { it.isNotEmpty() }
+                            // Mappa 1:1 dal CSV, ri-mappando gli episodi assoluti (es. S1E100) sulle stagioni TMDB
+                            var finalEps: Map<String, List<Int>>? = null
+                            if (item.watchedEpisodes.isNotEmpty()) {
+                                val remapped = mutableMapOf<String, MutableSet<Int>>()
+                                val tmdbSeasonsSorted = seasonsList?.filter { (it.seasonNumber ?: 0) > 0 }?.sortedBy { it.seasonNumber } ?: emptyList()
+                                
+                                item.watchedEpisodes.forEach { (seasonKeyStr, eps) ->
+                                    val originalSeasonNum = seasonKeyStr.toIntOrNull() ?: 0
+                                    eps.filter { it > 0 }.forEach { ep ->
+                                        var currentEp = ep
+                                        var currentSeason = originalSeasonNum
+                                        
+                                        if (tmdbSeasonsSorted.isNotEmpty()) {
+                                            var tmdbSeasonIdx = tmdbSeasonsSorted.indexOfFirst { it.seasonNumber == currentSeason }
+                                            if (tmdbSeasonIdx != -1) {
+                                                while (tmdbSeasonIdx < tmdbSeasonsSorted.size) {
+                                                    val tmdbSeason = tmdbSeasonsSorted[tmdbSeasonIdx]
+                                                    val maxEps = tmdbSeason.episodeCount ?: 0
+                                                    if (maxEps > 0 && currentEp > maxEps && tmdbSeasonIdx + 1 < tmdbSeasonsSorted.size) {
+                                                        currentEp -= maxEps
+                                                        tmdbSeasonIdx++
+                                                        currentSeason = tmdbSeasonsSorted[tmdbSeasonIdx].seasonNumber ?: currentSeason
+                                                    } else {
+                                                        break
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        remapped.getOrPut(currentSeason.toString()) { mutableSetOf() }.add(currentEp)
+                                    }
+                                }
+                                finalEps = remapped.mapValues { it.value.toList().sorted() }.takeIf { it.isNotEmpty() }
                             } else if (item.isExplicitlyCompleted && seasonsList != null) {
                                 val allWatched = mutableMapOf<String, List<Int>>()
                                 val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
@@ -623,10 +647,40 @@ class TvTimeGdprImporter @Inject constructor(
                                 allWatched.takeIf { it.isNotEmpty() }
                             } else null
 
-                            val watchedEpsCount = if (finalEps != null && finalEps.isNotEmpty()) {
+                            var watchedEpsCount = if (finalEps != null && finalEps.isNotEmpty()) {
                                 finalEps.filterKeys { it != "0" }.values.sumOf { it.size }
-                            } else {
-                                item.rawEpisodesSeen
+                            } else 0
+                            
+                            // Se TvTime ha eliminato record vecchi dal gdpr, finalEps conterrà meno episodi di rawEpisodesSeen. 
+                            // Riempiamo i buchi partendo dalla S1E1 fino a raggiungere rawEpisodesSeen
+                            if (item.rawEpisodesSeen > watchedEpsCount && seasonsList != null) {
+                                val approxWatched = mutableMapOf<String, MutableSet<Int>>()
+                                finalEps?.forEach { (s, eps) -> approxWatched[s] = eps.toMutableSet() }
+                                var currentCount = approxWatched.filterKeys { it != "0" }.values.sumOf { it.size }
+                                
+                                val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+                                val validSeasons = seasonsList.filter { (it.seasonNumber ?: 0) > 0 }.sortedBy { it.seasonNumber }
+                                
+                                for (season in validSeasons) {
+                                    if (currentCount >= item.rawEpisodesSeen) break
+                                    val sKey = (season.seasonNumber ?: 0).toString()
+                                    val epCount = tmdb.getReleasedEpisodeCountForSeason(season, todayIso, null, null)
+                                    if (epCount > 0) {
+                                        val existingEps = approxWatched.getOrPut(sKey) { mutableSetOf() }
+                                        for (ep in 1..epCount) {
+                                            if (currentCount >= item.rawEpisodesSeen) break
+                                            if (existingEps.add(ep)) {
+                                                currentCount++
+                                            }
+                                        }
+                                    }
+                                }
+                                finalEps = approxWatched.mapValues { it.value.toList().sorted() }.takeIf { it.isNotEmpty() }
+                                watchedEpsCount = currentCount
+                            }
+                            
+                            if (watchedEpsCount == 0 && item.rawEpisodesSeen > 0) {
+                                watchedEpsCount = item.rawEpisodesSeen
                             }
                             
                             val totalReleasedEps = tmdb.effectiveTotalEpisodes
@@ -688,6 +742,8 @@ class TvTimeGdprImporter @Inject constructor(
                                 dropped = item.isDropped,
                                 personalRating = item.personalRating,
                                 personalNote = item.personalNote,
+                                runtime = tmdb.runtime,
+                                episodeRunTime = tmdb.episodeRunTime,
                                 watchedEpisodes = finalEps ?: if (finalWatched) {
                                     val allWatched = mutableMapOf<String, List<Int>>()
                                     val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }

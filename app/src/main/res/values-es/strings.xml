@@ -1,55 +1,55 @@
-<resources>
+﻿<resources>
     <string name="app_name">FlickTrove</string>
 
     <!-- Shortcut Strings -->
     <string name="shortcut_search_short">Buscar</string>
-    <string name="shortcut_search_long">Buscar título</string>
+    <string name="shortcut_search_long">Buscar tÃ­tulo</string>
     <string name="shortcut_visti_short">Tu lista</string>
     <string name="shortcut_visti_long">Abrir tu lista</string>
-    <string name="shortcut_movie_short">Próximas películas</string>
-    <string name="shortcut_movie_long">Próximas películas</string>
-    <string name="shortcut_tv_short">Próximas series</string>
-    <string name="shortcut_tv_long">Próximas series</string>
-    <string name="widget_name">Próximamente y Búsqueda</string>
-    <string name="widget_list_name">Próximamente (Lista)</string>
+    <string name="shortcut_movie_short">PrÃ³ximas pelÃ­culas</string>
+    <string name="shortcut_movie_long">PrÃ³ximas pelÃ­culas</string>
+    <string name="shortcut_tv_short">PrÃ³ximas series</string>
+    <string name="shortcut_tv_long">PrÃ³ximas series</string>
+    <string name="widget_name">PrÃ³ximamente y BÃºsqueda</string>
+    <string name="widget_list_name">PrÃ³ximamente (Lista)</string>
 
     <!-- HomeScreen -->
     <string name="home_tab_title">Inicio</string>
-    <string name="home_empty_list">Tu lista está vacía</string>
+    <string name="home_empty_list">Tu lista estÃ¡ vacÃ­a</string>
     <string name="home_no_results">Sin resultados</string>
     <string name="home_unreleased">No estrenadas</string>
     <string name="home_dropped">Abandonadas</string>
-    <string name="home_tab_movies">PELÍCULAS</string>
+    <string name="home_tab_movies">PELÃCULAS</string>
     <string name="home_tab_tv_series">SERIES TV</string>
     <string name="updates_tab_all">TODO</string>
     <string name="updates_tab_new_releases">NUEVOS ESTRENOS</string>
     <string name="updates_tab_ongoing_episodes">EPISODIOS DE SERIES</string>
-    <string name="home_cd_change_layout">Cambiar diseño</string>
+    <string name="home_cd_change_layout">Cambiar diseÃ±o</string>
     <string name="home_cd_filters">Filtros</string>
 
     <!-- MainScreen -->
     <string name="main_tab_visti">Tu lista</string>
     <string name="main_tab_discover">Descubrir</string>
     <string name="main_tab_recommendations">Recomendado para ti</string>
-    <string name="main_tab_stats">Estadísticas</string>
+    <string name="main_tab_stats">EstadÃ­sticas</string>
     <string name="main_tab_folders">Mis carpetas</string>
     <string name="main_tab_settings">Ajustes</string>
     <string name="main_cd_search">Buscar</string>
     <string name="main_folder_rename">Renombrar carpeta</string>
     <string name="main_folder_change_color">Cambiar color</string>
     <string name="main_folder_delete">Eliminar carpeta</string>
-    <string name="main_exit_title">¿Salir de FlickTrove?</string>
-    <string name="main_exit_body">¿Estás seguro de que quieres salir de la aplicación?</string>
+    <string name="main_exit_title">Â¿Salir de FlickTrove?</string>
+    <string name="main_exit_body">Â¿EstÃ¡s seguro de que quieres salir de la aplicaciÃ³n?</string>
     <string name="main_exit_cancel">Cancelar</string>
     <string name="main_exit_confirm">Salir</string>
-    <string name="main_surprise_me_not_found">¡No se encontraron películas para estos criterios!</string>
+    <string name="main_surprise_me_not_found">Â¡No se encontraron pelÃ­culas para estos criterios!</string>
 
     <!-- Undo Toast -->
     <string name="action_undo">DESHACER</string>
 
     <!-- FoldersScreen -->
     <string name="folders_tab_title">Carpetas</string>
-    <string name="folders_empty_message">Aún no has creado ninguna carpeta</string>
+    <string name="folders_empty_message">AÃºn no has creado ninguna carpeta</string>
     <string name="folders_create_first">CREAR PRIMERA CARPETA</string>
     <string name="folders_rename">Renombrar carpeta</string>
     <string name="folders_change_color">Cambiar color</string>
@@ -60,65 +60,65 @@
 
     <!-- DiscoverScreen -->
     <string name="discover_tab_title">Descubrir</string>
-    <string name="discover_title_genre">Género</string>
-    <string name="discover_title_popular_movies">Películas populares</string>
+    <string name="discover_title_genre">GÃ©nero</string>
+    <string name="discover_title_popular_movies">PelÃ­culas populares</string>
     <string name="discover_title_now_playing_movies">En cines</string>
-    <string name="discover_title_upcoming_movies">Próximamente</string>
+    <string name="discover_title_upcoming_movies">PrÃ³ximamente</string>
     <string name="discover_title_popular_tv">Series populares</string>
-    <string name="discover_title_airing_today_tv">En emisión hoy</string>
-    <string name="discover_title_on_the_air_tv">En emisión</string>
-    <string name="discover_title_trending_movies">Películas en tendencia</string>
+    <string name="discover_title_airing_today_tv">En emisiÃ³n hoy</string>
+    <string name="discover_title_on_the_air_tv">En emisiÃ³n</string>
+    <string name="discover_title_trending_movies">PelÃ­culas en tendencia</string>
     <string name="discover_title_trending_tv">Series en tendencia</string>
     <string name="discover_title_default">Descubrir</string>
-    <string name="discover_empty_category">No se encontró contenido en esta categoría</string>
+    <string name="discover_empty_category">No se encontrÃ³ contenido en esta categorÃ­a</string>
 
     <!-- StatsScreen -->
-    <string name="detail_trailers_title">TRÁILERES Y CLIPS</string>
+    <string name="detail_trailers_title">TRÃILERES Y CLIPS</string>
     <string name="detail_no_trailers">No hay videos disponibles</string>
-    <string name="detail_add_subgenres">+ Subgéneros</string>
+    <string name="detail_add_subgenres">+ SubgÃ©neros</string>
     <string name="detail_hide_subgenres">- Ocultar</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">ALQUILAR O COMPRAR</string>
     <string name="detail_season">Temporada</string>
     <string name="detail_seasons">Temporadas</string>
-    <string name="action_share_title">Compartir película</string>
+    <string name="action_share_title">Compartir pelÃ­cula</string>
     <string name="action_share_body">Ver en FlickTrove: %s</string>
     <string name="action_done">HECHO</string>
-    <string name="stats_tab_title">Estadísticas</string>
-    <string name="stats_no_data">No hay estadísticas disponibles</string>
-    <string name="stats_all_time">Estadísticas de siempre</string>
-    <string name="stats_year_prefix">Estadísticas %d</string>
+    <string name="stats_tab_title">EstadÃ­sticas</string>
+    <string name="stats_no_data">No hay estadÃ­sticas disponibles</string>
+    <string name="stats_all_time">EstadÃ­sticas de siempre</string>
+    <string name="stats_year_prefix">EstadÃ­sticas %d</string>
     <string name="stats_watched_in_year">VISTO EN %d</string>
-    <string name="stats_your_movies">TUS PELÍCULAS</string>
+    <string name="stats_your_movies">TUS PELÃCULAS</string>
     <string name="stats_to_watch">POR VER</string>
     <string name="stats_watched">VISTAS</string>
     <string name="stats_time_spent">Tiempo invertido:</string>
-    <string name="stats_longest_movie">PELÍCULA MÁS LARGA</string>
+    <string name="stats_longest_movie">PELÃCULA MÃS LARGA</string>
     <string name="stats_tv_series">SERIES TV</string>
     <string name="stats_completed">COMPLETADAS</string>
-    <string name="stats_longest_tv">SERIE MÁS LARGA</string>
-    <string name="stats_top_cast">TUS ÍDOLOS (REPARTO)</string>
+    <string name="stats_longest_tv">SERIE MÃS LARGA</string>
+    <string name="stats_top_cast">TUS ÃDOLOS (REPARTO)</string>
     <string name="stats_top_directors">MEJORES DIRECTORES</string>
-    <string name="stats_genre_distribution">DISTRIBUCIÓN POR GÉNERO</string>
-    <string name="stats_top_decades">TUS DÉCADAS DORADAS</string>
-    <string name="stats_rating_distribution">DISTRIBUCIÓN DE CALIFICACIONES</string>
+    <string name="stats_genre_distribution">DISTRIBUCIÃ“N POR GÃ‰NERO</string>
+    <string name="stats_top_decades">TUS DÃ‰CADAS DORADAS</string>
+    <string name="stats_rating_distribution">DISTRIBUCIÃ“N DE CALIFICACIONES</string>
     <string name="stats_generating_card">Generando tarjeta...</string>
     <string name="stats_generating_card_desc">Estamos creando tu imagen para compartir</string>
     <string name="stats_total_time">TIEMPO TOTAL INVERTIDO</string>
-    <string name="stats_total_time_combined">REPRODUCCIÓN COMBINADA</string>
-    <string name="stats_share_text">🏆 ¡Mi tiempo total de visualización en FlickTrove: %1$s de películas y series! 🎬\nÚnete y rastrea tu progreso: https://alle-0.github.io/FlickTrove/</string>
-    <string name="stats_title_singular">TÍTULO</string>
-    <string name="stats_title_plural">TÍTULOS</string>
+    <string name="stats_total_time_combined">REPRODUCCIÃ“N COMBINADA</string>
+    <string name="stats_share_text">ðŸ† Â¡Mi tiempo total de visualizaciÃ³n en FlickTrove: %1$s de pelÃ­culas y series! ðŸŽ¬\nÃšnete y rastrea tu progreso: https://alle-0.github.io/FlickTrove/</string>
+    <string name="stats_title_singular">TÃTULO</string>
+    <string name="stats_title_plural">TÃTULOS</string>
     <string name="stats_of_total">%s DEL TOTAL</string>
-    <string name="stats_genres">GÉNEROS</string>
-    <string name="stats_tap_slice">TOCA UNA SECCIÓN</string>
+    <string name="stats_genres">GÃ‰NEROS</string>
+    <string name="stats_tap_slice">TOCA UNA SECCIÃ“N</string>
     <string name="stats_see_less">VER MENOS</string>
     <string name="stats_see_all">VER TODO</string>
-    <string name="stats_1_movie">1 película</string>
-    <string name="stats_n_movies">%d películas</string>
+    <string name="stats_1_movie">1 pelÃ­cula</string>
+    <string name="stats_n_movies">%d pelÃ­culas</string>
     <string name="stats_wrapped">RESUMEN %d</string>
     <string name="stats_filter_all">Todos</string>
-    <string name="auth_btn_login">Iniciar sesión</string>
+    <string name="auth_btn_login">Iniciar sesiÃ³n</string>
     <string name="auth_btn_signup">Registrarse</string>
     <string name="auth_or_continue_with">O CONTINUAR CON</string>
     <string name="auth_continue_google">Continuar con Google</string>
@@ -129,58 +129,58 @@
     <string name="quality_low_desc">Baja (Ahorro de datos)</string>
     <string name="quality_medium_desc">Media (Equilibrada)</string>
     <string name="quality_high_desc">Alta (Mejor calidad)</string>
-    <string name="stats_titles_watched">TÍTULOS VISTOS</string>
-    <string name="stats_top_genre">GÉNERO PRINCIPAL</string>
+    <string name="stats_titles_watched">TÃTULOS VISTOS</string>
+    <string name="stats_top_genre">GÃ‰NERO PRINCIPAL</string>
     <string name="stats_total_time_wrapped">TIEMPO TOTAL</string>
     <string name="stats_year_star">%d ESTRELLA</string>
-    <string name="stats_movies">PELÍCULAS</string>
+    <string name="stats_movies">PELÃCULAS</string>
     <string name="stats_series">SERIES</string>
     <string name="stats_share_card">COMPARTE TU TARJETA</string>
-    <string name="stats_period">PERÍODO</string>
+    <string name="stats_period">PERÃODO</string>
     <string name="stats_share_chooser_title">Comparte tu Resumen</string>
     <string name="stats_genre_other">OTRO</string>
-    <string name="stats_all_stats">Todas las estadísticas</string>
+    <string name="stats_all_stats">Todas las estadÃ­sticas</string>
     <string name="stats_episodes_short">%1$d ep</string>
-    <string name="stats_episodes_long">• %1$d episodios</string>
+    <string name="stats_episodes_long">â€¢ %1$d episodios</string>
     <string name="stats_dhm">%1$dd %2$dh %3$dm</string>
     <string name="stats_hm">%1$dh %2$dm</string>
     <string name="stats_m">%1$dm</string>
-    <string name="stats_cinephile_legacy">EL LEGADO DEL CINÉFILO</string>
-    <string name="stats_one_movie">1 película</string>
-    <string name="stats_many_movies">%1$d películas</string>
-    <string name="stats_share_title_msg">Comparte tus estadísticas</string>
-    <string name="stats_share_line_1">🎬 ¡%1$s en FlickTrove!\n\n</string>
-    <string name="stats_share_line_2">📊 He visto %1$d películas y %2$d series de TV.\n</string>
-    <string name="stats_share_line_3">⏳ Tiempo total: %1$s\n</string>
-    <string name="stats_share_line_genre">🎭 Género principal: %1$s\n</string>
-    <string name="stats_share_line_actor">⭐ Estrella principal: %1$s\n</string>
-    <string name="stats_share_line_director">🎥 Director principal: %1$s\n</string>
-    <string name="stats_share_line_decade">📅 Década dorada: %1$s\n</string>
-    <string name="stats_share_line_outro">\n¡Rastrea tu viaje cinematográfico en FlickTrove! 🍿</string>
+    <string name="stats_cinephile_legacy">EL LEGADO DEL CINÃ‰FILO</string>
+    <string name="stats_one_movie">1 pelÃ­cula</string>
+    <string name="stats_many_movies">%1$d pelÃ­culas</string>
+    <string name="stats_share_title_msg">Comparte tus estadÃ­sticas</string>
+    <string name="stats_share_line_1">ðŸŽ¬ Â¡%1$s en FlickTrove!\n\n</string>
+    <string name="stats_share_line_2">ðŸ“Š He visto %1$d pelÃ­culas y %2$d series de TV.\n</string>
+    <string name="stats_share_line_3">â³ Tiempo total: %1$s\n</string>
+    <string name="stats_share_line_genre">ðŸŽ­ GÃ©nero principal: %1$s\n</string>
+    <string name="stats_share_line_actor">â­ Estrella principal: %1$s\n</string>
+    <string name="stats_share_line_director">ðŸŽ¥ Director principal: %1$s\n</string>
+    <string name="stats_share_line_decade">ðŸ“… DÃ©cada dorada: %1$s\n</string>
+    <string name="stats_share_line_outro">\nÂ¡Rastrea tu viaje cinematogrÃ¡fico en FlickTrove! ðŸ¿</string>
 
     <!-- SettingsScreen -->
     <string name="settings_tab_title">Ajustes</string>
     <!-- Interface and Layout -->
-    <string name="settings_ui_layout">Interfaz y diseño</string>
+    <string name="settings_ui_layout">Interfaz y diseÃ±o</string>
     <string name="settings_folder_bookmarks">Marcadores de carpetas</string>
     <string name="settings_folder_bookmarks_desc">Muestra una cinta de color en las tarjetas para indicar la pertenencia a una carpeta.</string>
-    <string name="settings_badges">Insignias de información</string>
+    <string name="settings_badges">Insignias de informaciÃ³n</string>
     <string name="settings_badges_desc">Muestra insignias de colores con indicadores como NUEVO, POPULAR, MEJOR, etc.</string>
     <string name="settings_badges_meaning">Significado de insignias</string>
-    <string name="settings_layout_toggle">Botón de diseño</string>
-    <string name="settings_layout_toggle_desc">Muestra un botón para cambiar el número de columnas en Inicio</string>
+    <string name="settings_layout_toggle">BotÃ³n de diseÃ±o</string>
+    <string name="settings_layout_toggle_desc">Muestra un botÃ³n para cambiar el nÃºmero de columnas en Inicio</string>
     <string name="settings_split_home">Dividir estrenos en Inicio</string>
-    <string name="settings_split_home_desc">Separa los títulos estrenados de los próximos estrenos en Inicio</string>
+    <string name="settings_split_home_desc">Separa los tÃ­tulos estrenados de los prÃ³ximos estrenos en Inicio</string>
     <string name="settings_split_dropped">Mostrar series abandonadas</string>
-    <string name="settings_split_dropped_desc">Muestra series abandonadas en la parte inferior de la sección de Series TV (si se desactiva, se ocultarán por completo)</string>
+    <string name="settings_split_dropped_desc">Muestra series abandonadas en la parte inferior de la secciÃ³n de Series TV (si se desactiva, se ocultarÃ¡n por completo)</string>
     <string name="settings_use_movie_logo">Usar logos oficiales</string>
-    <string name="settings_use_movie_logo_desc">En los detalles, muestra el logo del título original en lugar de texto, cuando esté disponible.</string>
+    <string name="settings_use_movie_logo_desc">En los detalles, muestra el logo del tÃ­tulo original en lugar de texto, cuando estÃ© disponible.</string>
     <string name="settings_show_my_folders">Tarjeta Mis carpetas</string>
     <string name="settings_show_my_folders_desc">Muestra la tarjeta Mis carpetas en el panel de tu perfil.</string>
     <string name="settings_show_your_flow">Tarjeta Tu Flow</string>
     <string name="settings_show_your_flow_desc">Muestra la tarjeta Tu Flow en el panel de tu perfil.</string>
-    <string name="settings_language">Idioma de la aplicación</string>
-    <string name="settings_language_desc">Los cambios se aplicarán al reiniciar</string>
+    <string name="settings_language">Idioma de la aplicaciÃ³n</string>
+    <string name="settings_language_desc">Los cambios se aplicarÃ¡n al reiniciar</string>
     <string name="settings_language_system">Sistema</string>
     <string name="settings_language_en">EN</string>
     <string name="settings_language_it">IT</string>
@@ -192,47 +192,47 @@
     <string name="settings_default_start_home">POR VER</string>
     <string name="settings_default_start_visti">VISTO</string>
     <!-- Aesthetics -->
-    <string name="settings_aesthetics">Estética</string>
+    <string name="settings_aesthetics">EstÃ©tica</string>
     <string name="settings_accent_color">Color de acento</string>
-    <string name="settings_accent_color_desc">Personaliza la apariencia de la aplicación</string>
-    <string name="settings_dynamic_icon">Icono dinámico de la app</string>
+    <string name="settings_accent_color_desc">Personaliza la apariencia de la aplicaciÃ³n</string>
+    <string name="settings_dynamic_icon">Icono dinÃ¡mico de la app</string>
     <string name="settings_dynamic_icon_desc">Cambia el icono de la app en la pantalla de inicio para que coincida con el color de acento</string>
-    <string name="settings_entry_animation">Animación de entrada</string>
-    <string name="settings_entry_animation_desc">Muestra la animación del logo al abrir la aplicación</string>
+    <string name="settings_entry_animation">AnimaciÃ³n de entrada</string>
+    <string name="settings_entry_animation_desc">Muestra la animaciÃ³n del logo al abrir la aplicaciÃ³n</string>
     <string name="settings_amoled_bg">Fondo AMOLED</string>
     <string name="settings_amoled_bg_desc">Usa negro puro en lugar de gris oscuro</string>
     <!-- Accessibility -->
     <string name="settings_accessibility">Accesibilidad</string>
-    <string name="settings_title_size">Tamaño del texto de los títulos</string>
+    <string name="settings_title_size">TamaÃ±o del texto de los tÃ­tulos</string>
     <string name="settings_title_size_desc">Aumenta o reduce los textos principales</string>
-    <string name="settings_size_small">Pequeño</string>
+    <string name="settings_size_small">PequeÃ±o</string>
     <string name="settings_size_medium">Mediano</string>
     <string name="settings_size_large">Grande</string>
     <string name="settings_visual_effects">Efectos visuales avanzados</string>
     <string name="settings_visual_effects_desc">Activa desenfoques complejos y animaciones</string>
     <!-- Notifications and Vibration -->
-    <string name="settings_notifications_vibration">Notificaciones y vibración</string>
+    <string name="settings_notifications_vibration">Notificaciones y vibraciÃ³n</string>
     <string name="settings_enable_notifications">Activar notificaciones</string>
-    <string name="settings_enable_notifications_desc">Recibe notificaciones el día del estreno de las películas o series que sigues.</string>
-    <string name="settings_haptic_feedback">Respuesta háptica</string>
+    <string name="settings_enable_notifications_desc">Recibe notificaciones el dÃ­a del estreno de las pelÃ­culas o series que sigues.</string>
+    <string name="settings_haptic_feedback">Respuesta hÃ¡ptica</string>
     <string name="settings_haptic_feedback_desc">Vibra en las acciones de la interfaz</string>
     <!-- Images -->
-    <string name="settings_images">Imágenes</string>
+    <string name="settings_images">ImÃ¡genes</string>
     <string name="settings_image_quality">Calidad de imagen</string>
     <string name="settings_image_quality_desc">Gestiona el uso de datos</string>
-    <string name="settings_clear_cache">Borrar caché de imágenes</string>
-    <string name="settings_clear_cache_desc">%1$s   Libera espacio utilizado por pósteres y fondos</string>
+    <string name="settings_clear_cache">Borrar cachÃ© de imÃ¡genes</string>
+    <string name="settings_clear_cache_desc">%1$s   Libera espacio utilizado por pÃ³steres y fondos</string>
     <!-- Sync and Backup -->
-    <string name="settings_sync_backup">Sincronización y copia de seguridad</string>
-    <string name="settings_smart_merge">La combinación inteligente combinará los datos protegiendo siempre tus valoraciones y notas locales.</string>
-    <string name="settings_external_migration">Importación / Exportación universal de datos</string>
+    <string name="settings_sync_backup">SincronizaciÃ³n y copia de seguridad</string>
+    <string name="settings_smart_merge">La combinaciÃ³n inteligente combinarÃ¡ los datos protegiendo siempre tus valoraciones y notas locales.</string>
+    <string name="settings_external_migration">ImportaciÃ³n / ExportaciÃ³n universal de datos</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Todo CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Copia de seguridad en dispositivo de FlickTrove</string>
-    <string name="settings_trakt_sync_desc">App ➔ Trakt: Instantáneo\nTrakt ➔ App: 24h</string>
+    <string name="settings_trakt_sync_desc">App âž” Trakt: InstantÃ¡neo\nTrakt âž” App: 24h</string>
     <string name="settings_sync_missing_details">Sincronizar detalles faltantes</string>
-    <string name="settings_sync_missing_details_desc">Recupera datos faltantes para películas más antiguas de tu biblioteca. Usa solo si es estrictamente necesario (operación intensiva en segundo plano).</string>
-    <string name="settings_dialog_deep_sync_title">Advertencia: Sincronización intensiva</string>
-    <string name="settings_dialog_deep_sync_desc">Esta operación descargará datos faltantes en segundo plano para todas las películas antiguas guardadas. Requiere una conexión a internet activa y realiza numerosas operaciones en la nube.\n\nEjecútalo SOLO si notas que falta información esencial como el reparto o la duración en tus guardados antiguos.\n\n¿Estás seguro de que deseas continuar?</string>
+    <string name="settings_sync_missing_details_desc">Recupera datos faltantes para pelÃ­culas mÃ¡s antiguas de tu biblioteca. Usa solo si es estrictamente necesario (operaciÃ³n intensiva en segundo plano).</string>
+    <string name="settings_dialog_deep_sync_title">Advertencia: SincronizaciÃ³n intensiva</string>
+    <string name="settings_dialog_deep_sync_desc">Esta operaciÃ³n descargarÃ¡ datos faltantes en segundo plano para todas las pelÃ­culas antiguas guardadas. Requiere una conexiÃ³n a internet activa y realiza numerosas operaciones en la nube.\n\nEjecÃºtalo SOLO si notas que falta informaciÃ³n esencial como el reparto o la duraciÃ³n en tus guardados antiguos.\n\nÂ¿EstÃ¡s seguro de que deseas continuar?</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_restore">Restaurar</string>
     <!-- Account -->
@@ -240,28 +240,28 @@
     <string name="settings_guest">Invitado</string>
     <string name="settings_delete_account">Eliminar cuenta</string>
     <!-- Support and Info -->
-    <string name="settings_support_info">Soporte e información</string>
+    <string name="settings_support_info">Soporte e informaciÃ³n</string>
     <string name="settings_send_feedback">Enviar comentarios</string>
     <string name="settings_send_feedback_desc">Reporta errores o sugiere nuevas funciones</string>
-    <string name="settings_terms_service">Términos del servicio</string>
-    <string name="settings_privacy_policy">Política de privacidad</string>
-    <string name="settings_tmdb_notice">Este producto utiliza la API de TMDB pero no está respaldado ni certificado por TMDB.</string>
+    <string name="settings_terms_service">TÃ©rminos del servicio</string>
+    <string name="settings_privacy_policy">PolÃ­tica de privacidad</string>
+    <string name="settings_tmdb_notice">Este producto utiliza la API de TMDB pero no estÃ¡ respaldado ni certificado por TMDB.</string>
     <string name="settings_omdb_notice">Datos y calificaciones adicionales proporcionados por OMDb API.</string>
     <string name="settings_tvdb_notice">Metadatos de series proporcionados por TheTVDB.</string>
-    <string name="settings_trakt_notice">Sincronización y estadísticas impulsadas por Trakt.tv.</string>
+    <string name="settings_trakt_notice">SincronizaciÃ³n y estadÃ­sticas impulsadas por Trakt.tv.</string>
     <string name="settings_made_with">Desarrollado con </string>
     <string name="settings_for_lovers"> para amantes del cine</string>
     <!-- Dialog buttons -->
     <string name="settings_cancel">Cancelar</string>
-    <string name="settings_yes_delete">Sí, eliminar</string>
+    <string name="settings_yes_delete">SÃ­, eliminar</string>
     <string name="settings_confirm">Confirmar</string>
     <string name="settings_got_it">Entendido</string>
-    <string name="settings_yes_logout">Sí, cerrar sesión</string>
+    <string name="settings_yes_logout">SÃ­, cerrar sesiÃ³n</string>
     <string name="settings_link_google">Vincular cuenta de Google</string>
     <string name="settings_close">Cerrar</string>
-    <string name="avatar_selection_title_select_media">Selecciona una película o serie</string>
+    <string name="avatar_selection_title_select_media">Selecciona una pelÃ­cula o serie</string>
     <string name="avatar_selection_title_choose_avatar">Elige tu avatar</string>
-    <string name="avatar_selection_search_placeholder">Buscar una película o serie TV...</string>
+    <string name="avatar_selection_search_placeholder">Buscar una pelÃ­cula o serie TV...</string>
     <string name="avatar_selection_remove_avatar">Quitar avatar</string>
     <string name="avatar_selection_import_avatar">Importar avatar</string>
     <string name="avatar_selection_remove_cover">Quitar portada</string>
@@ -269,7 +269,7 @@
     <string name="avatar_selection_no_covers_found">No se encontraron portadas</string>
     <string name="avatar_selection_no_characters_found">No se encontraron personajes.</string>
     <string name="avatar_selection_back">Volver</string>
-    <string name="avatar_selection_movie">Película</string>
+    <string name="avatar_selection_movie">PelÃ­cula</string>
     <string name="avatar_selection_tv_show">Serie TV</string>
     <!-- Backup dialog -->
     <string name="settings_export_backup">Exportar copia de seguridad</string>
@@ -282,99 +282,99 @@
     <string name="settings_custom">Personalizado</string>
     <!-- Feedback form -->
     <string name="settings_feedback_title">Enviar comentarios</string>
-    <string name="settings_feedback_subtitle">Ayúdanos a mejorar FlickTrove</string>
+    <string name="settings_feedback_subtitle">AyÃºdanos a mejorar FlickTrove</string>
     <string name="settings_feedback_subject_label">Asunto</string>
     <string name="settings_feedback_subject_placeholder">Ej. Sugerencia, Error...</string>
-    <string name="settings_feedback_email_label">Correo electrónico (opcional)</string>
+    <string name="settings_feedback_email_label">Correo electrÃ³nico (opcional)</string>
     <string name="settings_feedback_email_placeholder">Para poder responderte</string>
-    <string name="settings_feedback_desc_label">Descripción</string>
-    <string name="settings_feedback_desc_placeholder">Cuéntanos los detalles...</string>
+    <string name="settings_feedback_desc_label">DescripciÃ³n</string>
+    <string name="settings_feedback_desc_placeholder">CuÃ©ntanos los detalles...</string>
     <!-- Dialogs -->
     <string name="settings_dialog_delete_account_title">Eliminar cuenta</string>
-    <string name="settings_dialog_delete_account_desc">¿Estás seguro de que deseas continuar? Todas tus películas guardadas, calificaciones y carpetas se eliminarán permanentemente de la nube.</string>
+    <string name="settings_dialog_delete_account_desc">Â¿EstÃ¡s seguro de que deseas continuar? Todas tus pelÃ­culas guardadas, calificaciones y carpetas se eliminarÃ¡n permanentemente de la nube.</string>
     <string name="settings_dialog_reauth_title">Confirma tu identidad</string>
-    <string name="settings_dialog_reauth_desc">Por seguridad, ingresa tu contraseña para eliminar permanentemente tu cuenta.</string>
-    <string name="settings_dialog_reauth_password_hint">Contraseña</string>
-    <string name="settings_dialog_clear_cache_title">Borrar caché</string>
-    <string name="settings_dialog_clear_cache_desc">Se eliminarán todos los pósteres y logos descargados. Se deberán volver a cargar en el próximo inicio.</string>
-    <string name="settings_dialog_logout_title">Cerrar sesión</string>
-    <string name="settings_dialog_logout_desc">¿Estás seguro de que deseas cerrar sesión? Deberás iniciar sesión de nuevo para sincronizar tus datos.</string>
+    <string name="settings_dialog_reauth_desc">Por seguridad, ingresa tu contraseÃ±a para eliminar permanentemente tu cuenta.</string>
+    <string name="settings_dialog_reauth_password_hint">ContraseÃ±a</string>
+    <string name="settings_dialog_clear_cache_title">Borrar cachÃ©</string>
+    <string name="settings_dialog_clear_cache_desc">Se eliminarÃ¡n todos los pÃ³steres y logos descargados. Se deberÃ¡n volver a cargar en el prÃ³ximo inicio.</string>
+    <string name="settings_dialog_logout_title">Cerrar sesiÃ³n</string>
+    <string name="settings_dialog_logout_desc">Â¿EstÃ¡s seguro de que deseas cerrar sesiÃ³n? DeberÃ¡s iniciar sesiÃ³n de nuevo para sincronizar tus datos.</string>
     <string name="settings_wipe_local_data_title">Borrar datos de la app (Seguro)</string>
     <string name="settings_wipe_local_data_desc">Borra todos los datos de tu dispositivo. Los datos en la nube permanecen intactos.</string>
     <string name="settings_dialog_wipe_data_title">Borrar datos</string>
-    <string name="settings_wipe_data_desc">Elige cómo deseas borrar tus datos:</string>
+    <string name="settings_wipe_data_desc">Elige cÃ³mo deseas borrar tus datos:</string>
     <string name="settings_dialog_wipe_local_data_title">Borrar datos locales</string>
-    <string name="settings_dialog_wipe_local_data_desc">¿Estás seguro de que deseas borrar tu base de datos local? Tus datos en la nube no se verán afectados y se volverán a descargar.</string>
+    <string name="settings_dialog_wipe_local_data_desc">Â¿EstÃ¡s seguro de que deseas borrar tu base de datos local? Tus datos en la nube no se verÃ¡n afectados y se volverÃ¡n a descargar.</string>
     <string name="settings_yes_wipe_local">Borrar datos locales</string>
 
     <string name="settings_wipe_total_data_title">Borrar datos en la nube</string>
     <string name="settings_wipe_total_data_desc">Elimina todos tus datos tanto del dispositivo como de la nube</string>
     <string name="settings_dialog_wipe_total_data_title">Borrar todos los datos</string>
-    <string name="settings_dialog_wipe_total_data_desc">¿Estás seguro de que deseas eliminar todo? Esto borrará permanentemente tu biblioteca de la nube y de este dispositivo. Esta acción no se puede deshacer.</string>
+    <string name="settings_dialog_wipe_total_data_desc">Â¿EstÃ¡s seguro de que deseas eliminar todo? Esto borrarÃ¡ permanentemente tu biblioteca de la nube y de este dispositivo. Esta acciÃ³n no se puede deshacer.</string>
     <string name="settings_yes_wipe_total">Borrar todos los datos</string>
-    <string name="settings_account_deleted_success">Cuenta eliminada con éxito</string>
-    <string name="settings_action_success">Operación completada con éxito</string>
-    <string name="settings_login">Iniciar sesión</string>
+    <string name="settings_account_deleted_success">Cuenta eliminada con Ã©xito</string>
+    <string name="settings_action_success">OperaciÃ³n completada con Ã©xito</string>
+    <string name="settings_login">Iniciar sesiÃ³n</string>
     <!-- Badges -->
     <string name="settings_badge_new">NUEVO</string>
-    <string name="settings_badge_new_desc">Próximamente o nuevos episodios estrenados</string>
+    <string name="settings_badge_new_desc">PrÃ³ximamente o nuevos episodios estrenados</string>
     <string name="settings_badge_masterpiece">OBRA MAESTRA</string>
     <string name="settings_badge_masterpiece_desc">Obra maestra absoluta (prom =8.8, &gt;2000 votos)</string>
     <string name="settings_badge_best">LO MEJOR</string>
-    <string name="settings_badge_best_desc">Calificación media excepcional (=8.5, &gt;300 votos)</string>
+    <string name="settings_badge_best_desc">CalificaciÃ³n media excepcional (=8.5, &gt;300 votos)</string>
     <string name="settings_badge_hot">POPULAR</string>
     <string name="settings_badge_hot_desc">Muy popular (votos &gt; 3000 en TMDB)</string>
-    <string name="settings_badge_wow">INCREÍBLE</string>
-    <string name="settings_badge_wow_desc">Excelente recepción (prom =8.0, &gt;1000 votos)</string>
+    <string name="settings_badge_wow">INCREÃBLE</string>
+    <string name="settings_badge_wow_desc">Excelente recepciÃ³n (prom =8.0, &gt;1000 votos)</string>
     <string name="settings_badge_hidden_gem">JOYA OCULTA</string>
     <string name="settings_badge_hidden_gem_desc">Joya oculta (prom =7.5, &lt;500 votos)</string>
     <string name="settings_badge_cult">DE CULTO</string>
-    <string name="settings_badge_cult_desc">Título icónico (\'90 - \'10, prom =8.0)</string>
-    <string name="settings_badge_classic">CLÁSICO</string>
-    <string name="settings_badge_classic_desc">Clásico del pasado (&lt; 1990, prom =7.0)</string>
-    <string name="settings_badge_epic">ÉPICO</string>
-    <string name="settings_badge_epic_desc">Larga duración, colosal (&gt; 160 min)</string>
-    <string name="settings_badge_binge">MARATÓN</string>
+    <string name="settings_badge_cult_desc">TÃ­tulo icÃ³nico (\'90 - \'10, prom =8.0)</string>
+    <string name="settings_badge_classic">CLÃSICO</string>
+    <string name="settings_badge_classic_desc">ClÃ¡sico del pasado (&lt; 1990, prom =7.0)</string>
+    <string name="settings_badge_epic">Ã‰PICO</string>
+    <string name="settings_badge_epic_desc">Larga duraciÃ³n, colosal (&gt; 160 min)</string>
+    <string name="settings_badge_binge">MARATÃ“N</string>
     <string name="settings_badge_binge_desc">Ideal para maratones (Series largas, &gt;50 ep.)</string>
-    <string name="settings_badge_scifi">CIENCIA FICCIÓN</string>
-    <string name="settings_badge_scifi_desc">Género de Ciencia Ficción</string>
+    <string name="settings_badge_scifi">CIENCIA FICCIÃ“N</string>
+    <string name="settings_badge_scifi_desc">GÃ©nero de Ciencia FicciÃ³n</string>
     <string name="settings_badge_comedy">COMEDIA</string>
     <string name="settings_badge_comedy_desc">Comedia valorada (prom =7.0)</string>
     <string name="settings_badge_horror">TERROR</string>
-    <string name="settings_badge_horror_desc">Género de Terror</string>
-    <string name="settings_badge_animation">ANIMACIÓN</string>
-    <string name="settings_badge_animation_desc">Género de Animación</string>
+    <string name="settings_badge_horror_desc">GÃ©nero de Terror</string>
+    <string name="settings_badge_animation">ANIMACIÃ“N</string>
+    <string name="settings_badge_animation_desc">GÃ©nero de AnimaciÃ³n</string>
     <string name="settings_badge_blockbuster">TAQUILLAZO</string>
     <string name="settings_badge_blockbuster_desc">Taquilla estelar (&gt; 500 mill. $)</string>
     <string name="settings_badge_indie">INDIE</string>
     <string name="settings_badge_indie_desc">Bajo presupuesto, alta calidad (presupuesto &lt; 5 mill., prom =7.0)</string>
-    <string name="settings_badge_quick">RÁPIDA</string>
-    <string name="settings_badge_quick_desc">Corta pero intensa (Película &lt; 90 min)</string>
+    <string name="settings_badge_quick">RÃPIDA</string>
+    <string name="settings_badge_quick_desc">Corta pero intensa (PelÃ­cula &lt; 90 min)</string>
     <string name="settings_badge_snack">SNACK</string>
     <string name="settings_badge_snack_desc">Episodios cortos (Serie TV &lt; 25 min)</string>
     <string name="settings_badge_divisive">DIVISIVA</string>
     <string name="settings_badge_divisive_desc">La amas o la odias (prom 5.0 - 6.5, &gt;1000 votos)</string>
     <string name="settings_badge_vintage">VINTAGE</string>
-    <string name="settings_badge_vintage_desc">Clásico de otros tiempos (&lt; 1970)</string>
+    <string name="settings_badge_vintage_desc">ClÃ¡sico de otros tiempos (&lt; 1970)</string>
     <string name="settings_badge_docu">DOCU</string>
     <string name="settings_badge_docu_desc">Documentales</string>
     <string name="settings_badge_family">FAMILIAR</string>
     <string name="settings_badge_family_desc">Ideal para la familia</string>
     <!-- Backup and Migration -->
     <string name="settings_processing">Procesando...</string>
-    <string name="settings_backup_restore_title">Copia de seguridad y restauración</string>
+    <string name="settings_backup_restore_title">Copia de seguridad y restauraciÃ³n</string>
     <string name="settings_backup_restore_desc">Exporta una copia de tus datos (favoritos, carpetas y ajustes) o restaura desde un archivo guardado previamente.</string>
-    <string name="settings_external_migration_dialog_title">Importación y exportación universal de datos</string>
-    <string name="settings_start_migration">Iniciar importación</string>
-    <string name="settings_external_migration_dialog_desc">¡Importa tu historial de reproducción desde cualquier plataforma o sitio web! Puedes cargar exportaciones de Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o cualquier archivo CSV/JSON/ZIP personalizado que contenga títulos, IDs o años de estreno. ¡El motor inteligente de FlickTrove detectará automáticamente el formato y coincidirá con tus películas y series!</string>
-    <string name="settings_import_tip_sync">Después de importar, se recomienda ejecutar "Sincronizar detalles faltantes" desde los ajustes.</string>
+    <string name="settings_external_migration_dialog_title">ImportaciÃ³n y exportaciÃ³n universal de datos</string>
+    <string name="settings_start_migration">Iniciar importaciÃ³n</string>
+    <string name="settings_external_migration_dialog_desc">Â¡Importa tu historial de reproducciÃ³n desde cualquier plataforma o sitio web! Puedes cargar exportaciones de Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o cualquier archivo CSV/JSON/ZIP personalizado que contenga tÃ­tulos, IDs o aÃ±os de estreno. Â¡El motor inteligente de FlickTrove detectarÃ¡ automÃ¡ticamente el formato y coincidirÃ¡ con tus pelÃ­culas y series!</string>
+    <string name="settings_import_tip_sync">DespuÃ©s de importar, se recomienda ejecutar "Sincronizar detalles faltantes" desde los ajustes.</string>
     <string name="settings_yamtrack_import">Importar desde Yamtrack</string>
     <string name="settings_yamtrack_export">Exportar a Yamtrack</string>
     <string name="settings_yamtrack_section">Yamtrack</string>
     <string name="settings_yamtrack_desc">Importa tu biblioteca de Yamtrack o exporta en formato CSV de Yamtrack (solo fuentes TMDB).</string>
 
     <!-- Movie Detail Strings -->
-    <string name="detail_error_title">Algo salió mal</string>
+    <string name="detail_error_title">Algo saliÃ³ mal</string>
     <string name="detail_error_unknown">Error desconocido</string>
     <string name="detail_retry">REINTENTAR</string>
     <string name="detail_go_back">Volver</string>
@@ -382,163 +382,163 @@
     <string name="detail_no_overview">Sin sinopsis disponible.</string>
     <string name="detail_content_desc_home">Volver a la pantalla principal</string>
     <string name="detail_manage_folders">Gestionar carpetas</string>
-    <string name="detail_share_text">¡Echa un vistazo a %1$s en FlickTrove!\n\n%2$s</string>
+    <string name="detail_share_text">Â¡Echa un vistazo a %1$s en FlickTrove!\n\n%2$s</string>
     <string name="detail_content_desc_share">Compartir</string>
     <string name="detail_content_desc_folder">Carpeta</string>
     <string name="detail_content_desc_back">Volver</string>
     <string name="detail_rating_legend_title">Leyenda de clasificaciones</string>
-    <string name="detail_rating_movies_usa">🇺🇸 Películas (EE. UU. / MPAA)</string>
-    <string name="detail_rating_g">Apta para todo público.</string>
-    <string name="detail_rating_pg">Se sugiere la guía de los padres.</string>
-    <string name="detail_rating_pg13">Se advierte rotundamente a los padres (Menores de 13 años).</string>
-    <string name="detail_rating_r">Restringido (Menores de 17 requieren acompañamiento de padre o tutor).</string>
-    <string name="detail_rating_nc17">Sin admisión a menores de 17 años.</string>
+    <string name="detail_rating_movies_usa">ðŸ‡ºðŸ‡¸ PelÃ­culas (EE. UU. / MPAA)</string>
+    <string name="detail_rating_g">Apta para todo pÃºblico.</string>
+    <string name="detail_rating_pg">Se sugiere la guÃ­a de los padres.</string>
+    <string name="detail_rating_pg13">Se advierte rotundamente a los padres (Menores de 13 aÃ±os).</string>
+    <string name="detail_rating_r">Restringido (Menores de 17 requieren acompaÃ±amiento de padre o tutor).</string>
+    <string name="detail_rating_nc17">Sin admisiÃ³n a menores de 17 aÃ±os.</string>
     <string name="detail_rating_nr">Sin clasificar.</string>
-    <string name="detail_rating_tv_usa">🇺🇸 Programas de TV (EE. UU. / Guías de TV)</string>
-    <string name="detail_rating_tvy">Para todos los niños.</string>
-    <string name="detail_rating_tvy7">Dirigido a niños mayores (7+).</string>
-    <string name="detail_rating_tvg">Público general.</string>
-    <string name="detail_rating_tvpg">Se sugiere la guía de los padres.</string>
-    <string name="detail_rating_tv14">Se advierte rotundamente a los padres (Menores de 14 años).</string>
-    <string name="detail_rating_tvma">Exclusivo para público adulto.</string>
-    <string name="detail_translate_comment">Traducir reseña</string>
-    <string name="detail_translate_download_prompt">El modelo de traducción (aprox. 30MB) aún no se ha descargado. ¿Permitir la descarga con datos móviles?</string>
-    <string name="detail_translate_yes_cellular">Sí, usar datos móviles</string>
+    <string name="detail_rating_tv_usa">ðŸ‡ºðŸ‡¸ Programas de TV (EE. UU. / GuÃ­as de TV)</string>
+    <string name="detail_rating_tvy">Para todos los niÃ±os.</string>
+    <string name="detail_rating_tvy7">Dirigido a niÃ±os mayores (7+).</string>
+    <string name="detail_rating_tvg">PÃºblico general.</string>
+    <string name="detail_rating_tvpg">Se sugiere la guÃ­a de los padres.</string>
+    <string name="detail_rating_tv14">Se advierte rotundamente a los padres (Menores de 14 aÃ±os).</string>
+    <string name="detail_rating_tvma">Exclusivo para pÃºblico adulto.</string>
+    <string name="detail_translate_comment">Traducir reseÃ±a</string>
+    <string name="detail_translate_download_prompt">El modelo de traducciÃ³n (aprox. 30MB) aÃºn no se ha descargado. Â¿Permitir la descarga con datos mÃ³viles?</string>
+    <string name="detail_translate_yes_cellular">SÃ­, usar datos mÃ³viles</string>
     <string name="detail_translate_no_wifi">No, solo Wi-Fi</string>
     <string name="detail_translate_not_now">Ahora no</string>
 
     <!-- Person Detail Strings -->
     <string name="person_read_less">LEER MENOS</string>
-    <string name="person_read_more">LEER MÁS</string>
-    <string name="person_no_bio">No hay biografía disponible.</string>
+    <string name="person_read_more">LEER MÃS</string>
+    <string name="person_no_bio">No hay biografÃ­a disponible.</string>
     <string name="person_birthday">FECHA DE NACIMIENTO</string>
     <string name="person_birth_place">LUGAR DE NACIMIENTO</string>
     <string name="person_known_for">CONOCIDO POR</string>
     <string name="person_popularity">POPULARIDAD</string>
     <string name="person_nd">N/A</string>
     <string name="person_highlights">Destacados</string>
-    <string name="person_filmography">Filmografía</string>
-    <string name="person_cast_movie_format">Reparto - Películas (%d)</string>
+    <string name="person_filmography">FilmografÃ­a</string>
+    <string name="person_cast_movie_format">Reparto - PelÃ­culas (%d)</string>
     <string name="person_cast_tv_format">Reparto - TV (%d)</string>
-    <string name="person_directing_movie_format">Dirección - Películas (%d)</string>
-    <string name="person_directing_tv_format">Dirección - TV (%d)</string>
-    <string name="person_writing_movie_format">Guion - Películas (%d)</string>
+    <string name="person_directing_movie_format">DirecciÃ³n - PelÃ­culas (%d)</string>
+    <string name="person_directing_tv_format">DirecciÃ³n - TV (%d)</string>
+    <string name="person_writing_movie_format">Guion - PelÃ­culas (%d)</string>
     <string name="person_writing_tv_format">Guion - TV (%d)</string>
-    <string name="person_production_movie_format">Producción - Películas (%d)</string>
-    <string name="person_production_tv_format">Producción - TV (%d)</string>
-    <string name="person_sound_movie_format">Música - Películas (%d)</string>
-    <string name="person_sound_tv_format">Música - TV (%d)</string>
-    <string name="person_art_movie_format">Arte - Películas (%d)</string>
+    <string name="person_production_movie_format">ProducciÃ³n - PelÃ­culas (%d)</string>
+    <string name="person_production_tv_format">ProducciÃ³n - TV (%d)</string>
+    <string name="person_sound_movie_format">MÃºsica - PelÃ­culas (%d)</string>
+    <string name="person_sound_tv_format">MÃºsica - TV (%d)</string>
+    <string name="person_art_movie_format">Arte - PelÃ­culas (%d)</string>
     <string name="person_art_tv_format">Arte - TV (%d)</string>
-    <string name="person_camera_movie_format">Cámara - Películas (%d)</string>
-    <string name="person_camera_tv_format">Cámara - TV (%d)</string>
-    <string name="person_crew_movie_format">Equipo - Películas (%d)</string>
+    <string name="person_camera_movie_format">CÃ¡mara - PelÃ­culas (%d)</string>
+    <string name="person_camera_tv_format">CÃ¡mara - TV (%d)</string>
+    <string name="person_crew_movie_format">Equipo - PelÃ­culas (%d)</string>
     <string name="person_crew_tv_format">Equipo - TV (%d)</string>
 
     <!-- Folder Detail Strings -->
     <string name="folder_detail_error">Error</string>
-    <string name="folder_detail_empty">Esta carpeta está vacía</string>
+    <string name="folder_detail_empty">Esta carpeta estÃ¡ vacÃ­a</string>
     <string name="folder_detail_tab_all">TODO</string>
-    <string name="folder_detail_tab_movies">PELÍCULAS</string>
+    <string name="folder_detail_tab_movies">PELÃCULAS</string>
     <string name="folder_detail_tab_tv">SERIES TV</string>
     <string name="folder_detail_change_columns">Cambiar columnas</string>
     <string name="folder_detail_filters">Filtros</string>
 
     <!-- Search Strings -->
-    <string name="search_error_message">No se pudieron cargar los datos. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="search_error_message">No se pudieron cargar los datos. Comprueba tu conexiÃ³n e intÃ©ntalo de nuevo.</string>
     <string name="search_trending_now">Tendencias ahora</string>
-    <string name="search_discover_more">Descubrir más</string>
+    <string name="search_discover_more">Descubrir mÃ¡s</string>
     <string name="search_no_results">Sin resultados</string>
     <string name="search_no_results_short">No se encontraron resultados.\nEscribe al menos 3 caracteres</string>
-    <string name="search_no_results_simplify">No se encontraron resultados.\nIntenta simplificar tu búsqueda</string>
+    <string name="search_no_results_simplify">No se encontraron resultados.\nIntenta simplificar tu bÃºsqueda</string>
     <string name="search_content_desc">Buscar</string>
-    <string name="search_fallback_genre">Género</string>
-    <string name="search_active_genre_format">Género: %1$s</string>
+    <string name="search_fallback_genre">GÃ©nero</string>
+    <string name="search_active_genre_format">GÃ©nero: %1$s</string>
     <string name="search_fallback_keyword">Seleccionado</string>
     <string name="search_active_keyword_format">Tema: %1$s</string>
-    <string name="search_placeholder">Buscar películas, series, personas...</string>
+    <string name="search_placeholder">Buscar pelÃ­culas, series, personas...</string>
     <string name="search_content_desc_clear">Borrar</string>
-    <string name="search_content_desc_layout">Cambiar diseño</string>
-    <string name="search_keyword_filter_warning">Nota: el filtro por palabras clave se ignora en la búsqueda de texto.</string>
+    <string name="search_content_desc_layout">Cambiar diseÃ±o</string>
+    <string name="search_keyword_filter_warning">Nota: el filtro por palabras clave se ignora en la bÃºsqueda de texto.</string>
     <string name="search_recent">RECIENTES</string>
     <string name="search_clear_all">BORRAR TODO</string>
-    <string name="search_remove_recent">Eliminar búsqueda</string>
-    <string name="search_suggested">GÉNEROS Y TEMAS SUGERIDOS</string>
+    <string name="search_remove_recent">Eliminar bÃºsqueda</string>
+    <string name="search_suggested">GÃ‰NEROS Y TEMAS SUGERIDOS</string>
     <string name="search_collapse">Contraer</string>
     <string name="search_expand">Expandir</string>
     <string name="search_tab_persons">PERSONAS</string>
     <string name="search_tab_collections">COLECCIONES</string>
     <string name="collection_trending_title">Sagas y colecciones en tendencia</string>
-    <string name="collection_movies_count_format">%1$d PELÍCULAS</string>
+    <string name="collection_movies_count_format">%1$d PELÃCULAS</string>
 
     <!-- Recommendations & Library Strings -->
     <string name="library_tab_title">Biblioteca</string>
-    <string name="library_empty_seen">Aún no has visto nada</string>
+    <string name="library_empty_seen">AÃºn no has visto nada</string>
     <string name="recommendations_tab_title">Recomendaciones</string>
-    <string name="recommendations_empty_1">Aún no tenemos suficientes datos para recomendarte algo.</string>
-    <string name="recommendations_empty_2">¡Añade películas a tus favoritos y califícalas para comenzar!</string>
+    <string name="recommendations_empty_1">AÃºn no tenemos suficientes datos para recomendarte algo.</string>
+    <string name="recommendations_empty_2">Â¡AÃ±ade pelÃ­culas a tus favoritos y califÃ­calas para comenzar!</string>
     <string name="recommendations_flick_mode">Modo Deslizar</string>
-    <string name="recommendations_add">AÑADIR</string>
+    <string name="recommendations_add">AÃ‘ADIR</string>
     <string name="recommendations_pass">PASAR</string>
-    <string name="recommendations_no_title">Sin título</string>
+    <string name="recommendations_no_title">Sin tÃ­tulo</string>
     <string name="recommendations_na">N/A</string>
     <string name="recommendations_desc_pass">Pasar</string>
     <string name="recommendations_desc_info">Info</string>
     <string name="recommendations_desc_favorite">Favoritos</string>
-    <string name="recommendations_completed_title">¡Recomendaciones completadas!</string>
-    <string name="recommendations_completed_desc">Has visto todas las recomendaciones actuales. ¡Intenta cambiar de PELÍCULAS a SERIES TV o recarga para encontrar nuevas!</string>
+    <string name="recommendations_completed_title">Â¡Recomendaciones completadas!</string>
+    <string name="recommendations_completed_desc">Has visto todas las recomendaciones actuales. Â¡Intenta cambiar de PELÃCULAS a SERIES TV o recarga para encontrar nuevas!</string>
     <string name="recommendations_reload">Recargar</string>
 
     <!-- Auth Strings -->
-    <string name="auth_subtitle">TU ARCHIVO CINEMATOGRÁFICO</string>
-    <string name="auth_email">Correo electrónico</string>
-    <string name="auth_error_email_invalid">Correo electrónico no válido</string>
-    <string name="auth_password">Contraseña</string>
-    <string name="auth_error_password_length">Mínimo 6 caracteres</string>
-    <string name="auth_forgot_password">¿Olvidaste tu contraseña?</string>
-    <string name="auth_login">Iniciar sesión</string>
+    <string name="auth_subtitle">TU ARCHIVO CINEMATOGRÃFICO</string>
+    <string name="auth_email">Correo electrÃ³nico</string>
+    <string name="auth_error_email_invalid">Correo electrÃ³nico no vÃ¡lido</string>
+    <string name="auth_password">ContraseÃ±a</string>
+    <string name="auth_error_password_length">MÃ­nimo 6 caracteres</string>
+    <string name="auth_forgot_password">Â¿Olvidaste tu contraseÃ±a?</string>
+    <string name="auth_login">Iniciar sesiÃ³n</string>
     <string name="auth_create_account">Crear cuenta</string>
-    <string name="auth_switch_to_register">¿No tienes una cuenta? Regístrate</string>
-    <string name="auth_switch_to_login">¿Ya tienes una cuenta? Inicia sesión</string>
+    <string name="auth_switch_to_register">Â¿No tienes una cuenta? RegÃ­strate</string>
+    <string name="auth_switch_to_login">Â¿Ya tienes una cuenta? Inicia sesiÃ³n</string>
     <string name="auth_or">O</string>
     <string name="auth_guest_continue">Continuar como invitado</string>
     <string name="auth_terms_prefix">Al continuar, aceptas nuestros </string>
-    <string name="auth_terms_link">Términos del servicio</string>
+    <string name="auth_terms_link">TÃ©rminos del servicio</string>
     <string name="auth_terms_and"> y la </string>
-    <string name="auth_privacy_link">Política de privacidad</string>
+    <string name="auth_privacy_link">PolÃ­tica de privacidad</string>
     <string name="auth_terms_suffix">.</string>
     <string name="auth_guest_dialog_title">Modo invitado</string>
-    <string name="auth_guest_dialog_desc">Al continuar como invitado, tus datos solo se guardarán localmente en este dispositivo. Si desinstalas la aplicación o borras sus datos, se perderá todo.</string>
+    <string name="auth_guest_dialog_desc">Al continuar como invitado, tus datos solo se guardarÃ¡n localmente en este dispositivo. Si desinstalas la aplicaciÃ³n o borras sus datos, se perderÃ¡ todo.</string>
     <string name="auth_guest_dialog_confirm">Aceptar y continuar</string>
     <string name="auth_guest_dialog_cancel">Cancelar</string>
-    <string name="auth_guest_login_warning">Iniciar sesión en una cuenta existente reemplazará tus datos de invitado actuales con los datos de esa cuenta.</string>
-    <string name="auth_guest_signup_info">Crear una nueva cuenta guardará y transferirá permanentemente todos tus datos de invitado actuales a ella.</string>
+    <string name="auth_guest_login_warning">Iniciar sesiÃ³n en una cuenta existente reemplazarÃ¡ tus datos de invitado actuales con los datos de esa cuenta.</string>
+    <string name="auth_guest_signup_info">Crear una nueva cuenta guardarÃ¡ y transferirÃ¡ permanentemente todos tus datos de invitado actuales a ella.</string>
     <string name="auth_syncing">Sincronizando...</string>
 
     <!-- Surprise Me Strings -->
-    <string name="surprise_title">Sorpréndeme</string>
+    <string name="surprise_title">SorprÃ©ndeme</string>
     <string name="surprise_close">Cerrar</string>
     <string name="surprise_mode_random">Aleatorio</string>
-    <string name="surprise_mode_random_desc">Película aleatoria</string>
+    <string name="surprise_mode_random_desc">PelÃ­cula aleatoria</string>
     <string name="surprise_mode_emotional">Emocional</string>
-    <string name="surprise_mode_emotional_desc">La combinación perfecta</string>
-    <string name="surprise_q_time">¿Cuánto tiempo tienes?</string>
+    <string name="surprise_mode_emotional_desc">La combinaciÃ³n perfecta</string>
+    <string name="surprise_q_time">Â¿CuÃ¡nto tiempo tienes?</string>
     <string name="surprise_time_short">Menos de 1h 40m</string>
     <string name="surprise_time_medium">Normal (~2h)</string>
     <string name="surprise_time_long">Toda la noche</string>
     <string name="surprise_any">No importa</string>
-    <string name="surprise_q_mood">¿Qué estado de ánimo buscas?</string>
-    <string name="surprise_mood_laugh">Quiero reír</string>
-    <string name="surprise_mood_tension">Quiero tensión</string>
+    <string name="surprise_q_mood">Â¿QuÃ© estado de Ã¡nimo buscas?</string>
+    <string name="surprise_mood_laugh">Quiero reÃ­r</string>
+    <string name="surprise_mood_tension">Quiero tensiÃ³n</string>
     <string name="surprise_mood_emotion">Quiero emocionarme</string>
     <string name="surprise_mood_escape">Viaje mental</string>
-    <string name="surprise_mood_any">Sorpréndeme</string>
-    <string name="surprise_q_company">¿Con quién la vas a ver?</string>
+    <string name="surprise_mood_any">SorprÃ©ndeme</string>
+    <string name="surprise_q_company">Â¿Con quiÃ©n la vas a ver?</string>
     <string name="surprise_company_alone">En solo</string>
     <string name="surprise_company_couple">En pareja</string>
     <string name="surprise_company_friends">Con amigos</string>
     <string name="surprise_company_family">En familia</string>
-    <string name="surprise_loading_1">Buscando la combinación perfecta...</string>
+    <string name="surprise_loading_1">Buscando la combinaciÃ³n perfecta...</string>
 
     <!-- Updates Strings -->
     <string name="updates_no_reminders">Sin recordatorios</string>
@@ -546,7 +546,7 @@
     <string name="updates_new_episodes">Nuevos episodios</string>
     <string name="updates_mark_all">MARCAR TODO</string>
     <string name="updates_new_episodes_count">%1$d nuevos episodios</string>
-    <string name="updates_out_today">¡Estreno hoy!</string>
+    <string name="updates_out_today">Â¡Estreno hoy!</string>
     <string name="updates_available_now">Disponible ahora</string>
     <string name="updates_tab_reminders">Recordatorios</string>
     <string name="updates_tab_notifications">Notificaciones</string>
@@ -554,51 +554,51 @@
     <string name="updates_waiting_count">%1$d pendientes</string>
     <string name="updates_no_notifications">No hay notificaciones recientes.</string>
     <string name="updates_calendar_reminder_date">Recordatorios para %1$s</string>
-    <string name="updates_calendar_select_day">Selecciona un día destacado en el calendario</string>
+    <string name="updates_calendar_select_day">Selecciona un dÃ­a destacado en el calendario</string>
     <string name="updates_calendar_prev_month">Mes anterior</string>
     <string name="updates_calendar_change_date">Cambiar fecha</string>
-    <string name="updates_calendar_prev_year">Año anterior</string>
-    <string name="updates_calendar_next_year">Año siguiente</string>
+    <string name="updates_calendar_prev_year">AÃ±o anterior</string>
+    <string name="updates_calendar_next_year">AÃ±o siguiente</string>
     <!-- Notifications & Widgets -->
-    <string name="notif_reminder_summary">FlickTrove · Recordatorios de estreno</string>
-    <string name="notif_update_summary">FlickTrove · Actualizaciones de series</string>
-    <string name="notif_media_movie">Película</string>
+    <string name="notif_reminder_summary">FlickTrove Â· Recordatorios de estreno</string>
+    <string name="notif_update_summary">FlickTrove Â· Actualizaciones de series</string>
+    <string name="notif_media_movie">PelÃ­cula</string>
     <string name="notif_media_tv">Serie TV</string>
     <string name="notif_new_release_title">Nuevo estreno: %1$s</string>
-    <string name="notif_new_release_body">¡\"%1$s\" ya está disponible! Toca para descubrir más.</string>
+    <string name="notif_new_release_body">Â¡\"%1$s\" ya estÃ¡ disponible! Toca para descubrir mÃ¡s.</string>
     <string name="notif_new_episode_title">Nuevo estreno: Episodio %1$s</string>
-    <string name="notif_new_episode_body">¡El episodio %1$s de \"%2$s\" se estrena hoy!</string>
+    <string name="notif_new_episode_body">Â¡El episodio %1$s de \"%2$s\" se estrena hoy!</string>
     <string name="notif_new_episodes_title">Nuevos episodios disponibles</string>
     <string name="notif_new_episodes_body_single">1 nuevo episodio disponible para \"%1$s\".</string>
     <string name="notif_new_episodes_body_plural">%1$d nuevos episodios disponibles para \"%2$s\".</string>
-    <string name="widget_nothing_to_see">¡Nada que ver!</string>
-    <string name="widget_coming_soon">PRÓXIMAMENTE</string>
+    <string name="widget_nothing_to_see">Â¡Nada que ver!</string>
+    <string name="widget_coming_soon">PRÃ“XIMAMENTE</string>
     <string name="widget_release_date_prefix">Estreno el: %1$s</string>
-    <string name="widget_no_releases">¡No hay próximos estrenos!</string>
+    <string name="widget_no_releases">Â¡No hay prÃ³ximos estrenos!</string>
     <string name="widget_no_img">Sin imagen</string>
 
     <!-- Quick Actions Strings -->
-    <string name="quick_action_title">Acciones rápidas</string>
-    <string name="quick_action_rating">Calificación rápida</string>
-    <string name="quick_action_note">Nota rápida</string>
+    <string name="quick_action_title">Acciones rÃ¡pidas</string>
+    <string name="quick_action_rating">CalificaciÃ³n rÃ¡pida</string>
+    <string name="quick_action_note">Nota rÃ¡pida</string>
     <string name="quick_folders">CARPETAS</string>
     <string name="quick_no_folders">Sin carpetas creadas</string>
-    <string name="quick_rating_title">CALIFICACIÓN RÁPIDA</string>
-    <string name="quick_rating_previous">  •  ANTERIOR: %1$.1f</string>
-    <string name="quick_note_title">NOTA RÁPIDA</string>
-    <string name="quick_note_hint">Añadir una nota o reseña...</string>
+    <string name="quick_rating_title">CALIFICACIÃ“N RÃPIDA</string>
+    <string name="quick_rating_previous">  â€¢  ANTERIOR: %1$.1f</string>
+    <string name="quick_note_title">NOTA RÃPIDA</string>
+    <string name="quick_note_hint">AÃ±adir una nota o reseÃ±a...</string>
     <string name="quick_note_dictate">Dictar nota</string>
     <string name="quick_note_stop_audio">Detener audio</string>
     <string name="quick_note_play_audio">Reproducir audio</string>
     <string name="quick_note_listening">Escuchando</string>
     <string name="quick_note_delete_audio">Eliminar audio</string>
-    <string name="quick_note_recording">Grabación en curso...</string>
-    <string name="quick_note_stop_recording">Detener grabación</string>
+    <string name="quick_note_recording">GrabaciÃ³n en curso...</string>
+    <string name="quick_note_stop_recording">Detener grabaciÃ³n</string>
     <string name="quick_note_record_audio">Grabar audio</string>
 
     <!-- Folder Modals Strings -->
     <string name="folder_picker_title">Mis carpetas</string>
-    <string name="folder_picker_subtitle">Organiza tus películas</string>
+    <string name="folder_picker_subtitle">Organiza tus pelÃ­culas</string>
     <string name="folder_picker_empty">No se encontraron carpetas</string>
     <string name="folder_picker_new">NUEVA CARPETA</string>
     <string name="folder_item_count">%1$d elementos</string>
@@ -606,19 +606,19 @@
     <string name="folder_edit_rename">Renombrar carpeta</string>
     <string name="folder_edit_color">Cambiar color</string>
     <string name="folder_edit_name_hint">Nombre de la carpeta</string>
-    <string name="folder_delete_title">¿Eliminar carpeta?</string>
-    <string name="folder_delete_confirm_prefix">¿Estás seguro de que deseas eliminar </string>
-    <string name="folder_delete_confirm_prefix_2">¿Estás seguro de que deseas eliminar la carpeta </string>
-    <string name="folder_delete_confirm_suffix">\? Esta acción no se puede deshacer.</string>
+    <string name="folder_delete_title">Â¿Eliminar carpeta?</string>
+    <string name="folder_delete_confirm_prefix">Â¿EstÃ¡s seguro de que deseas eliminar </string>
+    <string name="folder_delete_confirm_prefix_2">Â¿EstÃ¡s seguro de que deseas eliminar la carpeta </string>
+    <string name="folder_delete_confirm_suffix">\? Esta acciÃ³n no se puede deshacer.</string>
     <string name="folder_delete_action">ELIMINAR CARPETA</string>
-    <string name="folder_delete_warning_long">ESTA ACCIÓN ES IRREVERSIBLE Y SOLO ELIMINARÁ LA ORGANIZACIÓN, NO EL CONTENIDO GUARDADO.</string>
+    <string name="folder_delete_warning_long">ESTA ACCIÃ“N ES IRREVERSIBLE Y SOLO ELIMINARÃ LA ORGANIZACIÃ“N, NO EL CONTENIDO GUARDADO.</string>
     <string name="folder_delete_cancel">CANCELAR</string>
     <string name="folder_delete_short">ELIMINAR</string>
 
     <!-- System Modals Strings -->
     <string name="guest_warning_title">Modo invitado</string>
     <string name="guest_warning_local_only">Los datos solo se guardan localmente.</string>
-    <string name="guest_warning_data_loss">Riesgo de pérdida de datos si desinstalas la app.</string>
+    <string name="guest_warning_data_loss">Riesgo de pÃ©rdida de datos si desinstalas la app.</string>
     <string name="guest_warning_accept">Aceptar y continuar</string>
     <string name="import_library_title">Importar biblioteca</string>
     <string name="import_csv_button">Cargar CSV</string>
@@ -628,7 +628,7 @@
     <string name="feedback_type_bug">Error (Bug)</string>
     <string name="feedback_type_idea">Idea</string>
     <string name="feedback_type_other">Otro</string>
-    <string name="error_state_title">¡Upps! Algo salió mal</string>
+    <string name="error_state_title">Â¡Upps! Algo saliÃ³ mal</string>
     <string name="error_state_retry">Reintentar</string>
 
     <!-- Global & Modals Strings -->
@@ -641,58 +641,63 @@
     <string name="filter_show_all">MOSTRAR TODO</string>
     <string name="filter_apply">APLICAR FILTROS</string>
     <string name="filter_sort_by">ORDENAR POR</string>
-    <string name="filter_active_subgenres">SUBGÉNEROS ACTIVOS</string>
-    <string name="filter_genres">GÉNEROS</string>
+    <string name="filter_active_subgenres">SUBGÃ‰NEROS ACTIVOS</string>
+    <string name="filter_genres">GÃ‰NEROS</string>
     <string name="filter_platforms">PLATAFORMAS</string>
-    <string name="filter_period">PERÍODO</string>
-    <string name="filter_selected_subgenre">SUBGÉNERO SELECCIONADO</string>
-    <string name="card_quick_rate">Calificación rápida</string>
-    <string name="card_quick_note">Nota rápida</string>
+    <string name="filter_period">PERÃODO</string>
+    <string name="filter_status">ESTADO</string>
+    <string name="filter_status_watching">Viendo</string>
+    <string name="filter_status_not_started">Sin empezar</string>
+    <string name="filter_status_dropped">Abandonada</string>
+    <string name="filter_status_up_to_date">Al dÃ­a</string>
+    <string name="filter_selected_subgenre">SUBGÃ‰NERO SELECCIONADO</string>
+    <string name="card_quick_rate">CalificaciÃ³n rÃ¡pida</string>
+    <string name="card_quick_note">Nota rÃ¡pida</string>
     <string name="card_folders">Carpetas</string>
     <string name="card_share">Compartir</string>
     <string name="card_delete">Eliminar</string>
     <string name="color_picker_title">Color</string>
-    <string name="category_movies">PELÍCULAS</string>
+    <string name="category_movies">PELÃCULAS</string>
     <string name="category_tv">SERIES TV</string>
-    <string name="drawer_menu">Menú</string>
+    <string name="drawer_menu">MenÃº</string>
 
     <!-- Detail Components Strings -->
     <string name="detail_director">DIRECTOR</string>
     <string name="detail_cast">REPARTO</string>
     <string name="detail_top_comments">COMENTARIOS PRINCIPALES</string>
     <string name="detail_plot">SINOPSIS</string>
-    <string name="detail_where_to_watch">DÓNDE VER</string>
-    <string name="detail_collection">COLECCIÓN</string>
+    <string name="detail_where_to_watch">DÃ“NDE VER</string>
+    <string name="detail_collection">COLECCIÃ“N</string>
     <string name="detail_recommendations">RECOMENDADOS</string>
-    <string name="detail_technical_info">DETALLES TÉCNICOS</string>
-    <string name="detail_official_trailers">TRÁILERES OFICIALES</string>
-    <string name="detail_official_trailer">TRÁILER OFICIAL</string>
+    <string name="detail_technical_info">DETALLES TÃ‰CNICOS</string>
+    <string name="detail_official_trailers">TRÃILERES OFICIALES</string>
+    <string name="detail_official_trailer">TRÃILER OFICIAL</string>
     <string name="detail_video_title_teaser">TEASERS Y PROMOS</string>
     <string name="detail_video_title_clip">CLIPS Y ESCENAS</string>
     <string name="detail_video_title_featurette">REPORTAJES Y ESPECIALES</string>
-    <string name="detail_video_title_bts">DETRÁS DE LAS CÁMARAS</string>
+    <string name="detail_video_title_bts">DETRÃS DE LAS CÃMARAS</string>
     <string name="detail_video_title_bloopers">TOMAS FALSAS Y GAGS</string>
-    <string name="detail_video_title_credits">TÍTULOS Y CRÉDITOS DE APERTURA</string>
-    <string name="detail_video_title_recap">RESÚMENES</string>
-    <string name="detail_video_pill_trailer">TRÁILER</string>
+    <string name="detail_video_title_credits">TÃTULOS Y CRÃ‰DITOS DE APERTURA</string>
+    <string name="detail_video_title_recap">RESÃšMENES</string>
+    <string name="detail_video_pill_trailer">TRÃILER</string>
     <string name="detail_video_pill_teaser">TEASER</string>
     <string name="detail_video_pill_clip">CLIP</string>
     <string name="detail_video_pill_featurette">REPORTAJE</string>
     <string name="detail_video_pill_bts">BASTIDORES</string>
     <string name="detail_video_pill_bloopers">TOMAS FALSAS</string>
-    <string name="detail_video_pill_credits">CRÉDITOS</string>
+    <string name="detail_video_pill_credits">CRÃ‰DITOS</string>
     <string name="detail_video_pill_recap">RESUMEN</string>
-    <string name="detail_video_menu_trailer">Tráileres oficiales</string>
+    <string name="detail_video_menu_trailer">TrÃ¡ileres oficiales</string>
     <string name="detail_video_menu_teaser">Teasers y promos</string>
     <string name="detail_video_menu_clip">Clips y escenas</string>
     <string name="detail_video_menu_featurette">Reportajes y especiales</string>
-    <string name="detail_video_menu_bts">Detrás de las cámaras</string>
+    <string name="detail_video_menu_bts">DetrÃ¡s de las cÃ¡maras</string>
     <string name="detail_video_menu_bloopers">Tomas falsas y gags</string>
-    <string name="detail_video_menu_credits">Créditos de apertura</string>
-    <string name="detail_video_menu_recap">Resúmenes</string>
+    <string name="detail_video_menu_credits">CrÃ©ditos de apertura</string>
+    <string name="detail_video_menu_recap">ResÃºmenes</string>
     <string name="detail_swipe">DESLIZAR</string>
     <string name="detail_personal_zone">ZONA PERSONAL</string>
-    <string name="detail_tap_for_more">TOCA PARA VER MÁS</string>
+    <string name="detail_tap_for_more">TOCA PARA VER MÃS</string>
     <string name="detail_tap_for_less">TOCA PARA VER MENOS</string>
     <string name="detail_select_cover">Seleccionar portada</string>
     <string name="detail_no_alternative_covers">No hay portadas alternativas disponibles.</string>
@@ -700,43 +705,43 @@
     <string name="detail_custom_cover_badge">Portada personalizada</string>
     <string name="detail_change_cover_btn">Cambiar portada</string>
     <string name="detail_cover_selected_badge">EN USO</string>
-    <string name="detail_cover_updated_msg">✨ ¡Portada actualizada con éxito!</string>
-    <string name="detail_cover_reset_msg">🔄 Portada restablecida por defecto</string>
+    <string name="detail_cover_updated_msg">âœ¨ Â¡Portada actualizada con Ã©xito!</string>
+    <string name="detail_cover_reset_msg">ðŸ”„ Portada restablecida por defecto</string>
     <string name="personal_listening">Escuchando</string>
-    <string name="personal_audio_local_only">El audio se guarda localmente y no se sincronizará.</string>
+    <string name="personal_audio_local_only">El audio se guarda localmente y no se sincronizarÃ¡.</string>
     <string name="personal_save_note">GUARDAR NOTA</string>
-    <string name="rated_guide_title">Guía de clasificaciones</string>
-    <string name="rated_guide_source">Los datos provienen de la MPAA (EE. UU.), el estándar internacional para la clasificación de películas.</string>
-    <string name="rated_guide_help">FlickTrove muestra esta información para ayudarte a elegir la película adecuada para tu noche.</string>
+    <string name="rated_guide_title">GuÃ­a de clasificaciones</string>
+    <string name="rated_guide_source">Los datos provienen de la MPAA (EE. UU.), el estÃ¡ndar internacional para la clasificaciÃ³n de pelÃ­culas.</string>
+    <string name="rated_guide_help">FlickTrove muestra esta informaciÃ³n para ayudarte a elegir la pelÃ­cula adecuada para tu noche.</string>
     <!-- Settings ViewModel Strings -->
     <string name="settings_msg_accent_updated">Color de acento actualizado</string>
     <string name="settings_msg_folder_bookmarks">Marcadores de carpeta %1$s</string>
     <string name="settings_msg_badge">Insignia %1$s</string>
-    <string name="settings_msg_layout_btn">Botón de diseño %1$s</string>
-    <string name="settings_msg_releases_split">División de estrenos %1$s</string>
-    <string name="settings_msg_dropped_split">División de abandonadas %1$s</string>
-    <string name="settings_msg_logo_anim">Animación de logo %1$s</string>
+    <string name="settings_msg_layout_btn">BotÃ³n de diseÃ±o %1$s</string>
+    <string name="settings_msg_releases_split">DivisiÃ³n de estrenos %1$s</string>
+    <string name="settings_msg_dropped_split">DivisiÃ³n de abandonadas %1$s</string>
+    <string name="settings_msg_logo_anim">AnimaciÃ³n de logo %1$s</string>
     <string name="settings_msg_my_folders">Tarjeta Mis carpetas %1$s</string>
     <string name="settings_msg_your_flow">Tarjeta Tu Flow %1$s</string>
     <string name="settings_msg_notifications">Notificaciones %1$s</string>
-    <string name="settings_msg_vibration">Vibración %1$s</string>
-    <string name="settings_msg_dynamic_icon">Icono dinámico de la app %1$s</string>
+    <string name="settings_msg_vibration">VibraciÃ³n %1$s</string>
+    <string name="settings_msg_dynamic_icon">Icono dinÃ¡mico de la app %1$s</string>
     <string name="settings_msg_visual_fx">Efectos visuales avanzados %1$s</string>
     <string name="settings_msg_img_quality">Calidad de imagen: %1$s</string>
-    <string name="settings_msg_text_size">Tamaño del texto: %1$s</string>
+    <string name="settings_msg_text_size">TamaÃ±o del texto: %1$s</string>
     <string name="settings_msg_theme">Tema establecido en %1$s</string>
     <string name="settings_msg_language">Idioma establecido en: %1$s</string>
-    <string name="settings_msg_cache_cleared">Caché de imágenes borrada</string>
+    <string name="settings_msg_cache_cleared">CachÃ© de imÃ¡genes borrada</string>
     <string name="settings_msg_feedback_wait">Puedes enviar otra sugerencia en aproximadamente %1$d horas</string>
-    <string name="settings_msg_feedback_thanks">¡Gracias por tus comentarios!</string>
-    <string name="settings_msg_feedback_error">Error al enviar comentarios. Inténtalo de nuevo más tarde.</string>
-    <string name="settings_msg_connection_error">Error de conexión al enviar</string>
-    <string name="settings_msg_export_error">Error durante la exportación</string>
-    <string name="settings_msg_restore_success">Datos restaurados con éxito</string>
-    <string name="settings_msg_restore_error">Error al restaurar: archivo no válido</string>
-    <string name="settings_msg_import_success">Se importaron con éxito %1$d elementos</string>
-    <string name="settings_msg_import_error">Error de migración: comprueba el formato del archivo</string>
-    <string name="settings_msg_import_started">Importación iniciada en segundo plano…</string>
+    <string name="settings_msg_feedback_thanks">Â¡Gracias por tus comentarios!</string>
+    <string name="settings_msg_feedback_error">Error al enviar comentarios. IntÃ©ntalo de nuevo mÃ¡s tarde.</string>
+    <string name="settings_msg_connection_error">Error de conexiÃ³n al enviar</string>
+    <string name="settings_msg_export_error">Error durante la exportaciÃ³n</string>
+    <string name="settings_msg_restore_success">Datos restaurados con Ã©xito</string>
+    <string name="settings_msg_restore_error">Error al restaurar: archivo no vÃ¡lido</string>
+    <string name="settings_msg_import_success">Se importaron con Ã©xito %1$d elementos</string>
+    <string name="settings_msg_import_error">Error de migraciÃ³n: comprueba el formato del archivo</string>
+    <string name="settings_msg_import_started">ImportaciÃ³n iniciada en segundo planoâ€¦</string>
     <!-- ViewModels Shared Messages -->
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" eliminado</string>
@@ -749,45 +754,45 @@
     <string name="msg_folder_created_with_item">Carpeta \"%1$s\" creada con este elemento</string>
     <string name="msg_folder_deleted">Carpeta \"%1$s\" eliminada</string>
     <string name="msg_folder_not_found">Carpeta no encontrada</string>
-    <string name="msg_error_translating">Error durante la traducción</string>
+    <string name="msg_error_translating">Error durante la traducciÃ³n</string>
     <string name="msg_error_lang_model">Error al descargar el modelo de idioma</string>
     <string name="msg_error_lang_model_it">Error al descargar el modelo de idioma italiano.</string>
     <string name="msg_auth_deleting">Eliminando cuenta...</string>
-    <string name="msg_auth_no_account">No se encontró ninguna cuenta con este correo.</string>
-    <string name="msg_auth_no_connection">Sin conexión a internet.</string>
+    <string name="msg_auth_no_account">No se encontrÃ³ ninguna cuenta con este correo.</string>
+    <string name="msg_auth_no_connection">Sin conexiÃ³n a internet.</string>
     <string name="msg_auth_unexpected_error">Error inesperado: %1$s</string>
-    <string name="msg_auth_invalid_credentials">Correo electrónico o contraseña no válidos.</string>
-    <string name="msg_auth_collision">El correo ya está registrado. Por favor, inicia sesión.</string>
-    <string name="msg_auth_recent_login_required">Operación sensible. Por favor, vuelve a iniciar sesión.</string>
-    <string name="msg_auth_too_many_attempts">Demasiados intentos fallidos. Inténtalo de nuevo más tarde.</string>
+    <string name="msg_auth_invalid_credentials">Correo electrÃ³nico o contraseÃ±a no vÃ¡lidos.</string>
+    <string name="msg_auth_collision">El correo ya estÃ¡ registrado. Por favor, inicia sesiÃ³n.</string>
+    <string name="msg_auth_recent_login_required">OperaciÃ³n sensible. Por favor, vuelve a iniciar sesiÃ³n.</string>
+    <string name="msg_auth_too_many_attempts">Demasiados intentos fallidos. IntÃ©ntalo de nuevo mÃ¡s tarde.</string>
     <string name="msg_auth_enter_email_reset">Ingresa tu correo para restablecer</string>
     <string name="msg_auth_sending_reset">Enviando correo de restablecimiento...</string>
-    <string name="msg_auth_email_sent">Correo de restablecimiento enviado con éxito</string>
+    <string name="msg_auth_email_sent">Correo de restablecimiento enviado con Ã©xito</string>
     <string name="msg_auth_offensive_email">El correo contiene palabras no permitidas</string>
-    <string name="msg_auth_fields_required">Se requiere correo electrónico y contraseña</string>
-    <string name="msg_auth_logging_in">Iniciando sesión...</string>
+    <string name="msg_auth_fields_required">Se requiere correo electrÃ³nico y contraseÃ±a</string>
+    <string name="msg_auth_logging_in">Iniciando sesiÃ³n...</string>
     <string name="msg_auth_linking">Vinculando cuenta...</string>
     <string name="msg_auth_syncing">Sincronizando cuenta...</string>
     <string name="msg_auth_creating_account">Creando cuenta...</string>
     <string name="msg_auth_guest_access">Acceso de invitado...</string>
     <string name="msg_item_removed_from_folder">\"%1$s\" eliminado de la carpeta</string>
-    <string name="msg_item_added_to_folder">\"%1$s\" añadido a %2$s</string>
-    <string name="card_hint_manage_reminder">Gestiona el recordatorio en la página de detalles</string>
-    <string name="card_hint_manage_episodes">Gestiona los episodios en la página de detalles</string>
+    <string name="msg_item_added_to_folder">\"%1$s\" aÃ±adido a %2$s</string>
+    <string name="card_hint_manage_reminder">Gestiona el recordatorio en la pÃ¡gina de detalles</string>
+    <string name="card_hint_manage_episodes">Gestiona los episodios en la pÃ¡gina de detalles</string>
     <!-- Drawer -->
-    <string name="drawer_back_to_main">Menú principal</string>
-    <string name="drawer_movies">Películas</string>
-    <string name="drawer_movies_popular">Películas populares</string>
+    <string name="drawer_back_to_main">MenÃº principal</string>
+    <string name="drawer_movies">PelÃ­culas</string>
+    <string name="drawer_movies_popular">PelÃ­culas populares</string>
     <string name="drawer_movies_now_playing">En cines</string>
-    <string name="drawer_movies_upcoming">Próximas películas</string>
+    <string name="drawer_movies_upcoming">PrÃ³ximas pelÃ­culas</string>
     <string name="drawer_tv">Series TV</string>
     <string name="drawer_tv_popular">Series populares</string>
-    <string name="drawer_tv_airing">En emisión hoy</string>
-    <string name="drawer_tv_upcoming">En emisión</string>
+    <string name="drawer_tv_airing">En emisiÃ³n hoy</string>
+    <string name="drawer_tv_upcoming">En emisiÃ³n</string>
     <string name="drawer_custom">Tu contenido</string>
     <string name="drawer_discover">Revista</string>
     <string name="drawer_custom_recommendations">Recomendado para ti</string>
-    <string name="drawer_custom_surprise">Sorpréndeme</string>
+    <string name="drawer_custom_surprise">SorprÃ©ndeme</string>
     <string name="drawer_custom_folders">Mis carpetas</string>
     <string name="drawer_custom_news">Noticias</string>
     <string name="drawer_general">General</string>
@@ -814,15 +819,15 @@
     <!-- Action Feedback Labels -->
     <string name="action_label_removed">eliminado</string>
     <string name="action_label_marked_watched">marcado como visto</string>
-    <string name="action_label_added_to_watch">añadido a Por ver</string>
+    <string name="action_label_added_to_watch">aÃ±adido a Por ver</string>
     <string name="action_label_reminder_set">recordatorio configurado</string>
     <string name="action_label_updated">actualizado</string>
 
     <!-- Personal Zone Actions -->
-    <string name="personal_zone_global_rating">CALIFICACIÓN FLICKTROVE</string>
+    <string name="personal_zone_global_rating">CALIFICACIÃ“N FLICKTROVE</string>
     <string name="personal_zone_rate">CALIFICAR</string>
     <string name="personal_zone_note">NOTA</string>
-    <string name="personal_zone_empty">VACÍO</string>
+    <string name="personal_zone_empty">VACÃO</string>
     <string name="personal_zone_text_audio">TEXTO/AUDIO</string>
     <string name="personal_zone_text">TEXTO</string>
     <string name="personal_zone_audio">AUDIO</string>
@@ -830,46 +835,46 @@
     <string name="personal_zone_saved">GUARDADO</string>
     <string name="personal_record_voice">GRABAR VOZ</string>
     <string name="personal_recording">GRABANDO...</string>
-    <string name="personal_note_placeholder">Añadir una nota personal...</string>
+    <string name="personal_note_placeholder">AÃ±adir una nota personal...</string>
     <string name="episodes_mark_season_watched">MARCAR TEMPORADA COMO VISTA</string>
     <string name="episodes_episode_n">EPISODIO %d</string>
 
     <!-- News Section -->
-    <string name="news_tab_title">Últimas noticias</string>
+    <string name="news_tab_title">Ãšltimas noticias</string>
     <string name="news_empty">No hay noticias disponibles en este momento.</string>
-    <string name="news_read_more">Leer más</string>
+    <string name="news_read_more">Leer mÃ¡s</string>
     <string name="news_external_link">Enlace externo</string>
-    <string name="news_error_loading">No se pudieron cargar las noticias. Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="news_error_loading">No se pudieron cargar las noticias. Comprueba tu conexiÃ³n a internet e intÃ©ntalo de nuevo.</string>
 
     <!-- Dialogs -->
     <string name="dialog_rating_drag">ARRASTRA PARA CALIFICAR</string>
     <string name="dialog_rating_prev">ANTERIOR %.1f</string>
-    <string name="dialog_rating_save">GUARDAR CALIFICACIÓN</string>
-    <string name="dialog_rating_remove">ELIMINAR CALIFICACIÓN</string>
+    <string name="dialog_rating_save">GUARDAR CALIFICACIÃ“N</string>
+    <string name="dialog_rating_remove">ELIMINAR CALIFICACIÃ“N</string>
     <string name="dialog_note_title">NOTA PERSONAL</string>
     <string name="dialog_note_placeholder">Escribe o dicta una nota...</string>
 
     <!-- Rating Explanations -->
-    <string name="rating_g_label">APTO PARA TODO PÚBLICO</string>
-    <string name="rating_g_desc">Todas las edades admitidas. Nada que sea ofensivo para los padres al ser visto por niños.</string>
+    <string name="rating_g_label">APTO PARA TODO PÃšBLICO</string>
+    <string name="rating_g_desc">Todas las edades admitidas. Nada que sea ofensivo para los padres al ser visto por niÃ±os.</string>
 
-    <string name="rating_pg_label">GUÍA PATERNA SUGERIDA</string>
-    <string name="rating_pg_desc">Algunos contenidos pueden no ser adecuados para niños. Se aconseja orientación paterna.</string>
+    <string name="rating_pg_label">GUÃA PATERNA SUGERIDA</string>
+    <string name="rating_pg_desc">Algunos contenidos pueden no ser adecuados para niÃ±os. Se aconseja orientaciÃ³n paterna.</string>
 
-    <string name="rating_pg13_label">GUÍA PATERNA ESTRICTA</string>
-    <string name="rating_pg13_desc">Algunos contenidos pueden ser inapropiados para niños menores de 13 años.</string>
+    <string name="rating_pg13_label">GUÃA PATERNA ESTRICTA</string>
+    <string name="rating_pg13_desc">Algunos contenidos pueden ser inapropiados para niÃ±os menores de 13 aÃ±os.</string>
 
     <string name="rating_r_label">RESTRINGIDO</string>
-    <string name="rating_r_desc">Menores de 17 años requieren ir acompañados por un padre o tutor adulto.</string>
+    <string name="rating_r_desc">Menores de 17 aÃ±os requieren ir acompaÃ±ados por un padre o tutor adulto.</string>
 
     <string name="rating_nc17_label">SOLO ADULTOS</string>
-    <string name="rating_nc17_desc">No se admite a nadie de 17 años o menos.</string>
+    <string name="rating_nc17_desc">No se admite a nadie de 17 aÃ±os o menos.</string>
 
-    <string name="rating_tv14_label">GUÍA PATERNA ESTRICTA</string>
-    <string name="rating_tv14_desc">Este programa contiene material que muchos padres considerarían inadecuado para niños menores de 14 años.</string>
+    <string name="rating_tv14_label">GUÃA PATERNA ESTRICTA</string>
+    <string name="rating_tv14_desc">Este programa contiene material que muchos padres considerarÃ­an inadecuado para niÃ±os menores de 14 aÃ±os.</string>
 
-    <string name="rating_tvma_label">SOLO PARA PÚBLICO ADULTO</string>
-    <string name="rating_tvma_desc">Este programa está diseñado específicamente para ser visto por adultos y por lo tanto puede no ser adecuado para menores de 17 años.</string>
+    <string name="rating_tvma_label">SOLO PARA PÃšBLICO ADULTO</string>
+    <string name="rating_tvma_desc">Este programa estÃ¡ diseÃ±ado especÃ­ficamente para ser visto por adultos y por lo tanto puede no ser adecuado para menores de 17 aÃ±os.</string>
 
     <!-- Bottom Bar -->
     <string name="bottom_bar_to_watch">Por ver</string>
@@ -881,19 +886,19 @@
     <string name="detail_tech_release_date">FECHA DE ESTRENO</string>
     <string name="detail_tech_budget">PRESUPUESTO</string>
     <string name="detail_tech_language">IDIOMA</string>
-    <string name="detail_tech_revenue">RECAUDACIÓN</string>
-    <string name="detail_tech_production">PRODUCCIÓN</string>
-    <string name="detail_tech_country">PAÍS</string>
-    <string name="detail_tech_original_title">TÍTULO ORIGINAL</string>
+    <string name="detail_tech_revenue">RECAUDACIÃ“N</string>
+    <string name="detail_tech_production">PRODUCCIÃ“N</string>
+    <string name="detail_tech_country">PAÃS</string>
+    <string name="detail_tech_original_title">TÃTULO ORIGINAL</string>
     <string name="detail_tech_status">ESTADO</string>
-    <string name="status_returning_series">Serie en emisión</string>
+    <string name="status_returning_series">Serie en emisiÃ³n</string>
     <string name="status_planned">Planificada</string>
-    <string name="status_in_production">En producción</string>
+    <string name="status_in_production">En producciÃ³n</string>
     <string name="status_ended">Finalizada</string>
     <string name="status_canceled">Cancelada</string>
     <string name="status_pilot">Piloto</string>
     <string name="status_rumored">Rumor</string>
-    <string name="status_post_production">Posproducción</string>
+    <string name="status_post_production">PosproducciÃ³n</string>
     <string name="status_released">Estrenada</string>
 
     <!-- Quick Actions -->
@@ -901,42 +906,42 @@
     <string name="quick_action_delete">Eliminar</string>
 
     <!-- Filter Modal -->
-    <string name="filter_sort_watched_at">Fecha de visualización</string>
-    <string name="filter_sort_added_at">Añadidos recientemente</string>
+    <string name="filter_sort_watched_at">Fecha de visualizaciÃ³n</string>
+    <string name="filter_sort_added_at">AÃ±adidos recientemente</string>
     <string name="filter_sort_release_date">Fecha de estreno</string>
-    <string name="filter_sort_title">Alfabético</string>
-    <string name="filter_sort_personal_rating">Calificación personal</string>
-    <string name="filter_sort_runtime">Duración total</string>
+    <string name="filter_sort_title">AlfabÃ©tico</string>
+    <string name="filter_sort_personal_rating">CalificaciÃ³n personal</string>
+    <string name="filter_sort_runtime">DuraciÃ³n total</string>
     <string name="filter_dir_desc">Descendente</string>
     <string name="filter_dir_asc">Ascendente</string>
 
     <!-- Action Messages -->
     <string name="msg_action_removed">\"%1$s\" eliminado</string>
     <string name="msg_action_watched">\"%1$s\" marcado como visto</string>
-    <string name="msg_action_favorite">\"%1$s\" añadido a Por ver</string>
+    <string name="msg_action_favorite">\"%1$s\" aÃ±adido a Por ver</string>
     <string name="msg_action_reminder">Recordatorio configurado para \"%1$s\"</string>
     <string name="msg_action_updated">\"%1$s\" actualizado</string>
     <string name="msg_action_dropped">\"%1$s\" abandonada</string>
     <!-- Episodes -->
-    <string name="episodes_info_desc">Información del episodio</string>
-    <string name="episodes_long_press_info">Mantén presionado un episodio para más información</string>
+    <string name="episodes_info_desc">InformaciÃ³n del episodio</string>
+    <string name="episodes_long_press_info">MantÃ©n presionado un episodio para mÃ¡s informaciÃ³n</string>
     <string name="detail_release_date">Fecha de estreno</string>
-    <string name="detail_rating">Calificación</string>
+    <string name="detail_rating">CalificaciÃ³n</string>
     <!-- Icon Update -->
     <string name="icon_updated_restart">Icono actualizado. Reiniciando...</string>    <!-- Trakt Sync -->
     <string name="trakt_sync_now">Sincronizar ahora</string>
     <string name="trakt_disconnect">Desconectar</string>
     <string name="trakt_connect">Conectar con Trakt</string>
-    <string name="trakt_syncing_progress">Sincronización en curso: %1$d / %2$d</string>
-    <string name="trakt_sync_prep">Preparando sincronización...</string>
-    <string name="trakt_sync_title">Sincronización Trakt</string>
-    <string name="trakt_sync_prep_desc">Preparación en curso...</string>
+    <string name="trakt_syncing_progress">SincronizaciÃ³n en curso: %1$d / %2$d</string>
+    <string name="trakt_sync_prep">Preparando sincronizaciÃ³n...</string>
+    <string name="trakt_sync_title">SincronizaciÃ³n Trakt</string>
+    <string name="trakt_sync_prep_desc">PreparaciÃ³n en curso...</string>
     <string name="trakt_sync_progress_desc">Importando tu biblioteca: %1$d / %2$d</string>
-    <string name="trakt_sync_channel_desc">Notificaciones para la importación profunda de Trakt.tv</string>
-    <string name="trakt_manual_sync_started">Sincronización manual iniciada</string>
+    <string name="trakt_sync_channel_desc">Notificaciones para la importaciÃ³n profunda de Trakt.tv</string>
+    <string name="trakt_manual_sync_started">SincronizaciÃ³n manual iniciada</string>
     <string name="trakt_disconnected">Desconectado de Trakt</string>
-    <string name="trakt_connected">¡Conectado a Trakt!</string>
-    <string name="trakt_connect_error">Error al conectar con Trakt. Inténtalo de nuevo.</string>
+    <string name="trakt_connected">Â¡Conectado a Trakt!</string>
+    <string name="trakt_connect_error">Error al conectar con Trakt. IntÃ©ntalo de nuevo.</string>
 
     <string name="status_visible">visible</string>
     <string name="status_hidden">oculto</string>
@@ -952,66 +957,66 @@
     <string name="status_disabled_plural_m">desactivados</string>
 
     <!-- Person Offline Fallback -->
-    <string name="person_offline_title">Modo sin conexión</string>
-    <string name="person_offline_desc">Sin conexión o datos del artista no guardados en caché.\nConéctate a internet para descargar la biografía completa y filmografía.</string>
+    <string name="person_offline_title">Modo sin conexiÃ³n</string>
+    <string name="person_offline_desc">Sin conexiÃ³n o datos del artista no guardados en cachÃ©.\nConÃ©ctate a internet para descargar la biografÃ­a completa y filmografÃ­a.</string>
     <string name="person_offline_default_name">Artista #%1$d</string>
-    <string name="person_offline_bio">La biografía completa y la filmografía ampliada no están disponibles en modo sin conexión.\nA continuación se muestran los títulos presentes en tu biblioteca local.</string>
+    <string name="person_offline_bio">La biografÃ­a completa y la filmografÃ­a ampliada no estÃ¡n disponibles en modo sin conexiÃ³n.\nA continuaciÃ³n se muestran los tÃ­tulos presentes en tu biblioteca local.</string>
 
     <!-- Update & WhatsNew Dialogs -->
-    <string name="whats_new_title">¡Aplicación actualizada!</string>
+    <string name="whats_new_title">Â¡AplicaciÃ³n actualizada!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Nuevos botones de acción circulares flotantes (Atrás, Inicio, Compartir) integrados sobre el contenido con efecto Haze Blur
-• Animación de clic perfeccionada y aplicada a los iconos internos sin distorsionar el contenedor de cristal
-• Solucionada la interferencia de desenfoque en iconos en las pantallas de detalles de Colecciones y Personas
-• Ajustes en la interfaz y mejoras de rendimiento</string>
+    <string name="whats_new_fallback_notes">â€¢ Nuevos botones de acciÃ³n circulares flotantes (AtrÃ¡s, Inicio, Compartir) integrados sobre el contenido con efecto Haze Blur
+â€¢ AnimaciÃ³n de clic perfeccionada y aplicada a los iconos internos sin distorsionar el contenedor de cristal
+â€¢ Solucionada la interferencia de desenfoque en iconos en las pantallas de detalles de Colecciones y Personas
+â€¢ Ajustes en la interfaz y mejoras de rendimiento</string>
     <string name="whats_new_section_title">NOVEDADES DESTACADAS</string>
-    <string name="whats_new_btn_start">¡Genial, vamos!</string>
+    <string name="whats_new_btn_start">Â¡Genial, vamos!</string>
 
-    <string name="github_update_title">Nueva actualización disponible</string>
-    <string name="github_update_desc">¡Una nueva versión de FlickTrove está disponible en GitHub! Actualmente usas la v%1$s. Actualiza ahora para obtener las últimas funciones, mejoras y correcciones.</string>
+    <string name="github_update_title">Nueva actualizaciÃ³n disponible</string>
+    <string name="github_update_desc">Â¡Una nueva versiÃ³n de FlickTrove estÃ¡ disponible en GitHub! Actualmente usas la v%1$s. Actualiza ahora para obtener las Ãºltimas funciones, mejoras y correcciones.</string>
     <string name="github_update_btn_download">Descargar de GitHub</string>
-    <string name="github_update_btn_later">Más tarde</string>
+    <string name="github_update_btn_later">MÃ¡s tarde</string>
     <string name="github_update_btn_ignore">No volver a recordar</string>
 
-    <string name="settings_new_version_available">Nueva versión v%1$s disponible en GitHub →</string>
+    <string name="settings_new_version_available">Nueva versiÃ³n v%1$s disponible en GitHub â†’</string>
 
     <!-- Onboarding Dialog -->
     <string name="onboarding_skip">Omitir</string>
     <string name="onboarding_next">Siguiente</string>
-    <string name="onboarding_start">¡Empezar!</string>
+    <string name="onboarding_start">Â¡Empezar!</string>
     <string name="onboarding_slide1_title">Bienvenido a FlickTrove</string>
     <string name="onboarding_slide1_sub">TU RASTREADOR PERSONAL</string>
-    <string name="onboarding_slide1_desc">Explora, busca y rastrea Películas y Series TV con una experiencia fluida, rápida, sin anuncios y con estilo Glassmorphic.</string>
+    <string name="onboarding_slide1_desc">Explora, busca y rastrea PelÃ­culas y Series TV con una experiencia fluida, rÃ¡pida, sin anuncios y con estilo Glassmorphic.</string>
     <string name="onboarding_slide2_title">Organiza a tu manera</string>
     <string name="onboarding_slide2_sub">FAVORITOS, VISTAS Y CARPETAS</string>
-    <string name="onboarding_slide2_desc">Crea carpetas personalizadas, califica y añade notas de texto o audio a tu colección.</string>
+    <string name="onboarding_slide2_desc">Crea carpetas personalizadas, califica y aÃ±ade notas de texto o audio a tu colecciÃ³n.</string>
     <string name="onboarding_slide3_title">Todo al alcance de tus dedos</string>
-    <string name="onboarding_slide3_sub">GESTOS DE PRESIÓN PROLONGADA</string>
-    <string name="onboarding_slide3_desc">Mantén presionado cualquier póster para abrir al instante el menú de acciones rápidas y gestionar tu biblioteca sin entrar a los detalles.</string>
+    <string name="onboarding_slide3_sub">GESTOS DE PRESIÃ“N PROLONGADA</string>
+    <string name="onboarding_slide3_desc">MantÃ©n presionado cualquier pÃ³ster para abrir al instante el menÃº de acciones rÃ¡pidas y gestionar tu biblioteca sin entrar a los detalles.</string>
     <string name="onboarding_slide4_title">Tus datos te pertenecen</string>
-    <string name="onboarding_slide4_sub">COPIA LOCAL Y SINCRONIZACIÓN TRAKT</string>
-    <string name="onboarding_slide4_desc">Exporta e importa copias de seguridad locales en JSON en un segundo, o conecta tu cuenta de Trakt para la sincronización automática.</string>
+    <string name="onboarding_slide4_sub">COPIA LOCAL Y SINCRONIZACIÃ“N TRAKT</string>
+    <string name="onboarding_slide4_desc">Exporta e importa copias de seguridad locales en JSON en un segundo, o conecta tu cuenta de Trakt para la sincronizaciÃ³n automÃ¡tica.</string>
     <string name="onboarding_slide5_title">Series abandonadas</string>
     <string name="onboarding_slide5_sub">OCULTA SERIES ABANDONADAS</string>
-    <string name="onboarding_slide5_desc">¿Dejaste una serie a la mitad? Desliza hacia arriba en el botón de eliminar para marcarla como \'Abandonada\', de modo que deje de molestarte con episodios pendientes mientras mantienes el registro de lo que ya viste.</string>
+    <string name="onboarding_slide5_desc">Â¿Dejaste una serie a la mitad? Desliza hacia arriba en el botÃ³n de eliminar para marcarla como \'Abandonada\', de modo que deje de molestarte con episodios pendientes mientras mantienes el registro de lo que ya viste.</string>
     <string name="settings_review_tutorial">Repetir tutorial de bienvenida</string>
 
     <!-- Rewatch Import Dialog -->
-    <string name="import_rewatch_dialog_title">Gestión de re-visualizaciones (Múltiples vistas)</string>
-    <string name="import_rewatch_dialog_desc">El archivo importado puede contener películas vistas varias veces en diferentes fechas. ¿Qué fecha de visualización prefieres conservar para las entradas duplicadas?</string>
-    <string name="import_rewatch_keep_latest">Última fecha (Más reciente)</string>
-    <string name="import_rewatch_keep_first">Primera fecha (Histórica)</string>
+    <string name="import_rewatch_dialog_title">GestiÃ³n de re-visualizaciones (MÃºltiples vistas)</string>
+    <string name="import_rewatch_dialog_desc">El archivo importado puede contener pelÃ­culas vistas varias veces en diferentes fechas. Â¿QuÃ© fecha de visualizaciÃ³n prefieres conservar para las entradas duplicadas?</string>
+    <string name="import_rewatch_keep_latest">Ãšltima fecha (MÃ¡s reciente)</string>
+    <string name="import_rewatch_keep_first">Primera fecha (HistÃ³rica)</string>
 
     <!-- Collection Badge Strings -->
-    <string name="collection_badge_movies_plural">%1$d PELÍCULAS</string>
-    <string name="collection_badge_movies_single">%1$d PELÍCULA</string>
-    <string name="collection_badge_movies_plus">%1$d+ PELÍCULAS</string>
+    <string name="collection_badge_movies_plural">%1$d PELÃCULAS</string>
+    <string name="collection_badge_movies_single">%1$d PELÃCULA</string>
+    <string name="collection_badge_movies_plus">%1$d+ PELÃCULAS</string>
 
-    <string name="overview_show_more">Mostrar más</string>
+    <string name="overview_show_more">Mostrar mÃ¡s</string>
     <string name="overview_show_less">Mostrar menos</string>
 
     <!-- Peek-a-boo Check-In -->
-    <string name="checkin_how_did_it_make_you_feel">¿Cómo te hizo sentir?</string>
+    <string name="checkin_how_did_it_make_you_feel">Â¿CÃ³mo te hizo sentir?</string>
     <string name="checkin_mvp_actor">Personaje MVP</string>
     <string name="checkin_skip">Omitir</string>
     <string name="checkin_save_diary">Guardar en Flow</string>
@@ -1021,18 +1026,18 @@
 
     <string name="checkin_vibe_masterpiece">Obra maestra</string>
     <string name="checkin_vibe_mind_blowing">Alucinante</string>
-    <string name="checkin_vibe_in_tears">En lágrimas</string>
+    <string name="checkin_vibe_in_tears">En lÃ¡grimas</string>
     <string name="checkin_vibe_feels_good">Se siente bien</string>
     <string name="checkin_vibe_comfort">Acogedora</string>
     <string name="checkin_vibe_meh">Meh</string>
     <string name="checkin_vibe_disappointed">Decepcionado</string>
     <string name="checkin_vibe_funny">Divertida</string>
-    <string name="checkin_vibe_scary">Terrorífica</string>
+    <string name="checkin_vibe_scary">TerrorÃ­fica</string>
     <string name="checkin_vibe_boring">Aburrida</string>
     <string name="checkin_vibe_weird">Rara</string>
     <string name="checkin_vibe_action">Entusiasmado</string>
     <string name="settings_support_flicktrove">Apoyar a FlickTrove</string>
-    <string name="settings_support_dev_desc">¡Apoya el desarrollo y mantén la aplicación sin anuncios!</string>
+    <string name="settings_support_dev_desc">Â¡Apoya el desarrollo y mantÃ©n la aplicaciÃ³n sin anuncios!</string>
     <string name="account_change_name_title">Cambiar nombre</string>
     <string name="account_name_changes_left">Te quedan %d cambios de nombre.</string>
     <string name="avatar_banned_message">No tienes permitido cambiar tu avatar.</string>
@@ -1040,11 +1045,11 @@
     <string name="account_save">Guardar</string>
     <string name="account_error_name_short">El nombre debe tener al menos 3 caracteres.</string>
     <string name="account_error_name_long">El nombre no puede superar los 20 caracteres.</string>
-    <string name="account_error_name_profanity">Nombre no válido.</string>
-    <string name="account_error_name_taken">El nombre ya está en uso.</string>
+    <string name="account_error_name_profanity">Nombre no vÃ¡lido.</string>
+    <string name="account_error_name_taken">El nombre ya estÃ¡ en uso.</string>
     <string name="account_error_checking_name">Error al comprobar el nombre.</string>
     <string name="account_remove_avatar">Quitar avatar</string>
-    <string name="general_stats">ESTADÍSTICAS GENERALES</string>
+    <string name="general_stats">ESTADÃSTICAS GENERALES</string>
 
     <!-- Flow Persona Strings -->
     <string name="your_flow_persona">TU PERSONA DE FLOW</string>
@@ -1054,50 +1059,64 @@
     <string name="persona_title_connoisseur">El Conoscedor</string>
     <string name="persona_desc_connoisseur">Buscas el cine de mayor calidad. Solo lo mejor para tu Flow.</string>
 
-    <string name="persona_title_philosopher">El Filósofo</string>
-    <string name="persona_desc_philosopher">Te encantan las películas que desafían tu realidad y te hacen pensar durante días.</string>
+    <string name="persona_title_philosopher">El FilÃ³sofo</string>
+    <string name="persona_desc_philosopher">Te encantan las pelÃ­culas que desafÃ­an tu realidad y te hacen pensar durante dÃ­as.</string>
 
-    <string name="persona_title_empath">El Empático</string>
-    <string name="persona_desc_empath">Sientes todo intensamente. Tu Flow es un océano de emociones.</string>
+    <string name="persona_title_empath">El EmpÃ¡tico</string>
+    <string name="persona_desc_empath">Sientes todo intensamente. Tu Flow es un ocÃ©ano de emociones.</string>
 
     <string name="persona_title_adrenaline_junkie">El Adicto a la Adrenalina</string>
-    <string name="persona_desc_adrenaline_junkie">Acción, velocidad y explosiones. Tu Flow funciona con pura adrenalina.</string>
+    <string name="persona_desc_adrenaline_junkie">AcciÃ³n, velocidad y explosiones. Tu Flow funciona con pura adrenalina.</string>
 
     <string name="persona_title_comfort_seeker">El Buscador de Confort</string>
-    <string name="persona_desc_comfort_seeker">Mantas, té y películas reconfortantes. Tu Flow es tu lugar seguro.</string>
+    <string name="persona_desc_comfort_seeker">Mantas, tÃ© y pelÃ­culas reconfortantes. Tu Flow es tu lugar seguro.</string>
 
     <string name="persona_title_optimist">El Optimista</string>
-    <string name="persona_desc_optimist">Buscas el lado positivo. Tu Flow está lleno de alegría y calidez.</string>
+    <string name="persona_desc_optimist">Buscas el lado positivo. Tu Flow estÃ¡ lleno de alegrÃ­a y calidez.</string>
 
     <string name="persona_title_jokester">El Bromista</string>
-    <string name="persona_desc_jokester">Estás aquí para reírte bien. La comedia es el corazón de tu Flow.</string>
+    <string name="persona_desc_jokester">EstÃ¡s aquÃ­ para reÃ­rte bien. La comedia es el corazÃ³n de tu Flow.</string>
 
     <string name="persona_title_explorer">El Explorador</string>
-    <string name="persona_desc_explorer">Cuanto más extraño, mejor. Te aventuras en los rincones más bizarros del cine.</string>
+    <string name="persona_desc_explorer">Cuanto mÃ¡s extraÃ±o, mejor. Te aventuras en los rincones mÃ¡s bizarros del cine.</string>
 
     <string name="persona_title_thrill_seeker">El Buscador de Emociones</string>
     <string name="persona_desc_thrill_seeker">Te encanta el suspenso y los sustos. El miedo es solo combustible.</string>
 
-    <string name="persona_title_critic">El Crítico</string>
-    <string name="persona_desc_critic">Eres difícil de impresionar. Exiges perfección y nada menos.</string>
+    <string name="persona_title_critic">El CrÃ­tico</string>
+    <string name="persona_desc_critic">Eres difÃ­cil de impresionar. Exiges perfecciÃ³n y nada menos.</string>
 
-    <string name="persona_title_wanderer">El Nómada</string>
+    <string name="persona_title_wanderer">El NÃ³mada</string>
     <string name="persona_desc_wanderer">Tu Flow es diverso e impredecible. Vas adonde te lleva el viento.</string>
-    <string name="dashboard_general_stats">ESTADÍSTICAS GENERALES</string>
+    <string name="dashboard_general_stats">ESTADÃSTICAS GENERALES</string>
     <string name="dashboard_my_folders">MIS CARPETAS</string>
     <string name="dashboard_your_flow">TU FLOW</string>
-    <string name="flow_empty_title">Tu Flow está vacío</string>
-    <string name="flow_empty_desc">Añade más películas y series a tu lista de Vistas para generar tu Flow personalizado.</string>
-    <string name="flow_stats_empty_title">Sin estadísticas aún</string>
-    <string name="flow_stats_empty_desc">Sigue viendo y calificando títulos para ver tus estadísticas de Flow.</string>
-    <string name="flow_stats_all_time">Estadística de Flow histórica</string>
-    <string name="flow_stats_year">Estadística de Flow de %1$s</string>
+    <string name="flow_empty_title">Tu Flow estÃ¡ vacÃ­o</string>
+    <string name="flow_empty_desc">AÃ±ade mÃ¡s pelÃ­culas y series a tu lista de Vistas para generar tu Flow personalizado.</string>
+    <string name="flow_stats_empty_title">Sin estadÃ­sticas aÃºn</string>
+    <string name="flow_stats_empty_desc">Sigue viendo y calificando tÃ­tulos para ver tus estadÃ­sticas de Flow.</string>
+    <string name="flow_stats_all_time">EstadÃ­stica de Flow histÃ³rica</string>
+    <string name="flow_stats_year">EstadÃ­stica de Flow de %1$s</string>
     <string name="stat_hours_watched">Horas visualizadas</string>
-    <string name="stat_completed_titles">Títulos completados</string>
-    <string name="stat_avg_rating">Calificación media</string>
-    <string name="stat_movies_vs_series">Películas vs Series</string>
-    <string name="dashboard_no_folders_yet">Aún no has creado ninguna carpeta.</string>
-    <string name="dashboard_your_flow_desc">Tu combinación personalizada de descubrimientos y sugerencias</string>
+    <string name="stat_completed_titles">TÃ­tulos completados</string>
+    <string name="stat_avg_rating">CalificaciÃ³n media</string>
+    <string name="stat_movies_vs_series">PelÃ­culas vs Series</string>
+    <string name="dashboard_no_folders_yet">AÃºn no has creado ninguna carpeta.</string>
+    <string name="dashboard_your_flow_desc">Tu combinaciÃ³n personalizada de descubrimientos y sugerencias</string>
     <string name="auth_guest_prompt_title">Cuenta requerida</string>
     <string name="auth_guest_prompt_desc">Necesitas crear una cuenta para personalizar tu perfil y avatar.</string>
+    <string name="account_edit_profile">Editar perfil</string>
+    <string name="account_change_name_menu">Cambiar nombre</string>
+    <string name="account_change_avatar_menu">Cambiar avatar</string>
+    <string name="account_change_cover_menu">Cambiar portada</string>
+    <string name="settings_check_updates_github">Buscar actualizaciones en GitHub</string>
+    <string name="account_error_max_name_changes">Max name changes reached.</string>
+    <string name="account_error_name_update_failed">Failed to update name.</string>
+    <string name="account_guest_sync_title">Sync Data</string>
+    <string name="account_guest_sync_message">Sign up or login to sync your data.</string>
+    <string name="unmatched_items_title">Descartados / No Reconocidos</string>
+    <string name="unmatched_items_desc">Ver películas y series no reconocidas por TMDB durante la última importación</string>
+    <string name="unmatched_items_count">%d elementos</string>
+    <string name="unmatched_items_empty">¡Ningún elemento descartado! 🎉</string>
 </resources>
+

@@ -63,17 +63,21 @@ enum class AvatarSelectionMode { AVATAR, BACKDROP }
 class AvatarSelectionState {
     var isVisible by mutableStateOf(false)
     var onSelected: ((String?, String?) -> Unit)? = null
+    var onDismissed: (() -> Unit)? = null
     var mode by mutableStateOf(AvatarSelectionMode.AVATAR)
 
-    fun show(mode: AvatarSelectionMode = AvatarSelectionMode.AVATAR, onSelected: (String?, String?) -> Unit) {
+    fun show(mode: AvatarSelectionMode = AvatarSelectionMode.AVATAR, onDismissed: (() -> Unit)? = null, onSelected: (String?, String?) -> Unit) {
         this.mode = mode
         this.onSelected = onSelected
+        this.onDismissed = onDismissed
         this.isVisible = true
     }
 
     fun dismiss() {
         this.isVisible = false
         this.onSelected = null
+        this.onDismissed?.invoke()
+        this.onDismissed = null
     }
 }
 
@@ -338,9 +342,7 @@ fun AvatarSelectionModal(
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             color = Color.White,
                                             fontWeight = FontWeight.SemiBold
-                                        ),
-                                        maxLines = 1,
-                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
                                     )
                                 }
                             }

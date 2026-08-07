@@ -264,6 +264,7 @@ fun HomeScreenContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    val hasDroppedFilter = uiState.sortConfig.selectedStatuses.contains("dropped")
                     val sections = if (uiState.activeTab == "tv") {
                         if (uiState.preferences.showSplitDroppedHome) {
                             listOf(
@@ -271,7 +272,11 @@ fun HomeScreenContent(
                                 droppedTitle to uiState.droppedTvShows
                             ).filter { it.second.isNotEmpty() }
                         } else {
-                            listOf("" to uiState.activeTvShows)
+                            if (hasDroppedFilter) {
+                                listOf("" to uiState.movies)
+                            } else {
+                                listOf("" to uiState.activeTvShows)
+                            }
                         }
                     } else {
                         if (uiState.preferences.showSplitReleasesHome) {

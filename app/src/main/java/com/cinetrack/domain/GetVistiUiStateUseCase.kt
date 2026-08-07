@@ -51,7 +51,19 @@ class GetVistiUiStateUseCase @Inject constructor() {
                 val matchesProvider = prefs.vistiSort.selectedProviders.isEmpty() || 
                     (movie.streamingProviderIds?.any { it in prefs.vistiSort.selectedProviders } ?: false)
                 
-                matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider
+                val matchesStatus = prefs.vistiSort.selectedStatuses.isEmpty() ||
+                    movie.mediaType != "tv" ||
+                    prefs.vistiSort.selectedStatuses.any { status ->
+                        when (status) {
+                            "dropped" -> movie.dropped
+                            "not_started" -> !movie.dropped && (movie.progress ?: 0.0) == 0.0
+                            "watching" -> !movie.dropped && (movie.progress ?: 0.0) > 0.0 && (movie.progress ?: 0.0) < 1.0
+                            "up_to_date" -> movie.watched || (movie.progress ?: 0.0) >= 1.0
+                            else -> false
+                        }
+                    }
+
+                matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider && matchesStatus
             }
 
             val sorted: List<Movie> = sortMovies(filtered, prefs.vistiSort)
