@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="app_name">FlickTrove</string>
 
     <!-- Shortcut Strings -->
@@ -228,7 +228,7 @@
     <string name="settings_external_migration">Importation / Exportation universelle de donnÃ©es</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tous CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Sauvegarde FlickTrove sur l\'appareil</string>
-    <string name="settings_trakt_sync_desc">App âž” Trakt : InstantanÃ©\nTrakt âž” App : 24h</string>
+    <string name="settings_trakt_sync_desc">App ➔ Trakt : Instantané\nTrakt ➔ App : 24h</string>
     <string name="settings_sync_missing_details">Synchroniser les dÃ©tails manquants</string>
     <string name="settings_sync_missing_details_desc">RÃ©cupÃ©rez les donnÃ©es manquantes pour les films anciens de votre bibliothÃ¨que. Ã€ utiliser uniquement si strictement nÃ©cessaire (opÃ©ration intensive en arriÃ¨re-plan).</string>
     <string name="settings_dialog_deep_sync_title">Avertissement : Synchronisation intensive</string>
