@@ -27,7 +27,8 @@ import com.cinetrack.data.model.Movie
 fun UnmatchedItemsModal(
     isVisible: Boolean,
     onClose: () -> Unit,
-    movies: List<Movie>
+    movies: List<Movie>,
+    onRemoveItem: (Movie) -> Unit
 ) {
     if (isVisible) {
         val unmatched = movies.filter { it.posterPath == null && it.overview == null }
@@ -115,7 +116,7 @@ fun UnmatchedItemsModal(
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = item.title ?: "Sconosciuto",
                                             fontWeight = FontWeight.Bold,
@@ -127,6 +128,18 @@ fun UnmatchedItemsModal(
                                             text = if (item.mediaType == "tv") stringResource(R.string.stats_tv_series) else stringResource(R.string.stats_your_movies),
                                             fontSize = 12.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                    
+                                    IconButton(
+                                        onClick = { onRemoveItem(item) },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
+                                            contentDescription = "Remove",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
                                 }

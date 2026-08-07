@@ -930,7 +930,10 @@ fun SettingsScreenContent(
         UnmatchedItemsModal(
             isVisible = showUnmatchedItemsModal,
             onClose = { showUnmatchedItemsModal = false },
-            movies = unmatchedMovies
+            movies = unmatchedMovies,
+            onRemoveItem = { item ->
+                settingsViewModel.deleteUnmatchedItem(item)
+            }
         )
 
         SettingsLoadingOverlay(

@@ -727,4 +727,14 @@ class SettingsViewModel @Inject constructor(
         actionFeedbackManager.emit(uiText)
     }
 
+    fun deleteUnmatchedItem(movie: Movie) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                movieRepository.deleteMovie(movie)
+            } catch (e: Exception) {
+                // Ignore or show error
+            }
+        }
+    }
+
 }
