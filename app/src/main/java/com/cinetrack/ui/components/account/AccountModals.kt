@@ -107,11 +107,15 @@ fun AccountModals(
                 .addSnapshotListener { snapshot, error ->
                     if (error == null && snapshot != null && snapshot.exists()) {
                         val firestoreName = snapshot.getString("displayName")
-                        if (!firestoreName.isNullOrBlank() && firestoreName != currentUser.displayName) {
-                            currentDisplayName = firestoreName
-                            currentUser.updateProfile(userProfileChangeRequest {
-                                displayName = firestoreName
-                            })
+                        if (!firestoreName.isNullOrBlank()) {
+                            if (currentDisplayName != firestoreName) {
+                                currentDisplayName = firestoreName
+                            }
+                            if (firestoreName != currentUser.displayName) {
+                                currentUser.updateProfile(userProfileChangeRequest {
+                                    displayName = firestoreName
+                                })
+                            }
                         }
                         val dbNameChanges = snapshot.getLong("nameChangesCount")?.toInt() ?: 0
                         if (dbNameChanges != nameChangesCount) {
@@ -119,10 +123,13 @@ fun AccountModals(
                             prefs.edit().putInt("changes_${currentUser.uid}", dbNameChanges).apply()
                         }
                         val firestorePhoto = snapshot.getString("photoUrl")
+                        val newUri = firestorePhoto?.let { Uri.parse(it) }
+                        if (currentPhotoUrl != newUri) {
+                            currentPhotoUrl = newUri
+                        }
+                        
                         val authPhoto = currentUser.photoUrl?.toString()
                         if (firestorePhoto != authPhoto) {
-                            val newUri = firestorePhoto?.let { Uri.parse(it) }
-                            currentPhotoUrl = newUri
                             currentUser.updateProfile(userProfileChangeRequest {
                                 photoUri = newUri
                             })

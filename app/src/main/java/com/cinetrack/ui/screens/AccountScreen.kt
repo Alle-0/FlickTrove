@@ -171,19 +171,25 @@ object AccountTab : Tab {
                     .addSnapshotListener { snapshot, error ->
                         if (error == null && snapshot != null && snapshot.exists()) {
                             val firestoreName = snapshot.getString("displayName")
-                            if (!firestoreName.isNullOrBlank() && firestoreName != currentUser.displayName) {
-                                // Firestore name is different (likely changed by admin), force update Auth and UI
-                                currentDisplayName = firestoreName
-                                currentUser.updateProfile(userProfileChangeRequest {
-                                    displayName = firestoreName
-                                })
+                            if (!firestoreName.isNullOrBlank()) {
+                                if (currentDisplayName != firestoreName) {
+                                    currentDisplayName = firestoreName
+                                }
+                                if (firestoreName != currentUser.displayName) {
+                                    currentUser.updateProfile(userProfileChangeRequest {
+                                        displayName = firestoreName
+                                    })
+                                }
                             }
                             
                             val firestorePhoto = snapshot.getString("photoUrl")
+                            val newUri = firestorePhoto?.let { android.net.Uri.parse(it) }
+                            if (currentPhotoUrl != newUri) {
+                                currentPhotoUrl = newUri
+                            }
+                            
                             val authPhoto = currentUser.photoUrl?.toString()
                             if (firestorePhoto != authPhoto) {
-                                val newUri = firestorePhoto?.let { android.net.Uri.parse(it) }
-                                currentPhotoUrl = newUri
                                 currentUser.updateProfile(userProfileChangeRequest {
                                     photoUri = newUri
                                 })
