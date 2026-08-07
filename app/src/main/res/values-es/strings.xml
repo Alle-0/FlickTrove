@@ -1117,5 +1117,5 @@
     <string name="unmatched_items_title">Descartados / No reconocidos</string>
     <string name="unmatched_items_desc">Ver pel&#237;culas y series no reconocidas por TMDB durante la &#250;ltima importaci&#243;n</string>
     <string name="unmatched_items_count">%d elementos</string>
-    <string name="unmatched_items_empty">&#161;No hay elementos descartados! &#127881;</string>
+    <string name="unmatched_items_empty">&#161;No hay elementos descartados! 🎉</string>
 </resources>

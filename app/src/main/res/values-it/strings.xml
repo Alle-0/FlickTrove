@@ -1110,5 +1110,5 @@
     <string name="unmatched_items_title">Scartati / Non Riconosciuti</string>
     <string name="unmatched_items_desc">Vedi film e serie non riconosciuti da TMDB durante l\'ultimo import</string>
     <string name="unmatched_items_count">%d elementi</string>
-    <string name="unmatched_items_empty">Nessun elemento scartato! &#127881;</string>
+    <string name="unmatched_items_empty">Nessun elemento scartato! 🎉</string>
 </resources>

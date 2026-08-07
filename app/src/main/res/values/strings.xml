@@ -1117,5 +1117,5 @@
     <string name="unmatched_items_title">Discarded / Unrecognized</string>
     <string name="unmatched_items_desc">View movies and series not recognized by TMDB during the last import</string>
     <string name="unmatched_items_count">%d items</string>
-    <string name="unmatched_items_empty">No discarded items! &#127881;</string>
+    <string name="unmatched_items_empty">No discarded items! 🎉</string>
 </resources>

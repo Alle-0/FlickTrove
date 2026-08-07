@@ -1114,5 +1114,5 @@
     <string name="unmatched_items_title">Verworfen / Nicht erkannt</string>
     <string name="unmatched_items_desc">Filme und Serien anzeigen, die beim letzten Import von TMDB nicht erkannt wurden</string>
     <string name="unmatched_items_count">%d Elemente</string>
-    <string name="unmatched_items_empty">Keine verworfenen Elemente! &#127881;</string>
+    <string name="unmatched_items_empty">Keine verworfenen Elemente! 🎉</string>
 </resources>

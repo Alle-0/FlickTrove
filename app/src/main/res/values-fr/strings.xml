@@ -1114,5 +1114,5 @@
     <string name="unmatched_items_title">Rejet&#233;s / Non reconnus</string>
     <string name="unmatched_items_desc">Voir les films et s&#233;ries non reconnus par TMDB lors de la derni&#232;re importation</string>
     <string name="unmatched_items_count">%d &#233;l&#233;ments</string>
-    <string name="unmatched_items_empty">Aucun &#233;l&#233;ment rejet&#233; ! &#127881;</string>
+    <string name="unmatched_items_empty">Aucun &#233;l&#233;ment rejet&#233; ! 🎉</string>
 </resources>
