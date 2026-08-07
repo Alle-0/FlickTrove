@@ -58,7 +58,7 @@ class GetVistiUiStateUseCase @Inject constructor() {
                             "dropped" -> movie.dropped
                             "not_started" -> !movie.dropped && (movie.progress ?: 0.0) == 0.0
                             "watching" -> !movie.dropped && (movie.progress ?: 0.0) > 0.0 && (movie.progress ?: 0.0) < 1.0
-                            "up_to_date" -> movie.watched || (movie.progress ?: 0.0) >= 1.0
+                            "up_to_date" -> movie.status != "Ended" && movie.status != "Canceled"
                             else -> false
                         }
                     }
