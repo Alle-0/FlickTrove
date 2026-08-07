@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">FlickTrove</string>
 
     <!-- Shortcut Strings -->
@@ -15,7 +15,7 @@
 
     <!-- HomeScreen -->
     <string name="home_tab_title">Home</string>
-    <string name="home_empty_list">La tua lista è vuota</string>
+    <string name="home_empty_list">La tua lista ├¿ vuota</string>
     <string name="home_no_results">Nessun risultato</string>
     <string name="home_unreleased">In arrivo</string>
     <string name="home_dropped">Abbandonate</string>
@@ -93,10 +93,10 @@
     <string name="stats_to_watch">DA VEDERE</string>
     <string name="stats_watched">VISTI</string>
     <string name="stats_time_spent">Tempo speso:</string>
-    <string name="stats_longest_movie">FILM PIÙ LUNGO</string>
+    <string name="stats_longest_movie">FILM PI├Ö LUNGO</string>
     <string name="stats_tv_series">SERIE TV</string>
     <string name="stats_completed">COMPLETATE</string>
-    <string name="stats_longest_tv">SERIE PIÙ LUNGA</string>
+    <string name="stats_longest_tv">SERIE PI├Ö LUNGA</string>
     <string name="stats_top_cast">I TUOI MITI (CAST)</string>
     <string name="stats_top_directors">TOP REGISTI</string>
     <string name="stats_genre_distribution">DISTRIBUZIONE GENERI</string>
@@ -106,7 +106,7 @@
     <string name="stats_generating_card_desc">Stiamo creando la tua immagine da condividere</string>
     <string name="stats_total_time">TEMPO TOTALE TRASCORSO</string>
     <string name="stats_total_time_combined">DI VISIONE COMBINATA</string>
-    <string name="stats_share_text">🏆 Il mio tempo di visione totale su FlickTrove: %1$s tra film e serie TV! 🎬\nUnisciti a me e traccia i tuoi progressi: https://alle-0.github.io/FlickTrove/</string>
+    <string name="stats_share_text">­ƒÅå Il mio tempo di visione totale su FlickTrove: %1$s tra film e serie TV! ­ƒÄ¼\nUnisciti a me e traccia i tuoi progressi: https://alle-0.github.io/FlickTrove/</string>
     <string name="stats_title_singular">TITOLO</string>
     <string name="stats_title_plural">TITOLI</string>
     <string name="stats_of_total">%s DEL TOTALE</string>
@@ -123,7 +123,7 @@
     <string name="quality_high">Alta</string>
     <string name="quality_low_desc">Bassa (Risparmio Dati)</string>
     <string name="quality_medium_desc">Media (Bilanciata)</string>
-    <string name="quality_high_desc">Alta (Miglior Qualità)</string>
+    <string name="quality_high_desc">Alta (Miglior Qualit├á)</string>
     <string name="stats_titles_watched">TITOLI VISTI</string>
     <string name="stats_top_genre">GENERE TOP</string>
     <string name="stats_total_time_wrapped">TEMPO TOTALE</string>
@@ -136,7 +136,7 @@
     <string name="stats_genre_other">ALTRO</string>
     <string name="stats_all_stats">Tutte le statistiche</string>
     <string name="stats_episodes_short">%1$d ep</string>
-    <string name="stats_episodes_long">• %1$d episodi</string>
+    <string name="stats_episodes_long">ÔÇó %1$d episodi</string>
     <string name="stats_dhm">%1$dg %2$dh %3$dm</string>
     <string name="stats_hm">%1$dh %2$dm</string>
     <string name="stats_m">%1$dm</string>
@@ -144,14 +144,14 @@
     <string name="stats_one_movie">1 film</string>
     <string name="stats_many_movies">%1$d film</string>
     <string name="stats_share_title_msg">Condividi le tue statistiche</string>
-    <string name="stats_share_line_1">🎬 %1$s su FlickTrove!\n\n</string>
-    <string name="stats_share_line_2">📊 Ho guardato %1$d film e %2$d serie TV.\n</string>
-    <string name="stats_share_line_3">⏳ Tempo totale: %1$s\n</string>
-    <string name="stats_share_line_genre">🎭 Genere preferito: %1$s\n</string>
-    <string name="stats_share_line_actor">⭐ Star preferita: %1$s\n</string>
-    <string name="stats_share_line_director">🎥 Regista preferito: %1$s\n</string>
-    <string name="stats_share_line_decade">📅 Decade d\'oro: %1$s\n</string>
-    <string name="stats_share_line_outro">\nTraccia il tuo viaggio cinematografico su FlickTrove! 🍿</string>
+    <string name="stats_share_line_1">­ƒÄ¼ %1$s su FlickTrove!\n\n</string>
+    <string name="stats_share_line_2">­ƒôè Ho guardato %1$d film e %2$d serie TV.\n</string>
+    <string name="stats_share_line_3">ÔÅ│ Tempo totale: %1$s\n</string>
+    <string name="stats_share_line_genre">­ƒÄ¡ Genere preferito: %1$s\n</string>
+    <string name="stats_share_line_actor">Ô¡É Star preferita: %1$s\n</string>
+    <string name="stats_share_line_director">­ƒÄÑ Regista preferito: %1$s\n</string>
+    <string name="stats_share_line_decade">­ƒôà Decade d\'oro: %1$s\n</string>
+    <string name="stats_share_line_outro">\nTraccia il tuo viaggio cinematografico su FlickTrove! ­ƒì┐</string>
 
     <!-- SettingsScreen -->
     <string name="settings_tab_title">Impostazioni</string>
@@ -165,7 +165,7 @@
     <string name="settings_layout_toggle">Pulsante Layout</string>
     <string name="settings_layout_toggle_desc">Mostra il pulsante per cambiare il numero di colonne in Home</string>
     <string name="settings_split_home">Divisione uscite Home</string>
-    <string name="settings_split_home_desc">Separa i titoli già usciti da quelli in arrivo nella Home</string>
+    <string name="settings_split_home_desc">Separa i titoli gi├á usciti da quelli in arrivo nella Home</string>
     <string name="settings_split_dropped">Mostra serie abbandonate</string>
     <string name="settings_split_dropped_desc">Mostra le serie tv abbandonate in fondo alla lista (se disattivato, verranno nascoste del tutto)</string>
     <string name="settings_language">Lingua dell\'App</string>
@@ -191,7 +191,7 @@
     <string name="settings_amoled_bg">Sfondo AMOLED</string>
     <string name="settings_amoled_bg_desc">Usa il nero assoluto invece del grigio scuro</string>
     <!-- Accessibility -->
-    <string name="settings_accessibility">Accessibilità</string>
+    <string name="settings_accessibility">Accessibilit├á</string>
     <string name="settings_title_size">Dimensione testo titoli</string>
     <string name="settings_title_size_desc">Ingrandisce o riduce i testi principali</string>
     <string name="settings_size_small">Piccolo</string>
@@ -213,21 +213,21 @@
     <string name="settings_haptic_feedback_desc">Vibrazione alle azioni dell\'interfaccia</string>
     <!-- Images -->
     <string name="settings_images">Immagini</string>
-    <string name="settings_image_quality">Qualità Immagini</string>
+    <string name="settings_image_quality">Qualit├á Immagini</string>
     <string name="settings_image_quality_desc">Gestisci consumo dati</string>
     <string name="settings_clear_cache">Svuota Cache Immagini</string>
     <string name="settings_clear_cache_desc">%1$s   Libera spazio occupato da poster e backdrop</string>
     <!-- Sync and Backup -->
     <string name="settings_sync_backup">Sincronizzazione e Backup</string>
-    <string name="settings_smart_merge">Lo Smart Merge unirà i dati proteggendo sempre i tuoi voti e note locali.</string>
+    <string name="settings_smart_merge">Lo Smart Merge unir├á i dati proteggendo sempre i tuoi voti e note locali.</string>
     <string name="settings_external_migration">Importazione / Esportazione Universale</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tutti i CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Backup Dispositivo FlickTrove</string>
-    <string name="settings_trakt_sync_desc">App ➔ Trakt: Istantaneo\nTrakt ➔ App: 24h</string>
+    <string name="settings_trakt_sync_desc">App Ô×ö Trakt: Istantaneo\nTrakt Ô×ö App: 24h</string>
     <string name="settings_sync_missing_details">Sincronizza Dettagli Mancanti</string>
     <string name="settings_sync_missing_details_desc">Recupera i dati mancanti per i vecchi film in libreria. Da usare solo se strettamente necessario (operazione intensiva in background).</string>
     <string name="settings_dialog_deep_sync_title">Attenzione: Sync Intensivo</string>
-    <string name="settings_dialog_deep_sync_desc">Questa operazione scaricherà in background i dati mancanti per tutti i vecchi film salvati. Richiede una connessione attiva ed esegue molte operazioni sul cloud.\n\nEseguila SOLO se noti che ai tuoi vecchi salvataggi mancano informazioni essenziali come cast o durata.\n\nSei sicuro di voler procedere?</string>
+    <string name="settings_dialog_deep_sync_desc">Questa operazione scaricher├á in background i dati mancanti per tutti i vecchi film salvati. Richiede una connessione attiva ed esegue molte operazioni sul cloud.\n\nEseguila SOLO se noti che ai tuoi vecchi salvataggi mancano informazioni essenziali come cast o durata.\n\nSei sicuro di voler procedere?</string>
     <string name="settings_export">Esporta</string>
     <string name="settings_restore">Ripristina</string>
     <!-- Account -->
@@ -239,17 +239,17 @@
     <string name="settings_send_feedback_desc">Segnala bug o suggerisci nuove funzioni</string>
     <string name="settings_terms_service">Termini di Servizio</string>
     <string name="settings_privacy_policy">Informativa sulla Privacy</string>
-    <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non è approvato o certificato da TMDB.</string>
+    <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non ├¿ approvato o certificato da TMDB.</string>
     <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
     <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
     <string name="settings_made_with">Sviluppato con </string>
     <string name="settings_for_lovers"> per amanti del cinema</string>
     <!-- Dialog buttons -->
     <string name="settings_cancel">Annulla</string>
-    <string name="settings_yes_delete">Sì, Elimina</string>
+    <string name="settings_yes_delete">S├¼, Elimina</string>
     <string name="settings_confirm">Conferma</string>
     <string name="settings_got_it">Ho capito</string>
-    <string name="settings_yes_logout">Sì, Esci</string>
+    <string name="settings_yes_logout">S├¼, Esci</string>
     <string name="settings_link_google">Collega Account Google</string>
     <string name="settings_close">Chiudi</string>
     <string name="avatar_selection_title_select_media">Seleziona un film o una serie</string>
@@ -285,7 +285,7 @@
     <!-- Dialogs -->
     <string name="settings_dialog_delete_account_title">Elimina Account</string>
     <string name="settings_dialog_delete_account_desc">Sei sicuro di voler procedere? Tutti i tuoi film salvati, valutazioni e cartelle verranno rimossi permanentemente dal cloud.</string>
-    <string name="settings_dialog_reauth_title">Conferma la tua identità</string>
+    <string name="settings_dialog_reauth_title">Conferma la tua identit├á</string>
     <string name="settings_dialog_reauth_desc">Per sicurezza, inserisci la tua password per eliminare definitivamente l\'account.</string>
     <string name="settings_dialog_reauth_password_hint">Password</string>
     <string name="settings_dialog_clear_cache_title">Svuota Cache</string>
@@ -303,7 +303,7 @@
     <string name="settings_wipe_total_data_title">Elimina Dati Cloud</string>
     <string name="settings_wipe_total_data_desc">Elimina tutti i tuoi dati sia dal dispositivo che dal cloud</string>
     <string name="settings_dialog_wipe_total_data_title">Elimina Tutti i Dati</string>
-    <string name="settings_dialog_wipe_total_data_desc">Sei sicuro di voler cancellare tutto? Questo eliminerà permanentemente la tua libreria dal cloud e dal dispositivo. Non si può annullare.</string>
+    <string name="settings_dialog_wipe_total_data_desc">Sei sicuro di voler cancellare tutto? Questo eliminer├á permanentemente la tua libreria dal cloud e dal dispositivo. Non si pu├▓ annullare.</string>
     <string name="settings_yes_wipe_total">Elimina Tutto</string>
     <string name="settings_account_deleted_success">Account eliminato con successo</string>
     <string name="settings_action_success">Operazione completata con successo</string>
@@ -340,7 +340,7 @@
     <string name="settings_badge_blockbuster">BLOCKBUSTER</string>
     <string name="settings_badge_blockbuster_desc">Incassi stellari (&gt; 500 mln $)</string>
     <string name="settings_badge_indie">INDIE</string>
-    <string name="settings_badge_indie_desc">Basso budget, alta qualitÃ  (budget &lt; 5 mln, media =7.0)</string>
+    <string name="settings_badge_indie_desc">Basso budget, alta qualit├â┬á (budget &lt; 5 mln, media =7.0)</string>
     <string name="settings_badge_quick">QUICK</string>
     <string name="settings_badge_quick_desc">Breve ma intenso (Film &lt; 90 min)</string>
     <string name="settings_badge_snack">SNACK</string>
@@ -358,15 +358,15 @@
     <string name="settings_backup_restore_title">Backup e Ripristino</string>
     <string name="settings_backup_restore_desc">Esporta una copia dei tuoi dati (preferiti, cartelle e impostazioni) o ripristina da un file precedentemente salvato.</string>
     <string name="settings_external_migration_dialog_title">Importazione e Esportazione Universale</string>
-    <string name="settings_external_migration_dialog_desc">Importa il tuo storico da qualsiasi piattaforma o sito! Puoi caricare file da Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o qualsiasi file CSV/JSON/ZIP personalizzato contenente titoli, ID o anni di uscita. Il motore intelligente di FlickTrove rileverà il formato e abbinerà automaticamente i tuoi film e serie TV!</string>
-    <string name="settings_import_tip_sync">Dopo l\'importazione, è consigliabile eseguire un \"Sincronizza dettagli mancanti\" dalle impostazioni.</string>
+    <string name="settings_external_migration_dialog_desc">Importa il tuo storico da qualsiasi piattaforma o sito! Puoi caricare file da Trakt.tv, Letterboxd, IMDb, TVTime, Serializd o qualsiasi file CSV/JSON/ZIP personalizzato contenente titoli, ID o anni di uscita. Il motore intelligente di FlickTrove rilever├á il formato e abbiner├á automaticamente i tuoi film e serie TV!</string>
+    <string name="settings_import_tip_sync">Dopo l\'importazione, ├¿ consigliabile eseguire un \"Sincronizza dettagli mancanti\" dalle impostazioni.</string>
     <string name="settings_yamtrack_import">Importa da Yamtrack</string>
     <string name="settings_yamtrack_export">Esporta su Yamtrack</string>
     <string name="settings_yamtrack_section">Yamtrack</string>
     <string name="settings_yamtrack_desc">Importa la tua libreria Yamtrack o esporta in formato CSV Yamtrack (solo sorgenti TMDB).</string>
 
     <!-- Movie Detail Strings -->
-    <string name="detail_error_title">Qualcosa è andato storto</string>
+    <string name="detail_error_title">Qualcosa ├¿ andato storto</string>
     <string name="detail_error_unknown">Errore sconosciuto</string>
     <string name="detail_retry">RIPROVA</string>
     <string name="detail_go_back">Torna indietro</string>
@@ -395,7 +395,7 @@
     <string name="detail_rating_tvma">Solo per adulti (18+).</string>
     <string name="detail_translate_comment">Traduci commento</string>
     <string name="detail_translate_download_prompt">Il modello di traduzione (circa 30MB) potrebbe non essere presente. Vuoi consentire il download anche su rete dati cellulare?</string>
-    <string name="detail_translate_yes_cellular">Sì, usa rete</string>
+    <string name="detail_translate_yes_cellular">S├¼, usa rete</string>
     <string name="detail_translate_no_wifi">No, solo Wi-Fi</string>
     <string name="detail_translate_not_now">Non ora</string>
 
@@ -406,7 +406,7 @@
     <string name="person_birthday">DATA DI NASCITA</string>
     <string name="person_birth_place">LUOGO DI NASCITA</string>
     <string name="person_known_for">CONOSCIUTO PER</string>
-    <string name="person_popularity">POPOLARITÀ</string>
+    <string name="person_popularity">POPOLARIT├Ç</string>
     <string name="person_nd">N/D</string>
     <string name="person_highlights">Punti Forti</string>
     <string name="person_filmography">Filmografia</string>
@@ -429,7 +429,7 @@
 
     <!-- Folder Detail Strings -->
     <string name="folder_detail_error">Errore</string>
-    <string name="folder_detail_empty">Questa cartella è vuota</string>
+    <string name="folder_detail_empty">Questa cartella ├¿ vuota</string>
     <string name="folder_detail_tab_all">TUTTI</string>
     <string name="folder_detail_tab_movies">FILM</string>
     <string name="folder_detail_tab_tv">SERIE TV</string>
@@ -494,7 +494,7 @@
     <string name="auth_continue_google">Continua con Google</string>
     <string name="auth_btn_guest">Entra come Ospite</string>
     <string name="auth_switch_to_register">Non hai un account? Registrati</string>
-    <string name="auth_switch_to_login">Hai già un account? Accedi</string>
+    <string name="auth_switch_to_login">Hai gi├á un account? Accedi</string>
     <string name="auth_or">OPPURE</string>
     <string name="auth_guest_continue">Continua come Ospite</string>
     <string name="auth_terms_prefix">Continuando, accetti i nostri </string>
@@ -502,8 +502,8 @@
     <string name="auth_terms_and"> e la </string>
     <string name="auth_privacy_link">Privacy Policy</string>
     <string name="auth_terms_suffix">.</string>
-    <string name="auth_guest_dialog_title">Modalità Ospite</string>
-    <string name="auth_guest_dialog_desc">Continuando come ospite, i tuoi dati verranno salvati solo in locale su questo dispositivo. Se disinstalli l\'app o ne elimini i dati, tutto verrà perso.</string>
+    <string name="auth_guest_dialog_title">Modalit├á Ospite</string>
+    <string name="auth_guest_dialog_desc">Continuando come ospite, i tuoi dati verranno salvati solo in locale su questo dispositivo. Se disinstalli l\'app o ne elimini i dati, tutto verr├á perso.</string>
     <string name="auth_guest_dialog_confirm">Accetta e Continua</string>
     <string name="auth_guest_dialog_cancel">Annulla</string>
     <string name="auth_guest_login_warning">Accedendo a un account esistente, i tuoi attuali dati ospite verranno sostituiti con i dati di quell\'account.</string>
@@ -555,12 +555,12 @@
     <string name="updates_calendar_prev_year">Anno precedente</string>
     <string name="updates_calendar_next_year">Anno successivo</string>
     <!-- Notifications & Widgets -->
-    <string name="notif_reminder_summary">FlickTrove · Promemoria Uscite</string>
-    <string name="notif_update_summary">FlickTrove · Aggiornamento Serie</string>
+    <string name="notif_reminder_summary">FlickTrove ┬À Promemoria Uscite</string>
+    <string name="notif_update_summary">FlickTrove ┬À Aggiornamento Serie</string>
     <string name="notif_media_movie">Film</string>
     <string name="notif_media_tv">Serie TV</string>
     <string name="notif_new_release_title">Nuova uscita: %1$s</string>
-    <string name="notif_new_release_body">\"%1$s\" è ora disponibile! Aprilo per scoprire di più.</string>
+    <string name="notif_new_release_body">\"%1$s\" ├¿ ora disponibile! Aprilo per scoprire di pi├╣.</string>
     <string name="notif_new_episode_title">Nuova uscita: Episodio %1$s</string>
     <string name="notif_new_episode_body">L\'episodio %1$s di \"%2$s\" esce oggi!</string>
     <string name="notif_new_episodes_title">Nuovi episodi disponibili</string>
@@ -579,7 +579,7 @@
     <string name="quick_folders">CARTELLE</string>
     <string name="quick_no_folders">Nessuna cartella creata</string>
     <string name="quick_rating_title">VOTO RAPIDO</string>
-    <string name="quick_rating_previous">  •  PRECEDENTE: %1$.1f</string>
+    <string name="quick_rating_previous">  ÔÇó  PRECEDENTE: %1$.1f</string>
     <string name="quick_note_title">NOTA RAPIDA</string>
     <string name="quick_note_hint">Aggiungi una nota o recensione...</string>
     <string name="quick_note_dictate">Detta nota</string>
@@ -604,14 +604,14 @@
     <string name="folder_delete_title">Elimina Cartella?</string>
     <string name="folder_delete_confirm_prefix">Sei sicuro di voler eliminare </string>
     <string name="folder_delete_confirm_prefix_2">Sei sicuro di voler eliminare la cartella </string>
-    <string name="folder_delete_confirm_suffix">\? Questa azione è irreversibile.</string>
+    <string name="folder_delete_confirm_suffix">\? Questa azione ├¿ irreversibile.</string>
     <string name="folder_delete_action">ELIMINA CARTELLA</string>
-    <string name="folder_delete_warning_long">QUESTA AZIONE È IRREVERSIBILE E RIMUOVERÀ SOLO L\'ORGANIZZAZIONE, NON I CONTENUTI SALVATI.</string>
+    <string name="folder_delete_warning_long">QUESTA AZIONE ├ê IRREVERSIBILE E RIMUOVER├Ç SOLO L\'ORGANIZZAZIONE, NON I CONTENUTI SALVATI.</string>
     <string name="folder_delete_cancel">ANNULLA</string>
     <string name="folder_delete_short">ELIMINA</string>
 
     <!-- System Modals Strings -->
-    <string name="guest_warning_title">Modalità Ospite</string>
+    <string name="guest_warning_title">Modalit├á Ospite</string>
     <string name="guest_warning_local_only">Dati salvati solo localmente.</string>
     <string name="guest_warning_data_loss">Rischio perdita dati se disinstalli l\'app.</string>
     <string name="guest_warning_accept">Accetto e Continua</string>
@@ -623,14 +623,14 @@
     <string name="feedback_type_bug">Bug</string>
     <string name="feedback_type_idea">Idea</string>
     <string name="feedback_type_other">Altro</string>
-    <string name="error_state_title">Ops! Qualcosa è andato storto</string>
+    <string name="error_state_title">Ops! Qualcosa ├¿ andato storto</string>
     <string name="error_state_retry">Riprova</string>
 
     <!-- Global & Modals Strings -->
     <string name="action_cancel">ANNULLA</string>
     <string name="action_retry">RIPROVA</string>
     <string name="action_save">SALVA</string>
-    <string name="settings_quality">Qualità Immagini</string>
+    <string name="settings_quality">Qualit├á Immagini</string>
     <string name="filter_title">FILTRI</string>
     <string name="filter_reset">RESET</string>
     <string name="filter_show_all">MOSTRA TUTTI</string>
@@ -640,11 +640,6 @@
     <string name="filter_genres">GENERI</string>
     <string name="filter_platforms">PIATTAFORME</string>
     <string name="filter_period">PERIODO</string>
-    <string name="filter_status">STATO</string>
-    <string name="filter_status_watching">In visione</string>
-    <string name="filter_status_not_started">Non iniziate</string>
-    <string name="filter_status_dropped">Abbandonate</string>
-    <string name="filter_status_up_to_date">In pari</string>
     <string name="filter_selected_subgenre">SOTTOGENERE SELEZIONATO</string>
     <string name="card_quick_rate">Voto rapido</string>
     <string name="card_quick_note">Nota rapida</string>
@@ -700,10 +695,10 @@
     <string name="detail_custom_cover_badge">Copertina personalizzata</string>
     <string name="detail_change_cover_btn">Cambia copertina</string>
     <string name="detail_cover_selected_badge">IN USO</string>
-    <string name="detail_cover_updated_msg">✨ Copertina aggiornata con successo!</string>
-    <string name="detail_cover_reset_msg">🔄 Copertina ripristinata a quella predefinita</string>
+    <string name="detail_cover_updated_msg">Ô£¿ Copertina aggiornata con successo!</string>
+    <string name="detail_cover_reset_msg">­ƒöä Copertina ripristinata a quella predefinita</string>
     <string name="personal_listening">In ascolto</string>
-    <string name="personal_audio_local_only">L\'audio è salvato solo in locale e non verrà sincronizzato.</string>
+    <string name="personal_audio_local_only">L\'audio ├¿ salvato solo in locale e non verr├á sincronizzato.</string>
     <string name="personal_save_note">SALVA NOTA</string>
     <string name="rated_guide_title">Guida alle Classificazioni</string>
     <string name="rated_guide_source">I dati provengono dal sistema MPAA (USA), lo standard internazionale per la classificazione dei film.</string>
@@ -722,21 +717,21 @@
     <string name="settings_msg_vibration">Vibrazione %1$s</string>
     <string name="settings_msg_dynamic_icon">Icona App Dinamica %1$s</string>
     <string name="settings_msg_visual_fx">Effetti visivi avanzati %1$s</string>
-    <string name="settings_msg_img_quality">Qualità immagini: %1$s</string>
+    <string name="settings_msg_img_quality">Qualit├á immagini: %1$s</string>
     <string name="settings_msg_text_size">Dimensione testo: %1$s</string>
     <string name="settings_msg_theme">Tema impostato su %1$s</string>
     <string name="settings_msg_language">Lingua impostata: %1$s</string>
     <string name="settings_msg_cache_cleared">Cache immagini svuotata</string>
     <string name="settings_msg_feedback_wait">Puoi inviare un altro feedback tra circa %1$d ore</string>
     <string name="settings_msg_feedback_thanks">Grazie per il tuo feedback!</string>
-    <string name="settings_msg_feedback_error">Errore nell\'invio del feedback. Riprova più tardi.</string>
+    <string name="settings_msg_feedback_error">Errore nell\'invio del feedback. Riprova pi├╣ tardi.</string>
     <string name="settings_msg_connection_error">Errore di connessione durante l\'invio</string>
     <string name="settings_msg_export_error">Errore durante l\'esportazione</string>
     <string name="settings_msg_restore_success">Dati ripristinati con successo</string>
     <string name="settings_msg_restore_error">Errore durante il ripristino: file non valido</string>
     <string name="settings_msg_import_success">Importati %1$d elementi con successo</string>
     <string name="settings_msg_import_error">Errore durante la migrazione: verifica il formato</string>
-    <string name="settings_msg_import_started">Importazione avviata in background…</string>
+    <string name="settings_msg_import_started">Importazione avviata in backgroundÔÇª</string>
     <!-- ViewModels Shared Messages -->
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" rimosso</string>
@@ -757,9 +752,9 @@
     <string name="msg_auth_no_connection">Nessuna connessione a internet.</string>
     <string name="msg_auth_unexpected_error">Errore imprevisto: %1$s</string>
     <string name="msg_auth_invalid_credentials">Email o password errati.</string>
-    <string name="msg_auth_collision">L\'email è già registrata. Effettua l\'accesso.</string>
+    <string name="msg_auth_collision">L\'email ├¿ gi├á registrata. Effettua l\'accesso.</string>
     <string name="msg_auth_recent_login_required">Operazione sensibile. Effettua nuovamente l\'accesso.</string>
-    <string name="msg_auth_too_many_attempts">Troppi tentativi falliti. Riprova più tardi.</string>
+    <string name="msg_auth_too_many_attempts">Troppi tentativi falliti. Riprova pi├╣ tardi.</string>
     <string name="msg_auth_enter_email_reset">Inserisci l\'email per il ripristino</string>
     <string name="msg_auth_sending_reset">Invio email di ripristino...</string>
     <string name="msg_auth_email_sent">Email di ripristino inviata con successo</string>
@@ -775,7 +770,7 @@
     <string name="card_hint_manage_reminder">Gestisci il promemoria nella pagina dei dettagli</string>
     <string name="card_hint_manage_episodes">Gestisci gli episodi nella pagina dei dettagli</string>
     <!-- Drawer -->
-    <string name="drawer_back_to_main">Menù Principale</string>
+    <string name="drawer_back_to_main">Men├╣ Principale</string>
     <string name="drawer_movies">Film</string>
     <string name="drawer_movies_popular">Film popolari</string>
     <string name="drawer_movies_now_playing">Adesso al cinema</string>
@@ -851,7 +846,7 @@
 
     <!-- Rating Explanations -->
     <string name="rating_g_label">PER TUTTI</string>
-    <string name="rating_g_desc">Film adatto a tutte le età. Non contiene scene o linguaggi che possano offendere i genitori o i bambini.</string>
+    <string name="rating_g_desc">Film adatto a tutte le et├á. Non contiene scene o linguaggi che possano offendere i genitori o i bambini.</string>
 
     <string name="rating_pg_label">CONSIGLIATA SUPERVISIONE</string>
     <string name="rating_pg_desc">Alcune scene potrebbero non essere adatte ai bambini. Si consiglia la presenza di un genitore per spiegare eventuali temi.</string>
@@ -859,7 +854,7 @@
     <string name="rating_pg13_label">SCONSIGLIATO SOTTO I 13</string>
     <string name="rating_pg13_desc">Alcuni contenuti potrebbero essere inappropriati per minori di 13 anni. Richiede cautela da parte dei genitori.</string>
 
-    <string name="rating_r_desc">Richiede l\'accompagnamento di un adulto. Contiene temi maturi, linguaggio forte, violenza o nudità.</string>
+    <string name="rating_r_desc">Richiede l\'accompagnamento di un adulto. Contiene temi maturi, linguaggio forte, violenza o nudit├á.</string>
 
     <string name="rating_nc17_desc">Contenuto esclusivamente per un pubblico adulto. Assolutamente vietato l\'ingresso ai minori.</string>
 
@@ -920,11 +915,11 @@
 
     <!-- Episodes -->
     <string name="episodes_info_desc">Informazioni Episodio</string>
-    <string name="episodes_long_press_info">Tieni premuto un episodio per più info</string>
+    <string name="episodes_long_press_info">Tieni premuto un episodio per pi├╣ info</string>
     <string name="detail_release_date">Data di uscita</string>
     <string name="detail_rating">Valutazione</string>
     <!-- Icon Update -->
-    <string name="icon_updated_restart">L\'icona è stata aggiornata. Riavvio in corso...</string>    <!-- Trakt Sync -->
+    <string name="icon_updated_restart">L\'icona ├¿ stata aggiornata. Riavvio in corso...</string>    <!-- Trakt Sync -->
     <string name="trakt_sync_now">Sincronizza Ora</string>
     <string name="trakt_disconnect">Disconnetti</string>
     <string name="trakt_connect">Connetti a Trakt</string>
@@ -953,26 +948,26 @@
     <string name="status_disabled_plural_m">disattivati</string>
 
     <!-- Person Offline Fallback -->
-    <string name="person_offline_title">Modalità Offline</string>
+    <string name="person_offline_title">Modalit├á Offline</string>
     <string name="person_offline_desc">Connessione assente o dati artista non presenti in cache.\nConnettiti per scaricare biografia e filmografia completa.</string>
     <string name="person_offline_default_name">Artista #%1$d</string>
     <!-- Update & WhatsNew Dialogs -->
     <string name="whats_new_title">App Aggiornata!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Nuovi pulsanti circolari fluttuanti (Indietro, Home, Condividi) sopra i contenuti con effetto vetro nitido
-• Rimbalzo al tocco (bounce click) perfezionato e applicato solo all\'icona interna per un feedback elegante
-• Risolto il problema di sfocatura (blur) che copriva le icone nei dettagli di Collezioni e Persone
-• Ottimizzazioni generali e miglioramenti all\'interfaccia utente</string>
-    <string name="whats_new_section_title">NOVITÀ PRINCIPALI</string>
+    <string name="whats_new_fallback_notes">ÔÇó Nuovi pulsanti circolari fluttuanti (Indietro, Home, Condividi) sopra i contenuti con effetto vetro nitido
+ÔÇó Rimbalzo al tocco (bounce click) perfezionato e applicato solo all\'icona interna per un feedback elegante
+ÔÇó Risolto il problema di sfocatura (blur) che copriva le icone nei dettagli di Collezioni e Persone
+ÔÇó Ottimizzazioni generali e miglioramenti all\'interfaccia utente</string>
+    <string name="whats_new_section_title">NOVIT├Ç PRINCIPALI</string>
     <string name="whats_new_btn_start">Ottimo, Iniziamo!</string>
 
     <string name="github_update_title">Nuovo Aggiornamento Disponibile</string>
-    <string name="github_update_desc">È disponibile una nuova versione di FlickTrove su GitHub! Stai attualmente utilizzando la v%1$s. Aggiorna ora per avere tutte le ultime novità, miglioramenti e correzioni.</string>
+    <string name="github_update_desc">├ê disponibile una nuova versione di FlickTrove su GitHub! Stai attualmente utilizzando la v%1$s. Aggiorna ora per avere tutte le ultime novit├á, miglioramenti e correzioni.</string>
     <string name="github_update_btn_download">Scarica da GitHub</string>
-    <string name="github_update_btn_later">Più tardi</string>
-    <string name="github_update_btn_ignore">Non ricordarlo più</string>
+    <string name="github_update_btn_later">Pi├╣ tardi</string>
+    <string name="github_update_btn_ignore">Non ricordarlo pi├╣</string>
 
-    <string name="settings_new_version_available">Nuova versione v%1$s disponibile su GitHub →</string>
+    <string name="settings_new_version_available">Nuova versione v%1$s disponibile su GitHub ÔåÆ</string>
 
     <!-- Onboarding Dialog -->
     <string name="onboarding_skip">Salta</string>
@@ -980,7 +975,7 @@
     <string name="onboarding_start">Inizia Subito!</string>
     <string name="onboarding_slide1_title">Benvenuto in FlickTrove</string>
     <string name="onboarding_slide1_sub">IL TUO TRACKER PERSONALE</string>
-    <string name="onboarding_slide1_desc">Esplora, cerca e tieni traccia di Film &amp; Serie TV con un\'interfaccia Glassmorphism fluida, veloce e senza pubblicità.</string>
+    <string name="onboarding_slide1_desc">Esplora, cerca e tieni traccia di Film &amp; Serie TV con un\'interfaccia Glassmorphism fluida, veloce e senza pubblicit├á.</string>
     <string name="onboarding_slide2_title">Organizza come preferisci</string>
     <string name="onboarding_slide2_sub">PREFERITI, VISTI &amp; CARTELLE</string>
     <string name="onboarding_slide2_desc">Crea cartelle su misura per ogni occasione, vota e aggiungi note testuali o audio alle tue collezioni.</string>
@@ -992,13 +987,13 @@
     <string name="onboarding_slide4_desc">Esporta e importa i tuoi backup locali in formato JSON in un secondo, oppure collega il tuo account Trakt per la sincronizzazione automatica.</string>
     <string name="onboarding_slide5_title">Serie Interrotte</string>
     <string name="onboarding_slide5_sub">NASCONDI LE SERIE ABBANDONATE</string>
-    <string name="onboarding_slide5_desc">Hai abbandonato una serie a metà? Fai swipe verso l\'alto sul cestino per segnarla come \'Dropped\' così non riceverai più notifiche per i nuovi episodi, pur mantenendo traccia di quelli già visti!</string>
+    <string name="onboarding_slide5_desc">Hai abbandonato una serie a met├á? Fai swipe verso l\'alto sul cestino per segnarla come \'Dropped\' cos├¼ non riceverai pi├╣ notifiche per i nuovi episodi, pur mantenendo traccia di quelli gi├á visti!</string>
     <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
 
     <!-- Rewatch Import Dialog -->
     <string name="import_rewatch_dialog_title">Gestione Re-watch (Visioni Multiple)</string>
-    <string name="import_rewatch_dialog_desc">Il file importato potrebbe contenere film visti più volte in date diverse. Quale data di visione preferisci conservare per i film duplicati?</string>
-    <string name="import_rewatch_keep_latest">Ultima data (Più recente)</string>
+    <string name="import_rewatch_dialog_desc">Il file importato potrebbe contenere film visti pi├╣ volte in date diverse. Quale data di visione preferisci conservare per i film duplicati?</string>
+    <string name="import_rewatch_keep_latest">Ultima data (Pi├╣ recente)</string>
     <string name="import_rewatch_keep_first">Prima data (Storica)</string>
 
     <!-- Collection Badge Strings -->
@@ -1023,7 +1018,7 @@
     <string name="checkin_vibe_in_tears">In lacrime</string>
     <string name="checkin_vibe_feels_good">Bello</string>
     <string name="checkin_vibe_comfort">Accogliente</string>
-    <string name="checkin_vibe_meh">Così così</string>
+    <string name="checkin_vibe_meh">Cos├¼ cos├¼</string>
     <string name="checkin_vibe_disappointed">Deluso</string>
     <string name="checkin_vibe_funny">Divertente</string>
     <string name="checkin_vibe_scary">Spaventoso</string>
@@ -1031,16 +1026,16 @@
     <string name="checkin_vibe_weird">Assurdo</string>
     <string name="checkin_vibe_action">Gasato</string>
     <string name="settings_support_flicktrove">Supporta FlickTrove</string>
-    <string name="settings_support_dev_desc">Supporta lo sviluppo e mantieni l\'app senza pubblicità!</string>
+    <string name="settings_support_dev_desc">Supporta lo sviluppo e mantieni l\'app senza pubblicit├á!</string>
     <string name="account_change_name_title">Cambia Nome</string>
     <string name="account_name_changes_left">Hai ancora %d cambi di nome.</string>
     <string name="avatar_banned_message">Non sei autorizzato a cambiare avatar.</string>
     <string name="account_new_name_label">Nuovo Nome</string>
     <string name="account_save">Salva</string>
     <string name="account_error_name_short">Il nome deve avere almeno 3 caratteri.</string>
-    <string name="account_error_name_long">Il nome non può superare 20 caratteri.</string>
+    <string name="account_error_name_long">Il nome non pu├▓ superare 20 caratteri.</string>
     <string name="account_error_name_profanity">Nome non valido.</string>
-    <string name="account_error_name_taken">Nome già in uso.</string>
+    <string name="account_error_name_taken">Nome gi├á in uso.</string>
     <string name="account_error_checking_name">Errore nel controllo del nome.</string>
     <string name="general_stats">STATISTICHE GENERALI</string>
 
@@ -1050,42 +1045,42 @@
     <string name="flow_top_mvps">TOP MVPS</string>
 
     <string name="persona_title_connoisseur">L\'Intenditore</string>
-    <string name="persona_desc_connoisseur">Cerchi solo il cinema di altissima qualità. Solo il meglio per il tuo Flow.</string>
+    <string name="persona_desc_connoisseur">Cerchi solo il cinema di altissima qualit├á. Solo il meglio per il tuo Flow.</string>
 
     <string name="persona_title_philosopher">Il Filosofo</string>
-    <string name="persona_desc_philosopher">Ami i film che stravolgono la realtà e ti fanno riflettere per giorni.</string>
+    <string name="persona_desc_philosopher">Ami i film che stravolgono la realt├á e ti fanno riflettere per giorni.</string>
 
     <string name="persona_title_empath">L\'Empatico</string>
-    <string name="persona_desc_empath">Vivi ogni emozione profondamente. Il tuo Flow è un oceano di sentimenti.</string>
+    <string name="persona_desc_empath">Vivi ogni emozione profondamente. Il tuo Flow ├¿ un oceano di sentimenti.</string>
 
     <string name="persona_title_adrenaline_junkie">L\'Adrenalinico</string>
-    <string name="persona_desc_adrenaline_junkie">Azione, velocità ed esplosioni. Il tuo Flow va a pura adrenalina.</string>
+    <string name="persona_desc_adrenaline_junkie">Azione, velocit├á ed esplosioni. Il tuo Flow va a pura adrenalina.</string>
 
     <string name="persona_title_comfort_seeker">L\'Amante del Relax</string>
-    <string name="persona_desc_comfort_seeker">Coperte, tè e film rassicuranti. Il tuo Flow è il tuo rifugio sicuro.</string>
+    <string name="persona_desc_comfort_seeker">Coperte, t├¿ e film rassicuranti. Il tuo Flow ├¿ il tuo rifugio sicuro.</string>
 
     <string name="persona_title_optimist">L\'Ottimista</string>
-    <string name="persona_desc_optimist">Guardi sempre il lato positivo. Il tuo Flow è pieno di gioia e calore.</string>
+    <string name="persona_desc_optimist">Guardi sempre il lato positivo. Il tuo Flow ├¿ pieno di gioia e calore.</string>
 
     <string name="persona_title_jokester">L\'Animatore</string>
-    <string name="persona_desc_jokester">Sei qui per farti una bella risata. La commedia è il cuore del tuo Flow.</string>
+    <string name="persona_desc_jokester">Sei qui per farti una bella risata. La commedia ├¿ il cuore del tuo Flow.</string>
 
     <string name="persona_title_explorer">L\'Esploratore</string>
-    <string name="persona_desc_explorer">Più è strano, meglio è. Ti avventuri negli angoli più bizzarri del cinema.</string>
+    <string name="persona_desc_explorer">Pi├╣ ├¿ strano, meglio ├¿. Ti avventuri negli angoli pi├╣ bizzarri del cinema.</string>
 
     <string name="persona_title_thrill_seeker">L\'Amante del Brivido</string>
-    <string name="persona_desc_thrill_seeker">Adori la suspense e i salti sulla sedia. La paura è la tua benzina.</string>
+    <string name="persona_desc_thrill_seeker">Adori la suspense e i salti sulla sedia. La paura ├¿ la tua benzina.</string>
 
     <string name="persona_title_critic">Il Critico</string>
     <string name="persona_desc_critic">Sei difficile da impressionare. Esigi la perfezione e nient\'altro.</string>
 
     <string name="persona_title_wanderer">Il Viaggiatore</string>
-    <string name="persona_desc_wanderer">Il tuo Flow è vario e imprevedibile. Vai dove ti porta il vento.</string>
+    <string name="persona_desc_wanderer">Il tuo Flow ├¿ vario e imprevedibile. Vai dove ti porta il vento.</string>
     <string name="dashboard_general_stats">STATISTICHE GENERALI</string>
     <string name="dashboard_my_folders">LE MIE CARTELLE</string>
     <string name="dashboard_your_flow">IL TUO FLOW</string>
-    <string name="flow_empty_title">Il tuo Flow è vuoto</string>
-    <string name="flow_empty_desc">Aggiungi più film e serie tv ai tuoi Visti per generare il tuo Flow personalizzato.</string>
+    <string name="flow_empty_title">Il tuo Flow ├¿ vuoto</string>
+    <string name="flow_empty_desc">Aggiungi pi├╣ film e serie tv ai tuoi Visti per generare il tuo Flow personalizzato.</string>
     <string name="flow_stats_empty_title">Nessuna statistica</string>
     <string name="flow_stats_empty_desc">Continua a guardare e valutare titoli per visualizzare le statistiche del tuo Flow.</string>
     <string name="flow_stats_all_time">Flow stat di sempre</string>
@@ -1098,20 +1093,22 @@
     <string name="dashboard_your_flow_desc">Il tuo mix curato di scoperte e suggerimenti</string>
     <string name="auth_guest_prompt_title">Account Richiesto</string>
     <string name="auth_guest_prompt_desc">Devi creare un account per personalizzare il tuo profilo e avatar.</string>
+    <string name="filter_status">STATO</string>
+    <string name="filter_status_watching">In Visione</string>
+    <string name="filter_status_not_started">Non Iniziato</string>
+    <string name="filter_status_dropped">Abbandonato</string>
+    <string name="filter_status_up_to_date">Aggiornato</string>
     <string name="account_edit_profile">Modifica Profilo</string>
     <string name="account_change_name_menu">Cambia Nome</string>
     <string name="account_change_avatar_menu">Cambia Avatar</string>
-    <string name="account_change_cover_menu">Cambia Copertina</string>
+    <string name="account_change_cover_menu">Cambia Cover</string>
     <string name="settings_check_updates_github">Controlla aggiornamenti su GitHub</string>
-    <string name="account_error_max_name_changes">Hai raggiunto il limite di cambi nome.</string>
-    <string name="account_error_name_update_failed">Errore nel cambio del nome.</string>
+    <string name="account_error_max_name_changes">Limite massimo di cambi nome raggiunto.</string>
+    <string name="account_error_name_update_failed">Aggiornamento nome fallito.</string>
     <string name="account_guest_sync_title">Sincronizza Dati</string>
-    <string name="account_guest_sync_message">Accedi per sincronizzare i tuoi dati.</string>
+    <string name="account_guest_sync_message">Registrati o accedi per sincronizzare i tuoi dati.</string>
     <string name="unmatched_items_title">Scartati / Non Riconosciuti</string>
-    <string name="unmatched_items_desc">Visualizza i film e le serie non riconosciuti da TMDB durante l\'ultima importazione</string>
+    <string name="unmatched_items_desc">Vedi film e serie non riconosciuti da TMDB durante l\'ultimo import</string>
     <string name="unmatched_items_count">%d elementi</string>
-    <string name="unmatched_items_empty">Nessun elemento scartato! ??</string>
+    <string name="unmatched_items_empty">Nessun elemento scartato! &#127881;</string>
 </resources>
-
-
-

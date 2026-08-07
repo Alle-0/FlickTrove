@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">FlickTrove</string>
 
     <!-- Shortcut Strings -->
@@ -106,7 +106,7 @@
     <string name="stats_generating_card_desc">We are creating your image to share</string>
     <string name="stats_total_time">TOTAL TIME SPENT</string>
     <string name="stats_total_time_combined">COMBINED VIEWING</string>
-    <string name="stats_share_text">🏆 My total watch time on FlickTrove: %1$s of movies and TV shows! 🎬\nJoin me and track your progress: https://alle-0.github.io/FlickTrove/</string>
+    <string name="stats_share_text">­ƒÅå My total watch time on FlickTrove: %1$s of movies and TV shows! ­ƒÄ¼\nJoin me and track your progress: https://alle-0.github.io/FlickTrove/</string>
     <string name="stats_title_singular">TITLE</string>
     <string name="stats_title_plural">TITLES</string>
     <string name="stats_of_total">%s OF TOTAL</string>
@@ -141,7 +141,7 @@
     <string name="stats_genre_other">OTHER</string>
     <string name="stats_all_stats">All Stats</string>
     <string name="stats_episodes_short">%1$d ep</string>
-    <string name="stats_episodes_long">• %1$d episodes</string>
+    <string name="stats_episodes_long">ÔÇó %1$d episodes</string>
     <string name="stats_dhm">%1$dd %2$dh %3$dm</string>
     <string name="stats_hm">%1$dh %2$dm</string>
     <string name="stats_m">%1$dm</string>
@@ -149,14 +149,14 @@
     <string name="stats_one_movie">1 movie</string>
     <string name="stats_many_movies">%1$d movies</string>
     <string name="stats_share_title_msg">Share your stats</string>
-    <string name="stats_share_line_1">🎬 %1$s on FlickTrove!\n\n</string>
-    <string name="stats_share_line_2">📊 I watched %1$d movies and %2$d TV shows.\n</string>
-    <string name="stats_share_line_3">⏳ Total time: %1$s\n</string>
-    <string name="stats_share_line_genre">🎭 Top genre: %1$s\n</string>
-    <string name="stats_share_line_actor">⭐ Top star: %1$s\n</string>
-    <string name="stats_share_line_director">🎥 Top director: %1$s\n</string>
-    <string name="stats_share_line_decade">📅 Golden decade: %1$s\n</string>
-    <string name="stats_share_line_outro">\nTrack your cinematic journey on FlickTrove! 🍿</string>
+    <string name="stats_share_line_1">­ƒÄ¼ %1$s on FlickTrove!\n\n</string>
+    <string name="stats_share_line_2">­ƒôè I watched %1$d movies and %2$d TV shows.\n</string>
+    <string name="stats_share_line_3">ÔÅ│ Total time: %1$s\n</string>
+    <string name="stats_share_line_genre">­ƒÄ¡ Top genre: %1$s\n</string>
+    <string name="stats_share_line_actor">Ô¡É Top star: %1$s\n</string>
+    <string name="stats_share_line_director">­ƒÄÑ Top director: %1$s\n</string>
+    <string name="stats_share_line_decade">­ƒôà Golden decade: %1$s\n</string>
+    <string name="stats_share_line_outro">\nTrack your cinematic journey on FlickTrove! ­ƒì┐</string>
 
     <!-- SettingsScreen -->
     <string name="settings_tab_title">Settings</string>
@@ -228,7 +228,7 @@
     <string name="settings_external_migration">Universal Data Import / Export</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, All CSV/JSON/ZIP</string>
     <string name="settings_device_backup">FlickTrove Device Backup</string>
-    <string name="settings_trakt_sync_desc">App ➔ Trakt: Instant\nTrakt ➔ App: 24h</string>
+    <string name="settings_trakt_sync_desc">App Ô×ö Trakt: Instant\nTrakt Ô×ö App: 24h</string>
     <string name="settings_sync_missing_details">Sync Missing Details</string>
     <string name="settings_sync_missing_details_desc">Retrieve missing data for older movies in your library. Use only if strictly necessary (intensive background operation).</string>
     <string name="settings_dialog_deep_sync_title">Warning: Intensive Sync</string>
@@ -560,8 +560,8 @@
     <string name="updates_calendar_prev_year">Previous year</string>
     <string name="updates_calendar_next_year">Next year</string>
     <!-- Notifications & Widgets -->
-    <string name="notif_reminder_summary">FlickTrove · Release Reminders</string>
-    <string name="notif_update_summary">FlickTrove · Series Update</string>
+    <string name="notif_reminder_summary">FlickTrove ┬À Release Reminders</string>
+    <string name="notif_update_summary">FlickTrove ┬À Series Update</string>
     <string name="notif_media_movie">Movie</string>
     <string name="notif_media_tv">TV Series</string>
     <string name="notif_new_release_title">New release: %1$s</string>
@@ -584,7 +584,7 @@
     <string name="quick_folders">FOLDERS</string>
     <string name="quick_no_folders">No folders created</string>
     <string name="quick_rating_title">QUICK RATING</string>
-    <string name="quick_rating_previous">  •  PREVIOUS: %1$.1f</string>
+    <string name="quick_rating_previous">  ÔÇó  PREVIOUS: %1$.1f</string>
     <string name="quick_note_title">QUICK NOTE</string>
     <string name="quick_note_hint">Add a note or review...</string>
     <string name="quick_note_dictate">Dictate note</string>
@@ -700,8 +700,8 @@
     <string name="detail_custom_cover_badge">Custom Cover</string>
     <string name="detail_change_cover_btn">Change Cover</string>
     <string name="detail_cover_selected_badge">IN USE</string>
-    <string name="detail_cover_updated_msg">✨ Cover updated successfully!</string>
-    <string name="detail_cover_reset_msg">🔄 Cover reset to default</string>
+    <string name="detail_cover_updated_msg">Ô£¿ Cover updated successfully!</string>
+    <string name="detail_cover_reset_msg">­ƒöä Cover reset to default</string>
     <string name="personal_listening">Listening</string>
     <string name="personal_audio_local_only">Audio is saved locally and will not be synced.</string>
     <string name="personal_save_note">SAVE NOTE</string>
@@ -736,7 +736,7 @@
     <string name="settings_msg_restore_error">Restore error: invalid file</string>
     <string name="settings_msg_import_success">Successfully imported %1$d items</string>
     <string name="settings_msg_import_error">Migration error: check file format</string>
-    <string name="settings_msg_import_started">Import started in background…</string>
+    <string name="settings_msg_import_started">Import started in backgroundÔÇª</string>
     <!-- ViewModels Shared Messages -->
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removed</string>
@@ -960,10 +960,10 @@
     <!-- Update & WhatsNew Dialogs -->
     <string name="whats_new_title">App Updated!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• New floating circular action buttons (Back, Home, Share) layered cleanly over content with Haze Blur
-• Refined bounce click animation applied precisely to inner icons without distorting the glass container
-• Fixed blur interference on icons across Collection and Person detail screens
-• UI polishes and performance improvements</string>
+    <string name="whats_new_fallback_notes">ÔÇó New floating circular action buttons (Back, Home, Share) layered cleanly over content with Haze Blur
+ÔÇó Refined bounce click animation applied precisely to inner icons without distorting the glass container
+ÔÇó Fixed blur interference on icons across Collection and Person detail screens
+ÔÇó UI polishes and performance improvements</string>
     <string name="whats_new_section_title">MAIN HIGHLIGHTS</string>
     <string name="whats_new_btn_start">Awesome, let\'s go!</string>
 
@@ -973,7 +973,7 @@
     <string name="github_update_btn_later">Later</string>
     <string name="github_update_btn_ignore">Don\'t remind me again</string>
 
-    <string name="settings_new_version_available">New version v%1$s available on GitHub →</string>
+    <string name="settings_new_version_available">New version v%1$s available on GitHub ÔåÆ</string>
 
     <!-- Onboarding Dialog -->
     <string name="onboarding_skip">Skip</string>
@@ -1100,8 +1100,22 @@
     <string name="dashboard_your_flow_desc">Your curated mix of discoveries and suggestions</string>
     <string name="auth_guest_prompt_title">Account Required</string>
     <string name="auth_guest_prompt_desc">You need to create an account to personalize your profile and avatar.</string>
+    <string name="filter_status">STATUS</string>
+    <string name="filter_status_watching">Watching</string>
+    <string name="filter_status_not_started">Not Started</string>
+    <string name="filter_status_dropped">Dropped</string>
+    <string name="filter_status_up_to_date">Up to Date</string>
+    <string name="account_edit_profile">Edit Profile</string>
+    <string name="account_change_name_menu">Change Name</string>
+    <string name="account_change_avatar_menu">Change Avatar</string>
+    <string name="account_change_cover_menu">Change Cover</string>
+    <string name="settings_check_updates_github">Check for updates on GitHub</string>
+    <string name="account_error_max_name_changes">Max name changes reached.</string>
+    <string name="account_error_name_update_failed">Failed to update name.</string>
+    <string name="account_guest_sync_title">Sync Data</string>
+    <string name="account_guest_sync_message">Sign up or login to sync your data.</string>
     <string name="unmatched_items_title">Discarded / Unrecognized</string>
     <string name="unmatched_items_desc">View movies and series not recognized by TMDB during the last import</string>
     <string name="unmatched_items_count">%d items</string>
-    <string name="unmatched_items_empty">No discarded items! 🎉</string>
+    <string name="unmatched_items_empty">No discarded items! &#127881;</string>
 </resources>
