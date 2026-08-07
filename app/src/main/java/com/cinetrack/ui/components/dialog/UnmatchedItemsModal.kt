@@ -83,7 +83,7 @@ fun UnmatchedItemsModal(
                         }
                     }
 
-                    Divider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
 
                     if (unmatched.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
