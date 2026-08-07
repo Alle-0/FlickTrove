@@ -136,7 +136,7 @@ fun UnmatchedItemsModal(
                                         modifier = Modifier.size(36.dp)
                                     ) {
                                         Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
                                             contentDescription = "Remove",
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(20.dp)
