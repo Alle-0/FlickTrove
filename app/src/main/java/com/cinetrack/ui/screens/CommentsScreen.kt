@@ -93,7 +93,7 @@ class CommentsScreen(
                             Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = "Indietro", tint = Color.White, modifier = Modifier.size(24.dp))
                         }
                     },
-                    windowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
+                    windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
                         scrolledContainerColor = Color.Transparent
@@ -105,13 +105,13 @@ class CommentsScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .haze(hazeState)
             ) {
                 val flatTree = remember(comments) { buildFlatTree(comments) }
 
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .haze(hazeState),
                     contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 16.dp, bottom = 140.dp)
                 ) {
                     if (isLoading) {
