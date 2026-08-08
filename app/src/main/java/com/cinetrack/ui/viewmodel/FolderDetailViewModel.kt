@@ -103,7 +103,31 @@ class FolderDetailViewModel @Inject constructor(
                     kotlinx.coroutines.flow.flowOf(FolderDetailUiState.Error("Cartella non trovata") as FolderDetailUiState)
                 } else {
                     combine(
-                        repository.getMoviesByCompositeIds(folder.itemIds),
+                        repository.getMoviesByCompositeIds(folder.itemIds).onEach { movies ->
+                            val missingIds = folder.itemIds.filter { id -> 
+                                !movies.any { m -> "${m.mediaType}_${m.id}" == id } 
+                            }
+                            if (missingIds.isNotEmpty()) {
+                                viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                    missingIds.forEach { missingId ->
+                                        val parts = missingId.split("_")
+                                        if (parts.size == 2) {
+                                            val mediaType = parts[0]
+                                            val apiId = parts[1].toLongOrNull()
+                                            if (apiId != null) {
+                                                try {
+                                                    val details = repository.fetchMovieDetails(apiId, mediaType == "tv")
+                                                    val movie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, mediaType)
+                                                    repository.saveMovie(movie)
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         allFoldersFlow
                     ) { movies, allFolders ->
                         FolderDetailUiState.Success(folder, movies.toImmutableList(), allFolders.toImmutableList()) as FolderDetailUiState
@@ -235,6 +259,11 @@ class FolderDetailViewModel @Inject constructor(
                 itemIds = updatedIds,
                 updatedAt = Instant.now().toString()
             ))
+            
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            if (local == null) {
+                repository.saveMovie(movie)
+            }
             
             val title = movie.title ?: movie.name ?: ""
             val folderName = targetFolder.name

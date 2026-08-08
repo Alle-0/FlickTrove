@@ -6,7 +6,7 @@ import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.Provider
 import com.cinetrack.data.model.Season
-import com.cinetrack.data.api.TraktComment
+import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.api.Video
 
 import com.cinetrack.data.local.entities.FolderEntity
@@ -40,7 +40,7 @@ sealed class DetailUiState {
         val seasonDetails: ImmutableMap<Int, Season> = persistentMapOf(),
         val folders: ImmutableList<FolderEntity> = persistentListOf(),
         val watchProviderLink: String? = null,
-        val traktComments: ImmutableList<TraktComment> = persistentListOf(),
+        val appComments: ImmutableList<AppComment> = persistentListOf(),
         val characterImages: ImmutableMap<String, String> = persistentMapOf()
     ) : DetailUiState()
 }

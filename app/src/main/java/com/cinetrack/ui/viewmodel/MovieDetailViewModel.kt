@@ -58,6 +58,7 @@ class MovieDetailViewModel @Inject constructor(
     private val detailUiStateMapper: DetailUiStateMapper,
     private val tvdbRepository: TvdbRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
+    private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -87,6 +88,12 @@ class MovieDetailViewModel @Inject constructor(
                 repository.getGlobalMovieStatsFlow(movieId, mediaType).collect { stats ->
                     _globalStats.value = stats
                 }
+            }
+            
+            // Fetch comments
+            viewModelScope.launch {
+                val comments = commentRepository.getCommentsForMedia(movieId.toString())
+                _appComments.value = comments
             }
 
             // Fetch TVDB Character Images when metadata is loaded
@@ -123,7 +130,7 @@ class MovieDetailViewModel @Inject constructor(
     private val _loadingSeason = MutableStateFlow(false)
     private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.model.Season>>(emptyMap())
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
-    private val _traktComments = MutableStateFlow<List<com.cinetrack.data.api.TraktComment>>(emptyList())
+    private val _appComments = MutableStateFlow<List<com.cinetrack.data.model.AppComment>>(emptyList())
     private val _characterImages = MutableStateFlow<Map<String, String>>(emptyMap())
     private val _error = MutableStateFlow<String?>(null)
     
@@ -177,7 +184,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         val flow3 = combine(
-            _traktComments,
+            _appComments,
             _characterImages
         ) { comments, charImages ->
             Pair(comments, charImages)
@@ -200,7 +207,7 @@ class MovieDetailViewModel @Inject constructor(
                     seasonDetails = f2.first,
                     collectionMovies = f2.second,
                     errorMsg = f2.third,
-                    traktComments = f3.first,
+                    appComments = f3.first,
                     localMovies = localMovies,
                     folders = folders,
                     characterImages = f3.second
@@ -320,13 +327,13 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { repository.fetchComments(traktId, tmdbId, mediaType == "tv") }
+                val commentsDeferred = async { commentRepository.getCommentsForMedia(tmdbId.toString()) }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; emptyList() }
 
-                _traktComments.value = commentsResult
+                _appComments.value = commentsResult
 
                 _externalRatings.update {  
                     it.copy(
@@ -435,6 +442,10 @@ class MovieDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = Instant.now().toString()))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            if (local == null) {
+                repository.saveMovie(movie)
+            }
         }
     }
 
@@ -447,6 +458,13 @@ class MovieDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = Instant.now().toString()))
+            val state = uiState.value
+            if (state is DetailUiState.Success) {
+                val local = repository.getMovie(movieId, mediaType)
+                if (local == null) {
+                    repository.saveMovie(state.movieEntry)
+                }
+            }
         }
     }
 
@@ -755,6 +773,39 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
+    fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0) {
+        viewModelScope.launch {
+            val success = commentRepository.addComment(
+                mediaId = movieId.toString(),
+                mediaType = mediaType,
+                text = text,
+                isSpoiler = isSpoiler,
+                parentId = parentId,
+                parentUserId = parentUserId,
+                depth = depth
+            )
+            if (success) {
+                // Refresh comments
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+            }
+        }
+    }
+
+    fun toggleLikeComment(commentId: String) {
+        viewModelScope.launch {
+            val success = commentRepository.toggleLike(movieId.toString(), commentId)
+            if (success) {
+                // Refresh comments
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+            }
+        }
+    }
+
+    fun reportComment(commentId: String, reason: String, commentText: String) {
+        viewModelScope.launch {
+            commentRepository.reportComment(movieId.toString(), commentId, reason, commentText)
+        }
+    }
 }
 
 private data class MetadataState(
@@ -764,5 +815,5 @@ private data class MetadataState(
     val seasonD: Map<Int, com.cinetrack.data.model.Season>,
     val collectionM: List<Movie>,
     val errorMsg: String?,
-    val traktComments: List<com.cinetrack.data.api.TraktComment>
+    val appComments: List<com.cinetrack.data.model.AppComment>
 )

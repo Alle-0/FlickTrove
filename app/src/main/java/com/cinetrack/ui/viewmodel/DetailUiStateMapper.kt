@@ -3,7 +3,7 @@ package com.cinetrack.ui.viewmodel
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.CrewMember
 import com.cinetrack.data.api.MovieDetailResponse
-import com.cinetrack.data.api.TraktComment
+import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.mapper.MovieMapper
 import com.cinetrack.data.model.Season
@@ -24,7 +24,7 @@ class DetailUiStateMapper @Inject constructor(
         seasonDetails: Map<Int, Season>,
         collectionMovies: List<Movie>,
         errorMsg: String?,
-        traktComments: List<TraktComment>,
+        appComments: List<AppComment>,
         localMovies: List<Movie>,
         folders: List<FolderEntity>,
         characterImages: Map<String, String>
@@ -179,7 +179,7 @@ class DetailUiStateMapper @Inject constructor(
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
-            traktComments = traktComments.toImmutableList(),
+            appComments = appComments.toImmutableList(),
             characterImages = characterImages.toImmutableMap()
         )
     }

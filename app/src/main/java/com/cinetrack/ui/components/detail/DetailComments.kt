@@ -41,46 +41,96 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.geometry.Offset
-import com.cinetrack.data.api.TraktComment
+import com.cinetrack.data.model.AppComment
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DetailComments(
-    comments: List<TraktComment>,
+    comments: List<AppComment>,
     accentColor: Color,
-    translationStates: Map<Long, com.cinetrack.ui.viewmodel.MovieDetailViewModel.TranslationState> = emptyMap(),
-    hazeState: dev.chrisbanes.haze.HazeState? = null,
-    onTranslateClick: (Long, String) -> Unit = { _, _ -> },
+    onOpenThread: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (comments.isEmpty()) return
-
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.detail_top_comments),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Black,
-                letterSpacing = 3.sp
-            ),
-            color = Color.White.copy(alpha = 0.5f),
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-        )
-
-        val sortedComments = remember(comments) {
-            comments.sortedByDescending { it.likes }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "TOP COMMENTS",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 3.sp
+                ),
+                color = Color.White.copy(alpha = 0.5f)
+            )
+            
+            Text(
+                text = "Scrivi",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = accentColor,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onOpenThread() }
+                    .background(accentColor.copy(alpha = 0.15f))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            )
         }
 
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(horizontal = 24.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        val sortedComments = remember(comments) {
+            comments.filter { it.depth == 0 }.sortedByDescending { it.likesCount }.take(10)
+        }
+
+        if (comments.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .clickable { onOpenThread() }
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Nessun commento. Sii il primo a scriverne uno!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        } else {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
             items(sortedComments, key = { it.id }, contentType = { "comment" }) { comment ->
                 CommentCard(
                     comment = comment, 
-                    accentColor = accentColor,
-                    translationState = translationStates[comment.id],
-                    onTranslateRequest = { onTranslateClick(comment.id, comment.comment ?: "") }
+                    accentColor = accentColor
                 )
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .height(140.dp)
+                        .padding(start = 8.dp)
+                        .clickable { onOpenThread() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Vedi discussione completa ->",
+                        color = accentColor,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
             }
         }
     }
@@ -88,10 +138,8 @@ fun DetailComments(
 
 @Composable
 private fun CommentCard(
-    comment: TraktComment,
-    accentColor: Color,
-    translationState: com.cinetrack.ui.viewmodel.MovieDetailViewModel.TranslationState?,
-    onTranslateRequest: () -> Unit
+    comment: AppComment,
+    accentColor: Color
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showOriginal by remember { mutableStateOf(false) }
@@ -116,7 +164,7 @@ private fun CommentCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val username = comment.user?.name?.takeIf { it.isNotBlank() } ?: comment.user?.username ?: "Utente Anonimo"
+                val username = comment.userDisplayName.takeIf { it.isNotBlank() } ?: "Utente Anonimo"
                 Text(
                     text = username,
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -130,43 +178,18 @@ private fun CommentCard(
                 )
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (translationState?.isTranslating == true) {
-                        CircularProgressIndicator(
-                            color = accentColor,
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    } else {
-                        val hasTranslation = translationState?.translatedText != null
-                        val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
-                        if (currentLanguage != "en") {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
-                                contentDescription = "Traduci",
-                                tint = if (hasTranslation && !showOriginal) accentColor else Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier
-                                .size(16.dp)
-                                .bounceClick(scaleDown = 0.9f) {
-                                    if (hasTranslation) {
-                                        showOriginal = !showOriginal
-                                    } else {
-                                        onTranslateRequest()
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-                    }
+                    val currentUserId = remember { FirebaseAuth.getInstance().currentUser?.uid }
+                    val isLiked = currentUserId != null && comment.likedBy.contains(currentUserId)
+
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
+                        imageVector = ImageVector.vectorResource(id = if (isLiked) R.drawable.ic_star_piena else R.drawable.ic_star),
                         contentDescription = "Likes",
-                        tint = accentColor,
+                        tint = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
                         modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${comment.likes}",
+                        text = "${comment.likesCount}",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
@@ -214,11 +237,7 @@ private fun CommentCard(
                         }
                     }
             ) {
-                val displayedText = if (translationState?.translatedText != null && !showOriginal) {
-                    translationState.translatedText
-                } else {
-                    comment.comment ?: ""
-                }
+                val displayedText = comment.text
                 
                 Column(
                     modifier = Modifier

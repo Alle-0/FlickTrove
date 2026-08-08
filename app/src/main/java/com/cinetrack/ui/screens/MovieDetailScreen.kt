@@ -71,6 +71,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
+import com.cinetrack.ui.screens.CommentsScreen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
@@ -167,6 +170,7 @@ fun MovieDetailScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
+    val navigator = LocalNavigator.currentOrThrow
     val folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList()
     val context = androidx.compose.ui.platform.LocalContext.current
     val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
@@ -519,18 +523,15 @@ fun MovieDetailScreenContent(
                                         Spacer(modifier = Modifier.height(48.dp))
                                     }
                                     
-                                    if (state.traktComments.isNotEmpty()) {
                                         DetailComments(
-                                            comments = state.traktComments,
+                                            comments = state.appComments,
                                             accentColor = accentColor,
-                                            translationStates = translationStates,
-                                            hazeState = localHazeState,
-                                            onTranslateClick = { commentId, text ->
-                                                viewModel.requestTranslation(commentId, text)
+                                            onOpenThread = { 
+                                                val mediaTitle = state.details.title ?: state.details.name ?: ""
+                                                navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle)) 
                                             }
                                         )
                                         Spacer(modifier = Modifier.height(48.dp))
-                                    }
 
                                     DetailRecommendations(
                                         collection = state.details.belongsToCollection,
@@ -627,7 +628,8 @@ fun MovieDetailScreenContent(
     } // end MovieActionsWrapper
 
 
-    // Ratings Info Dialog
+
+
     DetailRatingInfoDialog(
         visible = showRatingInfoDialog,
         onDismiss = { showRatingInfoDialog = false },

@@ -262,6 +262,10 @@ class CollectionDetailViewModel @Inject constructor(
                 folder.itemIds + compositeId
             }
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
+            val local = repository.getMovie(movie.id, movie.mediaType)
+            if (local == null) {
+                repository.saveMovie(movie)
+            }
         }
     }
 
