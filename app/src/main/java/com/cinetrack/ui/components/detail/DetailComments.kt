@@ -113,7 +113,7 @@ fun DetailComments(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isOffline) "Nessuna connessione. Impossibile caricare i commenti." else "Nessun commento. Sii il primo a scriverne uno!",
+                    text = if (isOffline) stringResource(R.string.comment_no_connection) else stringResource(R.string.comment_empty_state),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.7f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
