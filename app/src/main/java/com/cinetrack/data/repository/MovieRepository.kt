@@ -146,6 +146,7 @@ class MovieRepository @Inject constructor(
         updatedMovie.favoriteActorId = movie.favoriteActorId
         updatedMovie.favoriteActorName = movie.favoriteActorName
         updatedMovie.favoriteActorProfilePath = movie.favoriteActorProfilePath
+        updatedMovie.favoriteActorTmdbPath = movie.favoriteActorTmdbPath
         updatedMovie.favoriteActorCharacter = movie.favoriteActorCharacter
         favoriteDao.insert(updatedMovie)
         

@@ -71,6 +71,7 @@ class DetailUiStateMapper @Inject constructor(
             it.favoriteActorId = movie.favoriteActorId
             it.favoriteActorName = movie.favoriteActorName
             it.favoriteActorProfilePath = movie.favoriteActorProfilePath
+            it.favoriteActorTmdbPath = movie.favoriteActorTmdbPath
             it.favoriteActorCharacter = movie.favoriteActorCharacter
         } ?: freshMovie
         var effectiveWatchedEpisodes = effectiveMovie.watchedEpisodes

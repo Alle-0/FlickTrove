@@ -143,6 +143,10 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+
+    // Giphy SDK
+    implementation("com.giphy.sdk:ui:2.3.13")
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

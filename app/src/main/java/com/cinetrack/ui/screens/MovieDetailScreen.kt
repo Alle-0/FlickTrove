@@ -174,6 +174,7 @@ fun MovieDetailScreenContent(
     val folders = (uiState as? DetailUiState.Success)?.folders ?: emptyList()
     val context = androidx.compose.ui.platform.LocalContext.current
     val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
+    val isOffline by viewModel.isOffline.collectAsStateWithLifecycle()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var showEpisodesSheet by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
@@ -488,6 +489,18 @@ fun MovieDetailScreenContent(
 
                                     Spacer(modifier = Modifier.height(40.dp))
 
+                                    DetailComments(
+                                        comments = state.appComments,
+                                        accentColor = accentColor,
+                                        isOffline = isOffline,
+                                        onOpenThread = { focusInput ->
+                                            val mediaTitle = state.details.title ?: state.details.name ?: ""
+                                            navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle, focusInput)) 
+                                        }
+                                    )
+
+                                    Spacer(modifier = Modifier.height(40.dp))
+
                                     DetailCast(
                                         directors = state.directors,
                                         cast = state.cast,
@@ -522,16 +535,6 @@ fun MovieDetailScreenContent(
                                         )
                                         Spacer(modifier = Modifier.height(48.dp))
                                     }
-                                    
-                                        DetailComments(
-                                            comments = state.appComments,
-                                            accentColor = accentColor,
-                                            onOpenThread = { 
-                                                val mediaTitle = state.details.title ?: state.details.name ?: ""
-                                                navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle)) 
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.height(48.dp))
 
                                     DetailRecommendations(
                                         collection = state.details.belongsToCollection,

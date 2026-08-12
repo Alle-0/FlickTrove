@@ -381,7 +381,7 @@ fun AvatarSelectionModal(
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = Color.Transparent
                         ),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = CircleShape
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

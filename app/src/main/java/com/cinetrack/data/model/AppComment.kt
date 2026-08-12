@@ -1,6 +1,7 @@
 package com.cinetrack.data.model
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.PropertyName
 
 data class AppComment(
     val id: String = "",
@@ -17,5 +18,7 @@ data class AppComment(
     val parentUserId: String? = null,
     val repliesCount: Int = 0,
     val depth: Int = 0,
-    val isSpoiler: Boolean = false
+    @get:PropertyName("isSpoiler")
+    @set:PropertyName("isSpoiler")
+    var isSpoiler: Boolean = false
 )

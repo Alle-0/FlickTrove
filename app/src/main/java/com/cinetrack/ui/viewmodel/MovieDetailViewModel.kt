@@ -59,8 +59,14 @@ class MovieDetailViewModel @Inject constructor(
     private val tvdbRepository: TvdbRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val commentRepository: com.cinetrack.data.repository.CommentRepository,
+    private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    val isOffline = networkMonitor.connectionState
+        .map { it == com.cinetrack.util.ConnectionState.OFFLINE }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), false)
+
 
     var movieId: Long = 0L
         private set
@@ -401,7 +407,10 @@ class MovieDetailViewModel @Inject constructor(
             current.emotionalVibes = if (vibes.isEmpty()) null else vibes.joinToString(",")
             current.favoriteActorId = mvpActor?.id
             current.favoriteActorName = mvpActor?.name
-            current.favoriteActorProfilePath = characterImageUrl ?: mvpActor?.profilePath
+            // Character image (TVDB) for the Flow card, falls back to TMDB profile
+            current.favoriteActorProfilePath = characterImageUrl?.takeIf { it.isNotBlank() } ?: mvpActor?.profilePath
+            // TMDB profile path always stored separately for Stats
+            current.favoriteActorTmdbPath = mvpActor?.profilePath
             current.favoriteActorCharacter = mvpActor?.character
             
             repository.saveMovie(current)
@@ -791,6 +800,12 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
+    fun refreshComments() {
+        viewModelScope.launch {
+            _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+        }
+    }
+
     fun toggleLikeComment(commentId: String) {
         viewModelScope.launch {
             val success = commentRepository.toggleLike(movieId.toString(), commentId)
@@ -801,9 +816,14 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    fun reportComment(commentId: String, reason: String, commentText: String) {
+    fun reportComment(commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String) {
         viewModelScope.launch {
-            commentRepository.reportComment(movieId.toString(), commentId, reason, commentText)
+            val result = commentRepository.reportComment(movieId.toString(), commentId, reason, commentText, commentAuthorId, commentAuthorName)
+            when (result) {
+                com.cinetrack.data.repository.CommentRepository.ReportResult.SUCCESS -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_success))
+                com.cinetrack.data.repository.CommentRepository.ReportResult.COOLDOWN -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_cooldown))
+                com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_error))
+            }
         }
     }
 }

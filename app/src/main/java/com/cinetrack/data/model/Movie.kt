@@ -340,7 +340,12 @@ data class Movie(
     @get:PropertyName("favorite_actor_character")
     @set:PropertyName("favorite_actor_character")
     @ColumnInfo(name = "favorite_actor_character")
-    var favoriteActorCharacter: String? = null
+    var favoriteActorCharacter: String? = null,
+
+    @get:PropertyName("favorite_actor_tmdb_path")
+    @set:PropertyName("favorite_actor_tmdb_path")
+    @ColumnInfo(name = "favorite_actor_tmdb_path")
+    var favoriteActorTmdbPath: String? = null // always the TMDB profile path (for Stats)
 ) {
     // --- Computed Properties ---
 

@@ -123,8 +123,8 @@ class FlowViewModel @Inject constructor(
                             mvpCounts[id] = MvpStat(
                                 actorId = id,
                                 actorName = name,
-                                characterImageUrl = movie.customBackdropPath ?: movie.backdropPath,
-                                profilePath = movie.favoriteActorProfilePath,
+                                characterImageUrl = null, // unused — profilePath carries the actor image
+                                profilePath = movie.favoriteActorTmdbPath ?: movie.favoriteActorProfilePath,
                                 count = 1
                             )
                         }

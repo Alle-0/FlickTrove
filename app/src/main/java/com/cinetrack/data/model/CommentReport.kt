@@ -9,6 +9,8 @@ data class CommentReport(
     val reportedByUid: String = "",
     val reason: String = "",
     val commentText: String = "",
+    val commentAuthorId: String = "",
+    val commentAuthorName: String = "",
     val timestamp: Timestamp? = null,
     val status: String = "pending"
 )

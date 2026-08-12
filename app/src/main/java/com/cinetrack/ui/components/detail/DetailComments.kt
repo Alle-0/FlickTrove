@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
@@ -48,7 +49,8 @@ import com.google.firebase.auth.FirebaseAuth
 fun DetailComments(
     comments: List<AppComment>,
     accentColor: Color,
-    onOpenThread: () -> Unit,
+    isOffline: Boolean = false,
+    onOpenThread: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -59,17 +61,29 @@ fun DetailComments(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "TOP COMMENTS",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 3.sp
-                ),
-                color = Color.White.copy(alpha = 0.5f)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.bounceClick { onOpenThread(false) }
+            ) {
+                Text(
+                    text = "TOP COMMENTS",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 3.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.5f),
+                    modifier = Modifier.size(12.dp)
+                )
+            }
             
             Text(
-                text = "Scrivi",
+                text = stringResource(R.string.comment_write_btn),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
@@ -77,7 +91,7 @@ fun DetailComments(
                 color = accentColor,
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable { onOpenThread() }
+                    .bounceClick { onOpenThread(true) }
                     .background(accentColor.copy(alpha = 0.15f))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
@@ -94,14 +108,15 @@ fun DetailComments(
                     .padding(horizontal = 24.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.White.copy(alpha = 0.05f))
-                    .clickable { onOpenThread() }
+                    .bounceClick { onOpenThread(true) }
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Nessun commento. Sii il primo a scriverne uno!",
+                    text = if (isOffline) "Nessuna connessione. Impossibile caricare i commenti." else "Nessun commento. Sii il primo a scriverne uno!",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             }
         } else {
@@ -121,11 +136,11 @@ fun DetailComments(
                     modifier = Modifier
                         .height(140.dp)
                         .padding(start = 8.dp)
-                        .clickable { onOpenThread() },
+                        .clickable { onOpenThread(false) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Vedi discussione completa ->",
+                        text = stringResource(R.string.comment_view_full_thread),
                         color = accentColor,
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                     )

@@ -52,7 +52,8 @@ data class SearchUiState(
     val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
     val togglingIds: PersistentSet<Long> = persistentSetOf(),
     val errorMessage: String? = null,
-    val suggestedFilters: ImmutableList<FilterPill> = persistentListOf()
+    val suggestedFilters: ImmutableList<FilterPill> = persistentListOf(),
+    val isLocalOnly: Boolean = false // true when showing local library results due to POOR/OFFLINE connection
 )
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -130,12 +131,12 @@ class SearchViewModel @Inject constructor(
     
     private var searchJob: Job? = null
     private var keywordSearchJob: Job? = null
-    private var isOnline: Boolean = true
+    private var connectionState: com.cinetrack.util.ConnectionState = com.cinetrack.util.ConnectionState.ONLINE
     
     init {
         viewModelScope.launch {
-            networkMonitor.isOnline.collect { online ->
-                isOnline = online
+            networkMonitor.connectionState.collect { state ->
+                connectionState = state
             }
         }
 
@@ -262,12 +263,14 @@ class SearchViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                if (!isOnline) {
+                val useLocalFirst = connectionState != com.cinetrack.util.ConnectionState.ONLINE
+                if (useLocalFirst) {
                     rawResults = performLocalSearch(query, category)
                     applyStateFilters()
-                    _uiState.update { it.copy(isEndReached = true) }
+                    _uiState.update { it.copy(isEndReached = true, isLocalOnly = true) }
                     return@launch
                 }
+                _uiState.update { it.copy(isLocalOnly = false) }
 
                 var page = 1
                 var accumulatedResults = emptyList<TMDBSearchResult>()
@@ -369,12 +372,12 @@ class SearchViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                if (!isOnline) {
+                if (connectionState != com.cinetrack.util.ConnectionState.ONLINE) {
                     rawResults = performLocalSearch(query, category)
                     applyStateFilters()
-                    _uiState.update { it.copy(isEndReached = true) }
+                    _uiState.update { it.copy(isEndReached = true, isLocalOnly = true) }
                 } else {
-                    _uiState.update { it.copy(isEndReached = true) }
+                    _uiState.update { it.copy(isEndReached = true, isLocalOnly = false) }
                     _uiState.update { it.copy(errorMessage = ErrorMapper.map(e.message)) }
                 }
             } finally {

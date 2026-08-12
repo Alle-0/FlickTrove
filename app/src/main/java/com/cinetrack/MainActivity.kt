@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.content.Intent
 
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
+import com.giphy.sdk.ui.Giphy
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import android.view.animation.AnticipateInterpolator
@@ -95,7 +97,7 @@ val LocalTitleTextSizeMultiplier = androidx.compose.runtime.compositionLocalOf<F
 val LocalAdvancedVisualEffects = androidx.compose.runtime.compositionLocalOf<Boolean> { true }
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private val deepLinkIntent = mutableStateOf<Intent?>(null)
     private val settingsViewModel: SettingsViewModel by viewModels()
 
@@ -105,6 +107,8 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         deepLinkIntent.value = intent
+        
+        Giphy.configure(this, "V5zYxUI6BN2WFMauxnBhzEjEjPdytapd", verificationMode = false)
 
         
         // Smooth exit animation for the native splash screen

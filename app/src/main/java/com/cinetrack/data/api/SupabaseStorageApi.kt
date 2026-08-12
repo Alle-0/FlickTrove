@@ -20,4 +20,21 @@ interface SupabaseStorageApi {
         @Header("Authorization") authHeader: String,
         @Body imageBytes: RequestBody
     ): UploadResponse
+    
+    @POST("upload-comment-image")
+    suspend fun uploadCommentImage(
+        @Header("Authorization") authHeader: String,
+        @Body imageBytes: RequestBody
+    ): UploadResponse
+    
+    @POST("delete-comment-image")
+    suspend fun deleteCommentImage(
+        @Header("Authorization") authHeader: String,
+        @Body request: DeleteImageRequest
+    ): UploadResponse
 }
+
+@Serializable
+data class DeleteImageRequest(
+    val imageUrl: String
+)

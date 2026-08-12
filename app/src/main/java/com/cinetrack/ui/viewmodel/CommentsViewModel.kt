@@ -11,11 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.ui.utils.UiText
+import com.cinetrack.R
 
 @HiltViewModel
 class CommentsViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
-    private val auth: FirebaseAuth
+    private val storageRepository: com.cinetrack.data.repository.StorageRepository,
+    private val auth: FirebaseAuth,
+    private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
     private val _comments = MutableStateFlow<List<AppComment>>(emptyList())
@@ -44,6 +49,17 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
+    fun uploadCommentImage(imageUri: android.net.Uri, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            val result = storageRepository.uploadCommentImage(imageUri)
+            result.onSuccess { url ->
+                onSuccess(url)
+            }.onFailure { e ->
+                onError(e.message ?: "Upload fallito")
+            }
+        }
+    }
+
     fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0) {
         viewModelScope.launch {
             val success = commentRepository.addComment(
@@ -62,16 +78,59 @@ class CommentsViewModel @Inject constructor(
     }
 
     fun toggleLikeComment(commentId: String) {
+        val uId = currentUserId ?: return
+        
+        // Aggiornamento ottimistico della UI
+        val currentComments = _comments.value.toMutableList()
+        val index = currentComments.indexOfFirst { it.id == commentId }
+        if (index != -1) {
+            val comment = currentComments[index]
+            val isLiked = comment.likedBy.contains(uId)
+            
+            val newLikedBy = if (isLiked) comment.likedBy - uId else comment.likedBy + uId
+            val newLikesCount = if (isLiked) maxOf(0, comment.likesCount - 1) else comment.likesCount + 1
+            
+            currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
+            _comments.value = currentComments
+        }
+
+        // Chiamata di rete in background
         viewModelScope.launch {
-            if (commentRepository.toggleLike(currentMediaId, commentId)) {
+            val success = commentRepository.toggleLike(currentMediaId, commentId)
+            if (!success) {
+                // In caso di fallimento, ripristina lo stato reale dal server
                 _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
             }
         }
     }
 
-    fun reportComment(commentId: String, reason: String, commentText: String) {
+    fun reportComment(commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String) {
         viewModelScope.launch {
-            commentRepository.reportComment(currentMediaId, commentId, reason, commentText)
+            val result = commentRepository.reportComment(currentMediaId, commentId, reason, commentText, commentAuthorId, commentAuthorName)
+            when (result) {
+                com.cinetrack.data.repository.CommentRepository.ReportResult.SUCCESS -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_success))
+                com.cinetrack.data.repository.CommentRepository.ReportResult.COOLDOWN -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_cooldown))
+                com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_error))
+            }
+        }
+    }
+
+    fun deleteComment(commentId: String) {
+        // Aggiornamento ottimistico: rimuoviamo subito il commento dalla lista locale
+        val currentComments = _comments.value.toMutableList()
+        val index = currentComments.indexOfFirst { it.id == commentId }
+        if (index != -1) {
+            currentComments.removeAt(index)
+            _comments.value = currentComments
+        }
+
+        // Chiamata di rete per l'eliminazione effettiva
+        viewModelScope.launch {
+            val success = commentRepository.deleteComment(currentMediaId, commentId)
+            if (!success) {
+                // Se fallisce, ripristiniamo la lista dal server
+                _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
+            }
         }
     }
 }

@@ -48,6 +48,52 @@ class StorageRepository @Inject constructor(
         }
     }
 
+    suspend fun uploadCommentImage(imageUri: Uri): Result<String> = runCatching {
+        val user = auth.currentUser ?: throw IllegalStateException("User must be logged in to upload an image.")
+        
+        // Retrieve the Firebase ID Token
+        val tokenResult = user.getIdToken(false).await()
+        val token = tokenResult.token ?: throw IllegalStateException("Could not get Firebase ID token.")
+        
+        // Compress and resize the image for comments (larger than avatar, e.g. max 1080x1080)
+        val compressedBytes = withContext(Dispatchers.IO) {
+            compressImage(imageUri, 1080, 1080)
+        }
+        
+        val requestBody = compressedBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+        
+        val response = api.uploadCommentImage(
+            authHeader = "Bearer $token",
+            imageBytes = requestBody
+        )
+        
+        if (response.publicUrl != null) {
+            response.publicUrl
+        } else {
+            throw Exception(response.error ?: "Unknown error uploading comment image")
+        }
+    }
+
+    suspend fun deleteCommentImage(imageUrl: String): Result<Boolean> = runCatching {
+        val user = auth.currentUser ?: throw IllegalStateException("User must be logged in to delete an image.")
+        
+        // Retrieve the Firebase ID Token
+        val tokenResult = user.getIdToken(false).await()
+        val token = tokenResult.token ?: throw IllegalStateException("Could not get Firebase ID token.")
+        
+        val request = com.cinetrack.data.api.DeleteImageRequest(imageUrl = imageUrl)
+        val response = api.deleteCommentImage(
+            authHeader = "Bearer $token",
+            request = request
+        )
+        
+        if (response.error == null) {
+            true
+        } else {
+            throw Exception(response.error)
+        }
+    }
+
     private fun compressImage(uri: Uri, maxWidth: Int, maxHeight: Int): ByteArray {
         val contentResolver = context.contentResolver
         

@@ -9,6 +9,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -28,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -63,12 +68,28 @@ import com.cinetrack.ui.components.search.SearchContentGrid
 import com.cinetrack.ui.components.search.SearchHeader
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
+import com.cinetrack.R
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.UiText
 import com.cinetrack.ui.viewmodel.FilterPill
 import com.cinetrack.ui.viewmodel.SearchViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.pow
@@ -424,6 +445,47 @@ fun SearchScreenContent(
                         onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
                         modifier = Modifier.align(Alignment.TopCenter)
                     )
+
+                    // 3. Local-Only Banner (bottom, shown when offline/poor connection)
+                    AnimatedVisibility(
+                        visible = uiState.isLocalOnly && uiState.query.length >= 3,
+                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(bottom = 24.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .hazeChild(
+                                    state = internalHazeState,
+                                    shape = RoundedCornerShape(50),
+                                    style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF1E1E1E).copy(alpha = 0.85f), blurRadius = 15.dp)
+                                )
+                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(50))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_cloud),
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(R.string.search_local_only),
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

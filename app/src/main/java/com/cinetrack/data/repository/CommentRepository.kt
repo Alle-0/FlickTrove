@@ -14,7 +14,8 @@ import javax.inject.Singleton
 @Singleton
 class CommentRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val storageRepository: StorageRepository
 ) {
     private fun getMediaCommentsCollection(mediaId: String) =
         firestore.collection("media_comments").document(mediaId).collection("comments")
@@ -106,27 +107,112 @@ class CommentRepository @Inject constructor(
         }
     }
 
-    suspend fun reportComment(mediaId: String, commentId: String, reason: String, commentText: String): Boolean {
-        val userId = auth.currentUser?.uid ?: return false
+enum class ReportResult {
+    SUCCESS,
+    COOLDOWN,
+    ERROR
+}
+
+    suspend fun reportComment(mediaId: String, commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String): ReportResult {
+        val userId = auth.currentUser?.uid ?: return ReportResult.ERROR
+        
+        // 24-hour cooldown check
+        val oneDayAgo = Timestamp(java.util.Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000))
+        val recentReports = reportsCollection
+            .whereEqualTo("commentId", commentId)
+            .whereEqualTo("reportedByUid", userId)
+            .whereEqualTo("reason", reason)
+            .whereGreaterThan("timestamp", oneDayAgo)
+            .get()
+            .await()
+            
+        if (!recentReports.isEmpty) {
+            return ReportResult.COOLDOWN
+        }
+        
         val report = CommentReport(
             mediaId = mediaId,
             commentId = commentId,
             reportedByUid = userId,
             reason = reason,
             commentText = commentText,
+            commentAuthorId = commentAuthorId,
+            commentAuthorName = commentAuthorName,
             timestamp = Timestamp.now()
         )
         return try {
             reportsCollection.add(report).await()
-            true
+            
+            // Auto-flag spoiler logic
+            if (reason == "SPOILER") {
+                val spoilerReports = reportsCollection
+                    .whereEqualTo("commentId", commentId)
+                    .whereEqualTo("reason", "SPOILER")
+                    .get()
+                    .await()
+                
+                if (spoilerReports.size() >= 3) {
+                    // Update comment to isSpoiler = true
+                    getMediaCommentsCollection(mediaId).document(commentId)
+                        .update("isSpoiler", true)
+                        .await()
+                }
+            }
+            
+            ReportResult.SUCCESS
         } catch (e: Exception) {
             e.printStackTrace()
-            false
+            ReportResult.ERROR
         }
     }
     suspend fun deleteComment(mediaId: String, commentId: String): Boolean {
         return try {
-            getMediaCommentsCollection(mediaId).document(commentId).delete().await()
+            val mediaCommentsColl = getMediaCommentsCollection(mediaId)
+            
+            // 1. Fetch the comment to delete
+            val commentSnapshot = mediaCommentsColl.document(commentId).get().await()
+            if (!commentSnapshot.exists()) return false
+            val comment = commentSnapshot.toObject(AppComment::class.java) ?: return false
+
+            // 2. Fetch all replies (1 level deep)
+            val repliesSnapshot = mediaCommentsColl.whereEqualTo("parentId", commentId).get().await()
+            
+            // 3. Delete images from Storage (for parent and replies)
+            val allComments = mutableListOf(comment)
+            allComments.addAll(repliesSnapshot.documents.mapNotNull { it.toObject(AppComment::class.java) })
+            
+            val imageRegex = Regex("""!\[.*?\]\((.*?)\)""")
+            for (c in allComments) {
+                val match = imageRegex.find(c.text)
+                if (match != null) {
+                    val imageUrl = match.groupValues[1]
+                    if (imageUrl.contains("supabase.co")) {
+                        val result = storageRepository.deleteCommentImage(imageUrl)
+                        if (result.isFailure) {
+                            android.util.Log.e("CommentRepository", "Failed to delete image: $imageUrl", result.exceptionOrNull())
+                            return false // Abort if image deletion fails to avoid orphans
+                        }
+                    }
+                }
+            }
+
+            // 4. Batch delete from Firestore
+            val batch = firestore.batch()
+            batch.delete(mediaCommentsColl.document(commentId))
+            for (doc in repliesSnapshot.documents) {
+                batch.delete(doc.reference)
+            }
+            
+            // 5. Update parent's repliesCount if needed
+            if (comment.parentId != null) {
+                val parentRef = mediaCommentsColl.document(comment.parentId)
+                val parentSnapshot = parentRef.get().await()
+                if (parentSnapshot.exists()) {
+                    batch.update(parentRef, "repliesCount", FieldValue.increment(-1))
+                }
+            }
+            
+            batch.commit().await()
             true
         } catch (e: Exception) {
             e.printStackTrace()

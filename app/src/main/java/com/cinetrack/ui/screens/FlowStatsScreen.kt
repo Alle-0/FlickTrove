@@ -296,8 +296,11 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
     ) {
         items(mvps.take(10)) { mvp ->
             val context = LocalContext.current
-            val imageUrl = mvp.profilePath?.takeIf { it.isNotBlank() && it != "null" }?.let { "https://image.tmdb.org/t/p/w500$it" } 
-                ?: mvp.characterImageUrl?.takeIf { it.isNotBlank() && it != "null" }?.let { "https://image.tmdb.org/t/p/w500$it" }
+            val imageUrl = com.cinetrack.util.buildTmdbImageUrl(
+                    mvp.profilePath?.takeIf { it.isNotBlank() && it != "null" },
+                    com.cinetrack.util.ImageType.PROFILE,
+                    com.cinetrack.util.ImageQuality.MEDIUM
+                )
                 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
