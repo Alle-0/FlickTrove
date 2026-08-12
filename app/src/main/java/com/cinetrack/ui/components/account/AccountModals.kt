@@ -91,6 +91,8 @@ fun AccountModals(
         settingsViewModel.showEditProfileMenu.collect {
             if (currentUser != null && !currentUser.isAnonymous) {
                 showProfileMenu = true
+            } else {
+                showGuestAuthDialog = true
             }
         }
     }

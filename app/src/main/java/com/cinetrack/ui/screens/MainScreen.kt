@@ -341,9 +341,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     hasAppUpdateBadge = hasAppUpdateBadge,
                                     onEditBackdropClick = if (currentTab is AccountTab) { 
                                         {
-                                            if (currentUser != null && !currentUser.isAnonymous) {
-                                                settingsViewModel.triggerEditProfileMenu()
-                                            }
+                                            settingsViewModel.triggerEditProfileMenu()
                                         } 
                                     } else null,
                                     onSettingsClick = if (currentTab is AccountTab) {
