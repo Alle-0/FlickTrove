@@ -660,7 +660,7 @@ fun AccountModals(
                                 Button(
                                     onClick = {
                                         showGuestAuthDialog = false
-                                        val rootNav = navigator
+                                        val rootNav = navigator?.parent ?: navigator
                                         rootNav?.push(com.cinetrack.ui.screens.LoginScreen())
                                     },
                                     modifier = Modifier.weight(1f),
