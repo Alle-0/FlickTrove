@@ -57,7 +57,7 @@ import com.cinetrack.data.local.database.FlickTroveDatabase
 class FlickTroveWidget : GlanceAppWidget() {
     
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val prefRepo = com.cinetrack.data.repository.PreferenceRepository(context.dataStore)
+        val prefRepo = com.cinetrack.data.repository.PreferenceRepository(context.applicationContext.dataStore)
         val language = prefRepo.userPreferencesFlow.first().contentLanguage
         
         val localizedContext = if (language != "system") {

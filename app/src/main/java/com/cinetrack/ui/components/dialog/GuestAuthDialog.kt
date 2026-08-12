@@ -42,8 +42,13 @@ fun GuestAuthDialog(
                 modifier = Modifier
                     .widthIn(max = 400.dp)
                     .fillMaxWidth(0.85f)
-                    .hazeGlass(state = globalHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp), useOffscreenStrategy = true)
             ) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .hazeGlass(state = globalHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
+                )
+                
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(24.dp)
