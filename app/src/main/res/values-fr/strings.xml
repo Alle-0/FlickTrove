@@ -577,6 +577,10 @@
     <string name="widget_no_releases">Aucun titre à venir !</string>
     <string name="widget_no_img">Pas d\'img</string>
 
+    <!-- Comments Screen -->
+    <string name="comments_screen_title">Discussion</string>
+    <string name="comments_screen_title_with_media">Discussion : %1$s</string>
+
     <!-- Quick Actions Strings -->
     <string name="quick_action_title">Actions rapides</string>
     <string name="quick_action_rating">Note rapide</string>

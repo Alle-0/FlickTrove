@@ -175,7 +175,7 @@ class CommentsScreen(
             topBar = {
                 TopAppBar(
                     modifier = Modifier.hazeChild(state = hazeState, style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
-                    title = { Text(if (mediaTitle.isNotBlank()) "Discussione: $mediaTitle" else "Discussione", fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
+                    title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
                     navigationIcon = {
                         Box(
                             modifier = Modifier

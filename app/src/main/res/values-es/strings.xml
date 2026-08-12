@@ -577,6 +577,10 @@
     <string name="widget_no_releases">¡No hay próximos estrenos!</string>
     <string name="widget_no_img">Sin imagen</string>
 
+    <!-- Comments Screen -->
+    <string name="comments_screen_title">Discusión</string>
+    <string name="comments_screen_title_with_media">Discusión: %1$s</string>
+
     <!-- Quick Actions Strings -->
     <string name="quick_action_title">Acciones rápidas</string>
     <string name="quick_action_rating">Calificación rápida</string>
