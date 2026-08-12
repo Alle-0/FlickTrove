@@ -85,6 +85,8 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
 - 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Cloudflare R2.
+- 💬 **Community & Social**: Read and write reviews, upload images in comments, and interact with the FlickTrove community.
+- 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
 - 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
 
 ---
@@ -175,7 +177,6 @@ Once the app is launched:
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
-- [ ] **Shared Reviews:** Write custom reviews and rate movies, sharing your thoughts with the community.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
 - [ ] **AI:** ?

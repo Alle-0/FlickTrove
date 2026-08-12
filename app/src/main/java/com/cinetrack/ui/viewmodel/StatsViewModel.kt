@@ -61,6 +61,7 @@ data class CalculatedStats(
     val ratingDistribution: ImmutableList<Int>,
     val topCast: ImmutableList<PersonStat>,
     val topDirectors: ImmutableList<PersonStat>,
+    val countryCounts: ImmutableList<Pair<String, Int>>,
     val topGenre: String?
 )
 
@@ -235,7 +236,7 @@ class StatsViewModel @Inject constructor(
         }
 
         // Top Cast
-        data class CastAccum(val name: String, val profilePath: String?, var count: Int)
+        data class CastAccum(val name: String, var profilePath: String?, var count: Int)
         val castMap = mutableMapOf<Long, CastAccum>()
         watched.forEach { m ->
             m.topCastData?.forEach { person ->
@@ -245,34 +246,55 @@ class StatsViewModel @Inject constructor(
                         castMap[person.id] = CastAccum(person.name, person.profilePath, 1)
                     } else {
                         existing.count++
+                        if (existing.profilePath.isNullOrBlank() && !person.profilePath.isNullOrBlank()) {
+                            existing.profilePath = person.profilePath
+                        }
                     }
                 }
             }
         }
-                val topCast = castMap.entries
+        val topCast = castMap.entries
             .sortedByDescending { it.value.count }
             .take(50)
             .map { (id, accum) -> PersonStat(id, accum.name, accum.profilePath, accum.count) }
             .toImmutableList()
 
         // Top Directors
-        data class DirAccum(val name: String, val profilePath: String?, var count: Int)
-        val dirMap = mutableMapOf<Long, DirAccum>()
+        data class DirAccum(val name: String, var profilePath: String?, var count: Int)
+        val directorMap = mutableMapOf<Long, DirAccum>()
         watched.forEach { m ->
             val dirId = m.directorId ?: return@forEach
             val dirName = m.directorName ?: return@forEach
             if (dirName.isBlank()) return@forEach
-            val existing = dirMap[dirId]
+            val existing = directorMap[dirId]
             if (existing == null) {
-                dirMap[dirId] = DirAccum(dirName, m.directorProfilePath, 1)
+                directorMap[dirId] = DirAccum(dirName, m.directorProfilePath, 1)
             } else {
                 existing.count++
+                if (existing.profilePath.isNullOrBlank() && !m.directorProfilePath.isNullOrBlank()) {
+                    existing.profilePath = m.directorProfilePath
+                }
             }
         }
-        val topDirectors = dirMap.entries
-            .sortedByDescending { it.value.count }
-            .take(50)
-            .map { (id, accum) -> PersonStat(id, accum.name, accum.profilePath, accum.count) }
+        val topDirectors = directorMap.values.sortedByDescending { it.count }.take(10).map {
+            PersonStat(
+                id = directorMap.entries.find { entry -> entry.value == it }?.key ?: 0,
+                name = it.name,
+                profilePath = it.profilePath,
+                count = it.count
+            )
+        }.toImmutableList()
+        
+        // Countries
+        val countryCounts = mutableMapOf<String, Int>()
+        watched.forEach { m ->
+            m.originCountry?.forEach { country ->
+                countryCounts[country] = (countryCounts[country] ?: 0) + 1
+            }
+        }
+        val sortedCountryCounts = countryCounts.entries
+            .sortedByDescending { it.value }
+            .map { it.key to it.value }
             .toImmutableList()
 
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
@@ -301,6 +323,7 @@ class StatsViewModel @Inject constructor(
             ratingDistribution = ratings.toList().toImmutableList(),
             topCast = topCast,
             topDirectors = topDirectors,
+            countryCounts = sortedCountryCounts,
             topGenre = topGenre
         )
     }

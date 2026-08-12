@@ -69,7 +69,8 @@ object MovieMapper {
             directorData = directors,
             directorId = mainDirector?.id,
             directorName = mainDirector?.name,
-            directorProfilePath = mainDirector?.profilePath
+            directorProfilePath = mainDirector?.profilePath,
+            originCountry = response.originCountry ?: response.productionCountries?.mapNotNull { it.iso31661 }
         )
     }
 

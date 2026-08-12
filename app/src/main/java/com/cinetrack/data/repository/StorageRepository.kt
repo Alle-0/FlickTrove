@@ -34,7 +34,7 @@ class StorageRepository @Inject constructor(
             compressImage(imageUri, 512, 512)
         }
         
-        val requestBody = compressedBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+        val requestBody = compressedBytes.toRequestBody("image/webp".toMediaTypeOrNull())
         
         val response = api.uploadAvatar(
             authHeader = "Bearer $token",
@@ -55,12 +55,12 @@ class StorageRepository @Inject constructor(
         val tokenResult = user.getIdToken(false).await()
         val token = tokenResult.token ?: throw IllegalStateException("Could not get Firebase ID token.")
         
-        // Compress and resize the image for comments (larger than avatar, e.g. max 1080x1080)
+        // Compress and resize the image for comments (e.g. max 600x600)
         val compressedBytes = withContext(Dispatchers.IO) {
-            compressImage(imageUri, 1080, 1080)
+            compressImage(imageUri, 600, 600)
         }
         
-        val requestBody = compressedBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+        val requestBody = compressedBytes.toRequestBody("image/webp".toMediaTypeOrNull())
         
         val response = api.uploadCommentImage(
             authHeader = "Bearer $token",
@@ -123,9 +123,15 @@ class StorageRepository @Inject constructor(
             BitmapFactory.decodeStream(it, null, decodeOptions)
         } ?: throw IllegalStateException("Could not decode image")
 
-        // Compress to JPEG
+        // Compress to WebP (60% quality)
         val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+        val compressFormat = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            Bitmap.CompressFormat.WEBP_LOSSY
+        } else {
+            @Suppress("DEPRECATION")
+            Bitmap.CompressFormat.WEBP
+        }
+        bitmap.compress(compressFormat, 60, outputStream)
         return outputStream.toByteArray()
     }
 }

@@ -90,7 +90,7 @@
     <div class="legal-container">
       <div class="legal-header">
         <h1>Privacy Policy</h1>
-        <p class="updated-date">Last Updated: July 7, 2026</p>
+        <p class="updated-date">Last Updated: August 12, 2026</p>
       </div>
 
       <div class="legal-content">
@@ -102,8 +102,8 @@
           necessary to provide and improve our services:</p>
         <ul>
           <li><strong>Personal Library Data:</strong> Movie and TV show tracking lists, custom folders, watch time
-            statistics, and personal ratings. By default, this data is stored locally on your device using a Room
-            database.</li>
+            statistics, personal ratings, and comments. By default, this data is stored locally on your device using a Room
+            database, but can be synced to the cloud.</li>
           <li><strong>Anonymous Global Ratings:</strong> When you assign a rating to a movie or a TV show, your rating score is mathematically aggregated (averaged) with ratings from other users to generate a "Global FlickTrove Rating". This global rating is completely anonymous, public to all users, and cannot be traced back to your personal profile or identity.</li>
           <li><strong>Authentication & Cloud Sync:</strong> If you choose to enable cloud synchronization, we use
             Firebase Authentication and Firebase Cloud Storage to securely store and sync your library across your
@@ -111,6 +111,7 @@
           <li><strong>Anonymous Diagnostic & Crash Logs:</strong> We collect anonymized diagnostic data, stack traces,
             and crash breadcrumbs via Firebase Crashlytics and Google Analytics to identify software bugs and improve
             app stability without personally identifying you.</li>
+          <li><strong>Content Moderation & Reporting:</strong> Users can flag inappropriate comments or avatars via the in-app reporting feature. We collect the reported content ID, the reporter's user ID, and the reason for the report to review and moderate the community, ensuring a safe environment.</li>
         </ul>
 
         <h2>2. Third-Party Services & APIs</h2>
@@ -122,7 +123,7 @@
             handling.</li>
           <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, authentication
             services, and crash diagnostics (Crashlytics & Analytics).</li>
-          <li><strong>Supabase (Cloudflare R2):</strong> Used for serverless Edge Functions and storing user-uploaded custom avatars. Images are stored securely and served via public URLs linked to your profile. *See the Supabase and Cloudflare Privacy Policies for more details.*</li>
+          <li><strong>Supabase (Cloudflare R2):</strong> Used for serverless Edge Functions and storing user-uploaded custom avatars and images attached to comments. Images are stored securely and served via public URLs linked to your profile or comment. *See the Supabase and Cloudflare Privacy Policies for more details.*</li>
           <li><strong>News RSS Providers (Everyeye.it & Collider.com):</strong> When you open the News tab, the App
             connects directly to Everyeye.it (Italian) or Collider.com (English) to retrieve public RSS feeds. Your
             device's IP address is exposed to these publishers during this request.</li>

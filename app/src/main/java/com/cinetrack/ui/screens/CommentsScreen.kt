@@ -104,6 +104,8 @@ class CommentsScreen(
 
         val comments by viewModel.comments.collectAsStateWithLifecycle()
         val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+        val hasMoreComments by viewModel.hasMoreComments.collectAsStateWithLifecycle()
+        val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
         val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
         val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
         val accentColor = Color(accentColorValue.toULong())
@@ -623,6 +625,29 @@ class CommentsScreen(
                             }
                             } // Close Row
                             } // Close AnimatedVisibility
+                        }
+                        
+                        if (hasMoreComments) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isLoadingMore) {
+                                        androidx.compose.material3.CircularProgressIndicator(color = accentColor, modifier = Modifier.size(24.dp))
+                                    } else {
+                                        TextButton(onClick = { viewModel.loadMoreComments() }) {
+                                            Text(
+                                                text = stringResource(R.string.comment_load_more),
+                                                color = accentColor,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

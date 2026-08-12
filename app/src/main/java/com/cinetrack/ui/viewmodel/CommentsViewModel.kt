@@ -37,6 +37,14 @@ class CommentsViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private val _hasMoreComments = MutableStateFlow(false)
+    val hasMoreComments: StateFlow<Boolean> = _hasMoreComments.asStateFlow()
+
+    private var lastVisibleComment: com.google.firebase.firestore.DocumentSnapshot? = null
+
     val currentUserId: String? get() = auth.currentUser?.uid
 
     private var currentMediaId: String = ""
@@ -73,8 +81,35 @@ class CommentsViewModel @Inject constructor(
     private fun refreshComments() {
         viewModelScope.launch {
             _isLoading.value = true
-            _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
+            lastVisibleComment = null
+            val result = commentRepository.getCommentsForMedia(currentMediaId)
+            _comments.value = result.first
+            lastVisibleComment = result.second
+            _hasMoreComments.value = result.second != null
             _isLoading.value = false
+        }
+    }
+
+    fun loadMoreComments() {
+        if (_isLoadingMore.value || !_hasMoreComments.value) return
+        
+        viewModelScope.launch {
+            _isLoadingMore.value = true
+            val result = commentRepository.getCommentsForMedia(
+                mediaId = currentMediaId,
+                lastVisible = lastVisibleComment
+            )
+            
+            val newComments = result.first
+            if (newComments.isNotEmpty()) {
+                val currentList = _comments.value.toMutableList()
+                currentList.addAll(newComments)
+                _comments.value = currentList
+            }
+            
+            lastVisibleComment = result.second
+            _hasMoreComments.value = result.second != null
+            _isLoadingMore.value = false
         }
     }
 
@@ -177,7 +212,7 @@ class CommentsViewModel @Inject constructor(
                 depth = depth
             )
             if (success) {
-                _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
+                refreshComments()
             }
         }
     }
@@ -203,8 +238,8 @@ class CommentsViewModel @Inject constructor(
         viewModelScope.launch {
             val success = commentRepository.toggleLike(currentMediaId, commentId)
             if (!success) {
-                // In caso di fallimento, ripristina lo stato reale dal server
-                _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
+                // In caso di fallimento, ripristina lo stato reale dal server (aggiornando solo il commento specifico o rifacendo la query)
+                refreshComments()
             }
         }
     }
@@ -234,7 +269,7 @@ class CommentsViewModel @Inject constructor(
             val success = commentRepository.deleteComment(currentMediaId, commentId)
             if (!success) {
                 // Se fallisce, ripristiniamo la lista dal server
-                _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
+                refreshComments()
             }
         }
     }

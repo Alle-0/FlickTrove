@@ -1,6 +1,6 @@
 # Terms of Service (ToS)
 
-**Last Updated:** July 7, 2026
+**Last Updated:** August 12, 2026
 
 Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
@@ -20,7 +20,7 @@ To the maximum extent permitted by applicable law, the developer disclaims any l
 
 ### 4. User-Generated Content (UGC)
 
-By using the custom avatar upload feature, you agree not to upload images that are illegal, offensive, pornographic, violent, or that violate third-party copyrights. You are solely responsible for the content you upload. The developer reserves the right to remove any inappropriate avatar and, in severe cases, suspend the user's account without prior notice.
+FlickTrove allows users to post comments, write reviews, and upload custom avatars or images. By using these features, you agree not to upload or post content that is illegal, offensive, pornographic, violent, discriminatory, or that violates third-party copyrights. You are solely responsible for the content you create and upload. The developer reserves the right to remove any inappropriate content (including comments and avatars) and, in severe cases, suspend the user's account without prior notice. We encourage users to use the in-app "Reporting" (segnalazioni) feature to flag any content that violates these guidelines.
 
 ### 5. Suspension of Account and Service
 

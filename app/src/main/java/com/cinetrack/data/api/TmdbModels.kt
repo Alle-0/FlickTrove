@@ -178,6 +178,7 @@ data class MovieDetailResponse(
     @SerialName("release_dates") val releaseDates: ReleaseDatesResponse? = null,
     @SerialName("content_ratings") val contentRatings: ContentRatingsResponse? = null,
     @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,
+    @SerialName("origin_country") val originCountry: List<String>? = null,
     val keywords: KeywordsResponse? = null,
     val images: ImagesResponse? = null
 )

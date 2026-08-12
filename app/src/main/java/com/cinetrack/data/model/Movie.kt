@@ -277,6 +277,11 @@ data class Movie(
     @get:PropertyName("accent_color_static")
     @set:PropertyName("accent_color_static")
     @ColumnInfo(name = "accent_color_static") var accentColorStatic: String? = null,
+    
+    @SerialName("origin_country")
+    @get:PropertyName("origin_country")
+    @set:PropertyName("origin_country")
+    @ColumnInfo(name = "origin_country") var originCountry: List<String>? = null,
 
     // System Fields
     @SerialName("last_sync_date")
@@ -633,6 +638,14 @@ data class Movie(
         get() = genres
         set(value) {
             genres = value?.mapNotNull { parseGenre(it) }
+        }
+
+    @get:PropertyName("origin_country")
+    @set:PropertyName("origin_country")
+    var originCountryProxy: List<Any?>?
+        get() = originCountry
+        set(value) {
+            originCountry = value?.mapNotNull { it as? String }
         }
 
     @get:PropertyName("director_data")

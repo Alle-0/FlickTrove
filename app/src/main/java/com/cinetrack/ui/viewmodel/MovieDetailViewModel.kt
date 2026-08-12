@@ -98,7 +98,7 @@ class MovieDetailViewModel @Inject constructor(
             
             // Fetch comments
             viewModelScope.launch {
-                val comments = commentRepository.getCommentsForMedia(movieId.toString())
+                val comments = commentRepository.getCommentsForMedia(movieId.toString()).first
                 _appComments.value = comments
             }
 
@@ -333,7 +333,7 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { commentRepository.getCommentsForMedia(tmdbId.toString()) }
+                val commentsDeferred = async { commentRepository.getCommentsForMedia(tmdbId.toString()).first }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
@@ -406,7 +406,7 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val success = commentRepository.toggleLike(movieId.toString(), commentId)
             if (!success) {
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
             }
         }
     }
@@ -822,14 +822,14 @@ class MovieDetailViewModel @Inject constructor(
             )
             if (success) {
                 // Refresh comments
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
             }
         }
     }
 
     fun refreshComments() {
         viewModelScope.launch {
-            _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+            _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
         }
     }
 
@@ -838,7 +838,7 @@ class MovieDetailViewModel @Inject constructor(
             val success = commentRepository.toggleLike(movieId.toString(), commentId)
             if (success) {
                 // Refresh comments
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
             }
         }
     }

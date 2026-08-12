@@ -4,6 +4,7 @@ import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.CommentReport
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -22,20 +23,32 @@ class CommentRepository @Inject constructor(
         
     private val reportsCollection = firestore.collection("comment_reports")
 
-    suspend fun getCommentsForMedia(mediaId: String, limit: Long = 50): List<AppComment> {
+    suspend fun getCommentsForMedia(
+        mediaId: String, 
+        limit: Long = 10,
+        lastVisible: DocumentSnapshot? = null
+    ): Pair<List<AppComment>, DocumentSnapshot?> {
         return try {
-            val snapshot = getMediaCommentsCollection(mediaId)
-                .get()
-                .await()
+            var query = getMediaCommentsCollection(mediaId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(limit)
+
+            if (lastVisible != null) {
+                query = query.startAfter(lastVisible)
+            }
+
+            val snapshot = query.get().await()
             
-            snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment -> 
+            val comments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment -> 
                 appComment.copy(id = snapshot.documents[index].id)
             }
-            .sortedByDescending { it.createdAt }
-            .take(limit.toInt())
+            
+            val newLastVisible = if (snapshot.size() > 0) snapshot.documents[snapshot.size() - 1] else null
+            
+            Pair(comments, newLastVisible)
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList()
+            Pair(emptyList(), null)
         }
     }
 

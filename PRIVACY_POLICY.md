@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** July 7, 2026
+**Last Updated:** August 12, 2026
 
 This Privacy Policy describes how the "FlickTrove" application (hereinafter referred to as the "App") collects, uses, protects, and retains user information, in full compliance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679) and current privacy laws regarding the protection of personal data.
 
@@ -13,9 +13,10 @@ For any questions, concerns, or requests regarding privacy, the exercise of GDPR
 
 The App is designed according to the principles of minimization: we collect only the absolute minimum amount of information necessary to ensure the security of your account and provide you with the promised features.
 
-* **Profile and Service Data:** Your email address (used exclusively for login purposes) and your in-app data (Preferences, Ratings, Custom Lists, Folders, and Notes) are securely saved and synchronized on our cloud servers to allow you to access them on any device.
+* **Profile and Service Data:** Your email address (used exclusively for login purposes) and your in-app data (Preferences, Ratings, Custom Lists, Folders, Notes, and Comments) are securely saved and synchronized on our cloud servers to allow you to access them on any device.
 * **Anonymous Global Ratings:** When you assign a rating to a movie or a TV show, your rating score is mathematically aggregated (averaged) with ratings from other users to generate a "Global FlickTrove Rating". This global rating is completely anonymous, public to all users, and cannot be traced back to your personal profile or identity.
 * **Non-Sensitive Technical Data:** We collect anonymized technical data (such as device model, OS version, and stack traces) and diagnostic breadcrumbs via Firebase Crashlytics and Google Analytics. Such data is used exclusively for identifying bugs, resolving crashes, and improving app stability without personally identifying you.
+* **Content Moderation and Reporting:** Users can flag inappropriate comments or avatars via the in-app reporting feature. We collect the reported content ID, the reporter's user ID, and the reason for the report to review and moderate the community, ensuring a safe environment.
 * **No Sensitive Data:** The application **DOES NOT** collect in any way or under any circumstances sensitive personal data (e.g., political orientation, health data, ethnicity, biometric data, sexual preferences). We do not use your data for marketing or invasive advertising tracking purposes.
 
 ### 3. Third-Party Tools and Services
@@ -23,7 +24,7 @@ The App is designed according to the principles of minimization: we collect only
 FlickTrove uses essential third-party infrastructures to function. These providers may collect and process data according to their own strict policies, in compliance with the European Data Privacy Framework:
 
 * **Firebase (Google):** Used for secure authentication (Firebase Auth), real-time cloud saving (Firestore), and crash diagnostics/stability monitoring (Crashlytics and Analytics). *See the Google/Firebase Privacy Policy for more details.*
-* **Supabase (Cloudflare R2):** Used for serverless Edge Functions and storing user-uploaded custom avatars. Images are stored securely and served via public URLs linked to your profile. *See the Supabase and Cloudflare Privacy Policies for more details.*
+* **Supabase (Cloudflare R2):** Used for serverless Edge Functions and storing user-uploaded custom avatars and images attached to comments. Images are stored securely and served via public URLs linked to your profile or comment. *See the Supabase and Cloudflare Privacy Policies for more details.*
 * **TMDB, TheTVDB, OMDB & Trakt APIs:** The App communicates with The Movie Database (TMDB), TheTVDB, Open Movie Database (OMDB), and Trakt.tv servers to retrieve plots, posters, ratings, and information about movies, actors, and TV shows based on your searches and library synchronization.
 * **News Feeds (Everyeye.it & Collider.com):** When you open the "Latest News" tab, the App directly fetches RSS feeds from external publishers (Everyeye.it for Italian or Collider.com for English). Please note that connecting to these external RSS feeds exposes your device's IP address to their respective servers according to their privacy policies.
 * **Google ML Kit (On-Device Translation):** To provide translations of movie synopses and descriptions without compromising privacy, the App uses Google ML Kit. All translation processing is performed 100% locally on your device (on-device AI) without sending your text or reading habits to external cloud translation services.

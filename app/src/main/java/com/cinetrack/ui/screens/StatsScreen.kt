@@ -504,6 +504,17 @@ fun StatsScreenContent(
                                     Spacer(Modifier.height(36.dp))
                                 }
 
+                                // ── Nazioni più Viste ─────────────────────────────────────
+                                if (stats.countryCounts.isNotEmpty()) {
+                                    StatsSectionHeader(
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_world),
+                                        title = stringResource(R.string.stats_countries),
+                                        count = null
+                                    )
+                                    CountryDistributionSection(countryCounts = stats.countryCounts)
+                                    Spacer(Modifier.height(36.dp))
+                                }
+
                                 // ── Le Tue Decadi d'Oro ───────────────────────────────────
                                 if (stats.decadeCounts.isNotEmpty()) {
                                     StatsSectionHeader(
