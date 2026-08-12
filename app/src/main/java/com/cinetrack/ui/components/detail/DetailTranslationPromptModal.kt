@@ -22,7 +22,7 @@ fun <T> DetailTranslationPromptModal(
     showTranslationPrompt: Pair<T, String>?,
     onDismiss: () -> Unit,
     onTranslate: (commentId: T, text: String, requireWifi: Boolean) -> Unit,
-    hazeState: HazeState,
+    hazeState: HazeState? = null,
     accentColor: Color
 ) {
     var rememberedPromptData by remember { mutableStateOf<Pair<T, String>?>(null) }

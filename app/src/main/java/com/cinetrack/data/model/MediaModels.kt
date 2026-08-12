@@ -78,6 +78,7 @@ data class DiscoveryFilters(
 data class UserPreferences(
     val homeSort: SortConfig = SortConfig(),
     val vistiSort: SortConfig = SortConfig(sortType = "watched_at"),
+    val foldersSort: SortConfig = SortConfig(sortType = "date", sortDirection = "desc"),
     val discoveryFilters: DiscoveryFilters = DiscoveryFilters(),
     val gridColumns: Int = 3,
     val showLayoutToggle: Boolean = false,

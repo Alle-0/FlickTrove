@@ -184,6 +184,29 @@ private fun CommentCard(
         )
     }
     var translationState by remember { mutableStateOf<com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState>(com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle) }
+    var showPrompt by remember { mutableStateOf<Pair<String, String>?>(null) } // <commentId, cleanText>
+
+    fun confirmTranslation(requireWifi: Boolean, cleanText: String, effectiveSourceLang: String, targetMlKit: String) {
+        coroutineScope.launch {
+            val translationManager = entryPoint.translationManager()
+            val actionFeedbackManager = entryPoint.actionFeedbackManager()
+            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading
+            val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi)
+            if (!downloaded) {
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
+                return@launch
+            }
+            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
+            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
+            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
+            } else {
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
+            }
+        }
+    }
 
     fun handleTranslate() {
         if (translationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated) {
@@ -220,25 +243,37 @@ private fun CommentCard(
 
             val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
             if (!modelReady) {
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading
-                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit)
-                if (!downloaded) {
-                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
-                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
-                    return@launch
-                }
+                showPrompt = Pair(comment.id, cleanText)
+                return@launch
             }
 
-            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
-            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
-            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
-            } else {
-                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
-            }
+            confirmTranslation(false, cleanText, effectiveSourceLang, targetMlKit)
         }
     }
+
+    DetailTranslationPromptModal(
+        showTranslationPrompt = showPrompt,
+        onDismiss = { showPrompt = null },
+        onTranslate = { _, text, requireWifi ->
+            showPrompt = null
+            coroutineScope.launch {
+                val translationManager = entryPoint.translationManager()
+                val preferenceRepository = entryPoint.preferenceRepository()
+                val prefs = preferenceRepository.userPreferencesFlow.first()
+                val systemLang = java.util.Locale.getDefault().language
+                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
+                val targetMlKit = translationManager.getCurrentTargetLanguage()
+                val detectedLang = translationManager.identifyLanguage(text)
+                val effectiveSourceLang = detectedLang ?: if (targetMlKit != com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH) {
+                    com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH
+                } else {
+                    com.google.mlkit.nl.translate.TranslateLanguage.ITALIAN
+                }
+                confirmTranslation(requireWifi, text, effectiveSourceLang, targetMlKit)
+            }
+        },
+        accentColor = accentColor
+    )
 
     Box(
         modifier = Modifier
@@ -399,11 +434,23 @@ private fun CommentCard(
                     }
 
                     if (mediaUrls.isNotEmpty()) {
+                        val imageLoader = remember {
+                            coil.ImageLoader.Builder(context)
+                                .components {
+                                    if (android.os.Build.VERSION.SDK_INT >= 28) {
+                                        add(coil.decode.ImageDecoderDecoder.Factory())
+                                    } else {
+                                        add(coil.decode.GifDecoder.Factory())
+                                    }
+                                }
+                                .build()
+                        }
                         mediaUrls.forEach { mediaUrl ->
                             coil.compose.AsyncImage(
                                 model = coil.request.ImageRequest.Builder(context)
                                     .data(mediaUrl)
                                     .build(),
+                                imageLoader = imageLoader,
                                 contentDescription = "Attachment",
                                 modifier = Modifier
                                     .padding(top = 8.dp)
@@ -419,11 +466,13 @@ private fun CommentCard(
                 }
 
                 if (isBlurred) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(Color(0xFF141414).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
-                    )
+                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(Color(0xFF141414).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
+                        )
+                    }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier

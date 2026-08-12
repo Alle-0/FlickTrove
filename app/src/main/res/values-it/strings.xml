@@ -483,6 +483,8 @@
 
     <!-- Auth Strings -->
     <string name="auth_subtitle">IL TUO ARCHIVIO CINEMATOGRAFICO</string>
+    <string name="auth_disclaimer_title">APP DI TRACKING &amp; ARCHIVIO</string>
+    <string name="auth_disclaimer_desc">FlickTrove non è un\'app di streaming o riproduzione video, ma una potente app di tracking per gestire e scoprire film e serie TV.</string>
     <string name="auth_email">Email</string>
     <string name="auth_error_email_invalid">Email non valida</string>
     <string name="auth_password">Password</string>

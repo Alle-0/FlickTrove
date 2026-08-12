@@ -75,6 +75,8 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 
+enum class FolderSortOption { DATE, NAME, ITEMS }
+
 object FoldersTab : Tab {
     override val options: TabOptions
         @Composable

@@ -26,13 +26,29 @@ class FoldersViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
-    val folders: StateFlow<ImmutableList<FolderEntity>> = repository.getFoldersFlow()
-        .map { it.sortedByDescending { folder -> folder.createdAt }.toImmutableList() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = persistentListOf()
-        )
+    private val _sortOption = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.FolderSortOption.DATE)
+    val sortOption: StateFlow<com.cinetrack.ui.screens.FolderSortOption> = _sortOption
+
+    private val _sortOrder = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.CommentSortOrder.DESC)
+    val sortOrder: StateFlow<com.cinetrack.ui.screens.CommentSortOrder> = _sortOrder
+
+    val folders: StateFlow<ImmutableList<FolderEntity>> = kotlinx.coroutines.flow.combine(repository.getFoldersFlow(), _sortOption, _sortOrder) { list, option, order ->
+        val sorted = when (option) {
+            com.cinetrack.ui.screens.FolderSortOption.DATE -> list.sortedBy { it.createdAt }
+            com.cinetrack.ui.screens.FolderSortOption.NAME -> list.sortedBy { it.name.lowercase() }
+            com.cinetrack.ui.screens.FolderSortOption.ITEMS -> list.sortedBy { it.itemIds.size }
+        }
+        if (order == com.cinetrack.ui.screens.CommentSortOrder.DESC) sorted.reversed().toImmutableList() else sorted.toImmutableList()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = persistentListOf()
+    )
+
+    fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.ui.screens.CommentSortOrder) {
+        _sortOption.value = option
+        _sortOrder.value = order
+    }
 
     val allMovies = repository.getLocalMoviesFlow()
         .map { it.toImmutableList() }

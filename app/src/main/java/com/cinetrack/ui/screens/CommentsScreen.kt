@@ -449,7 +449,9 @@ class CommentsScreen(
                                     
                                     if (comment.isSpoiler && !isSpoilerRevealed) {
                                         // Aggiungiamo un overlay scuro per i dispositivi che non supportano Modifier.blur
-                                        Box(modifier = Modifier.matchParentSize().background(Color(0xFF141414).copy(alpha = 0.9f), RoundedCornerShape(8.dp)))
+                                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                                            Box(modifier = Modifier.matchParentSize().background(Color(0xFF141414).copy(alpha = 0.9f), RoundedCornerShape(8.dp)))
+                                        }
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier

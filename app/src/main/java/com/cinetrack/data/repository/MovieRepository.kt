@@ -892,6 +892,7 @@ class MovieRepository @Inject constructor(
                 imageQuality = remotePrefs["imageQuality"] as? String ?: currentPrefs.imageQuality,
                 homeSort = parseSortConfig(remotePrefs["homeSort"], currentPrefs.homeSort),
                 vistiSort = parseSortConfig(remotePrefs["vistiSort"], currentPrefs.vistiSort),
+                foldersSort = parseSortConfig(remotePrefs["foldersSort"], currentPrefs.foldersSort),
                 discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
                 lastSyncTimestamp = System.currentTimeMillis()
             )

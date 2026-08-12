@@ -132,6 +132,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         var folderEditMode by remember { mutableStateOf(FolderEditMode.NAME) }
         var showFolderDeleteConfirm by remember { mutableStateOf(false) }
         
+        var showFoldersSortMenu by remember { mutableStateOf(false) }
+        var foldersSortMenuOffset by remember { mutableStateOf<Offset?>(null) }
+        
         var showExitConfirmation by remember { mutableStateOf(false) }
 
         var updatesOverlayOffsetX by rememberSaveable { mutableStateOf<Float?>(null) }
@@ -302,6 +305,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 hiltViewModel(activity)
                             } else null
 
+                            val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (currentTab is FoldersTab && activity != null) {
+                                hiltViewModel(activity)
+                            } else null
+
                             Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(50f)) {
                                 var discoverHasActiveFilters = false
                                 var discoverGridColumns: Int? = null
@@ -333,7 +340,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                    onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else null,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else if (currentTab is FoldersTab) { { offset -> showFoldersSortMenu = true; foldersSortMenuOffset = offset } } else null,
                                     hasActiveFilters = discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
@@ -410,6 +417,32 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 onDelete = {
                                     showFolderOptions = false
                                     showFolderDeleteConfirm = true
+                                }
+                            )
+                        }
+
+                        val foldersViewModelForSort: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (currentTab is FoldersTab && activity != null) {
+                            hiltViewModel(activity)
+                        } else null
+
+                        if (showFoldersSortMenu && foldersViewModelForSort != null && foldersSortMenuOffset != null) {
+                            val currentSortOption by foldersViewModelForSort.sortOption.collectAsStateWithLifecycle()
+                            val currentSortOrder by foldersViewModelForSort.sortOrder.collectAsStateWithLifecycle()
+
+                            com.cinetrack.ui.components.main.MainFoldersSortMenu(
+                                visible = showFoldersSortMenu,
+                                offset = foldersSortMenuOffset!!,
+                                hazeState = contentHazeState,
+                                currentSortOption = currentSortOption,
+                                currentSortOrder = currentSortOrder,
+                                onDismiss = { showFoldersSortMenu = false },
+                                onSortOptionSelect = { newOption ->
+                                    foldersViewModelForSort.updateSort(newOption, currentSortOrder)
+                                    showFoldersSortMenu = false
+                                },
+                                onSortOrderToggle = {
+                                    val newOrder = if (currentSortOrder == com.cinetrack.ui.screens.CommentSortOrder.DESC) com.cinetrack.ui.screens.CommentSortOrder.ASC else com.cinetrack.ui.screens.CommentSortOrder.DESC
+                                    foldersViewModelForSort.updateSort(currentSortOption, newOrder)
                                 }
                             )
                         }

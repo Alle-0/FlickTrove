@@ -23,6 +23,7 @@ class PreferenceRepository @Inject constructor(
     private object PreferencesKeys {
         val HOME_SORT = stringPreferencesKey("home_sort")
         val VISTI_SORT = stringPreferencesKey("visti_sort")
+        val FOLDERS_SORT = stringPreferencesKey("folders_sort")
         val DISCOVERY_FILTERS = stringPreferencesKey("discovery_filters")
         val GRID_COLUMNS = intPreferencesKey("grid_columns")
         val SHOW_LAYOUT_TOGGLE = booleanPreferencesKey("show_layout_toggle")
@@ -61,11 +62,13 @@ class PreferenceRepository @Inject constructor(
         .map { preferences ->
             val homeSortJson = preferences[PreferencesKeys.HOME_SORT]
             val vistiSortJson = preferences[PreferencesKeys.VISTI_SORT]
+            val foldersSortJson = preferences[PreferencesKeys.FOLDERS_SORT]
             val discoveryFiltersJson = preferences[PreferencesKeys.DISCOVERY_FILTERS]
 
             UserPreferences(
                 homeSort = homeSortJson?.let { json.decodeFromString<SortConfig>(it) } ?: SortConfig(),
                 vistiSort = vistiSortJson?.let { json.decodeFromString<SortConfig>(it) } ?: SortConfig(sortType = "watched_at"),
+                foldersSort = foldersSortJson?.let { json.decodeFromString<SortConfig>(it) } ?: SortConfig(sortType = "date", sortDirection = "desc"),
                 discoveryFilters = discoveryFiltersJson?.let { json.decodeFromString<DiscoveryFilters>(it) } ?: DiscoveryFilters(),
                 gridColumns = preferences[PreferencesKeys.GRID_COLUMNS] ?: 3,
                 showLayoutToggle = preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] ?: false,
@@ -103,6 +106,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateVistiSort(config: SortConfig) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.VISTI_SORT] = json.encodeToString(config)
+        }
+    }
+
+    suspend fun updateFoldersSort(config: SortConfig) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.FOLDERS_SORT] = json.encodeToString(config)
         }
     }
 
@@ -200,6 +209,7 @@ class PreferenceRepository @Inject constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_SORT] = json.encodeToString(prefs.homeSort)
             preferences[PreferencesKeys.VISTI_SORT] = json.encodeToString(prefs.vistiSort)
+            preferences[PreferencesKeys.FOLDERS_SORT] = json.encodeToString(prefs.foldersSort)
             preferences[PreferencesKeys.DISCOVERY_FILTERS] = json.encodeToString(prefs.discoveryFilters)
             preferences[PreferencesKeys.GRID_COLUMNS] = prefs.gridColumns
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = prefs.showLayoutToggle

@@ -158,7 +158,7 @@ fun AuthScreen(
             ) {
                 // ── Logo & Title ──────────────────────────────────────────────
                 Column(
-                    modifier = Modifier.padding(bottom = 44.dp),
+                    modifier = Modifier.padding(bottom = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -176,6 +176,53 @@ fun AuthScreen(
                         letterSpacing = 4.sp,
                         modifier = Modifier.padding(top = 2.dp)
                     )
+                }
+
+                // ── Streaming Disclaimer Banner ────────────────────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, PrimaryTeal.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(PrimaryTeal.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_punto_cerchiato),
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.auth_disclaimer_title),
+                                color = PrimaryTeal,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.auth_disclaimer_desc),
+                                color = Color.White.copy(alpha = 0.82f),
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
                 }
 
                 // ── UI States ──────────────────────────────────────────────
