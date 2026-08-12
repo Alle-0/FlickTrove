@@ -23,6 +23,9 @@ class CommentsViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
+    val isUserAnonymous: Boolean
+        get() = FirebaseAuth.getInstance().currentUser?.isAnonymous == true
+        
     private val _comments = MutableStateFlow<List<AppComment>>(emptyList())
     val comments: StateFlow<List<AppComment>> = _comments.asStateFlow()
     

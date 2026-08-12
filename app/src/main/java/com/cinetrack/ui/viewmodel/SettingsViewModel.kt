@@ -55,6 +55,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _showEditProfileMenu = MutableSharedFlow<Unit>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
+    
+    private val _showGuestAuthDialog = MutableSharedFlow<Unit>()
+    val showGuestAuthDialog = _showGuestAuthDialog.asSharedFlow()
 
     private val _showDashboardSettingsMenu = MutableSharedFlow<Unit>()
     val showDashboardSettingsMenu = _showDashboardSettingsMenu.asSharedFlow()
@@ -62,6 +65,12 @@ class SettingsViewModel @Inject constructor(
     fun triggerEditProfileMenu() {
         viewModelScope.launch {
             _showEditProfileMenu.emit(Unit)
+        }
+    }
+    
+    fun triggerGuestAuthDialog() {
+        viewModelScope.launch {
+            _showGuestAuthDialog.emit(Unit)
         }
     }
     

@@ -84,6 +84,7 @@ class CommentsScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = getViewModel<CommentsViewModel>()
+        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         
         LaunchedEffect(mediaId, mediaType) {
             viewModel.init(mediaId, mediaType)
@@ -472,11 +473,17 @@ class CommentsScreen(
                                         text = stringResource(R.string.comment_reply_btn),
                                         color = accentColor,
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        modifier = Modifier.bounceClick { replyingTo = comment }
+                                        modifier = Modifier.bounceClick {
+                                            if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                            else replyingTo = comment 
+                                        }
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Row(
-                                        modifier = Modifier.bounceClick { viewModel.toggleLikeComment(comment.id) },
+                                        modifier = Modifier.bounceClick {
+                                            if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                            else viewModel.toggleLikeComment(comment.id) 
+                                        },
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         LiquidStarIcon(
@@ -498,7 +505,10 @@ class CommentsScreen(
                                         tint = Color.Red,
                                         modifier = Modifier
                                             .size(14.dp)
-                                            .bounceClick { commentToReport = comment }
+                                            .bounceClick { 
+                                                if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                                else commentToReport = comment 
+                                            }
                                     )
                                     
                                     Spacer(modifier = Modifier.weight(1f))
@@ -644,6 +654,7 @@ class CommentsScreen(
                             val maxChar = 4000
                             OutlinedTextField(
                                 value = inputText,
+                                enabled = !viewModel.isUserAnonymous,
                                 onValueChange = { 
                                     if (it.text.length <= maxChar) {
                                         inputText = it 
@@ -668,7 +679,9 @@ class CommentsScreen(
                             Box(
                                 modifier = Modifier
                                     .bounceClick {
-                                        if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
+                                        if (viewModel.isUserAnonymous) {
+                                            settingsViewModel.triggerGuestAuthDialog()
+                                        } else if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
                                             val pId = replyingTo?.id
                                             val pUserId = replyingTo?.userId
                                             val newDepth = (replyingTo?.depth ?: -1) + 1

@@ -98,6 +98,12 @@ fun AccountModals(
     }
     
     LaunchedEffect(Unit) {
+        settingsViewModel.showGuestAuthDialog.collect {
+            showGuestAuthDialog = true
+        }
+    }
+    
+    LaunchedEffect(Unit) {
         settingsViewModel.showDashboardSettingsMenu.collect {
             showDashboardSettings = true
         }

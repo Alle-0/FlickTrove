@@ -72,6 +72,8 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
 import com.cinetrack.ui.screens.CommentsScreen
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -115,6 +117,7 @@ data class MovieDetailScreen(
     @Composable
     override fun Content() {
         val viewModel = getViewModel<MovieDetailViewModel>()
+        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         val navigator = LocalNavigator.currentOrThrow
         val detailStackDepth = androidx.compose.runtime.remember(navigator.items) {
             navigator.items.count { it is MovieDetailScreen || it is com.cinetrack.ui.screens.PersonDetailScreen }
@@ -129,6 +132,7 @@ data class MovieDetailScreen(
 
         MovieDetailScreenContent(
             viewModel = viewModel,
+            settingsViewModel = settingsViewModel,
             paddingValues = PaddingValues(0.dp),
             onBackClick = { navigator.pop() },
             onMovieClick = { movie ->
@@ -155,6 +159,7 @@ data class MovieDetailScreen(
 @Composable
 fun MovieDetailScreenContent(
     viewModel: MovieDetailViewModel,
+    settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -494,8 +499,12 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         isOffline = isOffline,
                                         onOpenThread = { focusInput ->
-                                            val mediaTitle = state.details.title ?: state.details.name ?: ""
-                                            navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle, focusInput)) 
+                                            if (com.google.firebase.ktx.Firebase.auth.currentUser?.isAnonymous == true) {
+                                                settingsViewModel.triggerGuestAuthDialog()
+                                            } else {
+                                                val mediaTitle = state.details.title ?: state.details.name ?: ""
+                                                navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle, focusInput))
+                                            } 
                                         }
                                     )
 
