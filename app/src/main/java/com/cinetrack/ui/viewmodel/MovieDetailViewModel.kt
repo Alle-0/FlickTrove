@@ -381,6 +381,33 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
             is DetailEvent.SaveCheckIn -> saveCheckIn(event.vibes, event.mvpActor, event.characterImageUrl)
+            is DetailEvent.ToggleCommentLike -> toggleCommentLike(event.commentId)
+        }
+    }
+
+    private fun toggleCommentLike(commentId: String) {
+        val uId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return
+        
+        // Ottimistico
+        val currentComments = _appComments.value.toMutableList()
+        val index = currentComments.indexOfFirst { it.id == commentId }
+        if (index != -1) {
+            val comment = currentComments[index]
+            val isLiked = comment.likedBy.contains(uId)
+            
+            val newLikedBy = if (isLiked) comment.likedBy - uId else comment.likedBy + uId
+            val newLikesCount = if (isLiked) maxOf(0, comment.likesCount - 1) else comment.likesCount + 1
+            
+            currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
+            _appComments.value = currentComments
+        }
+
+        // Background call
+        viewModelScope.launch {
+            val success = commentRepository.toggleLike(movieId.toString(), commentId)
+            if (!success) {
+                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString())
+            }
         }
     }
 

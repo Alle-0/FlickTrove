@@ -945,6 +945,13 @@ class MovieRepository @Inject constructor(
                         "selectedProviders" to prefs.vistiSort.selectedProviders,
                         "selectedDecades" to prefs.vistiSort.selectedDecades
                     ),
+                    "foldersSort" to mapOf(
+                        "sortType" to prefs.foldersSort.sortType,
+                        "sortDirection" to prefs.foldersSort.sortDirection,
+                        "selectedGenres" to prefs.foldersSort.selectedGenres,
+                        "selectedProviders" to prefs.foldersSort.selectedProviders,
+                        "selectedDecades" to prefs.foldersSort.selectedDecades
+                    ),
                     "discoveryFilters" to mapOf(
                         "selectedGenres" to prefs.discoveryFilters.selectedGenres,
                         "selectedProviders" to prefs.discoveryFilters.selectedProviders,

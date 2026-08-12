@@ -511,12 +511,19 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         isOffline = isOffline,
                                         onOpenThread = { focusInput ->
-                                            if (focusInput && com.google.firebase.ktx.Firebase.auth.currentUser?.isAnonymous == true) {
+                                            if (focusInput && com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true) {
                                                 settingsViewModel.triggerGuestAuthDialog()
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
                                                 navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle, focusInput))
                                             } 
+                                        },
+                                        onLikeClick = { commentId ->
+                                            if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true) {
+                                                settingsViewModel.triggerGuestAuthDialog()
+                                            } else {
+                                                viewModel.onEvent(DetailEvent.ToggleCommentLike(commentId))
+                                            }
                                         }
                                     )
 

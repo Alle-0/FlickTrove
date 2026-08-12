@@ -201,8 +201,7 @@ fun FoldersScreenContent(
                         NewFolderCard(onClick = { isCreateDialogOpen = true })
                     }
     
-                    val sortedFolders = folders.sortedBy { it.name.lowercase() }
-                    items(sortedFolders, key = { it.id }, contentType = { "folder" }) { folder ->
+                    items(folders, key = { it.id }, contentType = { "folder" }) { folder ->
                         Box(modifier = Modifier.animateItem()) {
                             FolderCard(
                                 folder = folder,

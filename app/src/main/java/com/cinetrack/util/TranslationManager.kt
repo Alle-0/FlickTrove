@@ -50,7 +50,13 @@ class TranslationManager @Inject constructor() {
         val mlkitLang = mapToMlKitLanguage(resolved)
         if (mlkitLang != currentTargetLanguage) {
             currentTargetLanguage = mlkitLang
-            legacyTranslator = buildTranslator(TranslateLanguage.ENGLISH, mlkitLang)
+            try {
+                if (mlkitLang != TranslateLanguage.ENGLISH) {
+                    legacyTranslator = buildTranslator(TranslateLanguage.ENGLISH, mlkitLang)
+                }
+            } catch (e: Exception) {
+                // Ignore initialization error
+            }
         }
     }
 

@@ -429,20 +429,15 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             val currentSortOption by foldersViewModelForSort.sortOption.collectAsStateWithLifecycle()
                             val currentSortOrder by foldersViewModelForSort.sortOrder.collectAsStateWithLifecycle()
 
-                            com.cinetrack.ui.components.main.MainFoldersSortMenu(
-                                visible = showFoldersSortMenu,
-                                offset = foldersSortMenuOffset!!,
+                            com.cinetrack.ui.components.dialog.FoldersFilterModal(
+                                isVisible = showFoldersSortMenu,
                                 hazeState = contentHazeState,
                                 currentSortOption = currentSortOption,
                                 currentSortOrder = currentSortOrder,
-                                onDismiss = { showFoldersSortMenu = false },
-                                onSortOptionSelect = { newOption ->
-                                    foldersViewModelForSort.updateSort(newOption, currentSortOrder)
+                                onDismissRequest = { showFoldersSortMenu = false },
+                                onSortChange = { newOption, newOrder ->
+                                    foldersViewModelForSort.updateSort(newOption, newOrder)
                                     showFoldersSortMenu = false
-                                },
-                                onSortOrderToggle = {
-                                    val newOrder = if (currentSortOrder == com.cinetrack.ui.screens.CommentSortOrder.DESC) com.cinetrack.ui.screens.CommentSortOrder.ASC else com.cinetrack.ui.screens.CommentSortOrder.DESC
-                                    foldersViewModelForSort.updateSort(currentSortOption, newOrder)
                                 }
                             )
                         }

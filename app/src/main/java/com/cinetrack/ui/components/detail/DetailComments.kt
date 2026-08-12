@@ -64,6 +64,7 @@ fun DetailComments(
     accentColor: Color,
     isOffline: Boolean = false,
     onOpenThread: (Boolean) -> Unit,
+    onLikeClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -141,7 +142,8 @@ fun DetailComments(
             items(sortedComments, key = { it.id }, contentType = { "comment" }) { comment ->
                 CommentCard(
                     comment = comment,
-                    accentColor = accentColor
+                    accentColor = accentColor,
+                    onLikeClick = onLikeClick
                 )
             }
             item {
@@ -167,7 +169,8 @@ fun DetailComments(
 @Composable
 private fun CommentCard(
     comment: AppComment,
-    accentColor: Color
+    accentColor: Color,
+    onLikeClick: (String) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var isSpoilerRevealed by remember { mutableStateOf(false) }
@@ -305,14 +308,16 @@ private fun CommentCard(
                     modifier = Modifier.weight(1f)
                 )
                 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val currentUserId = remember { FirebaseAuth.getInstance().currentUser?.uid }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.bounceClick(scaleDown = 0.8f) { onLikeClick(comment.id) }
+                ) {
+                    val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
                     val isLiked = currentUserId != null && comment.likedBy.contains(currentUserId)
 
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = if (isLiked) R.drawable.ic_star_piena else R.drawable.ic_star),
-                        contentDescription = "Likes",
-                        tint = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
+                    com.cinetrack.ui.screens.LiquidStarIcon(
+                        isLiked = isLiked,
+                        accentColor = accentColor,
                         modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
