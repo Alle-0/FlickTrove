@@ -1104,8 +1104,8 @@
     <string name="settings_check_updates_github">Auf GitHub nach Updates suchen</string>
     <string name="account_error_max_name_changes">Max. Namensänderungen erreicht.</string>
     <string name="account_error_name_update_failed">Fehler beim Aktualisieren des Namens.</string>
-    <string name="account_guest_sync_title">Daten synchronisieren</string>
-    <string name="account_guest_sync_message">Registrieren oder einloggen, um deine Daten zu synchronisieren.</string>
+    <string name="account_guest_sync_title">Soziale Funktionen</string>
+    <string name="account_guest_sync_message">Registrieren oder einloggen, um mit anderen zu interagieren und soziale Funktionen zu nutzen.</string>
     <string name="unmatched_items_title">Verworfen / Nicht erkannt</string>
     <string name="unmatched_items_desc">Filme und Serien, die bei TMDB nicht erkannt wurden, anzeigen</string>
     <string name="unmatched_items_count">%d Elemente</string>

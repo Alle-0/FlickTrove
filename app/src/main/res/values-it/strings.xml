@@ -1100,8 +1100,8 @@
     <string name="settings_check_updates_github">Controlla aggiornamenti su GitHub</string>
     <string name="account_error_max_name_changes">Limite massimo di cambi nome raggiunto.</string>
     <string name="account_error_name_update_failed">Aggiornamento nome fallito.</string>
-    <string name="account_guest_sync_title">Sincronizza Dati</string>
-    <string name="account_guest_sync_message">Registrati o accedi per sincronizzare i tuoi dati.</string>
+    <string name="account_guest_sync_title">Funzionalità Social</string>
+    <string name="account_guest_sync_message">Registrati o accedi per interagire con gli altri e usare le funzioni social.</string>
     <string name="unmatched_items_title">Scartati / Non Riconosciuti</string>
     <string name="unmatched_items_desc">Vedi film e serie non riconosciuti da TMDB durante l\'ultimo import</string>
     <string name="unmatched_items_count">%d elementi</string>
