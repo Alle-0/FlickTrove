@@ -18,14 +18,14 @@ import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
 @Composable
-fun DetailTranslationPromptModal(
-    showTranslationPrompt: Pair<Long, String>?,
+fun <T> DetailTranslationPromptModal(
+    showTranslationPrompt: Pair<T, String>?,
     onDismiss: () -> Unit,
-    onTranslate: (commentId: Long, text: String, requireWifi: Boolean) -> Unit,
+    onTranslate: (commentId: T, text: String, requireWifi: Boolean) -> Unit,
     hazeState: HazeState,
     accentColor: Color
 ) {
-    var rememberedPromptData by remember { mutableStateOf<Pair<Long, String>?>(null) }
+    var rememberedPromptData by remember { mutableStateOf<Pair<T, String>?>(null) }
     LaunchedEffect(showTranslationPrompt) {
         if (showTranslationPrompt != null) {
             rememberedPromptData = showTranslationPrompt

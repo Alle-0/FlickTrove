@@ -42,6 +42,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.AsyncImage
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.viewmodel.CommentsViewModel
+import com.cinetrack.ui.components.detail.DetailTranslationPromptModal
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -104,6 +105,7 @@ class CommentsScreen(
         val comments by viewModel.comments.collectAsStateWithLifecycle()
         val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
         val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
+        val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -546,11 +548,13 @@ class CommentsScreen(
                                             Spacer(modifier = Modifier.width(16.dp))
                                         }
                                         is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
-                                            Text(
-                                                text = stringResource(R.string.comment_show_original),
-                                                color = accentColor,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                modifier = Modifier.bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_traduzione),
+                                                contentDescription = stringResource(R.string.comment_show_original),
+                                                tint = accentColor,
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .bounceClick { viewModel.translateComment(comment.id, comment.text) }
                                             )
                                             Spacer(modifier = Modifier.width(16.dp))
                                         }
@@ -1088,6 +1092,17 @@ class CommentsScreen(
             }
         }
 
+        // Translation Prompt Dialog
+        DetailTranslationPromptModal(
+            showTranslationPrompt = showTranslationPrompt,
+            onDismiss = { viewModel.dismissTranslationPrompt() },
+            onTranslate = { commentId, text, requireWifi ->
+                viewModel.translateComment(commentId, text, requireWifi)
+            },
+            hazeState = hazeState,
+            accentColor = accentColor
+        )
+
         // Report Dialog Overlay
         commentToReport?.let { comment ->
             Box(
@@ -1190,17 +1205,48 @@ class CommentsScreen(
                         Text(stringResource(R.string.comment_delete_subtitle), color = Color.White.copy(0.8f))
                         Spacer(modifier = Modifier.height(24.dp))
                         Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            TextButton(onClick = { commentToDelete = null }) {
-                                Text(stringResource(R.string.comment_cancel_btn), color = Color.White.copy(0.8f))
+                            Button(
+                                onClick = { commentToDelete = null },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .bounceClick { commentToDelete = null },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.White.copy(alpha = 0.08f),
+                                    contentColor = Color.White.copy(alpha = 0.85f)
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.12f))
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.comment_cancel_btn),
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
-                            TextButton(onClick = {
-                                viewModel.deleteComment(comment.id)
-                                commentToDelete = null
-                            }) {
-                                Text(stringResource(R.string.comment_delete_title), color = Color.Red)
+                            Button(
+                                onClick = {
+                                    viewModel.deleteComment(comment.id)
+                                    commentToDelete = null
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .bounceClick {
+                                        viewModel.deleteComment(comment.id)
+                                        commentToDelete = null
+                                    },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Red.copy(alpha = 0.15f),
+                                    contentColor = Color(0xFFFF5252)
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red.copy(alpha = 0.35f))
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.comment_delete_title),
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }

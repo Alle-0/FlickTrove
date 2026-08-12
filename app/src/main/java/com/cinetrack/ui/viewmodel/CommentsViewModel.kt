@@ -56,6 +56,13 @@ class CommentsViewModel @Inject constructor(
     private val _translationStates = MutableStateFlow<Map<String, TranslationState>>(emptyMap())
     val translationStates: StateFlow<Map<String, TranslationState>> = _translationStates.asStateFlow()
 
+    private val _showTranslationPrompt = MutableStateFlow<Pair<String, String>?>(null)
+    val showTranslationPrompt: StateFlow<Pair<String, String>?> = _showTranslationPrompt.asStateFlow()
+
+    fun dismissTranslationPrompt() {
+        _showTranslationPrompt.value = null
+    }
+
     fun init(mediaId: String, mediaType: String) {
         if (currentMediaId == mediaId) return
         currentMediaId = mediaId
@@ -75,7 +82,7 @@ class CommentsViewModel @Inject constructor(
      * Requests translation of a comment.
      * If already translated, toggles back to the original text.
      */
-    fun translateComment(commentId: String, text: String) {
+    fun translateComment(commentId: String, text: String, requireWifi: Boolean? = null) {
         val current = _translationStates.value[commentId]
         // Toggle: if already translated, reset to Idle
         if (current is TranslationState.Translated) {
@@ -113,13 +120,20 @@ class CommentsViewModel @Inject constructor(
             // Step 2: Check / Download models
             val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
             if (!modelReady) {
+                if (requireWifi == null) {
+                    _showTranslationPrompt.value = Pair(commentId, cleanText)
+                    return@launch
+                }
+                _showTranslationPrompt.value = null
                 _translationStates.value = _translationStates.value + (commentId to TranslationState.Downloading)
-                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit)
+                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi = requireWifi)
                 if (!downloaded) {
                     _translationStates.value = _translationStates.value + (commentId to TranslationState.Error)
                     actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_lang_model))
                     return@launch
                 }
+            } else {
+                _showTranslationPrompt.value = null
             }
 
             // Step 3: Translate

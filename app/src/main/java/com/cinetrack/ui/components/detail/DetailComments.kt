@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -44,6 +46,17 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.geometry.Offset
 import com.cinetrack.data.model.AppComment
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+
+@dagger.hilt.EntryPoint
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+interface DetailCommentsEntryPoint {
+    fun translationManager(): com.cinetrack.util.TranslationManager
+    fun preferenceRepository(): com.cinetrack.data.repository.PreferenceRepository
+    fun actionFeedbackManager(): com.cinetrack.ui.utils.ActionFeedbackManager
+}
 
 @Composable
 fun DetailComments(
@@ -128,9 +141,7 @@ fun DetailComments(
             items(sortedComments, key = { it.id }, contentType = { "comment" }) { comment ->
                 CommentCard(
                     comment = comment,
-                    accentColor = accentColor,
-                    translationState = null,  // no translation in preview strip
-                    onTranslate = null
+                    accentColor = accentColor
                 )
             }
             item {
@@ -156,15 +167,78 @@ fun DetailComments(
 @Composable
 private fun CommentCard(
     comment: AppComment,
-    accentColor: Color,
-    translationState: com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState?,
-    onTranslate: ((commentId: String, text: String) -> Unit)?
+    accentColor: Color
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    var showOriginal by remember { mutableStateOf(false) }
+    var isSpoilerRevealed by remember { mutableStateOf(false) }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val expandedWidth = (configuration.screenWidthDp * 0.85f).dp
     val targetWidth = if (isExpanded) expandedWidth else 280.dp
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val entryPoint = remember(context) {
+        dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            DetailCommentsEntryPoint::class.java
+        )
+    }
+    var translationState by remember { mutableStateOf<com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState>(com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle) }
+
+    fun handleTranslate() {
+        if (translationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated) {
+            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
+            return
+        }
+        coroutineScope.launch {
+            val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+            val cleanText = comment.text.replace(mediaRegex, "").trim()
+            if (cleanText.isBlank()) return@launch
+
+            val translationManager = entryPoint.translationManager()
+            val preferenceRepository = entryPoint.preferenceRepository()
+            val actionFeedbackManager = entryPoint.actionFeedbackManager()
+
+            val prefs = preferenceRepository.userPreferencesFlow.first()
+            val systemLang = java.util.Locale.getDefault().language
+            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
+
+            val targetMlKit = translationManager.getCurrentTargetLanguage()
+            val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
+
+            val detectedLang = translationManager.identifyLanguage(cleanText)
+            if (detectedLang != null && (detectedLang == targetBcp47 || detectedLang == targetMlKit)) {
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
+                return@launch
+            }
+
+            val effectiveSourceLang = detectedLang ?: if (targetMlKit != com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH) {
+                com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH
+            } else {
+                com.google.mlkit.nl.translate.TranslateLanguage.ITALIAN
+            }
+
+            val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
+            if (!modelReady) {
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading
+                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit)
+                if (!downloaded) {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
+                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
+                    return@launch
+                }
+            }
+
+            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
+            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
+            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
+            } else {
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -216,36 +290,37 @@ private fun CommentCard(
                         color = Color.White.copy(alpha = 0.7f)
                     )
                     
-                    // Translate button (only shown when onTranslate callback is provided)
-                    if (onTranslate != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        when (translationState) {
-                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
-                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(12.dp),
-                                    strokeWidth = 1.5.dp,
-                                    color = accentColor
-                                )
-                            }
-                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
-                                Text(
-                                    text = stringResource(R.string.comment_show_original),
-                                    color = accentColor,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.bounceClick { onTranslate(comment.id, comment.text) }
-                                )
-                            }
-                            else -> {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_traduzione),
-                                    contentDescription = stringResource(R.string.comment_translate),
-                                    tint = Color.White.copy(alpha = 0.55f),
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .bounceClick { onTranslate(comment.id, comment.text) }
-                                )
-                            }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    
+                    // Translate button in top right
+                    when (translationState) {
+                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
+                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(12.dp),
+                                strokeWidth = 1.5.dp,
+                                color = accentColor
+                            )
+                        }
+                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_traduzione),
+                                contentDescription = stringResource(R.string.comment_show_original),
+                                tint = accentColor,
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .bounceClick { handleTranslate() }
+                            )
+                        }
+                        else -> {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_traduzione),
+                                contentDescription = stringResource(R.string.comment_translate),
+                                tint = Color.White.copy(alpha = 0.55f),
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .bounceClick { handleTranslate() }
+                            )
                         }
                     }
                 }
@@ -287,31 +362,88 @@ private fun CommentCard(
                                 blendMode = BlendMode.DstIn
                             )
                         }
-                    }
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                val displayedText = when (translationState) {
-                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> translationState.text
+                val currentTranslation = translationState
+                val displayedTextRaw = when (currentTranslation) {
+                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslation.text
                     else -> comment.text
                 }
+                val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+                val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
+                val mediaUrls = mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList()
+                val isBlurred = comment.isSpoiler && !isSpoilerRevealed
                 
                 Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .nestedScroll(nestedScrollConnection)
                         .verticalScroll(scrollState)
                         .padding(vertical = 4.dp)
                 ) {
-                    Text(
-                        text = displayedText,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 18.sp,
-                            fontSize = 13.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.8f),
-                        maxLines = if (isExpanded) Int.MAX_VALUE else 4,
-                        overflow = TextOverflow.Ellipsis
+                    if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
+                        Text(
+                            text = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = 18.sp,
+                                fontSize = 13.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.8f),
+                            maxLines = if (isExpanded) Int.MAX_VALUE else 4,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.then(
+                                if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                            )
+                        )
+                    }
+
+                    if (mediaUrls.isNotEmpty()) {
+                        mediaUrls.forEach { mediaUrl ->
+                            coil.compose.AsyncImage(
+                                model = coil.request.ImageRequest.Builder(context)
+                                    .data(mediaUrl)
+                                    .build(),
+                                contentDescription = "Attachment",
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .then(
+                                        if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                    ),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
+                    }
+                }
+
+                if (isBlurred) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(Color(0xFF141414).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
                     )
-                    
-                    // La selezione tra testo originale e tradotto ora è gestita tramite l'icona in alto a destra
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .bounceClick { isSpoilerRevealed = true }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_eye),
+                            contentDescription = "Rivela",
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.comment_tap_to_reveal),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
         }
