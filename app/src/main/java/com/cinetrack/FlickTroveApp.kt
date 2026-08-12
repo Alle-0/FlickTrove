@@ -182,6 +182,11 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                         }
                                     }
                                     
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .haze(globalHazeState)
+                                    ) {
                                     cafe.adriel.voyager.transitions.ScreenTransition(
                                         navigator = navigator,
                                         transition = {
@@ -289,6 +294,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     }
+                                    } // end haze Box
                                     
                                     com.cinetrack.ui.components.dialog.GuestAuthDialog(
                                         showDialog = showGuestAuthDialog,
