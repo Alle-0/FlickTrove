@@ -84,7 +84,18 @@ class CommentsScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = getViewModel<CommentsViewModel>()
-        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        
+        val localCtx = androidx.compose.ui.platform.LocalContext.current
+        var currentContext = localCtx
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        val settingsViewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
+        } else {
+            getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        }
         
         LaunchedEffect(mediaId, mediaType) {
             viewModel.init(mediaId, mediaType)

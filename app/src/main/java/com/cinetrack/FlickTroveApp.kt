@@ -175,6 +175,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                 }
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
+                                    var showGuestAuthDialog by remember { mutableStateOf(false) }
+                                    LaunchedEffect(Unit) {
+                                        settingsViewModel.showGuestAuthDialog.collect {
+                                            showGuestAuthDialog = true
+                                        }
+                                    }
+                                    
                                     cafe.adriel.voyager.transitions.ScreenTransition(
                                         navigator = navigator,
                                         transition = {
@@ -224,20 +231,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                     ) { screen ->
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             screen.Content()
-                                            
-                                            var showGuestAuthDialog by remember { mutableStateOf(false) }
-                                            LaunchedEffect(Unit) {
-                                                settingsViewModel.showGuestAuthDialog.collect {
-                                                    showGuestAuthDialog = true
-                                                }
-                                            }
-                                            
-                                            com.cinetrack.ui.components.dialog.GuestAuthDialog(
-                                                showDialog = showGuestAuthDialog,
-                                                onDismiss = { showGuestAuthDialog = false },
-                                                navigator = navigator,
-                                                globalHazeState = globalHazeState
-                                            )
                                             
                                             if (isSearchOverlayOpen && screen.key == searchOverlaySourceScreenKey) {
                                                 Box(modifier = Modifier.fillMaxSize().zIndex(100000f)) {
@@ -296,6 +289,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     }
+                                    
+                                    com.cinetrack.ui.components.dialog.GuestAuthDialog(
+                                        showDialog = showGuestAuthDialog,
+                                        onDismiss = { showGuestAuthDialog = false },
+                                        navigator = navigator,
+                                        globalHazeState = globalHazeState
+                                    )
                                 }
                             }
                         }

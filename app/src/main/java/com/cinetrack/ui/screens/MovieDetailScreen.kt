@@ -117,7 +117,19 @@ data class MovieDetailScreen(
     @Composable
     override fun Content() {
         val viewModel = getViewModel<MovieDetailViewModel>()
-        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        
+        val context = androidx.compose.ui.platform.LocalContext.current
+        var currentContext = context
+        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+            currentContext = currentContext.baseContext
+        }
+        val activity = currentContext as? androidx.activity.ComponentActivity
+        val settingsViewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
+        } else {
+            getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        }
+        
         val navigator = LocalNavigator.currentOrThrow
         val detailStackDepth = androidx.compose.runtime.remember(navigator.items) {
             navigator.items.count { it is MovieDetailScreen || it is com.cinetrack.ui.screens.PersonDetailScreen }
@@ -499,7 +511,7 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         isOffline = isOffline,
                                         onOpenThread = { focusInput ->
-                                            if (com.google.firebase.ktx.Firebase.auth.currentUser?.isAnonymous == true) {
+                                            if (focusInput && com.google.firebase.ktx.Firebase.auth.currentUser?.isAnonymous == true) {
                                                 settingsViewModel.triggerGuestAuthDialog()
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
