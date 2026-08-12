@@ -46,6 +46,8 @@ class PreferenceRepository @Inject constructor(
         val TVDB_JWT_TOKEN = stringPreferencesKey("tvdb_jwt_token")
         val SHOW_MY_FOLDERS = booleanPreferencesKey("show_my_folders")
         val SHOW_YOUR_FLOW = booleanPreferencesKey("show_your_flow")
+        val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
+        val IMAGE_QUALITY = stringPreferencesKey("image_quality")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -86,7 +88,9 @@ class PreferenceRepository @Inject constructor(
                 defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home",
                 tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: "",
                 showMyFolders = preferences[PreferencesKeys.SHOW_MY_FOLDERS] ?: true,
-                showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true
+                showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true,
+                titleTextSizeMultiplier = preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] ?: 1.0f,
+                imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM"
             )
         }
 
@@ -219,6 +223,20 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.TVDB_JWT_TOKEN] = prefs.tvdbJwtToken
             preferences[PreferencesKeys.SHOW_MY_FOLDERS] = prefs.showMyFolders
             preferences[PreferencesKeys.SHOW_YOUR_FLOW] = prefs.showYourFlow
+            preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] = prefs.titleTextSizeMultiplier
+            preferences[PreferencesKeys.IMAGE_QUALITY] = prefs.imageQuality
+        }
+    }
+
+    suspend fun updateTitleTextSizeMultiplier(multiplier: Float) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] = multiplier
+        }
+    }
+
+    suspend fun updateImageQuality(quality: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IMAGE_QUALITY] = quality
         }
     }
 

@@ -154,6 +154,7 @@ dependencies {
 
     // Google ML Kit
     implementation("com.google.mlkit:translate:17.0.3")
+    implementation("com.google.mlkit:language-id:17.0.6")
 
     // Paging 3
     implementation(libs.paging.runtime)

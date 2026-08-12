@@ -100,6 +100,8 @@ data class UserPreferences(
     val defaultStartTab: String = "home",
     val tvdbJwtToken: String = "",
     val showMyFolders: Boolean = true,
-    val showYourFlow: Boolean = true
+    val showYourFlow: Boolean = true,
+    val titleTextSizeMultiplier: Float = 1.0f,
+    val imageQuality: String = "MEDIUM"
 )
 

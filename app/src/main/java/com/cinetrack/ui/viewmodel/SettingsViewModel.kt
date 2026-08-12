@@ -82,6 +82,11 @@ class SettingsViewModel @Inject constructor(
 
     init {
         checkForUpdates(false)
+        viewModelScope.launch {
+            try {
+                movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            } catch (e: Exception) { }
+        }
     }
 
     fun checkForUpdates(force: Boolean = false) {
@@ -348,6 +353,7 @@ class SettingsViewModel @Inject constructor(
     fun toggleLayoutToggle(enabled: Boolean) {
         viewModelScope.launch {
             preferenceRepository.updateShowLayoutToggle(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, context.getString(statusRes)))
         }
@@ -385,6 +391,7 @@ class SettingsViewModel @Inject constructor(
     fun toggleShowMyFolders(enabled: Boolean) {
         viewModelScope.launch {
             preferenceRepository.updateShowMyFolders(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_my_folders, context.getString(statusRes)))
         }
@@ -393,6 +400,7 @@ class SettingsViewModel @Inject constructor(
     fun toggleShowYourFlow(enabled: Boolean) {
         viewModelScope.launch {
             preferenceRepository.updateShowYourFlow(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_your_flow, context.getString(statusRes)))
         }
@@ -499,6 +507,8 @@ class SettingsViewModel @Inject constructor(
     fun updateImageQuality(quality: com.cinetrack.util.ImageQuality) {
         viewModelScope.launch {
             settingsRepository.updateImageQuality(quality.name)
+            preferenceRepository.updateImageQuality(quality.name)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val desc = when(quality) {
                 com.cinetrack.util.ImageQuality.LOW -> com.cinetrack.ui.utils.UiText.StringResource(R.string.quality_low_desc)
                 com.cinetrack.util.ImageQuality.MEDIUM -> com.cinetrack.ui.utils.UiText.StringResource(R.string.quality_medium_desc)
@@ -511,6 +521,8 @@ class SettingsViewModel @Inject constructor(
     fun updateTitleTextSizeMultiplier(multiplier: Float) {
         viewModelScope.launch {
             settingsRepository.updateTitleTextSizeMultiplier(multiplier)
+            preferenceRepository.updateTitleTextSizeMultiplier(multiplier)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val desc = when(multiplier) {
                 0.8f -> UiText.StringResource(R.string.settings_size_small)
                 1.0f -> UiText.StringResource(R.string.settings_size_medium)
@@ -531,6 +543,7 @@ class SettingsViewModel @Inject constructor(
     fun setDefaultStartTab(tab: String) {
         viewModelScope.launch {
             preferenceRepository.updateDefaultStartTab(tab)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }
 

@@ -580,6 +580,11 @@
     <!-- Comments Screen -->
     <string name="comments_screen_title">Discussion</string>
     <string name="comments_screen_title_with_media">Discussion: %1$s</string>
+    <string name="comment_translate">Translate</string>
+    <string name="comment_translated_label">Translated</string>
+    <string name="comment_show_original">Show original</string>
+    <string name="comment_downloading_model">Downloading translation model…</string>
+    <string name="comment_translation_failed">Translation unavailable</string>
 
     <!-- Quick Actions Strings -->
     <string name="quick_action_title">Quick Actions</string>
@@ -1161,4 +1166,16 @@
     <string name="report_success">Report sent successfully</string>
     <string name="report_cooldown">You have already reported this in the last 24 hours</string>
     <string name="report_error">Error sending report</string>
+    <string name="sync_msg_cached">Sync completed (cache)</string>
+    <string name="sync_msg_pushing_changes">Uploading pending changes...</string>
+    <string name="sync_msg_fetching_favorites">Downloading favorites...</string>
+    <string name="sync_msg_syncing_favorites">Syncing favorites...</string>
+    <string name="sync_msg_saving_favorites">Saving favorites... (%1$d/%2$d)</string>
+    <string name="sync_msg_fetching_folders">Downloading folders...</string>
+    <string name="sync_msg_syncing_folders">Syncing folders...</string>
+    <string name="sync_msg_saving_folders">Saving folders... (%1$d/%2$d)</string>
+    <string name="sync_msg_syncing_preferences">Syncing preferences...</string>
+    <string name="sync_msg_completed">Sync completed</string>
+    <string name="sync_msg_error">Sync error</string>
+    <string name="comment_already_in_language">Comment is already in your language</string>
 </resources>

@@ -66,7 +66,7 @@ fun DetailComments(
                 modifier = Modifier.bounceClick { onOpenThread(false) }
             ) {
                 Text(
-                    text = "TOP COMMENTS",
+                    text = stringResource(R.string.detail_top_comments),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
@@ -127,8 +127,10 @@ fun DetailComments(
             ) {
             items(sortedComments, key = { it.id }, contentType = { "comment" }) { comment ->
                 CommentCard(
-                    comment = comment, 
-                    accentColor = accentColor
+                    comment = comment,
+                    accentColor = accentColor,
+                    translationState = null,  // no translation in preview strip
+                    onTranslate = null
                 )
             }
             item {
@@ -154,7 +156,9 @@ fun DetailComments(
 @Composable
 private fun CommentCard(
     comment: AppComment,
-    accentColor: Color
+    accentColor: Color,
+    translationState: com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState?,
+    onTranslate: ((commentId: String, text: String) -> Unit)?
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showOriginal by remember { mutableStateOf(false) }
@@ -211,6 +215,39 @@ private fun CommentCard(
                         ),
                         color = Color.White.copy(alpha = 0.7f)
                     )
+                    
+                    // Translate button (only shown when onTranslate callback is provided)
+                    if (onTranslate != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        when (translationState) {
+                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
+                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(12.dp),
+                                    strokeWidth = 1.5.dp,
+                                    color = accentColor
+                                )
+                            }
+                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
+                                Text(
+                                    text = stringResource(R.string.comment_show_original),
+                                    color = accentColor,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.bounceClick { onTranslate(comment.id, comment.text) }
+                                )
+                            }
+                            else -> {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_traduzione),
+                                    contentDescription = stringResource(R.string.comment_translate),
+                                    tint = Color.White.copy(alpha = 0.55f),
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .bounceClick { onTranslate(comment.id, comment.text) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
             
@@ -252,7 +289,10 @@ private fun CommentCard(
                         }
                     }
             ) {
-                val displayedText = comment.text
+                val displayedText = when (translationState) {
+                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> translationState.text
+                    else -> comment.text
+                }
                 
                 Column(
                     modifier = Modifier

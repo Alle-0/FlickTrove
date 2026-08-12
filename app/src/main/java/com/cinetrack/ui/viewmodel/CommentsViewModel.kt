@@ -15,12 +15,17 @@ import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.UiText
 import com.cinetrack.R
 
+import com.cinetrack.data.repository.PreferenceRepository
+import kotlinx.coroutines.flow.first
+
 @HiltViewModel
 class CommentsViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
     private val storageRepository: com.cinetrack.data.repository.StorageRepository,
+    private val preferenceRepository: PreferenceRepository,
     private val auth: FirebaseAuth,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val translationManager: com.cinetrack.util.TranslationManager
 ) : ViewModel() {
 
     val isUserAnonymous: Boolean
@@ -37,6 +42,20 @@ class CommentsViewModel @Inject constructor(
     private var currentMediaId: String = ""
     private var currentMediaType: String = ""
 
+    // ── Translation state ─────────────────────────────────────────────────────
+    /** Possible states for a single comment's translation */
+    sealed class TranslationState {
+        object Idle : TranslationState()
+        object Downloading : TranslationState()   // model download in progress (Gotcha 2)
+        object Translating : TranslationState()
+        data class Translated(val text: String) : TranslationState()
+        object Error : TranslationState()
+        object TooShort : TranslationState()      // text too short to detect language (Gotcha 1)
+    }
+
+    private val _translationStates = MutableStateFlow<Map<String, TranslationState>>(emptyMap())
+    val translationStates: StateFlow<Map<String, TranslationState>> = _translationStates.asStateFlow()
+
     fun init(mediaId: String, mediaType: String) {
         if (currentMediaId == mediaId) return
         currentMediaId = mediaId
@@ -50,6 +69,75 @@ class CommentsViewModel @Inject constructor(
             _comments.value = commentRepository.getCommentsForMedia(currentMediaId)
             _isLoading.value = false
         }
+    }
+
+    /**
+     * Requests translation of a comment.
+     * If already translated, toggles back to the original text.
+     */
+    fun translateComment(commentId: String, text: String) {
+        val current = _translationStates.value[commentId]
+        // Toggle: if already translated, reset to Idle
+        if (current is TranslationState.Translated) {
+            _translationStates.value = _translationStates.value + (commentId to TranslationState.Idle)
+            return
+        }
+        viewModelScope.launch {
+            val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+            val cleanText = text.replace(mediaRegex, "").trim()
+            if (cleanText.isBlank()) {
+                return@launch
+            }
+
+            // Sync user's target language from preferences
+            val prefs = preferenceRepository.userPreferencesFlow.first()
+            val systemLang = java.util.Locale.getDefault().language
+            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
+
+            val targetMlKit = translationManager.getCurrentTargetLanguage()
+            val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
+
+            // Step 1: Detect source language
+            val detectedLang = translationManager.identifyLanguage(cleanText)
+            if (detectedLang != null && (detectedLang == targetBcp47 || detectedLang == targetMlKit)) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
+                return@launch
+            }
+
+            val effectiveSourceLang = detectedLang ?: if (targetMlKit != com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH) {
+                com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH
+            } else {
+                com.google.mlkit.nl.translate.TranslateLanguage.ITALIAN
+            }
+
+            // Step 2: Check / Download models
+            val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
+            if (!modelReady) {
+                _translationStates.value = _translationStates.value + (commentId to TranslationState.Downloading)
+                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit)
+                if (!downloaded) {
+                    _translationStates.value = _translationStates.value + (commentId to TranslationState.Error)
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_lang_model))
+                    return@launch
+                }
+            }
+
+            // Step 3: Translate
+            _translationStates.value = _translationStates.value + (commentId to TranslationState.Translating)
+            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
+            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
+                _translationStates.value = _translationStates.value + (commentId to TranslationState.Translated(translated))
+            } else {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
+                _translationStates.value = _translationStates.value + (commentId to TranslationState.Idle)
+            }
+        }
+    }
+
+    // ── Gotcha 3: release all Translator native resources when ViewModel is destroyed ──
+    override fun onCleared() {
+        super.onCleared()
+        translationManager.closeAll()
     }
 
     fun uploadCommentImage(imageUri: android.net.Uri, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
@@ -137,3 +225,4 @@ class CommentsViewModel @Inject constructor(
         }
     }
 }
+

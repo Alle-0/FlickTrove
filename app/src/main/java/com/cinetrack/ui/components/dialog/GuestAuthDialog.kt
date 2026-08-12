@@ -57,7 +57,8 @@ fun GuestAuthDialog(
                         .hazeGlass(
                             state = globalHazeState,
                             shape = DialogShape,
-                            alpha = 1f
+                            alpha = 1f,
+                            useOffscreenStrategy = true
                         )
                 )
 

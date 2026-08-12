@@ -575,6 +575,11 @@
     <!-- Comments Screen -->
     <string name="comments_screen_title">Discussione</string>
     <string name="comments_screen_title_with_media">Discussione: %1$s</string>
+    <string name="comment_translate">Traduci</string>
+    <string name="comment_translated_label">Tradotto</string>
+    <string name="comment_show_original">Mostra originale</string>
+    <string name="comment_downloading_model">Download modello di traduzione…</string>
+    <string name="comment_translation_failed">Traduzione non disponibile</string>
 
     <!-- Quick Actions Strings -->
     <string name="quick_action_title">Azioni rapide</string>
@@ -1154,4 +1159,16 @@
     <string name="report_success">Segnalazione inviata con successo</string>
     <string name="report_cooldown">Hai già inviato questa segnalazione nelle ultime 24 ore</string>
     <string name="report_error">Errore durante l\'invio della segnalazione</string>
+    <string name="sync_msg_cached">Sincronizzazione completata (cache)</string>
+    <string name="sync_msg_pushing_changes">Carico modifiche in sospeso...</string>
+    <string name="sync_msg_fetching_favorites">Scarico preferiti...</string>
+    <string name="sync_msg_syncing_favorites">Sincronizzo preferiti...</string>
+    <string name="sync_msg_saving_favorites">Salvo preferiti... (%1$d/%2$d)</string>
+    <string name="sync_msg_fetching_folders">Scarico cartelle...</string>
+    <string name="sync_msg_syncing_folders">Sincronizzo cartelle...</string>
+    <string name="sync_msg_saving_folders">Salvo cartelle... (%1$d/%2$d)</string>
+    <string name="sync_msg_syncing_preferences">Sincronizzo preferenze...</string>
+    <string name="sync_msg_completed">Sincronizzazione completata</string>
+    <string name="sync_msg_error">Errore di sincronizzazione</string>
+    <string name="comment_already_in_language">Il commento è già nella tua lingua</string>
 </resources>

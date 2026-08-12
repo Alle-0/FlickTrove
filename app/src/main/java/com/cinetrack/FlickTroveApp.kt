@@ -160,7 +160,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.fillMaxSize().haze(globalHazeState, style = com.cinetrack.ui.theme.HazeStyles.PremiumDark)) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         Navigator(SplashScreen()) { navigator ->
                             CompositionLocalProvider(
                                 com.cinetrack.ui.LocalSearchOverlay provides { offset, genreId, genreName, keywordId, keywordName ->

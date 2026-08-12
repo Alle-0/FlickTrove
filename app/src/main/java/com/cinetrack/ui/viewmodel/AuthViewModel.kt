@@ -57,7 +57,7 @@ class AuthViewModel @Inject constructor(
                 if (movies.isEmpty()) {
                     _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                     movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                        _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                        _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                     }
                     _processState.update { null }
                 }
@@ -119,7 +119,7 @@ class AuthViewModel @Inject constructor(
                         }
                         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                         movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                         }
                         _processState.update { null }
                     }
@@ -236,7 +236,7 @@ class AuthViewModel @Inject constructor(
                             
                             _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                             movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                             }
                             _processState.update { AuthState.Authenticated }
                         }
@@ -273,7 +273,7 @@ class AuthViewModel @Inject constructor(
                             
                             _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                             movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                             }
                             _processState.update { null }
                         }
@@ -321,7 +321,7 @@ class AuthViewModel @Inject constructor(
                             
                             _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                             movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                             }
                             _processState.update { AuthState.Authenticated }
                         }
@@ -342,7 +342,7 @@ class AuthViewModel @Inject constructor(
                                     
                                     _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                                     movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                        _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                        _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                                     }
                                     _processState.update { null }
                                 }
@@ -385,7 +385,7 @@ class AuthViewModel @Inject constructor(
                             
                             _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
                             movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(UiText.DynamicString(syncProgress.message), syncProgress.progress) }
+                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
                             }
                             _processState.update { null }
                         }

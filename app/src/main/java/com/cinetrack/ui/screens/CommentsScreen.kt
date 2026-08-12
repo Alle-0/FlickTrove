@@ -103,6 +103,7 @@ class CommentsScreen(
 
         val comments by viewModel.comments.collectAsStateWithLifecycle()
         val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+        val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -182,7 +183,7 @@ class CommentsScreen(
                                 .padding(12.dp)
                                 .bounceClick { navigator.pop() }
                         ) {
-                            Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = "Indietro", tint = Color.White, modifier = Modifier.size(24.dp))
+                            Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = Color.White, modifier = Modifier.size(24.dp))
                         }
                     },
                     windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
@@ -193,7 +194,7 @@ class CommentsScreen(
                     actions = {
                         Box {
                             IconButton(onClick = { showSortMenu = true }) {
-                                Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = "Filtra", tint = Color.White)
+                                Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
                             }
                         }
                     }
@@ -382,8 +383,14 @@ class CommentsScreen(
 
                                 var isSpoilerRevealed by remember { mutableStateOf(false) }
 
+                                val currentTranslationState = translationStates[comment.id]
+                                val displayedTextRaw = when (currentTranslationState) {
+                                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslationState.text
+                                    else -> comment.text
+                                }
+
                                 val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-                                val textWithoutMedia = comment.text.replace(mediaRegex, "").trim()
+                                val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
                                 val mediaUrls = mediaRegex.findAll(comment.text).map { it.groupValues[1] }.toList()
 
                                 Box(contentAlignment = Alignment.Center) {
@@ -399,7 +406,7 @@ class CommentsScreen(
                                                             }
                                                         }
                                                     }
-                                                    append(parseSimpleMarkdown(if (mediaUrls.isNotEmpty()) textWithoutMedia else comment.text, accentColor))
+                                                    append(parseSimpleMarkdown(if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw, accentColor))
                                                 },
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = Color.White.copy(alpha = 0.8f),
@@ -509,20 +516,56 @@ class CommentsScreen(
                                             style = MaterialTheme.typography.labelMedium
                                         )
                                     }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_flag),
-                                        contentDescription = "Segnala",
-                                        tint = Color.Red,
-                                        modifier = Modifier
-                                            .size(14.dp)
-                                            .bounceClick { 
-                                                if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
-                                                else commentToReport = comment 
-                                            }
-                                    )
+                                    if (comment.userId != viewModel.currentUserId) {
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_flag),
+                                            contentDescription = stringResource(R.string.comment_report_title),
+                                            tint = Color.Red,
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .bounceClick { 
+                                                    if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                                    else commentToReport = comment 
+                                                }
+                                        )
+                                    }
                                     
                                     Spacer(modifier = Modifier.weight(1f))
+                                    
+                                    // Translate button
+                                    val currentTranslationStateAction = translationStates[comment.id]
+                                    when (currentTranslationStateAction) {
+                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
+                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
+                                            androidx.compose.material3.CircularProgressIndicator(
+                                                modifier = Modifier.size(12.dp),
+                                                strokeWidth = 1.5.dp,
+                                                color = accentColor
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
+                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
+                                            Text(
+                                                text = stringResource(R.string.comment_show_original),
+                                                color = accentColor,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
+                                        else -> {
+                                            Icon(
+                                                painter = painterResource(R.drawable.ic_traduzione),
+                                                contentDescription = stringResource(R.string.comment_translate),
+                                                tint = Color.White.copy(alpha = 0.55f),
+                                                modifier = Modifier
+                                                    .size(14.dp)
+                                                    .bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
+                                    }
                                     
                                     if (comment.createdAt != null) {
                                         val context = LocalContext.current

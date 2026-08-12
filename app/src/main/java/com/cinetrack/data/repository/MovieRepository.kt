@@ -24,6 +24,8 @@ import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import com.cinetrack.data.model.Folder
 import com.cinetrack.data.sync.SyncProgress
+import com.cinetrack.ui.utils.UiText
+import com.cinetrack.R
 import com.cinetrack.domain.UpdateEpisodesUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -680,7 +682,7 @@ class MovieRepository @Inject constructor(
         force: Boolean = false,
         onProgress: (suspend (SyncProgress) -> Unit)? = null
     ) = kotlinx.coroutines.withContext(Dispatchers.IO) {
-        suspend fun emit(message: String, progress: Float?) {
+        suspend fun emit(message: UiText, progress: Float?) {
             onProgress?.invoke(SyncProgress(message, progress))
         }
 
@@ -688,23 +690,23 @@ class MovieRepository @Inject constructor(
         val lastSync = preferenceRepository.userPreferencesFlow.first().lastSyncTimestamp
         if (!force && System.currentTimeMillis() - lastSync < 300_000L) {
             android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 5 minutes ago.")
-            emit("Sincronizzazione completata (cache)", 1f)
+            emit(UiText.StringResource(R.string.sync_msg_cached), 1f)
             return@withContext
         }
 
         // 0. Push any pending local changes first
         android.util.Log.d("MovieRepository", "Starting Firebase Sync - Pushing pending changes...")
-        emit("Carico modifiche in sospeso...", 0f)
+        emit(UiText.StringResource(R.string.sync_msg_pushing_changes), 0f)
         pushPendingChanges()
 
         try {
             // 1. Pull & Reconcile Favorites
             android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites...")
-            emit("Scarico preferiti...", null)
+            emit(UiText.StringResource(R.string.sync_msg_fetching_favorites), null)
             val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites()
             android.util.Log.d("MovieRepository", "Fetched ${remoteFavorites.size} favorites from Firebase")
             
-            emit("Sincronizzo preferiti...", 0.35f)
+            emit(UiText.StringResource(R.string.sync_msg_syncing_favorites), 0.35f)
             val localFavoritesList = favoriteDao.getAll()
             val localFavorites = localFavoritesList.associateBy { "${it.mediaType}_${it.id}" }
             val remoteFavoritesMap = remoteFavorites.associateBy { "${it.mediaType}_${it.id}" }
@@ -742,7 +744,8 @@ class MovieRepository @Inject constructor(
                     favoriteDao.insertAll(chunk)
                     val portion = (index + 1).toFloat() / chunks.size.toFloat()
                     val progress = 0.35f + (0.55f - 0.35f) * portion
-                    emit("Salvo preferiti... (${(index + 1) * chunk.size}/${moviesToInsert.size})", progress)
+                    val currentCount = (index + 1) * chunk.size
+                    emit(UiText.StringResource(R.string.sync_msg_saving_favorites, currentCount, moviesToInsert.size), progress)
                 }
             }
             
@@ -752,10 +755,10 @@ class MovieRepository @Inject constructor(
             android.util.Log.d("MovieRepository", "Successfully synchronized favorites with conflict resolution")
 
             // 2. Pull & Reconcile Folders
-            emit("Scarico cartelle...", null)
+            emit(UiText.StringResource(R.string.sync_msg_fetching_folders), null)
             val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
             
-            emit("Sincronizzo cartelle...", 0.7f)
+            emit(UiText.StringResource(R.string.sync_msg_syncing_folders), 0.7f)
             val localFoldersList = folderDao.getAll()
             val localFolders = localFoldersList.associateBy { it.id }
             val remoteFoldersMap = remoteFolders.associateBy { it.id }
@@ -805,7 +808,8 @@ class MovieRepository @Inject constructor(
                     folderDao.insertAll(chunk)
                     val portion = (index + 1).toFloat() / chunks.size.toFloat()
                     val progress = 0.7f + (0.9f - 0.7f) * portion
-                    emit("Salvo cartelle... (${(index + 1) * chunk.size}/${foldersToInsert.size})", progress)
+                    val currentCount = (index + 1) * chunk.size
+                    emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, foldersToInsert.size), progress)
                 }
             }
             
@@ -815,13 +819,13 @@ class MovieRepository @Inject constructor(
             android.util.Log.d("MovieRepository", "Successfully synchronized folders with conflict resolution")
 
             // 3. Pull Preferences
-            emit("Sincronizzo preferenze...", 0.92f)
+            emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
             syncPreferencesWithFirebase()
-            emit("Sync completata", 1f)
+            emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
-            emit("Errore di sincronizzazione", 1f)
+            emit(UiText.StringResource(R.string.sync_msg_error), 1f)
         }
     }
 
@@ -865,14 +869,27 @@ class MovieRepository @Inject constructor(
 
             val updatedPrefs = currentPrefs.copy(
                 gridColumns = (remotePrefs["gridColumns"] as? Number)?.toInt() ?: currentPrefs.gridColumns,
+                showLayoutToggle = remotePrefs["showLayoutToggle"] as? Boolean ?: currentPrefs.showLayoutToggle,
+                isSearchSuggestionsExpanded = remotePrefs["isSearchSuggestionsExpanded"] as? Boolean ?: currentPrefs.isSearchSuggestionsExpanded,
                 notificationsEnabled = remotePrefs["notificationsEnabled"] as? Boolean ?: currentPrefs.notificationsEnabled,
                 showFolderBookmarks = remotePrefs["showFolderBookmarks"] as? Boolean ?: currentPrefs.showFolderBookmarks,
                 showBadges = remotePrefs["showBadges"] as? Boolean ?: currentPrefs.showBadges,
                 disabledBadges = (remotePrefs["disabledBadges"] as? List<*>)?.filterIsInstance<String>()?.toSet() ?: currentPrefs.disabledBadges,
                 vibrationEnabled = remotePrefs["vibrationEnabled"] as? Boolean ?: currentPrefs.vibrationEnabled,
                 accentColor = remotePrefs["accentColor"] as? String ?: currentPrefs.accentColor,
+                appTheme = remotePrefs["appTheme"] as? String ?: currentPrefs.appTheme,
+                contentLanguage = remotePrefs["contentLanguage"] as? String ?: currentPrefs.contentLanguage,
                 advancedVisualEffectsEnabled = remotePrefs["advancedVisualEffectsEnabled"] as? Boolean ?: currentPrefs.advancedVisualEffectsEnabled,
                 dynamicAppIconEnabled = remotePrefs["dynamicAppIconEnabled"] as? Boolean ?: currentPrefs.dynamicAppIconEnabled,
+                showSplitReleasesHome = remotePrefs["showSplitReleasesHome"] as? Boolean ?: currentPrefs.showSplitReleasesHome,
+                showSplitDroppedHome = remotePrefs["showSplitDroppedHome"] as? Boolean ?: currentPrefs.showSplitDroppedHome,
+                showAppEntryAnimation = remotePrefs["showAppEntryAnimation"] as? Boolean ?: currentPrefs.showAppEntryAnimation,
+                useMovieLogo = remotePrefs["useMovieLogo"] as? Boolean ?: currentPrefs.useMovieLogo,
+                defaultStartTab = remotePrefs["defaultStartTab"] as? String ?: currentPrefs.defaultStartTab,
+                showMyFolders = remotePrefs["showMyFolders"] as? Boolean ?: currentPrefs.showMyFolders,
+                showYourFlow = remotePrefs["showYourFlow"] as? Boolean ?: currentPrefs.showYourFlow,
+                titleTextSizeMultiplier = (remotePrefs["titleTextSizeMultiplier"] as? Number)?.toFloat() ?: currentPrefs.titleTextSizeMultiplier,
+                imageQuality = remotePrefs["imageQuality"] as? String ?: currentPrefs.imageQuality,
                 homeSort = parseSortConfig(remotePrefs["homeSort"], currentPrefs.homeSort),
                 vistiSort = parseSortConfig(remotePrefs["vistiSort"], currentPrefs.vistiSort),
                 discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
@@ -892,17 +909,47 @@ class MovieRepository @Inject constructor(
                 // Convert to Map for Firestore
                 val prefsMap = mapOf(
                     "gridColumns" to prefs.gridColumns,
+                    "showLayoutToggle" to prefs.showLayoutToggle,
+                    "isSearchSuggestionsExpanded" to prefs.isSearchSuggestionsExpanded,
                     "notificationsEnabled" to prefs.notificationsEnabled,
                     "showFolderBookmarks" to prefs.showFolderBookmarks,
                     "showBadges" to prefs.showBadges,
                     "disabledBadges" to prefs.disabledBadges.toList(),
                     "vibrationEnabled" to prefs.vibrationEnabled,
                     "accentColor" to prefs.accentColor,
+                    "appTheme" to prefs.appTheme,
+                    "contentLanguage" to prefs.contentLanguage,
                     "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
                     "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
-                    "homeSort" to prefs.homeSort,
-                    "vistiSort" to prefs.vistiSort,
-                    "discoveryFilters" to prefs.discoveryFilters
+                    "showSplitReleasesHome" to prefs.showSplitReleasesHome,
+                    "showSplitDroppedHome" to prefs.showSplitDroppedHome,
+                    "showAppEntryAnimation" to prefs.showAppEntryAnimation,
+                    "useMovieLogo" to prefs.useMovieLogo,
+                    "defaultStartTab" to prefs.defaultStartTab,
+                    "showMyFolders" to prefs.showMyFolders,
+                    "showYourFlow" to prefs.showYourFlow,
+                    "titleTextSizeMultiplier" to prefs.titleTextSizeMultiplier.toDouble(),
+                    "imageQuality" to prefs.imageQuality,
+                    "homeSort" to mapOf(
+                        "sortType" to prefs.homeSort.sortType,
+                        "sortDirection" to prefs.homeSort.sortDirection,
+                        "selectedGenres" to prefs.homeSort.selectedGenres,
+                        "selectedProviders" to prefs.homeSort.selectedProviders,
+                        "selectedDecades" to prefs.homeSort.selectedDecades
+                    ),
+                    "vistiSort" to mapOf(
+                        "sortType" to prefs.vistiSort.sortType,
+                        "sortDirection" to prefs.vistiSort.sortDirection,
+                        "selectedGenres" to prefs.vistiSort.selectedGenres,
+                        "selectedProviders" to prefs.vistiSort.selectedProviders,
+                        "selectedDecades" to prefs.vistiSort.selectedDecades
+                    ),
+                    "discoveryFilters" to mapOf(
+                        "selectedGenres" to prefs.discoveryFilters.selectedGenres,
+                        "selectedProviders" to prefs.discoveryFilters.selectedProviders,
+                        "selectedDecades" to prefs.discoveryFilters.selectedDecades,
+                        "sortBy" to prefs.discoveryFilters.sortBy
+                    )
                 )
                 firebaseRemoteDataSource.setUserPreferences(prefsMap)
             } catch (e: Exception) {
