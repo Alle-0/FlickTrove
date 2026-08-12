@@ -62,7 +62,6 @@ fun AccountModals(
     var showProfileMenu by remember { mutableStateOf(false) }
     var showDashboardSettings by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
-    var showGuestAuthDialog by remember { mutableStateOf(false) }
     
     var nameInput by remember { mutableStateOf("") }
     var isCheckingNameLive by remember { mutableStateOf(false) }
@@ -92,14 +91,8 @@ fun AccountModals(
             if (currentUser != null && !currentUser.isAnonymous) {
                 showProfileMenu = true
             } else {
-                showGuestAuthDialog = true
+                settingsViewModel.triggerGuestAuthDialog()
             }
-        }
-    }
-    
-    LaunchedEffect(Unit) {
-        settingsViewModel.showGuestAuthDialog.collect {
-            showGuestAuthDialog = true
         }
     }
     
@@ -177,7 +170,7 @@ fun AccountModals(
     
     val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
 
-    if (showProfileMenu || showDashboardSettings || showNameDialog || showGuestAuthDialog) {
+    if (showProfileMenu || showDashboardSettings || showNameDialog) {
         Box(modifier = Modifier.zIndex(80000f)) {
             // Profile Menu Modal
             if (showProfileMenu) {
@@ -618,68 +611,6 @@ fun AccountModals(
                 }
             }
 
-            if (showGuestAuthDialog) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { showGuestAuthDialog = false },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = 400.dp)
-                            .fillMaxWidth(0.85f)
-                            .hazeGlass(state = globalHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(24.dp)
-                        ) {
-                            Text(
-                                stringResource(R.string.account_guest_sync_title),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                stringResource(R.string.account_guest_sync_message),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Button(
-                                    onClick = { showGuestAuthDialog = false },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f))
-                                ) {
-                                    Text(stringResource(R.string.auth_guest_dialog_cancel), color = MaterialTheme.colorScheme.onSurface)
-                                }
-                                Button(
-                                    onClick = {
-                                        showGuestAuthDialog = false
-                                        val rootNav = navigator?.parent ?: navigator
-                                        rootNav?.push(com.cinetrack.ui.screens.LoginScreen())
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                ) {
-                                    Text(stringResource(R.string.auth_btn_login), color = Color.White)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)
