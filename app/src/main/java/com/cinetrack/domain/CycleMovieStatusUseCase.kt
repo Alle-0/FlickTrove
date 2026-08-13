@@ -17,9 +17,20 @@ class CycleMovieStatusUseCase @Inject constructor(
                 reminder = local.reminder,
                 watchedEpisodes = local.watchedEpisodes,
                 numberOfEpisodes = local.numberOfEpisodes ?: movie.numberOfEpisodes,
+                numberOfSeasons = local.numberOfSeasons ?: movie.numberOfSeasons,
+                seasons = local.seasons ?: movie.seasons,
+                runtime = local.runtime ?: movie.runtime,
+                episodeRunTime = local.episodeRunTime ?: movie.episodeRunTime,
+                genres = local.genres ?: movie.genres,
+                topCastData = local.topCastData ?: movie.topCastData,
+                directorData = local.directorData ?: movie.directorData,
+                directorId = local.directorId ?: movie.directorId,
+                directorName = local.directorName ?: movie.directorName,
+                directorProfilePath = local.directorProfilePath ?: movie.directorProfilePath,
                 personalRating = local.personalRating,
                 personalNote = local.personalNote,
-                watchedAt = local.watchedAt
+                watchedAt = local.watchedAt,
+                progress = local.progress
             )
         } else {
             movie.copy(
