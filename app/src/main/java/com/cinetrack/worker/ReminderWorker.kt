@@ -26,7 +26,7 @@ class ReminderWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            val notifEnabled = settingsRepository.notificationsEnabled.first()
+            val notifEnabled = settingsRepository.notificationsReleases.first()
             val hasPermission = NotificationHelper.hasNotificationPermission(context)
             val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) // "yyyy-MM-dd"
             

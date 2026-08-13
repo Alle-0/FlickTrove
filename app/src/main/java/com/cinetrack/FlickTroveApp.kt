@@ -43,7 +43,9 @@ private val initialSystemLocale = java.util.Locale.getDefault()
 fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: SettingsViewModel) {
     val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
-    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val notificationsReleases by settingsViewModel.notificationsReleases.collectAsStateWithLifecycle()
+    val notificationsSocial by settingsViewModel.notificationsSocial.collectAsStateWithLifecycle()
+    val notificationsEnabled = notificationsReleases || notificationsSocial
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
 
     val undoViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.UndoViewModel>()
@@ -94,7 +96,10 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val startupNotifLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (!isGranted) settingsViewModel.toggleNotifications(false)
+        if (!isGranted) {
+            settingsViewModel.toggleNotificationsReleases(false)
+            settingsViewModel.toggleNotificationsSocial(false)
+        }
     }
 
     LaunchedEffect(notificationsEnabled) {

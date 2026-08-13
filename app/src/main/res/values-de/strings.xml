@@ -194,8 +194,12 @@
     <string name="settings_visual_effects">Erweiterte visuelle Effekte</string>
     <string name="settings_visual_effects_desc">Aktiviert komplexe Unschärfen (Blur) und Animationen</string>
     <string name="settings_notifications_vibration">Benachrichtigungen und Vibration</string>
-    <string name="settings_enable_notifications">Benachrichtigungen aktivieren</string>
-    <string name="settings_enable_notifications_desc">Werde am Erscheinungstag der Filme oder Serien benachrichtigt, denen du folgst.</string>
+    <string name="settings_enable_notifications_releases">Veröffentlichungen</string>
+    <string name="settings_enable_notifications_releases_desc">Werde am Erscheinungstag der Filme oder Serien benachrichtigt, denen du folgst.</string>
+    <string name="settings_enable_notifications_social">Soziale Benachrichtigungen</string>
+    <string name="settings_enable_notifications_social_desc">Werde benachrichtigt, wenn jemand auf deine Kommentare antwortet.</string>
+    <string name="notification_reply_title">Neue Antwort</string>
+    <string name="notification_reply_body">%1$s hat auf deinen Kommentar geantwortet.</string>
     <string name="settings_haptic_feedback">Haptisches Feedback</string>
     <string name="settings_haptic_feedback_desc">Vibriert bei Aktionen in der Benutzeroberfläche</string>
     <string name="settings_images">Bilder</string>

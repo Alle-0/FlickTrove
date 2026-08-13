@@ -44,7 +44,7 @@ class ReminderMigrationWorker(
             }
 
             // Read the preference once – honour the user's choice
-            val notifEnabled = settingsRepository.notificationsEnabled.first()
+            val notifEnabled = settingsRepository.notificationsReleases.first()
             // Also check the runtime permission (device-level guard)
             val hasPermission = NotificationHelper.hasNotificationPermission(applicationContext)
 

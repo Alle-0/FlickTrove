@@ -567,7 +567,8 @@ fun SettingsNotificationsSection(
     notificationPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
 ) {
     val context = LocalContext.current
-    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
+    val notificationsReleases by settingsViewModel.notificationsReleases.collectAsStateWithLifecycle()
+    val notificationsSocial by settingsViewModel.notificationsSocial.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_notifications_vibration),
@@ -575,11 +576,11 @@ fun SettingsNotificationsSection(
     ) {
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_bell_vibra),
-            title = stringResource(R.string.settings_enable_notifications),
-            description = stringResource(R.string.settings_enable_notifications_desc),
+            title = stringResource(R.string.settings_enable_notifications_releases),
+            description = stringResource(R.string.settings_enable_notifications_releases_desc),
             trailing = {
                 FlickTroveSwitch(
-                    checked = notificationsEnabled,
+                    checked = notificationsReleases,
                     onCheckedChange = { checked ->
                         if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                         if (checked) {
@@ -589,10 +590,10 @@ fun SettingsNotificationsSection(
                             ) {
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
-                                settingsViewModel.toggleNotifications(true)
+                                settingsViewModel.toggleNotificationsReleases(true)
                             }
                         } else {
-                            settingsViewModel.toggleNotifications(false)
+                            settingsViewModel.toggleNotificationsReleases(false)
                         }
                     },
                     accentColor = currentAccentColor
@@ -600,18 +601,59 @@ fun SettingsNotificationsSection(
             },
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                val newState = !notificationsEnabled
-                if (newState) {
+                if (!notificationsReleases) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                         != PackageManager.PERMISSION_GRANTED
                     ) {
                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     } else {
-                        settingsViewModel.toggleNotifications(true)
+                        settingsViewModel.toggleNotificationsReleases(true)
                     }
                 } else {
-                    settingsViewModel.toggleNotifications(false)
+                    settingsViewModel.toggleNotificationsReleases(false)
+                }
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_comment),
+            title = stringResource(R.string.settings_enable_notifications_social),
+            description = stringResource(R.string.settings_enable_notifications_social_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = notificationsSocial,
+                    onCheckedChange = { checked ->
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        if (checked) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                                != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                settingsViewModel.toggleNotificationsSocial(true)
+                            }
+                        } else {
+                            settingsViewModel.toggleNotificationsSocial(false)
+                        }
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                if (!notificationsSocial) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        settingsViewModel.toggleNotificationsSocial(true)
+                    }
+                } else {
+                    settingsViewModel.toggleNotificationsSocial(false)
                 }
             }
         )

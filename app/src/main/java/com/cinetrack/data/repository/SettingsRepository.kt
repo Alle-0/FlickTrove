@@ -7,7 +7,8 @@ interface SettingsRepository {
     val showFolderBookmarks: Flow<Boolean>
     val showBadges: Flow<Boolean>
     val disabledBadges: Flow<Set<String>>
-    val notificationsEnabled: Flow<Boolean>
+    val notificationsReleases: Flow<Boolean>
+    val notificationsSocial: Flow<Boolean>
     val vibrationEnabled: Flow<Boolean>
     val dynamicAppIconEnabled: Flow<Boolean>
     val advancedVisualEffectsEnabled: Flow<Boolean>
@@ -21,7 +22,8 @@ interface SettingsRepository {
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
     suspend fun toggleBadges(enabled: Boolean)
-    suspend fun toggleNotifications(enabled: Boolean)
+    suspend fun toggleNotificationsReleases(enabled: Boolean)
+    suspend fun toggleNotificationsSocial(enabled: Boolean)
     suspend fun toggleVibration(enabled: Boolean)
     suspend fun toggleDynamicAppIcon(enabled: Boolean)
     suspend fun updateDisabledBadges(badges: Set<String>)

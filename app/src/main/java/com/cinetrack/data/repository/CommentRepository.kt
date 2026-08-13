@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -88,6 +89,30 @@ class CommentRepository @Inject constructor(
                     transaction.update(parentRef, "repliesCount", FieldValue.increment(1))
                 }
             }.await()
+            
+            if (parentId != null && parentUserId != null && parentUserId != user.uid) {
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                    try {
+                        val prefsDoc = firestore.collection("users").document(parentUserId)
+                            .collection("settings").document("preferences").get().await()
+                        val notificationsSocial = prefsDoc.getBoolean("notificationsSocial") ?: true
+                        
+                        if (notificationsSocial) {
+                            com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                                targetUserId = parentUserId,
+                                titleLocKey = "notification_reply_title",
+                                bodyLocKey = "notification_reply_body",
+                                bodyLocArgs = listOf(user.displayName ?: "Qualcuno"),
+                                mediaId = mediaId.toLongOrNull() ?: 0L,
+                                mediaType = mediaType
+                            )
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            
             true
         } catch (e: Exception) {
             e.printStackTrace()

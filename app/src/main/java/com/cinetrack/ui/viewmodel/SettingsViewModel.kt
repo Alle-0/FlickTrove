@@ -242,7 +242,10 @@ class SettingsViewModel @Inject constructor(
     val disabledBadges: StateFlow<Set<String>> = settingsRepository.disabledBadges
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
-    val notificationsEnabled: StateFlow<Boolean> = settingsRepository.notificationsEnabled
+    val notificationsReleases: StateFlow<Boolean> = settingsRepository.notificationsReleases
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val notificationsSocial: StateFlow<Boolean> = settingsRepository.notificationsSocial
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val vibrationEnabled: StateFlow<Boolean> = settingsRepository.vibrationEnabled
@@ -419,9 +422,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun toggleNotifications(enabled: Boolean) {
+    fun toggleNotificationsReleases(enabled: Boolean) {
         viewModelScope.launch {
-            settingsRepository.toggleNotifications(enabled)
+            settingsRepository.toggleNotificationsReleases(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_enabled_plural_f else R.string.status_disabled_plural_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleNotificationsSocial(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleNotificationsSocial(enabled)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_plural_f else R.string.status_disabled_plural_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, context.getString(statusRes)))

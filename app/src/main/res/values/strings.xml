@@ -194,8 +194,12 @@
     <string name="settings_visual_effects">Advanced visual effects</string>
     <string name="settings_visual_effects_desc">Enables complex blurs and animations</string>
     <string name="settings_notifications_vibration">Notifications and Vibration</string>
-    <string name="settings_enable_notifications">Enable Notifications</string>
-    <string name="settings_enable_notifications_desc">Get notified on the release day of the movies or series you follow.</string>
+    <string name="settings_enable_notifications_releases">Release Notifications</string>
+    <string name="settings_enable_notifications_releases_desc">Get notified on the release day of the movies or series you follow.</string>
+    <string name="settings_enable_notifications_social">Social Notifications</string>
+    <string name="settings_enable_notifications_social_desc">Get notified when someone replies to your comments.</string>
+    <string name="notification_reply_title">New Reply</string>
+    <string name="notification_reply_body">%1$s replied to your comment.</string>
     <string name="settings_haptic_feedback">Haptic feedback</string>
     <string name="settings_haptic_feedback_desc">Vibrates on interface actions</string>
     <string name="settings_images">Images</string>

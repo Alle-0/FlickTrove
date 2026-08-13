@@ -28,7 +28,8 @@ class PreferenceRepository @Inject constructor(
         val GRID_COLUMNS = intPreferencesKey("grid_columns")
         val SHOW_LAYOUT_TOGGLE = booleanPreferencesKey("show_layout_toggle")
         val IS_SEARCH_SUGGESTIONS_EXPANDED = booleanPreferencesKey("is_search_suggestions_expanded")
-        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val NOTIFICATIONS_RELEASES = booleanPreferencesKey("notifications_releases")
+        val NOTIFICATIONS_SOCIAL = booleanPreferencesKey("notifications_social")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
         val SHOW_BADGES = booleanPreferencesKey("show_badges")
         val DISABLED_BADGES = stringSetPreferencesKey("disabled_badges")
@@ -73,7 +74,8 @@ class PreferenceRepository @Inject constructor(
                 gridColumns = preferences[PreferencesKeys.GRID_COLUMNS] ?: 3,
                 showLayoutToggle = preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] ?: false,
                 isSearchSuggestionsExpanded = preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] ?: true,
-                notificationsEnabled = preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true,
+                notificationsReleases = preferences[PreferencesKeys.NOTIFICATIONS_RELEASES] ?: true,
+                notificationsSocial = preferences[PreferencesKeys.NOTIFICATIONS_SOCIAL] ?: true,
                 showFolderBookmarks = preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] ?: true,
                 showBadges = preferences[PreferencesKeys.SHOW_BADGES] ?: true,
                 disabledBadges = preferences[PreferencesKeys.DISABLED_BADGES] ?: emptySet(),
@@ -139,9 +141,15 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
-    suspend fun updateNotificationsEnabled(enabled: Boolean) {
+    suspend fun toggleNotificationsReleases(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+            preferences[PreferencesKeys.NOTIFICATIONS_RELEASES] = enabled
+        }
+    }
+
+    suspend fun toggleNotificationsSocial(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_SOCIAL] = enabled
         }
     }
 

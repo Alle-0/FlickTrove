@@ -34,7 +34,7 @@ class TVUpdateWorker(
         val settingsRepository = entryPoint.settingsRepository()
 
         return try {
-            val notifEnabled = settingsRepository.notificationsEnabled.first()
+            val notifEnabled = settingsRepository.notificationsReleases.first()
             val hasPermission = NotificationHelper.hasNotificationPermission(applicationContext)
 
             val tvShows: List<Movie> = repository.getShowsForUpdate(150)

@@ -226,12 +226,6 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    fun setNotificationsEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferenceRepository.updateNotificationsEnabled(enabled)
-            movieRepository.savePreferencesRemote(uiState.value.preferences.copy(notificationsEnabled = enabled))
-        }
-    }
 
     fun setShowFolderBookmarks(show: Boolean) {
         viewModelScope.launch {

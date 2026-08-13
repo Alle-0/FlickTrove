@@ -155,7 +155,7 @@ Design is the true crown jewel of FlickTrove.
 
 ## <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
-For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, TheTVDB, OMDB, Trakt) have been excluded from this repository.
+For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, TheTVDB, OMDB, Trakt, Giphy) have been excluded from this repository.
 
 Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
 
@@ -228,8 +228,10 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 **Credits & Useful Resources:**
 
 - 🎬 [The Movie Database (TMDB) API](https://www.themoviedb.org/documentation/api) - For movie and TV show data
-- 📺 [TheTVDB API](https://thetvdb.com/api-information) - For advanced TV show metadata
-- 🛡️ [Shields.io](https://shields.io) - For README badges
+- 📺 [TheTVDB API](https://thetvdb.com/api-information) - For TV show data and artwork
+- 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
+- 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
+- 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 

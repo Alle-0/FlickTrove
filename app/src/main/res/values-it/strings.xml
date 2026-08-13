@@ -189,8 +189,12 @@
     <string name="settings_show_your_flow">Card Il Tuo Flow</string>
     <string name="settings_show_your_flow_desc">Mostra la card Il Tuo Flow nel tuo profilo.</string>
     <string name="settings_notifications_vibration">Notifiche e Vibrazione</string>
-    <string name="settings_enable_notifications">Attiva Notifiche</string>
-    <string name="settings_enable_notifications_desc">Ricevi un avviso il giorno dell\'uscita dei film o delle serie che segui.</string>
+    <string name="settings_enable_notifications_releases">Notifiche Uscite</string>
+    <string name="settings_enable_notifications_releases_desc">Ricevi un avviso il giorno dell\'uscita dei film o delle serie che segui.</string>
+    <string name="settings_enable_notifications_social">Notifiche Risposte</string>
+    <string name="settings_enable_notifications_social_desc">Ricevi un avviso quando qualcuno risponde al tuo commento.</string>
+    <string name="notification_reply_title">Nuova Risposta</string>
+    <string name="notification_reply_body">%1$s ha risposto al tuo commento.</string>
     <string name="settings_haptic_feedback">Feedback aptico</string>
     <string name="settings_haptic_feedback_desc">Vibrazione alle azioni dell\'interfaccia</string>
     <string name="settings_images">Immagini</string>

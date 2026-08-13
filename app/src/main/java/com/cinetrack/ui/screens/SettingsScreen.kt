@@ -314,7 +314,7 @@ fun SettingsScreenContent(
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
-    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsStateWithLifecycle()
+
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
     val updateInfo by settingsViewModel.updateInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
@@ -392,7 +392,10 @@ fun SettingsScreenContent(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        settingsViewModel.toggleNotifications(isGranted)
+        if (!isGranted) {
+            settingsViewModel.toggleNotificationsReleases(false)
+            settingsViewModel.toggleNotificationsSocial(false)
+        }
     }
 
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showFeedbackDialog || 

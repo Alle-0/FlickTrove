@@ -76,6 +76,14 @@ class AuthViewModel @Inject constructor(
                     trySend(AuthState.Anonymous)
                 } else {
                     trySend(AuthState.Authenticated)
+                    try {
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("user_fcm_tokens").document(user.uid)
+                                .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             auth.addAuthStateListener(listener)
