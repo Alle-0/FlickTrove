@@ -459,7 +459,7 @@ class CommentsScreen(
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier.pointerInput(comment.isSpoiler, isSpoilerRevealed) {
                                         if (comment.isSpoiler && !isSpoilerRevealed) {
-                                            androidx.compose.foundation.gestures.detectTapGestures(onTap = { offset ->
+                                            detectTapGestures(onTap = { offset ->
                                                 tapOffset = offset
                                                 coroutineScope.launch {
                                                     revealRadius.animateTo(
