@@ -279,8 +279,8 @@ data class Movie(
     @ColumnInfo(name = "accent_color_static") var accentColorStatic: String? = null,
     
     @SerialName("origin_country")
-    @get:PropertyName("origin_country")
-    @set:PropertyName("origin_country")
+    @get:Exclude
+    @set:Exclude
     @ColumnInfo(name = "origin_country") var originCountry: List<String>? = null,
 
     // System Fields
