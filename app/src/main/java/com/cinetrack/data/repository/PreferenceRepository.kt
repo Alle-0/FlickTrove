@@ -222,7 +222,8 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.GRID_COLUMNS] = prefs.gridColumns
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = prefs.showLayoutToggle
             preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] = prefs.isSearchSuggestionsExpanded
-            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = prefs.notificationsEnabled
+            preferences[PreferencesKeys.NOTIFICATIONS_RELEASES] = prefs.notificationsReleases
+            preferences[PreferencesKeys.NOTIFICATIONS_SOCIAL] = prefs.notificationsSocial
             preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] = prefs.showFolderBookmarks
             preferences[PreferencesKeys.SHOW_BADGES] = prefs.showBadges
             preferences[PreferencesKeys.DISABLED_BADGES] = prefs.disabledBadges
