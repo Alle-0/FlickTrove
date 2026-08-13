@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.screens.CommentSortOrder
+import com.cinetrack.data.model.CommentSortOrder
 import com.cinetrack.ui.screens.FolderSortOption
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick

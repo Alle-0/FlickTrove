@@ -14,20 +14,59 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
+import com.cinetrack.data.model.SocialNotification
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
     val notificationCount: Int = 0,
+    val socialNotifications: ImmutableList<SocialNotification> = persistentListOf(),
+    val socialUnreadCount: Int = 0,
     val isLoading: Boolean = true
 )
 
 @HiltViewModel
 class UpdatesViewModel @Inject constructor(
-    private val repository: MovieRepository
+    private val repository: MovieRepository,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : ViewModel() {
 
-    val uiState: StateFlow<UpdatesUiState> = repository.getLocalMoviesFlow()
-        .map { movies ->
+    private val _socialNotifications = MutableStateFlow<ImmutableList<SocialNotification>>(persistentListOf())
+    private val _socialUnreadCount = MutableStateFlow(0)
+
+    init {
+        observeSocialNotifications()
+    }
+
+    private fun observeSocialNotifications() {
+        val userId = auth.currentUser?.uid ?: return
+        
+        firestore.collection("user_social_notifications").document(userId)
+            .collection("items")
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .limit(50)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@addSnapshotListener
+                }
+                
+                if (snapshot != null) {
+                    val notifs = snapshot.documents.mapNotNull { it.toObject(SocialNotification::class.java) }
+                    _socialNotifications.value = notifs.toImmutableList()
+                    _socialUnreadCount.value = notifs.count { !it.isRead }
+                }
+            }
+    }
+
+    val uiState: StateFlow<UpdatesUiState> = combine(
+        repository.getLocalMoviesFlow(),
+        _socialNotifications,
+        _socialUnreadCount
+    ) { movies, socialNotifs, socialUnread ->
             val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
                 (!it.dropped && (it.newEpisodesFound ?: 0) > 0) || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped)
@@ -39,6 +78,8 @@ class UpdatesViewModel @Inject constructor(
             UpdatesUiState(
                 movies = updateList.toImmutableList(),
                 notificationCount = unreadNotifCount,
+                socialNotifications = socialNotifs,
+                socialUnreadCount = socialUnread,
                 isLoading = false
             )
         }
@@ -87,5 +128,19 @@ class UpdatesViewModel @Inject constructor(
                 repository.saveMovie(movie.copy(migratedAt = null))
             }
         }
+    }
+
+    fun markSocialNotificationAsRead(id: String) {
+        val userId = auth.currentUser?.uid ?: return
+        firestore.collection("user_social_notifications").document(userId)
+            .collection("items").document(id)
+            .update("isRead", true)
+    }
+
+    fun deleteSocialNotification(id: String) {
+        val userId = auth.currentUser?.uid ?: return
+        firestore.collection("user_social_notifications").document(userId)
+            .collection("items").document(id)
+            .delete()
     }
 }

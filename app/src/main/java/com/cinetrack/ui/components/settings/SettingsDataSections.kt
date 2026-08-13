@@ -536,6 +536,10 @@ fun SettingsSupportSection(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AttributionRow(
+                brand = "GIPHY",
+                text = stringResource(R.string.settings_giphy_notice)
+            )
+            AttributionRow(
                 brand = "TMDB",
                 text = stringResource(R.string.settings_tmdb_notice)
             )

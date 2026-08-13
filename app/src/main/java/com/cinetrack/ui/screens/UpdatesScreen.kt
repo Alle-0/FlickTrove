@@ -108,6 +108,7 @@ fun UpdatesScreen(
     val newEpisodes = movies.filter { (it.newEpisodesFound ?: 0) > 0 }
     val releasedRecently = movies.filter { it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0 }
     var remindersCategoryTab by rememberSaveable { mutableIntStateOf(0) }
+    var mainTab by rememberSaveable { mutableIntStateOf(0) }
 
     val rawFutureReminders = remember(movies, today) {
         movies.flatMap { it.generateReminderItems(today) }
@@ -131,6 +132,7 @@ fun UpdatesScreen(
     var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
     var showMonthPicker by remember { mutableStateOf(false) }
 
+    val socialListState = rememberLazyListState()
     val remindersListState = rememberLazyListState()
     LaunchedEffect(remindersCategoryTab) {
         remindersListState.scrollToItem(0)
@@ -167,7 +169,9 @@ fun UpdatesScreen(
     }
 
     BackHandler(enabled = !isClosing) {
-        if (pagerState.currentPage > 0) {
+        if (mainTab != 0) {
+            mainTab = 0
+        } else if (pagerState.currentPage > 0) {
             scope.launch { pagerState.animateScrollToPage(0) }
         } else {
             triggerExit()
@@ -232,11 +236,26 @@ fun UpdatesScreen(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
-                        userScrollEnabled = true
-                    ) { pageIndex ->
+                    AnimatedContent(
+                        targetState = mainTab,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                (slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> width } + fadeIn(animationSpec = tween(350))) togetherWith
+                                (slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> -width } + fadeOut(animationSpec = tween(350)))
+                            } else {
+                                (slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> -width } + fadeIn(animationSpec = tween(350))) togetherWith
+                                (slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> width } + fadeOut(animationSpec = tween(350)))
+                            }
+                        },
+                        label = "MainTabTransition",
+                        modifier = Modifier.fillMaxSize()
+                    ) { tabIndex ->
+                        if (tabIndex == 0) {
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize(),
+                                userScrollEnabled = true
+                            ) { pageIndex ->
                         if (pageIndex == 1) {
                             // REMINDERS VIEW
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -309,7 +328,6 @@ fun UpdatesScreen(
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.TopCenter)
-                                            .fillMaxWidth()
                                             .statusBarsPadding()
                                             .displayCutoutPadding()
                                             .padding(top = 78.dp)
@@ -317,7 +335,11 @@ fun UpdatesScreen(
                                             .zIndex(9f),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Spacer(
+                                        Box(
+                                            modifier = Modifier.wrapContentSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Spacer(
                                             modifier = Modifier
                                                 .matchParentSize()
                                                 .hazeGlass(
@@ -349,7 +371,8 @@ fun UpdatesScreen(
                                     }
                                 }
                             }
-                        } else {
+                        }
+                    } else {
                             // MAIN NOTIFICATIONS VIEW
                             Box(
                                 modifier = Modifier
@@ -365,7 +388,7 @@ fun UpdatesScreen(
                                     start = 20.dp, 
                                     end = 20.dp, 
                                     bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                                    top = 124.dp 
+                                    top = 195.dp 
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
@@ -493,12 +516,67 @@ fun UpdatesScreen(
                                             EmptyNotificationsState()
                                         }
                                     }
+                                } // end uiState.isLoading else
+                            } // end LazyColumn
+                        } // end Box
+                    } // end else
+                } // end HorizontalPager lambda
+            } else { // closes if (mainTab == 0)
+                        // SOCIAL TAB
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .haze(
+                                    state = internalHazeState,
+                                    style = HazeStyles.PremiumDark
+                                )
+                        ) {
+                            LazyColumn(
+                                state = socialListState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(
+                                    start = 16.dp, 
+                                    end = 16.dp, 
+                                    bottom = paddingValues.calculateBottomPadding() + 80.dp, 
+                                    top = 195.dp 
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                if (uiState.socialNotifications.isEmpty()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier.fillParentMaxSize(), 
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
+                                        }
+                                    }
+                                } else {
+                                    items(uiState.socialNotifications, key = { it.id }, contentType = { "social_notif" }) { notif ->
+                                        androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                            SocialNotificationCard(
+                                                notification = notif,
+                                                onClick = {
+                                                    viewModel.markSocialNotificationAsRead(notif.id)
+                                                    // Navigate to MovieDetailScreen(openComments = true)
+                                                    val movie = Movie(
+                                                        id = notif.mediaId.toLongOrNull() ?: 0L,
+                                                        mediaType = notif.mediaType,
+                                                        title = notif.mediaTitle,
+                                                        posterPath = null,
+                                                        backdropPath = null
+                                                    )
+                                                    onMovieClick(movie)
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    }
-                }
+                    } // end AnimatedContent
+                } // end Content Layer Box
 
                 // 2. Fixed Header (Layered on top of content)
                 Box(
@@ -515,14 +593,18 @@ fun UpdatesScreen(
                         .zIndex(10f),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .displayCutoutPadding()
-                            .height(64.dp),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .statusBarsPadding()
+                                .displayCutoutPadding()
+                                .height(64.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                     // Back Button
                     Box(
                         modifier = Modifier
@@ -601,8 +683,55 @@ fun UpdatesScreen(
                             )
                         }
                     }
-                } // end inner Box (statusBarsPadding)
-            } // end outer Box (hazeGlass header)
+                    } // end inner Box (statusBarsPadding)
+                    } // end Column
+                } // end outer Box (hazeGlass header)
+
+                // 3. Floating Notifications Tab Selector (Separate from Header)
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = pagerState.currentPage == 0,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .statusBarsPadding()
+                        .displayCutoutPadding()
+                        .padding(top = 78.dp)
+                        .padding(horizontal = 24.dp)
+                        .zIndex(9f),
+                    enter = fadeIn() + slideInVertically { -it / 2 },
+                    exit = fadeOut() + slideOutVertically { -it / 2 }
+                ) {
+                    Box(
+                        modifier = Modifier.wrapContentSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Spacer(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(
+                                    state = internalHazeState,
+                                    shape = CircleShape,
+                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                    useOffscreenStrategy = false
+                                )
+                        )
+                        val mainOptions = listOf(stringResource(R.string.updates_tab_library), stringResource(R.string.updates_tab_social))
+                        val mainCounts = listOf(
+                            uiState.notificationCount + rawFutureReminders.size,
+                            uiState.socialUnreadCount
+                        )
+                        com.cinetrack.ui.components.common.CategoryTabSelector(
+                            options = mainOptions,
+                            counts = mainCounts,
+                            selectedIndex = mainTab,
+                            onOptionClick = { index ->
+                                mainTab = index
+                                if (index == 1) {
+                                    scope.launch { socialListState.scrollToItem(0) }
+                                }
+                            }
+                        )
+                    }
+                }
 
 
         } // end Box(fillMaxSize)

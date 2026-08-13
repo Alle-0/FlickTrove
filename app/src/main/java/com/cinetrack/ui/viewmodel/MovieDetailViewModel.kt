@@ -98,7 +98,7 @@ class MovieDetailViewModel @Inject constructor(
             
             // Fetch comments
             viewModelScope.launch {
-                val comments = commentRepository.getCommentsForMedia(movieId.toString()).first
+                val comments = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
                 _appComments.value = comments
             }
 
@@ -333,7 +333,7 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { commentRepository.getCommentsForMedia(tmdbId.toString()).first }
+                val commentsDeferred = async { commentRepository.getTopCommentsForMediaPreview(tmdbId.toString()) }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
@@ -402,11 +402,13 @@ class MovieDetailViewModel @Inject constructor(
             _appComments.value = currentComments
         }
 
-        // Background call
+        // Chiamata di rete in background
         viewModelScope.launch {
-            val success = commentRepository.toggleLike(movieId.toString(), commentId)
+            val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
+            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
+            val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
             if (!success) {
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
+                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
             }
         }
     }
@@ -818,27 +820,31 @@ class MovieDetailViewModel @Inject constructor(
                 isSpoiler = isSpoiler,
                 parentId = parentId,
                 parentUserId = parentUserId,
-                depth = depth
+                depth = depth,
+                mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" },
+                mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
             )
             if (success) {
                 // Refresh comments
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
+                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
             }
         }
     }
 
     fun refreshComments() {
         viewModelScope.launch {
-            _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
+            _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
         }
     }
 
     fun toggleLikeComment(commentId: String) {
         viewModelScope.launch {
-            val success = commentRepository.toggleLike(movieId.toString(), commentId)
+            val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
+            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
+            val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
             if (success) {
                 // Refresh comments
-                _appComments.value = commentRepository.getCommentsForMedia(movieId.toString()).first
+                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
             }
         }
     }

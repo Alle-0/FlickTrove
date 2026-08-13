@@ -15,6 +15,7 @@ if (!serviceAccountKey) {
     initializeApp({
       credential: cert(serviceAccount)
     })
+    getFirestore().settings({ preferRest: true })
     console.log("Firebase Admin initialized successfully.")
   } catch (error) {
     console.error("Error parsing FIREBASE_SERVICE_ACCOUNT:", error)

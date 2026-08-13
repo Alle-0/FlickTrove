@@ -222,6 +222,8 @@
     <string name="settings_terms_service">Termini di Servizio</string>
     <string name="settings_privacy_policy">Informativa sulla Privacy</string>
     <string name="settings_tmdb_notice">Questo prodotto utilizza l\'API di TMDB ma non è approvato o certificato da TMDB.</string>
+    <string name="settings_giphy_notice">GIF animate da GIPHY</string>
+    <string name="settings_tvdb_notice">Serie metadata forniti da TheTVDB.</string>
     <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
     <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
     <string name="settings_made_with">Sviluppato con </string>
@@ -504,6 +506,10 @@
     <string name="updates_available_now">Disponibile ora</string>
     <string name="updates_tab_reminders">Promemoria</string>
     <string name="updates_tab_notifications">Notifiche</string>
+    <string name="updates_tab_library">Libreria</string>
+    <string name="updates_tab_social">Social</string>
+    <string name="updates_social_liked">ha messo mi piace al tuo commento</string>
+    <string name="updates_social_replied">ha risposto al tuo commento</string>
     <string name="updates_your_reminders">I tuoi Promemoria</string>
     <string name="updates_waiting_count">%1$d in attesa</string>
     <string name="updates_no_notifications">Nessuna notifica recente.</string>

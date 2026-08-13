@@ -305,6 +305,7 @@ fun AttributionRow(
         "TMDB" -> R.drawable.ic_tmdb_logo
         "Trakt.tv" -> R.drawable.ic_trakt_logo
         "TheTVDB" -> R.drawable.ic_tvdb_logo
+        "GIPHY" -> R.drawable.ic_giphy_logo
         else -> null
     }
 
@@ -332,6 +333,7 @@ fun AttributionRow(
                         "OMDb API" -> Color(0xFFF5C518)
                         "TheTVDB" -> Color(0xFF31B057)
                         "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
+                        "GIPHY" -> Color.Black
                         else -> Color.White.copy(alpha = 0.05f)
                     }
                 )
@@ -344,7 +346,13 @@ fun AttributionRow(
                     contentDescription = "$brand Logo",
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(if (brand == "TMDB") 6.dp else 0.dp),
+                        .padding(
+                            when (brand) {
+                                "TMDB" -> 6.dp
+                                "GIPHY" -> 8.dp
+                                else -> 0.dp
+                            }
+                        ),
                     contentScale = ContentScale.Fit
                 )
             } else {
@@ -353,11 +361,12 @@ fun AttributionRow(
                     text = when (brand) {
                         "OMDb API" -> "OMDb"
                         "TheTVDB" -> "TVDB"
+                        "GIPHY" -> "GIPHY"
                         else -> brand.take(1)
                     },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB") 10.sp else 14.sp
+                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY") 10.sp else 14.sp
                     ),
                     color = if (brand == "OMDb API") Color.Black else Color.White
                 )

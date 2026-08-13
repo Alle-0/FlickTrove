@@ -114,7 +114,7 @@ fun DetailComments(
         }
 
         val sortedComments = remember(comments) {
-            comments.filter { it.depth == 0 }.sortedByDescending { it.likesCount }.take(10)
+            comments.filter { it.depth == 0 }.sortedByDescending { it.likesCount }.take(5)
         }
 
         if (comments.isEmpty()) {

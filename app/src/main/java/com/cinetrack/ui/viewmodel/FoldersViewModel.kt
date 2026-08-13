@@ -31,8 +31,8 @@ class FoldersViewModel @Inject constructor(
     private val _sortOption = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.FolderSortOption.DATE)
     val sortOption: StateFlow<com.cinetrack.ui.screens.FolderSortOption> = _sortOption
 
-    private val _sortOrder = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.CommentSortOrder.DESC)
-    val sortOrder: StateFlow<com.cinetrack.ui.screens.CommentSortOrder> = _sortOrder
+    private val _sortOrder = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.data.model.CommentSortOrder.DESC)
+    val sortOrder: StateFlow<com.cinetrack.data.model.CommentSortOrder> = _sortOrder
 
     init {
         viewModelScope.launch {
@@ -42,7 +42,7 @@ class FoldersViewModel @Inject constructor(
                     "items" -> com.cinetrack.ui.screens.FolderSortOption.ITEMS
                     else -> com.cinetrack.ui.screens.FolderSortOption.DATE
                 }
-                _sortOrder.value = if (prefs.foldersSort.sortDirection == "asc") com.cinetrack.ui.screens.CommentSortOrder.ASC else com.cinetrack.ui.screens.CommentSortOrder.DESC
+                _sortOrder.value = if (prefs.foldersSort.sortDirection == "asc") com.cinetrack.data.model.CommentSortOrder.ASC else com.cinetrack.data.model.CommentSortOrder.DESC
             }
         }
     }
@@ -65,14 +65,14 @@ class FoldersViewModel @Inject constructor(
             com.cinetrack.ui.screens.FolderSortOption.NAME -> list.sortedBy { it.name.lowercase() }
             com.cinetrack.ui.screens.FolderSortOption.ITEMS -> list.sortedBy { it.itemIds.size }
         }
-        if (order == com.cinetrack.ui.screens.CommentSortOrder.DESC) sorted.reversed().toImmutableList() else sorted.toImmutableList()
+        if (order == com.cinetrack.data.model.CommentSortOrder.DESC) sorted.reversed().toImmutableList() else sorted.toImmutableList()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = persistentListOf()
     )
 
-    fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.ui.screens.CommentSortOrder) {
+    fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.data.model.CommentSortOrder) {
         _sortOption.value = option
         _sortOrder.value = order
         viewModelScope.launch {
@@ -81,7 +81,7 @@ class FoldersViewModel @Inject constructor(
                 com.cinetrack.ui.screens.FolderSortOption.ITEMS -> "items"
                 else -> "date"
             }
-            val sortDirectionString = if (order == com.cinetrack.ui.screens.CommentSortOrder.ASC) "asc" else "desc"
+            val sortDirectionString = if (order == com.cinetrack.data.model.CommentSortOrder.ASC) "asc" else "desc"
             val newConfig = com.cinetrack.data.model.SortConfig(sortType = sortTypeString, sortDirection = sortDirectionString)
             preferenceRepository.updateFoldersSort(newConfig)
             // Get latest prefs to save remotely

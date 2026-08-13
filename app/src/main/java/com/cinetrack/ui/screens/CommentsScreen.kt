@@ -69,15 +69,18 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.drawscope.clipPath
+import com.cinetrack.data.model.CommentSortOption
+import com.cinetrack.data.model.CommentSortOrder
 
-enum class CommentSortOption { DATE, LIKES }
-enum class CommentSortOrder { ASC, DESC }
+typealias CommentSortOption = com.cinetrack.data.model.CommentSortOption
+typealias CommentSortOrder = com.cinetrack.data.model.CommentSortOrder
 
 class CommentsScreen(
     private val mediaId: String,
     private val mediaType: String,
     private val accentColorValue: Long,
     private val mediaTitle: String = "",
+    private val mediaImage: String? = null,
     private val focusInputOnLaunch: Boolean = false
 ) : Screen {
 
@@ -121,6 +124,10 @@ class CommentsScreen(
         var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
         var showSortMenu by remember { mutableStateOf(false) }
+
+        LaunchedEffect(sortOption, sortOrder) {
+            viewModel.setSort(sortOption, sortOrder)
+        }
         val localFocusManager = LocalFocusManager.current
         val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val context = androidx.compose.ui.platform.LocalContext.current
@@ -573,7 +580,7 @@ class CommentsScreen(
                                     Row(
                                         modifier = Modifier.bounceClick {
                                             if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
-                                            else viewModel.toggleLikeComment(comment.id) 
+                                            else viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage) 
                                         },
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -664,13 +671,17 @@ class CommentsScreen(
                                     }
                                 }
                                 
-                                val childrenCount = comments.count { it.parentId == comment.id }
+                                val childrenCount = maxOf(comment.repliesCount, comments.count { it.parentId == comment.id })
                                 if (childrenCount > 0) {
                                     val isExpanded = expandedComments.value.contains(comment.id)
                                     Row(
                                         modifier = Modifier
                                             .padding(top = 8.dp)
                                             .bounceClick {
+                                                val willExpand = !isExpanded
+                                                if (willExpand) {
+                                                    viewModel.loadRepliesForComment(comment.id)
+                                                }
                                                 expandedComments.value = if (isExpanded) {
                                                     expandedComments.value - comment.id
                                                 } else {
@@ -847,7 +858,7 @@ class CommentsScreen(
                                             }
                                             
                                             localFocusManager.clearFocus()
-                                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth)
+                                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage)
                                             inputText = androidx.compose.ui.text.input.TextFieldValue("")
                                             attachedMedia = emptyList()
                                             replyingTo = null

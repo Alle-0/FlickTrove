@@ -92,6 +92,14 @@ fun MainDeepLinkHandler(
                 val reqType = intent.getStringExtra("requestedType") ?: "popular_movies"
                 DiscoverTab.requestedType = reqType
                 tabNavigator.current = DiscoverTab
+            } else if (action == "com.cinetrack.FLICKTROVE_SOCIAL_NOTIFICATION") {
+                val mediaId = intent.getStringExtra("mediaId")?.toLongOrNull()
+                val mediaType = intent.getStringExtra("mediaType")
+                if (mediaId != null && mediaType != null) {
+                    when (mediaType) {
+                        "movie", "tv" -> rootNavigator.push(MovieDetailScreen(mediaId, mediaType, openComments = true))
+                    }
+                }
             }
             
             deepLinkIntent.value = null

@@ -45,6 +45,11 @@ class CommentsViewModel @Inject constructor(
 
     private var lastVisibleComment: com.google.firebase.firestore.DocumentSnapshot? = null
 
+    var currentSortOption = com.cinetrack.data.model.CommentSortOption.DATE
+        private set
+    var currentSortOrder = com.cinetrack.data.model.CommentSortOrder.DESC
+        private set
+
     val currentUserId: String? get() = auth.currentUser?.uid
 
     private var currentMediaId: String = ""
@@ -78,11 +83,26 @@ class CommentsViewModel @Inject constructor(
         refreshComments()
     }
 
+    fun setSort(sortOption: com.cinetrack.data.model.CommentSortOption, sortOrder: com.cinetrack.data.model.CommentSortOrder) {
+        if (currentSortOption == sortOption && currentSortOrder == sortOrder) return
+        currentSortOption = sortOption
+        currentSortOrder = sortOrder
+        refreshComments()
+    }
+
     private fun refreshComments() {
         viewModelScope.launch {
             _isLoading.value = true
             lastVisibleComment = null
-            val result = commentRepository.getCommentsForMedia(currentMediaId)
+            val sortBy = if (currentSortOption == com.cinetrack.data.model.CommentSortOption.LIKES) "likesCount" else "createdAt"
+            val direction = if (currentSortOrder == com.cinetrack.data.model.CommentSortOrder.ASC) com.google.firebase.firestore.Query.Direction.ASCENDING else com.google.firebase.firestore.Query.Direction.DESCENDING
+            val result = commentRepository.getCommentsForMedia(
+                mediaId = currentMediaId,
+                limit = 10,
+                sortBy = sortBy,
+                direction = direction,
+                lastVisible = null
+            )
             _comments.value = result.first
             lastVisibleComment = result.second
             _hasMoreComments.value = result.second != null
@@ -95,21 +115,43 @@ class CommentsViewModel @Inject constructor(
         
         viewModelScope.launch {
             _isLoadingMore.value = true
+            val sortBy = if (currentSortOption == com.cinetrack.data.model.CommentSortOption.LIKES) "likesCount" else "createdAt"
+            val direction = if (currentSortOrder == com.cinetrack.data.model.CommentSortOrder.ASC) com.google.firebase.firestore.Query.Direction.ASCENDING else com.google.firebase.firestore.Query.Direction.DESCENDING
             val result = commentRepository.getCommentsForMedia(
                 mediaId = currentMediaId,
+                limit = 10,
+                sortBy = sortBy,
+                direction = direction,
                 lastVisible = lastVisibleComment
             )
             
             val newComments = result.first
             if (newComments.isNotEmpty()) {
                 val currentList = _comments.value.toMutableList()
-                currentList.addAll(newComments)
+                val existingIds = currentList.map { it.id }.toSet()
+                val toAdd = newComments.filterNot { existingIds.contains(it.id) }
+                currentList.addAll(toAdd)
                 _comments.value = currentList
             }
             
             lastVisibleComment = result.second
             _hasMoreComments.value = result.second != null
             _isLoadingMore.value = false
+        }
+    }
+
+    fun loadRepliesForComment(commentId: String) {
+        viewModelScope.launch {
+            val replies = commentRepository.getRepliesForComment(currentMediaId, commentId)
+            if (replies.isNotEmpty()) {
+                val current = _comments.value.toMutableList()
+                val existingIds = current.map { it.id }.toSet()
+                val toAdd = replies.filterNot { existingIds.contains(it.id) }
+                if (toAdd.isNotEmpty()) {
+                    current.addAll(toAdd)
+                    _comments.value = current
+                }
+            }
         }
     }
 
@@ -200,7 +242,7 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
-    fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0) {
+    fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0, mediaTitle: String = "", mediaImage: String? = null) {
         viewModelScope.launch {
             val success = commentRepository.addComment(
                 mediaId = currentMediaId,
@@ -209,7 +251,9 @@ class CommentsViewModel @Inject constructor(
                 isSpoiler = isSpoiler,
                 parentId = parentId,
                 parentUserId = parentUserId,
-                depth = depth
+                depth = depth,
+                mediaTitle = mediaTitle,
+                mediaImage = mediaImage
             )
             if (success) {
                 refreshComments()
@@ -217,7 +261,7 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
-    fun toggleLikeComment(commentId: String) {
+    fun toggleLikeComment(commentId: String, mediaTitle: String, mediaImage: String? = null) {
         val uId = currentUserId ?: return
         
         // Aggiornamento ottimistico della UI
@@ -236,7 +280,7 @@ class CommentsViewModel @Inject constructor(
 
         // Chiamata di rete in background
         viewModelScope.launch {
-            val success = commentRepository.toggleLike(currentMediaId, commentId)
+            val success = commentRepository.toggleLike(currentMediaId, commentId, currentMediaType, mediaTitle, mediaImage)
             if (!success) {
                 // In caso di fallimento, ripristina lo stato reale dal server (aggiornando solo il commento specifico o rifacendo la query)
                 refreshComments()

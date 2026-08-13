@@ -29,11 +29,14 @@ class CommentRepository @Inject constructor(
     suspend fun getCommentsForMedia(
         mediaId: String, 
         limit: Long = 10,
+        sortBy: String = "createdAt",
+        direction: Query.Direction = Query.Direction.DESCENDING,
         lastVisible: DocumentSnapshot? = null
     ): Pair<List<AppComment>, DocumentSnapshot?> {
         return try {
             var query = getMediaCommentsCollection(mediaId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereEqualTo("depth", 0)
+                .orderBy(sortBy, direction)
                 .limit(limit)
 
             if (lastVisible != null) {
@@ -55,17 +58,61 @@ class CommentRepository @Inject constructor(
         }
     }
 
+    suspend fun getRepliesForComment(
+        mediaId: String,
+        commentId: String
+    ): List<AppComment> {
+        return try {
+            val snapshot = getMediaCommentsCollection(mediaId)
+                .whereEqualTo("parentId", commentId)
+                .orderBy("createdAt", Query.Direction.ASCENDING)
+                .get()
+                .await()
+            
+            snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment -> 
+                appComment.copy(id = snapshot.documents[index].id)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    suspend fun getTopCommentsForMediaPreview(
+        mediaId: String, 
+        limit: Long = 5
+    ): List<AppComment> {
+        return try {
+            val snapshot = getMediaCommentsCollection(mediaId)
+                .whereEqualTo("depth", 0)
+                .orderBy("likesCount", Query.Direction.DESCENDING)
+                .limit(limit)
+                .get()
+                .await()
+            
+            snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment -> 
+                appComment.copy(id = snapshot.documents[index].id)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
     suspend fun addComment(
         mediaId: String,
         mediaType: String,
         text: String,
-        isSpoiler: Boolean,
+        isSpoiler: Boolean = false,
         parentId: String? = null,
         parentUserId: String? = null,
-        depth: Int = 0
+        depth: Int = 0,
+        mediaTitle: String = "",
+        mediaImage: String? = null
     ): Boolean {
         val user = auth.currentUser ?: return false
         val newComment = AppComment(
+            id = "", // Will be set by Firestore
             mediaId = mediaId,
             mediaType = mediaType,
             userId = user.uid,
@@ -80,7 +127,7 @@ class CommentRepository @Inject constructor(
         )
 
         return try {
-            firestore.runTransaction { transaction ->
+            val generatedCommentId = firestore.runTransaction { transaction ->
                 val mediaCommentsColl = getMediaCommentsCollection(mediaId)
                 val newDocRef = mediaCommentsColl.document()
                 transaction.set(newDocRef, newComment)
@@ -90,9 +137,30 @@ class CommentRepository @Inject constructor(
                     val parentRef = mediaCommentsColl.document(parentId)
                     transaction.update(parentRef, "repliesCount", FieldValue.increment(1))
                 }
+                newDocRef.id
             }.await()
             
             if (parentId != null && parentUserId != null && parentUserId != user.uid) {
+                // Inserimento della notifica Social in-app (Risposta)
+                val notifRef = firestore.collection("user_social_notifications")
+                    .document(parentUserId).collection("items").document()
+                val socialNotif = hashMapOf(
+                    "id" to notifRef.id,
+                    "type" to "reply",
+                    "mediaId" to mediaId,
+                    "mediaType" to mediaType,
+                    "mediaTitle" to mediaTitle,
+                    "mediaImage" to mediaImage,
+                    "commentId" to generatedCommentId,
+                    "senderName" to (user.displayName ?: "Qualcuno"),
+                    "senderUserId" to user.uid,
+                    "createdAt" to Timestamp.now(),
+                    "isRead" to false
+                )
+                firestore.runTransaction { transaction ->
+                    transaction.set(notifRef, socialNotif)
+                }.await()
+
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     try {
                         val prefsDoc = firestore.collection("users").document(parentUserId)
@@ -106,7 +174,9 @@ class CommentRepository @Inject constructor(
                                 bodyLocKey = "notification_reply_body",
                                 bodyLocArgs = listOf(user.displayName ?: "Qualcuno"),
                                 mediaId = mediaId.toLongOrNull() ?: 0L,
-                                mediaType = mediaType
+                                mediaType = mediaType,
+                                mediaImage = mediaImage,
+                                commentId = generatedCommentId
                             )
                         }
                     } catch (e: Exception) {
@@ -122,7 +192,13 @@ class CommentRepository @Inject constructor(
         }
     }
 
-    suspend fun toggleLike(mediaId: String, commentId: String): Boolean {
+    suspend fun toggleLike(
+        mediaId: String, 
+        commentId: String,
+        mediaType: String,
+        mediaTitle: String,
+        mediaImage: String? = null
+    ): Boolean {
         val userId = auth.currentUser?.uid ?: return false
         val docRef = getMediaCommentsCollection(mediaId).document(commentId)
         
@@ -132,12 +208,36 @@ class CommentRepository @Inject constructor(
                 if (!snapshot.exists()) return@runTransaction
                 
                 val currentLikes = snapshot.get("likedBy") as? List<*> ?: emptyList<String>()
-                if (currentLikes.contains(userId)) {
+                val isLiking = !currentLikes.contains(userId)
+                
+                if (!isLiking) {
                     transaction.update(docRef, "likesCount", FieldValue.increment(-1))
                     transaction.update(docRef, "likedBy", FieldValue.arrayRemove(userId))
                 } else {
                     transaction.update(docRef, "likesCount", FieldValue.increment(1))
                     transaction.update(docRef, "likedBy", FieldValue.arrayUnion(userId))
+                    
+                    // Inserimento notifica Social in-app (Like)
+                    val commentOwnerId = snapshot.getString("userId")
+                    if (commentOwnerId != null && commentOwnerId != userId) {
+                        val notifRef = firestore.collection("user_social_notifications")
+                            .document(commentOwnerId).collection("items").document()
+                        
+                        val notif = hashMapOf(
+                            "id" to notifRef.id,
+                            "type" to "like",
+                            "mediaId" to mediaId,
+                            "mediaType" to mediaType,
+                            "mediaTitle" to mediaTitle,
+                            "mediaImage" to mediaImage,
+                            "commentId" to commentId,
+                            "senderName" to (auth.currentUser?.displayName ?: "Qualcuno"),
+                            "senderUserId" to userId,
+                            "createdAt" to Timestamp.now(),
+                            "isRead" to false
+                        )
+                        transaction.set(notifRef, notif)
+                    }
                 }
             }.await()
             true

@@ -23,3 +23,6 @@ data class AppComment(
     @set:PropertyName("isSpoiler")
     var isSpoiler: Boolean = false
 )
+
+enum class CommentSortOption { DATE, LIKES }
+enum class CommentSortOrder { ASC, DESC }

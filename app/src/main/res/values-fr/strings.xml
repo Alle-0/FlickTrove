@@ -228,6 +228,7 @@
     <string name="settings_terms_service">Conditions d\'utilisation</string>
     <string name="settings_privacy_policy">Politique de confidentialité</string>
     <string name="settings_tmdb_notice">Ce produit utilise l\'API TMDB mais n\'est ni approuvé ni certifié par TMDB.</string>
+    <string name="settings_giphy_notice">GIFs fournis par GIPHY</string>
     <string name="settings_omdb_notice">Données et notes supplémentaires fournies par l\'API OMDb.</string>
     <string name="settings_tvdb_notice">Métadonnées des séries fournies par TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronisation et statistiques propulsées par Trakt.tv.</string>
@@ -1059,4 +1060,8 @@
     <string name="comment_already_in_language">Le commentaire est déjà dans votre langue</string>
     <string name="see_all_countries">Voir tout</string>
     <string name="show_less">Voir moins</string>
+    <string name="updates_tab_library">Bibliothèque</string>
+    <string name="updates_tab_social">Social</string>
+    <string name="updates_social_liked">a aimé votre commentaire</string>
+    <string name="updates_social_replied">a répondu à votre commentaire</string>
 </resources>

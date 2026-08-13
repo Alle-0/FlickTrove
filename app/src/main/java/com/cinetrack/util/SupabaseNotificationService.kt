@@ -20,7 +20,9 @@ object SupabaseNotificationService {
         bodyLocKey: String? = null,
         bodyLocArgs: List<String>? = null,
         mediaId: Long,
-        mediaType: String
+        mediaType: String,
+        mediaImage: String? = null,
+        commentId: String? = null
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val user = FirebaseAuth.getInstance().currentUser ?: return@withContext false
@@ -34,6 +36,7 @@ object SupabaseNotificationService {
                 "$baseUrl/functions/v1/notify-user"
             }
             val url = URL(functionUrl)
+            android.util.Log.d("SupabaseNotification", "Attempting to send notification to: $functionUrl")
             val connection = url.openConnection() as HttpURLConnection
             
             connection.requestMethod = "POST"
@@ -53,6 +56,8 @@ object SupabaseNotificationService {
                 bodyLocArgs?.let { put("bodyLocArgs", org.json.JSONArray(it)) }
                 put("mediaId", mediaId)
                 put("mediaType", mediaType)
+                mediaImage?.let { put("mediaImage", it) }
+                commentId?.let { put("commentId", it) }
             }
 
             OutputStreamWriter(connection.outputStream).use { writer ->
@@ -61,9 +66,17 @@ object SupabaseNotificationService {
             }
 
             val responseCode = connection.responseCode
+            val responseMessage = connection.responseMessage
+            android.util.Log.d("SupabaseNotification", "Response Code: $responseCode, Message: $responseMessage")
+            
+            if (responseCode !in 200..299) {
+                val errorStream = connection.errorStream?.bufferedReader()?.use { it.readText() }
+                android.util.Log.e("SupabaseNotification", "Error Response: $errorStream")
+            }
+            
             return@withContext responseCode in 200..299
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("SupabaseNotification", "Exception while sending notification: ${e.message}", e)
             return@withContext false
         }
     }

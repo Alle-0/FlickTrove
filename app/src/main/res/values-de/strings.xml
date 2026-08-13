@@ -228,6 +228,7 @@
     <string name="settings_terms_service">Nutzungsbedingungen</string>
     <string name="settings_privacy_policy">Datenschutzbestimmungen</string>
     <string name="settings_tmdb_notice">Dieses Produkt nutzt die TMDB-API, wird jedoch nicht von TMDB unterstützt oder zertifiziert.</string>
+    <string name="settings_giphy_notice">GIFs von GIPHY</string>
     <string name="settings_omdb_notice">Zusätzliche Daten und Bewertungen werden von der OMDb API bereitgestellt.</string>
     <string name="settings_tvdb_notice">Serien-Metadaten bereitgestellt von TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronisation und Statistiken unterstützt von Trakt.tv.</string>
@@ -1059,4 +1060,8 @@
     <string name="comment_already_in_language">Der Kommentar ist bereits in deiner Sprache</string>
     <string name="see_all_countries">Alle ansehen</string>
     <string name="show_less">Weniger anzeigen</string>
+    <string name="updates_tab_library">Bibliothek</string>
+    <string name="updates_tab_social">Social</string>
+    <string name="updates_social_liked">gefällt dein Kommentar</string>
+    <string name="updates_social_replied">hat auf deinen Kommentar geantwortet</string>
 </resources>

@@ -21,6 +21,8 @@
     <string name="updates_tab_all">ALL</string>
     <string name="updates_tab_new_releases">NEW RELEASES</string>
     <string name="updates_tab_ongoing_episodes">SERIES EPISODES</string>
+    <string name="updates_tab_library">Library</string>
+    <string name="updates_tab_social">Social</string>
     <string name="home_cd_change_layout">Change Layout</string>
     <string name="home_cd_filters">Filters</string>
     <string name="main_tab_visti">Your List</string>
@@ -228,6 +230,7 @@
     <string name="settings_terms_service">Terms of Service</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+    <string name="settings_giphy_notice">GIFs powered by GIPHY</string>
     <string name="settings_omdb_notice">Additional data and ratings provided by OMDb API.</string>
     <string name="settings_tvdb_notice">Series metadata provided by TheTVDB.</string>
     <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
@@ -1064,4 +1067,6 @@
     <string name="folder_sort_items_count">Items Count</string>
     <string name="see_all_countries">See all</string>
     <string name="show_less">Show less</string>
+    <string name="updates_social_liked">liked your comment</string>
+    <string name="updates_social_replied">replied to your comment</string>
 </resources>

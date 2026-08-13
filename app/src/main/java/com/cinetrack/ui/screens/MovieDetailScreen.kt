@@ -111,7 +111,8 @@ import com.cinetrack.ui.components.dialog.EpisodesBottomSheet
 
 data class MovieDetailScreen(
     val movieId: Long,
-    val mediaType: String
+    val mediaType: String,
+    val openComments: Boolean = false
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
@@ -144,6 +145,7 @@ data class MovieDetailScreen(
 
         MovieDetailScreenContent(
             viewModel = viewModel,
+            openComments = openComments,
             settingsViewModel = settingsViewModel,
             paddingValues = PaddingValues(0.dp),
             onBackClick = { navigator.pop() },
@@ -171,6 +173,7 @@ data class MovieDetailScreen(
 @Composable
 fun MovieDetailScreenContent(
     viewModel: MovieDetailViewModel,
+    openComments: Boolean = false,
     settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -265,6 +268,28 @@ fun MovieDetailScreenContent(
             if (imageUrl != null) {
                 viewModel.fetchAccentColor(imageUrl, movie)
             }
+        }
+    }
+
+    // Handle openComments auto-navigation
+    LaunchedEffect(hasCompletedFirstEnter, uiState) {
+        if (openComments && hasCompletedFirstEnter && uiState is DetailUiState.Success) {
+            val state = uiState as DetailUiState.Success
+            val mediaTitle = state.details.title ?: state.details.name ?: ""
+            val image = buildTmdbImageUrl(state.details.backdropPath ?: state.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
+            val globalAccentColor = settingsViewModel.accentColor.value.toComposeColor()
+            
+            // Push CommentsScreen
+            navigator.push(
+                CommentsScreen(
+                    mediaId = viewModel.movieId.toString(),
+                    mediaType = viewModel.mediaType,
+                    accentColorValue = globalAccentColor.value.toLong(),
+                    mediaTitle = mediaTitle,
+                    mediaImage = image,
+                    focusInputOnLaunch = false
+                )
+            )
         }
     }
 
@@ -515,7 +540,17 @@ fun MovieDetailScreenContent(
                                                 settingsViewModel.triggerGuestAuthDialog()
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
-                                                navigator.push(CommentsScreen(viewModel.movieId.toString(), viewModel.mediaType, globalAccentColor.value.toLong(), mediaTitle, focusInput))
+                                                val image = buildTmdbImageUrl(state.details.backdropPath ?: state.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
+                                                navigator.push(
+                                                    CommentsScreen(
+                                                        mediaId = viewModel.movieId.toString(), 
+                                                        mediaType = viewModel.mediaType, 
+                                                        accentColorValue = globalAccentColor.value.toLong(), 
+                                                        mediaTitle = mediaTitle, 
+                                                        mediaImage = image,
+                                                        focusInputOnLaunch = focusInput
+                                                    )
+                                                )
                                             } 
                                         },
                                         onLikeClick = { commentId ->
