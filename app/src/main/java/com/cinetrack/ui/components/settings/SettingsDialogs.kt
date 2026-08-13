@@ -1040,12 +1040,15 @@ fun LanguageSelectionDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
-                                .clip(RoundedCornerShape(16.dp))
                                 .bounceClick {
                                     if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
                                     onSelect(value)
                                 }
-                                .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.05f))
+                                .background(
+                                    color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .clip(RoundedCornerShape(16.dp))
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {

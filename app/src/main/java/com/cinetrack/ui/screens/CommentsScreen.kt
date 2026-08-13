@@ -179,7 +179,9 @@ class CommentsScreen(
                 },
             topBar = {
                 TopAppBar(
-                    modifier = Modifier.hazeChild(state = hazeState, style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
+                    modifier = Modifier
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                        .hazeChild(state = hazeState, style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
                     title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
                     navigationIcon = {
                         Box(
@@ -386,6 +388,9 @@ class CommentsScreen(
                                 var isTextExpandable by remember { mutableStateOf(false) }
 
                                 var isSpoilerRevealed by remember { mutableStateOf(false) }
+                                var tapOffset by remember { mutableStateOf(Offset.Zero) }
+                                val revealRadius = remember { androidx.compose.animation.core.Animatable(0f) }
+                                val coroutineScope = rememberCoroutineScope()
 
                                 val currentTranslationState = translationStates[comment.id]
                                 val displayedTextRaw = when (currentTranslationState) {
@@ -397,7 +402,7 @@ class CommentsScreen(
                                 val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
                                 val mediaUrls = mediaRegex.findAll(comment.text).map { it.groupValues[1] }.toList()
 
-                                Box(contentAlignment = Alignment.Center) {
+                                val contentToDraw = @Composable { isBlurred: Boolean ->
                                     Column {
                                         if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
                                             Text(
@@ -424,7 +429,7 @@ class CommentsScreen(
                                                 modifier = Modifier
                                                     .animateContentSize()
                                                     .then(
-                                                        if (comment.isSpoiler && !isSpoilerRevealed) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                                        if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                                     )
                                             )
                                         }
@@ -441,39 +446,82 @@ class CommentsScreen(
                                                         .fillMaxWidth()
                                                         .clip(RoundedCornerShape(12.dp))
                                                         .then(
-                                                            if (comment.isSpoiler && !isSpoilerRevealed) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                                            if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                                         ),
                                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                                 )
                                             }
                                         }
                                     }
-                                    
+                                }
+
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.pointerInput(comment.isSpoiler, isSpoilerRevealed) {
+                                        if (comment.isSpoiler && !isSpoilerRevealed) {
+                                            androidx.compose.foundation.gestures.detectTapGestures(onTap = { offset ->
+                                                tapOffset = offset
+                                                coroutineScope.launch {
+                                                    revealRadius.animateTo(
+                                                        targetValue = 2000f,
+                                                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                                                    )
+                                                    isSpoilerRevealed = true
+                                                }
+                                            })
+                                        }
+                                    }
+                                ) {
                                     if (comment.isSpoiler && !isSpoilerRevealed) {
-                                        // Aggiungiamo un overlay scuro per i dispositivi che non supportano Modifier.blur
-                                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-                                            Box(modifier = Modifier.matchParentSize().background(Color(0xFF141414).copy(alpha = 0.9f), RoundedCornerShape(8.dp)))
+                                        contentToDraw(true)
+                                        
+                                        if (revealRadius.value > 0f) {
+                                            Box(modifier = Modifier
+                                                .matchParentSize()
+                                                .clip(androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                                    addOval(androidx.compose.ui.geometry.Rect(
+                                                        center = tapOffset,
+                                                        radius = revealRadius.value
+                                                    ))
+                                                })
+                                            ) {
+                                                contentToDraw(false)
+                                            }
                                         }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                                                .bounceClick { isSpoilerRevealed = true }
+                                        
+                                        androidx.compose.animation.AnimatedVisibility(
+                                            visible = revealRadius.value == 0f,
+                                            enter = fadeIn(),
+                                            exit = fadeOut(animationSpec = tween(200)),
+                                            modifier = Modifier.matchParentSize()
                                         ) {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.ic_eye),
-                                                contentDescription = "Rivela",
-                                                tint = Color.White,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = stringResource(R.string.comment_tap_to_reveal),
-                                                color = Color.White,
-                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                                            )
+                                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                                                    Box(modifier = Modifier.matchParentSize().background(Color(0xFF141414).copy(alpha = 0.9f), RoundedCornerShape(8.dp)))
+                                                }
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(id = R.drawable.ic_eye),
+                                                        contentDescription = "Rivela",
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text(
+                                                        text = stringResource(R.string.comment_tap_to_reveal),
+                                                        color = Color.White,
+                                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                                    )
+                                                }
+                                            }
                                         }
+                                    } else {
+                                        contentToDraw(false)
                                     }
                                 }
                                 

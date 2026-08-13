@@ -68,6 +68,16 @@ class AuthViewModel @Inject constructor(
 
     val authState: StateFlow<AuthState> = combine(
         callbackFlow {
+            // Emit current cached state immediately to prevent splash screen hang
+            val initialUser = auth.currentUser
+            if (initialUser == null) {
+                trySend(AuthState.Unauthenticated)
+            } else if (initialUser.isAnonymous) {
+                trySend(AuthState.Anonymous)
+            } else {
+                trySend(AuthState.Authenticated)
+            }
+
             val listener = FirebaseAuth.AuthStateListener { auth ->
                 val user = auth.currentUser
                 if (user == null) {
