@@ -49,6 +49,8 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 @dagger.hilt.EntryPoint
 @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
@@ -104,8 +106,8 @@ fun DetailComments(
                 ),
                 color = accentColor,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
                     .bounceClick { onOpenThread(true) }
+                    .clip(RoundedCornerShape(12.dp))
                     .background(accentColor.copy(alpha = 0.15f))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
@@ -120,9 +122,9 @@ fun DetailComments(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
+                    .bounceClick { onOpenThread(true) }
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.White.copy(alpha = 0.05f))
-                    .bounceClick { onOpenThread(true) }
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -174,6 +176,8 @@ private fun CommentCard(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var isSpoilerRevealed by remember { mutableStateOf(false) }
+    var tapOffset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    val revealRadius = remember { androidx.compose.animation.core.Animatable(0f) }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val expandedWidth = (configuration.screenWidthDp * 0.85f).dp
     val targetWidth = if (isExpanded) expandedWidth else 280.dp
@@ -413,90 +417,139 @@ private fun CommentCard(
                 val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
                 val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
                 val mediaUrls = mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList()
-                val isBlurred = comment.isSpoiler && !isSpoilerRevealed
-                
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .nestedScroll(nestedScrollConnection)
-                        .verticalScroll(scrollState)
-                        .padding(vertical = 4.dp)
-                ) {
-                    if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
-                        Text(
-                            text = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                lineHeight = 18.sp,
-                                fontSize = 13.sp
-                            ),
-                            color = Color.White.copy(alpha = 0.8f),
-                            maxLines = if (isExpanded) Int.MAX_VALUE else 4,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.then(
-                                if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                val contentToDraw = @Composable { isBlurred: Boolean ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .nestedScroll(nestedScrollConnection)
+                            .verticalScroll(scrollState)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
+                            Text(
+                                text = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    lineHeight = 18.sp,
+                                    fontSize = 13.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.8f),
+                                maxLines = if (isExpanded) Int.MAX_VALUE else 4,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.then(
+                                    if (isBlurred) Modifier.clip(RoundedCornerShape(8.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                )
                             )
-                        )
-                    }
-
-                    if (mediaUrls.isNotEmpty()) {
-                        val imageLoader = remember {
-                            coil.ImageLoader.Builder(context)
-                                .components {
-                                    if (android.os.Build.VERSION.SDK_INT >= 28) {
-                                        add(coil.decode.ImageDecoderDecoder.Factory())
-                                    } else {
-                                        add(coil.decode.GifDecoder.Factory())
-                                    }
-                                }
-                                .build()
                         }
-                        mediaUrls.forEach { mediaUrl ->
-                            coil.compose.AsyncImage(
-                                model = coil.request.ImageRequest.Builder(context)
-                                    .data(mediaUrl)
-                                    .build(),
-                                imageLoader = imageLoader,
-                                contentDescription = "Attachment",
-                                modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .then(
-                                        if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
-                                    ),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                            )
+
+                        if (mediaUrls.isNotEmpty()) {
+                            val imageLoader = remember {
+                                coil.ImageLoader.Builder(context)
+                                    .components {
+                                        if (android.os.Build.VERSION.SDK_INT >= 28) {
+                                            add(coil.decode.ImageDecoderDecoder.Factory())
+                                        } else {
+                                            add(coil.decode.GifDecoder.Factory())
+                                        }
+                                    }
+                                    .build()
+                            }
+                            mediaUrls.forEach { mediaUrl ->
+                                coil.compose.AsyncImage(
+                                    model = coil.request.ImageRequest.Builder(context)
+                                        .data(mediaUrl)
+                                        .build(),
+                                    imageLoader = imageLoader,
+                                    contentDescription = "Attachment",
+                                    modifier = Modifier
+                                        .padding(top = 8.dp)
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .then(
+                                            if (isBlurred) Modifier.clip(RoundedCornerShape(12.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                        ),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            }
                         }
                     }
                 }
 
-                if (isBlurred) {
-                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .background(Color(0xFF141414).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
-                        )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 48.dp, minHeight = 32.dp)
+                        .pointerInput(comment.isSpoiler, isSpoilerRevealed) {
+                        if (comment.isSpoiler && !isSpoilerRevealed) {
+                            detectTapGestures(onTap = { offset ->
+                                tapOffset = offset
+                                coroutineScope.launch {
+                                    revealRadius.animateTo(
+                                        targetValue = 2000f,
+                                        animationSpec = androidx.compose.animation.core.tween(600, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                    )
+                                    isSpoilerRevealed = true
+                                }
+                            })
+                        }
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                            .bounceClick { isSpoilerRevealed = true }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_eye),
-                            contentDescription = "Rivela",
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.comment_tap_to_reveal),
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
-                        )
+                ) {
+                    if (comment.isSpoiler && !isSpoilerRevealed) {
+                        contentToDraw(true)
+                        
+                        if (revealRadius.value > 0f) {
+                            Box(modifier = Modifier
+                                .matchParentSize()
+                                .clip(androidx.compose.foundation.shape.GenericShape { size, _ ->
+                                    addOval(androidx.compose.ui.geometry.Rect(
+                                        center = tapOffset,
+                                        radius = revealRadius.value
+                                    ))
+                                })
+                            ) {
+                                contentToDraw(false)
+                            }
+                        }
+                        
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = revealRadius.value == 0f,
+                            enter = androidx.compose.animation.fadeIn(),
+                            exit = androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(200)),
+                            modifier = Modifier.matchParentSize()
+                        ) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                                    Box(
+                                        modifier = Modifier
+                                            .matchParentSize()
+                                            .background(Color(0xFF141414).copy(alpha = 0.88f), RoundedCornerShape(8.dp))
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_eye),
+                                        contentDescription = "Rivela",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    val showText = textWithoutMedia.length >= 20 || mediaUrls.isNotEmpty()
+                                    if (showText) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = stringResource(R.string.comment_tap_to_reveal),
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        contentToDraw(false)
                     }
                 }
             }

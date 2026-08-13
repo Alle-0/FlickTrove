@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.drawBehind
@@ -181,7 +182,7 @@ class CommentsScreen(
                 TopAppBar(
                     modifier = Modifier
                         .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                        .hazeChild(state = hazeState, style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
+                        .hazeChild(state = hazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp), style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
                     title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
                     navigationIcon = {
                         Box(
@@ -366,12 +367,24 @@ class CommentsScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        text = comment.userDisplayName.ifBlank { "Anonimo" },
+                                        text = if (comment.isDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { "Anonimo" },
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = Color.White
                                     )
                                     Spacer(modifier = Modifier.weight(1f))
-                                    if (comment.userId == viewModel.currentUserId && comment.createdAt != null && (System.currentTimeMillis() - comment.createdAt.toDate().time) <= 24 * 60 * 60 * 1000) {
+                                    if (comment.userId == viewModel.currentUserId && !comment.isDeleted && comment.createdAt != null) {
+                                        val timeSinceCreated = System.currentTimeMillis() - comment.createdAt.toDate().time
+                                        if (timeSinceCreated <= 12 * 60 * 60 * 1000) {
+                                            Icon(
+                                                painter = painterResource(id = if (comment.isSpoiler) R.drawable.ic_eye_off else R.drawable.ic_eye),
+                                                contentDescription = "Toggle Spoiler",
+                                                tint = if (comment.isSpoiler) accentColor else Color.White.copy(alpha = 0.5f),
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .bounceClick { viewModel.toggleSpoilerStatus(comment.id, comment.isSpoiler) }
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                        }
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_trash),
                                             contentDescription = "Elimina",
@@ -393,8 +406,9 @@ class CommentsScreen(
                                 val coroutineScope = rememberCoroutineScope()
 
                                 val currentTranslationState = translationStates[comment.id]
-                                val displayedTextRaw = when (currentTranslationState) {
-                                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslationState.text
+                                val displayedTextRaw = when {
+                                    comment.isDeleted -> stringResource(R.string.comment_deleted)
+                                    currentTranslationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslationState.text
                                     else -> comment.text
                                 }
 
@@ -429,7 +443,7 @@ class CommentsScreen(
                                                 modifier = Modifier
                                                     .animateContentSize()
                                                     .then(
-                                                        if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                                        if (isBlurred) Modifier.clip(RoundedCornerShape(8.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                                     )
                                             )
                                         }
@@ -446,7 +460,7 @@ class CommentsScreen(
                                                         .fillMaxWidth()
                                                         .clip(RoundedCornerShape(12.dp))
                                                         .then(
-                                                            if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                                            if (isBlurred) Modifier.clip(RoundedCornerShape(12.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                                         ),
                                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                                 )
@@ -457,7 +471,9 @@ class CommentsScreen(
 
                                 Box(
                                     contentAlignment = Alignment.Center,
-                                    modifier = Modifier.pointerInput(comment.isSpoiler, isSpoilerRevealed) {
+                                    modifier = Modifier
+                                        .defaultMinSize(minWidth = 48.dp, minHeight = 32.dp)
+                                        .pointerInput(comment.isSpoiler, isSpoilerRevealed) {
                                         if (comment.isSpoiler && !isSpoilerRevealed) {
                                             detectTapGestures(onTap = { offset ->
                                                 tapOffset = offset
@@ -511,12 +527,15 @@ class CommentsScreen(
                                                         tint = Color.White,
                                                         modifier = Modifier.size(16.dp)
                                                     )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Text(
-                                                        text = stringResource(R.string.comment_tap_to_reveal),
-                                                        color = Color.White,
-                                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                                                    )
+                                                    val showText = textWithoutMedia.length >= 20 || mediaUrls.isNotEmpty()
+                                                    if (showText) {
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Text(
+                                                            text = stringResource(R.string.comment_tap_to_reveal),
+                                                            color = Color.White,
+                                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
@@ -1179,37 +1198,23 @@ class CommentsScreen(
         )
 
         // Report Dialog Overlay
-        commentToReport?.let { comment ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .pointerInput(Unit) { detectTapGestures(onTap = { commentToReport = null }) },
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(24.dp),
-                            containerColor = Color(0xFF1E1E1E).copy(alpha = 0.5f)
-                        )
-                        .padding(24.dp)
-                        .pointerInput(Unit) { detectTapGestures {} }
-                ) {
-                    Column {
-                        Text(stringResource(R.string.comment_report_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.comment_report_subtitle), color = Color.White.copy(0.8f))
-                        Spacer(modifier = Modifier.height(24.dp))
-                        val context = androidx.compose.ui.platform.LocalContext.current
-                        val reportButtonModifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Red.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
-                            .border(1.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                            .padding(vertical = 14.dp)
+        FlickTroveModal(
+            isVisible = commentToReport != null,
+            onDismissRequest = { commentToReport = null },
+            hazeState = hazeState
+        ) {
+            val comment = commentToReport
+            if (comment != null) {
+                Text(stringResource(R.string.comment_report_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.comment_report_subtitle), color = Color.White.copy(0.8f))
+                Spacer(modifier = Modifier.height(24.dp))
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val reportButtonModifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                    .border(1.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                    .padding(vertical = 14.dp)
                             
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -1250,36 +1255,20 @@ class CommentsScreen(
                         }
                     }
                 }
-            }
-        }
 
         // Delete Dialog Overlay
-        commentToDelete?.let { comment ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .pointerInput(Unit) { detectTapGestures(onTap = { commentToDelete = null }) },
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(24.dp),
-                            containerColor = Color(0xFF1E1E1E).copy(alpha = 0.5f)
-                        )
-                        .padding(24.dp)
-                        .pointerInput(Unit) { detectTapGestures {} }
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.comment_delete_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.comment_delete_subtitle), color = Color.White.copy(0.8f))
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Row(
+        FlickTroveModal(
+            isVisible = commentToDelete != null,
+            onDismissRequest = { commentToDelete = null },
+            hazeState = hazeState
+        ) {
+            val comment = commentToDelete
+            if (comment != null) {
+                Text(stringResource(R.string.comment_delete_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.comment_delete_subtitle), color = Color.White.copy(0.8f))
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -1326,8 +1315,6 @@ class CommentsScreen(
                         }
                     }
                 }
-            }
-        }
         } // End of Outer Box
     }
 

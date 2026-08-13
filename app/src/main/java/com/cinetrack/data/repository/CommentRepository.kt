@@ -19,6 +19,8 @@ class CommentRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val storageRepository: StorageRepository
 ) {
+    enum class DeleteCommentResult { HARD_DELETED, SOFT_DELETED, FAILED }
+
     private fun getMediaCommentsCollection(mediaId: String) =
         firestore.collection("media_comments").document(mediaId).collection("comments")
         
@@ -203,58 +205,77 @@ enum class ReportResult {
             ReportResult.ERROR
         }
     }
-    suspend fun deleteComment(mediaId: String, commentId: String): Boolean {
+    
+    suspend fun updateSpoilerStatus(mediaId: String, commentId: String, isSpoiler: Boolean): Boolean {
         return try {
-            val mediaCommentsColl = getMediaCommentsCollection(mediaId)
-            
-            // 1. Fetch the comment to delete
-            val commentSnapshot = mediaCommentsColl.document(commentId).get().await()
-            if (!commentSnapshot.exists()) return false
-            val comment = commentSnapshot.toObject(AppComment::class.java) ?: return false
-
-            // 2. Fetch all replies (1 level deep)
-            val repliesSnapshot = mediaCommentsColl.whereEqualTo("parentId", commentId).get().await()
-            
-            // 3. Delete images from Storage (for parent and replies)
-            val allComments = mutableListOf(comment)
-            allComments.addAll(repliesSnapshot.documents.mapNotNull { it.toObject(AppComment::class.java) })
-            
-            val imageRegex = Regex("""!\[.*?\]\((.*?)\)""")
-            for (c in allComments) {
-                val match = imageRegex.find(c.text)
-                if (match != null) {
-                    val imageUrl = match.groupValues[1]
-                    if (imageUrl.contains("supabase.co")) {
-                        val result = storageRepository.deleteCommentImage(imageUrl)
-                        if (result.isFailure) {
-                            android.util.Log.e("CommentRepository", "Failed to delete image: $imageUrl", result.exceptionOrNull())
-                            return false // Abort if image deletion fails to avoid orphans
-                        }
-                    }
-                }
-            }
-
-            // 4. Batch delete from Firestore
-            val batch = firestore.batch()
-            batch.delete(mediaCommentsColl.document(commentId))
-            for (doc in repliesSnapshot.documents) {
-                batch.delete(doc.reference)
-            }
-            
-            // 5. Update parent's repliesCount if needed
-            if (comment.parentId != null) {
-                val parentRef = mediaCommentsColl.document(comment.parentId)
-                val parentSnapshot = parentRef.get().await()
-                if (parentSnapshot.exists()) {
-                    batch.update(parentRef, "repliesCount", FieldValue.increment(-1))
-                }
-            }
-            
-            batch.commit().await()
+            getMediaCommentsCollection(mediaId).document(commentId)
+                .update("isSpoiler", isSpoiler)
+                .await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+    suspend fun deleteComment(mediaId: String, commentId: String): DeleteCommentResult {
+        return try {
+            val mediaCommentsColl = getMediaCommentsCollection(mediaId)
+            val commentSnapshot = mediaCommentsColl.document(commentId).get().await()
+            if (!commentSnapshot.exists()) return DeleteCommentResult.FAILED
+            val comment = commentSnapshot.toObject(AppComment::class.java) ?: return DeleteCommentResult.FAILED
+            if (comment.userId != auth.currentUser?.uid || comment.isDeleted) return DeleteCommentResult.FAILED
+
+            val repliesSnapshot = mediaCommentsColl.whereEqualTo("parentId", commentId).get().await()
+            
+            val imageRegex = Regex("""!\[.*?\]\((.*?)\)""")
+            for (match in imageRegex.findAll(comment.text)) {
+                val imageUrl = match.groupValues[1]
+                if (imageUrl.contains("supabase.co")) {
+                    val result = storageRepository.deleteCommentImage(imageUrl)
+                    if (result.isFailure) {
+                        android.util.Log.e("CommentRepository", "Failed to delete image: $imageUrl", result.exceptionOrNull())
+                        return DeleteCommentResult.FAILED
+                    }
+                }
+            }
+
+            val batch = firestore.batch()
+            val result = if (repliesSnapshot.isEmpty) {
+                batch.delete(mediaCommentsColl.document(commentId))
+                if (comment.parentId != null) {
+                    val parentRef = mediaCommentsColl.document(comment.parentId)
+                    if (parentRef.get().await().exists()) {
+                        batch.update(parentRef, "repliesCount", FieldValue.increment(-1))
+                    }
+                }
+                DeleteCommentResult.HARD_DELETED
+            } else {
+                // Preserve the discussion tree, but sever any link to the deleted author.
+                batch.update(
+                    mediaCommentsColl.document(commentId),
+                    mapOf(
+                        "text" to "",
+                        "userId" to "",
+                        "userDisplayName" to "",
+                        "userAvatarUrl" to "",
+                        "parentUserId" to FieldValue.delete(),
+                        "isSpoiler" to false,
+                        "likesCount" to 0,
+                        "likedBy" to emptyList<String>(),
+                        "isDeleted" to true
+                    )
+                )
+                for (doc in repliesSnapshot.documents) {
+                    batch.update(doc.reference, "parentUserId", FieldValue.delete())
+                }
+                DeleteCommentResult.SOFT_DELETED
+            }
+
+            batch.commit().await()
+            result
+        } catch (e: Exception) {
+            e.printStackTrace()
+            DeleteCommentResult.FAILED
         }
     }
 }

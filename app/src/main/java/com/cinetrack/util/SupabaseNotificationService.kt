@@ -27,12 +27,17 @@ object SupabaseNotificationService {
             val tokenResult = user.getIdToken(false).await()
             val idToken = tokenResult.token ?: return@withContext false
 
-            val functionUrl = "\${BuildConfig.SUPABASE_URL}/functions/v1/notify-user"
+            val baseUrl = BuildConfig.SUPABASE_URL.trimEnd('/')
+            val functionUrl = if (baseUrl.endsWith("/functions/v1")) {
+                "$baseUrl/notify-user"
+            } else {
+                "$baseUrl/functions/v1/notify-user"
+            }
             val url = URL(functionUrl)
             val connection = url.openConnection() as HttpURLConnection
             
             connection.requestMethod = "POST"
-            connection.setRequestProperty("Authorization", "Bearer \$idToken")
+            connection.setRequestProperty("Authorization", "Bearer $idToken")
             connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("Accept", "application/json")
             connection.doOutput = true

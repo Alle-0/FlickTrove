@@ -1002,6 +1002,7 @@
     <string name="account_guest_sync_message">Sign up or login to interact with others and use social features.</string>
     <string name="comment_no_connection">No connection. Cannot load comments.</string>
     <string name="comment_empty_state">No comments yet. Be the first to write one!</string>
+    <string name="comment_deleted">[Comment deleted]</string>
     <string name="unmatched_items_title">Discarded / Unrecognized</string>
     <string name="unmatched_items_desc">View movies and series not recognized by TMDB during the last import</string>
     <string name="unmatched_items_count">%d items</string>

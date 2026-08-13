@@ -18,6 +18,7 @@ data class AppComment(
     val parentUserId: String? = null,
     val repliesCount: Int = 0,
     val depth: Int = 0,
+    val isDeleted: Boolean = false,
     @get:PropertyName("isSpoiler")
     @set:PropertyName("isSpoiler")
     var isSpoiler: Boolean = false

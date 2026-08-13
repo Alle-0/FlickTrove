@@ -244,6 +244,27 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
+    fun toggleSpoilerStatus(commentId: String, currentSpoilerStatus: Boolean) {
+        val newSpoilerStatus = !currentSpoilerStatus
+        
+        // Optimistic UI update
+        val currentComments = _comments.value.toMutableList()
+        val index = currentComments.indexOfFirst { it.id == commentId }
+        if (index != -1) {
+            currentComments[index] = currentComments[index].copy(isSpoiler = newSpoilerStatus)
+            _comments.value = currentComments
+        }
+
+        // Background network call
+        viewModelScope.launch {
+            val success = commentRepository.updateSpoilerStatus(currentMediaId, commentId, newSpoilerStatus)
+            if (!success) {
+                // Revert on failure
+                refreshComments()
+            }
+        }
+    }
+
     fun reportComment(commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String) {
         viewModelScope.launch {
             val result = commentRepository.reportComment(currentMediaId, commentId, reason, commentText, commentAuthorId, commentAuthorName)
@@ -256,22 +277,28 @@ class CommentsViewModel @Inject constructor(
     }
 
     fun deleteComment(commentId: String) {
-        // Aggiornamento ottimistico: rimuoviamo subito il commento dalla lista locale
-        val currentComments = _comments.value.toMutableList()
-        val index = currentComments.indexOfFirst { it.id == commentId }
-        if (index != -1) {
-            currentComments.removeAt(index)
-            _comments.value = currentComments
-        }
-
-        // Chiamata di rete per l'eliminazione effettiva
         viewModelScope.launch {
-            val success = commentRepository.deleteComment(currentMediaId, commentId)
-            if (!success) {
-                // Se fallisce, ripristiniamo la lista dal server
-                refreshComments()
+            when (commentRepository.deleteComment(currentMediaId, commentId)) {
+                com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.HARD_DELETED -> {
+                    _comments.value = _comments.value.filterNot { it.id == commentId }
+                }
+                com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.SOFT_DELETED -> {
+                    _comments.value = _comments.value.map { comment ->
+                        if (comment.id == commentId) comment.copy(
+                            userId = "",
+                            userDisplayName = "",
+                            userAvatarUrl = "",
+                            text = "",
+                            parentUserId = null,
+                            likesCount = 0,
+                            likedBy = emptyList(),
+                            isSpoiler = false,
+                            isDeleted = true
+                        ) else comment
+                    }
+                }
+                com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.FAILED -> refreshComments()
             }
         }
     }
 }
-

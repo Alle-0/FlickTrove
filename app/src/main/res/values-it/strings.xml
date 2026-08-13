@@ -993,6 +993,7 @@
     <string name="account_guest_sync_message">Registrati o accedi per interagire con gli altri e usare le funzioni social.</string>
     <string name="comment_no_connection">Nessuna connessione. Impossibile caricare i commenti.</string>
     <string name="comment_empty_state">Nessun commento. Sii il primo a scriverne uno!</string>
+    <string name="comment_deleted">[Commento eliminato]</string>
     <string name="unmatched_items_title">Scartati / Non Riconosciuti</string>
     <string name="unmatched_items_desc">Vedi film e serie non riconosciuti da TMDB durante l\'ultimo import</string>
     <string name="unmatched_items_count">%d elementi</string>
