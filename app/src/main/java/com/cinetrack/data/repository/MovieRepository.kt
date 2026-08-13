@@ -350,7 +350,13 @@ class MovieRepository @Inject constructor(
                                 releaseYear = freshMovie.releaseYear ?: currentLocal.releaseYear,
                                 status = freshMovie.status ?: currentLocal.status,
                                 voteAverage = freshMovie.voteAverage ?: currentLocal.voteAverage,
-                                voteCount = freshMovie.voteCount ?: currentLocal.voteCount
+                                voteCount = freshMovie.voteCount ?: currentLocal.voteCount,
+                                originCountry = freshMovie.originCountry ?: currentLocal.originCountry,
+                                revenue = freshMovie.revenue ?: currentLocal.revenue,
+                                budget = freshMovie.budget ?: currentLocal.budget,
+                                tagline = freshMovie.tagline ?: currentLocal.tagline,
+                                imdbId = freshMovie.imdbId ?: currentLocal.imdbId,
+                                streamingProviderIds = freshMovie.streamingProviderIds ?: currentLocal.streamingProviderIds
                             )
                             favoriteDao.insert(currentLocal)
                         }
