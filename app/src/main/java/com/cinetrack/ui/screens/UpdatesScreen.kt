@@ -324,54 +324,7 @@ fun UpdatesScreen(
                             }
                         }
 
-                        if (rawFutureReminders.isNotEmpty() || remindersCategoryTab != 0) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.TopCenter)
-                                            .statusBarsPadding()
-                                            .displayCutoutPadding()
-                                            .padding(top = 78.dp)
-                                            .padding(horizontal = 24.dp)
-                                            .zIndex(9f),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.wrapContentSize(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Spacer(
-                                            modifier = Modifier
-                                                .matchParentSize()
-                                                .hazeGlass(
-                                                    state = internalHazeState,
-                                                    shape = CircleShape,
-                                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                                    useOffscreenStrategy = false
-                                                )
-                                        )
-                                        val options = listOf(
-                                            stringResource(R.string.updates_tab_all),
-                                            stringResource(R.string.updates_tab_new_releases),
-                                            stringResource(R.string.updates_tab_ongoing_episodes)
-                                        )
-                                        val counts = listOf(
-                                            rawFutureReminders.size,
-                                            rawFutureReminders.count { !it.isOngoingSeriesEpisode },
-                                            rawFutureReminders.count { it.isOngoingSeriesEpisode }
-                                        )
-                                        com.cinetrack.ui.components.common.CategoryTabSelector(
-                                            options = options,
-                                            counts = counts,
-                                            selectedIndex = remindersCategoryTab,
-                                            onOptionClick = { index ->
-                                                remindersCategoryTab = index
-                                                scope.launch { remindersListState.scrollToItem(0) }
-                                            }
-                                        )
-                                    }
-                                }
                             }
-                        }
                     } else {
                             // MAIN NOTIFICATIONS VIEW
                             Box(
@@ -687,9 +640,11 @@ fun UpdatesScreen(
                     } // end Column
                 } // end outer Box (hazeGlass header)
 
-                // 3. Floating Notifications Tab Selector (Separate from Header)
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = pagerState.currentPage == 0,
+                // 3. Floating tab selector. It morphs between the main and reminders filters.
+                // Keeping a single glass container makes the transition work in both directions.
+                if (pagerState.currentPage == 0 || rawFutureReminders.isNotEmpty() || remindersCategoryTab != 0) {
+                    val isRemindersSelector = pagerState.currentPage == 1
+                    Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .statusBarsPadding()
@@ -697,11 +652,17 @@ fun UpdatesScreen(
                         .padding(top = 78.dp)
                         .padding(horizontal = 24.dp)
                         .zIndex(9f),
-                    enter = fadeIn() + slideInVertically { -it / 2 },
-                    exit = fadeOut() + slideOutVertically { -it / 2 }
+                    contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        modifier = Modifier.wrapContentSize(),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .animateContentSize(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Spacer(
@@ -711,26 +672,60 @@ fun UpdatesScreen(
                                     state = internalHazeState,
                                     shape = CircleShape,
                                     blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                    useOffscreenStrategy = false
+                                useOffscreenStrategy = false
+                            )
+                        )
+                        AnimatedContent(
+                            targetState = isRemindersSelector,
+                            transitionSpec = {
+                                (fadeIn(animationSpec = tween(180, delayMillis = 80)) +
+                                    scaleIn(initialScale = 0.88f, animationSpec = tween(260))) togetherWith
+                                    (fadeOut(animationSpec = tween(120)) +
+                                        scaleOut(targetScale = 0.88f, animationSpec = tween(180)))
+                            },
+                            label = "MorphingUpdatesTabSelector"
+                        ) { showRemindersFilters ->
+                            if (showRemindersFilters) {
+                                val options = listOf(
+                                    stringResource(R.string.updates_tab_all),
+                                    stringResource(R.string.updates_tab_new_releases),
+                                    stringResource(R.string.updates_tab_ongoing_episodes)
                                 )
-                        )
-                        val mainOptions = listOf(stringResource(R.string.updates_tab_library), stringResource(R.string.updates_tab_social))
-                        val mainCounts = listOf(
-                            uiState.notificationCount + rawFutureReminders.size,
-                            uiState.socialUnreadCount
-                        )
-                        com.cinetrack.ui.components.common.CategoryTabSelector(
-                            options = mainOptions,
-                            counts = mainCounts,
-                            selectedIndex = mainTab,
-                            onOptionClick = { index ->
-                                mainTab = index
-                                if (index == 1) {
-                                    scope.launch { socialListState.scrollToItem(0) }
-                                }
+                                val counts = listOf(
+                                    rawFutureReminders.size,
+                                    rawFutureReminders.count { !it.isOngoingSeriesEpisode },
+                                    rawFutureReminders.count { it.isOngoingSeriesEpisode }
+                                )
+                                com.cinetrack.ui.components.common.CategoryTabSelector(
+                                    options = options,
+                                    counts = counts,
+                                    selectedIndex = remindersCategoryTab,
+                                    onOptionClick = { index ->
+                                        remindersCategoryTab = index
+                                        scope.launch { remindersListState.scrollToItem(0) }
+                                    }
+                                )
+                            } else {
+                                val mainOptions = listOf(stringResource(R.string.updates_tab_library), stringResource(R.string.updates_tab_social))
+                                val mainCounts = listOf(
+                                    uiState.notificationCount + rawFutureReminders.size,
+                                    uiState.socialUnreadCount
+                                )
+                                com.cinetrack.ui.components.common.CategoryTabSelector(
+                                    options = mainOptions,
+                                    counts = mainCounts,
+                                    selectedIndex = mainTab,
+                                    onOptionClick = { index ->
+                                        mainTab = index
+                                        if (index == 1) {
+                                            scope.launch { socialListState.scrollToItem(0) }
+                                        }
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
+                }
                 }
 
 
