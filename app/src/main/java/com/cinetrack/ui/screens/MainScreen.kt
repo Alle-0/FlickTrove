@@ -344,7 +344,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     hasActiveFilters = discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
-                                    notificationCount = updatesUiState.notificationCount,
+                                    notificationCount = updatesUiState.totalUnreadCount,
                                     hasAppUpdateBadge = hasAppUpdateBadge,
                                     onEditBackdropClick = if (currentTab is AccountTab) { 
                                         {

@@ -79,3 +79,4 @@ Thumbs.db
 *backup*.json
 *.zip
 gdpr-data*
+.vscode

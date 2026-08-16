@@ -420,7 +420,6 @@ private fun CommentCard(
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .nestedScroll(nestedScrollConnection)
                             .verticalScroll(scrollState)
                             .padding(vertical = 4.dp)

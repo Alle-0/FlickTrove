@@ -4,6 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import com.cinetrack.ui.components.detail.PersonMorphingTopBar
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -152,11 +156,30 @@ fun PersonDetailScreenContent(
     val scope = rememberCoroutineScope()
     val currentImageQuality = LocalImageQuality.current
 
-    var isBackPressed by remember { mutableStateOf(false) }
-    val backIconScale by animateFloatAsState(
-        targetValue = if (isBackPressed) 0.88f else 1f,
-        animationSpec = spring(stiffness = if (isBackPressed) 10000f else Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
-        label = "BackIconScale"
+    val scrollState = rememberLazyListState()
+    val density = LocalDensity.current
+    val scrollThreshold = with(density) { 320.dp.toPx() }
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (scrollState.firstVisibleItemIndex > 0) 1f
+            else (scrollState.firstVisibleItemScrollOffset.toFloat() / scrollThreshold).coerceIn(0f, 1f)
+        }
+    }
+    
+    val isScrolling = scrollState.isScrollInProgress
+    val isTransitioning = animatedVisibilityScope?.transition?.let { it.currentState != it.targetState } ?: false
+    val isMerged = scrollProgress >= 1f && !isTransitioning
+    
+    val targetSymbioteProgress = if (isScrolling || isMerged) scrollProgress else 0f
+    
+    val symbioteProgress by animateFloatAsState(
+        targetValue = targetSymbioteProgress,
+        animationSpec = if (isScrolling || isMerged) {
+            spring(stiffness = Spring.StiffnessHigh)
+        } else {
+            spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+        },
+        label = "symbioteProgress"
     )
 
     val movieActions = LocalMovieActions.current
@@ -348,6 +371,7 @@ fun PersonDetailScreenContent(
                         }
 
                         LazyColumn(
+                            state = scrollState,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .haze(localHazeState, style = HazeStyles.PremiumDark),
@@ -433,177 +457,60 @@ fun PersonDetailScreenContent(
         }
 
         val context = LocalContext.current
-        Box(
-            modifier = Modifier
-                .zIndex(100f)
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .displayCutoutPadding()
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-            contentAlignment = Alignment.TopStart
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.size(44.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(
-                                    state = localHazeState,
-                                    shape = CircleShape,
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                    useOffscreenStrategy = true
-                                )
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick { onBackClick() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_left),
-                                contentDescription = stringResource(R.string.detail_content_desc_back),
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
+        PersonMorphingTopBar(
+            title = uiState.person?.name ?: "",
+            localHazeState = localHazeState,
+            symbioteProgress = symbioteProgress,
+            detailStackDepth = detailStackDepth,
+            onBackClick = onBackClick,
+            onHomeClick = onHomeClick,
+            onShareClick = {
+                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    val imageUrl = com.cinetrack.util.buildTmdbImageUrl(
+                        uiState.person?.profilePath,
+                        com.cinetrack.util.ImageType.PROFILE,
+                        currentImageQuality
+                    )
+                    val fileUri = if (imageUrl != null) {
+                        val request = coil.request.ImageRequest.Builder(context)
+                            .data(imageUrl).build()
+                        val result = context.imageLoader.execute(request)
+                        if (result is coil.request.SuccessResult) {
+                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                            val imagesDir = java.io.File(context.cacheDir, "images")
+                            imagesDir.mkdirs()
+                            val file = java.io.File(imagesDir, "share_person.jpg")
+                            val fos = java.io.FileOutputStream(file)
+                            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                            fos.close()
+                            androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                        } else null
+                    } else null
 
-                    val homeButtonVisible = detailStackDepth >= 3
-                    val homeButtonAlpha by animateFloatAsState(
-                        targetValue = if (homeButtonVisible) 1f else 0f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                        label = "HomeButtonAlpha"
-                    )
-                    val homeButtonScale by animateFloatAsState(
-                        targetValue = if (homeButtonVisible) 1f else 0.6f,
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
-                        label = "HomeButtonScale"
-                    )
-                    if (homeButtonAlpha > 0.01f) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .graphicsLayer {
-                                    alpha = homeButtonAlpha
-                                    scaleX = homeButtonScale
-                                    scaleY = homeButtonScale
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .hazeGlass(
-                                        state = localHazeState,
-                                        shape = CircleShape,
-                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                        useOffscreenStrategy = true
-                                    )
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .bounceClick { onHomeClick() },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                                    contentDescription = stringResource(R.string.detail_content_desc_home),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            val personName = uiState.person?.name ?: ""
+                            val dept = uiState.person?.knownForDepartment?.takeIf { it.isNotBlank() }
+                            val displayName = if (dept != null) "$personName ($dept)" else personName
+                            val bioSnippet = uiState.person?.biography?.takeIf { it.isNotBlank() }?.let { bio ->
+                                if (bio.length > 200) bio.take(197) + "..." else bio
+                            }
+                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=person&id=${uiState.personId}"
+                            val body = if (bioSnippet != null) "$bioSnippet\n\n$link" else link
+                            val shareText = context.getString(R.string.detail_share_text, displayName, body)
+                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+                            if (fileUri != null) {
+                                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                type = "image/jpeg"
+                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            } else {
+                                type = "text/plain"
                             }
                         }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier.size(44.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(
-                                state = localHazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = true
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick {
-                                scope.launch(Dispatchers.IO) {
-                                    val imageUrl = buildTmdbImageUrl(
-                                        uiState.person?.profilePath,
-                                        ImageType.PROFILE,
-                                        currentImageQuality
-                                    )
-                                    val fileUri = if (imageUrl != null) {
-                                        val request = coil.request.ImageRequest.Builder(context)
-                                            .data(imageUrl).build()
-                                        val result = context.imageLoader.execute(request)
-                                        if (result is coil.request.SuccessResult) {
-                                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
-                                            val imagesDir = java.io.File(context.cacheDir, "images")
-                                            imagesDir.mkdirs()
-                                            val file = java.io.File(imagesDir, "share_person.jpg")
-                                            val fos = java.io.FileOutputStream(file)
-                                            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
-                                            fos.close()
-                                            androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                        } else null
-                                    } else null
-
-                                    withContext(Dispatchers.Main) {
-                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                            val personName = uiState.person?.name ?: ""
-                                            val dept = uiState.person?.knownForDepartment?.takeIf { it.isNotBlank() }
-                                            val displayName = if (dept != null) "$personName ($dept)" else personName
-                                            val bioSnippet = uiState.person?.biography?.takeIf { it.isNotBlank() }?.let { bio ->
-                                                if (bio.length > 200) bio.take(197) + "..." else bio
-                                            }
-                                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=person&id=${uiState.personId}"
-                                            val body = if (bioSnippet != null) "$bioSnippet\n\n$link" else link
-                                            val shareText = context.getString(R.string.detail_share_text, displayName, body)
-                                            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
-                                            if (fileUri != null) {
-                                                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
-                                                type = "image/jpeg"
-                                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                            } else {
-                                                type = "text/plain"
-                                            }
-                                        }
-                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_share),
-                            contentDescription = stringResource(R.string.detail_content_desc_share),
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.detail_content_desc_share)))
                     }
                 }
             }
-        }
+        )
     }
 }

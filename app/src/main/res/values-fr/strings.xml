@@ -1064,4 +1064,7 @@
     <string name="updates_tab_social">Social</string>
     <string name="updates_social_liked">a aimé votre commentaire</string>
     <string name="updates_social_replied">a répondu à votre commentaire</string>
+    <string name="updates_social_on">sur</string>
+    <string name="updates_social_recent">Récents</string>
+    <string name="updates_social_read">Lus</string>
 </resources>

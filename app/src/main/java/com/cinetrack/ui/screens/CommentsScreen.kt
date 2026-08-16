@@ -52,10 +52,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.util.lerp
+import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.R
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -175,7 +179,9 @@ class CommentsScreen(
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
+
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -189,7 +195,7 @@ class CommentsScreen(
                 TopAppBar(
                     modifier = Modifier
                         .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                        .hazeChild(state = hazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp), style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF121212).copy(alpha = 0.5f), blurRadius = 15.dp)),
+                        .hazeChild(state = hazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp), style = dev.chrisbanes.haze.HazeStyle(tint = Color.Black.copy(alpha = 0.7f), blurRadius = 20.dp)),
                     title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
                     navigationIcon = {
                         Box(
@@ -214,7 +220,7 @@ class CommentsScreen(
                     }
                 )
             },
-            containerColor = Color(0xFF121212)
+            containerColor = Color.Transparent
         ) { paddingValues ->
             Box(
                 modifier = Modifier
@@ -691,7 +697,7 @@ class CommentsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         val toggleColor = Color.White.copy(alpha = 0.6f)
-                                        Box(modifier = Modifier.width(24.dp).height(1.dp).background(toggleColor.copy(alpha = 0.3f)))
+                                        Box(modifier = Modifier.width(12.dp).height(1.dp).background(toggleColor.copy(alpha = 0.3f)))
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = if (isExpanded) stringResource(R.string.comment_hide_replies) else if (childrenCount == 1) stringResource(R.string.comment_view_replies_singular, childrenCount) else stringResource(R.string.comment_view_replies_plural, childrenCount),
@@ -815,29 +821,41 @@ class CommentsScreen(
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val maxChar = 4000
-                            OutlinedTextField(
-                                value = inputText,
-                                enabled = !viewModel.isUserAnonymous,
-                                onValueChange = { 
-                                    if (it.text.length <= maxChar) {
-                                        inputText = it 
-                                    }
-                                },
+                            val inputScrollState = rememberScrollState()
+                            Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { focusState -> isInputExpanded = focusState.isFocused },
-                                placeholder = { Text(stringResource(R.string.comment_input_hint), color = Color.White.copy(alpha = 0.4f)) },
-                                visualTransformation = remember { MarkdownVisualTransformation() },
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = accentColor,
-                                    unfocusedBorderColor = Color.White.copy(alpha = 0.1f),
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(24.dp),
-                                maxLines = 4
-                            )
+                                    .heightIn(max = 120.dp)
+                                    .border(1.dp, if (isInputExpanded) accentColor else Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                                    .premiumScrollbar(inputScrollState, width = 3f, paddingEnd = 6f)
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) { focusRequester.requestFocus() }
+                                    .padding(horizontal = 16.dp, vertical = 15.dp),
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                androidx.compose.foundation.text.BasicTextField(
+                                    value = inputText,
+                                    enabled = !viewModel.isUserAnonymous,
+                                    onValueChange = { 
+                                        if (it.text.length <= maxChar) {
+                                            inputText = it 
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(focusRequester)
+                                        .onFocusChanged { focusState -> isInputExpanded = focusState.isFocused }
+                                        .verticalScroll(inputScrollState),
+                                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
+                                    cursorBrush = androidx.compose.ui.graphics.SolidColor(accentColor),
+                                    visualTransformation = remember { MarkdownVisualTransformation() }
+                                )
+                                if (inputText.text.isEmpty()) {
+                                    Text(stringResource(R.string.comment_input_hint), color = Color.White.copy(alpha = 0.4f), style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                             Box(
                                 modifier = Modifier
@@ -848,6 +866,11 @@ class CommentsScreen(
                                             val pId = replyingTo?.id
                                             val pUserId = replyingTo?.userId
                                             val newDepth = (replyingTo?.depth ?: -1) + 1
+                                            
+                                            // Auto-expand the parent comment so the new reply is visible immediately
+                                            if (pId != null) {
+                                                expandedComments.value = expandedComments.value + pId
+                                            }
                                             
                                             var finalMessage = inputText.text.trim()
                                             if (attachedMedia.isNotEmpty()) {
@@ -884,7 +907,8 @@ class CommentsScreen(
                                 textAlign = androidx.compose.ui.text.style.TextAlign.End
                             )
                         }
-                        AnimatedVisibility(visible = isInputExpanded || attachedMedia.isNotEmpty()) {
+                        val isKeyboardOpen = androidx.compose.foundation.layout.WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+                        AnimatedVisibility(visible = isInputExpanded || attachedMedia.isNotEmpty() || inputText.text.isNotEmpty() || isKeyboardOpen) {
                             Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                                 if (attachedMedia.isNotEmpty()) {
                                     androidx.compose.foundation.lazy.LazyRow(
@@ -1040,293 +1064,303 @@ class CommentsScreen(
                     }
                 }
             }
-        }
 
-        } // End of Scaffold
-        
-        // Sort Dialog Overlay
-        AnimatedVisibility(
-            visible = showSortMenu,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .pointerInput(Unit) { detectTapGestures(onTap = { showSortMenu = false }) },
-                contentAlignment = Alignment.Center
+            } // End of Scaffold
+            
+            // Sort Dialog Overlay
+            AnimatedVisibility(
+                visible = showSortMenu,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxWidth()
-                        .animateEnterExit(
-                            enter = scaleIn(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeIn(),
-                            exit = scaleOut(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeOut()
-                        )
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(24.dp),
-                            containerColor = Color(0xFF1E1E1E).copy(alpha = 0.7f)
-                        )
-                        .padding(24.dp)
-                        .pointerInput(Unit) { detectTapGestures {} }
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .pointerInput(Unit) { detectTapGestures(onTap = { showSortMenu = false }) },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column {
-                        // Header
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(stringResource(R.string.comment_filters_title), color = Color.White, fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.titleLarge, letterSpacing = 2.sp)
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_x),
-                                contentDescription = "Chiudi",
-                                tint = Color.White.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .bounceClick { showSortMenu = false }
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .fillMaxWidth()
+                            .animateEnterExit(
+                                enter = scaleIn(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeIn(),
+                                exit = scaleOut(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeOut()
                             )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        // Sort By Section
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                .padding(16.dp)
-                        ) {
-                            Column {
-                                Text(stringResource(R.string.comment_sort_by), color = Color.White.copy(0.8f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                // Option: Date
-                                val isDate = sortOption == CommentSortOption.DATE
-                                Row(
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = RoundedCornerShape(24.dp),
+                                containerColor = Color(0xFF1E1E1E).copy(alpha = 0.7f)
+                            )
+                            .padding(24.dp)
+                            .pointerInput(Unit) { detectTapGestures {} }
+                    ) {
+                        Column {
+                            // Header
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(stringResource(R.string.comment_filters_title), color = Color.White, fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.titleLarge, letterSpacing = 2.sp)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_x),
+                                    contentDescription = "Chiudi",
+                                    tint = Color.White.copy(alpha = 0.5f),
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .bounceClick { sortOption = CommentSortOption.DATE }
-                                        .then(
-                                            if (isDate) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                        )
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(stringResource(R.string.comment_sort_date), color = if(isDate) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isDate) FontWeight.Bold else FontWeight.Normal)
-                                    if (isDate) {
-                                        Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
+                                        .size(24.dp)
+                                        .bounceClick { showSortMenu = false }
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(24.dp))
+                            
+                            // Sort By Section
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                    .padding(16.dp)
+                            ) {
+                                Column {
+                                    Text(stringResource(R.string.comment_sort_by), color = Color.White.copy(0.8f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    
+                                    // Option: Date
+                                    val isDate = sortOption == CommentSortOption.DATE
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .bounceClick { sortOption = CommentSortOption.DATE }
+                                            .then(
+                                                if (isDate) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                                else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                            )
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(stringResource(R.string.comment_sort_date), color = if(isDate) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isDate) FontWeight.Bold else FontWeight.Normal)
+                                        if (isDate) {
+                                            Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
+                                        }
                                     }
-                                }
-                                
-                                Spacer(modifier = Modifier.height(12.dp))
-                                
-                                // Option: Likes
-                                val isLikes = sortOption == CommentSortOption.LIKES
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .bounceClick { sortOption = CommentSortOption.LIKES }
-                                        .then(
-                                            if (isLikes) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                        )
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(stringResource(R.string.comment_sort_likes), color = if(isLikes) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isLikes) FontWeight.Bold else FontWeight.Normal)
-                                    if (isLikes) {
-                                        Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
+                                    
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    
+                                    // Option: Likes
+                                    val isLikes = sortOption == CommentSortOption.LIKES
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .bounceClick { sortOption = CommentSortOption.LIKES }
+                                            .then(
+                                                if (isLikes) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                                else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                            )
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(stringResource(R.string.comment_sort_likes), color = if(isLikes) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isLikes) FontWeight.Bold else FontWeight.Normal)
+                                        if (isLikes) {
+                                            Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
+                                        }
                                     }
                                 }
                             }
-                        }
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        // Order Section
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            // Descending
-                            val isDesc = sortOrder == CommentSortOrder.DESC
-                            Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .bounceClick { sortOrder = CommentSortOrder.DESC }
-                                    .then(
-                                        if (isDesc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
-                                        else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
-                                    )
-                                    .padding(vertical = 12.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = null, tint = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(stringResource(R.string.comment_sort_descending), color = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isDesc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
-                            }
                             
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                             
-                            // Ascending
-                            val isAsc = sortOrder == CommentSortOrder.ASC
-                            Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .bounceClick { sortOrder = CommentSortOrder.ASC }
-                                    .then(
-                                        if (isAsc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
-                                        else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
-                                    )
-                                    .padding(vertical = 12.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(painter = painterResource(id = R.drawable.ic_right), contentDescription = null, tint = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(stringResource(R.string.comment_sort_ascending), color = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isAsc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
+                            // Order Section
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                // Descending
+                                val isDesc = sortOrder == CommentSortOrder.DESC
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick { sortOrder = CommentSortOrder.DESC }
+                                        .then(
+                                            if (isDesc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
+                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
+                                        )
+                                        .padding(vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = null, tint = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(R.string.comment_sort_descending), color = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isDesc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
+                                }
+                                
+                                Spacer(modifier = Modifier.width(16.dp))
+                                
+                                // Ascending
+                                val isAsc = sortOrder == CommentSortOrder.ASC
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick { sortOrder = CommentSortOrder.ASC }
+                                        .then(
+                                            if (isAsc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
+                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
+                                        )
+                                        .padding(vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(painter = painterResource(id = R.drawable.ic_right), contentDescription = null, tint = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(R.string.comment_sort_ascending), color = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isAsc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        // Translation Prompt Dialog
-        DetailTranslationPromptModal(
-            showTranslationPrompt = showTranslationPrompt,
-            onDismiss = { viewModel.dismissTranslationPrompt() },
-            onTranslate = { commentId, text, requireWifi ->
-                viewModel.translateComment(commentId, text, requireWifi)
-            },
-            hazeState = hazeState,
-            accentColor = accentColor
-        )
+            // Translation Prompt Dialog
+            DetailTranslationPromptModal(
+                showTranslationPrompt = showTranslationPrompt,
+                onDismiss = { viewModel.dismissTranslationPrompt() },
+                onTranslate = { commentId, text, requireWifi ->
+                    viewModel.translateComment(commentId, text, requireWifi)
+                },
+                hazeState = hazeState,
+                accentColor = accentColor
+            )
 
-        // Report Dialog Overlay
-        FlickTroveModal(
-            isVisible = commentToReport != null,
-            onDismissRequest = { commentToReport = null },
-            hazeState = hazeState
-        ) {
-            val comment = commentToReport
-            if (comment != null) {
-                Text(stringResource(R.string.comment_report_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.comment_report_subtitle), color = Color.White.copy(0.8f))
-                Spacer(modifier = Modifier.height(24.dp))
-                val context = androidx.compose.ui.platform.LocalContext.current
-                val reportButtonModifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Red.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
-                    .border(1.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                    .padding(vertical = 14.dp)
-                            
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(modifier = Modifier
-                                .bounceClick {
-                                    viewModel.reportComment(comment.id, "SPOILER", comment.text, comment.userId, comment.userDisplayName)
-                                    commentToReport = null
-                                }
-                                .then(reportButtonModifier),
-                                contentAlignment = Alignment.Center
+            // Report Dialog Overlay
+            FlickTroveModal(
+                isVisible = commentToReport != null,
+                onDismissRequest = { commentToReport = null },
+                hazeState = hazeState
+            ) {
+                val comment = commentToReport
+                if (comment != null) {
+                    Text(stringResource(R.string.comment_report_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.comment_report_subtitle), color = Color.White.copy(0.8f))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val reportButtonModifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Red.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                        .border(1.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(vertical = 14.dp)
+                                
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(stringResource(R.string.comment_report_spoiler), color = Color.Red, fontWeight = FontWeight.SemiBold)
-                            }
-                            
-                            Box(modifier = Modifier
-                                .bounceClick {
-                                    viewModel.reportComment(comment.id, "INAPPROPRIATE_CONTENT", comment.text, comment.userId, comment.userDisplayName)
-                                    commentToReport = null
+                                Box(modifier = Modifier
+                                    .bounceClick {
+                                        viewModel.reportComment(comment.id, "SPOILER", comment.text, comment.userId, comment.userDisplayName)
+                                        commentToReport = null
+                                    }
+                                    .then(reportButtonModifier),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.comment_report_spoiler), color = Color.Red, fontWeight = FontWeight.SemiBold)
                                 }
-                                .then(reportButtonModifier),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(stringResource(R.string.comment_report_inappropriate_content), color = Color.Red, fontWeight = FontWeight.SemiBold)
-                            }
-                            
-                            Box(modifier = Modifier
-                                .bounceClick {
-                                    viewModel.reportComment(comment.id, "INAPPROPRIATE_USER", comment.text, comment.userId, comment.userDisplayName)
-                                    commentToReport = null
+                                
+                                Box(modifier = Modifier
+                                    .bounceClick {
+                                        viewModel.reportComment(comment.id, "INAPPROPRIATE_CONTENT", comment.text, comment.userId, comment.userDisplayName)
+                                        commentToReport = null
+                                    }
+                                    .then(reportButtonModifier),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.comment_report_inappropriate_content), color = Color.Red, fontWeight = FontWeight.SemiBold)
                                 }
-                                .then(reportButtonModifier),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(stringResource(R.string.comment_report_inappropriate_user), color = Color.Red, fontWeight = FontWeight.SemiBold)
+                                
+                                Box(modifier = Modifier
+                                    .bounceClick {
+                                        viewModel.reportComment(comment.id, "INAPPROPRIATE_USER", comment.text, comment.userId, comment.userDisplayName)
+                                        commentToReport = null
+                                    }
+                                    .then(reportButtonModifier),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.comment_report_inappropriate_user), color = Color.Red, fontWeight = FontWeight.SemiBold)
+                                }
+                                
+                                Box(modifier = Modifier
+                                    .bounceClick { commentToReport = null }
+                                    .fillMaxWidth()
+                                    .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                    .padding(vertical = 14.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.comment_cancel_btn), color = Color.White.copy(alpha = 0.8f), fontWeight = FontWeight.SemiBold)
+                                }
                             }
                         }
                     }
-                }
 
-        // Delete Dialog Overlay
-        FlickTroveModal(
-            isVisible = commentToDelete != null,
-            onDismissRequest = { commentToDelete = null },
-            hazeState = hazeState
-        ) {
-            val comment = commentToDelete
-            if (comment != null) {
-                Text(stringResource(R.string.comment_delete_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.comment_delete_subtitle), color = Color.White.copy(0.8f))
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Button(
-                                onClick = { commentToDelete = null },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .bounceClick { commentToDelete = null },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.White.copy(alpha = 0.08f),
-                                    contentColor = Color.White.copy(alpha = 0.85f)
-                                ),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.12f))
+            // Delete Dialog Overlay
+            FlickTroveModal(
+                isVisible = commentToDelete != null,
+                onDismissRequest = { commentToDelete = null },
+                hazeState = hazeState
+            ) {
+                val comment = commentToDelete
+                if (comment != null) {
+                    Text(stringResource(R.string.comment_delete_title), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.comment_delete_subtitle), color = Color.White.copy(0.8f))
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(
-                                    text = stringResource(R.string.comment_cancel_btn),
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                            Button(
-                                onClick = {
-                                    viewModel.deleteComment(comment.id)
-                                    commentToDelete = null
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .bounceClick {
+                                Button(
+                                    onClick = { commentToDelete = null },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick { commentToDelete = null },
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(alpha = 0.08f),
+                                        contentColor = Color.White.copy(alpha = 0.85f)
+                                    ),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.12f))
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.comment_cancel_btn),
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                Button(
+                                    onClick = {
                                         viewModel.deleteComment(comment.id)
                                         commentToDelete = null
                                     },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Red.copy(alpha = 0.15f),
-                                    contentColor = Color(0xFFFF5252)
-                                ),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red.copy(alpha = 0.35f))
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.comment_delete_title),
-                                    fontWeight = FontWeight.Bold
-                                )
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick {
+                                            viewModel.deleteComment(comment.id)
+                                            commentToDelete = null
+                                        },
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Red.copy(alpha = 0.15f),
+                                        contentColor = Color(0xFFFF5252)
+                                    ),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red.copy(alpha = 0.35f))
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.comment_delete_title),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
-                }
-        } // End of Outer Box
+            } // End of Outer Box
+        }
     }
 
     @Composable

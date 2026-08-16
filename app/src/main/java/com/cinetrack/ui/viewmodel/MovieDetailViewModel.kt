@@ -405,7 +405,7 @@ class MovieDetailViewModel @Inject constructor(
         // Chiamata di rete in background
         viewModelScope.launch {
             val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
-            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
+            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
             val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
             if (!success) {
                 _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
@@ -822,7 +822,7 @@ class MovieDetailViewModel @Inject constructor(
                 parentUserId = parentUserId,
                 depth = depth,
                 mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" },
-                mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
+                mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
             )
             if (success) {
                 // Refresh comments
@@ -840,7 +840,7 @@ class MovieDetailViewModel @Inject constructor(
     fun toggleLikeComment(commentId: String) {
         viewModelScope.launch {
             val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
-            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.backdropPath ?: it.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH) else null }
+            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
             val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
             if (success) {
                 // Refresh comments

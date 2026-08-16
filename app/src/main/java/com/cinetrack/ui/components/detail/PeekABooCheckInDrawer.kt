@@ -108,7 +108,7 @@ fun PeekABooCheckInDrawer(
     characterImages: Map<String, String> = emptyMap(),
     accentColor: Color,
     hazeState: HazeState,
-    onSave: (vibes: List<String>, mvp: CastMember?, characterImageUrl: String?) -> Unit,
+    onSave: (rating: Double?, vibes: List<String>, mvp: CastMember?, characterImageUrl: String?) -> Unit,
     onDismiss: () -> Unit,
     peekTimeoutMs: Long = 6000L,
     modifier: Modifier = Modifier
@@ -120,6 +120,8 @@ fun PeekABooCheckInDrawer(
     var isPeeking by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
     var currentPage by remember { mutableIntStateOf(0) }
+
+    var rating by remember(movie?.personalRating) { mutableDoubleStateOf(movie?.personalRating ?: 0.0) }
 
     // Local selection state initialized from movie if present
     var selectedVibes by remember(movie?.emotionalVibes) { 
@@ -138,6 +140,7 @@ fun PeekABooCheckInDrawer(
     LaunchedEffect(visible, startExpanded) {
         if (visible) {
             // Restore selection to the saved movie state (in case they modified and dismissed previously)
+            rating = movie?.personalRating ?: 0.0
             selectedVibes = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
                 val clean = vibeString.trim()
                 val emojiPart = clean.split(" ").firstOrNull()
@@ -238,7 +241,11 @@ fun PeekABooCheckInDrawer(
                                 modifier = Modifier.weight(1f)
                             ) { page ->
                                 Text(
-                                    text = if (page == 0) stringResource(R.string.checkin_how_did_it_make_you_feel) else stringResource(R.string.checkin_mvp_actor),
+                                    text = when (page) {
+                                        0 -> stringResource(R.string.dialog_rating_drag)
+                                        1 -> stringResource(R.string.checkin_how_did_it_make_you_feel)
+                                        else -> stringResource(R.string.checkin_mvp_actor)
+                                    },
                                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Black),
                                     color = Color.White,
                                     lineHeight = 16.sp
@@ -280,6 +287,33 @@ fun PeekABooCheckInDrawer(
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                         ) { page ->
                             if (page == 0) {
+                                // Page 0: Rating
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                                ) {
+                                    com.cinetrack.ui.components.shared.FluidRatingBar(
+                                        rating = rating,
+                                        onRatingChange = { rating = it },
+                                        accentColor = accentColor,
+                                        starSize = 56.dp,
+                                        modifier = Modifier.padding(vertical = 16.dp)
+                                    )
+                                    if (rating > 0) {
+                                        Text(
+                                            text = stringResource(R.string.dialog_rating_prev, rating),
+                                            color = accentColor,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = stringResource(R.string.dialog_rating_remove),
+                                            color = Color.White.copy(0.5f),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                }
+                            } else if (page == 1) {
                                 // Page 1: Vibe Grid
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                     ALL_VIBES.chunked(3).forEach { rowVibes ->
@@ -413,7 +447,7 @@ fun PeekABooCheckInDrawer(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(bottom = 10.dp)
                         ) {
-                            repeat(2) { index ->
+                            repeat(3) { index ->
                                 val isCurrent = currentPage == index
                                 val isDone = currentPage > index
                                 val color by animateColorAsState(
@@ -446,9 +480,9 @@ fun PeekABooCheckInDrawer(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Back button (only visible on page 2)
+                            // Back button (only visible on page 1 and 2)
                             AnimatedVisibility(
-                                visible = currentPage == 1,
+                                visible = currentPage > 0,
                                 enter = fadeIn() + expandHorizontally(),
                                 exit = fadeOut() + shrinkHorizontally()
                             ) {
@@ -460,7 +494,7 @@ fun PeekABooCheckInDrawer(
                                         .background(Color.White.copy(alpha = 0.1f))
                                         .bounceClick(scaleDown = 0.95f) {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            currentPage = 0
+                                            currentPage -= 1
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -486,22 +520,23 @@ fun PeekABooCheckInDrawer(
                                     )
                                     .bounceClick(scaleDown = 0.95f) {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (currentPage == 0) {
-                                            currentPage = 1
+                                        if (currentPage < 2) {
+                                            currentPage += 1
                                         } else {
                                             val finalCharImageUrl = selectedMvp?.let { mvp ->
                                                 val cName = mvp.character?.lowercase()?.trim()
                                                 val aName = mvp.name.lowercase().trim()
                                                 cName?.let { characterImages[it] } ?: characterImages[aName]
                                             }
-                                            onSave(selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
+                                            val finalRating = if (rating > 0.0) rating else null
+                                            onSave(finalRating, selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
                                             dismissAll()
                                         }
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (currentPage == 0) stringResource(R.string.checkin_next) else stringResource(R.string.checkin_save_diary),
+                                    text = if (currentPage < 2) stringResource(R.string.checkin_next) else stringResource(R.string.checkin_save_diary),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF0B0F19)

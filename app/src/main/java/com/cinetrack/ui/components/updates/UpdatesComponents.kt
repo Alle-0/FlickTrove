@@ -3,6 +3,7 @@ package com.cinetrack.ui.components.updates
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -189,11 +190,9 @@ fun UpdateCard(
                 scaleX = scale
                 scaleY = scale
             }
-            .hazeGlass(
-                state = null,
-                shape = RoundedCornerShape(26.dp),
-                blurRadius = HazeStyles.SmallGlassBlurRadius
-            )
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color(0xFF1C1C1E))
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(26.dp))
             .clickable(
                 interactionSource = interactionSource,
                 indication = null

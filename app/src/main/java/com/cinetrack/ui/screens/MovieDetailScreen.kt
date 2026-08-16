@@ -141,6 +141,19 @@ data class MovieDetailScreen(
             viewModel.initMovie(movieId, mediaType)
         }
 
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+        androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+            val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    viewModel.refreshComments()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
         val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
 
         MovieDetailScreenContent(
@@ -276,7 +289,7 @@ fun MovieDetailScreenContent(
         if (openComments && hasCompletedFirstEnter && uiState is DetailUiState.Success) {
             val state = uiState as DetailUiState.Success
             val mediaTitle = state.details.title ?: state.details.name ?: ""
-            val image = buildTmdbImageUrl(state.details.backdropPath ?: state.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
+            val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
             val globalAccentColor = settingsViewModel.accentColor.value.toComposeColor()
             
             // Push CommentsScreen
@@ -540,7 +553,7 @@ fun MovieDetailScreenContent(
                                                 settingsViewModel.triggerGuestAuthDialog()
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
-                                                val image = buildTmdbImageUrl(state.details.backdropPath ?: state.details.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
+                                                val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
                                                 navigator.push(
                                                     CommentsScreen(
                                                         mediaId = viewModel.movieId.toString(), 
@@ -684,7 +697,10 @@ fun MovieDetailScreenContent(
                 characterImages = cachedSuccess!!.characterImages,
                 accentColor = checkInAccent,
                 hazeState = rootHazeState,
-                onSave = { vibes, mvp, charUrl ->
+                onSave = { rating, vibes, mvp, charUrl ->
+                    if (rating != cachedSuccess!!.movieEntry.personalRating) {
+                        viewModel.onEvent(DetailEvent.Rate(rating ?: 0.0))
+                    }
                     viewModel.onEvent(DetailEvent.SaveCheckIn(vibes, mvp, charUrl))
                 },
                 onDismiss = { showCheckInDrawer = false }

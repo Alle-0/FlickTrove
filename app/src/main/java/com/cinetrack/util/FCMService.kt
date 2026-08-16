@@ -34,61 +34,75 @@ class FCMService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         
-        // Notifications are automatically handled by FCM if the app is in the background
-        // AND the payload contains a "notification" object.
-        // But if the app is in the foreground, we should display it manually.
-        val notification = remoteMessage.notification
+        // We now use data-only messages to have full control over the notification appearance,
+        // even when the app is in the background.
         val data = remoteMessage.data
         
-        if (notification != null) {
-            var title = notification.title
-            if (title.isNullOrEmpty() && !notification.titleLocalizationKey.isNullOrEmpty()) {
-                val resId = resources.getIdentifier(notification.titleLocalizationKey, "string", packageName)
-                if (resId != 0) {
-                    val args = notification.titleLocalizationArgs
-                    title = if (args != null) getString(resId, *args) else getString(resId)
-                }
+        var title = remoteMessage.notification?.title ?: data["title"]
+        val titleLocKey = remoteMessage.notification?.titleLocalizationKey ?: data["titleLocKey"]
+        if (title.isNullOrEmpty() && !titleLocKey.isNullOrEmpty()) {
+            val resId = resources.getIdentifier(titleLocKey, "string", packageName)
+            if (resId != 0) {
+                title = getString(resId)
             }
-            if (title == null) title = ""
+        }
+        if (title.isNullOrEmpty()) title = ""
 
-            var body = notification.body
-            if (body.isNullOrEmpty() && !notification.bodyLocalizationKey.isNullOrEmpty()) {
-                val resId = resources.getIdentifier(notification.bodyLocalizationKey, "string", packageName)
-                if (resId != 0) {
-                    val args = notification.bodyLocalizationArgs
-                    body = if (args != null) getString(resId, *args) else getString(resId)
+        var body = remoteMessage.notification?.body ?: data["body"]
+        val bodyLocKey = remoteMessage.notification?.bodyLocalizationKey ?: data["bodyLocKey"]
+        if (body.isNullOrEmpty() && !bodyLocKey.isNullOrEmpty()) {
+            val resId = resources.getIdentifier(bodyLocKey, "string", packageName)
+            if (resId != 0) {
+                body = getString(resId)
+            }
+        }
+        if (body.isNullOrEmpty()) body = ""
+        
+        val mediaId = data["mediaId"]?.toLongOrNull() ?: 0L
+        val mediaType = data["mediaType"] ?: ""
+        val mediaImage = data["mediaImage"] ?: ""
+        
+        if (title!!.isNotEmpty() && NotificationHelper.hasNotificationPermission(this)) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                if (mediaId != 0L && mediaType.isNotEmpty()) {
+                    this.data = android.net.Uri.parse("flicktrove://media/$mediaType/$mediaId")
                 }
             }
-            if (body == null) body = ""
             
-            val mediaId = data["mediaId"]?.toLongOrNull() ?: 0L
-            val mediaType = data["mediaType"] ?: ""
-            
-            if (mediaId != 0L && mediaType.isNotEmpty() && NotificationHelper.hasNotificationPermission(this)) {
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    this.data = android.net.Uri.parse("flicktrove://media/\$mediaType/\$mediaId")
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                (System.currentTimeMillis() % 10000).toInt(), // unique request code
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            // Download image synchronously for the LargeIcon (copertina di fianco)
+            var largeIconBitmap: android.graphics.Bitmap? = null
+            if (mediaImage.isNotEmpty()) {
+                try {
+                    val url = java.net.URL(mediaImage)
+                    largeIconBitmap = android.graphics.BitmapFactory.decodeStream(url.openStream())
+                } catch (e: Exception) {
+                    Log.w("FCMService", "Failed to download media image for notification", e)
                 }
+            }
+
+            val builder = NotificationCompat.Builder(this, "flicktrove_episodes")
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setColor(0xFF00BFA5.toInt())
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
                 
-                val pendingIntent = PendingIntent.getActivity(
-                    this,
-                    mediaId.toInt(), // unique request code
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                )
-
-                val builder = NotificationCompat.Builder(this, "flicktrove_episodes") // reuse the general channel or create a new one
-                    .setSmallIcon(R.drawable.ic_notification)
-                    .setContentTitle(title)
-                    .setContentText(body)
-                    .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setColor(0xFF00BFA5.toInt())
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent)
-
-                NotificationManagerCompat.from(this).notify((System.currentTimeMillis() % 10000).toInt(), builder.build())
+            if (largeIconBitmap != null) {
+                builder.setLargeIcon(largeIconBitmap)
             }
+
+            NotificationManagerCompat.from(this).notify((System.currentTimeMillis() % 10000).toInt(), builder.build())
         }
     }
 }

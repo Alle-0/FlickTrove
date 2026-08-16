@@ -1,17 +1,17 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { initializeApp, cert } from 'npm:firebase-admin/app'
-import { getMessaging } from 'npm:firebase-admin/messaging'
 import { getFirestore } from 'npm:firebase-admin/firestore'
+import { GoogleAuth } from 'npm:google-auth-library@9.0.0'
 
 console.log("Supabase Edge Function for Firebase Notifications Started!")
 
-// Initialize Firebase Admin with Service Account from Supabase Secrets
+let serviceAccount: any = null;
 const serviceAccountKey = Deno.env.get('FIREBASE_SERVICE_ACCOUNT')
 if (!serviceAccountKey) {
   console.error('FIREBASE_SERVICE_ACCOUNT environment variable is not set!')
 } else {
   try {
-    const serviceAccount = JSON.parse(serviceAccountKey)
+    serviceAccount = JSON.parse(serviceAccountKey)
     initializeApp({
       credential: cert(serviceAccount)
     })
@@ -58,7 +58,7 @@ serve(async (req) => {
 
     const callerUid = decodedToken.uid;
 
-    const { targetUserId, title, body, titleLocKey, bodyLocKey, bodyLocArgs, mediaId, mediaType } = await req.json()
+    const { targetUserId, title, body, titleLocKey, bodyLocKey, bodyLocArgs, mediaId, mediaType, mediaImage } = await req.json()
 
     if (!targetUserId || (!title && !titleLocKey) || (!body && !bodyLocKey)) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -94,48 +94,51 @@ serve(async (req) => {
       })
     }
 
-    // Send the push notification
-    const message: any = {
-      data: {
-        mediaId: String(mediaId || ''),
-        mediaType: String(mediaType || ''),
-        click_action: 'FLICKTROVE_SOCIAL_NOTIFICATION'
+    // Send the push notification using standard REST fetch to bypass Deno node:http bug
+    const auth = new GoogleAuth({
+      credentials: {
+        client_email: serviceAccount.client_email,
+        private_key: serviceAccount.private_key,
       },
-      token: fcmToken,
-    }
+      scopes: ['https://www.googleapis.com/auth/firebase.messaging']
+    })
+    const client = await auth.getClient()
+    const tokenResponse = await client.getAccessToken()
 
-    if (title || body) {
-      message.notification = {
-        title: title || undefined,
-        body: body || undefined,
-      }
-    }
-
-    if (titleLocKey || bodyLocKey) {
-      message.android = {
-        notification: {
-          titleLocKey: titleLocKey || undefined,
-          bodyLocKey: bodyLocKey || undefined,
-          bodyLocArgs: bodyLocArgs || undefined,
-        }
-      }
-      
-      message.apns = {
-        payload: {
-          aps: {
-            alert: {
-              titleLocKey: titleLocKey || undefined,
-              locKey: bodyLocKey || undefined,
-              locArgs: bodyLocArgs || undefined,
-            }
-          }
+    const fcmUrl = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`
+    const payload = {
+      message: {
+        token: fcmToken,
+        data: {
+          mediaId: String(mediaId || ''),
+          mediaType: String(mediaType || ''),
+          mediaImage: String(mediaImage || ''),
+          title: title || '',
+          body: body || '',
+          titleLocKey: titleLocKey || '',
+          bodyLocKey: bodyLocKey || '',
+          click_action: 'FLICKTROVE_SOCIAL_NOTIFICATION'
         }
       }
     }
 
-    const response = await getMessaging().send(message)
+    const res = await fetch(fcmUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokenResponse.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
 
-    return new Response(JSON.stringify({ success: true, messageId: response }), {
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(`FCM API error: ${res.status} ${errorText}`)
+    }
+
+    const responseData = await res.json()
+
+    return new Response(JSON.stringify({ success: true, messageId: responseData.name }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })

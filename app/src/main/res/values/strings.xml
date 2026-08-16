@@ -1069,4 +1069,7 @@
     <string name="show_less">Show less</string>
     <string name="updates_social_liked">liked your comment</string>
     <string name="updates_social_replied">replied to your comment</string>
+    <string name="updates_social_on">on</string>
+    <string name="updates_social_recent">Recent</string>
+    <string name="updates_social_read">Read</string>
 </resources>

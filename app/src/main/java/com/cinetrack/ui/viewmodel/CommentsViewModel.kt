@@ -29,7 +29,7 @@ class CommentsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val isUserAnonymous: Boolean
-        get() = FirebaseAuth.getInstance().currentUser?.isAnonymous == true
+        get() = FirebaseAuth.getInstance().currentUser?.isAnonymous != false
         
     private val _comments = MutableStateFlow<List<AppComment>>(emptyList())
     val comments: StateFlow<List<AppComment>> = _comments.asStateFlow()
@@ -105,7 +105,7 @@ class CommentsViewModel @Inject constructor(
             )
             _comments.value = result.first
             lastVisibleComment = result.second
-            _hasMoreComments.value = result.second != null
+            _hasMoreComments.value = result.first.size == 10
             _isLoading.value = false
         }
     }
@@ -135,7 +135,7 @@ class CommentsViewModel @Inject constructor(
             }
             
             lastVisibleComment = result.second
-            _hasMoreComments.value = result.second != null
+            _hasMoreComments.value = result.first.size == 10
             _isLoadingMore.value = false
         }
     }
@@ -244,19 +244,29 @@ class CommentsViewModel @Inject constructor(
 
     fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0, mediaTitle: String = "", mediaImage: String? = null) {
         viewModelScope.launch {
-            val success = commentRepository.addComment(
-                mediaId = currentMediaId,
-                mediaType = currentMediaType,
-                text = text,
-                isSpoiler = isSpoiler,
-                parentId = parentId,
-                parentUserId = parentUserId,
-                depth = depth,
-                mediaTitle = mediaTitle,
-                mediaImage = mediaImage
-            )
-            if (success) {
-                refreshComments()
+            try {
+                val success = commentRepository.addComment(
+                    mediaId = currentMediaId,
+                    mediaType = currentMediaType,
+                    text = text,
+                    isSpoiler = isSpoiler,
+                    parentId = parentId,
+                    parentUserId = parentUserId,
+                    depth = depth,
+                    mediaTitle = mediaTitle,
+                    mediaImage = mediaImage
+                )
+                if (success) {
+                    if (parentId != null) {
+                        // It's a reply: load the replies of the parent so it appears immediately
+                        loadRepliesForComment(parentId)
+                    } else {
+                        refreshComments()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                actionFeedbackManager.emit(UiText.DynamicString("Error: ${e.message}"))
             }
         }
     }

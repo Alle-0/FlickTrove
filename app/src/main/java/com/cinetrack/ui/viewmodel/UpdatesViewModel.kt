@@ -18,12 +18,15 @@ import com.cinetrack.data.model.SocialNotification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
+import com.cinetrack.ui.components.updates.generateReminderItems
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
     val notificationCount: Int = 0,
     val socialNotifications: ImmutableList<SocialNotification> = persistentListOf(),
     val socialUnreadCount: Int = 0,
+    val totalUnreadCount: Int = 0,
     val isLoading: Boolean = true
 )
 
@@ -75,11 +78,14 @@ class UpdatesViewModel @Inject constructor(
             val unreadNotifCount = movies.count {
                 !it.dropped && ((it.newEpisodesFound ?: 0) > 0 || (it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0))
             }
+            val futureRemindersCount = movies.flatMap { it.generateReminderItems(today) }.size
+
             UpdatesUiState(
                 movies = updateList.toImmutableList(),
                 notificationCount = unreadNotifCount,
                 socialNotifications = socialNotifs,
                 socialUnreadCount = socialUnread,
+                totalUnreadCount = unreadNotifCount + futureRemindersCount + socialUnread,
                 isLoading = false
             )
         }
@@ -135,6 +141,26 @@ class UpdatesViewModel @Inject constructor(
         firestore.collection("user_social_notifications").document(userId)
             .collection("items").document(id)
             .update("isRead", true)
+    }
+
+    fun markAllSocialNotificationsAsRead() {
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                val unreadDocs = firestore.collection("user_social_notifications").document(userId)
+                    .collection("items").whereEqualTo("isRead", false).get().await()
+                
+                if (unreadDocs.isEmpty) return@launch
+                
+                val batch = firestore.batch()
+                for (doc in unreadDocs.documents) {
+                    batch.update(doc.reference, "isRead", true)
+                }
+                batch.commit().await()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun deleteSocialNotification(id: String) {

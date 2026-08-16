@@ -13,5 +13,7 @@ data class SocialNotification(
     val senderName: String = "",
     val senderUserId: String = "",
     val createdAt: Timestamp? = null,
-    val isRead: Boolean = false
+    @get:com.google.firebase.firestore.PropertyName("isRead")
+    @set:com.google.firebase.firestore.PropertyName("isRead")
+    var isRead: Boolean = false
 )

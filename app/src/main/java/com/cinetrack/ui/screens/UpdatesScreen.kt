@@ -97,7 +97,8 @@ fun UpdatesScreen(
     startY: Float? = null,
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
-    onMovieClick: (Movie) -> Unit
+    onMovieClick: (Movie) -> Unit,
+    onSocialNotificationClick: ((Movie) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -169,13 +170,7 @@ fun UpdatesScreen(
     }
 
     BackHandler(enabled = !isClosing) {
-        if (mainTab != 0) {
-            mainTab = 0
-        } else if (pagerState.currentPage > 0) {
-            scope.launch { pagerState.animateScrollToPage(0) }
-        } else {
-            triggerExit()
-        }
+        triggerExit()
     }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -235,17 +230,15 @@ fun UpdatesScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .haze(
+                            state = internalHazeState,
+                            style = HazeStyles.PremiumDark
+                        )
                 ) {
                     AnimatedContent(
                         targetState = mainTab,
                         transitionSpec = {
-                            if (targetState > initialState) {
-                                (slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> width } + fadeIn(animationSpec = tween(350))) togetherWith
-                                (slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> -width } + fadeOut(animationSpec = tween(350)))
-                            } else {
-                                (slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> -width } + fadeIn(animationSpec = tween(350))) togetherWith
-                                (slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { width -> width } + fadeOut(animationSpec = tween(350)))
-                            }
+                            fadeIn(animationSpec = tween(300)) togetherWith fadeOut(animationSpec = tween(300))
                         },
                         label = "MainTabTransition",
                         modifier = Modifier.fillMaxSize()
@@ -262,10 +255,6 @@ fun UpdatesScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .haze(
-                                            state = internalHazeState,
-                                            style = HazeStyles.PremiumDark
-                                        )
                                 ) {
                                     AnimatedContent(
                                         targetState = isCalendarView,
@@ -330,10 +319,6 @@ fun UpdatesScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .haze(
-                                        state = internalHazeState,
-                                        style = HazeStyles.PremiumDark
-                                    )
                             ) {
                                 LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
@@ -479,10 +464,6 @@ fun UpdatesScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .haze(
-                                    state = internalHazeState,
-                                    style = HazeStyles.PremiumDark
-                                )
                         ) {
                             LazyColumn(
                                 state = socialListState,
@@ -501,27 +482,103 @@ fun UpdatesScreen(
                                             modifier = Modifier.fillParentMaxSize(), 
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
+                                            Text(stringResource(R.string.updates_no_notifications), color = Color.White.copy(alpha = 0.3f))
                                         }
                                     }
                                 } else {
-                                    items(uiState.socialNotifications, key = { it.id }, contentType = { "social_notif" }) { notif ->
-                                        androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                            SocialNotificationCard(
-                                                notification = notif,
-                                                onClick = {
-                                                    viewModel.markSocialNotificationAsRead(notif.id)
-                                                    // Navigate to MovieDetailScreen(openComments = true)
-                                                    val movie = Movie(
-                                                        id = notif.mediaId.toLongOrNull() ?: 0L,
-                                                        mediaType = notif.mediaType,
-                                                        title = notif.mediaTitle,
-                                                        posterPath = null,
-                                                        backdropPath = null
-                                                    )
-                                                    onMovieClick(movie)
+                                    val unreadSocialNotifs = uiState.socialNotifications.filter { !it.isRead }.sortedByDescending { it.createdAt }
+                                    val readSocialNotifs = uiState.socialNotifications.filter { it.isRead }.sortedByDescending { it.createdAt }
+
+                                    if (unreadSocialNotifs.isNotEmpty()) {
+                                        item {
+                                            SectionHeader(
+                                                text = stringResource(R.string.updates_social_recent),
+                                                action = {
+                                                    val markInteractionSource = remember { MutableInteractionSource() }
+                                                    val markIsPressed by markInteractionSource.collectIsPressedAsState()
+                                                    val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markSocialScale")
+                                                    
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .graphicsLayer { scaleX = markScale; scaleY = markScale }
+                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                            .clickable(
+                                                                interactionSource = markInteractionSource,
+                                                                indication = null
+                                                            ) { 
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                viewModel.markAllSocialNotificationsAsRead()
+                                                            }
+                                                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                                                    ) {
+                                                        Text(
+                                                            stringResource(R.string.updates_mark_all), 
+                                                            color = MaterialTheme.colorScheme.primary, 
+                                                            fontSize = 10.sp, 
+                                                            fontWeight = FontWeight.Black,
+                                                            letterSpacing = 1.sp
+                                                        )
+                                                    }
                                                 }
                                             )
+                                        }
+
+                                        items(unreadSocialNotifs, key = { it.id }, contentType = { "social_notif" }) { notif ->
+                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                SocialNotificationCard(
+                                                    notification = notif,
+                                                    onClick = {
+                                                        viewModel.markSocialNotificationAsRead(notif.id)
+                                                        val movie = Movie(
+                                                            id = notif.mediaId.toLongOrNull() ?: 0L,
+                                                            mediaType = notif.mediaType,
+                                                            title = notif.mediaTitle,
+                                                            posterPath = null,
+                                                            backdropPath = null
+                                                        )
+                                                        if (onSocialNotificationClick != null) {
+                                                            onSocialNotificationClick(movie)
+                                                        } else {
+                                                            onMovieClick(movie)
+                                                        }
+                                                    },
+                                                    onMarkRead = {
+                                                        viewModel.markSocialNotificationAsRead(notif.id)
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (readSocialNotifs.isNotEmpty()) {
+                                        item {
+                                            SectionHeader(
+                                                text = stringResource(R.string.updates_social_read)
+                                            )
+                                        }
+
+                                        items(readSocialNotifs, key = { it.id }, contentType = { "social_notif" }) { notif ->
+                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                SocialNotificationCard(
+                                                    notification = notif,
+                                                    onClick = {
+                                                        val movie = Movie(
+                                                            id = notif.mediaId.toLongOrNull() ?: 0L,
+                                                            mediaType = notif.mediaType,
+                                                            title = notif.mediaTitle,
+                                                            posterPath = null,
+                                                            backdropPath = null
+                                                        )
+                                                        if (onSocialNotificationClick != null) {
+                                                            onSocialNotificationClick(movie)
+                                                        } else {
+                                                            onMovieClick(movie)
+                                                        }
+                                                    },
+                                                    onMarkRead = {} // Already read
+                                                )
+                                            }
                                         }
                                     }
                                 }

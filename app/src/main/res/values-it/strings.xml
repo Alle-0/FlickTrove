@@ -510,6 +510,9 @@
     <string name="updates_tab_social">Social</string>
     <string name="updates_social_liked">ha messo mi piace al tuo commento</string>
     <string name="updates_social_replied">ha risposto al tuo commento</string>
+    <string name="updates_social_on">su</string>
+    <string name="updates_social_recent">Recenti</string>
+    <string name="updates_social_read">Letti</string>
     <string name="updates_your_reminders">I tuoi Promemoria</string>
     <string name="updates_waiting_count">%1$d in attesa</string>
     <string name="updates_no_notifications">Nessuna notifica recente.</string>

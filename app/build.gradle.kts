@@ -37,6 +37,7 @@ android {
         val traktSecret = localProps.getProperty("TRAKT_CLIENT_SECRET", "")
         val tvdbKey = localProps.getProperty("TVDB_API_KEY", "")
         val supabaseUrl = localProps.getProperty("SUPABASE_URL", "")
+        val supabaseAnonKey = localProps.getProperty("SUPABASE_ANON_KEY", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
@@ -45,6 +46,7 @@ android {
         buildConfigField("String", "TRAKT_CLIENT_SECRET", "\"$traktSecret\"")
         buildConfigField("String", "TVDB_API_KEY", "\"$tvdbKey\"")
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
     }
 
     signingConfigs {

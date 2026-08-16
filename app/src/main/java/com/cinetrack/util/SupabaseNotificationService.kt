@@ -38,11 +38,13 @@ object SupabaseNotificationService {
             val url = URL(functionUrl)
             android.util.Log.d("SupabaseNotification", "Attempting to send notification to: $functionUrl")
             val connection = url.openConnection() as HttpURLConnection
-            
+
             connection.requestMethod = "POST"
             connection.setRequestProperty("Authorization", "Bearer $idToken")
             connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("Accept", "application/json")
+            // Pass apikey header as Supabase API Gateway requires it
+            connection.setRequestProperty("apikey", BuildConfig.SUPABASE_ANON_KEY)
             connection.doOutput = true
             connection.connectTimeout = 5000
             connection.readTimeout = 5000
@@ -68,12 +70,12 @@ object SupabaseNotificationService {
             val responseCode = connection.responseCode
             val responseMessage = connection.responseMessage
             android.util.Log.d("SupabaseNotification", "Response Code: $responseCode, Message: $responseMessage")
-            
+
             if (responseCode !in 200..299) {
                 val errorStream = connection.errorStream?.bufferedReader()?.use { it.readText() }
                 android.util.Log.e("SupabaseNotification", "Error Response: $errorStream")
             }
-            
+
             return@withContext responseCode in 200..299
         } catch (e: Exception) {
             android.util.Log.e("SupabaseNotification", "Exception while sending notification: ${e.message}", e)

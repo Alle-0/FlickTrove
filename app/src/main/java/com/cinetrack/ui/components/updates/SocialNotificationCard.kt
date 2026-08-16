@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.updates
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,16 +10,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -32,7 +39,8 @@ import java.util.Locale
 @Composable
 fun SocialNotificationCard(
     notification: SocialNotification,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onMarkRead: () -> Unit
 ) {
     val alpha = if (notification.isRead) 0.5f else 1f
     
@@ -60,76 +68,128 @@ fun SocialNotificationCard(
         MaterialTheme.colorScheme.primary
     }
 
-    Row(
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = if (isPressed) androidx.compose.animation.core.Spring.StiffnessHigh else androidx.compose.animation.core.Spring.StiffnessLow
+        ),
+        label = "socialCardScale"
+    )
+
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Immagine media (con iconcina in basso a destra)
-        Box(
-            modifier = Modifier.size(60.dp)
-        ) {
-            AsyncImage(
-                model = notification.mediaImage,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.DarkGray)
-            )
-            
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 6.dp, y = 6.dp)
-                    .size(24.dp)
-                    .background(MaterialTheme.colorScheme.surface, CircleShape)
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
+            .height(82.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color(0xFF1C1C1E))
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(26.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = iconRes),
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                onClick()
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Immagine media (con iconcina in basso a destra)
+            Box(
+                modifier = Modifier.width(44.dp).height(58.dp)
+            ) {
+                AsyncImage(
+                    model = notification.mediaImage,
                     contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.fillMaxSize()
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.DarkGray)
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 6.dp, y = 6.dp)
+                        .size(20.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                        .padding(3.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = iconRes),
+                        contentDescription = null,
+                        tint = iconColor,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(14.dp))
+            
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                val onText = stringResource(R.string.updates_social_on)
+                Text(
+                    text = "${notification.senderName} $actionText $onText ${notification.mediaTitle}",
+                    color = Color.White.copy(alpha = alpha),
+                    fontSize = 13.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = dateText,
+                    color = Color.White.copy(alpha = alpha * 0.6f),
+                    fontSize = 11.sp
                 )
             }
-        }
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = "${notification.senderName} $actionText su ${notification.mediaTitle}",
-                color = Color.White.copy(alpha = alpha),
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
-                fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = dateText,
-                color = Color.White.copy(alpha = alpha * 0.6f),
-                fontSize = 12.sp
-            )
-        }
-        
-        if (!notification.isRead) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-            )
+            
+            if (!notification.isRead) {
+                val actionInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                val isActionPressed by actionInteractionSource.collectIsPressedAsState()
+                val actionScale by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = if (isActionPressed) 0.8f else 1f,
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                        stiffness = if (isActionPressed) androidx.compose.animation.core.Spring.StiffnessHigh else androidx.compose.animation.core.Spring.StiffnessLow
+                    ),
+                    label = "socialActionScale"
+                )
+
+                androidx.compose.material3.IconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onMarkRead()
+                    },
+                    interactionSource = actionInteractionSource,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = actionScale
+                        scaleY = actionScale
+                    }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick_card),
+                        contentDescription = "Mark as read",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
     }
 }
