@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.window.Dialog
@@ -127,6 +128,7 @@ fun FoldersScreenContent(
     onFolderClick: (FolderEntity) -> Unit = {}
 ) {
     val folders by viewModel.folders.collectAsStateWithLifecycle()
+    val allMovies by viewModel.allMovies.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
@@ -205,6 +207,7 @@ fun FoldersScreenContent(
                         Box(modifier = Modifier.animateItem()) {
                             FolderCard(
                                 folder = folder,
+                                allMovies = allMovies,
                                 onClick = { onFolderClick(folder) },
                                 onLongClick = { bounds ->
                                     activeMenuBounds = bounds
@@ -356,6 +359,7 @@ fun FoldersScreenContent(
 @Composable
 fun FolderCard(
     folder: FolderEntity,
+    allMovies: List<com.cinetrack.data.model.Movie>,
     onClick: () -> Unit,
     onLongClick: (Rect) -> Unit
 ) {
@@ -381,20 +385,52 @@ fun FolderCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
         // Colored dot (circle) with icon
-        // Icon container with subtle background
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(50))
-                .background(folderColor.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
-                contentDescription = null,
-                tint = folderColor,
-                modifier = Modifier.size(18.dp)
-            )
+        val topItems = remember(folder.itemIds, allMovies) {
+            folder.itemIds.take(3).mapNotNull { id ->
+                allMovies.find { "${it.mediaType}_${it.id}" == id }
+            }
+        }
+
+        if (topItems.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(folderColor.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
+                    contentDescription = null,
+                    tint = folderColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .width(40.dp + ((topItems.size - 1) * 20).dp)
+                    .height(60.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                topItems.forEachIndexed { index, movie ->
+                    Box(
+                        modifier = Modifier
+                            .offset(x = (index * 20).dp)
+                            .size(width = 40.dp, height = 60.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(6.dp))
+                            .zIndex((topItems.size - index).toFloat())
+                    ) {
+                        coil.compose.AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
+                            contentDescription = null,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
         }
         
         Spacer(Modifier.width(16.dp))

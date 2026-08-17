@@ -20,7 +20,7 @@ To the maximum extent permitted by applicable law, the developer disclaims any l
 
 ### 4. User-Generated Content (UGC)
 
-FlickTrove allows users to post comments, write reviews, and upload custom avatars or images. By using these features, you agree not to upload or post content that is illegal, offensive, pornographic, violent, discriminatory, or that violates third-party copyrights. You are solely responsible for the content you create and upload. The developer reserves the right to remove any inappropriate content (including comments and avatars) and, in severe cases, suspend the user's account without prior notice. We encourage users to use the in-app "Reporting" (segnalazioni) feature to flag any content that violates these guidelines.
+FlickTrove allows users to post comments, write reviews, and upload custom avatars or images. By using these features, you agree not to upload or post content that is illegal, offensive, pornographic, violent, discriminatory, or that violates third-party copyrights. You must also use the designated "Spoiler" feature if your comment contains spoilers about the plot of movies or TV shows. You are solely responsible for the content you create and upload. The developer reserves the unchallengeable right to remove any inappropriate content (including comments and avatars) and restrict, suspend (temporarily or permanently), or ban the user's ability to post comments, or in severe cases, suspend the user's account without prior notice. We encourage users to use the in-app "Reporting" (segnalazioni) feature to flag any content that violates these guidelines.
 
 ### 5. Suspension of Account and Service
 

@@ -72,6 +72,14 @@ class CommentsViewModel @Inject constructor(
     private val _showTranslationPrompt = MutableStateFlow<Pair<String, String>?>(null)
     val showTranslationPrompt: StateFlow<Pair<String, String>?> = _showTranslationPrompt.asStateFlow()
 
+    private val _isUserBanned = MutableStateFlow(false)
+    val isUserBanned: StateFlow<Boolean> = _isUserBanned.asStateFlow()
+    
+    private val _banExpiration = MutableStateFlow<String?>(null)
+    val banExpiration: StateFlow<String?> = _banExpiration.asStateFlow()
+    
+    private var banListenerRegistration: com.google.firebase.firestore.ListenerRegistration? = null
+
     fun dismissTranslationPrompt() {
         _showTranslationPrompt.value = null
     }
@@ -81,7 +89,33 @@ class CommentsViewModel @Inject constructor(
         currentMediaId = mediaId
         currentMediaType = mediaType
         refreshComments()
+        
+        val uid = auth.currentUser?.uid
+        if (uid != null && banListenerRegistration == null) {
+            banListenerRegistration = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users").document(uid)
+                .addSnapshotListener { snapshot, _ ->
+                    if (snapshot != null && snapshot.exists()) {
+                        val isBanned = snapshot.getBoolean("bannedFromCommenting") ?: false
+                        val until = snapshot.getTimestamp("bannedUntil")?.toDate()
+                        
+                        if (isBanned) {
+                            _isUserBanned.value = true
+                            _banExpiration.value = null
+                        } else if (until != null && until.after(java.util.Date())) {
+                            _isUserBanned.value = true
+                            val df = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                            _banExpiration.value = df.format(until)
+                        } else {
+                            _isUserBanned.value = false
+                            _banExpiration.value = null
+                        }
+                    }
+                }
+        }
     }
+
+
 
     fun setSort(sortOption: com.cinetrack.data.model.CommentSortOption, sortOrder: com.cinetrack.data.model.CommentSortOrder) {
         if (currentSortOption == sortOption && currentSortOrder == sortOrder) return
@@ -228,6 +262,7 @@ class CommentsViewModel @Inject constructor(
     // ── Gotcha 3: release all Translator native resources when ViewModel is destroyed ──
     override fun onCleared() {
         super.onCleared()
+        banListenerRegistration?.remove()
         translationManager.closeAll()
     }
 
@@ -242,7 +277,21 @@ class CommentsViewModel @Inject constructor(
         }
     }
 
+    private var lastCommentTimeMs: Long = 0
+    private val COOLDOWN_MS = 10000L // 10 seconds
+
     fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0, mediaTitle: String = "", mediaImage: String? = null) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastCommentTimeMs < COOLDOWN_MS) {
+            val remainingSeconds = ((COOLDOWN_MS - (currentTime - lastCommentTimeMs)) / 1000).toInt() + 1
+            viewModelScope.launch {
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(com.cinetrack.R.string.comment_cooldown_wait, remainingSeconds))
+            }
+            return
+        }
+        
+        lastCommentTimeMs = currentTime
+
         viewModelScope.launch {
             try {
                 val success = commentRepository.addComment(

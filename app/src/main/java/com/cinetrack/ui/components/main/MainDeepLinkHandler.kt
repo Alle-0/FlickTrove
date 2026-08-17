@@ -68,12 +68,14 @@ fun MainDeepLinkHandler(
 
                 val type = uri.getQueryParameter("type") ?: typeFromPath ?: "movie"
                 val id = uri.getQueryParameter("id")?.toLongOrNull() ?: idFromPath
+                val openComments = uri.getQueryParameter("openComments")?.toBoolean() ?: false
+                val targetCommentId = uri.getQueryParameter("commentId")
 
                 if (id != null) {
                     when (type) {
                         "person" -> rootNavigator.push(PersonDetailScreen(id, null))
                         "collection" -> rootNavigator.push(CollectionDetailScreen(id, null))
-                        else -> rootNavigator.push(MovieDetailScreen(id, type))
+                        else -> rootNavigator.push(MovieDetailScreen(id, type, openComments = openComments, targetCommentId = targetCommentId))
                     }
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "search") {
@@ -95,9 +97,10 @@ fun MainDeepLinkHandler(
             } else if (action == "com.cinetrack.FLICKTROVE_SOCIAL_NOTIFICATION") {
                 val mediaId = intent.getStringExtra("mediaId")?.toLongOrNull()
                 val mediaType = intent.getStringExtra("mediaType")
+                val commentId = intent.getStringExtra("commentId")
                 if (mediaId != null && mediaType != null) {
                     when (mediaType) {
-                        "movie", "tv" -> rootNavigator.push(MovieDetailScreen(mediaId, mediaType, openComments = true))
+                        "movie", "tv" -> rootNavigator.push(MovieDetailScreen(mediaId, mediaType, openComments = true, targetCommentId = commentId))
                     }
                 }
             }

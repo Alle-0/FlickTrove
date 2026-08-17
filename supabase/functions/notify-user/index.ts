@@ -1,7 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { initializeApp, cert } from 'npm:firebase-admin/app'
 import { getFirestore } from 'npm:firebase-admin/firestore'
-import { GoogleAuth } from 'npm:google-auth-library@9.0.0'
 
 console.log("Supabase Edge Function for Firebase Notifications Started!")
 
@@ -44,12 +43,18 @@ serve(async (req) => {
 
     const idToken = authHeader.split('Bearer ')[1]
     
-    // Verify the Firebase ID Token (Security check to prevent spam)
-    const { getAuth } = await import('npm:firebase-admin/auth');
+    // Verify the Firebase ID Token using pure Web Crypto (jose) and fetch to avoid Deno node:http crash
+    const { jwtVerify, createRemoteJWKSet } = await import('https://deno.land/x/jose@v4.14.4/index.ts')
     let decodedToken;
     try {
-      decodedToken = await getAuth().verifyIdToken(idToken);
+      const JWKS = createRemoteJWKSet(new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'))
+      const { payload } = await jwtVerify(idToken, JWKS, {
+        issuer: `https://securetoken.google.com/${serviceAccount.project_id}`,
+        audience: serviceAccount.project_id
+      })
+      decodedToken = payload
     } catch (e) {
+      console.error("Token verification failed:", e)
       return new Response(JSON.stringify({ error: 'Unauthorized: Invalid Firebase ID token' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -58,7 +63,7 @@ serve(async (req) => {
 
     const callerUid = decodedToken.uid;
 
-    const { targetUserId, title, body, titleLocKey, bodyLocKey, bodyLocArgs, mediaId, mediaType, mediaImage } = await req.json()
+    const { targetUserId, title, body, titleLocKey, bodyLocKey, bodyLocArgs, titleLocArgs, mediaId, mediaType, mediaImage } = await req.json()
 
     if (!targetUserId || (!title && !titleLocKey) || (!body && !bodyLocKey)) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -95,15 +100,35 @@ serve(async (req) => {
     }
 
     // Send the push notification using standard REST fetch to bypass Deno node:http bug
-    const auth = new GoogleAuth({
-      credentials: {
-        client_email: serviceAccount.client_email,
-        private_key: serviceAccount.private_key,
-      },
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging']
+    const { SignJWT, importPKCS8 } = await import('https://deno.land/x/jose@v4.14.4/index.ts')
+    const alg = 'RS256'
+    const privateKeyStr = serviceAccount.private_key
+    const key = await importPKCS8(privateKeyStr, alg)
+    
+    const jwt = await new SignJWT({
+      iss: serviceAccount.client_email,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: 'https://oauth2.googleapis.com/token',
     })
-    const client = await auth.getClient()
-    const tokenResponse = await client.getAccessToken()
+      .setProtectedHeader({ alg, typ: 'JWT' })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(key)
+      
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+    })
+    
+    if (!tokenRes.ok) {
+      throw new Error(`Failed to get FCM access token: ${await tokenRes.text()}`)
+    }
+    
+    const tokenData = await tokenRes.json()
+    const accessToken = tokenData.access_token
 
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`
     const payload = {
@@ -117,6 +142,8 @@ serve(async (req) => {
           body: body || '',
           titleLocKey: titleLocKey || '',
           bodyLocKey: bodyLocKey || '',
+          titleLocArgs: titleLocArgs ? JSON.stringify(titleLocArgs) : '',
+          bodyLocArgs: bodyLocArgs ? JSON.stringify(bodyLocArgs) : '',
           click_action: 'FLICKTROVE_SOCIAL_NOTIFICATION'
         }
       }
@@ -125,7 +152,7 @@ serve(async (req) => {
     const res = await fetch(fcmUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${tokenResponse.token}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)

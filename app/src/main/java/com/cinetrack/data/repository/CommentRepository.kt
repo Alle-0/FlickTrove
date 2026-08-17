@@ -111,6 +111,19 @@ class CommentRepository @Inject constructor(
         mediaImage: String? = null
     ): Boolean {
         val user = auth.currentUser ?: return false
+        
+        // Check if user is banned
+        try {
+            val userDoc = firestore.collection("users").document(user.uid).get().await()
+            val isBanned = userDoc.getBoolean("bannedFromCommenting") == true
+            val bannedUntil = userDoc.getTimestamp("bannedUntil")?.toDate()
+            if (isBanned || (bannedUntil != null && bannedUntil.after(java.util.Date()))) {
+                return false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         val newComment = AppComment(
             id = "", // Will be set by Firestore
             mediaId = mediaId,

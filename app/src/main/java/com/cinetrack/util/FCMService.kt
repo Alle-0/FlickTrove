@@ -40,20 +40,42 @@ class FCMService : FirebaseMessagingService() {
         
         var title = remoteMessage.notification?.title ?: data["title"]
         val titleLocKey = remoteMessage.notification?.titleLocalizationKey ?: data["titleLocKey"]
+        val titleLocArgsStr = data["titleLocArgs"]
         if (title.isNullOrEmpty() && !titleLocKey.isNullOrEmpty()) {
             val resId = resources.getIdentifier(titleLocKey, "string", packageName)
             if (resId != 0) {
-                title = getString(resId)
+                if (!titleLocArgsStr.isNullOrEmpty()) {
+                    try {
+                        val jsonArray = org.json.JSONArray(titleLocArgsStr)
+                        val args = Array(jsonArray.length()) { i -> jsonArray.getString(i) }
+                        title = getString(resId, *args)
+                    } catch (e: Exception) {
+                        title = getString(resId)
+                    }
+                } else {
+                    title = getString(resId)
+                }
             }
         }
         if (title.isNullOrEmpty()) title = ""
 
         var body = remoteMessage.notification?.body ?: data["body"]
         val bodyLocKey = remoteMessage.notification?.bodyLocalizationKey ?: data["bodyLocKey"]
+        val bodyLocArgsStr = data["bodyLocArgs"]
         if (body.isNullOrEmpty() && !bodyLocKey.isNullOrEmpty()) {
             val resId = resources.getIdentifier(bodyLocKey, "string", packageName)
             if (resId != 0) {
-                body = getString(resId)
+                if (!bodyLocArgsStr.isNullOrEmpty()) {
+                    try {
+                        val jsonArray = org.json.JSONArray(bodyLocArgsStr)
+                        val args = Array(jsonArray.length()) { i -> jsonArray.getString(i) }
+                        body = getString(resId, *args)
+                    } catch (e: Exception) {
+                        body = getString(resId)
+                    }
+                } else {
+                    body = getString(resId)
+                }
             }
         }
         if (body.isNullOrEmpty()) body = ""
@@ -66,7 +88,12 @@ class FCMService : FirebaseMessagingService() {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 if (mediaId != 0L && mediaType.isNotEmpty()) {
-                    this.data = android.net.Uri.parse("flicktrove://media/$mediaType/$mediaId")
+                    var uriStr = "flicktrove://media/$mediaType/$mediaId"
+                    val commentId = data["commentId"]
+                    if (!commentId.isNullOrEmpty()) {
+                        uriStr += "?openComments=true&commentId=$commentId"
+                    }
+                    this.data = android.net.Uri.parse(uriStr)
                 }
             }
             

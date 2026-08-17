@@ -1072,4 +1072,7 @@
     <string name="updates_social_on">on</string>
     <string name="updates_social_recent">Recent</string>
     <string name="updates_social_read">Read</string>
+    <string name="comment_banned_permanent">You cannot comment. You have been permanently suspended.</string>
+    <string name="comment_banned_temporary">You cannot comment. You have been suspended until %1$s.</string>
+    <string name="comment_cooldown_wait">Wait %1$d seconds before commenting again.</string>
 </resources>

@@ -85,7 +85,8 @@ class CommentsScreen(
     private val accentColorValue: Long,
     private val mediaTitle: String = "",
     private val mediaImage: String? = null,
-    private val focusInputOnLaunch: Boolean = false
+    private val focusInputOnLaunch: Boolean = false,
+    private val targetCommentId: String? = null
 ) : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -116,6 +117,8 @@ class CommentsScreen(
         val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
         val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
         val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
+        val isUserBanned by viewModel.isUserBanned.collectAsStateWithLifecycle()
+        val banExpiration by viewModel.banExpiration.collectAsStateWithLifecycle()
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -227,12 +230,40 @@ class CommentsScreen(
                     .fillMaxSize()
             ) {
                 val expandedComments = remember { mutableStateOf(setOf<String>()) }
+                var hasScrolledToTarget by remember { mutableStateOf(false) }
+                val listState = rememberLazyListState()
+
+                LaunchedEffect(comments) {
+                    if (targetCommentId != null && !hasScrolledToTarget && comments.isNotEmpty()) {
+                        var current = comments.find { it.id == targetCommentId }
+                        val toExpand = mutableSetOf<String>()
+                        while (current?.parentId != null) {
+                            toExpand.add(current.parentId!!)
+                            current = comments.find { it.id == current!!.parentId }
+                        }
+                        if (toExpand.isNotEmpty()) {
+                            expandedComments.value = expandedComments.value + toExpand
+                        }
+                    }
+                }
 
                 val flatTree = remember(comments, expandedComments.value, sortOption, sortOrder) { 
                     buildFlatTree(comments, expandedComments.value, sortOption, sortOrder) 
                 }
 
+                LaunchedEffect(flatTree) {
+                    if (targetCommentId != null && !hasScrolledToTarget && flatTree.isNotEmpty()) {
+                        val index = flatTree.indexOfFirst { it.id == targetCommentId }
+                        if (index != -1) {
+                            kotlinx.coroutines.delay(300)
+                            listState.animateScrollToItem(index)
+                            hasScrolledToTarget = true
+                        }
+                    }
+                }
+
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .haze(hazeState),
@@ -375,17 +406,19 @@ class CommentsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             
                             Column(modifier = Modifier.weight(1f)) {
+                                val isEffectivelyDeleted = comment.isDeleted || comment.userId.isBlank() || (comment.text.isBlank() && comment.userDisplayName.isBlank())
+                                
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        text = if (comment.isDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { "Anonimo" },
+                                        text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { "Anonimo" },
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = Color.White
                                     )
                                     Spacer(modifier = Modifier.weight(1f))
-                                    if (comment.userId == viewModel.currentUserId && !comment.isDeleted && comment.createdAt != null) {
+                                    if (comment.userId == viewModel.currentUserId && !isEffectivelyDeleted && comment.createdAt != null) {
                                         val timeSinceCreated = System.currentTimeMillis() - comment.createdAt.toDate().time
                                         if (timeSinceCreated <= 12 * 60 * 60 * 1000) {
                                             Icon(
@@ -420,7 +453,7 @@ class CommentsScreen(
 
                                 val currentTranslationState = translationStates[comment.id]
                                 val displayedTextRaw = when {
-                                    comment.isDeleted -> stringResource(R.string.comment_deleted)
+                                    isEffectivelyDeleted -> stringResource(R.string.comment_deleted)
                                     currentTranslationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslationState.text
                                     else -> comment.text
                                 }
@@ -573,86 +606,90 @@ class CommentsScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.comment_reply_btn),
-                                        color = accentColor,
-                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        modifier = Modifier.bounceClick {
-                                            if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
-                                            else replyingTo = comment 
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Row(
-                                        modifier = Modifier.bounceClick {
-                                            if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
-                                            else viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage) 
-                                        },
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        LiquidStarIcon(
-                                            isLiked = isLiked,
-                                            accentColor = accentColor,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                    if (!isEffectivelyDeleted) {
                                         Text(
-                                            text = "${comment.likesCount}",
-                                            color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
-                                            style = MaterialTheme.typography.labelMedium
+                                            text = stringResource(R.string.comment_reply_btn),
+                                            color = accentColor,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            modifier = Modifier.bounceClick {
+                                                if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                                else replyingTo = comment 
+                                            }
                                         )
-                                    }
-                                    if (comment.userId != viewModel.currentUserId) {
                                         Spacer(modifier = Modifier.width(16.dp))
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_flag),
-                                            contentDescription = stringResource(R.string.comment_report_title),
-                                            tint = Color.Red,
-                                            modifier = Modifier
-                                                .size(14.dp)
-                                                .bounceClick { 
-                                                    if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
-                                                    else commentToReport = comment 
-                                                }
-                                        )
-                                    }
-                                    
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    
-                                    // Translate button
-                                    val currentTranslationStateAction = translationStates[comment.id]
-                                    when (currentTranslationStateAction) {
-                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
-                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
-                                            androidx.compose.material3.CircularProgressIndicator(
-                                                modifier = Modifier.size(12.dp),
-                                                strokeWidth = 1.5.dp,
-                                                color = accentColor
+                                        Row(
+                                            modifier = Modifier.bounceClick {
+                                                if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                                else viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage) 
+                                            },
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            LiquidStarIcon(
+                                                isLiked = isLiked,
+                                                accentColor = accentColor,
+                                                modifier = Modifier.size(16.dp)
                                             )
-                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                text = "${comment.likesCount}",
+                                                color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
+                                                style = MaterialTheme.typography.labelMedium
+                                            )
                                         }
-                                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
+                                        if (comment.userId != viewModel.currentUserId) {
+                                            Spacer(modifier = Modifier.width(16.dp))
                                             Icon(
-                                                painter = painterResource(R.drawable.ic_traduzione),
-                                                contentDescription = stringResource(R.string.comment_show_original),
-                                                tint = accentColor,
+                                                painter = painterResource(id = R.drawable.ic_flag),
+                                                contentDescription = stringResource(R.string.comment_report_title),
+                                                tint = Color.Red,
                                                 modifier = Modifier
                                                     .size(14.dp)
-                                                    .bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                                    .bounceClick { 
+                                                        if (viewModel.isUserAnonymous) settingsViewModel.triggerGuestAuthDialog()
+                                                        else commentToReport = comment 
+                                                    }
                                             )
-                                            Spacer(modifier = Modifier.width(16.dp))
                                         }
-                                        else -> {
-                                            Icon(
-                                                painter = painterResource(R.drawable.ic_traduzione),
-                                                contentDescription = stringResource(R.string.comment_translate),
-                                                tint = Color.White.copy(alpha = 0.55f),
-                                                modifier = Modifier
-                                                    .size(14.dp)
-                                                    .bounceClick { viewModel.translateComment(comment.id, comment.text) }
-                                            )
-                                            Spacer(modifier = Modifier.width(16.dp))
+                                        
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        
+                                        // Translate button
+                                        val currentTranslationStateAction = translationStates[comment.id]
+                                        when (currentTranslationStateAction) {
+                                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
+                                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
+                                                androidx.compose.material3.CircularProgressIndicator(
+                                                    modifier = Modifier.size(12.dp),
+                                                    strokeWidth = 1.5.dp,
+                                                    color = accentColor
+                                                )
+                                                Spacer(modifier = Modifier.width(16.dp))
+                                            }
+                                            is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_traduzione),
+                                                    contentDescription = stringResource(R.string.comment_show_original),
+                                                    tint = accentColor,
+                                                    modifier = Modifier
+                                                        .size(14.dp)
+                                                        .bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                                )
+                                                Spacer(modifier = Modifier.width(16.dp))
+                                            }
+                                            else -> {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.ic_traduzione),
+                                                    contentDescription = stringResource(R.string.comment_translate),
+                                                    tint = Color.White.copy(alpha = 0.55f),
+                                                    modifier = Modifier
+                                                        .size(14.dp)
+                                                        .bounceClick { viewModel.translateComment(comment.id, comment.text) }
+                                                )
+                                                Spacer(modifier = Modifier.width(16.dp))
+                                            }
                                         }
+                                    } else {
+                                        Spacer(modifier = Modifier.weight(1f))
                                     }
                                     
                                     if (comment.createdAt != null) {
@@ -818,7 +855,24 @@ class CommentsScreen(
                         }
                     }
                     
-                    Column {
+                    if (isUserBanned) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp)
+                                .background(Color(0xFF330000), RoundedCornerShape(12.dp))
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = banExpiration?.let { stringResource(R.string.comment_banned_temporary, it) } ?: stringResource(R.string.comment_banned_permanent),
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    } else {
+                        Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val maxChar = 4000
                             val inputScrollState = rememberScrollState()
@@ -1062,10 +1116,10 @@ class CommentsScreen(
                             }
                         }
                     }
+                    }
                 }
             }
-
-            } // End of Scaffold
+        } // End of Scaffold
             
             // Sort Dialog Overlay
             AnimatedVisibility(

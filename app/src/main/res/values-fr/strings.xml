@@ -1067,4 +1067,7 @@
     <string name="updates_social_on">sur</string>
     <string name="updates_social_recent">Récents</string>
     <string name="updates_social_read">Lus</string>
+    <string name="comment_banned_permanent">Vous ne pouvez pas commenter. Vous avez été suspendu définitivement.</string>
+    <string name="comment_banned_temporary">Vous ne pouvez pas commenter. Vous avez été suspendu jusqu\'au %1$s.</string>
+    <string name="comment_cooldown_wait">Attendez %1$d secondes avant de commenter à nouveau.</string>
 </resources>

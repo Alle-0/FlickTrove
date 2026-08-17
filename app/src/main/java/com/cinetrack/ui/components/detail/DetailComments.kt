@@ -114,10 +114,13 @@ fun DetailComments(
         }
 
         val sortedComments = remember(comments) {
-            comments.filter { it.depth == 0 }.sortedByDescending { it.likesCount }.take(5)
+            comments.filter { 
+                val isEffectivelyDeleted = it.isDeleted || it.userId.isBlank() || (it.text.isBlank() && it.userDisplayName.isBlank())
+                it.depth == 0 && !isEffectivelyDeleted 
+            }.sortedByDescending { it.likesCount }.take(5)
         }
 
-        if (comments.isEmpty()) {
+        if (sortedComments.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

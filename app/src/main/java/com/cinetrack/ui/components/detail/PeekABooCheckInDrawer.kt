@@ -301,9 +301,9 @@ fun PeekABooCheckInDrawer(
                                     )
                                     if (rating > 0) {
                                         Text(
-                                            text = stringResource(R.string.dialog_rating_prev, rating),
+                                            text = rating.toString().removeSuffix(".0"),
                                             color = accentColor,
-                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black)
+                                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black)
                                         )
                                     } else {
                                         Text(

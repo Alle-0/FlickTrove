@@ -112,7 +112,8 @@ import com.cinetrack.ui.components.dialog.EpisodesBottomSheet
 data class MovieDetailScreen(
     val movieId: Long,
     val mediaType: String,
-    val openComments: Boolean = false
+    val openComments: Boolean = false,
+    val targetCommentId: String? = null
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
@@ -159,6 +160,7 @@ data class MovieDetailScreen(
         MovieDetailScreenContent(
             viewModel = viewModel,
             openComments = openComments,
+            targetCommentId = targetCommentId,
             settingsViewModel = settingsViewModel,
             paddingValues = PaddingValues(0.dp),
             onBackClick = { navigator.pop() },
@@ -187,6 +189,7 @@ data class MovieDetailScreen(
 fun MovieDetailScreenContent(
     viewModel: MovieDetailViewModel,
     openComments: Boolean = false,
+    targetCommentId: String? = null,
     settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -300,6 +303,7 @@ fun MovieDetailScreenContent(
                     accentColorValue = globalAccentColor.value.toLong(),
                     mediaTitle = mediaTitle,
                     mediaImage = image,
+                    targetCommentId = targetCommentId,
                     focusInputOnLaunch = false
                 )
             )
@@ -629,7 +633,7 @@ fun MovieDetailScreenContent(
                                 }
                             }
 
-                            if (!showEpisodesSheet && !isDetailCastSheetOpen && !showCheckInDrawer) {
+                            if (!showEpisodesSheet && !isDetailCastSheetOpen) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
