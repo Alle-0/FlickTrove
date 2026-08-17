@@ -418,8 +418,8 @@ fun FolderCard(
                         modifier = Modifier
                             .offset(x = (index * 20).dp)
                             .size(width = 40.dp, height = 60.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(6.dp))
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
                             .zIndex((topItems.size - index).toFloat())
                     ) {
                         coil.compose.AsyncImage(
@@ -435,15 +435,43 @@ fun FolderCard(
         
         Spacer(Modifier.width(16.dp))
         
-        Text(
-            text = folder.name,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.3).sp
-            ),
-            color = Color.White,
-            modifier = Modifier.weight(1f)
-        )
+        if (topItems.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(folderColor)
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = folder.name,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = (-0.3).sp
+                ),
+                color = Color.White
+            )
+            
+            val formatter = remember { java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.getDefault()) }
+            val formattedDate = remember(folder.createdAt) {
+                try {
+                    val instant = java.time.Instant.parse(folder.createdAt)
+                    java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault()).format(formatter)
+                } catch (e: Exception) {
+                    ""
+                }
+            }
+            if (formattedDate.isNotEmpty()) {
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.4f)
+                )
+            }
+        }
         
         Text(
             text = folder.itemIds.size.toString(),
@@ -470,29 +498,21 @@ fun NewFolderCard(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
             .bounceClick { onClick() }
-            .padding(12.dp),
+            .padding(vertical = 12.dp, horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.White.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_plus),
-                null,
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        Icon(
+            ImageVector.vectorResource(id = R.drawable.ic_plus),
+            null,
+            tint = Color.White.copy(alpha = 0.8f),
+            modifier = Modifier.size(20.dp)
+        )
         
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(12.dp))
         
         Text(
             stringResource(R.string.folders_new_folder),
@@ -500,7 +520,7 @@ fun NewFolderCard(onClick: () -> Unit) {
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = (-0.3).sp
             ),
-            color = Color.White.copy(alpha = 0.6f)
+            color = Color.White.copy(alpha = 0.8f)
         )
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.CalculatedStats
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.foundation.border
+import androidx.compose.ui.zIndex
 
 @Composable
 fun GeneralStatsCard(
@@ -278,37 +280,82 @@ fun FolderPreviewItem(
     }
     val fColor = Color(folderColorInt)
 
+    val topItems = remember(folder.itemIds, allMovies) {
+        folder.itemIds.take(3).mapNotNull { id ->
+            allMovies.find { "${it.mediaType}_${it.id}" == id }
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .bounceClick { onClick() }
-            .width(64.dp)
+            .width(72.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(fColor.copy(alpha = 0.15f))
-                .border(1.dp, fColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_cartella_piena),
-                contentDescription = folder.name,
-                tint = fColor,
-                modifier = Modifier.size(28.dp)
-            )
+        if (topItems.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(fColor.copy(alpha = 0.15f))
+                    .border(1.dp, fColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_cartella),
+                    contentDescription = folder.name,
+                    tint = fColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .width(38.dp + ((topItems.size - 1) * 12).dp)
+                    .height(56.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                topItems.forEachIndexed { index, movie ->
+                    Box(
+                        modifier = Modifier
+                            .offset(x = (index * 12).dp)
+                            .size(width = 38.dp, height = 56.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, Color(0xFF13151A), RoundedCornerShape(8.dp))
+                            .zIndex((topItems.size - index).toFloat())
+                    ) {
+                        coil.compose.AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
+                            contentDescription = null,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = folder.name,
-            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (topItems.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(fColor)
+                )
+                Spacer(Modifier.width(4.dp))
+            }
+            Text(
+                text = folder.name,
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        
         Text(
             text = "(${folder.itemIds.size})",
             style = MaterialTheme.typography.labelSmall,
