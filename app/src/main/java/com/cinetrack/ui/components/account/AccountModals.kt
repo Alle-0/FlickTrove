@@ -40,6 +40,28 @@ import com.google.firebase.ktx.Firebase
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.animation.core.animateFloatAsState
+import kotlin.math.roundToInt
+import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.rounded.Close
+import java.util.Collections
+
+private data class DashboardSettingItem(
+    val iconRes: Int,
+    val titleRes: Int,
+    val descRes: Int,
+    val checked: Boolean,
+    val onCheckedChange: (Boolean) -> Unit
+)
 
 @Composable
 fun AccountModals(
@@ -83,6 +105,8 @@ fun AccountModals(
     
     val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
     val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
+    val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
+    val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -171,7 +195,17 @@ fun AccountModals(
     val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
 
     if (showProfileMenu || showDashboardSettings || showNameDialog) {
-        Box(modifier = Modifier.zIndex(80000f)) {
+        Box(
+            modifier = Modifier
+                .zIndex(80000f)
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            awaitPointerEvent().changes.forEach { it.consume() }
+                        }
+                    }
+                }
+        ) {
             // Profile Menu Modal
             if (showProfileMenu) {
                 BackHandler(enabled = showProfileMenu) {
@@ -202,19 +236,37 @@ fun AccountModals(
                             modifier = Modifier.padding(24.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                stringResource(R.string.account_edit_profile),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    stringResource(R.string.account_edit_profile),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .bounceClick { showProfileMenu = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                        contentDescription = "Close",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
                             
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
+                                    .bounceClick {
                                         showProfileMenu = false
                                         nameInput = currentDisplayName
                                         showNameDialog = true
@@ -236,7 +288,7 @@ fun AccountModals(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
+                                    .bounceClick {
                                         showProfileMenu = false
                                         if (avatarBanned) {
                                             scope.launch {
@@ -279,7 +331,7 @@ fun AccountModals(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
+                                    .bounceClick {
                                         showProfileMenu = false
                                         avatarSelection.show(
                                             mode = com.cinetrack.ui.components.account.AvatarSelectionMode.BACKDROP,
@@ -328,7 +380,6 @@ fun AccountModals(
                 ) {
                     Box(
                         modifier = Modifier
-                            .widthIn(max = 350.dp)
                             .fillMaxWidth(0.9f)
                             .hazeGlass(state = globalHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
                             .clickable(
@@ -340,73 +391,154 @@ fun AccountModals(
                             modifier = Modifier.padding(24.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                stringResource(R.string.settings_ui_layout),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Text(
+                                    stringResource(R.string.settings_ui_layout),
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.White.copy(alpha = 0.05f))
-                                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                                        .size(32.dp)
+                                        .bounceClick { showDashboardSettings = false },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
-                                        contentDescription = null,
-                                        tint = Color.White,
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                        contentDescription = "Close",
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(stringResource(R.string.settings_show_my_folders), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-                                    Text(stringResource(R.string.settings_show_my_folders_desc), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
-                                }
-                                FlickTroveSwitch(
-                                    checked = showMyFolders,
-                                    onCheckedChange = { settingsViewModel.toggleShowMyFolders(it) },
-                                    accentColor = MaterialTheme.colorScheme.primary
-                                )
                             }
                             
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                            var localOrder by remember(dashboardCardOrder) { mutableStateOf(dashboardCardOrder) }
+                            
+                            val listState = rememberLazyListState()
+                            var draggedItemKey by remember { mutableStateOf<String?>(null) }
+                            var dragOffset by remember { mutableStateOf(0f) }
+                            var itemHeightPx by remember { mutableStateOf(0f) }
+                            val density = LocalDensity.current
+                            val draggedIndex = localOrder.indexOf(draggedItemKey)
+                            val visualTargetIndex = remember(draggedIndex, dragOffset, itemHeightPx) {
+                                if (draggedIndex == -1 || itemHeightPx == 0f) -1
+                                else {
+                                    val offsetSlots = (dragOffset / itemHeightPx).roundToInt()
+                                    (draggedIndex + offsetSlots).coerceIn(0, localOrder.size - 1)
+                                }
+                            }
+
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.White.copy(alpha = 0.05f))
-                                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                localOrder.forEachIndexed { index, itemKey ->
+                                    val isDragging = draggedItemKey == itemKey
+                                    
+                                    val translationTarget = when {
+                                        isDragging -> dragOffset
+                                        draggedIndex != -1 && visualTargetIndex != -1 -> {
+                                            if (draggedIndex < index && index <= visualTargetIndex) {
+                                                -itemHeightPx
+                                            } else if (draggedIndex > index && index >= visualTargetIndex) {
+                                                itemHeightPx
+                                            } else {
+                                                0f
+                                            }
+                                        }
+                                        else -> 0f
+                                    }
+
+                                    val animatedTranslation by animateFloatAsState(
+                                        targetValue = translationTarget,
+                                        label = "translationY"
                                     )
+                                    val finalTranslation = if (isDragging) dragOffset else animatedTranslation
+
+                                    val itemInfo = when (itemKey) {
+                                        "folders" -> DashboardSettingItem(R.drawable.ic_cartella, R.string.settings_show_my_folders, R.string.settings_show_my_folders_desc, showMyFolders) { settingsViewModel.toggleShowMyFolders(it) }
+                                        "flow" -> DashboardSettingItem(R.drawable.ic_sparkle, R.string.settings_show_your_flow, R.string.settings_show_your_flow_desc, showYourFlow) { settingsViewModel.toggleShowYourFlow(it) }
+                                        "stats" -> DashboardSettingItem(R.drawable.ic_stat, R.string.settings_show_general_stats, R.string.settings_show_general_stats_desc, showGeneralStats) { settingsViewModel.toggleShowGeneralStats(it) }
+                                        else -> DashboardSettingItem(R.drawable.ic_stat, R.string.settings_show_general_stats, R.string.settings_show_general_stats_desc, showGeneralStats) { settingsViewModel.toggleShowGeneralStats(it) }
+                                    }
+
+                                     Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .onGloballyPositioned { coordinates ->
+                                                if (itemHeightPx == 0f) {
+                                                    itemHeightPx = coordinates.size.height.toFloat() + with(density) { 16.dp.toPx() }
+                                                }
+                                            }
+                                            .zIndex(if (isDragging) 1f else 0f)
+                                            .graphicsLayer { translationY = finalTranslation }
+                                            .background(if (isDragging) Color.White.copy(alpha = 0.1f) else Color.Transparent, RoundedCornerShape(12.dp))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.DragHandle,
+                                            contentDescription = "Drag to reorder",
+                                            tint = Color.White.copy(alpha = 0.5f),
+                                            modifier = Modifier
+                                                .padding(end = 8.dp)
+                                                .size(24.dp)
+                                                .pointerInput(itemKey) {
+                                                    detectVerticalDragGestures(
+                                                        onDragStart = { draggedItemKey = itemKey },
+                                                        onDragEnd = { 
+                                                            if (draggedIndex != -1 && visualTargetIndex != -1 && draggedIndex != visualTargetIndex) {
+                                                                val newList = localOrder.toMutableList()
+                                                                val item = newList.removeAt(draggedIndex)
+                                                                newList.add(visualTargetIndex, item)
+                                                                localOrder = newList
+                                                                settingsViewModel.updateDashboardCardOrder(newList)
+                                                            }
+                                                            draggedItemKey = null
+                                                            dragOffset = 0f
+                                                        },
+                                                        onDragCancel = { 
+                                                            draggedItemKey = null
+                                                            dragOffset = 0f 
+                                                        },
+                                                        onVerticalDrag = { change, dragAmount ->
+                                                            change.consume()
+                                                            dragOffset += dragAmount
+                                                        }
+                                                    )
+                                                }
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color.White.copy(alpha = 0.05f))
+                                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = itemInfo.iconRes),
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(stringResource(itemInfo.titleRes), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+                                            Text(stringResource(itemInfo.descRes), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
+                                        }
+                                        FlickTroveSwitch(
+                                            checked = itemInfo.checked,
+                                            onCheckedChange = itemInfo.onCheckedChange,
+                                            accentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(stringResource(R.string.settings_show_your_flow), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-                                    Text(stringResource(R.string.settings_show_your_flow_desc), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), style = MaterialTheme.typography.bodyMedium)
-                                }
-                                FlickTroveSwitch(
-                                    checked = showYourFlow,
-                                    onCheckedChange = { settingsViewModel.toggleShowYourFlow(it) },
-                                    accentColor = MaterialTheme.colorScheme.primary
-                                )
                             }
                         }
                     }
@@ -528,7 +660,7 @@ fun AccountModals(
                                         .height(56.dp)
                                         .clip(RoundedCornerShape(16.dp))
                                         .background(Color.White.copy(alpha = 0.1f))
-                                        .clickable { 
+                                        .bounceClick { 
                                             showNameDialog = false
                                             showProfileMenu = true
                                         },
@@ -547,12 +679,12 @@ fun AccountModals(
                                         .height(56.dp)
                                         .clip(RoundedCornerShape(16.dp))
                                         .background(if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f))
-                                        .clickable(enabled = isSaveEnabled) {
+                                        .bounceClick(enabled = isSaveEnabled) {
                                             if (nameChangesCount >= 2) {
                                                 scope.launch {
                                                     snackbarHostState.showSnackbar(context.getString(R.string.account_error_max_name_changes))
                                                 }
-                                                return@clickable
+                                                return@bounceClick
                                             }
                                             isCheckingName = true
                                             scope.launch {

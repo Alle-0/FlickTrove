@@ -738,7 +738,10 @@ fun UpdatesScreen(
                                 (fadeIn(animationSpec = tween(180, delayMillis = 80)) +
                                     scaleIn(initialScale = 0.88f, animationSpec = tween(260))) togetherWith
                                     (fadeOut(animationSpec = tween(120)) +
-                                        scaleOut(targetScale = 0.88f, animationSpec = tween(180)))
+                                        scaleOut(targetScale = 0.88f, animationSpec = tween(180))) using androidx.compose.animation.SizeTransform(
+                                            clip = false,
+                                            sizeAnimationSpec = { _, _ -> androidx.compose.animation.core.spring(stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow) }
+                                        )
                             },
                             label = "MorphingUpdatesTabSelector"
                         ) { showRemindersFilters ->

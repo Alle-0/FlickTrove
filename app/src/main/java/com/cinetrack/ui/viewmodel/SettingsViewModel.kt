@@ -304,6 +304,14 @@ class SettingsViewModel @Inject constructor(
         .map { it.showYourFlow }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showGeneralStats: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showGeneralStats }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val dashboardCardOrder: StateFlow<List<String>> = preferenceRepository.userPreferencesFlow
+        .map { it.dashboardCardOrder }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("stats", "folders", "flow"))
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null) {
@@ -406,6 +414,22 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_your_flow, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleShowGeneralStats(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowGeneralStats(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
+            actionFeedbackManager.emit(UiText.DynamicString("General Stats ${context.getString(statusRes)}")) // Assuming no specific string res yet
+        }
+    }
+
+    fun updateDashboardCardOrder(order: List<String>) {
+        viewModelScope.launch {
+            preferenceRepository.updateDashboardCardOrder(order)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }
 

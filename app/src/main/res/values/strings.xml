@@ -166,6 +166,8 @@
     <string name="settings_show_my_folders_desc">Shows the My Folders card on your profile dashboard.</string>
     <string name="settings_show_your_flow">Your Flow Card</string>
     <string name="settings_show_your_flow_desc">Shows the Your Flow card on your profile dashboard.</string>
+    <string name="settings_show_general_stats">General Stats Card</string>
+    <string name="settings_show_general_stats_desc">Shows the General Stats card on your profile dashboard.</string>
     <string name="settings_language">App Language</string>
     <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>

@@ -104,6 +104,8 @@ data class UserPreferences(
     val showMyFolders: Boolean = true,
     val showYourFlow: Boolean = true,
     val titleTextSizeMultiplier: Float = 1.0f,
-    val imageQuality: String = "MEDIUM"
+    val imageQuality: String = "MEDIUM",
+    val showGeneralStats: Boolean = true,
+    val dashboardCardOrder: List<String> = listOf("stats", "folders", "flow")
 )
 

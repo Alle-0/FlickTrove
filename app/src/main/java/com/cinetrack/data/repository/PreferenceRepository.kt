@@ -50,6 +50,8 @@ class PreferenceRepository @Inject constructor(
         val SHOW_YOUR_FLOW = booleanPreferencesKey("show_your_flow")
         val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
+        val SHOW_GENERAL_STATS = booleanPreferencesKey("show_general_stats")
+        val DASHBOARD_CARD_ORDER = stringPreferencesKey("dashboard_card_order")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -95,7 +97,9 @@ class PreferenceRepository @Inject constructor(
                 showMyFolders = preferences[PreferencesKeys.SHOW_MY_FOLDERS] ?: true,
                 showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true,
                 titleTextSizeMultiplier = preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] ?: 1.0f,
-                imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM"
+                imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM",
+                showGeneralStats = preferences[PreferencesKeys.SHOW_GENERAL_STATS] ?: true,
+                dashboardCardOrder = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow").split(",")
             )
         }
 
@@ -256,6 +260,18 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateImageQuality(quality: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.IMAGE_QUALITY] = quality
+        }
+    }
+
+    suspend fun updateShowGeneralStats(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_GENERAL_STATS] = show
+        }
+    }
+
+    suspend fun updateDashboardCardOrder(order: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] = order.joinToString(",")
         }
     }
 

@@ -140,6 +140,8 @@ object AccountTab : Tab {
         }
         val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
         val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
+        val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
+        val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
         
         // Firebase User Info
         val currentUser = Firebase.auth.currentUser
@@ -426,33 +428,43 @@ object AccountTab : Tab {
                         modifier = Modifier.padding(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        GeneralStatsCard(
-                            stats = statsUiState.stats,
-                            hazeState = backgroundHazeState,
-                            backgroundLuminance = rawLuminance,
-                            onClick = { tabNavigator.current = StatsTab }
-                        )
-
-                        if (showMyFolders) {
-                            MyFoldersCard(
-                                folders = folders,
-                                allMovies = allMovies,
-                                hazeState = backgroundHazeState,
-                                backgroundLuminance = rawLuminance,
-                                onViewAllClick = { tabNavigator.current = FoldersTab },
-                                onFolderClick = { folder ->
-                                    tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
+                        dashboardCardOrder.forEach { cardKey ->
+                            when (cardKey) {
+                                "stats" -> {
+                                    if (showGeneralStats) {
+                                        GeneralStatsCard(
+                                            stats = statsUiState.stats,
+                                            hazeState = backgroundHazeState,
+                                            backgroundLuminance = rawLuminance,
+                                            onClick = { tabNavigator.current = StatsTab }
+                                        )
+                                    }
                                 }
-                            )
-                        }
-
-                        if (showYourFlow) {
-                            YourFlowCard(
-                                hazeState = backgroundHazeState,
-                                backgroundLuminance = rawLuminance,
-                                onFlowClick = { tabNavigator.current = FlowTab },
-                                onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
-                            )
+                                "folders" -> {
+                                    if (showMyFolders) {
+                                        MyFoldersCard(
+                                            folders = folders,
+                                            allMovies = allMovies,
+                                            hazeState = backgroundHazeState,
+                                            backgroundLuminance = rawLuminance,
+                                            onViewAllClick = { tabNavigator.current = FoldersTab },
+                                            onFolderClick = { folder ->
+                                                tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
+                                            }
+                                        )
+                                    }
+                                }
+                                "flow" -> {
+                                    if (showYourFlow) {
+                                        YourFlowCard(
+                                            hazeState = backgroundHazeState,
+                                            backgroundLuminance = rawLuminance,
+                                            onFlowClick = { tabNavigator.current = FlowTab },
+                                            onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                     
