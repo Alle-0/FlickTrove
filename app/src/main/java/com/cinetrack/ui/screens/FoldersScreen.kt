@@ -286,12 +286,16 @@ fun FoldersScreenContent(
                         .nestedScroll(nestedScrollConnection)
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = { focusManager.clearFocus() })
-                        },
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        }
                 ) {
                     item {
                         val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
                         val currentHeight = if (searchBarMaxHeightPx > 0f) with(density) { searchBarHeightPx.toDp() } else Dp.Unspecified
+                        val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 8.dp).coerceAtLeast(0.dp)
+                        
+                        // Fast fade: fully opaque at 1.0, fully transparent at 0.5
+                        val progress = if (searchBarMaxHeightPx > 0f) (searchBarHeightPx / searchBarMaxHeightPx).coerceIn(0f, 1f) else 1f
+                        val alphaProgress = ((progress - 0.5f) * 2f).coerceIn(0f, 1f)
                         
                         Box(
                             modifier = Modifier
@@ -300,48 +304,68 @@ fun FoldersScreenContent(
                                 .clipToBounds(),
                             contentAlignment = Alignment.TopCenter
                         ) {
-                            Row(
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 8.dp)
+                                    .height(pillHeight)
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
-                                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
-                                Spacer(Modifier.width(12.dp))
-                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                                    if (searchQuery.isEmpty()) {
-                                        Text(stringResource(R.string.search_folders), color = Color.White.copy(alpha = 0.5f), fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
-                                    }
-                                    androidx.compose.foundation.text.BasicTextField(
-                                        value = searchQuery,
-                                        onValueChange = viewModel::updateSearchQuery,
-                                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 16.sp),
-                                        singleLine = true,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
-                                        decorationBox = { innerTextField -> 
-                                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                                                innerTextField()
+                                if (alphaProgress > 0f) {
+                                    Box(modifier = Modifier
+                                        .wrapContentHeight(unbounded = true)
+                                        .graphicsLayer {
+                                            alpha = alphaProgress
+                                        }
+                                    ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                                            if (searchQuery.isEmpty()) {
+                                                Text(stringResource(R.string.search_folders), color = Color.White.copy(alpha = 0.5f), fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
+                                            }
+                                            androidx.compose.foundation.text.BasicTextField(
+                                                value = searchQuery,
+                                                onValueChange = viewModel::updateSearchQuery,
+                                                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 16.sp),
+                                                singleLine = true,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                                                decorationBox = { innerTextField -> 
+                                                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                                        innerTextField()
+                                                    }
+                                                }
+                                            )
+                                        }
+                                        if (searchQuery.isNotEmpty()) {
+                                            Spacer(Modifier.width(8.dp))
+                                            IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(24.dp)) {
+                                                Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
                                             }
                                         }
-                                    )
-                                }
-                                if (searchQuery.isNotEmpty()) {
-                                    Spacer(Modifier.width(8.dp))
-                                    IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(24.dp)) {
-                                        Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
                                     }
                                 }
                             }
                         }
                     }
+                    }
 
                     item {
                         val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
+                        val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 12.dp).coerceAtLeast(0.dp)
+                        
+                        // Fast fade: fully opaque at 1.0, fully transparent at 0.5
+                        val progress = if (newFolderMaxHeightPx > 0f) (newFolderHeightPx / newFolderMaxHeightPx).coerceIn(0f, 1f) else 1f
+                        val alphaProgress = ((progress - 0.5f) * 2f).coerceIn(0f, 1f)
                         
                         Box(
                             modifier = Modifier
@@ -350,7 +374,13 @@ fun FoldersScreenContent(
                                 .clipToBounds(),
                             contentAlignment = Alignment.TopCenter
                         ) {
-                            NewFolderCard(onClick = { isCreateDialogOpen = true })
+                            if (alphaProgress > 0f) {
+                                NewFolderCard(
+                                    onClick = { isCreateDialogOpen = true },
+                                    modifier = Modifier.height(pillHeight),
+                                    alphaProgress = alphaProgress
+                                )
+                            }
                         }
                     }
     
@@ -366,6 +396,7 @@ fun FoldersScreenContent(
                                 }
                             )
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
@@ -657,36 +688,48 @@ fun FolderCard(
 }
 
 @Composable
-fun NewFolderCard(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
+fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
+    Box(
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-            .bounceClick { onClick() }
-            .padding(vertical = 12.dp, horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .bounceClick { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            ImageVector.vectorResource(id = R.drawable.ic_plus),
-            null,
-            tint = Color.White.copy(alpha = 0.8f),
-            modifier = Modifier.size(20.dp)
-        )
-        
-        Spacer(Modifier.width(12.dp))
-        
-        Text(
-            stringResource(R.string.folders_new_folder),
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.3).sp
-            ),
-            color = Color.White.copy(alpha = 0.8f)
-        )
+        if (alphaProgress > 0f) {
+            Box(modifier = Modifier
+                .wrapContentHeight(unbounded = true)
+                .graphicsLayer { alpha = alphaProgress }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_plus),
+                    null,
+                    tint = Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier.size(20.dp)
+                )
+                
+                Spacer(Modifier.width(12.dp))
+                
+                Text(
+                    text = stringResource(R.string.folders_new_folder),
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
     }
 }
+
 
 @Composable
 fun FolderCreateDialog(

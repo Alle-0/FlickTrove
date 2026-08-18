@@ -189,7 +189,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         !showFolderEditDialog &&
                         !showFolderDeleteConfirm &&
                         !showExitConfirmation &&
-                        !movieActions.isAnyModalOpen,
+                        !movieActions.isAnyModalOpen &&
+                        !isSettingsDialogOpen,
                 scrimColor = Color.Black.copy(alpha = 0.5f),
                 drawerContent = {
                     GlassyDrawer(
