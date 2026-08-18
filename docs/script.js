@@ -270,62 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 600);
   });
 
-  // 3.5 Custom Interactive JS Mouse Cursor with Lag & Trail
-  const cursorDot = document.querySelector('.cursor-dot');
-  const cursorOutline = document.querySelector('.cursor-outline');
-  const bgMouseGlow = document.querySelector('.bg-mouse-glow');
-
-  const isDesktopMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  if (cursorDot && cursorOutline && isDesktopMouse) {
-    document.body.classList.add('custom-cursor-active');
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let outlineX = mouseX;
-    let outlineY = mouseY;
-    let glowX = mouseX;
-    let glowY = mouseY;
-
-    window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      // Dot follows instantly
-      cursorDot.style.left = `${mouseX}px`;
-      cursorDot.style.top = `${mouseY}px`;
-    }, { passive: true });
-
-    // Smooth physics loop with requestAnimationFrame
-    const animateCursor = () => {
-      // Outline follows with smooth delay (lerp 0.18)
-      outlineX += (mouseX - outlineX) * 0.07;
-      outlineY += (mouseY - outlineY) * 0.07;
-      cursorOutline.style.left = `${outlineX}px`;
-      cursorOutline.style.top = `${outlineY}px`;
-
-      // Ambient background glow follows with ultra-smooth heavy delay (lerp 0.08)
-      if (bgMouseGlow) {
-        glowX += (mouseX - glowX) * 0.08;
-        glowY += (mouseY - glowY) * 0.08;
-        bgMouseGlow.style.left = `${glowX}px`;
-        bgMouseGlow.style.top = `${glowY}px`;
-      }
-
-      requestAnimationFrame(animateCursor);
-    };
-    animateCursor();
-
-    // Hover effect on true interactive elements only (buttons, links, tabs)
-    const attachCursorHover = () => {
-      const interactiveElements = document.querySelectorAll('a, button, input, .genre-btn, .screenshot-item, .faq-item, .lightbox-close');
-      interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover-active'));
-        el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover-active'));
-      });
-    };
-    attachCursorHover();
-    // Re-attach hover when grid updates
-    window.attachCursorHover = attachCursorHover;
-  }
 
   /* =========================================
      4. ADVANCED 120FPS SCROLL DYNAMICS ENGINE

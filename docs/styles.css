@@ -104,68 +104,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Custom Interactive JS Mouse Cursor */
-.cursor-dot,
-.cursor-outline {
-  display: none !important;
-}
-
-@media (hover: hover) and (pointer: fine) {
-
-  body.custom-cursor-active,
-  body.custom-cursor-active a,
-  body.custom-cursor-active button,
-  body.custom-cursor-active input,
-  body.custom-cursor-active .feature-card,
-  body.custom-cursor-active .stat-item {
-    cursor: none !important;
-  }
-
-  body.custom-cursor-active .cursor-dot,
-  body.custom-cursor-active .cursor-outline {
-    display: block !important;
-  }
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent-teal);
-  border-radius: 50%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10000001;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s ease, height 0.2s ease, background 0.2s ease;
-  box-shadow: 0 0 10px var(--accent-teal);
-}
-
-.cursor-outline {
-  width: 38px;
-  height: 38px;
-  border: 1.5px solid rgba(45, 212, 191, 0.6);
-  background: rgba(45, 212, 191, 0.05);
-  border-radius: 50%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10000000;
-  transform: translate(-50%, -50%);
-  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, background 0.25s ease;
-  backdrop-filter: blur(2px);
-}
-
-.cursor-outline.hover-active {
-  width: 20px;
-  height: 20px;
-  border-width: 2.5px;
-  border-color: var(--accent-teal);
-  background: rgba(45, 212, 191, 0.35);
-  box-shadow: 0 0 18px var(--accent-teal);
-}
 
 /* Subtle, Elegant Background Glows & Ambient Mouse Light */
 .bg-glow-1,
