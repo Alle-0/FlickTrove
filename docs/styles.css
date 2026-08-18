@@ -5679,6 +5679,13 @@ section {
   position: relative;
   perspective: 1200px;
 }
+
+@keyframes pulseGlow {
+  0% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); filter: blur(90px); }
+  50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.05); filter: blur(100px); }
+  100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); filter: blur(90px); }
+}
+
 .feature-image::before {
   content: '';
   position: absolute;
@@ -5692,8 +5699,9 @@ section {
   opacity: 0.15;
   border-radius: 50%;
   z-index: 0;
-  transition: opacity 0.5s ease, transform 0.5s ease;
   pointer-events: none;
+  animation: pulseGlow 8s ease-in-out infinite;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .feature-block:nth-child(2) .feature-image::before {
   background: radial-gradient(circle at center, var(--accent-gold) 0%, rgba(220, 38, 38, 0.5) 100%);
@@ -5701,7 +5709,21 @@ section {
 .feature-image:hover::before {
   opacity: 0.4;
   transform: translate(-50%, -50%) scale(1.1);
+  animation-play-state: paused;
 }
+
+@keyframes float3D {
+  0% { transform: rotateY(-12deg) rotateX(5deg) translateZ(0) translateY(0); }
+  50% { transform: rotateY(-8deg) rotateX(8deg) translateZ(20px) translateY(-15px); }
+  100% { transform: rotateY(-12deg) rotateX(5deg) translateZ(0) translateY(0); }
+}
+
+@keyframes float3D-reverse {
+  0% { transform: rotateY(12deg) rotateX(5deg) translateZ(0) translateY(0); }
+  50% { transform: rotateY(8deg) rotateX(8deg) translateZ(20px) translateY(-15px); }
+  100% { transform: rotateY(12deg) rotateX(5deg) translateZ(0) translateY(0); }
+}
+
 .feature-image img {
   position: relative;
   z-index: 1;
@@ -5718,11 +5740,14 @@ section {
   transform: rotateY(-12deg) rotateX(5deg) translateZ(0);
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, box-shadow;
+  animation: float3D 6s ease-in-out infinite;
 }
 .feature-block.reverse .feature-image img {
   transform: rotateY(12deg) rotateX(5deg) translateZ(0);
+  animation: float3D-reverse 6s ease-in-out infinite;
 }
 .feature-image img:hover {
+  animation-play-state: paused;
   transform: rotateY(0deg) rotateX(0deg) scale(1.05) translateZ(50px) !important;
   box-shadow: 
     0 0 0 3px #050505, 
