@@ -77,6 +77,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/Icon.svg">
   <link rel="apple-touch-icon" href="assets/icon-512.png">
   <link rel="shortcut icon" href="favicon.ico">
+  <!-- AOS Library for scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 
 <body>
@@ -722,7 +724,7 @@
 
       <div class="features-container">
         <div class="feature-block">
-          <div class="feature-content">
+          <div class="feature-content" data-aos="fade-right">
             <div class="feature-badge">Discovery Engine</div>
             <h3>Discover & Smart Search</h3>
             <p>Explore popular movies, TV series, and upcoming releases. Search instantly and discover what is trending today.</p>
@@ -732,13 +734,13 @@
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Discover similar movies and series</li>
             </ul>
           </div>
-          <div class="feature-image">
+          <div class="feature-image" data-aos="fade-left" data-aos-delay="200">
             <img src="assets/feature_discover.jpg" alt="Discover and Search">
           </div>
         </div>
 
         <div class="feature-block reverse">
-          <div class="feature-content">
+          <div class="feature-content" data-aos="fade-left">
             <div class="feature-badge">Insights</div>
             <h3>Deep Statistics</h3>
             <p>Track your watched movies, favorite episodes, and total viewing hours. Understand your tastes with advanced charts and metrics.</p>
@@ -748,13 +750,13 @@
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Personal milestones tracking</li>
             </ul>
           </div>
-          <div class="feature-image">
+          <div class="feature-image" data-aos="fade-right" data-aos-delay="200">
             <img src="assets/feature_stats.jpg" alt="Advanced Statistics">
           </div>
         </div>
 
         <div class="feature-block">
-          <div class="feature-content">
+          <div class="feature-content" data-aos="fade-right">
             <div class="feature-badge">Collections</div>
             <h3>Organize with Folders</h3>
             <p>Organize your watchlist into custom folders. Personalize each collection with distinct colors and track your favorites.</p>
@@ -764,7 +766,7 @@
               <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Advanced sorting and filtering</li>
             </ul>
           </div>
-          <div class="feature-image">
+          <div class="feature-image" data-aos="fade-left" data-aos-delay="200">
             <img src="assets/feature_folders.png" alt="Custom Folders">
           </div>
         </div>
