@@ -5617,8 +5617,15 @@ section {
 .feature-image img {
   width: 100%;
   max-width: 320px;
-  border-radius: 40px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border-radius: 32px; /* Slightly less rounded to match modern Android */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 4px #12151c, 0 0 0 5px rgba(255, 255, 255, 0.15), 0 0 40px rgba(45, 212, 191, 0.15); /* Faux device frame effect + glow */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+.feature-image img:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 4px #12151c, 0 0 0 5px rgba(255, 255, 255, 0.25), 0 0 60px rgba(45, 212, 191, 0.3);
 }
 
 @media (max-width: 900px) {
