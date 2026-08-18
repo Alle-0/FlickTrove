@@ -1,0 +1,17 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 6C3 4.34315 4.34315 3 6 3H9C10.6569 3 12 4.34315 12 6V18C12 19.6569 10.6569 21 9 21H6C4.34315 21 3 19.6569 3 18V10.5" stroke="black" stroke-width="2" stroke-linecap="round"/>
+<path d="M21 14.5C21 13.1193 19.8807 12 18.5 12H15.5" stroke="black" stroke-width="2" stroke-linecap="round"/>
+<path d="M14.5 21H18.5C19.8807 21 21 19.8807 21 18.5" stroke="black" stroke-width="2" stroke-linecap="round"/>
+<rect x="5.5" y="5.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="8.5" y="5.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="5.5" y="9.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="8.5" y="9.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="5.5" y="13.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="8.5" y="13.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="5.5" y="17.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="8.5" y="17.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="14.5" y="14.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="17.5" y="14.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="14.5" y="17.5" width="1" height="1" rx="0.5" stroke="black"/>
+<rect x="17.5" y="17.5" width="1" height="1" rx="0.5" stroke="black"/>
+</svg>

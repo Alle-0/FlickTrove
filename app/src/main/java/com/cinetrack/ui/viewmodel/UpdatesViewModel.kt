@@ -85,7 +85,7 @@ class UpdatesViewModel @Inject constructor(
                 notificationCount = unreadNotifCount,
                 socialNotifications = socialNotifs,
                 socialUnreadCount = socialUnread,
-                totalUnreadCount = unreadNotifCount + futureRemindersCount + socialUnread,
+                totalUnreadCount = unreadNotifCount + socialUnread,
                 isLoading = false
             )
         }

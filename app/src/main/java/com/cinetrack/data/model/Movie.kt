@@ -142,6 +142,11 @@ data class Movie(
     @set:Exclude
     @ColumnInfo(name = "personal_rating") var personalRating: Double? = null,
     
+    @SerialName("voted_at")
+    @get:PropertyName("voted_at")
+    @set:PropertyName("voted_at")
+    @ColumnInfo(name = "voted_at") var votedAt: Long? = null,
+
     @SerialName("personal_note")
     @get:PropertyName("personal_note")
     @set:PropertyName("personal_note")
@@ -589,6 +594,18 @@ data class Movie(
                 else -> null
             }
         }
+
+    @get:PropertyName("personal_rating")
+    @set:PropertyName("personal_rating")
+    var _personalRating: Double?
+        get() = personalRating
+        set(value) { personalRating = value }
+
+    @get:Exclude
+    @set:Exclude
+    var _votedAt: Long?
+        get() = votedAt
+        set(value) { votedAt = value }
 
     @get:PropertyName("progress")
     @set:PropertyName("progress")

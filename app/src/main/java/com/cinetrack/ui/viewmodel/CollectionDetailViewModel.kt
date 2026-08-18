@@ -241,7 +241,7 @@ class CollectionDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating))
+            repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
         }
     }
 

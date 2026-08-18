@@ -166,7 +166,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val local = repository.getMovie(movie.id, movie.mediaType)
                 val current = local ?: movie
-                repository.saveMovie(current.copy(personalRating = rating))
+                repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }

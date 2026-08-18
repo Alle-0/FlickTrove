@@ -167,7 +167,7 @@ class FavoritesViewModel @Inject constructor(
         viewModelScope.launch {
             val local = movieRepository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
-            movieRepository.saveMovie(current.copy(personalRating = rating))
+            movieRepository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
         }
     }
 

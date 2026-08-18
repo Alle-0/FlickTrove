@@ -443,6 +443,7 @@ class MovieDetailViewModel @Inject constructor(
             // TMDB profile path always stored separately for Stats
             current.favoriteActorTmdbPath = mvpActor?.profilePath
             current.favoriteActorCharacter = mvpActor?.character
+            current.votedAt = System.currentTimeMillis()
             
             repository.saveMovie(current)
         }
@@ -454,6 +455,7 @@ class MovieDetailViewModel @Inject constructor(
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
             current.personalRating = effectiveRating
+            current.votedAt = System.currentTimeMillis()
             repository.saveMovie(current)
         }
     }
@@ -544,7 +546,10 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             // If rating is 0.0 or null, set to null (remove rating)
             val effectiveRating = if (rating == 0.0) null else rating
-            val updated = state.movieEntry.copy(personalRating = effectiveRating)
+            val updated = state.movieEntry.copy(
+                personalRating = effectiveRating,
+                votedAt = System.currentTimeMillis()
+            )
             repository.saveMovie(updated)
         }
     }
