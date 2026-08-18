@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Animate On Scroll
+  AOS.init({
+    duration: 800,
+    once: true,
+    offset: 100
+  });
+
   // Navbar scroll effect
   const navbar = document.querySelector('.navbar');
 
