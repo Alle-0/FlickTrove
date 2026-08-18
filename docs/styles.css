@@ -5601,9 +5601,11 @@ section {
 .feature-content h3 {
   font-size: 2.8rem;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--text-secondary) 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: transparent;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
