@@ -102,13 +102,13 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_home_new.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_explore_new.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_recommendations_new.png" width="240"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_detail_new.png" width="240"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
       <td align="center"><br><b>Custom Folders</b></td>
-      <td align="center"><br><b>Deep Details</b></td>
+      <td align="center"><br><b>Interactive Map</b></td>
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_stats_new.png" width="240"/>&nbsp;&nbsp;</td>
