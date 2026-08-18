@@ -1031,7 +1031,10 @@ fun LanguageSelectionDialog(
                         "it" to stringResource(R.string.settings_language_it),
                         "es" to stringResource(R.string.settings_language_es),
                         "fr" to stringResource(R.string.settings_language_fr),
-                        "de" to stringResource(R.string.settings_language_de)
+                        "de" to stringResource(R.string.settings_language_de),
+                        "pt" to stringResource(R.string.settings_language_pt),
+                        "ru" to stringResource(R.string.settings_language_ru),
+                        "hi" to stringResource(R.string.settings_language_hi)
                     )
                     
                     options.forEach { (value, label) ->

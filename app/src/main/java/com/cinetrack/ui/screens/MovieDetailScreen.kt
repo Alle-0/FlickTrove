@@ -702,10 +702,7 @@ fun MovieDetailScreenContent(
                 accentColor = checkInAccent,
                 hazeState = rootHazeState,
                 onSave = { rating, vibes, mvp, charUrl ->
-                    if (rating != cachedSuccess!!.movieEntry.personalRating) {
-                        viewModel.onEvent(DetailEvent.Rate(rating ?: 0.0))
-                    }
-                    viewModel.onEvent(DetailEvent.SaveCheckIn(vibes, mvp, charUrl))
+                    viewModel.onEvent(DetailEvent.SaveCheckIn(rating, vibes, mvp, charUrl))
                 },
                 onDismiss = { showCheckInDrawer = false }
             )

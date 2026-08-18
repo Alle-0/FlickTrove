@@ -303,7 +303,10 @@ fun PeekABooCheckInDrawer(
                                         Text(
                                             text = rating.toString().removeSuffix(".0"),
                                             color = accentColor,
-                                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black)
+                                            style = MaterialTheme.typography.displayMedium.copy(
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 48.sp
+                                            )
                                         )
                                     } else {
                                         Text(

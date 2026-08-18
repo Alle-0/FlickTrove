@@ -1073,4 +1073,5 @@
     <string name="comment_banned_permanent">No puedes comentar. Has sido suspendido permanentemente.</string>
     <string name="comment_banned_temporary">No puedes comentar. Has sido suspendido hasta el %1$s.</string>
     <string name="comment_cooldown_wait">Espera %1$d segundos antes de comentar de nuevo.</string>
+    <string name="search_folders">Buscar carpetas…</string>
 </resources>

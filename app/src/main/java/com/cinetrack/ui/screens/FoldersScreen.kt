@@ -29,6 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -138,6 +144,7 @@ fun FoldersScreenContent(
     var activeMenuBounds by remember { mutableStateOf(Rect.Zero) }
     
     val activeHazeState = hazeState ?: remember { HazeState() }
+    val focusManager = LocalFocusManager.current
     
     androidx.activity.compose.BackHandler(enabled = activeMenuFolder != null) {
         activeMenuFolder = null
@@ -150,7 +157,7 @@ fun FoldersScreenContent(
                 .fillMaxSize()
                 .haze(state = activeHazeState)
         ) {
-            if (folders.isEmpty()) {
+            if (folders.isNullOrEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -189,22 +196,166 @@ fun FoldersScreenContent(
                     }
                 }
             } else {
+                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                
+                val density = androidx.compose.ui.platform.LocalDensity.current
+                
+                // Use fixed standard heights to prevent first-frame measurement clipping
+                val searchBarMaxHeightDp = 64.dp // 56dp for the bar + 8dp bottom padding
+                val newFolderMaxHeightDp = 56.dp // 44dp for the card + 12dp spacing approximately
+                
+                val searchBarMaxHeightPxDefault = with(density) { searchBarMaxHeightDp.toPx() }
+                var searchBarMaxHeightPx by remember { mutableFloatStateOf(searchBarMaxHeightPxDefault) }
+                var searchBarHeightPx by remember { mutableFloatStateOf(searchBarMaxHeightPxDefault) }
+                
+                val newFolderMaxHeightPxDefault = with(density) { newFolderMaxHeightDp.toPx() }
+                var newFolderMaxHeightPx by remember { mutableFloatStateOf(newFolderMaxHeightPxDefault) }
+                var newFolderHeightPx by remember { mutableFloatStateOf(newFolderMaxHeightPxDefault) }
+
+                val nestedScrollConnection = remember {
+                    object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
+                        override fun onPreScroll(available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                            var consumedY = 0f
+                            var delta = available.y
+
+                            // 1. Try to collapse search bar first
+                            if (delta < 0 && searchBarMaxHeightPx > 0f && searchBarHeightPx > 0f) {
+                                val newHeight = (searchBarHeightPx + delta).coerceIn(0f, searchBarMaxHeightPx)
+                                val consumed = newHeight - searchBarHeightPx
+                                searchBarHeightPx = newHeight
+                                delta -= consumed
+                                consumedY += consumed
+                            }
+
+                            // 2. If delta is still < 0 (search bar fully collapsed), collapse new folder
+                            if (delta < 0 && newFolderMaxHeightPx > 0f && newFolderHeightPx > 0f) {
+                                val newHeight = (newFolderHeightPx + delta).coerceIn(0f, newFolderMaxHeightPx)
+                                val consumed = newHeight - newFolderHeightPx
+                                newFolderHeightPx = newHeight
+                                delta -= consumed
+                                consumedY += consumed
+                            }
+
+                            return androidx.compose.ui.geometry.Offset(0f, consumedY)
+                        }
+
+                        override fun onPostScroll(consumed: androidx.compose.ui.geometry.Offset, available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                            var consumedY = 0f
+                            var delta = available.y
+
+                            // When scrolling up (swiping down, delta > 0), expand in REVERSE order:
+                            // First expand new folder
+                            if (delta > 0 && newFolderMaxHeightPx > 0f && newFolderHeightPx < newFolderMaxHeightPx) {
+                                val newHeight = (newFolderHeightPx + delta).coerceIn(0f, newFolderMaxHeightPx)
+                                val consumedAmount = newHeight - newFolderHeightPx
+                                newFolderHeightPx = newHeight
+                                delta -= consumedAmount
+                                consumedY += consumedAmount
+                            }
+
+                            // Then expand search bar
+                            if (delta > 0 && searchBarMaxHeightPx > 0f && searchBarHeightPx < searchBarMaxHeightPx) {
+                                val newHeight = (searchBarHeightPx + delta).coerceIn(0f, searchBarMaxHeightPx)
+                                val consumedAmount = newHeight - searchBarHeightPx
+                                searchBarHeightPx = newHeight
+                                delta -= consumedAmount
+                                consumedY += consumedAmount
+                            }
+
+                            return androidx.compose.ui.geometry.Offset(0f, consumedY)
+                        }
+                    }
+                }
+                
+                LaunchedEffect(listState.isScrollInProgress) {
+                    if (listState.isScrollInProgress) {
+                        focusManager.clearFocus()
+                    }
+                }
+                
                 LazyColumn(
+                    state = listState,
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
                         top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp,
                         bottom = paddingValues.calculateBottomPadding() + 32.dp
                     ),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(nestedScrollConnection)
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = { focusManager.clearFocus() })
+                        },
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item {
-                        NewFolderCard(onClick = { isCreateDialogOpen = true })
+                        val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+                        val currentHeight = if (searchBarMaxHeightPx > 0f) with(density) { searchBarHeightPx.toDp() } else Dp.Unspecified
+                        
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(currentHeight)
+                                .clipToBounds(),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(12.dp))
+                                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(stringResource(R.string.search_folders), color = Color.White.copy(alpha = 0.5f), fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
+                                    }
+                                    androidx.compose.foundation.text.BasicTextField(
+                                        value = searchQuery,
+                                        onValueChange = viewModel::updateSearchQuery,
+                                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 16.sp),
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                                        decorationBox = { innerTextField -> 
+                                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                                innerTextField()
+                                            }
+                                        }
+                                    )
+                                }
+                                if (searchQuery.isNotEmpty()) {
+                                    Spacer(Modifier.width(8.dp))
+                                    IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(24.dp)) {
+                                        Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
+                        
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(currentHeight)
+                                .clipToBounds(),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            NewFolderCard(onClick = { isCreateDialogOpen = true })
+                        }
                     }
     
-                    items(folders, key = { it.id }, contentType = { "folder" }) { folder ->
-                        Box(modifier = Modifier.animateItem()) {
+                    items(folders.orEmpty(), key = { it.id }, contentType = { "folder" }) { folder ->
+                        Box {
                             FolderCard(
                                 folder = folder,
                                 allMovies = allMovies,
@@ -409,15 +560,27 @@ fun FolderCard(
         } else {
             Box(
                 modifier = Modifier
-                    .width(40.dp + ((topItems.size - 1) * 20).dp)
+                    .width(40.dp + ((topItems.size - 1) * 22).dp)
                     .height(60.dp),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.Center
             ) {
                 topItems.forEachIndexed { index, movie ->
+                    val centerIndex = (topItems.size - 1) / 2f
+                    val currentRotation = if (topItems.size <= 1) 0f else {
+                        val maxRotation = 15f
+                        val rotationStep = (maxRotation * 2) / (topItems.size - 1)
+                        -maxRotation + (index * rotationStep)
+                    }
+                    val xOffset = (index - centerIndex) * 14f
+                    
                     Box(
                         modifier = Modifier
-                            .offset(x = (index * 20).dp)
+                            .offset(x = xOffset.dp)
                             .size(width = 40.dp, height = 60.dp)
+                            .graphicsLayer {
+                                rotationZ = currentRotation
+                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.1f)
+                            }
                             .clip(RoundedCornerShape(10.dp))
                             .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
                             .zIndex((topItems.size - index).toFloat())

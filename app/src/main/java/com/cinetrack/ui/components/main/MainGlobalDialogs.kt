@@ -131,7 +131,7 @@ fun MainGlobalDialogs(
         val foldersViewModel: FoldersViewModel = with(screen) { getViewModel<FoldersViewModel>() }
         val folderId = currentTab.folderId
         val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
-        val folder = folderFlow.value.find { it.id == folderId }
+        val folder = folderFlow.value?.find { it.id == folderId }
         if (folder != null) {
             FolderEditDialog(
                 initialName = folder.name,
@@ -151,7 +151,7 @@ fun MainGlobalDialogs(
         val foldersViewModel: FoldersViewModel = with(screen) { getViewModel<FoldersViewModel>() }
         val folderId = currentTab.folderId
         val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
-        val folder = folderFlow.value.find { it.id == folderId }
+        val folder = folderFlow.value?.find { it.id == folderId }
         
         if (folder != null) {
             FlickTroveModal(

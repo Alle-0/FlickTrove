@@ -1070,4 +1070,5 @@
     <string name="comment_banned_permanent">Sie können nicht kommentieren. Sie wurden dauerhaft gesperrt.</string>
     <string name="comment_banned_temporary">Sie können nicht kommentieren. Sie wurden bis zum %1$s gesperrt.</string>
     <string name="comment_cooldown_wait">Warte %1$d Sekunden, bevor du erneut kommentierst.</string>
+    <string name="search_folders">Ordner suchen…</string>
 </resources>

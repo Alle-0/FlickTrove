@@ -713,13 +713,7 @@ fun UpdatesScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .wrapContentSize()
-                            .animateContentSize(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioNoBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            ),
+                            .wrapContentSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Spacer(
@@ -734,6 +728,7 @@ fun UpdatesScreen(
                         )
                         AnimatedContent(
                             targetState = isRemindersSelector,
+                            contentAlignment = Alignment.Center,
                             transitionSpec = {
                                 (fadeIn(animationSpec = tween(180, delayMillis = 80)) +
                                     scaleIn(initialScale = 0.88f, animationSpec = tween(260))) togetherWith
@@ -757,6 +752,7 @@ fun UpdatesScreen(
                                     rawFutureReminders.count { it.isOngoingSeriesEpisode }
                                 )
                                 com.cinetrack.ui.components.common.CategoryTabSelector(
+                                    modifier = Modifier.wrapContentWidth(unbounded = true),
                                     options = options,
                                     counts = counts,
                                     selectedIndex = remindersCategoryTab,
@@ -772,6 +768,7 @@ fun UpdatesScreen(
                                     uiState.socialUnreadCount
                                 )
                                 com.cinetrack.ui.components.common.CategoryTabSelector(
+                                    modifier = Modifier.wrapContentWidth(unbounded = true),
                                     options = mainOptions,
                                     counts = mainCounts,
                                     selectedIndex = mainTab,

@@ -172,13 +172,10 @@
     <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>
     <string name="settings_language_en">EN</string>
-    <string name="settings_language_it">Italiano</string>
-    <string name="settings_language_es">Español</string>
-    <string name="settings_language_fr">Français</string>
-    <string name="settings_language_de">Deutsch</string>
-    <string name="settings_language_pt">Português</string>
-    <string name="settings_language_ru">Русский</string>
-    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_it">IT</string>
+    <string name="settings_language_es">ES</string>
+    <string name="settings_language_fr">FR</string>
+    <string name="settings_language_de">DE</string>
     <string name="settings_default_start_tab">Start Screen</string>
     <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
     <string name="settings_default_start_home">TO WATCH</string>

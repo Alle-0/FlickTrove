@@ -124,7 +124,14 @@ class DetailUiStateMapper @Inject constructor(
                     watchedAt = local.watchedAt,
                     personalRating = local.personalRating,
                     personalNote = local.personalNote,
-                    dropped = local.dropped
+                    dropped = local.dropped,
+                    emotionalVibes = local.emotionalVibes,
+                    favoriteActorId = local.favoriteActorId,
+                    favoriteActorName = local.favoriteActorName,
+                    favoriteActorProfilePath = local.favoriteActorProfilePath,
+                    favoriteActorCharacter = local.favoriteActorCharacter,
+                    favoriteActorTmdbPath = local.favoriteActorTmdbPath,
+                    customBackdropPath = local.customBackdropPath
                 )
             } else this
         }

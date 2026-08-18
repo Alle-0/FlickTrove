@@ -198,6 +198,9 @@ fun SettingsUILayoutSection(
                     "es" -> stringResource(R.string.settings_language_es)
                     "fr" -> stringResource(R.string.settings_language_fr)
                     "de" -> stringResource(R.string.settings_language_de)
+                    "pt" -> stringResource(R.string.settings_language_pt)
+                    "ru" -> stringResource(R.string.settings_language_ru)
+                    "hi" -> stringResource(R.string.settings_language_hi)
                     else -> contentLanguage
                 }
                 Text(
@@ -280,7 +283,10 @@ fun SettingsLanguageSection(
                     Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it"),
                     Triple("es", stringResource(R.string.settings_language_es), contentLanguage == "es"),
                     Triple("fr", stringResource(R.string.settings_language_fr), contentLanguage == "fr"),
-                    Triple("de", stringResource(R.string.settings_language_de), contentLanguage == "de")
+                    Triple("de", stringResource(R.string.settings_language_de), contentLanguage == "de"),
+                    Triple("pt", stringResource(R.string.settings_language_pt), contentLanguage == "pt"),
+                    Triple("ru", stringResource(R.string.settings_language_ru), contentLanguage == "ru"),
+                    Triple("hi", stringResource(R.string.settings_language_hi), contentLanguage == "hi")
                 )
                 options.forEach { (value, label, isSelected) ->
                     key(value) {

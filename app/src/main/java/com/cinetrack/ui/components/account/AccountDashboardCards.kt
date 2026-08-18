@@ -13,10 +13,12 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +39,7 @@ import com.cinetrack.ui.viewmodel.CalculatedStats
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.foundation.border
 import androidx.compose.ui.zIndex
+import androidx.compose.animation.core.*
 
 @Composable
 fun GeneralStatsCard(
@@ -135,7 +138,17 @@ fun GeneralStatsCard(
                     }
                 }
             } else {
-                Text("Loading stats...", color = Color.White.copy(alpha = 0.5f))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SkeletonStatItem()
+                        SkeletonStatItem()
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SkeletonStatItem()
+                        SkeletonStatItem()
+                    }
+                }
             }
         }
     }
@@ -160,8 +173,57 @@ private fun StatItem(label: String, value: String) {
 }
 
 @Composable
+private fun SkeletonStatItem() {
+    val infiniteTransition = rememberInfiniteTransition(label = "skeleton")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "skeleton_alpha"
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(modifier = Modifier.width(90.dp).height(14.dp).background(Color.White.copy(alpha = alpha), RoundedCornerShape(4.dp)))
+        Box(modifier = Modifier.width(50.dp).height(20.dp).background(Color.White.copy(alpha = alpha), RoundedCornerShape(4.dp)))
+    }
+}
+
+@Composable
+private fun SkeletonFolderItem() {
+    val infiniteTransition = rememberInfiniteTransition(label = "skeleton_folder")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "skeleton_alpha"
+    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(72.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .background(Color.White.copy(alpha = alpha), RoundedCornerShape(12.dp))
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(12.dp)
+                .background(Color.White.copy(alpha = alpha), RoundedCornerShape(4.dp))
+        )
+    }
+}
+
+@Composable
 fun MyFoldersCard(
-    folders: List<FolderEntity>,
+    folders: List<FolderEntity>?,
     allMovies: List<Movie>,
     hazeState: HazeState,
     backgroundLuminance: Float = 0f,
@@ -227,7 +289,19 @@ fun MyFoldersCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             // Horizontal list of folders
-            if (folders.isEmpty()) {
+            if (folders == null) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    SkeletonFolderItem()
+                    SkeletonFolderItem()
+                    SkeletonFolderItem()
+                    SkeletonFolderItem()
+                }
+            } else if (folders.isEmpty()) {
                 Text(
                     "You haven't created any folders yet.",
                     color = Color.White.copy(alpha = 0.5f),
@@ -290,7 +364,7 @@ fun FolderPreviewItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .bounceClick { onClick() }
-            .width(72.dp)
+            .width(82.dp)
     ) {
         if (topItems.isEmpty()) {
             Box(
@@ -311,15 +385,27 @@ fun FolderPreviewItem(
         } else {
             Box(
                 modifier = Modifier
-                    .width(38.dp + ((topItems.size - 1) * 12).dp)
+                    .width(38.dp + ((topItems.size - 1) * 20).dp)
                     .height(56.dp),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.Center
             ) {
                 topItems.forEachIndexed { index, movie ->
+                    val centerIndex = (topItems.size - 1) / 2f
+                    val currentRotation = if (topItems.size <= 1) 0f else {
+                        val maxRotation = 15f
+                        val rotationStep = (maxRotation * 2) / (topItems.size - 1)
+                        -maxRotation + (index * rotationStep)
+                    }
+                    val xOffset = (index - centerIndex) * 12f
+
                     Box(
                         modifier = Modifier
-                            .offset(x = (index * 12).dp)
+                            .offset(x = xOffset.dp)
                             .size(width = 38.dp, height = 56.dp)
+                            .graphicsLayer {
+                                rotationZ = currentRotation
+                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.1f)
+                            }
                             .clip(RoundedCornerShape(8.dp))
                             .border(1.dp, Color(0xFF13151A), RoundedCornerShape(8.dp))
                             .zIndex((topItems.size - index).toFloat())

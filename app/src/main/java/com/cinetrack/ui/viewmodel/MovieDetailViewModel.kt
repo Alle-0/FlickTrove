@@ -380,7 +380,7 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.ToggleFolderMembership -> toggleFolderMembership(event.folder)
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
-            is DetailEvent.SaveCheckIn -> saveCheckIn(event.vibes, event.mvpActor, event.characterImageUrl)
+            is DetailEvent.SaveCheckIn -> saveCheckIn(event.rating, event.vibes, event.mvpActor, event.characterImageUrl)
             is DetailEvent.ToggleCommentLike -> toggleCommentLike(event.commentId)
         }
     }
@@ -428,11 +428,13 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun saveCheckIn(vibes: List<String>, mvpActor: com.cinetrack.data.api.CastMember?, characterImageUrl: String?) {
+    private fun saveCheckIn(rating: Double?, vibes: List<String>, mvpActor: com.cinetrack.data.api.CastMember?, characterImageUrl: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             val local = repository.getMovie(movieId, mediaType)
             val current = local ?: (uiState.value as? DetailUiState.Success)?.movieEntry ?: return@launch
             
+            val effectiveRating = if (rating == 0.0) null else rating
+            current.personalRating = effectiveRating
             current.emotionalVibes = if (vibes.isEmpty()) null else vibes.joinToString(",")
             current.favoriteActorId = mvpActor?.id
             current.favoriteActorName = mvpActor?.name

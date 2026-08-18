@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.animation.core.animateFloatAsState
 import kotlin.math.roundToInt
 import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Close
 import java.util.Collections
@@ -199,11 +200,7 @@ fun AccountModals(
             modifier = Modifier
                 .zIndex(80000f)
                 .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            awaitPointerEvent().changes.forEach { it.consume() }
-                        }
-                    }
+                    detectDragGestures { _, _ -> }
                 }
         ) {
             // Profile Menu Modal
@@ -421,6 +418,7 @@ fun AccountModals(
                             val listState = rememberLazyListState()
                             var draggedItemKey by remember { mutableStateOf<String?>(null) }
                             var dragOffset by remember { mutableStateOf(0f) }
+                            var dropTrigger by remember { mutableIntStateOf(0) }
                             var itemHeightPx by remember { mutableStateOf(0f) }
                             val density = LocalDensity.current
                             val draggedIndex = localOrder.indexOf(draggedItemKey)
@@ -431,33 +429,47 @@ fun AccountModals(
                                     (draggedIndex + offsetSlots).coerceIn(0, localOrder.size - 1)
                                 }
                             }
+                            
+                            val currentDraggedIndex by rememberUpdatedState(draggedIndex)
+                            val currentVisualTargetIndex by rememberUpdatedState(visualTargetIndex)
+                            val currentLocalOrder by rememberUpdatedState(localOrder)
 
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 localOrder.forEachIndexed { index, itemKey ->
-                                    val isDragging = draggedItemKey == itemKey
-                                    
-                                    val translationTarget = when {
-                                        isDragging -> dragOffset
-                                        draggedIndex != -1 && visualTargetIndex != -1 -> {
-                                            if (draggedIndex < index && index <= visualTargetIndex) {
-                                                -itemHeightPx
-                                            } else if (draggedIndex > index && index >= visualTargetIndex) {
-                                                itemHeightPx
-                                            } else {
-                                                0f
+                                    androidx.compose.runtime.key(itemKey) {
+                                        val isDragging = draggedItemKey == itemKey
+                                        
+                                        val translationTarget = when {
+                                            isDragging -> dragOffset
+                                            draggedIndex != -1 && visualTargetIndex != -1 -> {
+                                                if (draggedIndex < index && index <= visualTargetIndex) {
+                                                    -itemHeightPx
+                                                } else if (draggedIndex > index && index >= visualTargetIndex) {
+                                                    itemHeightPx
+                                                } else {
+                                                    0f
+                                                }
+                                            }
+                                            else -> 0f
+                                        }
+                                        val translation = remember(dropTrigger) { androidx.compose.animation.core.Animatable(0f) }
+                                        
+
+                                        androidx.compose.runtime.LaunchedEffect(translationTarget) {
+                                            if (!isDragging) {
+                                                translation.animateTo(
+                                                    targetValue = translationTarget,
+                                                    animationSpec = androidx.compose.animation.core.spring(
+                                                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                                                    )
+                                                )
                                             }
                                         }
-                                        else -> 0f
-                                    }
-
-                                    val animatedTranslation by animateFloatAsState(
-                                        targetValue = translationTarget,
-                                        label = "translationY"
-                                    )
-                                    val finalTranslation = if (isDragging) dragOffset else animatedTranslation
+    
+                                        val finalTranslation = if (isDragging) dragOffset else translation.value
 
                                     val itemInfo = when (itemKey) {
                                         "folders" -> DashboardSettingItem(R.drawable.ic_cartella, R.string.settings_show_my_folders, R.string.settings_show_my_folders_desc, showMyFolders) { settingsViewModel.toggleShowMyFolders(it) }
@@ -487,26 +499,27 @@ fun AccountModals(
                                                 .padding(end = 8.dp)
                                                 .size(24.dp)
                                                 .pointerInput(itemKey) {
-                                                    detectVerticalDragGestures(
+                                                    detectDragGestures(
                                                         onDragStart = { draggedItemKey = itemKey },
                                                         onDragEnd = { 
-                                                            if (draggedIndex != -1 && visualTargetIndex != -1 && draggedIndex != visualTargetIndex) {
-                                                                val newList = localOrder.toMutableList()
-                                                                val item = newList.removeAt(draggedIndex)
-                                                                newList.add(visualTargetIndex, item)
+                                                            if (currentDraggedIndex != -1 && currentVisualTargetIndex != -1 && currentDraggedIndex != currentVisualTargetIndex) {
+                                                                val newList = currentLocalOrder.toMutableList()
+                                                                val item = newList.removeAt(currentDraggedIndex)
+                                                                newList.add(currentVisualTargetIndex, item)
                                                                 localOrder = newList
                                                                 settingsViewModel.updateDashboardCardOrder(newList)
                                                             }
                                                             draggedItemKey = null
                                                             dragOffset = 0f
+                                                            dropTrigger++
                                                         },
                                                         onDragCancel = { 
                                                             draggedItemKey = null
                                                             dragOffset = 0f 
                                                         },
-                                                        onVerticalDrag = { change, dragAmount ->
+                                                        onDrag = { change, dragAmount ->
                                                             change.consume()
-                                                            dragOffset += dragAmount
+                                                            dragOffset += dragAmount.y
                                                         }
                                                     )
                                                 }
@@ -538,6 +551,7 @@ fun AccountModals(
                                             accentColor = MaterialTheme.colorScheme.primary
                                         )
                                     }
+                                    } // End key(itemKey)
                                 }
                             }
                         }

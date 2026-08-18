@@ -203,6 +203,7 @@ class TranslationManager @Inject constructor() {
             "ko" -> TranslateLanguage.KOREAN
             "ru" -> TranslateLanguage.RUSSIAN
             "ar" -> TranslateLanguage.ARABIC
+            "hi" -> TranslateLanguage.HINDI
             else -> TranslateLanguage.ENGLISH
         }
     }
@@ -220,6 +221,7 @@ class TranslationManager @Inject constructor() {
             TranslateLanguage.KOREAN -> "ko"
             TranslateLanguage.RUSSIAN -> "ru"
             TranslateLanguage.ARABIC -> "ar"
+            TranslateLanguage.HINDI -> "hi"
             else -> "en"
         }
     }

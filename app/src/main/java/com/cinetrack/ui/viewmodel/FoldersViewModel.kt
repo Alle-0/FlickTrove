@@ -59,17 +59,25 @@ class FoldersViewModel @Inject constructor(
         }
     }
 
-    val folders: StateFlow<ImmutableList<FolderEntity>> = kotlinx.coroutines.flow.combine(repository.getFoldersFlow(), _sortOption, _sortOrder) { list, option, order ->
+    private val _searchQuery = kotlinx.coroutines.flow.MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+    val folders: StateFlow<ImmutableList<FolderEntity>?> = kotlinx.coroutines.flow.combine(repository.getFoldersFlow(), _sortOption, _sortOrder, _searchQuery) { list, option, order, query ->
+        val filteredList = if (query.isBlank()) list else list.filter { it.name.contains(query, ignoreCase = true) }
         val sorted = when (option) {
-            com.cinetrack.ui.screens.FolderSortOption.DATE -> list.sortedBy { parseDateString(it.createdAt) }
-            com.cinetrack.ui.screens.FolderSortOption.NAME -> list.sortedBy { it.name.lowercase() }
-            com.cinetrack.ui.screens.FolderSortOption.ITEMS -> list.sortedBy { it.itemIds.size }
+            com.cinetrack.ui.screens.FolderSortOption.DATE -> filteredList.sortedBy { parseDateString(it.createdAt) }
+            com.cinetrack.ui.screens.FolderSortOption.NAME -> filteredList.sortedBy { it.name.lowercase() }
+            com.cinetrack.ui.screens.FolderSortOption.ITEMS -> filteredList.sortedBy { it.itemIds.size }
         }
         if (order == com.cinetrack.data.model.CommentSortOrder.DESC) sorted.reversed().toImmutableList() else sorted.toImmutableList()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = persistentListOf()
+        initialValue = null
     )
 
     fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.data.model.CommentSortOrder) {
@@ -116,7 +124,7 @@ class FoldersViewModel @Inject constructor(
 
     fun deleteFolder(folderId: String) {
         viewModelScope.launch {
-            val folder = folders.value.find { it.id == folderId }
+            val folder = folders.value?.find { it.id == folderId }
             if (folder != null) {
                 repository.deleteFolder(folderId)
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {
