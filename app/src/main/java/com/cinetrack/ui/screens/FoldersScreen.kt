@@ -363,9 +363,9 @@ fun FoldersScreenContent(
                         val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
                         val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 12.dp).coerceAtLeast(0.dp)
                         
-                        // Fast fade: fully opaque at 1.0, fully transparent at 0.5
+                        // Fast fade: fully opaque at 1.0, fully transparent at 0.6 to disappear earlier
                         val progress = if (newFolderMaxHeightPx > 0f) (newFolderHeightPx / newFolderMaxHeightPx).coerceIn(0f, 1f) else 1f
-                        val alphaProgress = ((progress - 0.5f) * 2f).coerceIn(0f, 1f)
+                        val alphaProgress = ((progress - 0.6f) * 2.5f).coerceIn(0f, 1f)
                         
                         Box(
                             modifier = Modifier
@@ -374,13 +374,11 @@ fun FoldersScreenContent(
                                 .clipToBounds(),
                             contentAlignment = Alignment.TopCenter
                         ) {
-                            if (alphaProgress > 0f) {
-                                NewFolderCard(
-                                    onClick = { isCreateDialogOpen = true },
-                                    modifier = Modifier.height(pillHeight),
-                                    alphaProgress = alphaProgress
-                                )
-                            }
+                            NewFolderCard(
+                                onClick = { isCreateDialogOpen = true },
+                                modifier = Modifier.height(pillHeight),
+                                alphaProgress = alphaProgress
+                            )
                         }
                     }
     
