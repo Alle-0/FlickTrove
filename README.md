@@ -101,9 +101,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_home_new.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_recommendations_new.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_detail_new.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260629_113957.png" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260816_203605.png" width="240" alt="Recommendations"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260808_114729.png" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
@@ -111,9 +111,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><br><b>Interactive Map</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_stats_new.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_folders_new.png" width="240"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/screenshot_map_new.png" width="240"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260807_113541.png" width="240" alt="Stats Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260816_203516.png" width="240" alt="Folders Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="screenshots/Screenshot_20260813_082544.png" width="240" alt="Interactive Map"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>
