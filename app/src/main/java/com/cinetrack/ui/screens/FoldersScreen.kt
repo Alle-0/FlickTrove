@@ -5,6 +5,7 @@ import com.cinetrack.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
@@ -135,6 +136,7 @@ fun FoldersScreenContent(
 ) {
     val folders by viewModel.folders.collectAsStateWithLifecycle()
     val allMovies by viewModel.allMovies.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
@@ -157,7 +159,7 @@ fun FoldersScreenContent(
                 .fillMaxSize()
                 .haze(state = activeHazeState)
         ) {
-            if (folders.isNullOrEmpty()) {
+            if (folders.isNullOrEmpty() && searchQuery.isBlank()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -349,7 +351,12 @@ fun FoldersScreenContent(
                                         if (searchQuery.isNotEmpty()) {
                                             Spacer(Modifier.width(8.dp))
                                             IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(24.dp)) {
-                                                Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_x), 
+                                                    contentDescription = null, 
+                                                    tint = Color.White.copy(alpha = 0.5f), 
+                                                    modifier = Modifier.size(16.dp)
+                                                )
                                             }
                                         }
                                     }
@@ -359,26 +366,42 @@ fun FoldersScreenContent(
                     }
                     }
 
-                    item {
-                        val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
-                        val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 12.dp).coerceAtLeast(0.dp)
-                        
-                        // Fast fade: fully opaque at 1.0, fully transparent at 0.6 to disappear earlier
-                        val progress = if (newFolderMaxHeightPx > 0f) (newFolderHeightPx / newFolderMaxHeightPx).coerceIn(0f, 1f) else 1f
-                        val alphaProgress = ((progress - 0.6f) * 2.5f).coerceIn(0f, 1f)
-                        
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(currentHeight)
-                                .clipToBounds(),
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            NewFolderCard(
-                                onClick = { isCreateDialogOpen = true },
-                                modifier = Modifier.height(pillHeight),
-                                alphaProgress = alphaProgress
-                            )
+                    if (searchQuery.isBlank()) {
+                        item {
+                            val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
+                            val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 12.dp).coerceAtLeast(0.dp)
+                            
+                            // Fast fade: fully opaque at 1.0, fully transparent at 0.6 to disappear earlier
+                            val progress = if (newFolderMaxHeightPx > 0f) (newFolderHeightPx / newFolderMaxHeightPx).coerceIn(0f, 1f) else 1f
+                            val alphaProgress = ((progress - 0.6f) * 2.5f).coerceIn(0f, 1f)
+                            
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(currentHeight)
+                                    .clipToBounds(),
+                                contentAlignment = Alignment.TopCenter
+                            ) {
+                                NewFolderCard(
+                                    onClick = { isCreateDialogOpen = true },
+                                    modifier = Modifier.height(pillHeight),
+                                    alphaProgress = alphaProgress
+                                )
+                            }
+                        }
+                    }
+                    if (folders.isNullOrEmpty() && searchQuery.isNotBlank()) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Nessun risultato per \"$searchQuery\"",
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
     

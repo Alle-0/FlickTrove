@@ -372,7 +372,7 @@ data class Movie(
         get() {
             // 1. Robust date comparison (Priority)
             val todayIso = try {
-                LocalDate.now().toString()
+                java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
             } catch (e: Exception) {
                 "2024-01-01" // Fallback if system date fails
             }
@@ -432,7 +432,7 @@ data class Movie(
         get() {
             if (mediaType != "tv") return 1
             val todayIso = try {
-                LocalDate.now().toString()
+                java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
             } catch (e: Exception) {
                 "2026-01-01"
             }

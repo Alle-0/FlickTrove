@@ -44,11 +44,11 @@ class UniversalCsvImporter @Inject constructor(
             val typeIdx = lowerHeaders.indexOfFirst { it in listOf("title type", "type", "media_type", "item_type", "contenttype") }
             val ratingIdx = lowerHeaders.indexOfFirst { it in listOf("rating", "your rating", "my rating", "score", "user rating", "rating10", "rating5", "user_rating", "personal_rating") }
             val noteIdx = lowerHeaders.indexOfFirst { it in listOf("review", "comment", "note", "personal_note", "your review", "my review", "notes", "text", "message") }
-            val watchedIdx = lowerHeaders.indexOfFirst { it in listOf("watched", "seen", "status", "watched status", "watched_status") }
+            val watchedIdx = lowerHeaders.indexOfFirst { it in listOf("watched", "seen", "status", "watched status", "watched_status", "watch_status", "play_status") }
             val favIdx = lowerHeaders.indexOfFirst { it in listOf("favorite", "is_favorite", "fav", "starred", "liked") }
             val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season", "season number", "season_number", "s", "season_num") }
             val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode", "episode number", "episode_number", "e", "episode_num", "ep") }
-            val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection") }
+            val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection", "list_type", "custom_list") }
             
             // Yamtrack-specific Headers
             val yamtrackMediaIdIdx = lowerHeaders.indexOfFirst { it == "media_id" }
@@ -96,7 +96,15 @@ class UniversalCsvImporter @Inject constructor(
                         }
                     }
 
-                    val isWatchlistFile = fileName != null && (fileName.contains("watchlist") || fileName.contains("to_watch") || fileName.contains("planned") || fileName.contains("for_later"))
+                    val folderStr = if (folderIdx != -1 && columns.size > folderIdx) columns[folderIdx]?.trim()?.lowercase() else null
+                    val statusStr = if (watchedIdx != -1 && columns.size > watchedIdx) columns[watchedIdx]?.trim()?.lowercase() else null
+                    
+                    val isWatchlistFile = fileName != null && (fileName.contains("watchlist") || fileName.contains("to_watch") || fileName.contains("planned") || fileName.contains("for_later") || fileName.contains("plan_to_watch") || fileName.contains("want_to_watch") || fileName.contains("bookmark"))
+                    val isWatchlistFolder = folderStr in listOf("watchlist", "to_watch", "to watch", "planned", "for_later", "da vedere", "plan to watch", "plan_to_watch", "want to watch", "want_to_watch", "ptw", "bookmark", "bookmarked", "saved", "salvati", "da guardare", "guarda più tardi")
+                    val isWatchlistStatus = statusStr in listOf("planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere", "plan to watch", "plan_to_watch", "want to watch", "want_to_watch", "ptw", "bookmark", "bookmarked", "saved", "salvati", "da guardare", "guarda più tardi")
+                    
+                    val isWatchlistEntry = isWatchlistFile || isWatchlistFolder || isWatchlistStatus
+
                     var droppedVal = false
                     var watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
                         val w = columns[watchedIdx]?.trim()?.lowercase()
@@ -104,9 +112,9 @@ class UniversalCsvImporter @Inject constructor(
                             "1", "true", "yes", "watched", "completed", "watching", "seen", "up_to_date" -> true
                             "0", "false", "no", "planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere" -> false
                             "dropped", "paused" -> { droppedVal = true; false }
-                            else -> !isWatchlistFile
+                            else -> !isWatchlistEntry
                         }
-                    } else !isWatchlistFile
+                    } else !isWatchlistEntry
 
                     if (isYamtrack && watchedIdx != -1 && columns.size > watchedIdx) {
                         watchedVal = when (columns[watchedIdx]) {

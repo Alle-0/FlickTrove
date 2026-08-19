@@ -39,6 +39,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import com.cinetrack.ui.components.card.PersonCard
+import com.cinetrack.data.model.GlobalMovieStats
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -64,6 +65,7 @@ fun DetailCast(
     directors: List<CrewMember>,
     cast: List<CastMember>,
     accentColor: Color,
+    globalStats: GlobalMovieStats? = null,
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
@@ -182,12 +184,17 @@ fun DetailCast(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
                 items(groupedCast.take(15), key = { "cast-${it.id}" }, contentType = { "person" }) { person ->
+                    val votes = globalStats?.mvps?.get(person.id.toString()) ?: 0L
+                    val totalMvps = globalStats?.totalMvps ?: 0L
+                    val mvpPercentage = if (totalMvps > 0 && votes > 0) ((votes.toFloat() / totalMvps) * 100).toInt() else null
+
                     PersonCard(
                         id = person.id,
                         name = person.name,
                         subLabel = person.character ?: "-",
                         imagePath = person.profilePath,
                         accentColor = accentColor,
+                        mvpPercentage = mvpPercentage,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         onClick = { onPersonClick(person.id, person.profilePath) }
@@ -220,7 +227,10 @@ fun DetailCast(
         val groupedCast = cast.groupBy { it.id }.map { (_, members) ->
             val first = members.first()
             val combinedCharacters = members.mapNotNull { it.character }.distinct().filter { it.isNotBlank() }.joinToString(" / ")
-            BottomSheetPerson(first.id, first.name, combinedCharacters.ifBlank { "-" }, first.profilePath)
+            val votes = globalStats?.mvps?.get(first.id.toString()) ?: 0L
+            val totalMvps = globalStats?.totalMvps ?: 0L
+            val mvpPercentage = if (totalMvps > 0 && votes > 0) ((votes.toFloat() / totalMvps) * 100).toInt() else null
+            BottomSheetPerson(first.id, first.name, combinedCharacters.ifBlank { "-" }, first.profilePath, mvpPercentage)
         }
         PeopleBottomSheet(
             title = stringResource(R.string.detail_cast),
@@ -235,7 +245,7 @@ fun DetailCast(
     }
 }
 
-data class BottomSheetPerson(val id: Long, val name: String, val subLabel: String, val profilePath: String?)
+data class BottomSheetPerson(val id: Long, val name: String, val subLabel: String, val profilePath: String?, val mvpPercentage: Int? = null)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -285,6 +295,7 @@ fun PeopleBottomSheet(
                         subLabel = person.subLabel,
                         imagePath = person.profilePath,
                         accentColor = accentColor,
+                        mvpPercentage = person.mvpPercentage,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         showSubLabelContainer = false,
@@ -307,6 +318,7 @@ fun PersonCard(
     subLabel: String,
     imagePath: String?,
     accentColor: Color,
+    mvpPercentage: Int? = null,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     showSubLabelContainer: Boolean = true,
@@ -375,6 +387,16 @@ fun PersonCard(
             lineHeight = 13.sp,
             modifier = Modifier.fillMaxWidth().heightIn(min = 28.dp)
         )
+        
+        if (mvpPercentage != null && mvpPercentage > 0) {
+            Text(
+                text = "$mvpPercentage%",
+                color = accentColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)
+            )
+        }
         
         if (showSubLabelContainer || subLabel.isNotBlank()) {
             // Use a fixed height container for subLabel to maintain row consistency

@@ -117,7 +117,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
 
         private val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE movies ADD COLUMN voted_at INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE favorites ADD COLUMN voted_at INTEGER DEFAULT NULL")
             }
         }
 

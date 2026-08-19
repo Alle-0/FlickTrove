@@ -120,8 +120,9 @@ class UpdatesViewModel @Inject constructor(
     fun clearAllNewEpisodes() {
         viewModelScope.launch {
             val moviesWithUpdates = repository.getLocalMovies().filter { (it.newEpisodesFound ?: 0) > 0 }
-            moviesWithUpdates.forEach { movie ->
-                repository.saveMovie(movie.copy(newEpisodesFound = 0))
+            if (moviesWithUpdates.isNotEmpty()) {
+                val updatedMovies = moviesWithUpdates.map { it.copy(newEpisodesFound = 0) }
+                repository.saveMoviesBulk(updatedMovies)
             }
         }
     }

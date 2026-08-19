@@ -585,6 +585,7 @@ fun MovieDetailScreenContent(
                                         directors = state.directors,
                                         cast = state.cast,
                                         accentColor = accentColor,
+                                        globalStats = globalStats,
                                         hazeState = localHazeState,
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         animatedVisibilityScope = animatedVisibilityScope,

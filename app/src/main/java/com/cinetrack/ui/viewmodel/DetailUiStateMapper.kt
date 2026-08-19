@@ -79,7 +79,7 @@ class DetailUiStateMapper @Inject constructor(
         if (mediaType == "tv" && effectiveMovie.watched && (effectiveMovie.progress ?: 0.0) >= 1.0 &&
             (effectiveWatchedEpisodes.isNullOrEmpty() || effectiveWatchedEpisodes.values.sumOf { it.size } == 0)) {
             val allWatched = mutableMapOf<String, List<Int>>()
-            val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+            val todayIso = try { java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date()) } catch (e: Exception) { "2026-01-01" }
             var nextEpSeason: Int? = null
             var nextEpNum: Int? = null
             if (!effectiveMovie.nextEpisodeString.isNullOrBlank() && (effectiveMovie.nextEpisodeAirDate.isNullOrBlank() || effectiveMovie.nextEpisodeAirDate!! > todayIso)) {

@@ -59,7 +59,9 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
@@ -389,8 +391,10 @@ fun PeekABooCheckInDrawer(
                                 // Page 2: MVP Cast Section
                                 Column(modifier = Modifier.fillMaxWidth()) {
                                     if (cast.isNotEmpty()) {
+                                        val castGridState = rememberLazyGridState()
 
                                         LazyVerticalGrid(
+                                            state = castGridState,
                                             columns = GridCells.Fixed(4),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -398,30 +402,44 @@ fun PeekABooCheckInDrawer(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(300.dp)
-                                                .graphicsLayer(compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen)
-                                                .drawWithContent {
-                                                    drawContent()
-                                                    drawRect(
-                                                        brush = Brush.verticalGradient(
-                                                            0f to Color.Transparent,
-                                                            0.1f to Color.Black,
-                                                            0.9f to Color.Black,
-                                                            1f to Color.Transparent
-                                                        ),
-                                                        blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
-                                                    )
-                                                }
+                                                .verticalFadingEdges(castGridState, 16.dp, 16.dp)
                                         ) {
                                             items(cast.take(24), key = { it.id }) { actor ->
                                                 val isMvp = selectedMvp?.id == actor.id
                                                 val charName = actor.character?.lowercase()?.trim()
                                                 val actorName = actor.name.lowercase().trim()
                                                 val charImageUrl = charName?.let { characterImages[it] } ?: characterImages[actorName]
+                                                val originalMvpId = movie?.favoriteActorId
+                                                val currentMvpId = selectedMvp?.id
+                                                var baselineMvpCount = globalStats?.mvps?.get(actor.id.toString()) ?: 0L
+                                                var totalMvpsCount = globalStats?.totalMvps ?: 0L
+                                                if (originalMvpId == actor.id && baselineMvpCount == 0L) baselineMvpCount = 1L
+                                                if (originalMvpId != null && totalMvpsCount == 0L) totalMvpsCount = 1L
+                                                
+                                                val addedMvp = if (currentMvpId == actor.id && originalMvpId != actor.id) 1L else 0L
+                                                val removedMvp = if (currentMvpId != actor.id && originalMvpId == actor.id) 1L else 0L
+                                                val totalAdded = if (currentMvpId != null && currentMvpId != originalMvpId && currentMvpId != actor.id && originalMvpId != actor.id) 1L else 0L
+                                                val totalRemoved = if (originalMvpId != null && currentMvpId != originalMvpId && currentMvpId != actor.id && originalMvpId != actor.id) 1L else 0L
+                                                
+                                                // Actually the total added/removed is just based on whether the current MVP is different from original MVP.
+                                                // Wait, if current MVP is different from original MVP, we remove 1 from total (for original) and add 1 to total (for current).
+                                                // So totalMvpsCount doesn't change unless we go from no MVP to some MVP (+1) or some MVP to no MVP (-1).
+                                                val globalTotalAdded = if (originalMvpId == null && currentMvpId != null) 1L else 0L
+                                                val globalTotalRemoved = if (originalMvpId != null && currentMvpId == null) 1L else 0L
+
+                                                val projectedMvpCount = maxOf(0L, baselineMvpCount + addedMvp - removedMvp)
+                                                val projectedTotalMvps = maxOf(0L, totalMvpsCount + globalTotalAdded - globalTotalRemoved)
+                                                
+                                                val realPercentage = if (projectedTotalMvps > 0 && projectedMvpCount > 0) {
+                                                    ((projectedMvpCount.toFloat() / projectedTotalMvps) * 100).toInt()
+                                                } else null
+
                                                 CastMvpChip(
                                                     actor = actor,
                                                     isMvp = isMvp,
                                                     accentColor = accentColor,
                                                     characterImageUrl = charImageUrl,
+                                                    mvpPercentage = realPercentage,
                                                     onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                         selectedMvp = if (isMvp) null else actor
@@ -695,6 +713,7 @@ private fun CastMvpChip(
     isMvp: Boolean,
     accentColor: Color,
     characterImageUrl: String? = null,
+    mvpPercentage: Int? = null,
     onClick: () -> Unit
 ) {
     val scale by animateFloatAsState(
@@ -799,6 +818,15 @@ private fun CastMvpChip(
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
+        if (mvpPercentage != null && mvpPercentage > 0) {
+            Text(
+                text = "$mvpPercentage%",
+                color = accentColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)
+            )
+        }
         Text(
             text = actor.name,
             fontSize = 8.sp,
