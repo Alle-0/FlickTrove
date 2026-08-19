@@ -595,12 +595,7 @@ data class Movie(
             }
         }
 
-    @get:PropertyName("personal_rating")
-    @set:PropertyName("personal_rating")
-    var _personalRating: Double?
-        get() = personalRating
-        set(value) { personalRating = value }
-
+    // Removed conflicting _personalRating property which caused Firebase serialization to crash
     @get:Exclude
     @set:Exclude
     var _votedAt: Long?
