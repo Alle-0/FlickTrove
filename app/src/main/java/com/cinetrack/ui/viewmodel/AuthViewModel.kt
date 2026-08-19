@@ -91,6 +91,9 @@ class AuthViewModel @Inject constructor(
                             com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("user_fcm_tokens").document(user.uid)
                                 .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
                         }
+                        // Save the current app version to the user profile
+                        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(user.uid)
+                            .set(mapOf("appVersion" to com.cinetrack.BuildConfig.VERSION_NAME), com.google.firebase.firestore.SetOptions.merge())
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
