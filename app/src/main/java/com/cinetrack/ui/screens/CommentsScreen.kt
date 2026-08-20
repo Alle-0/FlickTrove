@@ -1041,12 +1041,7 @@ class CommentsScreen(
                                         enabled = attachedMedia.isEmpty()
                                     ) {
                                         val gifAlpha = if (attachedMedia.isEmpty()) 0.8f else 0.3f
-                                        Box(
-                                            modifier = Modifier.border(1.dp, Color.White.copy(alpha = gifAlpha), RoundedCornerShape(4.dp)).padding(horizontal = 4.dp, vertical = 2.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(stringResource(R.string.comment_gif), color = Color.White.copy(alpha = gifAlpha), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp))
-                                        }
+                                        Icon(painterResource(id = R.drawable.ic_gif), contentDescription = "GIF", tint = Color.White.copy(alpha = gifAlpha), modifier = Modifier.size(20.dp))
                                     }
                                     // Foto
                                     IconButton(
