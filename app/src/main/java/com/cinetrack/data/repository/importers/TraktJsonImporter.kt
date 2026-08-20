@@ -177,6 +177,28 @@ class TraktJsonImporter @Inject constructor(
                         ?: itemObj["comment"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["review"]?.jsonPrimitive?.contentOrNull)?.take(5000)
 
+                    val mvpVal = (obj["mvp"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["best_character"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["favorite_character"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["fav_character"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["favorite_actor"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["fav_actor"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["mvp"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["best_character"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["favorite_character"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["fav_character"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["favorite_actor"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["fav_actor"]?.jsonPrimitive?.contentOrNull)?.take(255)
+
+                    val vibesVal = (obj["vibes"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["emotional_vibes"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["tags"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["mood"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["vibes"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["emotional_vibes"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["tags"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["mood"]?.jsonPrimitive?.contentOrNull)?.take(255)
+
                     val hasWatchedField = listOf("watched", "seen", "status", "watch_status").any { key ->
                         obj.containsKey(key) || itemObj.containsKey(key)
                     }
@@ -292,6 +314,9 @@ class TraktJsonImporter @Inject constructor(
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,
                                         watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                        favoriteActorName = mvpVal,
+                                        favoriteActorCharacter = mvpVal,
+                                        emotionalVibes = vibesVal,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -311,6 +336,9 @@ class TraktJsonImporter @Inject constructor(
                                     personalNote = userNote,
                                     watchedEpisodes = finalWatchedEps,
                                     watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                    favoriteActorName = mvpVal,
+                                    favoriteActorCharacter = mvpVal,
+                                    emotionalVibes = vibesVal,
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
@@ -339,6 +367,9 @@ class TraktJsonImporter @Inject constructor(
                                         personalNote = userNote,
                                         watchedEpisodes = finalWatchedEps,
                                         watchedAt = if (isSeen) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                        favoriteActorName = mvpVal,
+                                        favoriteActorCharacter = mvpVal,
+                                        emotionalVibes = vibesVal,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )

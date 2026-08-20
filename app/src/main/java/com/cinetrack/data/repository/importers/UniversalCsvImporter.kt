@@ -49,6 +49,8 @@ class UniversalCsvImporter @Inject constructor(
             val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season", "season number", "season_number", "s", "season_num") }
             val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode", "episode number", "episode_number", "e", "episode_num", "ep") }
             val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection", "list_type", "custom_list") }
+            val mvpIdx = lowerHeaders.indexOfFirst { it in listOf("mvp", "best character", "best_character", "favorite character", "favorite_character", "fav_character", "fav character", "favorite actor", "favorite_actor", "fav actor", "fav_actor") }
+            val vibesIdx = lowerHeaders.indexOfFirst { it in listOf("vibes", "emotional_vibes", "emotional vibes", "tags", "mood") }
             
             // Yamtrack-specific Headers
             val yamtrackMediaIdIdx = lowerHeaders.indexOfFirst { it == "media_id" }
@@ -86,6 +88,8 @@ class UniversalCsvImporter @Inject constructor(
                     val parsedWatchedDate = parseAndNormalizeWatchedDate(rawWatchedDateVal)
                     val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx]?.toDoubleOrNull() else null
                     val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx]?.take(5000) else null
+                    val mvpVal = if (mvpIdx != -1 && columns.size > mvpIdx) columns[mvpIdx]?.take(255) else null
+                    val vibesVal = if (vibesIdx != -1 && columns.size > vibesIdx) columns[vibesIdx]?.take(255) else null
                     
                     var typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
                     if (isYamtrack) {
@@ -160,6 +164,9 @@ class UniversalCsvImporter @Inject constructor(
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
                                         watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                        favoriteActorName = mvpVal,
+                                        favoriteActorCharacter = mvpVal,
+                                        emotionalVibes = vibesVal,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
@@ -179,6 +186,9 @@ class UniversalCsvImporter @Inject constructor(
                                     personalNote = noteVal,
                                     watchedEpisodes = epsMap,
                                     watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                    favoriteActorName = mvpVal,
+                                    favoriteActorCharacter = mvpVal,
+                                    emotionalVibes = vibesVal,
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
@@ -206,6 +216,9 @@ class UniversalCsvImporter @Inject constructor(
                                         personalNote = noteVal,
                                         watchedEpisodes = epsMap,
                                         watchedAt = if (watchedVal) (parsedWatchedDate ?: java.time.Instant.now().toString()) else null,
+                                        favoriteActorName = mvpVal,
+                                        favoriteActorCharacter = mvpVal,
+                                        emotionalVibes = vibesVal,
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )

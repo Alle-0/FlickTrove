@@ -91,7 +91,7 @@ fun DetailPersonalZone(
         ) {
             val hasVibe = !movie.emotionalVibes.isNullOrBlank() || movie.favoriteActorId != null
             val vibeValueText = if (hasVibe) stringResource(R.string.personal_zone_saved) else stringResource(R.string.personal_zone_empty)
-            val canVibe = movie.watched
+            val canInteract = movie.watched || movie.mediaType == "tv"
             
             PersonalAction(
                 label = stringResource(R.string.personal_zone_vibe),
@@ -101,8 +101,8 @@ fun DetailPersonalZone(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                 accentColor = accentColor,
                 isActive = false,
-                enabled = canVibe,
-                onClick = { if (canVibe) onCheckInClick() },
+                enabled = canInteract,
+                onClick = { if (canInteract) onCheckInClick() },
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
 
@@ -146,7 +146,8 @@ fun DetailPersonalZone(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                 accentColor = accentColor,
                 isActive = expandedAction == "rate",
-                onClick = { expandedAction = if (expandedAction == "rate") null else "rate" },
+                enabled = canInteract,
+                onClick = { if (canInteract) expandedAction = if (expandedAction == "rate") null else "rate" },
                 modifier = Modifier.weight(1f).fillMaxHeight(),
                 trailingContent = {
                     Column(

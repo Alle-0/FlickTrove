@@ -229,6 +229,17 @@ class FirebaseRemoteDataSource @Inject constructor(
         newRating: Double? = null,
         oldRating: Double? = null
     ) {
+        val uid = userId ?: return
+        try {
+            val userDoc = firestore.collection("users").document(uid).get().await()
+            if (userDoc.getBoolean("bannedFromVoting") == true) {
+                android.util.Log.w("FirebaseRemoteDataSource", "User $uid is banned from voting. Shadow banning global stats update.")
+                return
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error checking ban status: ${e.message}", e)
+        }
+
         val docRef = getGlobalMovieStats(compositeId)
         try {
             firestore.runTransaction { transaction ->
