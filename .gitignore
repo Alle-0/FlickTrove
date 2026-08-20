@@ -80,3 +80,12 @@ Thumbs.db
 *.zip
 gdpr-data*
 .vscode
+
+# =========================
+# Custom / Internal Setup (Do not track)
+# =========================
+supabase/
+figma_exports_svg_v2/
+mcp.json
+kofi.svg
+
