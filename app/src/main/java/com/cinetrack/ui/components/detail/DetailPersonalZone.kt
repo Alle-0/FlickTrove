@@ -154,7 +154,9 @@ fun DetailPersonalZone(
                     Column(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .graphicsLayer { alpha = 1f } // sempre acceso, indipendente da canInteract
                     ) {
                         Text(
                             text = stringResource(R.string.personal_zone_global_rating),
