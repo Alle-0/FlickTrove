@@ -583,7 +583,7 @@ fun MovieDetailScreenContent(
                                     Spacer(modifier = Modifier.height(40.dp))
 
                                     DetailCast(
-                                        directors = state.directors,
+                                        crew = state.crew,
                                         cast = state.cast,
                                         accentColor = accentColor,
                                         globalStats = globalStats,
