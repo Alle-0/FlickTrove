@@ -312,14 +312,28 @@ fun DetailHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
+                        val dateStr = movie.releaseDate ?: movie.firstAirDate
+                        val isReleased = movie.isReleased
+                        
+                        val displayedDate = if (!isReleased && !dateStr.isNullOrBlank()) {
+                            if (dateStr.length >= 10) {
+                                val parts = dateStr.split("-")
+                                if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateStr
+                            } else dateStr
+                        } else {
+                            dateStr?.take(4) ?: "-"
+                        }
+                        
+                        val dateColor = if (!isReleased) accentColor else Color.White.copy(alpha = 0.6f)
+
                         Text(
-                            text = movie.releaseDate?.take(4) ?: movie.firstAirDate?.take(4) ?: "-",
+                            text = displayedDate,
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.5.sp
                             ),
-                            color = Color.White.copy(alpha = 0.6f)
+                            color = dateColor
                         )
                         
                         Box(
