@@ -2,9 +2,8 @@ package com.cinetrack.ui.components.detail
 
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.cinetrack.R
-
 import androidx.compose.ui.graphics.vector.ImageVector
+
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,7 +46,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.geometry.Offset
-import com.cinetrack.data.model.AppComment
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
