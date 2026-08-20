@@ -140,6 +140,22 @@ interface TraktService {
         @retrofit2.http.Body request: TraktListItemsRequest
     ): retrofit2.Response<TraktSyncResponse>
 
+    @retrofit2.http.GET("users/hidden/progress_watched")
+    suspend fun getHiddenProgressWatched(
+        @retrofit2.http.Query("type") type: String = "show",
+        @retrofit2.http.Query("limit") limit: Int = 1000
+    ): retrofit2.Response<List<TraktHiddenItem>>
+
+    @retrofit2.http.POST("users/hidden/progress_watched")
+    suspend fun addHiddenProgressWatched(
+        @retrofit2.http.Body request: TraktSyncRequest
+    ): retrofit2.Response<TraktSyncResponse>
+
+    @retrofit2.http.POST("users/hidden/progress_watched/remove")
+    suspend fun removeHiddenProgressWatched(
+        @retrofit2.http.Body request: TraktSyncRequest
+    ): retrofit2.Response<TraktSyncResponse>
+
     @retrofit2.http.GET("sync/watched/shows")
     suspend fun getWatchedShows(
         @retrofit2.http.Query("extended") extended: String? = null
@@ -238,6 +254,14 @@ data class TraktActivityItem(
     val commented_at: String? = null,
     val paused_at: String? = null,
     val hidden_at: String? = null
+)
+
+@Serializable
+data class TraktHiddenItem(
+    val hidden_at: String? = null,
+    val type: String? = null,
+    val show: TraktShowItem? = null,
+    val movie: TraktMovieItem? = null
 )
 
 @Serializable

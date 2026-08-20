@@ -85,13 +85,14 @@ fun DetailPersonalZone(
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
+        val canInteract = movie.watched || movie.mediaType == "tv"
+        
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val hasVibe = !movie.emotionalVibes.isNullOrBlank() || movie.favoriteActorId != null
             val vibeValueText = if (hasVibe) stringResource(R.string.personal_zone_saved) else stringResource(R.string.personal_zone_empty)
-            val canInteract = movie.watched || movie.mediaType == "tv"
             
             PersonalAction(
                 label = stringResource(R.string.personal_zone_vibe),

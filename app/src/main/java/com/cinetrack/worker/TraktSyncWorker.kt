@@ -785,6 +785,67 @@ class TraktSyncWorker @AssistedInject constructor(
                 android.util.Log.w("TraktSyncWorker", "Sync Custom Lists (Folders) fallita, skip", e)
             }
 
+            // 🚀 Fase 6: Hidden from Progress (Dropped) 🚀
+            try {
+                val hiddenResponse = traktService.getHiddenProgressWatched(type = "show", limit = 1000)
+                if (hiddenResponse.isSuccessful) {
+                    val hiddenItems = hiddenResponse.body() ?: emptyList()
+                    val remoteHiddenIds = hiddenItems.mapNotNull { it.show?.ids?.tmdb }
+
+                    val droppedUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
+                    val localMovies = movieRepository.getLocalMovies()
+
+                    if (isFirstSync || remoteHiddenIds.isEmpty()) {
+                        // Push locale dropped verso Trakt
+                        val droppedToPush = localMovies.filter { it.mediaType == "tv" && it.dropped && !remoteHiddenIds.contains(it.id) }
+                        if (droppedToPush.isNotEmpty()) {
+                            android.util.Log.e("TRAKT_DEBUG", "SYNC MERGE: Push di ${droppedToPush.size} dropped shows su Trakt")
+                            try {
+                                val showsPush = droppedToPush.map {
+                                    com.cinetrack.data.api.TraktSyncShow(ids = com.cinetrack.data.api.TraktSyncIds(tmdb = it.id))
+                                }
+                                traktService.addHiddenProgressWatched(
+                                    com.cinetrack.data.api.TraktSyncRequest(shows = showsPush)
+                                )
+                            } catch (e: Exception) {
+                                android.util.Log.e("TraktSyncWorker", "Errore push dropped", e)
+                            }
+                        }
+                    } else {
+                        // Two-way diff
+                        for (hiddenId in remoteHiddenIds) {
+                            val local = localMovies.find { it.id == hiddenId && it.mediaType == "tv" }
+                            if (local != null && !local.dropped) {
+                                droppedUpdates.add(local.copy(dropped = true))
+                            }
+                        }
+
+                        val toRemoveFromTrakt = mutableListOf<com.cinetrack.data.api.TraktSyncShow>()
+                        val toPushToTrakt = mutableListOf<com.cinetrack.data.api.TraktSyncShow>()
+                        
+                        for (local in localMovies.filter { it.mediaType == "tv" }) {
+                            val isTraktHidden = remoteHiddenIds.contains(local.id)
+                            if (local.dropped && !isTraktHidden) {
+                                toPushToTrakt.add(com.cinetrack.data.api.TraktSyncShow(ids = com.cinetrack.data.api.TraktSyncIds(tmdb = local.id)))
+                            } else if (!local.dropped && isTraktHidden) {
+                                toRemoveFromTrakt.add(com.cinetrack.data.api.TraktSyncShow(ids = com.cinetrack.data.api.TraktSyncIds(tmdb = local.id)))
+                            }
+                        }
+                        
+                        if (toPushToTrakt.isNotEmpty()) {
+                            traktService.addHiddenProgressWatched(com.cinetrack.data.api.TraktSyncRequest(shows = toPushToTrakt))
+                        }
+                        if (toRemoveFromTrakt.isNotEmpty()) {
+                            traktService.removeHiddenProgressWatched(com.cinetrack.data.api.TraktSyncRequest(shows = toRemoveFromTrakt))
+                        }
+                    }
+
+                    if (droppedUpdates.isNotEmpty()) movieRepository.saveMoviesBulk(droppedUpdates)
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("TraktSyncWorker", "Sync Dropped (Hidden) fallita, skip", e)
+            }
+
             traktAuthRepository.saveLastActivitiesTime(remoteLastActivities)
 
             if (isFirstSync) {

@@ -29,6 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cinetrack.R
+import com.cinetrack.data.model.AppComment
+import com.cinetrack.ui.utils.parseMarkdown
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -428,8 +431,9 @@ private fun CommentCard(
                             .padding(vertical = 4.dp)
                     ) {
                         if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
+                            val textToDisplay = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
                             Text(
-                                text = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw,
+                                text = textToDisplay.parseMarkdown(),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     lineHeight = 18.sp,
                                     fontSize = 13.sp
