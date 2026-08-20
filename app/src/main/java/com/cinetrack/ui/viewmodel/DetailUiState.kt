@@ -40,6 +40,7 @@ sealed class DetailUiState {
         val seasonDetails: ImmutableMap<Int, Season> = persistentMapOf(),
         val folders: ImmutableList<FolderEntity> = persistentListOf(),
         val watchProviderLink: String? = null,
+        val isInTheaters: Boolean = false,
         val appComments: ImmutableList<AppComment> = persistentListOf(),
         val characterImages: ImmutableMap<String, String> = persistentMapOf()
     ) : DetailUiState()

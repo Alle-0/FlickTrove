@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Dot -->
+    <path
+        android:pathData="M6,7.7m-0.5,0a0.5,0.5 0,1 1,1 0a0.5,0.5 0,1 1,-1 0"
+        android:strokeColor="@color/white"
+        android:strokeWidth="1"
+        android:fillColor="@android:color/transparent"/>
+    <!-- Stripe marks -->
+    <path
+        android:pathData="M9.5,7L10.5,8M13,7L14,8M16.5,7L17.5,8"
+        android:strokeColor="@color/white"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+    <!-- Horizontal divider line -->
+    <path
+        android:pathData="M5,10L18,10"
+        android:strokeColor="@color/white"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+    <!-- Top arc (clapper top) -->
+    <path
+        android:pathData="M3,7.81C3,6.258 4.258,5 5.81,5H18C19.657,5 21,6.343 21,8V11"
+        android:strokeColor="@color/white"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"/>
+    <!-- Bottom arc (clapper body) -->
+    <path
+        android:pathData="M21,15.231C21,16.76 19.76,18 18.231,18H6C4.343,18 3,16.657 3,15V12"
+        android:strokeColor="@color/white"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"/>
+</vector>

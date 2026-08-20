@@ -187,6 +187,7 @@ class DetailUiStateMapper @Inject constructor(
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
+            isInTheaters = (metadata.watchProviders?.results?.get(watchRegion)?.theater?.isNotEmpty() == true),
             appComments = appComments.toImmutableList(),
             characterImages = characterImages.toImmutableMap()
         )

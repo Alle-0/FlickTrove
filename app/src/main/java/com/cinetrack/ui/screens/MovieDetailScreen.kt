@@ -476,7 +476,8 @@ fun MovieDetailScreenContent(
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
-                                        onCoverSelectClick = { showCoverSelectionSheet = true }
+                                        onCoverSelectClick = { showCoverSelectionSheet = true },
+                                        isInTheaters = state.isInTheaters
                                     )
 
                                     DetailMetaRows(

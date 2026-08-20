@@ -239,7 +239,8 @@ data class WatchProviderResult(
     val link: String? = null,
     val flatrate: List<Provider>? = null,
     val rent: List<Provider>? = null,
-    val buy: List<Provider>? = null
+    val buy: List<Provider>? = null,
+    val theater: List<Provider>? = null
 )
 
 @Serializable

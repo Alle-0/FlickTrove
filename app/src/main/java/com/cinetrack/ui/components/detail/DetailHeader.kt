@@ -74,6 +74,7 @@ fun DetailHeader(
     onRatingClick: () -> Unit = {},
     hasAlternativeCovers: Boolean = false,
     onCoverSelectClick: (() -> Unit)? = null,
+    isInTheaters: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -335,6 +336,35 @@ fun DetailHeader(
                             ),
                             color = dateColor
                         )
+
+                        if (isInTheaters) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(accentColor.copy(alpha = 0.18f))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_cinema),
+                                    contentDescription = null,
+                                    tint = accentColor,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Text(
+                                    text = "Al cinema",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = accentColor
+                                )
+                            }
+                        }
                         
                         Box(
                             modifier = Modifier
