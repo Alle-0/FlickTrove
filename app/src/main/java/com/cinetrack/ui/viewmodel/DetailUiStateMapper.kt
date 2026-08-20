@@ -187,7 +187,19 @@ class DetailUiStateMapper @Inject constructor(
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
-            isInTheaters = (metadata.watchProviders?.results?.get(watchRegion)?.theater?.isNotEmpty() == true),
+            isInTheaters = run {
+                if (mediaType != MediaType.MOVIE) return@run false
+                val releaseDateStr = metadata.releaseDate
+                if (releaseDateStr.isNullOrEmpty()) return@run false
+                try {
+                    val releaseDate = java.time.LocalDate.parse(releaseDateStr)
+                    val now = java.time.LocalDate.now()
+                    val days = java.time.temporal.ChronoUnit.DAYS.between(releaseDate, now)
+                    days in 0..60 // Assuming 60 days theatrical window
+                } catch (e: Exception) {
+                    false
+                }
+            },
             appComments = appComments.toImmutableList(),
             characterImages = characterImages.toImmutableMap()
         )

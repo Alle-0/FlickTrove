@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">Rechercher</string>
@@ -1075,4 +1075,20 @@
     <string name="comment_cooldown_wait">Attendez %1$d secondes avant de commenter à nouveau.</string>
     <string name="search_folders">Rechercher des dossiers…</string>
     <string name="in_theaters">Au cinéma</string>
+    <string name="detail_crew">Équipe</string>
+    <string name="dept_visual_effects">Effets Visuels</string>
+    <string name="dept_acting">Interprétation</string>
+    <string name="dept_lighting">Éclairage</string>
+    <string name="dept_costume">Costumes et Maquillage</string>
+    <string name="dept_creator">Créateur</string>
+    <string name="dept_writing">Scénario</string>
+    <string name="dept_camera">Caméra</string>
+    <string name="dept_crew">Équipe</string>
+    <string name="dept_directing">Réalisation</string>
+    <string name="dept_production">Production</string>
+    <string name="dept_art">Art</string>
+    <string name="dept_sound">Son</string>
+    <string name="dept_editing">Montage</string>
 </resources>
+
+

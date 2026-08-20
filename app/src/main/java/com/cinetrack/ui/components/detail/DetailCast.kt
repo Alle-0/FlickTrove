@@ -95,6 +95,7 @@ fun DetailCast(
             }
 
             Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -112,13 +113,23 @@ fun DetailCast(
                     ),
                     color = Color.White.copy(alpha = 0.5f)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_right),
-                    contentDescription = "See All",
-                    tint = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.size(16.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.detail_crew).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_right),
+                        contentDescription = "See All",
+                        tint = Color.White.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
 
             LazyRow(
@@ -214,7 +225,7 @@ fun DetailCast(
         }.sortedBy { it.title } // Sort alphabetically by department
 
         PeopleBottomSheet(
-            title = stringResource(R.string.detail_director), // Mantengo l'etichetta base
+            title = stringResource(R.string.detail_crew),
             sections = sections,
             accentColor = accentColor,
             hazeState = hazeState,
@@ -293,8 +304,25 @@ fun PeopleBottomSheet(
                 if (sections != null) {
                     sections.forEach { section ->
                         item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            val localizedTitle = when (section.title.lowercase()) {
+                                "acting", "actors" -> stringResource(R.string.dept_acting)
+                                "art" -> stringResource(R.string.dept_art)
+                                "camera" -> stringResource(R.string.dept_camera)
+                                "costume & make-up" -> stringResource(R.string.dept_costume)
+                                "crew" -> stringResource(R.string.dept_crew)
+                                "directing" -> stringResource(R.string.dept_directing)
+                                "editing" -> stringResource(R.string.dept_editing)
+                                "lighting" -> stringResource(R.string.dept_lighting)
+                                "production" -> stringResource(R.string.dept_production)
+                                "sound" -> stringResource(R.string.dept_sound)
+                                "visual effects" -> stringResource(R.string.dept_visual_effects)
+                                "writing" -> stringResource(R.string.dept_writing)
+                                "creator" -> stringResource(R.string.dept_creator)
+                                else -> section.title
+                            }
+
                             Text(
-                                text = section.title.uppercase(),
+                                text = localizedTitle.uppercase(),
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black, letterSpacing = 2.sp),
                                 color = accentColor,
                                 modifier = Modifier.padding(top = 16.dp, bottom = 0.dp)

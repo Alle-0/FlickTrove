@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">खोजें</string>
@@ -1079,4 +1079,19 @@
     <string name="comment_cooldown_wait">फिर से टिप्पणी करने से पहले %1$d सेकंड प्रतीक्षा करें।</string>
     <string name="search_folders">फ़ोल्डर खोजें…</string>
     <string name="in_theaters">सिनेमाघरों में</string>
+    <string name="detail_crew">क्रू</string>
+    <string name="dept_visual_effects">दृश्य प्रभाव</string>
+    <string name="dept_acting">अभिनय</string>
+    <string name="dept_lighting">प्रकाश</string>
+    <string name="dept_costume">पोशाक और मेकअप</string>
+    <string name="dept_creator">निर्माता</string>
+    <string name="dept_writing">लेखन</string>
+    <string name="dept_camera">कैमरा</string>
+    <string name="dept_crew">क्रू</string>
+    <string name="dept_directing">निर्देशन</string>
+    <string name="dept_production">उत्पादन</string>
+    <string name="dept_art">कला</string>
+    <string name="dept_sound">ध्वनि</string>
+    <string name="dept_editing">संपादन</string>
 </resources>
+
