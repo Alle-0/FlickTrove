@@ -184,17 +184,13 @@ fun DetailCast(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
                 items(groupedCast.take(15), key = { "cast-${it.id}" }, contentType = { "person" }) { person ->
-                    val votes = globalStats?.mvps?.get(person.id.toString()) ?: 0L
-                    val totalMvps = globalStats?.totalMvps ?: 0L
-                    val mvpPercentage = if (totalMvps > 0 && votes > 0) ((votes.toFloat() / totalMvps) * 100).toInt() else null
-
                     PersonCard(
                         id = person.id,
                         name = person.name,
                         subLabel = person.character ?: "-",
                         imagePath = person.profilePath,
                         accentColor = accentColor,
-                        mvpPercentage = mvpPercentage,
+                        mvpPercentage = null,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         onClick = { onPersonClick(person.id, person.profilePath) }
@@ -227,10 +223,7 @@ fun DetailCast(
         val groupedCast = cast.groupBy { it.id }.map { (_, members) ->
             val first = members.first()
             val combinedCharacters = members.mapNotNull { it.character }.distinct().filter { it.isNotBlank() }.joinToString(" / ")
-            val votes = globalStats?.mvps?.get(first.id.toString()) ?: 0L
-            val totalMvps = globalStats?.totalMvps ?: 0L
-            val mvpPercentage = if (totalMvps > 0 && votes > 0) ((votes.toFloat() / totalMvps) * 100).toInt() else null
-            BottomSheetPerson(first.id, first.name, combinedCharacters.ifBlank { "-" }, first.profilePath, mvpPercentage)
+            BottomSheetPerson(first.id, first.name, combinedCharacters.ifBlank { "-" }, first.profilePath, null)
         }
         PeopleBottomSheet(
             title = stringResource(R.string.detail_cast),
