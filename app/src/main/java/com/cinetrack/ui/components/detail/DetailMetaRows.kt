@@ -1,6 +1,8 @@
 package com.cinetrack.ui.components.detail
 
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
@@ -53,6 +55,7 @@ fun DetailMetaRows(
     onGenreClick: (Genre, Offset) -> Unit,
     onKeywordClick: (Long, String, Offset) -> Unit,
     onProviderClick: (Provider) -> Unit,
+    isInTheaters: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -139,7 +142,7 @@ fun DetailMetaRows(
         }
 
         // Watch Providers (Compact stacked layout)
-        if (streaming.isNotEmpty() || buyAndRent.isNotEmpty()) {
+        if (streaming.isNotEmpty() || buyAndRent.isNotEmpty() || isInTheaters) {
             Text(
                 text = stringResource(R.string.detail_where_to_watch),
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -150,6 +153,38 @@ fun DetailMetaRows(
                 color = Color.White.copy(alpha = 0.5f),
                 modifier = Modifier.padding(bottom = 10.dp)
             )
+
+            if (isInTheaters) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(accentColor.copy(alpha = 0.18f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_cinema),
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(11.dp)
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = stringResource(R.string.in_theaters),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = accentColor
+                    )
+                }
+
+                if (streaming.isNotEmpty() || buyAndRent.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
 
             if (streaming.isNotEmpty()) {
                 ProviderRow(

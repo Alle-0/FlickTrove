@@ -476,8 +476,7 @@ fun MovieDetailScreenContent(
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
-                                        onCoverSelectClick = { showCoverSelectionSheet = true },
-                                        isInTheaters = state.isInTheaters
+                                        onCoverSelectClick = { showCoverSelectionSheet = true }
                                     )
 
                                     DetailMetaRows(
@@ -486,6 +485,7 @@ fun MovieDetailScreenContent(
                                         streaming = state.streamingProviders,
                                         buyAndRent = state.buyRentProviders,
                                         accentColor = accentColor,
+                                        isInTheaters = state.isInTheaters,
                                         onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
                                         onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
                                         onProviderClick = { provider ->
