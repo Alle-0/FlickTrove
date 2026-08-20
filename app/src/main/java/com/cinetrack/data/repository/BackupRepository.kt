@@ -326,7 +326,9 @@ class BackupRepository @Inject constructor(
                             newMvp = null,
                             oldMvp = null,
                             newRating = newRating,
-                            oldRating = null
+                            oldRating = null,
+                            newStatus = incoming.status,
+                            oldStatus = null
                         )
                     }
                 }
@@ -370,7 +372,11 @@ class BackupRepository @Inject constructor(
                 
                 val newRating = updated.personalRating
                 val oldRating = local.personalRating
-                if (newRating != oldRating) {
+                
+                val newStatus = updated.status
+                val oldStatus = local.status
+                
+                if (newRating != oldRating || newStatus != oldStatus) {
                     repositoryScope.launch {
                         firebaseRemoteDataSource.updateGlobalMovieStats(
                             compositeId = updated.compositeId,
@@ -379,7 +385,9 @@ class BackupRepository @Inject constructor(
                             newMvp = null,
                             oldMvp = null,
                             newRating = newRating,
-                            oldRating = oldRating
+                            oldRating = oldRating,
+                            newStatus = newStatus,
+                            oldStatus = oldStatus
                         )
                     }
                 }

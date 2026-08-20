@@ -227,7 +227,9 @@ class FirebaseRemoteDataSource @Inject constructor(
         newMvp: Long?,
         oldMvp: Long?,
         newRating: Double? = null,
-        oldRating: Double? = null
+        oldRating: Double? = null,
+        newStatus: String? = null,
+        oldStatus: String? = null
     ) {
         val uid = userId ?: return
         try {
@@ -334,6 +336,37 @@ class FirebaseRemoteDataSource @Inject constructor(
                         transaction.set(docRef, initialData)
                     }
                 }
+                
+                // Update trending_stats_weekly
+                val isNewWatched = (newStatus == "watched" && oldStatus != "watched")
+                val isRemovedWatched = (oldStatus == "watched" && newStatus != "watched")
+                
+                if (countDelta != 0L || isNewWatched || isRemovedWatched) {
+                    val calendar = java.util.Calendar.getInstance()
+                    val year = calendar.get(java.util.Calendar.YEAR)
+                    val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
+                    val weekId = "${year}_W$week"
+                    
+                    val trendingDocRef = firestore.collection("trending_stats_weekly")
+                        .document(weekId)
+                        .collection("movies")
+                        .document(compositeId)
+                        
+                    val trendingUpdates = mutableMapOf<String, Any>()
+                    if (countDelta != 0L) {
+                        trendingUpdates["rating_count"] = com.google.firebase.firestore.FieldValue.increment(countDelta)
+                    }
+                    if (isNewWatched) {
+                        trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(1L)
+                    } else if (isRemovedWatched) {
+                        trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(-1L)
+                    }
+                    
+                    if (trendingUpdates.isNotEmpty()) {
+                        transaction.set(trendingDocRef, trendingUpdates, SetOptions.merge())
+                    }
+                }
+
             }.await()
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRemoteDataSource", "Error updating global stats for $compositeId", e)
