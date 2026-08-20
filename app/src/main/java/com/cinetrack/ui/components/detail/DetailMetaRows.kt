@@ -155,30 +155,38 @@ fun DetailMetaRows(
             )
 
             if (isInTheaters) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(accentColor.copy(alpha = 0.18f))
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_cinema),
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(11.dp)
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
+                Column {
                     Text(
-                        text = stringResource(R.string.in_theaters),
+                        text = stringResource(R.string.in_theaters).uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 9.sp,
+                            fontSize = 8.sp,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 0.5.sp
+                            letterSpacing = 1.5.sp
                         ),
-                        color = accentColor
+                        color = Color.White.copy(alpha = 0.25f),
+                        modifier = Modifier.padding(bottom = 5.dp)
                     )
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .border(
+                                width = 0.5.dp,
+                                color = accentColor.copy(alpha = 0.3f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(1.5.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(accentColor.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_cinema),
+                            contentDescription = stringResource(R.string.in_theaters),
+                            tint = accentColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
                 if (streaming.isNotEmpty() || buyAndRent.isNotEmpty()) {
