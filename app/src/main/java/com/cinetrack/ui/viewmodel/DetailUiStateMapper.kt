@@ -188,7 +188,7 @@ class DetailUiStateMapper @Inject constructor(
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
             isInTheaters = run {
-                if (mediaType != MediaType.MOVIE) return@run false
+                if (mediaType != "movie") return@run false
                 val releaseDateStr = metadata.releaseDate
                 if (releaseDateStr.isNullOrEmpty()) return@run false
                 try {
