@@ -161,7 +161,7 @@ class DetailUiStateMapper @Inject constructor(
             },
             watchedProgress = progress,
             matchPercentage = matchScore,
-            directors = (metadata.credits?.crew?.filter { c: CrewMember -> c.job == "Director" } ?: emptyList()).toImmutableList(),
+            crew = (metadata.credits?.crew ?: emptyList()).toImmutableList(),
             cast = (metadata.credits?.cast?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
             streamingProviders = (metadata.watchProviders?.results?.get(watchRegion)?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
             buyRentProviders = ((metadata.watchProviders?.results?.get(watchRegion)?.buy ?: emptyList()) + 

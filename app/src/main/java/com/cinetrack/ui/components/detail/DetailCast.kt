@@ -62,7 +62,7 @@ import dev.chrisbanes.haze.HazeState
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailCast(
-    directors: List<CrewMember>,
+    crew: List<CrewMember>,
     cast: List<CastMember>,
     accentColor: Color,
     globalStats: GlobalMovieStats? = null,
@@ -73,17 +73,18 @@ fun DetailCast(
     onSheetStateChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    if (directors.isEmpty() && cast.isEmpty()) return
+    if (crew.isEmpty() && cast.isEmpty()) return
 
-    var showAllDirectors by remember { mutableStateOf(false) }
+    var showAllCrew by remember { mutableStateOf(false) }
     var showAllCast by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showAllDirectors, showAllCast) {
-        onSheetStateChange(showAllDirectors || showAllCast)
+    LaunchedEffect(showAllCrew, showAllCast) {
+        onSheetStateChange(showAllCrew || showAllCast)
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
         // REGIA SECTION
+        val directors = remember(crew) { crew.filter { it.job == "Director" } }
         if (directors.isNotEmpty()) {
             val groupedDirectors = remember(directors) {
                 directors.groupBy { it.id }.map { (_, members) ->
@@ -100,7 +101,7 @@ fun DetailCast(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
-                    ) { showAllDirectors = true }
+                    ) { showAllCrew = true }
                     .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
             ) {
                 Text(
@@ -201,20 +202,25 @@ fun DetailCast(
         }
     
 
-    if (showAllDirectors && directors.isNotEmpty()) {
-        val groupedDirectors = directors.groupBy { it.id }.map { (_, members) ->
-            val first = members.first()
-            val combinedJobs = members.map { it.job }.distinct().joinToString(" / ")
-            BottomSheetPerson(first.id, first.name, combinedJobs, first.profilePath)
-        }
+    if (showAllCrew && crew.isNotEmpty()) {
+        val groupedCrewByDepartment = crew.groupBy { it.department.ifBlank { "Other" } }
+        val sections = groupedCrewByDepartment.map { (dept, members) ->
+            val uniqueMembers = members.groupBy { it.id }.map { (_, dups) ->
+                val first = dups.first()
+                val combinedJobs = dups.map { it.job }.distinct().joinToString(" / ")
+                BottomSheetPerson(first.id, first.name, combinedJobs, first.profilePath)
+            }
+            BottomSheetSection(dept, uniqueMembers)
+        }.sortedBy { it.title } // Sort alphabetically by department
+
         PeopleBottomSheet(
-            title = stringResource(R.string.detail_director),
-            people = groupedDirectors,
+            title = stringResource(R.string.detail_director), // Mantengo l'etichetta base
+            sections = sections,
             accentColor = accentColor,
             hazeState = hazeState,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
-            onDismiss = { showAllDirectors = false },
+            onDismiss = { showAllCrew = false },
             onPersonClick = onPersonClick
         )
     }
@@ -240,11 +246,14 @@ fun DetailCast(
 
 data class BottomSheetPerson(val id: Long, val name: String, val subLabel: String, val profilePath: String?, val mvpPercentage: Int? = null)
 
+data class BottomSheetSection(val title: String, val people: List<BottomSheetPerson>)
+
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun PeopleBottomSheet(
     title: String,
-    people: List<BottomSheetPerson>,
+    people: List<BottomSheetPerson>? = null,
+    sections: List<BottomSheetSection>? = null,
     accentColor: Color,
     hazeState: HazeState? = null,
     sharedTransitionScope: SharedTransitionScope?,
@@ -281,22 +290,52 @@ fun PeopleBottomSheet(
                     .nestedScroll(nestedScrollConnection)
                     .verticalFadingEdges(gridState, 32.dp, 32.dp)
             ) {
-                items(people, key = { it.id }) { person ->
-                    PersonCard(
-                        id = person.id,
-                        name = person.name,
-                        subLabel = person.subLabel,
-                        imagePath = person.profilePath,
-                        accentColor = accentColor,
-                        mvpPercentage = person.mvpPercentage,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        showSubLabelContainer = false,
-                        onClick = { 
-                            onDismiss()
-                            onPersonClick(person.id, person.profilePath) 
+                if (sections != null) {
+                    sections.forEach { section ->
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                text = section.title.uppercase(),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black, letterSpacing = 2.sp),
+                                color = accentColor,
+                                modifier = Modifier.padding(top = 16.dp, bottom = 0.dp)
+                            )
                         }
-                    )
+                        items(section.people, key = { "sec-${section.title}-${it.id}" }) { person ->
+                            PersonCard(
+                                id = person.id,
+                                name = person.name,
+                                subLabel = person.subLabel,
+                                imagePath = person.profilePath,
+                                accentColor = accentColor,
+                                mvpPercentage = person.mvpPercentage,
+                                sharedTransitionScope = sharedTransitionScope,
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                showSubLabelContainer = false,
+                                onClick = { 
+                                    onDismiss()
+                                    onPersonClick(person.id, person.profilePath) 
+                                }
+                            )
+                        }
+                    }
+                } else if (people != null) {
+                    items(people, key = { it.id }) { person ->
+                        PersonCard(
+                            id = person.id,
+                            name = person.name,
+                            subLabel = person.subLabel,
+                            imagePath = person.profilePath,
+                            accentColor = accentColor,
+                            mvpPercentage = person.mvpPercentage,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            showSubLabelContainer = false,
+                            onClick = { 
+                                onDismiss()
+                                onPersonClick(person.id, person.profilePath) 
+                            }
+                        )
+                    }
                 }
             }
         }

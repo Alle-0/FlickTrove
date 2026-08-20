@@ -27,7 +27,7 @@ sealed class DetailUiState {
         val watchState: WatchState,
         val watchedProgress: Float,
         val matchPercentage: Int?,
-        val directors: ImmutableList<CrewMember>,
+        val crew: ImmutableList<CrewMember>,
         val cast: ImmutableList<CastMember>,
         val streamingProviders: ImmutableList<Provider>,
         val buyRentProviders: ImmutableList<Provider>,

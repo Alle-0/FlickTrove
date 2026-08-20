@@ -289,6 +289,7 @@ data class CrewMember(
     val id: Long = 0L,
     val name: String = "",
     val job: String = "",
+    val department: String = "",
     @SerialName("profile_path") val profilePath: String? = null
 )
 
