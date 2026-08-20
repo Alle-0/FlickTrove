@@ -1081,4 +1081,5 @@
     <string name="comment_banned_temporary">You cannot comment. You have been suspended until %1$s.</string>
     <string name="comment_cooldown_wait">Wait %1$d seconds before commenting again.</string>
     <string name="search_folders">Search folders…</string>
+    <string name="in_theaters">In theaters</string>
 </resources>

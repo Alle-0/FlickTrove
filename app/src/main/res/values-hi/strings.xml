@@ -1078,4 +1078,5 @@
     <string name="comment_banned_temporary">आप टिप्पणी नहीं कर सकते। आपको %1$s तक निलंबित कर दिया गया है।</string>
     <string name="comment_cooldown_wait">फिर से टिप्पणी करने से पहले %1$d सेकंड प्रतीक्षा करें।</string>
     <string name="search_folders">फ़ोल्डर खोजें…</string>
+    <string name="in_theaters">सिनेमाघरों में</string>
 </resources>

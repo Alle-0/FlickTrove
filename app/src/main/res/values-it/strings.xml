@@ -1069,4 +1069,5 @@
     <string name="comment_banned_temporary">Non puoi commentare. Sei stato sospeso fino al %1$s.</string>
     <string name="comment_cooldown_wait">Attendi %1$d secondi prima di commentare di nuovo.</string>
     <string name="search_folders">Cerca cartelle…</string>
+    <string name="in_theaters">Al cinema</string>
 </resources>

@@ -355,7 +355,7 @@ fun DetailHeader(
                                 )
                                 Spacer(modifier = Modifier.width(3.dp))
                                 Text(
-                                    text = "Al cinema",
+                                    text = stringResource(R.string.in_theaters),
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.Black,
