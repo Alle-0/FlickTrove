@@ -13,6 +13,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import java.util.Locale
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import java.text.SimpleDateFormat
+
 @Singleton
 class NewsRepository @Inject constructor(
     private val newsService: NewsService,
@@ -26,16 +30,40 @@ class NewsRepository @Inject constructor(
             rawLanguage
         }
 
-        val feedUrl = if (resolvedLanguage == "it") {
-            "https://cinema.everyeye.it/feed/"
+        val feedUrls = if (resolvedLanguage == "it") {
+            listOf(
+                "https://cinema.everyeye.it/feed/",
+                "https://www.badtaste.it/feed/"
+            )
         } else {
-            "https://collider.com/feed/"
+            listOf(
+                "https://collider.com/feed/",
+                "https://screenrant.com/feed/"
+            )
         }
 
-        val response = newsService.getNewsFeed(feedUrl)
-        val inputStream = response.byteStream()
-        
-        parseRss(inputStream)
+        val deferredResults = feedUrls.map { url ->
+            async {
+                try {
+                    val response = newsService.getNewsFeed(url)
+                    parseRss(response.byteStream())
+                } catch (e: Exception) {
+                    emptyList<NewsItem>()
+                }
+            }
+        }
+
+        val allNews = deferredResults.awaitAll().flatten()
+
+        // Sort by date using standard RSS format (RFC-822)
+        val format = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
+        allNews.sortedByDescending { item ->
+            try {
+                format.parse(item.pubDate.trim())?.time ?: 0L
+            } catch (e: Exception) {
+                0L
+            }
+        }
     }
 
     private fun parseRss(inputStream: InputStream): List<NewsItem> {
