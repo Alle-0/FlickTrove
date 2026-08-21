@@ -752,7 +752,7 @@ fun UpdatesScreen(
                                     rawFutureReminders.count { it.isOngoingSeriesEpisode }
                                 )
                                 com.cinetrack.ui.components.common.CategoryTabSelector(
-                                    modifier = Modifier.wrapContentWidth(unbounded = true),
+                                    modifier = Modifier.wrapContentWidth(),
                                     options = options,
                                     counts = counts,
                                     selectedIndex = remindersCategoryTab,
@@ -768,7 +768,7 @@ fun UpdatesScreen(
                                     uiState.socialUnreadCount
                                 )
                                 com.cinetrack.ui.components.common.CategoryTabSelector(
-                                    modifier = Modifier.wrapContentWidth(unbounded = true),
+                                    modifier = Modifier.wrapContentWidth(),
                                     options = mainOptions,
                                     counts = mainCounts,
                                     selectedIndex = mainTab,
