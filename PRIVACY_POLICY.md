@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** August 12, 2026
+**Last Updated:** August 21, 2026
 
 This Privacy Policy describes how the "FlickTrove" application (hereinafter referred to as the "App") collects, uses, protects, and retains user information, in full compliance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679) and current privacy laws regarding the protection of personal data.
 
@@ -27,7 +27,7 @@ FlickTrove uses essential third-party infrastructures to function. These provide
 * **Supabase (Cloudflare R2):** Used for serverless Edge Functions and storing user-uploaded custom avatars and images attached to comments. Images are stored securely and served via public URLs linked to your profile or comment. *See the Supabase and Cloudflare Privacy Policies for more details.*
 * **Giphy API:** Used to allow users to search and attach GIFs within comments. When searching for GIFs, search queries and your IP address may be exposed to Giphy's servers. *See the Giphy Privacy Policy for more details.*
 * **TMDB, TheTVDB, OMDB & Trakt APIs:** The App communicates with The Movie Database (TMDB), TheTVDB, Open Movie Database (OMDB), and Trakt.tv servers to retrieve plots, posters, ratings, and information about movies, actors, and TV shows based on your searches and library synchronization.
-* **News Feeds (Everyeye.it & Collider.com):** When you open the "Latest News" tab, the App directly fetches RSS feeds from external publishers (Everyeye.it for Italian or Collider.com for English). Please note that connecting to these external RSS feeds exposes your device's IP address to their respective servers according to their privacy policies.
+* **News Feeds (Everyeye.it, BadTaste.it, Collider.com & ScreenRant.com):** When you open the "Latest News" tab, the App directly fetches RSS feeds from external publishers (Everyeye.it and BadTaste.it for Italian, or Collider.com and ScreenRant.com for English). Please note that connecting to these external RSS feeds exposes your device's IP address to their respective servers according to their privacy policies.
 * **Google ML Kit (On-Device Translation):** To provide translations of movie synopses and descriptions without compromising privacy, the App uses Google ML Kit. All translation processing is performed 100% locally on your device (on-device AI) without sending your text or reading habits to external cloud translation services.
 * **GitHub Pages/Raw:** The decentralized hosting infrastructure where log files, README images, or legal policy pages might be hosted.
 

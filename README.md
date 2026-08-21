@@ -234,6 +234,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
+- 📰 RSS Feeds: [Everyeye.it](https://cinema.everyeye.it/) & [BadTaste.it](https://www.badtaste.it/) (IT), [Collider.com](https://collider.com/) & [ScreenRant.com](https://screenrant.com/) (EN) - For the latest news
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 

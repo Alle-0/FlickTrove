@@ -1,6 +1,6 @@
 # Terms of Service (ToS)
 
-**Last Updated:** August 12, 2026
+**Last Updated:** August 21, 2026
 
 Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
@@ -11,7 +11,7 @@ The use of the "FlickTrove" application (hereinafter referred to as the "App") i
 ### 2. Intellectual Property
 
 All source code, user interface (UI), graphics, animations, design, and original content of the application are the exclusive property of the developer, except for any third-party libraries or assets distributed with their respective open-source licenses (widely credited within the app).
-Any unauthorized reproduction, copying, modification, reverse engineering, or redistribution, for commercial or non-commercial purposes, is strictly prohibited without the explicit written consent of the developer. Metadata, ratings, and promotional images (including posters) regarding movies and TV shows are the property of their rightful copyright holders and are provided via the TMDB, TheTVDB, OMDB, and Trakt APIs in accordance with their respective terms of use. External news articles and links displayed in the News section remain the property of their respective publishers (Everyeye.it and Collider.com).
+Any unauthorized reproduction, copying, modification, reverse engineering, or redistribution, for commercial or non-commercial purposes, is strictly prohibited without the explicit written consent of the developer. Metadata, ratings, and promotional images (including posters) regarding movies and TV shows are the property of their rightful copyright holders and are provided via the TMDB, TheTVDB, OMDB, Giphy, and Trakt APIs in accordance with their respective terms of use. External news articles and links displayed in the News section remain the property of their respective publishers (Everyeye.it, BadTaste.it, Collider.com, and ScreenRant.com).
 
 ### 3. Limitation of Liability
 
