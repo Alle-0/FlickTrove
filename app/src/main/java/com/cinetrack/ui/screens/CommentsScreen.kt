@@ -1013,45 +1013,49 @@ class CommentsScreen(
                                         modifier = Modifier.scale(0.8f)
                                     )
                                     Spacer(modifier = Modifier.weight(1f))
-                                    IconButton(
-                                        onClick = { 
-                                            val fragmentManager = context.findFragmentActivity()?.supportFragmentManager
-                                            if (fragmentManager != null) {
-                                                val settings = com.giphy.sdk.ui.GPHSettings(
-                                                    theme = com.giphy.sdk.ui.themes.GPHTheme.Dark,
-                                                    mediaTypeConfig = arrayOf(com.giphy.sdk.ui.GPHContentType.gif)
-                                                )
-                                                val dialog = com.giphy.sdk.ui.views.GiphyDialogFragment.newInstance(settings)
-                                                dialog.gifSelectionListener = object : com.giphy.sdk.ui.views.GiphyDialogFragment.GifSelectionListener {
-                                                    override fun didSearchTerm(term: String) {}
-                                                    override fun onDismissed(selectedContentType: com.giphy.sdk.ui.GPHContentType) {}
-                                                    override fun onGifSelected(media: com.giphy.sdk.core.models.Media, searchTerm: String?, selectedContentType: com.giphy.sdk.ui.GPHContentType) {
-                                                        val gifUrl = media.images.fixedHeight?.gifUrl ?: media.images.original?.gifUrl ?: ""
-                                                        if (gifUrl.isNotEmpty()) {
-                                                            attachedMedia = listOf(gifUrl)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .bounceClick(enabled = attachedMedia.isEmpty()) {
+                                                val fragmentManager = context.findFragmentActivity()?.supportFragmentManager
+                                                if (fragmentManager != null) {
+                                                    val settings = com.giphy.sdk.ui.GPHSettings(
+                                                        theme = com.giphy.sdk.ui.themes.GPHTheme.Dark,
+                                                        mediaTypeConfig = arrayOf(com.giphy.sdk.ui.GPHContentType.gif)
+                                                    )
+                                                    val dialog = com.giphy.sdk.ui.views.GiphyDialogFragment.newInstance(settings)
+                                                    dialog.gifSelectionListener = object : com.giphy.sdk.ui.views.GiphyDialogFragment.GifSelectionListener {
+                                                        override fun didSearchTerm(term: String) {}
+                                                        override fun onDismissed(selectedContentType: com.giphy.sdk.ui.GPHContentType) {}
+                                                        override fun onGifSelected(media: com.giphy.sdk.core.models.Media, searchTerm: String?, selectedContentType: com.giphy.sdk.ui.GPHContentType) {
+                                                            val gifUrl = media.images.fixedHeight?.gifUrl ?: media.images.original?.gifUrl ?: ""
+                                                            if (gifUrl.isNotEmpty()) {
+                                                                attachedMedia = listOf(gifUrl)
+                                                            }
+                                                            dialog.dismiss()
                                                         }
-                                                        dialog.dismiss()
                                                     }
+                                                    dialog.show(fragmentManager, "giphy_dialog")
+                                                } else {
+                                                    android.widget.Toast.makeText(context, "Fragment manager not found", android.widget.Toast.LENGTH_SHORT).show()
                                                 }
-                                                dialog.show(fragmentManager, "giphy_dialog")
-                                            } else {
-                                                android.widget.Toast.makeText(context, "Fragment manager not found", android.widget.Toast.LENGTH_SHORT).show()
-                                            }
-                                        },
-                                        enabled = attachedMedia.isEmpty()
+                                            },
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         val gifAlpha = if (attachedMedia.isEmpty()) 0.8f else 0.3f
                                         Icon(painterResource(id = R.drawable.ic_gif), contentDescription = "GIF", tint = Color.White.copy(alpha = gifAlpha), modifier = Modifier.size(20.dp))
                                     }
                                     // Foto
-                                    IconButton(
-                                        onClick = { 
-                                            if (isUploadingImage) return@IconButton
-                                            photoPickerLauncher.launch(
-                                                androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                            )
-                                        },
-                                        enabled = attachedMedia.isEmpty() && !isUploadingImage
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .bounceClick(enabled = attachedMedia.isEmpty() && !isUploadingImage) {
+                                                if (isUploadingImage) return@bounceClick
+                                                photoPickerLauncher.launch(
+                                                    androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                                )
+                                            },
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         if (isUploadingImage) {
                                             androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(20.dp), color = accentColor, strokeWidth = 2.dp)
@@ -1061,7 +1065,12 @@ class CommentsScreen(
                                         }
                                     }
                                     // MD Toggle
-                                    IconButton(onClick = { isMarkdownMenuExpanded = !isMarkdownMenuExpanded }) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .bounceClick { isMarkdownMenuExpanded = !isMarkdownMenuExpanded },
+                                        contentAlignment = Alignment.Center
+                                    ) {
                                         Icon(painterResource(id = R.drawable.ic_pencil), contentDescription = "Markdown", tint = if (isMarkdownMenuExpanded) accentColor else Color.White.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
                                     }
                                 }

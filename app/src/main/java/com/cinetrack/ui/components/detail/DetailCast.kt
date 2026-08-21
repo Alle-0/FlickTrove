@@ -99,10 +99,7 @@ fun DetailCast(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { showAllCrew = true }
+                    .bounceClick(scaleDown = 0.98f) { showAllCrew = true }
                     .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
             ) {
                 Text(
@@ -167,10 +164,7 @@ fun DetailCast(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { showAllCast = true }
+                    .bounceClick(scaleDown = 0.98f) { showAllCast = true }
                     .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
             ) {
                 Text(

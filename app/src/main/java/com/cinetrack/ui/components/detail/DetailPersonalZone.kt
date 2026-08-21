@@ -267,7 +267,6 @@ private fun PersonalAction(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                alpha = if (enabled) 1f else 0.4f
             }
             .clip(RoundedCornerShape(50))
             .background(
@@ -301,52 +300,57 @@ private fun PersonalAction(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        if (hasValue || isActive) accentColor.copy(alpha = 0.15f)
-                        else Color.White.copy(alpha = 0.1f), 
-                        RoundedCornerShape(50)
-                    )
-                    .border(
-                        width = 0.5.dp,
-                        color = if (hasValue || isActive) accentColor.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(50)
-                    ),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.graphicsLayer { alpha = if (enabled) 1f else 0.4f }
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = if (hasValue || isActive) accentColor else Color.White.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = label,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White.copy(alpha = 0.4f),
-                    lineHeight = 10.sp
-                )
-                Text(
-                    text = value,
-                    fontSize = when {
-                        hasValue && isRateAction -> 34.sp
-                        hasValue -> 18.sp
-                        else -> 14.sp
-                    },
-                    fontWeight = FontWeight.Black,
-                    color = if (hasValue) accentColor else Color.White.copy(alpha = 0.6f),
-                    lineHeight = when {
-                        hasValue && isRateAction -> 34.sp
-                        hasValue -> 18.sp
-                        else -> 14.sp
-                    }
-                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            if (hasValue || isActive) accentColor.copy(alpha = 0.15f)
+                            else Color.White.copy(alpha = 0.1f), 
+                            RoundedCornerShape(50)
+                        )
+                        .border(
+                            width = 0.5.dp,
+                            color = if (hasValue || isActive) accentColor.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(50)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (hasValue || isActive) accentColor else Color.White.copy(alpha = 0.4f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(verticalArrangement = Arrangement.Center) {
+                    Text(
+                        text = label,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White.copy(alpha = 0.4f),
+                        lineHeight = 10.sp
+                    )
+                    Text(
+                        text = value,
+                        fontSize = when {
+                            hasValue && isRateAction -> 34.sp
+                            hasValue -> 18.sp
+                            else -> 14.sp
+                        },
+                        fontWeight = FontWeight.Black,
+                        color = if (hasValue) accentColor else Color.White.copy(alpha = 0.6f),
+                        lineHeight = when {
+                            hasValue && isRateAction -> 34.sp
+                            hasValue -> 18.sp
+                            else -> 14.sp
+                        }
+                    )
+                }
             }
             if (trailingContent != null) {
                 Spacer(modifier = Modifier.weight(1f))
