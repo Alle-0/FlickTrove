@@ -77,7 +77,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
 - 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
 - 📊 **Advanced Statistics**: Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema and TV series.
-- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and seamlessly toggle episodes even when offline.
+- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
 - ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
@@ -234,7 +234,6 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
-- 📰 RSS Feeds: [Everyeye.it](https://cinema.everyeye.it/) & [BadTaste.it](https://www.badtaste.it/) (IT), [Collider.com](https://collider.com/) & [ScreenRant.com](https://screenrant.com/) (EN) - For the latest news
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 
