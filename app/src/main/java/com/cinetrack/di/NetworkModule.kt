@@ -133,8 +133,22 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("news_okhttp")
+    fun provideNewsOkHttpClient(okHttpClient: OkHttpClient): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @Named("news_retrofit")
-    fun provideNewsRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideNewsRetrofit(@Named("news_okhttp") okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://localhost/") // overridden by @Url
             .client(okHttpClient)
