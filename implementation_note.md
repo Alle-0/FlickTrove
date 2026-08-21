@@ -25,3 +25,14 @@
 ## 🗺️ Roadmap Planning
 
 - **SIMKL Integration (Backlog)**: Drafted the architectural implementation plan (`SIMKL_INTEGRATION_PLAN.md`) to support SIMKL sync alongside Trakt in a future update.
+
+<details>
+<summary><b>In-App Notes</b></summary>
+
+<!-- APP_NOTES_START -->
+
+* 🐛 **Bug Fixes:** Resolved a critical background crash that occasionally prevented recently watched movies and votes from syncing correctly with the cloud. All your pending data will automatically sync upon opening this update.
+
+<!-- APP_NOTES_END -->
+
+</details>
