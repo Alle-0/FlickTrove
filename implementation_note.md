@@ -1,22 +1,27 @@
-# Implementation Note: v3.6.5 Update
+# 🚀 FlickTrove v3.6.5
 
-## Updates Included in this Release:
+## ✨ What's New & UI Improvements
 
-### 1. Offline Mode for TV Series Episodes
-- **Problem**: When the app was offline, the TV Series episodes list failed to load because it couldn't fetch the season details (such as episode names and images) from TMDB.
-- **Solution**: Implemented a fallback mechanism in `EpisodesBottomSheet.kt`. If the TMDB network call fails due to no internet connection, the UI now generates a mock list of episodes based on the local `episodeCount` stored in the `MovieEntity`'s `seasons` property.
-- **Result**: You can now successfully view the checklist of episodes and mark them as watched/unwatched while completely offline. The changes are saved locally and will synchronize once a connection is restored.
+- **Offline Mode for TV Series**: You can now view and toggle watched episodes for TV Series even when completely offline! The app will gracefully fall back to local data and synchronize changes once a connection is restored.
+- **"In Theaters" Badge Redesign**: Moved the localized "In theaters" badge to the "Where to watch" section, themed beautifully to match the premium provider rows.
+- **Expanded Cast & Crew UI**: The "Cast" section has been heavily upgraded to include Crew members. Clicking on the Director section now opens a bottom sheet showing the full crew, neatly grouped by department (e.g., Directing, Writing, Sound).
+- **Markdown Support**: Added Markdown support for comments in details, allowing richer text formatting!
+- **Sleeker Comment Editor & Haptics**: 
+  - Replaced the generic text "GIF" button with a polished `ic_gif` icon.
+  - Added smooth `bounceClick` animations and haptic feedback to the new editor icons (GIF, Image, Markdown) and the Cast/Crew section headers.
+- **Unreleased Media Enhancements**:
+  - Unreleased movies now prominently display their full release date highlighted in the accent color.
+  - Rating and interactive actions are now intelligently disabled for unreleased TV series to prevent invalid states.
 
-### 2. "In Theaters" Badge Relocation and Theming
-- Moved the "In Theaters" badge from the main header (`DetailHeader.kt`) to the "Where to watch" section (`DetailMetaRows.kt`) to improve layout hierarchy.
-- Themed the badge to look like a premium provider row, aligning perfectly with the app's aesthetic guidelines.
+## 🐛 Bug Fixes & Logic Tweaks
 
-### 3. SIMKL Integration Plan (Backlog)
-- Created the SIMKL implementation plan document at `docs/roadmap/SIMKL_INTEGRATION_PLAN.md` for future reference, covering the architecture and integration points to synchronize watch history alongside Trakt.
+- **Ratings Visibility**: Fixed a UI bug where the global "FlickTrove Rating" would fade out. It now remains fully visible even when the user's rate action is disabled.
+- **Trakt Sync**: Fixed underlying logic in the Trakt sync worker and rating synchronization.
+- **Code Cleanup & Stability**:
+  - Fixed a compilation issue related to `MediaType` parsing in the UI state mapper.
+  - Removed duplicate imports in `DetailComments.kt`.
+  - Removed the MVP percentage from `DetailCast` for a cleaner look.
 
-### 4. UI Polish & Bug Fixes
-- **Click Modifiers**: Added the custom `bounceClick` modifier to the "CAST >" and "CREW >" section headers in `DetailCast.kt`, as well as to the GIF, Image, and Markdown attachment icons in `CommentsScreen.kt`, providing consistent haptic and visual feedback across the app.
-- **Personal Zone Rating Alpha**: Fixed a visual bug in `DetailPersonalZone.kt` where the entire row was being dimmed (`alpha = 0.4f`) when the rating action was disabled (e.g. movie not watched yet). The dimming is now only applied to the left "RATE" side, keeping the "FLICKTROVE RATING" section on the right fully visible as intended.
+## 🗺️ Roadmap Planning
 
-### 5. Version Bump
-- Bumped app version to **3.6.5** (versionCode: 19) in `app/build.gradle.kts`.
+- **SIMKL Integration (Backlog)**: Drafted the architectural implementation plan (`SIMKL_INTEGRATION_PLAN.md`) to support SIMKL sync alongside Trakt in a future update.
