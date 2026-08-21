@@ -1,4 +1,4 @@
-# 🚀 FlickTrove v3.6.5
+# 🚀 FlickTrove v3.6.4
 
 ## ✨ What's New & UI Improvements
 
