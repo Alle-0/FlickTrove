@@ -242,7 +242,22 @@ fun EpisodesBottomSheet(
                     )
                 }
 
-            val currentSeasonData = seasonDetails[selectedSeasonNumber]
+            val fetchedSeasonData = seasonDetails[selectedSeasonNumber]
+            val fallbackSeasonData = movie.seasons?.find { it.seasonNumber == selectedSeasonNumber }
+            val currentSeasonData = fetchedSeasonData ?: fallbackSeasonData?.let {
+                val epCount = it.episodeCount ?: 0
+                it.copy(
+                    episodes = it.episodes ?: (1..epCount).map { epNum ->
+                        Episode(
+                            episodeNumber = epNum,
+                            name = context.getString(R.string.person_offline_title), // Using existing offline string "Offline"
+                            overview = null,
+                            stillPath = null,
+                            airDate = null
+                        )
+                    }
+                )
+            }
 
             // Non-draggable content area
             Column(
