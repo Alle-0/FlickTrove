@@ -77,7 +77,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
 - 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
 - 📊 **Advanced Statistics**: Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema and TV series.
-- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
+- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and seamlessly toggle episodes even when offline.
 - ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
 - 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
@@ -85,7 +85,8 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
 - 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Cloudflare R2.
-- 💬 **Community & Social**: Read and write reviews, upload images in comments, and interact with the FlickTrove community.
+- 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove community.
+- 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
 - 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
 - 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
 
