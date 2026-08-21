@@ -180,7 +180,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
-- [ ] **SIMKL Integration:** Alternative cloud sync engine for users migrating from Trakt.
+- [ ] **SIMKL Integration:** Alternative cloud sync engine for users.
 - [ ] **AI:** ?
 
 ---
