@@ -31,7 +31,8 @@
 
 <!-- APP_NOTES_START -->
 
-* 🐛 **Bug Fixes:** Resolved a critical background crash that occasionally prevented recently watched movies and votes from syncing correctly with the cloud. All your pending data will automatically sync upon opening this update.
+* ✨ **What's New:** You can now toggle TV series episodes even when offline! We've also upgraded the Cast section to include full Crew details, added Markdown support for comments, and polished the UI with new icons and haptic animations.
+* 🐛 **Bug Fixes:** Fixed a visual issue with the global rating visibility and improved the reliability of background Trakt synchronization.
 
 <!-- APP_NOTES_END -->
 
