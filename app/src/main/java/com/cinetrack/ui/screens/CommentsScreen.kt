@@ -860,7 +860,7 @@ class CommentsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp)
-                                .background(Color(0xFF330000), RoundedCornerShape(12.dp))
+                                .background(Color(0xFF330000), androidx.compose.foundation.shape.CircleShape)
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {

@@ -18,6 +18,7 @@ interface SettingsRepository {
     val lastSeenAppVersion: Flow<String>
     val ignoredUpdateVersion: Flow<String>
     val hasSeenOnboarding: Flow<Boolean>
+    val hideSavedFromDiscovery: Flow<Boolean>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -34,4 +35,5 @@ interface SettingsRepository {
     suspend fun updateLastSeenAppVersion(version: String)
     suspend fun updateIgnoredUpdateVersion(version: String)
     suspend fun setOnboardingSeen(seen: Boolean)
+    suspend fun toggleHideSavedFromDiscovery(enabled: Boolean)
 }

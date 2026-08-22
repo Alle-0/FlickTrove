@@ -42,6 +42,7 @@ fun SettingsUILayoutSection(
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
+    val hideSavedFromDiscovery by settingsViewModel.hideSavedFromDiscovery.collectAsStateWithLifecycle()
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
@@ -56,6 +57,26 @@ fun SettingsUILayoutSection(
         title = stringResource(R.string.settings_ui_layout),
         icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
     ) {
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_eye_off),
+            title = stringResource(R.string.settings_hide_saved),
+            description = stringResource(R.string.settings_hide_saved_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = hideSavedFromDiscovery,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleHideSavedFromDiscovery(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleHideSavedFromDiscovery(!hideSavedFromDiscovery)
+            }
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
             title = stringResource(R.string.settings_folder_bookmarks),

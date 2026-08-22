@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">Cerca</string>
@@ -142,6 +142,8 @@
     <string name="stats_share_line_outro">\nTraccia il tuo viaggio cinematografico su FlickTrove! 🍿</string>
     <string name="settings_tab_title">Impostazioni</string>
     <string name="settings_ui_layout">Interfaccia e Layout</string>
+    <string name="settings_hide_saved">Nascondi Titoli Salvati</string>
+    <string name="settings_hide_saved_desc">Nasconde i film e le serie TV già visti o salvati nella watchlist dalle sezioni Esplora e Consigliati.</string>
     <string name="settings_folder_bookmarks">Segnalibri cartelle</string>
     <string name="settings_folder_bookmarks_desc">Mostra un nastro colorato sulle card per indicare l\'appartenenza alle cartelle.</string>
     <string name="settings_badges">Badge informativi</string>

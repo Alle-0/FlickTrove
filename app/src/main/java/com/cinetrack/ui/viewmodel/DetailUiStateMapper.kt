@@ -27,7 +27,8 @@ class DetailUiStateMapper @Inject constructor(
         appComments: List<AppComment>,
         localMovies: List<Movie>,
         folders: List<FolderEntity>,
-        characterImages: Map<String, String>
+        characterImages: Map<String, String>,
+        hideSaved: Boolean = false
     ): DetailUiState {
         if (errorMsg != null && metadata == null) return DetailUiState.Error(errorMsg)
         if (metadata == null) return DetailUiState.Loading
@@ -170,7 +171,11 @@ class DetailUiStateMapper @Inject constructor(
                 videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
             } ?: emptyList()).toImmutableList(),
             videos = (metadata.videos?.results?.filter { v -> v.site == "YouTube" || v.site == "Vimeo" } ?: emptyList()).toImmutableList(),
-            recommendations = (metadata.recommendations?.results?.take(10)?.map { rec ->
+            recommendations = (metadata.recommendations?.results?.mapNotNull { rec ->
+                if (hideSaved) {
+                    val isSaved = localMovies.any { it.id == rec.id && it.mediaType == mediaType }
+                    if (isSaved) return@mapNotNull null
+                }
                 localMovies.find { it.id == rec.id && it.mediaType == mediaType } ?: MovieMapper.mapResponseToMovie(
                     MovieDetailResponse(
                         id = rec.id, title = rec.title, name = rec.name,
@@ -180,7 +185,7 @@ class DetailUiStateMapper @Inject constructor(
                     ),
                     mediaType
                 )
-            } ?: emptyList()).map { it.hydrate() }.toImmutableList(),
+            }?.take(10) ?: emptyList()).map { it.hydrate() }.toImmutableList(),
             collectionMovies = collectionMovies.map { it.hydrate() }.toImmutableList(),
             externalRatings = externalRatings,
             loadingSeason = loadingSeason,

@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">Поиск</string>
@@ -148,7 +148,9 @@
     <string name="stats_share_line_decade">📅 Золотое десятилетие: %1$s\n</string>
     <string name="stats_share_line_outro">\nОтслеживайте свое кино-путешествие в FlickTrove! 🍿</string>
     <string name="settings_tab_title">Настройки</string>
-    <string name="settings_ui_layout">Интерфейс и оформление</string>
+    <string name="settings_ui_layout">Интерфейс и компоновка</string>
+    <string name="settings_hide_saved">Скрыть сохраненные элементы</string>
+    <string name="settings_hide_saved_desc">Скрывает просмотренные фильмы и элементы из списка наблюдения в Обзоре и деталях.</string>
     <string name="settings_folder_bookmarks">Закладки папок</string>
     <string name="settings_folder_bookmarks_desc">Показывает цветную ленту на карточках, указывающую на принадлежность к папке.</string>
     <string name="settings_badges">Информационные значки</string>

@@ -35,10 +35,15 @@ class SettingsRepositoryImpl @Inject constructor(
         val LAST_SEEN_APP_VERSION = stringPreferencesKey("last_seen_app_version")
         val IGNORED_UPDATE_VERSION = stringPreferencesKey("ignored_update_version")
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+        val HIDE_SAVED_FROM_DISCOVERY = booleanPreferencesKey("hide_saved_from_discovery")
     }
 
     override val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.HAS_SEEN_ONBOARDING] ?: false
+    }
+
+    override val hideSavedFromDiscovery: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HIDE_SAVED_FROM_DISCOVERY] ?: false // Default is false
     }
 
     override val lastSeenAppVersion: Flow<String> = dataStore.data.map { preferences ->
@@ -184,6 +189,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setOnboardingSeen(seen: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HAS_SEEN_ONBOARDING] = seen
+        }
+    }
+
+    override suspend fun toggleHideSavedFromDiscovery(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HIDE_SAVED_FROM_DISCOVERY] = enabled
         }
     }
 }

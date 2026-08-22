@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">खोजें</string>
@@ -149,6 +149,8 @@
     <string name="stats_share_line_outro">\nFlickTrove पर अपनी सिनेमाई यात्रा को ट्रैक करें! 🍿</string>
     <string name="settings_tab_title">सेटिंग्स</string>
     <string name="settings_ui_layout">इंटरफ़ेस और लेआउट</string>
+    <string name="settings_hide_saved">सहेजे गए शीर्षक छिपाएं</string>
+    <string name="settings_hide_saved_desc">डिस्कवर और विवरणों से देखी गई फिल्मों और वॉचलिस्ट आइटम को फ़िल्टर करता है।</string>
     <string name="settings_folder_bookmarks">फ़ोल्डर बुकमार्क</string>
     <string name="settings_folder_bookmarks_desc">फ़ोल्डर सदस्यता को दर्शाने के लिए कार्ड पर एक रंगीन रिबन दिखाता है।</string>
     <string name="settings_badges">जानकारी बैज</string>

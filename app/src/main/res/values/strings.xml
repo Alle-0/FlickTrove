@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
     <string name="shortcut_search_short">Search</string>
@@ -149,6 +149,8 @@
     <string name="stats_share_line_outro">\nTrack your cinematic journey on FlickTrove! 🍿</string>
     <string name="settings_tab_title">Settings</string>
     <string name="settings_ui_layout">Interface and Layout</string>
+    <string name="settings_hide_saved">Hide Saved Items</string>
+    <string name="settings_hide_saved_desc">Filters out watched movies and watchlist items from Discover and details.</string>
     <string name="settings_folder_bookmarks">Folder Bookmarks</string>
     <string name="settings_folder_bookmarks_desc">Shows a colored ribbon on cards to indicate folder membership.</string>
     <string name="settings_badges">Info Badges</string>

@@ -99,13 +99,13 @@ class CommentsViewModel @Inject constructor(
                         val isBanned = snapshot.getBoolean("bannedFromCommenting") ?: false
                         val until = snapshot.getTimestamp("bannedUntil")?.toDate()
                         
-                        if (isBanned) {
-                            _isUserBanned.value = true
-                            _banExpiration.value = null
-                        } else if (until != null && until.after(java.util.Date())) {
+                        if (isBanned && until != null && until.after(java.util.Date())) {
                             _isUserBanned.value = true
                             val df = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
                             _banExpiration.value = df.format(until)
+                        } else if (isBanned && until == null) {
+                            _isUserBanned.value = true
+                            _banExpiration.value = null
                         } else {
                             _isUserBanned.value = false
                             _banExpiration.value = null

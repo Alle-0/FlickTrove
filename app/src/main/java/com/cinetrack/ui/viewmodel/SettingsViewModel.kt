@@ -148,6 +148,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val hideSavedFromDiscovery = settingsRepository.hideSavedFromDiscovery.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    fun toggleHideSavedFromDiscovery(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleHideSavedFromDiscovery(enabled)
+        }
+    }
+
     private val _isBackupLoading = MutableStateFlow(false)
     val isBackupLoading = _isBackupLoading.asStateFlow()
 
@@ -647,7 +659,7 @@ class SettingsViewModel @Inject constructor(
                     title = title,
                     description = description,
                     rating = rating,
-                    appVersion = "3.1.5", // Aligning with UI version
+                    appVersion = com.cinetrack.BuildConfig.VERSION_NAME,
                     deviceModel = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
                     androidVersion = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})"
                 )

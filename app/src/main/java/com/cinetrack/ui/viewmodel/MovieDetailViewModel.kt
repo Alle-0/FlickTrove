@@ -59,6 +59,7 @@ class MovieDetailViewModel @Inject constructor(
     private val tvdbRepository: TvdbRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val commentRepository: com.cinetrack.data.repository.CommentRepository,
+    private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -201,8 +202,18 @@ class MovieDetailViewModel @Inject constructor(
             flow2,
             flow3,
             repository.getLocalMoviesFlow(),
-            repository.getFoldersFlow()
-        ) { f1, f2, f3, localMovies, folders ->
+            repository.getFoldersFlow(),
+            settingsRepository.hideSavedFromDiscovery
+        ) { args ->
+            val f1 = args[0] as Triple<MovieDetailResponse?, ExternalRatings, Boolean>
+            val f2 = args[1] as Triple<Map<Int, com.cinetrack.data.model.Season>, List<Movie>, String?>
+            val f3 = args[2] as Pair<List<com.cinetrack.data.model.AppComment>, Map<String, String>>
+            @Suppress("UNCHECKED_CAST")
+            val localMovies = args[3] as List<Movie>
+            @Suppress("UNCHECKED_CAST")
+            val folders = args[4] as List<FolderEntity>
+            val hideSaved = args[5] as Boolean
+            
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                 detailUiStateMapper.mapToState(
                     movieId = movieId,
@@ -216,7 +227,8 @@ class MovieDetailViewModel @Inject constructor(
                     appComments = f3.first,
                     localMovies = localMovies,
                     folders = folders,
-                    characterImages = f3.second
+                    characterImages = f3.second,
+                    hideSaved = hideSaved
                 )
             }
         }

@@ -19,6 +19,7 @@ import javax.inject.Inject
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.repository.PreferenceRepository
+import com.cinetrack.data.repository.SettingsRepository
 import androidx.compose.foundation.lazy.grid.LazyGridState
 
 import kotlinx.collections.immutable.ImmutableList
@@ -49,6 +50,7 @@ class DiscoverViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
+    private val settingsRepository: SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val getDiscoverUiStateUseCase: GetDiscoverUiStateUseCase,
     savedStateHandle: SavedStateHandle
@@ -204,9 +206,9 @@ class DiscoverViewModel @Inject constructor(
                     }
 
                     if (isTvType) {
-                        repository.discoverTVWithParams(page = pageToFetch, options = options)
+                        repository.discoverTVWithParams(page = pageToFetch, options = options).map { it.copy(mediaType = "tv") }
                     } else {
-                        repository.discoverMoviesWithParams(page = pageToFetch, options = options)
+                        repository.discoverMoviesWithParams(page = pageToFetch, options = options).map { it.copy(mediaType = "movie") }
                     }
                 } else {
                     // Fallback to specific endpoints when no custom filters
@@ -224,14 +226,34 @@ class DiscoverViewModel @Inject constructor(
                     }
                 }
                 
-                if (fetchedResults.isEmpty()) {
+                val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
+                val localMovies = repository.getLocalMoviesFlow().first()
+                val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+
+                val finalResults = if (hideSaved) {
+                    fetchedResults.filter { movie ->
+                        val compositeId = "${movie.mediaType}_${movie.id}"
+                        !localCompositeIds.contains(compositeId)
+                    }
+                } else {
+                    fetchedResults
+                }
+
+                if (finalResults.isEmpty() && fetchedResults.isNotEmpty()) {
+                    // All items filtered out, auto-load next page to avoid empty screen
+                    _currentPage.value = pageToFetch
+                    fetchMovies(isNextPage = true)
+                    return@launch
+                }
+
+                if (finalResults.isEmpty()) {
                     _isEndReached.value = true
                 } else {
                     if (isNextPage) {
-                        _movies.value = (_movies.value + fetchedResults).distinctBy { it.id }
+                        _movies.value = (_movies.value + finalResults).distinctBy { it.id }
                         _currentPage.value = pageToFetch
                     } else {
-                        _movies.value = fetchedResults
+                        _movies.value = finalResults
                     }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {

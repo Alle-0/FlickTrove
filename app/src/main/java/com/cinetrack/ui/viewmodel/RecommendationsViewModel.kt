@@ -9,6 +9,7 @@ import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.domain.CalculateMatchScoreUseCase
 import com.cinetrack.data.repository.PreferenceRepository
+import com.cinetrack.data.repository.SettingsRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -44,6 +45,7 @@ class RecommendationsViewModel @Inject constructor(
     private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase,
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
+    private val settingsRepository: SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
@@ -116,11 +118,16 @@ class RecommendationsViewModel @Inject constructor(
     init {
         // Fetch recommendations when mediaType changes
         viewModelScope.launch {
-            _mediaType.collect { type ->
+            combine(
+                _mediaType,
+                settingsRepository.hideSavedFromDiscovery
+            ) { type, hideSaved ->
+                type to hideSaved
+            }.collect { (type, hideSaved) ->
                 currentPage = 1
                 _isEndReached.value = false
                 val allLocalMovies = repository.getLocalMoviesFlow().first()
-                fetchRecommendations(type, allLocalMovies, page = 1)
+                fetchRecommendations(type, allLocalMovies, page = 1, hideSaved = hideSaved)
             }
         }
     }
@@ -134,7 +141,8 @@ class RecommendationsViewModel @Inject constructor(
         viewModelScope.launch {
             currentPage = 1
             _isEndReached.value = false
-            fetchRecommendations(currentState.mediaType, currentState.favorites, page = 1)
+            val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
+            fetchRecommendations(currentState.mediaType, currentState.favorites, page = 1, hideSaved = hideSaved)
         }
     }
 
@@ -145,7 +153,8 @@ class RecommendationsViewModel @Inject constructor(
         viewModelScope.launch {
             _isNextPageLoading.value = true
             currentPage++
-            fetchRecommendations(currentState.mediaType, currentState.favorites, page = currentPage, isAppend = true)
+            val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
+            fetchRecommendations(currentState.mediaType, currentState.favorites, page = currentPage, isAppend = true, hideSaved = hideSaved)
         }
     }
 
@@ -236,7 +245,7 @@ class RecommendationsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchRecommendations(type: String, favorites: List<Movie>, page: Int, isAppend: Boolean = false) {
+    private suspend fun fetchRecommendations(type: String, favorites: List<Movie>, page: Int, isAppend: Boolean = false, hideSaved: Boolean = false) {
         if (!isAppend) _isLoading.value = true
         try {
             if (favorites.isEmpty()) {
@@ -307,7 +316,8 @@ class RecommendationsViewModel @Inject constructor(
             results.addAll(
                 rawData.filter { movie ->
                     val compositeId = "${type}_${movie.id}"
-                    !localCompositeIds.contains(compositeId) && !existingIds.contains(movie.id)
+                    val isHidden = hideSaved && localCompositeIds.contains(compositeId)
+                    !isHidden && !existingIds.contains(movie.id)
                 }.map { it.copy(mediaType = type) }
             )
 
