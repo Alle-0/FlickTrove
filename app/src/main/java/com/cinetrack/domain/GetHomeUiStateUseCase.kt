@@ -22,7 +22,7 @@ class GetHomeUiStateUseCase @Inject constructor() {
     ): Flow<HomeUiState> {
         @OptIn(kotlinx.coroutines.FlowPreview::class)
         val baseMoviesFlow = moviesFlow.map { movies -> 
-            movies.filter { (it.favorite || it.reminder) && !it.watched } 
+            movies.filter { ((it.favorite || it.reminder) || (it.mediaType == "tv" && it.dropped)) && !it.watched } 
         }.distinctUntilChanged()
         
         @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -80,11 +80,13 @@ class GetHomeUiStateUseCase @Inject constructor() {
 
             val today = LocalDate.now().toString()
             val notificationCount = toWatchMovies.count { movie ->
-                val isNewEpisode = (movie.newEpisodesFound ?: 0) > 0
-                val isReleasedToday = (movie.newEpisodesFound ?: 0) == 0 && 
-                                        movie.reminder == true && 
-                                        movie.migratedAt == today
-                isNewEpisode || isReleasedToday
+                if (movie.dropped) false else {
+                    val isNewEpisode = (movie.newEpisodesFound ?: 0) > 0
+                    val isReleasedToday = (movie.newEpisodesFound ?: 0) == 0 && 
+                                            movie.reminder == true && 
+                                            movie.migratedAt == today
+                    isNewEpisode || isReleasedToday
+                }
             }
 
             val movieFolderColors = buildMap<String, MutableList<String>> {
