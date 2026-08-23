@@ -203,7 +203,12 @@ class AuthViewModel @Inject constructor(
                     displayName = uniqueName
                 })?.await()
                 
-                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), com.google.firebase.firestore.SetOptions.merge())
+                batch.set(userRef, mapOf(
+                    "displayName" to uniqueName, 
+                    "avatarBanned" to false, 
+                    "nameChangesCount" to 0,
+                    "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                ), com.google.firebase.firestore.SetOptions.merge())
                 
                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                 batch.set(usernameRef, mapOf("uid" to uid))
@@ -246,7 +251,12 @@ class AuthViewModel @Inject constructor(
                                 
                                 val batch = Firebase.firestore.batch()
                                 val userRef = Firebase.firestore.collection("users").document(uid)
-                                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                batch.set(userRef, mapOf(
+                                    "displayName" to uniqueName, 
+                                    "avatarBanned" to false, 
+                                    "nameChangesCount" to 0,
+                                    "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                ), SetOptions.merge())
                                 
                                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                 batch.set(usernameRef, mapOf("uid" to uid))
@@ -283,7 +293,12 @@ class AuthViewModel @Inject constructor(
                                 
                                 val batch = Firebase.firestore.batch()
                                 val userRef = Firebase.firestore.collection("users").document(uid)
-                                batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                batch.set(userRef, mapOf(
+                                    "displayName" to uniqueName, 
+                                    "avatarBanned" to false, 
+                                    "nameChangesCount" to 0,
+                                    "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                ), SetOptions.merge())
                                 
                                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                 batch.set(usernameRef, mapOf("uid" to uid))
@@ -330,7 +345,12 @@ class AuthViewModel @Inject constructor(
                                     
                                     val batch = Firebase.firestore.batch()
                                     val userRef = Firebase.firestore.collection("users").document(uid)
-                                    batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                    batch.set(userRef, mapOf(
+                                        "displayName" to uniqueName, 
+                                        "avatarBanned" to false, 
+                                        "nameChangesCount" to 0,
+                                        "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                    ), SetOptions.merge())
                                     
                                     val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                     batch.set(usernameRef, mapOf("uid" to uid))
@@ -394,7 +414,12 @@ class AuthViewModel @Inject constructor(
                                     
                                     val batch = Firebase.firestore.batch()
                                     val userRef = Firebase.firestore.collection("users").document(uid)
-                                    batch.set(userRef, mapOf("displayName" to uniqueName, "avatarBanned" to false, "nameChangesCount" to 0), SetOptions.merge())
+                                    batch.set(userRef, mapOf(
+                                        "displayName" to uniqueName, 
+                                        "avatarBanned" to false, 
+                                        "nameChangesCount" to 0,
+                                        "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                    ), SetOptions.merge())
                                     
                                     val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                     batch.set(usernameRef, mapOf("uid" to uid))

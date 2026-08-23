@@ -45,6 +45,8 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeChild
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -97,155 +99,54 @@ fun FoldersFilterModal(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Sort By Section
-        Surface(
-            color = Color.White.copy(alpha = 0.03f),
-            shape = RoundedCornerShape(24.dp),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-            modifier = Modifier.fillMaxWidth()
+        ExpandableSection(
+            title = stringResource(id = R.string.filter_sort_by),
+            isExpanded = true,
+            showChevron = false,
+            isClickable = false,
+            onToggle = { }
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = stringResource(id = R.string.filter_sort_by),
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp,
-                    modifier = Modifier.padding(bottom = 16.dp, start = 4.dp)
-                )
-
                 val sortOptions = listOf(
                     FolderSortOption.DATE to stringResource(id = R.string.comment_sort_date),
                     FolderSortOption.NAME to stringResource(id = R.string.folder_sort_name),
                     FolderSortOption.ITEMS to stringResource(id = R.string.folder_sort_items_count)
                 )
 
-                sortOptions.forEachIndexed { index, (option, label) ->
-                    val isSelected = localSortOption == option
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .bounceClick(scaleDown = 0.98f) {
-                                localSortOption = option
-                            }
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                else Color.White.copy(alpha = 0.05f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .border(
-                                1.dp,
-                                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                else Color.Transparent,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 16.dp, vertical = 14.dp)
-                    ) {
-                        Text(
-                            text = label,
-                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
-                            fontSize = 15.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            modifier = Modifier.align(Alignment.CenterStart)
-                        )
-                        
-                        if (isSelected) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_tick),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .align(Alignment.CenterEnd)
-                            )
-                        }
-                    }
-                    
-                    if (index < sortOptions.size - 1) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                sortOptions.forEach { (option, label) ->
+                    SortOptionItem(
+                        label = label,
+                        isSelected = localSortOption == option,
+                        onClick = { localSortOption = option }
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                // Direction Toggle
+                Spacer(modifier = Modifier.height(16.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .bounceClick { localSortOrder = CommentSortOrder.DESC }
-                            .background(
-                                if (localSortOrder == CommentSortOrder.DESC) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                else Color.White.copy(alpha = 0.05f),
-                                RoundedCornerShape(100)
-                            )
-                            .border(
-                                1.dp,
-                                if (localSortOrder == CommentSortOrder.DESC) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                else Color.Transparent,
-                                RoundedCornerShape(100)
-                            )
-                            .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_right),
-                                contentDescription = null,
-                                tint = if (localSortOrder == CommentSortOrder.DESC) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
-                                modifier = Modifier.size(16.dp).rotate(90f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(id = R.string.filter_dir_desc),
-                                color = if (localSortOrder == CommentSortOrder.DESC) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.7f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .bounceClick { localSortOrder = CommentSortOrder.ASC }
-                            .background(
-                                if (localSortOrder == CommentSortOrder.ASC) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                else Color.White.copy(alpha = 0.05f),
-                                RoundedCornerShape(100)
-                            )
-                            .border(
-                                1.dp,
-                                if (localSortOrder == CommentSortOrder.ASC) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                else Color.Transparent,
-                                RoundedCornerShape(100)
-                            )
-                            .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_left),
-                                contentDescription = null,
-                                tint = if (localSortOrder == CommentSortOrder.ASC) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
-                                modifier = Modifier.size(16.dp).rotate(90f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(id = R.string.filter_dir_asc),
-                                color = if (localSortOrder == CommentSortOrder.ASC) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.7f),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
+                    DirectionChip(
+                        label = stringResource(id = R.string.filter_dir_desc),
+                        isSelected = localSortOrder == CommentSortOrder.DESC,
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        iconRotation = 90f,
+                        modifier = Modifier.weight(1f),
+                        onClick = { localSortOrder = CommentSortOrder.DESC }
+                    )
+                    DirectionChip(
+                        label = stringResource(id = R.string.filter_dir_asc),
+                        isSelected = localSortOrder == CommentSortOrder.ASC,
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        iconRotation = -90f,
+                        modifier = Modifier.weight(1f),
+                        onClick = { localSortOrder = CommentSortOrder.ASC }
+                    )
                 }
             }
         }

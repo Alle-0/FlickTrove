@@ -1091,6 +1091,9 @@
     <string name="dept_art">Art</string>
     <string name="dept_sound">Son</string>
     <string name="dept_editing">Montage</string>
+    <string name="folder_sort_name">Nom</string>
+    <string name="folder_sort_items_count">Nombre d\'éléments</string>
 </resources>
+
 
 

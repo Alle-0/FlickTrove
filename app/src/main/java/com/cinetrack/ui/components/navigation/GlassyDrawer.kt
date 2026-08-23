@@ -127,7 +127,12 @@ fun GlassyDrawer(
                         }
                     }
                 }
-                IconButton(onClick = onClose) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .bounceClick { onClose() },
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                         contentDescription = "Close",

@@ -584,9 +584,9 @@ fun FolderCard(
                     onLongClick = { onLongClick(bounds[0]) },
                     onClick = onClick
                 )
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
         // Colored dot (circle) with icon
         val topItems = remember(folder.itemIds, allMovies) {
             folder.itemIds.take(3).mapNotNull { id ->
@@ -704,7 +704,7 @@ fun FolderCard(
             tint = Color.White.copy(alpha = 0.2f),
             modifier = Modifier.size(20.dp)
         )
-    }
+        }
     }
 }
 

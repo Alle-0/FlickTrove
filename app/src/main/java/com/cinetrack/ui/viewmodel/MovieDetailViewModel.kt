@@ -205,8 +205,11 @@ class MovieDetailViewModel @Inject constructor(
             repository.getFoldersFlow(),
             settingsRepository.hideSavedFromDiscovery
         ) { args ->
+            @Suppress("UNCHECKED_CAST")
             val f1 = args[0] as Triple<MovieDetailResponse?, ExternalRatings, Boolean>
+            @Suppress("UNCHECKED_CAST")
             val f2 = args[1] as Triple<Map<Int, com.cinetrack.data.model.Season>, List<Movie>, String?>
+            @Suppress("UNCHECKED_CAST")
             val f3 = args[2] as Pair<List<com.cinetrack.data.model.AppComment>, Map<String, String>>
             @Suppress("UNCHECKED_CAST")
             val localMovies = args[3] as List<Movie>

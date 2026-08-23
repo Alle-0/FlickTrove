@@ -74,6 +74,7 @@ fun HomeFilterModal(
     hazeState: HazeState?,
     triggerBounds: Rect? = null,
     category: String = "movie",
+    isCommentsFilter: Boolean = false,
     showSortBy: Boolean = true,
     suggestedFilters: List<com.cinetrack.ui.viewmodel.FilterPill> = emptyList(),
     initialKeywordName: String? = null,
@@ -92,11 +93,11 @@ fun HomeFilterModal(
     val bottomSafetyPx = with(density) { 56.dp.toPx() }
     val maxAllowedHeight = screenHeight - topSafetyPx - bottomSafetyPx
     
-    var expandedSection by remember { mutableStateOf<String?>(null) }
+    var expandedSection by remember { mutableStateOf<String?>(if (isCommentsFilter) "sort" else null) }
     var showAllGenres by remember { mutableStateOf(false) }
     
     val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(with(density) { 380.dp.toPx() }, maxAllowedHeight) 
+        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(with(density) { (if (isCommentsFilter) 0.dp else 380.dp).toPx() }, maxAllowedHeight) 
                       else screenHeight * 0.45f,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "dynamicHeight"
@@ -171,7 +172,7 @@ fun HomeFilterModal(
                     ) {
                         // Measure based on which section is expanded
                         val expandedHeight = when(expandedSection) {
-                            "sort" -> with(density) { (48 * 6 + 100).dp.toPx() } // Approx sort items
+                            "sort" -> with(density) { (if (isCommentsFilter) 48 * 2 + 100 else 48 * 6 + 100).dp.toPx() } // Approx sort items
                             "genres" -> with(density) { 250.dp.toPx() }
                             "platforms" -> with(density) { 100.dp.toPx() }
                             "period" -> with(density) { 120.dp.toPx() }
@@ -181,7 +182,8 @@ fun HomeFilterModal(
                         
                         Spacer(modifier = Modifier.height(
                             with(density) { 
-                                (54 * 4).dp + // 4 Section headers
+                                val sectionCount = if (isCommentsFilter) 1 else 4
+                                (54 * sectionCount).dp + // Section headers
                                 expandedHeight.pxToDp(density) +
                                 100.dp // Apply button space
                             }
@@ -350,21 +352,28 @@ fun HomeFilterModal(
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_sort_by),
                                     isExpanded = expandedSection == "sort",
-                                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
+                                    showChevron = !isCommentsFilter,
+                                    isClickable = !isCommentsFilter,
+                                    onToggle = { if (!isCommentsFilter) expandedSection = if (expandedSection == "sort") null else "sort" }
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         val sortOptions = buildList {
-                                            if (isVisti) {
-                                                add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
+                                            if (isCommentsFilter) {
+                                                add(FilterOption("date", stringResource(R.string.comment_sort_date)))
+                                                add(FilterOption("likes", stringResource(R.string.comment_sort_likes)))
+                                            } else {
+                                                if (isVisti) {
+                                                    add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
+                                                }
+                                                add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
+                                                add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                                add(FilterOption("title", stringResource(R.string.filter_sort_title)))
+                                                add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
+                                                add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
                                             }
-                                            add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
-                                            add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                            add(FilterOption("title", stringResource(R.string.filter_sort_title)))
-                                            add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
-                                            add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
                                         }
 
                                         sortOptions.forEach { option ->
@@ -404,7 +413,7 @@ fun HomeFilterModal(
                             }
 
                             // --- STATUS SECTION (Only for TV) ---
-                            if (category == "tv") {
+                            if (!isCommentsFilter && category == "tv") {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_status),
                                     isExpanded = expandedSection == "status",
@@ -445,7 +454,7 @@ fun HomeFilterModal(
                             }
 
                             // --- ACTIVE KEYWORDS SECTION ---
-                            if (localSortConfig.selectedKeywords.isNotEmpty()) {
+                            if (!isCommentsFilter && localSortConfig.selectedKeywords.isNotEmpty()) {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_active_subgenres),
                                     isExpanded = expandedSection == "keywords" || expandedSection == null,
@@ -478,7 +487,8 @@ fun HomeFilterModal(
                             }
 
                             // --- GENRES SECTION ---
-                            ExpandableSection(
+                            if (!isCommentsFilter) {
+                                ExpandableSection(
                                 title = stringResource(R.string.filter_genres),
                                 isExpanded = expandedSection == "genres",
                                 badgeCount = localSortConfig.selectedGenres.size,
@@ -539,11 +549,13 @@ fun HomeFilterModal(
                                             }
                                         }
                                     }
+                                    }
                                 }
                             }
 
                             // --- PLATFORMS SECTION ---
-                            ExpandableSection(
+                            if (!isCommentsFilter) {
+                                ExpandableSection(
                                 title = stringResource(R.string.filter_platforms),
                                 isExpanded = expandedSection == "platforms",
                                 badgeCount = localSortConfig.selectedProviders.size,
@@ -572,9 +584,11 @@ fun HomeFilterModal(
                                     }
                                 }
                             }
+                        }
 
-                            // --- PERIOD SECTION ---
-                            ExpandableSection(
+                        // --- DECADES SECTION ---
+                        if (!isCommentsFilter) {
+                                ExpandableSection(
                                 title = stringResource(R.string.filter_period),
                                 isExpanded = expandedSection == "period",
                                 badgeCount = localSortConfig.selectedDecades.size,
@@ -603,9 +617,10 @@ fun HomeFilterModal(
                                 }
                             }
                         }
+                    }
 
-                        Box(
-                            modifier = Modifier
+                    Box(
+                        modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 24.dp)
                                 .padding(bottom = 24.dp, top = 8.dp)
@@ -636,296 +651,3 @@ fun HomeFilterModal(
 
 // Helper for Dp conversions inside the Composable scope
 private fun Float.pxToDp(density: androidx.compose.ui.unit.Density) = with(density) { this@pxToDp.toDp() }
-
-@Composable
-private fun ExpandableSection(
-    title: String,
-    isExpanded: Boolean,
-    badgeCount: Int = 0,
-    onToggle: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    val rotation by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f, label = "arrowRotation")
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp)
-            .bounceClick { onToggle() }
-            .clip(RoundedCornerShape(28.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .border(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-                    )
-                ),
-                shape = RoundedCornerShape(28.dp)
-            )
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        letterSpacing = 1.2.sp
-                    )
-                    
-                    AnimatedVisibility(
-                        visible = badgeCount > 0,
-                        enter = fadeIn() + scaleIn(initialScale = 0.8f),
-                        exit = fadeOut() + scaleOut(targetScale = 0.8f)
-                    ) {
-                        Row {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = badgeCount.toString(),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontSize = 10.sp
-                                )
-                            }
-                        }
-                    }
-                }
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                    contentDescription = null,
-                    tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                    modifier = Modifier
-                        .size(20.dp)
-                        .graphicsLayer(rotationZ = rotation)
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = scaleIn(initialScale = 0.95f) + fadeIn(),
-                exit = scaleOut(targetScale = 0.95f) + fadeOut()
-            ) {
-                Box(modifier = Modifier.padding(bottom = 14.dp)) {
-                    content()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FilterChip(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Transparent,
-        label = "chipBorder"
-    )
-    val bgColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f),
-        label = "chipBg"
-    )
-    val textColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-        label = "chipText"
-    )
-
-    Box(
-        modifier = Modifier
-            .bounceClick { onClick() }
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = textColor
-        )
-    }
-}
-
-@Composable
-private fun ProviderItem(
-    name: String,
-    logoPath: String?,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        label = "providerBorder"
-    )
-    val bgColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-        label = "providerBg"
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(64.dp)
-            .bounceClick { onClick() }
-    ) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(bgColor)
-                .border(width = 2.dp, color = borderColor, shape = RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (logoPath != null) {
-                SubcomposeAsyncImage(
-                    model = buildTmdbImageUrl(logoPath, ImageType.LOGO, LocalImageQuality.current),
-                    contentDescription = name,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White.copy(alpha = 0.05f))
-                        )
-                    },
-                    error = {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = name.take(1).uppercase(),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
-                        }
-                    }
-                )
-            } else {
-                Text(
-                    text = name.take(1).uppercase(),
-                    color = Color.White.copy(alpha = 0.3f),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = name,
-            fontSize = 9.sp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.9f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun SortOptionItem(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .bounceClick { onClick() }
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f))
-            .border(
-                width = 1.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-            fontSize = 14.sp
-        )
-
-        if (isSelected) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun DirectionChip(
-    label: String,
-    isSelected: Boolean,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconRotation: Float = 0f,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.03f),
-        label = "dirBg"
-    )
-    val contentColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.45f),
-        label = "dirContent"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f) else Color.Transparent,
-        label = "dirBorder"
-    )
-
-    Box(
-        modifier = modifier
-            .height(40.dp)
-            .bounceClick { onClick() }
-            .clip(RoundedCornerShape(20.dp))
-            .background(backgroundColor)
-            .border(1.dp, borderColor, RoundedCornerShape(20.dp)),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(16.dp).graphicsLayer(rotationZ = iconRotation))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = label,
-                color = contentColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
-            )
-        }
-    }
-}
-
-private data class FilterOption(val id: String, val label: String)

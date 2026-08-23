@@ -1094,6 +1094,9 @@
     <string name="dept_art">Arte</string>
     <string name="dept_sound">Sonido</string>
     <string name="dept_editing">Edición</string>
+    <string name="folder_sort_name">Nombre</string>
+    <string name="folder_sort_items_count">Cantidad de Elementos</string>
 </resources>
+
 
 

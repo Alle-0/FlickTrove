@@ -1126,157 +1126,21 @@ class CommentsScreen(
         } // End of Scaffold
             
             // Sort Dialog Overlay
-            AnimatedVisibility(
-                visible = showSortMenu,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .pointerInput(Unit) { detectTapGestures(onTap = { showSortMenu = false }) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp)
-                            .fillMaxWidth()
-                            .animateEnterExit(
-                                enter = scaleIn(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeIn(),
-                                exit = scaleOut(transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 0f)) + fadeOut()
-                            )
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = RoundedCornerShape(24.dp),
-                                containerColor = Color(0xFF1E1E1E).copy(alpha = 0.7f)
-                            )
-                            .padding(24.dp)
-                            .pointerInput(Unit) { detectTapGestures {} }
-                    ) {
-                        Column {
-                            // Header
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(stringResource(R.string.comment_filters_title), color = Color.White, fontWeight = FontWeight.ExtraBold, style = MaterialTheme.typography.titleLarge, letterSpacing = 2.sp)
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_x),
-                                    contentDescription = "Chiudi",
-                                    tint = Color.White.copy(alpha = 0.5f),
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .bounceClick { showSortMenu = false }
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            // Sort By Section
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                    .padding(16.dp)
-                            ) {
-                                Column {
-                                    Text(stringResource(R.string.comment_sort_by), color = Color.White.copy(0.8f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    
-                                    // Option: Date
-                                    val isDate = sortOption == CommentSortOption.DATE
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick { sortOption = CommentSortOption.DATE }
-                                            .then(
-                                                if (isDate) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                                else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                            )
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(stringResource(R.string.comment_sort_date), color = if(isDate) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isDate) FontWeight.Bold else FontWeight.Normal)
-                                        if (isDate) {
-                                            Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
-                                        }
-                                    }
-                                    
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    
-                                    // Option: Likes
-                                    val isLikes = sortOption == CommentSortOption.LIKES
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick { sortOption = CommentSortOption.LIKES }
-                                            .then(
-                                                if (isLikes) Modifier.border(1.dp, accentColor, RoundedCornerShape(12.dp)).background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                                else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                            )
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(stringResource(R.string.comment_sort_likes), color = if(isLikes) Color.White else Color.White.copy(alpha = 0.6f), fontWeight = if(isLikes) FontWeight.Bold else FontWeight.Normal)
-                                        if (isLikes) {
-                                            Icon(painter = painterResource(id = R.drawable.ic_tick), contentDescription = null, tint = accentColor, modifier = Modifier.size(20.dp))
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            // Order Section
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                // Descending
-                                val isDesc = sortOrder == CommentSortOrder.DESC
-                                Row(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .bounceClick { sortOrder = CommentSortOrder.DESC }
-                                        .then(
-                                            if (isDesc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
-                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
-                                        )
-                                        .padding(vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = null, tint = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(stringResource(R.string.comment_sort_descending), color = if(isDesc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isDesc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
-                                }
-                                
-                                Spacer(modifier = Modifier.width(16.dp))
-                                
-                                // Ascending
-                                val isAsc = sortOrder == CommentSortOrder.ASC
-                                Row(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .bounceClick { sortOrder = CommentSortOrder.ASC }
-                                        .then(
-                                            if (isAsc) Modifier.border(1.dp, accentColor, RoundedCornerShape(50.dp)).background(accentColor.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
-                                            else Modifier.background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(50.dp))
-                                        )
-                                        .padding(vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(painter = painterResource(id = R.drawable.ic_right), contentDescription = null, tint = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp).rotate(-90f))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(stringResource(R.string.comment_sort_ascending), color = if(isAsc) accentColor else Color.White.copy(alpha = 0.5f), fontWeight = if(isAsc) FontWeight.Bold else FontWeight.Normal, style = MaterialTheme.typography.labelLarge)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Sort Menu using HomeFilterModal for consistency
+            com.cinetrack.ui.components.dialog.HomeFilterModal(
+                isVisible = showSortMenu,
+                isCommentsFilter = true,
+                sortConfig = com.cinetrack.data.model.SortConfig(
+                    sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",
+                    sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc"
+                ),
+                hazeState = hazeState,
+                onSortConfigChanged = { newConfig ->
+                    sortOption = if (newConfig.sortType == "date") CommentSortOption.DATE else CommentSortOption.LIKES
+                    sortOrder = if (newConfig.sortDirection == "desc") CommentSortOrder.DESC else CommentSortOrder.ASC
+                },
+                onDismissRequest = { showSortMenu = false }
+            )
 
             // Translation Prompt Dialog
             DetailTranslationPromptModal(

@@ -79,8 +79,8 @@ fun FlickTroveModal(
             ) {
                 Card(
                     modifier = Modifier
-                        .widthIn(max = 400.dp)
-                        .fillMaxWidth(0.88f)
+                        .widthIn(max = 450.dp)
+                        .fillMaxWidth(0.94f)
                         .padding(horizontal = 16.dp)
                         .bounceClick(scaleDown = 1f) { /* Consume clicks */ },
                     shape = cardShape,

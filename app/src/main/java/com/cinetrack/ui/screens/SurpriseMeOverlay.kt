@@ -96,12 +96,13 @@ fun SurpriseMeOverlay(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (step in 1..3) {
-                    IconButton(
-                        onClick = { step-- },
+                    Box(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.1f))
+                            .bounceClick { step-- },
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(ImageVector.vectorResource(R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = Color.White, modifier = Modifier.size(18.dp))
                     }
@@ -118,12 +119,13 @@ fun SurpriseMeOverlay(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
-                IconButton(
-                    onClick = onClose,
+                Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.1f))
+                        .bounceClick { onClose() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(ImageVector.vectorResource(R.drawable.ic_x), contentDescription = stringResource(R.string.surprise_close), tint = Color.White, modifier = Modifier.size(18.dp))
                 }
