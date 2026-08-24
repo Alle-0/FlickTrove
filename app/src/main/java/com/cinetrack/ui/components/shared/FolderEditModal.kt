@@ -46,6 +46,7 @@ fun FolderEditDialog(
     var name by remember { mutableStateOf(initialName) }
     var selectedColor by remember { mutableStateOf(initialColor) }
     val focusManager = LocalFocusManager.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     
     var isVisible by remember { mutableStateOf(false) }
     var isDismissing by remember { mutableStateOf(false) }
@@ -84,10 +85,11 @@ fun FolderEditDialog(
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = scrimAlpha))
                 .pointerInput(Unit) {
-                    detectTapGestures { 
+                    detectTapGestures(onTap = { 
                         focusManager.clearFocus()
+                        keyboardController?.hide()
                         isDismissing = true
-                    }
+                    })
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -102,8 +104,9 @@ fun FolderEditDialog(
                         .width(320.dp)
                         .clip(RoundedCornerShape(32.dp))
                         .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), alpha = blurAlpha)
-                        .pointerInput(Unit) {
-                            detectTapGestures { focusManager.clearFocus() }
+                        .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                         }
                         .premiumScrollbar(scrollState)
                         .verticalScroll(scrollState)
@@ -137,7 +140,7 @@ fun FolderEditDialog(
                             value = name,
                             onValueChange = { if (it.length <= 40) name = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.3f)) },
+                            label = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.5f)) },
                             shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,

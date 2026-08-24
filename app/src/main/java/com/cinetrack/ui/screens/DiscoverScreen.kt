@@ -5,6 +5,8 @@ import com.cinetrack.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -211,6 +213,36 @@ fun DiscoverScreenContent(
                                 com.cinetrack.ui.components.shared.MovieListCardSkeleton()
                             } else {
                                 com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                            }
+                        }
+                    } else if (uiState.isError && uiState.movies.isEmpty()) {
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 100.dp),
+                                contentAlignment = androidx.compose.ui.Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                    Icon(
+                                        Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                                        modifier = Modifier.size(64.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = stringResource(R.string.discover_error),
+                                        color = Color.White.copy(alpha = 0.7f),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(horizontal = 32.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Button(onClick = { viewModel.retry() }) {
+                                        Text(stringResource(R.string.discover_retry))
+                                    }
+                                }
                             }
                         }
                     } else if (uiState.movies.isEmpty()) {

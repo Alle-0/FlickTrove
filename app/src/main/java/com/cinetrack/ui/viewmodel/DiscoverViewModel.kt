@@ -33,6 +33,7 @@ data class DiscoverUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
     val isLoading: Boolean = true,
     val isNextPageLoading: Boolean = false,
+    val isError: Boolean = false,
     val type: String = "popular",
     val genreName: String? = null,
     val currentPage: Int = 1,
@@ -62,6 +63,7 @@ class DiscoverViewModel @Inject constructor(
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     private val _isLoading = MutableStateFlow(true)
     private val _isNextPageLoading = MutableStateFlow(false)
+    private val _isError = MutableStateFlow(false)
     private val _currentPage = MutableStateFlow(1)
     private val _isEndReached = MutableStateFlow(false)
     private val _sortConfig = MutableStateFlow(SortConfig())
@@ -78,11 +80,16 @@ class DiscoverViewModel @Inject constructor(
         combine(
             _movies,
             _isLoading,
-            _isNextPageLoading,
+            _isNextPageLoading
+        ) { movies, loading, nextLoading ->
+            Triple(movies, loading, nextLoading)
+        },
+        combine(
+            _isError,
             _currentPage,
             _isEndReached
-        ) { movies, loading, nextLoading, page, endReached ->
-            Triple(movies, Triple(loading, nextLoading, page), endReached)
+        ) { error, page, endReached ->
+            Triple(error, page, endReached)
         },
         combine(
             repository.getLocalMoviesFlow(),
@@ -92,17 +99,18 @@ class DiscoverViewModel @Inject constructor(
         ) { local, sort, folders, prefs ->
             Triple(local, sort, Pair(folders, prefs))
         }
-    ) { groupA, groupB ->
+    ) { groupA, groupB, groupC ->
         getDiscoverUiStateUseCase(
             apiMovies = groupA.first,
-            isLoading = groupA.second.first,
-            isNextPageLoading = groupA.second.second,
-            currentPage = groupA.second.third,
-            isEndReached = groupA.third,
-            localMovies = groupB.first,
-            sortConfig = groupB.second,
-            folders = groupB.third.first,
-            prefs = groupB.third.second,
+            isLoading = groupA.second,
+            isNextPageLoading = groupA.third,
+            isError = groupB.first,
+            currentPage = groupB.second,
+            isEndReached = groupB.third,
+            localMovies = groupC.first,
+            sortConfig = groupC.second,
+            folders = groupC.third.first,
+            prefs = groupC.third.second,
             type = type,
             genreName = genreName
         )
@@ -134,6 +142,7 @@ class DiscoverViewModel @Inject constructor(
                 _isLoading.value = true
                 _currentPage.value = 1
                 _isEndReached.value = false
+                _isError.value = false
             }
 
             try {
@@ -261,6 +270,9 @@ class DiscoverViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isEndReached.value = true // Prevent infinite loops on error
+                if (!isNextPage) {
+                    _isError.value = true
+                }
             } finally {
                 _isLoading.value = false
                 _isNextPageLoading.value = false
@@ -272,6 +284,10 @@ class DiscoverViewModel @Inject constructor(
         if (!_isNextPageLoading.value && !_isLoading.value && !_isEndReached.value) {
             fetchMovies(isNextPage = true)
         }
+    }
+
+    fun retry() {
+        fetchMovies(isNextPage = false)
     }
 
     fun toggleFavorite(movie: Movie) {

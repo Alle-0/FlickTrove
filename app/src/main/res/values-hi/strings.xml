@@ -1095,5 +1095,9 @@
     <string name="dept_art">कला</string>
     <string name="dept_sound">ध्वनि</string>
     <string name="dept_editing">संपादन</string>
+    <string name="discover_error">नेटवर्क त्रुटि। कृपया अपने कनेक्शन की जांच करें, एडब्लॉकर/वीपीएन अक्षम करें और पुनः प्रयास करें।</string>
+    <string name="discover_retry">पुनः प्रयास करें</string>
+    <string name="stats_map_no_movies">कोई फ़िल्म नहीं</string>
+    <string name="stats_map_movies">%1$d फ़िल्में</string>
 </resources>
 

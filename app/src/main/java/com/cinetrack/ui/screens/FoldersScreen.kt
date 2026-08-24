@@ -761,6 +761,7 @@ fun FolderCreateDialog(
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
     val focusManager = LocalFocusManager.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     var isDismissing by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
     var pendingCreate by remember { mutableStateOf<Triple<String, String, String>?>(null) }
@@ -797,10 +798,11 @@ fun FolderCreateDialog(
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = scrimAlpha))
                 .pointerInput(Unit) {
-                    detectTapGestures { 
+                    detectTapGestures(onTap = { 
                         focusManager.clearFocus()
+                        keyboardController?.hide()
                         isDismissing = true
-                    }
+                    })
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -815,8 +817,9 @@ fun FolderCreateDialog(
                         .width(320.dp)
                         .clip(RoundedCornerShape(32.dp))
                         .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp), alpha = blurAlpha)
-                        .pointerInput(Unit) {
-                            detectTapGestures { focusManager.clearFocus() }
+                        .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                         }
                         .premiumScrollbar(scrollState)
                         .verticalScroll(scrollState)
@@ -849,7 +852,7 @@ fun FolderCreateDialog(
                     value = name,
                     onValueChange = { if (it.length <= 40) name = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(stringResource(R.string.folders_name_placeholder), color = Color.White.copy(alpha = 0.3f)) },
+                    label = { Text(stringResource(R.string.folders_name_placeholder), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,

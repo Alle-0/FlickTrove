@@ -39,6 +39,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.cinetrack.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -249,7 +251,7 @@ fun WorldHeatMap(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = if (selectedCount > 0) "$selectedCount movies" else "No movies",
+                                text = if (selectedCount > 0) stringResource(R.string.stats_map_movies, selectedCount) else stringResource(R.string.stats_map_no_movies),
                                 color = accentColor,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium

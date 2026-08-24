@@ -1096,6 +1096,13 @@
     <string name="dept_editing">Edición</string>
     <string name="folder_sort_name">Nombre</string>
     <string name="folder_sort_items_count">Cantidad de Elementos</string>
+    <string name="discover_error">Error de red. Comprueba tu conexión, desactiva adblock/VPN e inténtalo de nuevo.</string>
+    <string name="discover_retry">Reintentar</string>
+
+    <string name="settings_show_general_stats">Tarjeta Estadísticas Generales</string>
+    <string name="settings_show_general_stats_desc">Muestra la tarjeta de estadísticas generales en el panel de tu perfil.</string>
+    <string name="stats_map_no_movies">Sin películas</string>
+    <string name="stats_map_movies">%1$d películas</string>
 </resources>
 
 

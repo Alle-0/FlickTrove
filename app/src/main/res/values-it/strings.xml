@@ -1088,6 +1088,13 @@
     <string name="dept_editing">Montaggio</string>
     <string name="folder_sort_name">Nome</string>
     <string name="folder_sort_items_count">Numero di Elementi</string>
+    <string name="discover_error">Errore di rete. Controlla la tua connessione, disattiva adblock/VPN e riprova.</string>
+    <string name="discover_retry">Riprova</string>
+
+    <string name="settings_show_general_stats">Scheda Statistiche Generali</string>
+    <string name="settings_show_general_stats_desc">Mostra la scheda delle statistiche generali nella dashboard del profilo.</string>
+    <string name="stats_map_no_movies">Nessun film</string>
+    <string name="stats_map_movies">%1$d film</string>
 </resources>
 
 

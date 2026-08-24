@@ -1093,6 +1093,13 @@
     <string name="dept_editing">Schnitt</string>
     <string name="folder_sort_name">Name</string>
     <string name="folder_sort_items_count">Anzahl der Elemente</string>
+    <string name="discover_error">Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung, deaktivieren Sie Adblocker/VPNs und versuchen Sie es erneut.</string>
+    <string name="discover_retry">Wiederholen</string>
+
+    <string name="settings_show_general_stats">Karte Allgemeine Statistiken</string>
+    <string name="settings_show_general_stats_desc">Zeigt die Karte mit allgemeinen Statistiken auf Ihrem Profil-Dashboard an.</string>
+    <string name="stats_map_no_movies">Keine Filme</string>
+    <string name="stats_map_movies">%1$d Filme</string>
 </resources>
 
 

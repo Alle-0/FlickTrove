@@ -1098,6 +1098,8 @@
     <string name="dept_art">Art</string>
     <string name="dept_sound">Sound</string>
     <string name="dept_editing">Editing</string>
+    <string name="discover_error">Network error. Please check your connection, disable adblockers/VPN, and try again.</string>
+    <string name="discover_retry">Retry</string>
+    <string name="stats_map_no_movies">No movies</string>
+    <string name="stats_map_movies">%1$d movies</string>
 </resources>
-
-

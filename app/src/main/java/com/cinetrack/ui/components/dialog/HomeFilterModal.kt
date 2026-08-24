@@ -63,6 +63,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.utils.verticalFadingEdges
+import com.cinetrack.ui.utils.horizontalFadingEdges
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
@@ -563,7 +564,10 @@ fun HomeFilterModal(
                             ) {
                                 val currentLang = configuration.locales[0]?.language?.lowercase() ?: java.util.Locale.getDefault().language.lowercase()
                                 val availableProviders = remember(currentLang) { ProviderConstants.getAvailableProviders(currentLang) }
+                                val providersListState = androidx.compose.foundation.lazy.rememberLazyListState()
                                 LazyRow(
+                                    state = providersListState,
+                                    modifier = Modifier.horizontalFadingEdges(providersListState, leftEdgeWidth = 16.dp, rightEdgeWidth = 16.dp),
                                     contentPadding = PaddingValues(horizontal = 12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {

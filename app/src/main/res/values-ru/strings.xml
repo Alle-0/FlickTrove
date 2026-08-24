@@ -1095,5 +1095,9 @@
     <string name="dept_art">Искусство</string>
     <string name="dept_sound">Звук</string>
     <string name="dept_editing">Монтаж</string>
+    <string name="discover_error">Ошибка сети. Пожалуйста, проверьте подключение, отключите блокировщики рекламы/VPN и попробуйте снова.</string>
+    <string name="discover_retry">Повторить</string>
+    <string name="stats_map_no_movies">Нет фильмов</string>
+    <string name="stats_map_movies">Фильмов: %1$d</string>
 </resources>
 

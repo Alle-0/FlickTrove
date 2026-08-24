@@ -106,7 +106,7 @@ fun FeedbackBottomSheet(
 
             OutlinedTextField(
                 value = message,
-                onValueChange = { if (it.length <= 500) message = it },
+                onValueChange = { if (it.length <= 2000) message = it },
                 modifier = Modifier.fillMaxWidth().height(180.dp),
                 placeholder = { Text(stringResource(R.string.feedback_hint), color = Color.White.copy(alpha = 0.2f)) },
                 colors = OutlinedTextFieldDefaults.colors(

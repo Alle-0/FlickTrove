@@ -1095,5 +1095,9 @@
     <string name="dept_art">Arte</string>
     <string name="dept_sound">Som</string>
     <string name="dept_editing">Edição</string>
+    <string name="discover_error">Erro de rede. Verifique sua conexão, desative adblockers/VPN e tente novamente.</string>
+    <string name="discover_retry">Tentar novamente</string>
+    <string name="stats_map_no_movies">Nenhum filme</string>
+    <string name="stats_map_movies">%1$d filmes</string>
 </resources>
 
