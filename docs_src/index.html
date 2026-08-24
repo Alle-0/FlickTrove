@@ -1,31 +1,33 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="it">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FlickTrove — Premium Cinema & TV Show Tracker for Android</title>
-    <meta name="description" content="The ultimate personal cinema and TV show companion for Android. Experience your personal cinema library with breathtaking style. Cloud-synced, ad-free, and meticulously designed.">
+    <meta name="description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
+    <meta name="keywords" content="FlickTrove, Android movie tracker, TV show tracker, cinema app, movie diary, watchlist manager, offline movie app, TV release reminders, cinema calendar">
+    <meta name="author" content="Alessandro (Alle-0)">
     
-    <!-- Open Graph / Twitter Cards -->
+    <!-- Open Graph / Facebook / LinkedIn / Discord -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="FlickTrove — Premium Cinema & TV Show Tracker">
-    <meta property="og:description" content="Experience your personal cinema library with breathtaking style.">
+    <meta property="og:url" content="https://alle-0.github.io/FlickTrove/">
+    <meta property="og:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
+    <meta property="og:description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
     <meta property="og:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
+    <meta name="twitter:description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
+    <meta name="twitter:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
     <link rel="icon" type="image/svg+xml" href="assets/Icon.svg">
     
-    <!-- Fonts: Inter for Body, System Default / Roboto style for Headers -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
     <!-- AOS CSS -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Feather Icons -->
-    <script src="https://unpkg.com/feather-icons"></script>
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./index.css" />
@@ -34,73 +36,37 @@
     <!-- Navbar -->
     <nav class="navbar" data-aos="fade-down" data-aos-duration="800">
       <div class="container nav-content">
-        <a href="#" class="logo">
-          <img src="assets/Icon.svg" alt="FlickTrove Logo" onerror="this.src='/favicon.png';" />
+        <div class="logo">
+          <img src="/favicon.png" alt="FlickTrove Logo" />
           FlickTrove
-        </a>
-        <div class="nav-links">
-          <a href="#features" class="nav-link">Features</a>
-          <a href="https://www.reddit.com/r/FlickTrove/" target="_blank" class="nav-link">Community</a>
-          <a href="https://github.com/Alle-0/FlickTrove" target="_blank" class="nav-link">GitHub</a>
         </div>
-        <div class="nav-actions">
-          <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn btn-primary btn-sm btn-bounce">
-            <i data-feather="download" class="icon-sm"></i> Download
-          </a>
+        <div>
+          <a href="#features" class="btn btn-glass" style="margin-right: 12px; padding: 8px 16px;">Scopri di più</a>
+          <a href="#" class="btn btn-primary" style="padding: 8px 16px;">Scarica l'App</a>
         </div>
       </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-bg-glow primary-glow"></div>
-      <div class="hero-bg-glow secondary-glow"></div>
-      
-      <div class="container hero-container">
-        <div class="hero-text-content">
-          <div class="hero-pill" data-aos="fade-up" data-aos-duration="1000">
-            <span class="pill-badge">NEW</span> <span class="pill-text">Version 2.0 is now available</span>
-          </div>
-          <h1 class="hero-title" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
-            The ultimate way to track your <span class="text-gradient">movies & shows</span>.
-          </h1>
-          <p class="hero-subtitle" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
-            Experience your personal cinema library with breathtaking style. Cloud-synced, offline-ready, and meticulously designed for Android.
-          </p>
-          <div class="hero-cta" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
-            <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn btn-primary btn-lg btn-bounce">
-              <i data-feather="download"></i> Download APK — Free
-            </a>
-            <a href="#features" class="btn btn-glass btn-lg btn-bounce">
-              Explore Features
-            </a>
-          </div>
-          <div class="social-proof" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
-            <div class="proof-item">
-              <i data-feather="check-circle"></i> 100% Ad-Free
-            </div>
-            <div class="proof-item">
-              <i data-feather="check-circle"></i> Open Source
-            </div>
-          </div>
+      <div class="container">
+        <div class="hero-pill" data-aos="zoom-in" data-aos-duration="1000">
+          ✨ La nuova versione 2.0 è ora disponibile
         </div>
-        
-        <!-- 3D Smartphone Mockup Placeholder -->
-        <div class="hero-visual" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="400">
-          <div class="smartphone-mockup">
-            <div class="smartphone-screen">
-               <div class="screen-content">
-                  <!-- Decorative UI elements mimicking the app -->
-                  <div class="app-header"></div>
-                  <div class="app-card large-card"></div>
-                  <div class="app-row">
-                    <div class="app-card small-card"></div>
-                    <div class="app-card small-card"></div>
-                  </div>
-               </div>
-            </div>
-            <div class="smartphone-glare"></div>
-          </div>
+        <h1 data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          Traccia. Scopri. <br/>Vivi le tue Serie.
+        </h1>
+        <p data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+          FlickTrove è il compagno definitivo per gli amanti del cinema. Organizza le tue visioni, crea cartelle personalizzate e analizza le tue statistiche, tutto in un'unica app dal design premium.
+        </p>
+        <div class="hero-cta" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="600">
+          <a href="#" class="btn btn-primary">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"></path></svg>
+            Scarica per Android
+          </a>
+          <a href="#features" class="btn btn-glass">
+            Esplora le Funzioni
+          </a>
         </div>
       </div>
     </section>
@@ -108,78 +74,46 @@
     <!-- Features Section -->
     <section id="features" class="features">
       <div class="container">
-        <div class="section-header" data-aos="fade-up">
-          <h2 class="section-title">Everything you need, wrapped in <span class="text-gradient-secondary">glass</span>.</h2>
-          <p class="section-subtitle">A powerful set of tools designed with a cinematic, cyberpunk-inspired aesthetic.</p>
+        <div class="features-header" data-aos="fade-up">
+          <h2>Tutto quello che ti serve</h2>
+          <p style="color: var(--text-muted); font-size: 18px;">Un set di strumenti potentissimo avvolto in un design minimale.</p>
         </div>
 
         <div class="bento-grid">
-          <!-- Card 1: Comprehensive Search -->
-          <div class="bento-card col-span-8" data-aos="fade-up" data-aos-delay="100">
-            <div class="bento-bg-gradient" style="background: radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.15) 0%, transparent 50%);"></div>
-            <div class="feature-icon icon-primary">
-              <i data-feather="search"></i>
+          <!-- Card 1 (Large) -->
+          <div class="bento-card large" data-aos="fade-up" data-aos-delay="100">
+            <div class="feature-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
             </div>
-            <div class="bento-content">
-              <h3>Comprehensive Search</h3>
-              <p>Access the entire TMDB catalog. Find movies, TV shows, explore biographical details, and discover exactly where to stream them.</p>
-            </div>
+            <h3>Statistiche Avanzate</h3>
+            <p>Ottieni insight dettagliati sulle tue abitudini di visione. Scopri i tuoi attori preferiti, i generi più visti e quanto tempo hai passato guardando le tue serie TV preferite con grafici interattivi e accattivanti.</p>
           </div>
 
-          <!-- Card 2: Notifications -->
-          <div class="bento-card col-span-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="feature-icon icon-secondary">
-              <i data-feather="bell"></i>
+          <!-- Card 2 (Small) -->
+          <div class="bento-card small" data-aos="fade-up" data-aos-delay="200">
+            <div class="feature-icon" style="color: var(--accent)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </div>
-            <div class="bento-content">
-              <h3>Smart Alerts</h3>
-              <p>Never miss a release. Receive timely alerts when a movie or TV show episode drops.</p>
-            </div>
+            <h3>Tracking Perfetto</h3>
+            <p>Segna gli episodi visti in un tocco. Non perderai mai più il filo della tua serie TV preferita.</p>
           </div>
 
-          <!-- Card 3: Custom Folders -->
-          <div class="bento-card col-span-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="feature-icon icon-tertiary">
-              <i data-feather="folder"></i>
+          <!-- Card 3 (Small) -->
+          <div class="bento-card small" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-icon" style="color: #38bdf8">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
             </div>
-            <div class="bento-content">
-              <h3>Custom Folders</h3>
-              <p>Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists.</p>
-            </div>
+            <h3>Cartelle Smart</h3>
+            <p>Crea raccolte personalizzate e tag per organizzare la tua enorme libreria di titoli senza sforzo.</p>
           </div>
 
-          <!-- Card 4: Advanced Stats -->
-          <div class="bento-card col-span-8" data-aos="fade-up" data-aos-delay="400">
-            <div class="bento-bg-gradient" style="background: radial-gradient(circle at 0% 100%, rgba(255, 64, 129, 0.15) 0%, transparent 50%);"></div>
-            <div class="feature-icon icon-pink">
-              <i data-feather="pie-chart"></i>
+          <!-- Card 4 (Large) -->
+          <div class="bento-card large" data-aos="fade-up" data-aos-delay="400">
+            <div class="feature-icon" style="color: #a78bfa">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </div>
-            <div class="bento-content">
-              <h3>Advanced Statistics</h3>
-              <p>Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema.</p>
-            </div>
-          </div>
-
-          <!-- Card 5: Cloud Sync -->
-          <div class="bento-card col-span-6" data-aos="fade-up" data-aos-delay="500">
-            <div class="feature-icon icon-primary">
-              <i data-feather="cloud"></i>
-            </div>
-            <div class="bento-content">
-              <h3>Cloud Sync</h3>
-              <p>Native support for Firebase to securely save your data. Your personal library, accessible everywhere.</p>
-            </div>
-          </div>
-
-          <!-- Card 6: Offline First -->
-          <div class="bento-card col-span-6" data-aos="fade-up" data-aos-delay="600">
-             <div class="feature-icon icon-tertiary">
-              <i data-feather="wifi-off"></i>
-            </div>
-            <div class="bento-content">
-              <h3>Offline-First</h3>
-              <p>Access your library even without an internet connection, thanks to solid local caching.</p>
-            </div>
+            <h3>Sincronizzazione Cloud</h3>
+            <p>I tuoi dati sono al sicuro e sincronizzati su tutti i tuoi dispositivi. Goditi FlickTrove ovunque tu sia, e mantieni i tuoi progressi sempre aggiornati con un semplice tap, senza configurazioni complesse.</p>
           </div>
         </div>
       </div>
@@ -188,60 +122,29 @@
     <!-- Footer -->
     <footer>
       <div class="container">
-        <div class="footer-top">
-          <div class="footer-brand">
-            <div class="logo">
-              <img src="assets/Icon.svg" alt="FlickTrove Logo" onerror="this.src='/favicon.png';" />
-              FlickTrove
-            </div>
-            <p class="footer-tagline">Developed with passion for movie and TV show lovers.</p>
+        <div class="footer-content">
+          <div class="logo" style="font-size: 20px;">
+            <img src="/favicon.png" alt="Logo" style="width: 24px; height: 24px;"/>
+            FlickTrove
           </div>
-          <div class="footer-links-group">
-            <h4>Community</h4>
-            <a href="https://www.reddit.com/r/FlickTrove/" target="_blank">Reddit</a>
-            <a href="https://github.com/Alle-0/FlickTrove" target="_blank">GitHub</a>
-          </div>
-          <div class="footer-links-group">
-            <h4>Legal</h4>
+          <div class="footer-links">
             <a href="/privacy.html">Privacy Policy</a>
-            <a href="/terms.html">Terms of Service</a>
-          </div>
-          <div class="footer-cta">
-             <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn btn-primary btn-bounce">Download APK</a>
+            <a href="/terms.html">Termini di Servizio</a>
+            <a href="mailto:support@flicktrove.com">Supporto</a>
           </div>
         </div>
-        <div class="footer-bottom">
-          <div class="copyright">
-            &copy; 2026 Alessandro Basile. All rights reserved.
-          </div>
-          <div class="developer-credit">
-            Developed by <strong>Alessandro Basile</strong>
-          </div>
+        <div class="copyright">
+          &copy; 2026 FlickTrove. Tutti i diritti riservati.
         </div>
       </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-      // Initialize Feather Icons
-      feather.replace();
-      
-      // Initialize AOS Animations
       AOS.init({
         once: true,
         offset: 50,
-        easing: 'ease-out-cubic',
-      });
-      
-      // Add Navbar Scroll Effect
-      const navbar = document.querySelector('.navbar');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 20) {
-          navbar.classList.add('scrolled');
-        } else {
-          navbar.classList.remove('scrolled');
-        }
       });
     </script>
   </body>
