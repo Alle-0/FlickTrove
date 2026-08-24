@@ -5770,3 +5770,30 @@ section {
     font-size: 2.5rem;
   }
 }
+
+/* Visual Weight Reduction Tweaks */
+.universal-import-section {
+  padding: 4rem 1rem 1rem !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+}
+.flow-pipeline-section {
+  padding: 1rem 1rem 4rem !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+}
+.universal-import-section .hub-header h2,
+.flow-pipeline-section .section-header h2 {
+  font-size: 1.8rem !important;
+  margin-bottom: 0.5rem !important;
+}
+.universal-import-section .hub-header p,
+.flow-pipeline-section .section-header p {
+  font-size: 0.95rem !important;
+}
+.cyber-migration-hub,
+.pipeline-container {
+  padding: 1.5rem !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
