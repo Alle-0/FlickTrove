@@ -5853,3 +5853,11 @@ section {
 .kofi-btn:hover svg {
   transform: scale(1.1) rotate(-5deg);
 }
+
+@media (max-width: 900px) {
+  .feature-image img { max-width: 240px; }
+}
+
+@media (max-width: 480px) {
+  .feature-image img { max-width: 190px; }
+}
