@@ -110,25 +110,25 @@ body {
 .bg-glow-2 {
   position: fixed;
   border-radius: 50%;
-  filter: blur(8px);
+  filter: blur(120px);
   z-index: -1;
   pointer-events: none;
-  opacity: 0.25;
+  opacity: 0.35;
 }
 
 .bg-glow-1 {
-  width: 500px;
-  height: 500px;
-  top: -100px;
-  left: 5%;
+  width: 600px;
+  height: 600px;
+  top: -150px;
+  left: -150px;
   background: radial-gradient(circle, var(--accent-teal), transparent 70%);
 }
 
 .bg-glow-2 {
   width: 550px;
   height: 550px;
-  bottom: 5%;
-  right: -5%;
+  bottom: -100px;
+  right: -100px;
   background: radial-gradient(circle, var(--accent-purple), transparent 70%);
 }
 
