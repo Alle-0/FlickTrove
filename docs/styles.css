@@ -5804,7 +5804,6 @@ section {
   text-align: center;
   position: relative;
   z-index: 10;
-  background: radial-gradient(circle at center, rgba(255, 94, 91, 0.05) 0%, transparent 60%);
 }
 
 .support-container {
@@ -5821,39 +5820,6 @@ section {
   margin: 1.5rem 0 1rem;
 }
 
-.kofi-glow-border::before {
-  background: conic-gradient(from 0deg, transparent 0%, #FF5E5B 15%, #FFB300 35%, #FF5E5B 50%, #FFB300 70%, transparent 100%);
-}
-
-.kofi-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #FF5E5B;
-  color: #ffffff !important;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 14px 32px;
-  border-radius: 9999px;
-  text-decoration: none;
-  box-shadow: 0 8px 25px rgba(255, 94, 91, 0.4);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.kofi-btn:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 35px rgba(255, 94, 91, 0.6);
-  background: #ff7572;
-}
-
-.kofi-btn svg {
-  transition: transform 0.3s ease;
-}
-
-.kofi-btn:hover svg {
-  transform: scale(1.1) rotate(-5deg);
-}
-
 @media (max-width: 900px) {
   .feature-image img { max-width: 240px; }
 }
@@ -5861,3 +5827,4 @@ section {
 @media (max-width: 480px) {
   .feature-image img { max-width: 190px; }
 }
+
