@@ -130,13 +130,21 @@ fun DetailActions(
     }
 
     val mainPillAlpha by transition.animateFloat(
-        transitionSpec = { tween(300) },
+        transitionSpec = { 
+            if (targetState == WatchState.WATCHED) {
+                tween(300, delayMillis = 300) // Fade later, after width starts shrinking
+            } else if (initialState == WatchState.WATCHED) {
+                tween(400) 
+            } else {
+                tween(300, delayMillis = 100)
+            }
+        },
         label = "MainPillAlpha"
     ) { state ->
-        1f // Pill always visible for icon
+        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
     }
 
-    val isPillVisible = true
+    val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
     val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
 
     val spacing by transition.animateDp(
@@ -233,7 +241,7 @@ fun DetailActions(
         val maxAvailableWidth = maxWidth
         
         val targetPillWidth = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType == "movie") {
-            56.dp
+            0.dp
         } else {
             maxAvailableWidth - spacing - trashWidth
         }
@@ -249,11 +257,9 @@ fun DetailActions(
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-
             // Main Action Pill morphs into a circle for movies when WATCHED
             Box(
                 modifier = Modifier
@@ -261,7 +267,7 @@ fun DetailActions(
                     .fillMaxHeight()
                     .graphicsLayer { 
                         alpha = mainPillAlpha
-                        transformOrigin = TransformOrigin(1f, 0.5f) // Anchor to Right
+                        transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
                     }
                     .hazeGlass(
                         state = hazeState,
@@ -465,10 +471,15 @@ fun DetailActions(
             contentAlignment = Alignment.Center
         ) {
             if (trashWidth > 20.dp) {
-                var isTrashMode by remember { mutableStateOf(optimisticWatchState != WatchState.DROPPED) }
+                var isTrashMode by remember { mutableStateOf(
+                    if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) false 
+                    else optimisticWatchState != WatchState.DROPPED
+                ) }
 
                 LaunchedEffect(optimisticWatchState) {
                     if (optimisticWatchState == WatchState.DROPPED) {
+                        isTrashMode = false
+                    } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
                         isTrashMode = false
                     } else if (optimisticWatchState != WatchState.NONE) {
                         isTrashMode = true
@@ -496,14 +507,16 @@ fun DetailActions(
                                 detectVerticalDragGestures(
                                     onDragStart = { dragAccumulator = 0f },
                                     onVerticalDrag = { change, dragAmount ->
-                                        if (movie.mediaType != "tv") return@detectVerticalDragGestures
                                         change.consume()
                                         dragAccumulator += dragAmount
                                         if (isTrashMode && dragAccumulator > 0f) dragAccumulator = 0f
                                         if (!isTrashMode && dragAccumulator < 0f) dragAccumulator = 0f
                                         
                                         if (isTrashMode && dragAccumulator < -30f) {
-                                            if (optimisticWatchState != WatchState.WATCHED) {
+                                            if (movie.mediaType == "tv" && optimisticWatchState != WatchState.WATCHED) {
+                                                isTrashMode = false
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
                                                 isTrashMode = false
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             }
@@ -524,12 +537,16 @@ fun DetailActions(
                                         try { awaitRelease() } finally { isSideButtonPressed = false }
                                     },
                                     onTap = { 
-                                        if (isTrashMode || movie.mediaType != "tv") {
+                                        if (isTrashMode) {
                                             onRemove()
                                         } else {
-                                            val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
-                                            optimisticWatchState = next
-                                            onStateChange(next)
+                                            if (movie.mediaType == "tv") {
+                                                val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
+                                                optimisticWatchState = next
+                                                onStateChange(next)
+                                            } else {
+                                                onManageRewatches?.invoke()
+                                            }
                                         }
                                     }
                                 )
@@ -542,7 +559,7 @@ fun DetailActions(
                         contentAlignment = Alignment.Center
                     ) {
                         AnimatedContent(
-                            targetState = isTrashMode || movie.mediaType != "tv",
+                            targetState = isTrashMode,
                             transitionSpec = {
                                 if (targetState) {
                                     slideInVertically { height -> -height } + fadeIn() togetherWith slideOutVertically { height -> height } + fadeOut()
@@ -577,18 +594,19 @@ fun DetailActions(
                                 ) {
                                     // Layer 1: static box/container - never animates
                                     Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_box),
+                                        imageVector = if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_drop_box) else ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.8f),
                                         modifier = Modifier.size(24.dp)
                                     )
                                     // Layer 2: only the arrow animates, clipped to the button circle
-                                    Box(
-                                        modifier = Modifier
-                                            .size(56.dp)
-                                            .clip(CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
+                                    if (movie.mediaType == "tv") {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(56.dp)
+                                                .clip(CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
                                         androidx.compose.animation.AnimatedContent(
                                             targetState = optimisticWatchState == WatchState.DROPPED,
                                             transitionSpec = {
