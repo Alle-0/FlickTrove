@@ -116,33 +116,14 @@ fun DetailActions(
     ) { if (it != WatchState.NONE && movie.isReleased) 68.dp else 0.dp }
 
     val mainPillWeight by transition.animateFloat(
-        transitionSpec = {
-            if (targetState == WatchState.WATCHED) {
-                tween(800, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
-            } else {
-                // Expand smoothly so the user can see it grow from left to right
-                spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow)
-            }
-        },
+        transitionSpec = { spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow) },
         label = "MainPillWeight"
-    ) { state ->
-        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
-    }
+    ) { 1f }
 
     val mainPillAlpha by transition.animateFloat(
-        transitionSpec = { 
-            if (targetState == WatchState.WATCHED) {
-                tween(300, delayMillis = 300) // Fade later, after width starts shrinking
-            } else if (initialState == WatchState.WATCHED) {
-                tween(400) 
-            } else {
-                tween(300, delayMillis = 100)
-            }
-        },
+        transitionSpec = { tween(300) },
         label = "MainPillAlpha"
-    ) { state ->
-        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
-    }
+    ) { 1f }
 
     val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
     val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
@@ -240,11 +221,7 @@ fun DetailActions(
     ) {
         val maxAvailableWidth = maxWidth
         
-        val targetPillWidth = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType == "movie") {
-            0.dp
-        } else {
-            maxAvailableWidth - spacing - trashWidth
-        }
+        val targetPillWidth = maxAvailableWidth - spacing - trashWidth
         
         val pillWidth by animateDpAsState(
             targetValue = targetPillWidth,
@@ -392,7 +369,7 @@ fun DetailActions(
                     )
                 }
 
-                if (label.isNotEmpty() && (movie.mediaType == "tv" || optimisticWatchState != WatchState.WATCHED)) {
+                if (label.isNotEmpty()) {
                     Spacer(modifier = Modifier.width(10.dp))
                     AnimatedContent(
                         targetState = displayWatchState,
@@ -640,7 +617,7 @@ fun DetailActions(
                             }
                         }
                     }
-                     if (movie.mediaType == "tv" && optimisticWatchState != WatchState.WATCHED) {
+                     if (optimisticWatchState != WatchState.NONE) {
                         val topOffset by animateDpAsState(
                             targetValue = if (isTrashMode) 0.dp else 8.dp,
                             animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 1500f else 200f),
