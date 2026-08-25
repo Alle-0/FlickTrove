@@ -472,17 +472,12 @@ fun DetailActions(
         ) {
             if (trashWidth > 20.dp) {
                 var isTrashMode by remember { mutableStateOf(
-                    if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) false 
-                    else optimisticWatchState != WatchState.DROPPED
+                    if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
                 ) }
 
                 LaunchedEffect(optimisticWatchState) {
-                    if (optimisticWatchState == WatchState.DROPPED) {
-                        isTrashMode = false
-                    } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
-                        isTrashMode = false
-                    } else if (optimisticWatchState != WatchState.NONE) {
-                        isTrashMode = true
+                    if (optimisticWatchState != WatchState.NONE) {
+                        isTrashMode = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
                     }
                 }
 
@@ -513,7 +508,7 @@ fun DetailActions(
                                         if (!isTrashMode && dragAccumulator < 0f) dragAccumulator = 0f
                                         
                                         if (isTrashMode && dragAccumulator < -30f) {
-                                            if (movie.mediaType == "tv" && optimisticWatchState != WatchState.WATCHED) {
+                                            if (movie.mediaType == "tv") {
                                                 isTrashMode = false
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
@@ -704,4 +699,4 @@ fun DetailActions(
             }
         }
     }
-}
+}}
