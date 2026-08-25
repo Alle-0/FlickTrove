@@ -74,6 +74,7 @@ fun DetailActions(
     onStateChange: (WatchState) -> Unit,
     onRemove: () -> Unit,
     onEpisodesClick: (() -> Unit)? = null,
+    onManageRewatches: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -215,7 +216,7 @@ fun DetailActions(
         }
         displayWatchState == WatchState.WATCHED -> {
             if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
-            else ImageVector.vectorResource(id = R.drawable.ic_tick)
+            else ImageVector.vectorResource(id = R.drawable.ic_ricarica)
         }
         else -> ImageVector.vectorResource(id = R.drawable.ic_lista_plus)
     }
@@ -232,24 +233,44 @@ fun DetailActions(
         else -> ""
     }
 
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
-            .height(56.dp),
-        horizontalArrangement = Arrangement.Start, // Changed to Start to facilitate leftward shrink
-        verticalAlignment = Alignment.CenterVertically
+            .height(56.dp)
     ) {
-        // Main Action Pill
-        if (mainPillWeight > 0.005f) {
+        val maxAvailableWidth = maxWidth
+        
+        val targetPillWidth = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType == "movie") {
+            56.dp
+        } else {
+            maxAvailableWidth - spacing - trashWidth
+        }
+        
+        val pillWidth by animateDpAsState(
+            targetValue = targetPillWidth,
+            animationSpec = spring(
+                dampingRatio = 0.8f,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "PillWidth"
+        )
+
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Main Action Pill morphs into a circle for movies when WATCHED
             Box(
                 modifier = Modifier
-                    .weight(mainPillWeight)
+                    .width(pillWidth)
                     .fillMaxHeight()
                     .graphicsLayer { 
                         alpha = mainPillAlpha
-                        // Remove scaleX and scaleY to prevent Haze misalignment (ritardo)
-                        transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
+                        transformOrigin = TransformOrigin(1f, 0.5f) // Anchor to Right
                     }
                     .hazeGlass(
                         state = hazeState,
@@ -285,14 +306,18 @@ fun DetailActions(
                                     onEpisodesClick?.invoke()
                                 }
                             } else {
-                                val next = when (optimisticWatchState) {
-                                    WatchState.NONE -> WatchState.BOOKMARKED
-                                    WatchState.BOOKMARKED -> WatchState.WATCHED
-                                    WatchState.WATCHED -> WatchState.NONE
-                                    WatchState.DROPPED -> WatchState.BOOKMARKED
+                                if (optimisticWatchState == WatchState.WATCHED) {
+                                    onManageRewatches?.invoke()
+                                } else {
+                                    val next = when (optimisticWatchState) {
+                                        WatchState.NONE -> WatchState.BOOKMARKED
+                                        WatchState.BOOKMARKED -> WatchState.WATCHED
+                                        WatchState.WATCHED -> WatchState.NONE
+                                        WatchState.DROPPED -> WatchState.BOOKMARKED
+                                    }
+                                    optimisticWatchState = next
+                                    onStateChange(next)
                                 }
-                                optimisticWatchState = next
-                                onStateChange(next)
                             }
                         }
                     )
@@ -431,12 +456,6 @@ fun DetailActions(
             }
         }
     }
-
-        // Filler to push pill to the left when it shrinks
-        val fillerWeight = 1f - mainPillWeight
-        if (fillerWeight > 0.005f) {
-            Spacer(modifier = Modifier.weight(fillerWeight))
-        }
 
         if (spacing > 0.01.dp) {
             Spacer(modifier = Modifier.width(spacing))

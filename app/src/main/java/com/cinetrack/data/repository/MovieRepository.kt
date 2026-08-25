@@ -13,6 +13,7 @@ import com.cinetrack.data.local.dao.CacheDao
 import com.cinetrack.data.local.dao.FavoriteDao
 import com.cinetrack.data.local.dao.FolderDao
 import com.cinetrack.data.local.dao.SearchHistoryDao
+import com.cinetrack.data.local.dao.WatchHistoryDao
 import com.cinetrack.data.remote.FirebaseRemoteDataSource
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
@@ -54,6 +55,7 @@ class MovieRepository @Inject constructor(
     private val folderDao: FolderDao,
     private val cacheDao: CacheDao,
     private val searchHistoryDao: SearchHistoryDao,
+    private val watchHistoryDao: WatchHistoryDao,
     private val tmdbService: TMDBService,
     private val omdbService: OmdbService,
     private val traktService: TraktService,
@@ -1441,6 +1443,15 @@ class MovieRepository @Inject constructor(
             awaitClose { listener.remove() }
         }
     }
+    // --- Watch History ---
+    suspend fun getWatchHistoryForMovie(movieId: Long) = watchHistoryDao.getWatchHistoryForMovie(movieId)
+    fun getWatchHistoryForMovieFlow(movieId: Long) = watchHistoryDao.getWatchHistoryForMovieFlow(movieId)
+    fun getAllWatchHistoryFlow() = watchHistoryDao.getAllWatchHistoryFlow()
+    suspend fun getAllWatchHistory() = watchHistoryDao.getAllWatchHistory()
+    suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.insert(history)
+    suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.update(history)
+    suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.delete(history)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryDao.deleteByMovieId(movieId)
 }
 
 data class TraktRatingInfo(val rating: Double?, val votes: Int)

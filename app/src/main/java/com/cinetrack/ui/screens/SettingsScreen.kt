@@ -348,7 +348,6 @@ fun SettingsScreenContent(
     var showWipeTotalDataConfirm by remember { mutableStateOf(false) }
     var showBackupDialog by remember { mutableStateOf(false) }
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
-    var pendingMigrationFilePath by remember { mutableStateOf<String?>(null) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -401,7 +400,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showDeepSyncConfirm || pendingMigrationFilePath != null
+                           showDeepSyncConfirm
 
     var showUnmatchedItemsModal by remember { mutableStateOf(false) }
     val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
@@ -423,7 +422,6 @@ fun SettingsScreenContent(
         showWipeLocalDataConfirm = false
         showWipeTotalDataConfirm = false
         var showUnmatchedItemsModal = false
-        pendingMigrationFilePath = null
     }
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
@@ -464,7 +462,6 @@ fun SettingsScreenContent(
             showLogoutConfirm = false
             showBackupDialog = false
             showExternalMigrationDialog = false
-            pendingMigrationFilePath = null
         }
     }
 
@@ -522,7 +519,7 @@ fun SettingsScreenContent(
                 context.contentResolver.openInputStream(it)?.use { stream ->
                     val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
                     tempFile.outputStream().use { out -> stream.copyTo(out) }
-                    pendingMigrationFilePath = tempFile.absolutePath
+                    settingsViewModel.migrateExternalFile(tempFile.absolutePath)
                 }
             } catch (e: Exception) {
                 // Error handling is managed by ViewModel
@@ -904,29 +901,6 @@ fun SettingsScreenContent(
             onImport = {
                 showExternalMigrationDialog = false
                 externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/zip", "application/x-zip-compressed", "application/octet-stream", "*/*"))
-            }
-        )
-
-        SettingsRewatchMigrationDialog(
-            visible = pendingMigrationFilePath != null,
-            activeHazeState = activeHazeState,
-            onDismiss = {
-                pendingMigrationFilePath?.let { path ->
-                    try { File(path).delete() } catch (_: Exception) {}
-                }
-                pendingMigrationFilePath = null
-            },
-            onKeepLatest = {
-                pendingMigrationFilePath?.let { path ->
-                    settingsViewModel.migrateExternalFile(path, keepLatestWatchDate = true)
-                }
-                pendingMigrationFilePath = null
-            },
-            onKeepFirst = {
-                pendingMigrationFilePath?.let { path ->
-                    settingsViewModel.migrateExternalFile(path, keepLatestWatchDate = false)
-                }
-                pendingMigrationFilePath = null
             }
         )
 

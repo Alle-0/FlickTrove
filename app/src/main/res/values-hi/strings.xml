@@ -914,10 +914,6 @@
     <string name="onboarding_slide5_sub">छोड़े गए शो छिपाएँ</string>
     <string name="onboarding_slide5_desc">बीच में ही कोई शो छोड़ दिया? इसे \'छोड़ दी गई\' के रूप में चिह्नित करने के लिए हटाएँ बटन पर ऊपर की ओर स्वाइप करें ताकि यह आपको न देखे गए एपिसोड के लिए परेशान करना बंद कर दे, जबकि आपने जो देखा है उसका ट्रैक भी रखे।</string>
     <string name="settings_review_tutorial">स्वागत ट्यूटोरियल फिर से चलाएं</string>
-    <string name="import_rewatch_dialog_title">फिर से देखने का प्रबंधन (कई बार देखा गया)</string>
-    <string name="import_rewatch_dialog_desc">इम्पोर्ट की गई फ़ाइल में अलग-अलग तारीखों में कई बार देखी गई फ़िल्में हो सकती हैं। आप डुप्लिकेट प्रविष्टियों के लिए कौन सी देखने की तारीख रखना चाहेंगे?</string>
-    <string name="import_rewatch_keep_latest">नवीनतम तारीख (सबसे हालिया)</string>
-    <string name="import_rewatch_keep_first">पहली तारीख (ऐतिहासिक)</string>
     <string name="collection_badge_movies_plural">%1$d फ़िल्में</string>
     <string name="collection_badge_movies_single">%1$d फ़िल्म</string>
     <string name="collection_badge_movies_plus">%1$d+ फ़िल्में</string>
@@ -1099,5 +1095,6 @@
     <string name="discover_retry">पुनः प्रयास करें</string>
     <string name="stats_map_no_movies">कोई फ़िल्म नहीं</string>
     <string name="stats_map_movies">%1$d फ़िल्में</string>
+    <string name="feedback_roadmap_note">क्या आपके पास कोई जटिल विचार है या आप रोडमैप पर चर्चा करना चाहते हैं? r/FlickTrove से जुड़ें या GitHub पर एक Issue खोलें!</string>
 </resources>
 

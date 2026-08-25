@@ -3,6 +3,8 @@ package com.cinetrack.data.repository
 import com.cinetrack.data.local.dao.FavoriteDao
 import com.cinetrack.data.local.dao.FolderDao
 import com.cinetrack.data.local.entities.FolderEntity
+import com.cinetrack.data.local.dao.WatchHistoryDao
+import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.data.model.BackupData
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.importers.TraktJsonImporter
@@ -27,6 +29,7 @@ import javax.inject.Singleton
 class BackupRepository @Inject constructor(
     private val favoriteDao: FavoriteDao,
     private val folderDao: FolderDao,
+    private val watchHistoryDao: WatchHistoryDao,
     private val preferenceRepository: PreferenceRepository,
     private val traktJsonImporter: TraktJsonImporter,
     private val traktZipImporter: TraktZipImporter,
@@ -128,33 +131,28 @@ class BackupRepository @Inject constructor(
 
     suspend fun migrateTraktStream(
         inputStream: InputStream,
-        keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> },
         fileName: String? = null
     ): Int = traktJsonImporter.migrateTraktStream(
         inputStream = inputStream,
-        keepLatestWatchDate = keepLatestWatchDate,
         onProgress = onProgress,
         fileName = fileName
-    ) { items, keepLatest, cb ->
-        processAndSaveImportedItems(items, keepLatest, cb)
+    ) { items, cb ->
+        processAndSaveImportedItems(items, cb)
     }
 
     private suspend fun migrateTvTimeGdprZip(
         zipEntries: Map<String, ByteArray>,
-        keepLatestWatchDate: Boolean,
         onProgress: suspend (Int, Int) -> Unit
     ): Int = tvTimeGdprImporter.migrateTvTimeGdprZip(
         zipEntries = zipEntries,
-        keepLatestWatchDate = keepLatestWatchDate,
         onProgress = onProgress
-    ) { items, keepLatest, cb ->
-        processAndSaveImportedItems(items, keepLatest, cb)
+    ) { items, cb ->
+        processAndSaveImportedItems(items, cb)
     }
 
     suspend fun migrateZipStream(
         inputStream: InputStream,
-        keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
     ): Int = withContext(Dispatchers.IO) {
         val zipEntries = mutableMapOf<String, ByteArray>()
@@ -186,13 +184,13 @@ class BackupRepository @Inject constructor(
         }
 
         if (isTvTimeGdpr) {
-            return@withContext migrateTvTimeGdprZip(zipEntries, keepLatestWatchDate, onProgress)
+            return@withContext migrateTvTimeGdprZip(zipEntries, onProgress)
         }
 
         // Dedicated Trakt export handler: processes each file with the correct semantics
         if (traktZipImporter.isTraktExport(zipEntries.keys)) {
             return@withContext traktZipImporter.import(zipEntries) { items ->
-                processAndSaveImportedItems(items, keepLatestWatchDate, onProgress)
+                processAndSaveImportedItems(items, onProgress)
             }
         }
 
@@ -203,11 +201,11 @@ class BackupRepository @Inject constructor(
                 val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
                 val count = if (isJson) {
                     java.io.ByteArrayInputStream(entryBytes).use { 
-                        migrateTraktStream(it, keepLatestWatchDate, onProgress, fileName = name) 
+                        migrateTraktStream(it, onProgress, fileName = name) 
                     }
                 } else {
                     java.io.ByteArrayInputStream(entryBytes).use { 
-                        migrateCsvStream(it, keepLatestWatchDate, onProgress, fileName = name) 
+                        migrateCsvStream(it, onProgress, fileName = name) 
                     }
                 }
                 totalCount += count
@@ -220,21 +218,18 @@ class BackupRepository @Inject constructor(
 
     suspend fun migrateCsvStream(
         inputStream: InputStream,
-        keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> },
         fileName: String? = null
     ): Int = universalCsvImporter.migrateCsvStream(
         inputStream = inputStream,
-        keepLatestWatchDate = keepLatestWatchDate,
         onProgress = onProgress,
         fileName = fileName
-    ) { items, keepLatest, cb ->
-        processAndSaveImportedItems(items, keepLatest, cb)
+    ) { items, cb ->
+        processAndSaveImportedItems(items, cb)
     }
 
     internal suspend fun processAndSaveImportedItems(
         itemsWithFolders: List<Pair<Movie, String?>>,
-        keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> }
     ) = withContext(Dispatchers.IO) {
         val mergedIncoming = mutableMapOf<String, Movie>()
@@ -277,13 +272,15 @@ class BackupRepository @Inject constructor(
                 val exWatched = existing.watchedAt
                 val mWatched = m.watchedAt
                 val bestWatchedAt = when {
-                    exWatched != null && mWatched != null -> if (keepLatestWatchDate) {
-                        if (exWatched > mWatched) exWatched else mWatched
-                    } else {
-                        if (exWatched < mWatched) exWatched else mWatched
+                    exWatched != null && mWatched != null -> {
+                        if (exWatched > mWatched) exWatched else mWatched // Always keep latest
                     }
                     else -> exWatched ?: mWatched
                 }
+
+                existing.extractedWatchDates.addAll(m.extractedWatchDates)
+                if (mWatched != null) existing.extractedWatchDates.add(mWatched)
+                if (exWatched != null) existing.extractedWatchDates.add(exWatched)
 
                 mergedIncoming[key] = existing.copy(
                     posterPath = existing.posterPath ?: m.posterPath,
@@ -316,6 +313,18 @@ class BackupRepository @Inject constructor(
             val local = favoriteDao.getById(incoming.id, incoming.mediaType ?: "movie")
             if (local == null) {
                 favoriteDao.insert(incoming)
+                // Insert into WatchHistoryDao
+                val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
+                if (incoming.watchedAt != null) watchDatesToInsert.add(incoming.watchedAt!!)
+                watchDatesToInsert.forEach { date ->
+                    watchHistoryDao.insert(
+                        WatchHistoryEntity(
+                            movieId = incoming.id,
+                            watchedAt = date
+                        )
+                    )
+                }
+
                 val newRating = incoming.personalRating
                 if (newRating != null && newRating > 0.0) {
                     repositoryScope.launch {
@@ -341,10 +350,8 @@ class BackupRepository @Inject constructor(
                 val locWatched = local.watchedAt
                 val incWatched = incoming.watchedAt
                 val bestWatchedAt = when {
-                    locWatched != null && incWatched != null -> if (keepLatestWatchDate) {
-                        if (locWatched > incWatched) locWatched else incWatched
-                    } else {
-                        if (locWatched < incWatched) locWatched else incWatched
+                    locWatched != null && incWatched != null -> {
+                        if (locWatched > incWatched) locWatched else incWatched // Always keep latest
                     }
                     else -> locWatched ?: incWatched
                 }
@@ -370,6 +377,18 @@ class BackupRepository @Inject constructor(
                 )
                 favoriteDao.insert(updated)
                 
+                // Insert into WatchHistoryDao
+                val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
+                if (incWatched != null) watchDatesToInsert.add(incWatched)
+                watchDatesToInsert.forEach { date ->
+                    watchHistoryDao.insert(
+                        WatchHistoryEntity(
+                            movieId = updated.id,
+                            watchedAt = date
+                        )
+                    )
+                }
+
                 val newRating = updated.personalRating
                 val oldRating = local.personalRating
                 

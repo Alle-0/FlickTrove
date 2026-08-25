@@ -88,11 +88,22 @@ class CycleMovieStatusUseCase @Inject constructor(
                             clientUpdatedAt = System.currentTimeMillis()
                         )
                     } else {
+                        val watchedDate = java.time.Instant.now().toString()
+                        
+                        // Insert first watch history
+                        repository.insertWatchHistory(
+                            com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                movieId = current.id,
+                                watchedAt = watchedDate,
+                                isRewatch = false
+                            )
+                        )
+                        
                         current.copy(
                             favorite = false,
                             reminder = false,
                             watched = true,
-                            watchedAt = java.time.Instant.now().toString(),
+                            watchedAt = watchedDate,
                             dropped = false,
                             clientUpdatedAt = System.currentTimeMillis()
                         )
@@ -133,15 +144,33 @@ class CycleMovieStatusUseCase @Inject constructor(
                 }
             }
         }
+        var finalUpdated = updated
+        if (finalUpdated.mediaType == "tv" && (finalUpdated.favorite || finalUpdated.reminder)) {
+            try {
+                val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                val targetSeasonNum = finalUpdated.seasons?.firstOrNull { !it.airDate.isNullOrBlank() && it.airDate >= today }?.seasonNumber
+                    ?: finalUpdated.nextEpisodeString?.substringAfter("S")?.substringBefore("E")?.toIntOrNull()
+                
+                if (targetSeasonNum != null && targetSeasonNum > 0) {
+                    val detailedSeason = repository.fetchSeasonDetails(finalUpdated.id, targetSeasonNum)
+                    finalUpdated = finalUpdated.copy(
+                        seasons = finalUpdated.seasons?.map { if (it.seasonNumber == targetSeasonNum) detailedSeason else it }
+                    )
+                }
+            } catch (e: Exception) {
+                // Ignore failure; background workers will eventually sync this
+                android.util.Log.e("CycleMovieStatusUseCase", "cycleMovieStatus: Failed to fetch season details", e)
+            }
+        }
+
+        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: [${finalUpdated.title}] isReleased=${finalUpdated.isReleased} (date=${finalUpdated.releaseDate})")
+        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus END: id=${finalUpdated.id}, watched=${finalUpdated.watched}, fav=${finalUpdated.favorite}, rem=${finalUpdated.reminder}")
         
-        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: [${updated.title}] isReleased=${updated.isReleased} (date=${updated.releaseDate})")
-        android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus END: id=${updated.id}, watched=${updated.watched}, fav=${updated.favorite}, rem=${updated.reminder}")
-        
-        if (updated != current) {
+        if (finalUpdated != current) {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Saving updated movie")
-            repository.saveMovie(updated)
+            repository.saveMovie(finalUpdated)
             // Trigger background fetch for missing metadata (runtime, cast) using partial update to avoid race conditions
-            repository.fetchMissingDetailsAsync(updated)
+            repository.fetchMissingDetailsAsync(finalUpdated)
         } else {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: No changes to save")
         }

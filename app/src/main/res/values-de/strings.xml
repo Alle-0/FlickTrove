@@ -910,10 +910,6 @@
     <string name="onboarding_slide5_sub">ABGEBROCHENE SERIEN AUSBLENDEN</string>
     <string name="onboarding_slide5_desc">Eine Serie mittendrin abgebrochen? Wische auf dem Löschen-Button nach oben, um sie als ‚Abgebrochen‘ zu markieren, damit sie dich nicht mehr wegen ungesehener Episoden nervt, während du trotzdem den Überblick behältst.</string>
     <string name="settings_review_tutorial">Willkommens-Tutorial erneut abspielen</string>
-    <string name="import_rewatch_dialog_title">Umgang mit Mehrfachsichtungen</string>
-    <string name="import_rewatch_dialog_desc">Die importierte Datei enthält möglicherweise Filme, die mehrmals an verschiedenen Daten gesehen wurden. Welches Sehdatum möchtest du für doppelte Einträge behalten?</string>
-    <string name="import_rewatch_keep_latest">Neuestes Datum (Aktuellstes)</string>
-    <string name="import_rewatch_keep_first">Erstes Datum (Historisch)</string>
     <string name="collection_badge_movies_plural">%1$d FILME</string>
     <string name="collection_badge_movies_single">%1$d FILM</string>
     <string name="collection_badge_movies_plus">%1$d+ FILME</string>
@@ -1100,6 +1096,7 @@
     <string name="settings_show_general_stats_desc">Zeigt die Karte mit allgemeinen Statistiken auf Ihrem Profil-Dashboard an.</string>
     <string name="stats_map_no_movies">Keine Filme</string>
     <string name="stats_map_movies">%1$d Filme</string>
+    <string name="feedback_roadmap_note">Haben Sie eine komplexe Idee oder möchten Sie die Roadmap diskutieren? Treten Sie r/FlickTrove bei oder eröffnen Sie ein Issue auf GitHub!</string>
 </resources>
 
 

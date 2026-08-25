@@ -26,9 +26,11 @@ import java.util.Calendar
 import kotlinx.collections.immutable.ImmutableList
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.*
@@ -70,6 +73,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -251,32 +255,37 @@ fun StatsScreenContent(
                                     Spacer(Modifier.height(paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp))
 
                                     // ── Year Selection Button (Top Bar Style) ─────────────────
-                                    Box(
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 24.dp, vertical = 20.dp)
+                                            .padding(horizontal = 24.dp, vertical = 20.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        Text(
+                                            text = when (val range = uiState.timeRange) {
+                                                is TimeRange.AllTime -> stringResource(R.string.stats_all_time)
+                                                is TimeRange.Year -> stringResource(R.string.stats_year_prefix, range.year)
+                                            },
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            modifier = Modifier.weight(1f, fill = false).basicMarquee()
+                                        )
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        // YearSelectionButton
                                         Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.align(Alignment.CenterStart)
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Text(
-                                                text = when (val range = uiState.timeRange) {
-                                                    is TimeRange.AllTime -> stringResource(R.string.stats_all_time)
-                                                    is TimeRange.Year -> stringResource(R.string.stats_year_prefix, range.year)
-                                                },
-                                                style = MaterialTheme.typography.headlineSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White
+                                            YearSelectionButton(
+                                                currentRange = uiState.timeRange,
+                                                onToggle = onToggleYearPicker
                                             )
                                         }
-
-                                        // YearSelectionButton (Glassy Filter button style)
-                                        YearSelectionButton(
-                                            currentRange = uiState.timeRange,
-                                            onToggle = onToggleYearPicker,
-                                            modifier = Modifier.align(Alignment.CenterEnd)
-                                        )
                                     }
 
                                     val selectedYear = when (val range = uiState.timeRange) {

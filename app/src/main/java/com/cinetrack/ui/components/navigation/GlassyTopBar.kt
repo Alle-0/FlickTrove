@@ -72,7 +72,9 @@ fun GlassyTopBar(
     layoutColumns: Int? = null,
     hasAppUpdateBadge: Boolean = false,
     onEditBackdropClick: (() -> Unit)? = null,
-    onSettingsClick: (() -> Unit)? = null
+    onSettingsClick: (() -> Unit)? = null,
+    isStatsRewatchesEnabled: Boolean? = null,
+    onStatsRewatchToggle: ((Boolean) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -120,7 +122,7 @@ fun GlassyTopBar(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 56.dp), // Leaves space for the 32dp buttons + padding on the sides
+                    .padding(horizontal = if (isStatsRewatchesEnabled != null) 100.dp else 56.dp), // Leaves space for the text pill
                 contentAlignment = Alignment.Center
             ) {
                 Row(
@@ -324,6 +326,43 @@ fun GlassyTopBar(
                     }
                 }
 
+                if (isStatsRewatchesEnabled != null && onStatsRewatchToggle != null) {
+                    val isOptimisticRewatches = remember(isStatsRewatchesEnabled) { mutableStateOf(isStatsRewatchesEnabled) }
+                    
+                    Box(
+                        modifier = Modifier
+                            .height(36.dp)
+                            .wrapContentWidth()
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = {
+                                    isOptimisticRewatches.value = !isOptimisticRewatches.value
+                                    onStatsRewatchToggle(isOptimisticRewatches.value)
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(vertical = 6.dp)
+                                .background(
+                                    color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
+                                    shape = CircleShape
+                                )
+                                .padding(horizontal = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(id = R.string.stats_rewatches),
+                                color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.onPrimary else Color.White.copy(alpha = 0.7f),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
                 if (onEditBackdropClick != null) {
                     Box(
                         modifier = Modifier
@@ -425,7 +464,7 @@ fun GlassyTopBar(
                     }
                 }
 
-                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null) {
+                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null && onStatsRewatchToggle == null && onSettingsClick == null) {
                     Spacer(modifier = Modifier.size(48.dp))
                 }
             }

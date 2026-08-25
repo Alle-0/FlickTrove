@@ -38,7 +38,7 @@ fun FeedbackBottomSheet(
     onDismiss: () -> Unit
 ) {
     var selectedType by remember { mutableStateOf(FeedbackType.BUG) }
-    var message by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
     val haptic = LocalHapticFeedback.current
 
     FlickTroveBottomSheet(onDismissRequest = onDismiss) {
@@ -106,8 +106,8 @@ fun FeedbackBottomSheet(
 
             OutlinedTextField(
                 value = message,
-                onValueChange = { if (it.length <= 2000) message = it },
-                modifier = Modifier.fillMaxWidth().height(180.dp),
+                onValueChange = { if (it.text.length <= 2000) message = it },
+                modifier = Modifier.fillMaxWidth().height(160.dp),
                 placeholder = { Text(stringResource(R.string.feedback_hint), color = Color.White.copy(alpha = 0.2f)) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.White.copy(alpha = 0.15f),
@@ -117,7 +117,62 @@ fun FeedbackBottomSheet(
                     unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
                 ),
                 shape = RoundedCornerShape(20.dp),
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
+                visualTransformation = remember { com.cinetrack.ui.screens.MarkdownVisualTransformation() }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val mdAction = { prefix: String, suffix: String ->
+                        val selection = message.selection
+                        val text = message.text
+                        if (selection.collapsed) {
+                            val newText = text.substring(0, selection.start) + prefix + suffix + text.substring(selection.end)
+                            message = androidx.compose.ui.text.input.TextFieldValue(newText, selection = androidx.compose.ui.text.TextRange(selection.start + prefix.length))
+                        } else {
+                            val newText = text.substring(0, selection.start) + prefix + text.substring(selection.start, selection.end) + suffix + text.substring(selection.end)
+                            message = androidx.compose.ui.text.input.TextFieldValue(newText, selection = androidx.compose.ui.text.TextRange(selection.end + prefix.length + suffix.length))
+                        }
+                    }
+
+                    @Composable
+                    fun MdBtn(onClick: () -> Unit, content: @Composable () -> Unit) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clickable { onClick() }
+                                .background(Color(0xFF2A2A2A), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            content()
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                    androidx.compose.foundation.lazy.LazyRow {
+                        item {
+                            MdBtn(onClick = { mdAction("**", "**") }) { Text("B", fontWeight = FontWeight.Bold, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                            MdBtn(onClick = { mdAction("*", "*") }) { Text("I", fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                            MdBtn(onClick = { mdAction("~~", "~~") }) { Text("S", textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                            MdBtn(onClick = { mdAction("> ", "") }) { Text("\"\"", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                            MdBtn(onClick = { mdAction("- ", "") }) { Text("•", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.feedback_roadmap_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.5f)
             )
 
             if (errorMessage != null) {
@@ -131,9 +186,9 @@ fun FeedbackBottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { onSubmit(selectedType, message) },
+                onClick = { onSubmit(selectedType, message.text) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = !isSubmitting && message.isNotBlank(),
+                enabled = !isSubmitting && message.text.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(containerColor = accentColor),
                 shape = RoundedCornerShape(20.dp)
             ) {

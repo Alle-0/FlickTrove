@@ -757,27 +757,26 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun migrateExternalData(fileContent: String, keepLatestWatchDate: Boolean = true) {
+    fun migrateExternalData(fileContent: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
                 tempFile.writeText(fileContent)
-                migrateExternalFile(tempFile.absolutePath, keepLatestWatchDate)
+                migrateExternalFile(tempFile.absolutePath)
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
             }
         }
     }
 
-    fun migrateExternalFile(filePath: String, keepLatestWatchDate: Boolean = true) {
+    fun migrateExternalFile(filePath: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
                     .setInputData(
                         androidx.work.workDataOf(
                             "filePath" to filePath,
-                            "isRestore" to false,
-                            "keepLatestWatchDate" to keepLatestWatchDate
+                            "isRestore" to false
                         )
                     )
                     .build()

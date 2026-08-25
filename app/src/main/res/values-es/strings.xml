@@ -913,10 +913,6 @@
     <string name="onboarding_slide5_sub">OCULTA SERIES ABANDONADAS</string>
     <string name="onboarding_slide5_desc">¿Dejaste una serie a la mitad? Desliza hacia arriba en el botón de eliminar para marcarla como \'Abandonada\', de modo que deje de molestarte con episodios pendientes mientras mantienes el registro de lo que ya viste.</string>
     <string name="settings_review_tutorial">Repetir tutorial de bienvenida</string>
-    <string name="import_rewatch_dialog_title">Gestión de re-visualizaciones (Múltiples vistas)</string>
-    <string name="import_rewatch_dialog_desc">El archivo importado puede contener películas vistas varias veces en diferentes fechas. ¿Qué fecha de visualización prefieres conservar para las entradas duplicadas?</string>
-    <string name="import_rewatch_keep_latest">Última fecha (Más reciente)</string>
-    <string name="import_rewatch_keep_first">Primera fecha (Histórica)</string>
     <string name="collection_badge_movies_plural">%1$d PELÍCULAS</string>
     <string name="collection_badge_movies_single">%1$d PELÍCULA</string>
     <string name="collection_badge_movies_plus">%1$d+ PELÍCULAS</string>
@@ -1103,6 +1099,7 @@
     <string name="settings_show_general_stats_desc">Muestra la tarjeta de estadísticas generales en el panel de tu perfil.</string>
     <string name="stats_map_no_movies">Sin películas</string>
     <string name="stats_map_movies">%1$d películas</string>
+    <string name="feedback_roadmap_note">¿Tienes una idea compleja o quieres discutir la hoja de ruta? ¡Únete a r/FlickTrove o abre un Issue en GitHub!</string>
 </resources>
 
 

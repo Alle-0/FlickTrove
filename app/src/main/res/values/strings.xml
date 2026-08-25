@@ -75,7 +75,8 @@
     <string name="action_done">DONE</string>
     <string name="stats_tab_title">Stats</string>
     <string name="stats_no_data">No stats available</string>
-    <string name="stats_all_time">All Time Stats</string>
+    <string name="stats_all_time">All Time</string>
+    <string name="stats_rewatches">Rewatches</string>
     <string name="stats_year_prefix">Stats %d</string>
     <string name="stats_watched_in_year">WATCHED IN %d</string>
     <string name="stats_your_movies">YOUR MOVIES</string>
@@ -917,10 +918,6 @@
     <string name="onboarding_slide5_sub">HIDE ABANDONED SHOWS</string>
     <string name="onboarding_slide5_desc">Dropped a show midway? Swipe up on the delete button to mark it as \'Dropped\' so it stops bothering you for unwatched episodes while still keeping track of what you\'ve seen.</string>
     <string name="settings_review_tutorial">Replay Welcome Tutorial</string>
-    <string name="import_rewatch_dialog_title">Re-watch Handling (Multiple Watches)</string>
-    <string name="import_rewatch_dialog_desc">The imported file may contain movies watched multiple times across different dates. Which watch date would you like to preserve for duplicate entries?</string>
-    <string name="import_rewatch_keep_latest">Latest Date (Most Recent)</string>
-    <string name="import_rewatch_keep_first">First Date (Historical)</string>
     <string name="collection_badge_movies_plural">%1$d MOVIES</string>
     <string name="collection_badge_movies_single">%1$d MOVIE</string>
     <string name="collection_badge_movies_plus">%1$d+ MOVIES</string>
@@ -1102,4 +1099,5 @@
     <string name="discover_retry">Retry</string>
     <string name="stats_map_no_movies">No movies</string>
     <string name="stats_map_movies">%1$d movies</string>
+    <string name="feedback_roadmap_note">Have a complex idea or want to discuss the roadmap? Join r/FlickTrove or open an Issue on GitHub!</string>
 </resources>

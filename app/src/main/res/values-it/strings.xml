@@ -321,7 +321,7 @@
     <string name="settings_badge_blockbuster">BLOCKBUSTER</string>
     <string name="settings_badge_blockbuster_desc">Incassi stellari (&gt; 500 mln $)</string>
     <string name="settings_badge_indie">INDIE</string>
-    <string name="settings_badge_indie_desc">Basso budget, alta qualitÃ  (budget &lt; 5 mln, media =7.0)</string>
+    <string name="settings_badge_indie_desc">Basso budget, alta qualità (budget &lt; 5 mln, media =7.0)</string>
     <string name="settings_badge_quick">QUICK</string>
     <string name="settings_badge_quick_desc">Breve ma intenso (Film &lt; 90 min)</string>
     <string name="settings_badge_snack">SNACK</string>
@@ -913,10 +913,6 @@
     <string name="onboarding_slide5_sub">NASCONDI LE SERIE ABBANDONATE</string>
     <string name="onboarding_slide5_desc">Hai abbandonato una serie a metà? Fai swipe verso l\'alto sul cestino per segnarla come \'Dropped\' così non riceverai più notifiche per i nuovi episodi, pur mantenendo traccia di quelli già visti!</string>
     <string name="settings_review_tutorial">Rivedi Tutorial Iniziale</string>
-    <string name="import_rewatch_dialog_title">Gestione Re-watch (Visioni Multiple)</string>
-    <string name="import_rewatch_dialog_desc">Il file importato potrebbe contenere film visti più volte in date diverse. Quale data di visione preferisci conservare per i film duplicati?</string>
-    <string name="import_rewatch_keep_latest">Ultima data (Più recente)</string>
-    <string name="import_rewatch_keep_first">Prima data (Storica)</string>
     <string name="collection_badge_movies_plural">%1$d FILM</string>
     <string name="collection_badge_movies_single">%1$d FILM</string>
     <string name="collection_badge_movies_plus">%1$d+ FILM</string>
@@ -1095,6 +1091,7 @@
     <string name="settings_show_general_stats_desc">Mostra la scheda delle statistiche generali nella dashboard del profilo.</string>
     <string name="stats_map_no_movies">Nessun film</string>
     <string name="stats_map_movies">%1$d film</string>
+    <string name="feedback_roadmap_note">Hai un\'idea complessa o vuoi discutere la roadmap? Unisciti a r/FlickTrove o apri una Issue su GitHub!</string>
 </resources>
 
 

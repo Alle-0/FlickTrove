@@ -28,6 +28,7 @@ class DetailUiStateMapper @Inject constructor(
         localMovies: List<Movie>,
         folders: List<FolderEntity>,
         characterImages: Map<String, String>,
+        watchHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>,
         hideSaved: Boolean = false
     ): DetailUiState {
         if (errorMsg != null && metadata == null) return DetailUiState.Error(errorMsg)
@@ -206,7 +207,8 @@ class DetailUiStateMapper @Inject constructor(
                 }
             },
             appComments = appComments.toImmutableList(),
-            characterImages = characterImages.toImmutableMap()
+            characterImages = characterImages.toImmutableMap(),
+            watchHistory = watchHistory.toImmutableList()
         )
     }
 }

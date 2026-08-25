@@ -28,10 +28,9 @@ class TraktJsonImporter @Inject constructor(
 ) {
     suspend fun migrateTraktStream(
         inputStream: InputStream,
-        keepLatestWatchDate: Boolean = true,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> },
         fileName: String? = null,
-        onBatchReady: suspend (List<Pair<Movie, String?>>, Boolean, suspend (Int, Int) -> Unit) -> Unit
+        onBatchReady: suspend (List<Pair<Movie, String?>>, suspend (Int, Int) -> Unit) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         val content = inputStream.bufferedReader().use { it.readText() }
         if (content.isBlank()) return@withContext 0
@@ -73,7 +72,7 @@ class TraktJsonImporter @Inject constructor(
                 )
             }
             if (moviesToInsert.isNotEmpty()) {
-                onBatchReady(moviesToInsert.map { Pair(it, null) }, keepLatestWatchDate, onProgress)
+                onBatchReady(moviesToInsert.map { Pair(it, null) }, onProgress)
                 return@withContext moviesToInsert.size
             }
         } catch (e: Exception) {
@@ -383,7 +382,7 @@ class TraktJsonImporter @Inject constructor(
                 }
                 val results = deferreds.awaitAll().filterNotNull()
                 if (results.isNotEmpty()) {
-                    onBatchReady(results, keepLatestWatchDate, onProgress)
+                    onBatchReady(results, onProgress)
                     count += results.size
                 }
                 kotlinx.coroutines.delay(300)

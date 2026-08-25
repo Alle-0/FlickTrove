@@ -914,10 +914,6 @@
     <string name="onboarding_slide5_sub">СКРЫВАЙТЕ БРОШЕННЫЕ ШОУ</string>
     <string name="onboarding_slide5_desc">Бросили шоу на полпути? Смахните вверх по кнопке удаления, чтобы отметить его как \'Брошено\', чтобы оно перестало беспокоить вас непросмотренными эпизодами, сохраняя при этом информацию о том, что вы уже посмотрели.</string>
     <string name="settings_review_tutorial">Повторить приветственный туториал</string>
-    <string name="import_rewatch_dialog_title">Управление пересмотрами (множественные просмотры)</string>
-    <string name="import_rewatch_dialog_desc">Импортируемый файл может содержать фильмы, просмотренные несколько раз в разные даты. Какую дату просмотра вы хотели бы сохранить для повторяющихся записей?</string>
-    <string name="import_rewatch_keep_latest">Последняя дата (самая новая)</string>
-    <string name="import_rewatch_keep_first">Первая дата (историческая)</string>
     <string name="collection_badge_movies_plural">%1$d ФИЛЬМОВ</string>
     <string name="collection_badge_movies_single">%1$d ФИЛЬМ</string>
     <string name="collection_badge_movies_plus">%1$d+ ФИЛЬМОВ</string>
@@ -1099,5 +1095,6 @@
     <string name="discover_retry">Повторить</string>
     <string name="stats_map_no_movies">Нет фильмов</string>
     <string name="stats_map_movies">Фильмов: %1$d</string>
+    <string name="feedback_roadmap_note">Есть сложная идея или хотите обсудить дорожную карту? Присоединяйтесь к r/FlickTrove или откройте Issue на GitHub!</string>
 </resources>
 

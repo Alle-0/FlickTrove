@@ -326,6 +326,8 @@ data class Movie(
     @set:PropertyName("client_updated_at")
     @ColumnInfo(name = "client_updated_at") var clientUpdatedAt: Long = 0L,
 
+
+
     // --- Emotional Check-In (Peek-a-boo) ---
     @get:PropertyName("emotional_vibes")
     @set:PropertyName("emotional_vibes")
@@ -357,6 +359,12 @@ data class Movie(
     @ColumnInfo(name = "favorite_actor_tmdb_path")
     var favoriteActorTmdbPath: String? = null // always the TMDB profile path (for Stats)
 ) {
+    @Transient
+    @Ignore
+    @get:Exclude
+    @set:Exclude
+    var extractedWatchDates: MutableSet<String> = mutableSetOf()
+
     // --- Computed Properties ---
 
     @get:Exclude

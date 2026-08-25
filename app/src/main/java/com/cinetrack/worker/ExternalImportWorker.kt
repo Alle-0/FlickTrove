@@ -65,7 +65,6 @@ class ExternalImportWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val filePath = inputData.getString("filePath") ?: return@withContext Result.failure()
         val isRestore = inputData.getBoolean("isRestore", false)
-        val keepLatestWatchDate = inputData.getBoolean("keepLatestWatchDate", true)
 
         val file = File(filePath)
         if (!file.exists()) {
@@ -98,14 +97,14 @@ class ExternalImportWorker @AssistedInject constructor(
                 showCompletionNotification(appContext.getString(R.string.settings_msg_restore_success), false)
             } else {
                 val count = if (isZipFile(file)) {
-                    file.inputStream().use { backupRepository.migrateZipStream(it, keepLatestWatchDate, progressCallback) }
+                    file.inputStream().use { backupRepository.migrateZipStream(it, progressCallback) }
                 } else {
                     val contentStart = file.bufferedReader().use { it.readText().take(100).trimStart() }
                     val isJson = contentStart.startsWith("[") || contentStart.startsWith("{")
                     if (isJson) {
-                        file.inputStream().use { backupRepository.migrateTraktStream(it, keepLatestWatchDate, progressCallback) }
+                        file.inputStream().use { backupRepository.migrateTraktStream(it, progressCallback) }
                     } else {
-                        file.inputStream().use { backupRepository.migrateCsvStream(it, keepLatestWatchDate, progressCallback) }
+                        file.inputStream().use { backupRepository.migrateCsvStream(it, progressCallback) }
                     }
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))

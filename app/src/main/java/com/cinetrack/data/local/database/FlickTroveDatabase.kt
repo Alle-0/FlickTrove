@@ -17,6 +17,8 @@ import com.cinetrack.data.local.entities.ColorCacheEntity
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.local.entities.MovieDetailCacheEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
+import com.cinetrack.data.local.entities.WatchHistoryEntity
+import com.cinetrack.data.local.dao.WatchHistoryDao
 
 @Database(
     entities = [
@@ -24,9 +26,10 @@ import com.cinetrack.data.local.entities.SearchHistoryEntity
         FolderEntity::class,
         ColorCacheEntity::class,
         MovieDetailCacheEntity::class,
-        SearchHistoryEntity::class
+        SearchHistoryEntity::class,
+        WatchHistoryEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -35,6 +38,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
     abstract fun folderDao(): FolderDao
     abstract fun cacheDao(): CacheDao
     abstract fun searchHistoryDao(): SearchHistoryDao
+    abstract fun watchHistoryDao(): WatchHistoryDao
 
     companion object {
         private const val DATABASE_NAME = "flicktrove.db"
@@ -121,6 +125,27 @@ abstract class FlickTroveDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `watch_history` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `movieId` INTEGER NOT NULL,
+                        `watchedAt` TEXT NOT NULL,
+                        `isRewatch` INTEGER NOT NULL
+                    )
+                """.trimIndent())
+                
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_watch_history_movieId` ON `watch_history` (`movieId`)")
+                
+                // Seed watch history for existing watched movies
+                db.execSQL("""
+                    INSERT INTO watch_history (movieId, watchedAt, isRewatch)
+                    SELECT id, watched_at, 0 FROM favorites WHERE watched = 1 AND media_type = 'movie' AND watched_at IS NOT NULL
+                """.trimIndent())
+            }
+        }
+
         fun getInstance(context: Context): FlickTroveDatabase {
             return instance ?: synchronized(this) {
                 try {
@@ -136,7 +161,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                 .fallbackToDestructiveMigration()
                 .build().also { instance = it }
             }

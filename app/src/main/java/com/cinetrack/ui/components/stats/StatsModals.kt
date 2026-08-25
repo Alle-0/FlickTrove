@@ -78,7 +78,7 @@ fun StatsSkeleton(paddingValues: PaddingValues) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(Modifier.width(180.dp).height(24.dp).clip(RoundedCornerShape(8.dp)).shimmerEffect())
-                Box(Modifier.width(100.dp).height(36.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect())
+                Box(Modifier.width(100.dp).height(36.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect()) // Year picker
             }
 
             Spacer(Modifier.height(20.dp))

@@ -178,11 +178,15 @@ fun WrappedBannerPill(
                             .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
                         contentAlignment = Alignment.Center
                     ) {
+                        val rotation by androidx.compose.animation.core.animateFloatAsState(
+                            targetValue = if (expanded) 90f else 0f, 
+                            label = "wrapped_arrow_rotation"
+                        )
                         Icon(
-                            imageVector = if (expanded) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_right),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = rotation }
                         )
                     }
                 }

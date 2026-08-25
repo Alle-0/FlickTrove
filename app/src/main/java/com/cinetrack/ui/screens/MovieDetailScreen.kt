@@ -217,6 +217,7 @@ fun MovieDetailScreenContent(
     var showRatingInfoDialog by remember { mutableStateOf(false) }
     var showCoverSelectionSheet by remember { mutableStateOf(false) }
     var showCheckInDrawer by remember { mutableStateOf(false) }
+    var showWatchHistorySheet by remember { mutableStateOf(false) }
     var forceExpandCheckIn by remember { mutableStateOf(false) }
     var isDetailCastSheetOpen by remember { mutableStateOf(false) }
     var previousWatchState by remember { mutableStateOf<WatchState?>(null) }
@@ -544,7 +545,8 @@ fun MovieDetailScreenContent(
                                         onCheckInClick = { 
                                             forceExpandCheckIn = true
                                             showCheckInDrawer = true 
-                                        }
+                                        },
+                                        onHistoryClick = { showWatchHistorySheet = true }
                                     )
 
                                     Spacer(modifier = Modifier.height(40.dp))
@@ -651,7 +653,8 @@ fun MovieDetailScreenContent(
                                         hazeState = localHazeState,
                                         onStateChange = { viewModel.onEvent(DetailEvent.SetWatchState(it)) },
                                         onRemove = { viewModel.onEvent(DetailEvent.DeleteMovie) },
-                                        onEpisodesClick = { showEpisodesSheet = true }
+                                        onEpisodesClick = { showEpisodesSheet = true },
+                                        onManageRewatches = { showWatchHistorySheet = true }
                                     )
                                 }
                             }
@@ -662,6 +665,19 @@ fun MovieDetailScreenContent(
                                     viewModel = viewModel,
                                     hazeState = localHazeState,
                                     onDismiss = { showEpisodesSheet = false }
+                                )
+                            }
+                            
+                            if (showWatchHistorySheet) {
+                                com.cinetrack.ui.components.detail.WatchHistoryBottomSheet(
+                                    movie = activeMovie,
+                                    history = state.watchHistory,
+                                    accentColor = accentColor,
+                                    onDismiss = { showWatchHistorySheet = false },
+                                    onAddRewatch = { viewModel.logRewatch() },
+                                    onUpdateDate = { entity, newDate -> viewModel.updateWatchHistoryDate(entity, newDate) },
+                                    onDelete = { entity -> viewModel.deleteWatchHistory(entity) },
+                                    hazeState = localHazeState
                                 )
                             }
                         }

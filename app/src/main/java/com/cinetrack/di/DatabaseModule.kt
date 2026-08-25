@@ -33,4 +33,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSearchHistoryDao(database: FlickTroveDatabase): SearchHistoryDao = database.searchHistoryDao()
+
+    @Provides
+    fun provideWatchHistoryDao(database: FlickTroveDatabase): com.cinetrack.data.local.dao.WatchHistoryDao = database.watchHistoryDao()
 }

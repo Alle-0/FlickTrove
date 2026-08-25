@@ -187,7 +187,12 @@ class AuthViewModel @Inject constructor(
             
             val currentUser = auth.currentUser
             val emailToSave = currentUser?.email ?: fallbackEmail ?: ""
-            val avatarToSave = currentUser?.photoUrl?.toString() ?: ""
+            
+            val existingPhotoUrl = if (snapshot.exists()) snapshot.getString("photoUrl") else null
+            val authPhotoUrl = currentUser?.photoUrl?.toString()
+            
+            // Prefer the existing Firestore avatar. If it doesn't exist, use the one from Auth (e.g., from Google Sign-In)
+            val avatarToSave = if (!existingPhotoUrl.isNullOrBlank()) existingPhotoUrl else (authPhotoUrl ?: "")
             
             val batch = Firebase.firestore.batch()
             // Always ensure email and avatar are up to date

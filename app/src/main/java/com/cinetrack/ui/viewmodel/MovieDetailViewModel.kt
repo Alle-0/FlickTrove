@@ -103,6 +103,13 @@ class MovieDetailViewModel @Inject constructor(
                 _appComments.value = comments
             }
 
+            // Fetch watch history
+            viewModelScope.launch {
+                repository.getWatchHistoryForMovieFlow(movieId).collect { history ->
+                    _watchHistory.value = history
+                }
+            }
+
             // Fetch TVDB Character Images when metadata is loaded
             viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 _metadata.collect { tmdbResponse ->
@@ -139,6 +146,7 @@ class MovieDetailViewModel @Inject constructor(
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
     private val _appComments = MutableStateFlow<List<com.cinetrack.data.model.AppComment>>(emptyList())
     private val _characterImages = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val _watchHistory = MutableStateFlow<List<com.cinetrack.data.local.entities.WatchHistoryEntity>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
     
     data class TranslationState(
@@ -192,9 +200,10 @@ class MovieDetailViewModel @Inject constructor(
 
         val flow3 = combine(
             _appComments,
-            _characterImages
-        ) { comments, charImages ->
-            Pair(comments, charImages)
+            _characterImages,
+            _watchHistory
+        ) { comments, charImages, wHistory ->
+            Triple(comments, charImages, wHistory)
         }
 
         return combine(
@@ -210,7 +219,7 @@ class MovieDetailViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val f2 = args[1] as Triple<Map<Int, com.cinetrack.data.model.Season>, List<Movie>, String?>
             @Suppress("UNCHECKED_CAST")
-            val f3 = args[2] as Pair<List<com.cinetrack.data.model.AppComment>, Map<String, String>>
+            val f3 = args[2] as Triple<List<com.cinetrack.data.model.AppComment>, Map<String, String>, List<com.cinetrack.data.local.entities.WatchHistoryEntity>>
             @Suppress("UNCHECKED_CAST")
             val localMovies = args[3] as List<Movie>
             @Suppress("UNCHECKED_CAST")
@@ -231,6 +240,7 @@ class MovieDetailViewModel @Inject constructor(
                     localMovies = localMovies,
                     folders = folders,
                     characterImages = f3.second,
+                    watchHistory = f3.third,
                     hideSaved = hideSaved
                 )
             }
@@ -582,6 +592,61 @@ class MovieDetailViewModel @Inject constructor(
         val movie = state.movieEntry
         viewModelScope.launch {
             repository.deleteMovie(movie)
+        }
+    }
+
+    fun logRewatch() {
+        if (movieId == 0L || mediaType != "movie") return
+        viewModelScope.launch {
+            val watchedDate = java.time.Instant.now().toString()
+            
+            repository.insertWatchHistory(
+                com.cinetrack.data.local.entities.WatchHistoryEntity(
+                    movieId = movieId,
+                    watchedAt = watchedDate,
+                    isRewatch = true
+                )
+            )
+            
+            val local = repository.getMovie(movieId, mediaType)
+            if (local != null) {
+                repository.saveMovie(local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis()))
+            }
+            
+            emitMessage(UiText.DynamicString("Rewatch logged!"))
+        }
+    }
+
+    fun updateWatchHistoryDate(history: com.cinetrack.data.local.entities.WatchHistoryEntity, newDateIso: String) {
+        viewModelScope.launch {
+            repository.updateWatchHistory(history.copy(watchedAt = newDateIso))
+            // Update movie's latest watchedAt if necessary
+            val allHistory = repository.getWatchHistoryForMovie(movieId)
+            val latest = allHistory.maxByOrNull { it.watchedAt }
+            val local = repository.getMovie(movieId, mediaType)
+            if (local != null && latest != null && local.watchedAt != latest.watchedAt) {
+                repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+            }
+        }
+    }
+
+    fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) {
+        viewModelScope.launch {
+            repository.deleteWatchHistory(history)
+            
+            // Revert state if history is empty
+            val allHistory = repository.getWatchHistoryForMovie(movieId)
+            val local = repository.getMovie(movieId, mediaType)
+            if (local != null) {
+                if (allHistory.isEmpty()) {
+                    repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
+                } else {
+                    val latest = allHistory.maxByOrNull { it.watchedAt }
+                    if (latest != null && local.watchedAt != latest.watchedAt) {
+                        repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+                    }
+                }
+            }
         }
     }
 

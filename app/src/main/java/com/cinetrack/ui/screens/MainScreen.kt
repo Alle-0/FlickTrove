@@ -330,6 +330,16 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     }
                                 }
 
+                                var statsIncludeRewatches: Boolean? = null
+                                var statsOnRewatchToggle: ((Boolean) -> Unit)? = null
+                                
+                                if (currentTab is StatsTab && activity != null) {
+                                    val statsVm = hiltViewModel<com.cinetrack.ui.viewmodel.StatsViewModel>(activity)
+                                    val statsUiState by statsVm.uiState.collectAsStateWithLifecycle()
+                                    statsIncludeRewatches = statsUiState.includeRewatches
+                                    statsOnRewatchToggle = { statsVm.toggleIncludeRewatches(it) }
+                                }
+
                                 GlassyTopBar(
                                     title = title,
                                     hazeState = contentHazeState,
@@ -356,7 +366,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         {
                                             settingsViewModel.triggerDashboardSettingsMenu()
                                         }
-                                    } else null
+                                    } else null,
+                                    isStatsRewatchesEnabled = statsIncludeRewatches,
+                                    onStatsRewatchToggle = statsOnRewatchToggle
                                 )
                             }
 

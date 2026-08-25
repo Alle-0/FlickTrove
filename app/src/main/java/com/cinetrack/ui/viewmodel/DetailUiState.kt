@@ -42,7 +42,8 @@ sealed class DetailUiState {
         val watchProviderLink: String? = null,
         val isInTheaters: Boolean = false,
         val appComments: ImmutableList<AppComment> = persistentListOf(),
-        val characterImages: ImmutableMap<String, String> = persistentMapOf()
+        val characterImages: ImmutableMap<String, String> = persistentMapOf(),
+        val watchHistory: ImmutableList<com.cinetrack.data.local.entities.WatchHistoryEntity> = persistentListOf()
     ) : DetailUiState()
 }
 

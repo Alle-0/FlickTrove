@@ -33,9 +33,8 @@ class TvTimeGdprImporter @Inject constructor(
 
     suspend fun migrateTvTimeGdprZip(
         zipEntries: Map<String, ByteArray>,
-        keepLatestWatchDate: Boolean,
         onProgress: suspend (Int, Int) -> Unit,
-        onBatchReady: suspend (List<Pair<Movie, String?>>, Boolean, suspend (Int, Int) -> Unit) -> Unit
+        onBatchReady: suspend (List<Pair<Movie, String?>>, suspend (Int, Int) -> Unit) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         val itemsMap = mutableMapOf<String, TvTimeItemData>()
 
@@ -778,7 +777,7 @@ class TvTimeGdprImporter @Inject constructor(
             
             val batchPairs = deferreds.awaitAll().filterNotNull().flatten()
             if (batchPairs.isNotEmpty()) {
-                onBatchReady(batchPairs, keepLatestWatchDate, { _, _ -> })
+                onBatchReady(batchPairs, { _, _ -> })
                 savedCount += batchPairs.distinctBy { Pair(it.first.id, it.first.mediaType) }.size
             }
             onProgress(savedCount, totalToProcess)
