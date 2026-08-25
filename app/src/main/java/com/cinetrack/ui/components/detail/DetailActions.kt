@@ -130,22 +130,13 @@ fun DetailActions(
     }
 
     val mainPillAlpha by transition.animateFloat(
-        transitionSpec = { 
-            if (targetState == WatchState.WATCHED) {
-                tween(300, delayMillis = 300) // Fade later, after width starts shrinking
-            } else if (initialState == WatchState.WATCHED) {
-                // Immediate fade in, allowing the left-to-right expansion to be visible from the start
-                tween(400) 
-            } else {
-                tween(300, delayMillis = 100)
-            }
-        },
+        transitionSpec = { tween(300) },
         label = "MainPillAlpha"
     ) { state ->
-        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
+        1f // Pill always visible for icon
     }
 
-    val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
+    val isPillVisible = true
     val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
 
     val spacing by transition.animateDp(
@@ -258,9 +249,11 @@ fun DetailActions(
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             // Main Action Pill morphs into a circle for movies when WATCHED
             Box(
                 modifier = Modifier
@@ -268,7 +261,7 @@ fun DetailActions(
                     .fillMaxHeight()
                     .graphicsLayer { 
                         alpha = mainPillAlpha
-                        transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
+                        transformOrigin = TransformOrigin(1f, 0.5f) // Anchor to Right
                     }
                     .hazeGlass(
                         state = hazeState,
