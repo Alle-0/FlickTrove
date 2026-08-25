@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -367,7 +370,7 @@ fun FeedbackDialog(
 ) {
     var title by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(initialEmail) }
-    var description by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf(TextFieldValue("")) }
     var rating by remember { mutableStateOf(3) }
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
@@ -473,20 +476,78 @@ fun FeedbackDialog(
                         )
 
                         Column {
-                            GlassyTextField(
-                                value = description,
-                                onValueChange = { if (it.length <= 500) description = it },
-                                label = stringResource(R.string.settings_feedback_desc_label),
-                                placeholder = stringResource(R.string.settings_feedback_desc_placeholder),
-                                minHeight = 120.dp
-                            )
                             Text(
-                                text = "${description.length}/500",
+                                text = stringResource(R.string.settings_feedback_desc_label),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+                            )
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { if (it.text.length <= 2000) description = it },
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
+                                placeholder = { Text(stringResource(R.string.settings_feedback_desc_placeholder), color = Color.White.copy(alpha = 0.3f)) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 120.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.05f),
+                                    focusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                    cursorColor = MaterialTheme.colorScheme.primary
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                visualTransformation = remember { com.cinetrack.ui.screens.MarkdownVisualTransformation() }
+                            )
+                            // Character counter
+                            Text(
+                                text = "${description.text.length}/2000",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = OnSurfaceMuted.copy(alpha = 0.5f),
                                 modifier = Modifier
                                     .align(Alignment.End)
                                     .padding(top = 4.dp, end = 8.dp)
+                            )
+                            // Markdown toolbar
+                            val accentColor = MaterialTheme.colorScheme.primary
+                            val mdAction = { prefix: String, suffix: String ->
+                                val sel = description.selection
+                                val text = description.text
+                                val newText = if (sel.collapsed) {
+                                    text.substring(0, sel.start) + prefix + suffix + text.substring(sel.end)
+                                } else {
+                                    text.substring(0, sel.start) + prefix + text.substring(sel.start, sel.end) + suffix + text.substring(sel.end)
+                                }
+                                val newCursor = if (sel.collapsed) sel.start + prefix.length else sel.end + prefix.length + suffix.length
+                                description = TextFieldValue(newText, selection = TextRange(newCursor))
+                            }
+                            @Composable
+                            fun MdBtn(onClick: () -> Unit, content: @Composable () -> Unit) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clickable { onClick() }
+                                        .background(Color(0xFF2A2A2A), RoundedCornerShape(8.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) { content() }
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyRow {
+                                item {
+                                    MdBtn(onClick = { mdAction("**", "**") }) { Text("B", fontWeight = FontWeight.Bold, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                    MdBtn(onClick = { mdAction("*", "*") }) { Text("I", fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                    MdBtn(onClick = { mdAction("~~", "~~") }) { Text("S", textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                    MdBtn(onClick = { mdAction("> ", "") }) { Text("\"\"", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                    MdBtn(onClick = { mdAction("- ", "") }) { Text("•", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.feedback_roadmap_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.5f)
                             )
                         }
                     }
@@ -495,7 +556,7 @@ fun FeedbackDialog(
                 // Footer (Fixed)
                 Spacer(modifier = Modifier.height(20.dp))
 
-                val isEnabled = title.isNotBlank() && description.isNotBlank() && !isLoading
+                val isEnabled = title.isNotBlank() && description.text.isNotBlank() && !isLoading
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -508,7 +569,7 @@ fun FeedbackDialog(
                         )
                         .bounceClick(enabled = isEnabled) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSubmit(title, description, rating, email)
+                            onSubmit(title, description.text, rating, email)
                         },
                     contentAlignment = Alignment.Center
                 ) {
