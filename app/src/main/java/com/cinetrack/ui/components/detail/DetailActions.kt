@@ -549,7 +549,7 @@ fun DetailActions(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
-                                borderColor = (if (isTrashMode) trashColor else Color.White).copy(alpha = 0.75f)
+                                borderColor = (if (isTrashMode) trashColor else if (movie.mediaType != "tv") displayColor else Color.White).copy(alpha = 0.75f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -591,7 +591,7 @@ fun DetailActions(
                                     Icon(
                                         imageVector = if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_drop_box) else ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                                         contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.8f),
+                                        tint = if (movie.mediaType != "tv") displayColor else Color.White.copy(alpha = 0.8f),
                                         modifier = Modifier.size(24.dp)
                                     )
                                     // Layer 2: only the arrow animates, clipped to the button circle
