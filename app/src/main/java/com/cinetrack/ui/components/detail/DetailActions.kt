@@ -392,7 +392,7 @@ fun DetailActions(
                     )
                 }
 
-                if (label.isNotEmpty() && optimisticWatchState != WatchState.WATCHED) {
+                if (label.isNotEmpty() && (movie.mediaType == "tv" || optimisticWatchState != WatchState.WATCHED)) {
                     Spacer(modifier = Modifier.width(10.dp))
                     AnimatedContent(
                         targetState = displayWatchState,
