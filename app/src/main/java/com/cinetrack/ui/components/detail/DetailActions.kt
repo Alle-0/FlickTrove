@@ -192,7 +192,7 @@ fun DetailActions(
     )
 
     // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
-    val displayWatchState = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv") WatchState.BOOKMARKED else optimisticWatchState
+    val displayWatchState = optimisticWatchState
 
     val icon = when {
         !movie.isReleased -> {
@@ -386,7 +386,7 @@ fun DetailActions(
                     )
                 }
 
-                if (label.isNotEmpty()) {
+                if (label.isNotEmpty() && optimisticWatchState != WatchState.WATCHED) {
                     Spacer(modifier = Modifier.width(10.dp))
                     AnimatedContent(
                         targetState = displayWatchState,
@@ -448,7 +448,6 @@ fun DetailActions(
         }
 
             // Filler to push TrashBox to the right when Pill shrinks
-            Spacer(modifier = Modifier.weight(1f))
 
             if (spacing > 0.01.dp) {
                 Spacer(modifier = Modifier.width(spacing))
