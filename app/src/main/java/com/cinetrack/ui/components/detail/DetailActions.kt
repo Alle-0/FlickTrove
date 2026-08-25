@@ -451,15 +451,12 @@ fun DetailActions(
                                 )
                             }
                         }
-                    }
                 }
             }
-        }
-    }
 
-        if (spacing > 0.01.dp) {
-            Spacer(modifier = Modifier.width(spacing))
-        }
+            if (spacing > 0.01.dp) {
+                Spacer(modifier = Modifier.width(spacing))
+            }
 
         Box(
             modifier = Modifier
@@ -689,8 +686,11 @@ fun DetailActions(
                             )
                         }
                     }
-                }
+                    }
                 }
             }
         }
     }
+}
+}
+}
