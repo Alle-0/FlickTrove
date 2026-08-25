@@ -319,13 +319,13 @@ fun AttributionRow(
                 color = Color.White.copy(alpha = 0.04f),
                 shape = RoundedCornerShape(16.dp)
             )
-            .padding(12.dp),
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Logo Representation with local vector or fallback text
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(28.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(
                     when (brand) {
@@ -373,7 +373,7 @@ fun AttributionRow(
             }
         }
         
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         
         val annotatedString = buildAnnotatedString {
             val parts = text.split(brand)

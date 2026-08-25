@@ -533,7 +533,7 @@ fun SettingsSupportSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AttributionRow(
                 brand = "GIPHY",
@@ -595,7 +595,7 @@ fun SettingsFooterSection(
                         tint = accentColor,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = stringResource(R.string.settings_new_version_available, updateInfo.latestVersion),
                         style = MaterialTheme.typography.labelMedium.copy(
