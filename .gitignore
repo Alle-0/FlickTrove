@@ -87,4 +87,5 @@ gdpr-data*
 supabase/
 figma_exports_svg_v2/
 mcp.json
+/scripts/
 
