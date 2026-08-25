@@ -258,11 +258,9 @@ fun DetailActions(
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.End,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-
             // Main Action Pill morphs into a circle for movies when WATCHED
             Box(
                 modifier = Modifier
@@ -270,7 +268,7 @@ fun DetailActions(
                     .fillMaxHeight()
                     .graphicsLayer { 
                         alpha = mainPillAlpha
-                        transformOrigin = TransformOrigin(1f, 0.5f) // Anchor to Right
+                        transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
                     }
                     .hazeGlass(
                         state = hazeState,
@@ -451,8 +449,13 @@ fun DetailActions(
                                 )
                             }
                         }
+                    }
                 }
             }
+        }
+
+            // Filler to push TrashBox to the right when Pill shrinks
+            Spacer(modifier = Modifier.weight(1f))
 
             if (spacing > 0.01.dp) {
                 Spacer(modifier = Modifier.width(spacing))
@@ -691,6 +694,4 @@ fun DetailActions(
             }
         }
     }
-}
-}
 }
