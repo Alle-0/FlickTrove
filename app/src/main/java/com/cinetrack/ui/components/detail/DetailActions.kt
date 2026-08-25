@@ -454,6 +454,7 @@ fun DetailActions(
         }
 
             // Filler to push TrashBox to the right when Pill shrinks
+            Spacer(modifier = Modifier.weight(1f))
 
             if (spacing > 0.01.dp) {
                 Spacer(modifier = Modifier.width(spacing))
