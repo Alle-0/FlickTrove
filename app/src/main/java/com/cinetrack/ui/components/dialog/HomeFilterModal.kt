@@ -367,7 +367,9 @@ fun HomeFilterModal(
                                                 add(FilterOption("likes", stringResource(R.string.comment_sort_likes)))
                                             } else {
                                                 if (isVisti) {
-                                                    add(FilterOption("watched_at", stringResource(R.string.filter_sort_watched_at)))
+                                                    add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
+                                                    add(FilterOption("first_watched_at", stringResource(R.string.filter_sort_first_watched_at)))
+                                                    add(FilterOption("rewatch_count", stringResource(R.string.filter_sort_rewatch_count)))
                                                 }
                                                 add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
                                                 add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))

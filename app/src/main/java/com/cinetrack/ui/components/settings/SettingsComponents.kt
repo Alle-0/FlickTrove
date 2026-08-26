@@ -366,8 +366,10 @@ fun AttributionRow(
                     },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY") 10.sp else 14.sp
+                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY") 9.sp else 14.sp
                     ),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Visible,
                     color = if (brand == "OMDb API") Color.Black else Color.White
                 )
             }

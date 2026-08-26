@@ -160,6 +160,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val promptWatchDateOnDetail = settingsRepository.promptWatchDateOnDetail.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    fun togglePromptWatchDateOnDetail(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.togglePromptWatchDateOnDetail(enabled)
+        }
+    }
+
     private val _isBackupLoading = MutableStateFlow(false)
     val isBackupLoading = _isBackupLoading.asStateFlow()
 

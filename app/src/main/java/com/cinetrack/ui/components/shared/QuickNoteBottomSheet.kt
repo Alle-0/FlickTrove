@@ -15,6 +15,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -105,6 +107,8 @@ fun QuickNoteModal(
         }
     }
 
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
     FlickTroveModal(
         onDismissRequest = onDismiss,
         hazeState = hazeState
@@ -113,7 +117,10 @@ fun QuickNoteModal(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 8.dp)
-                .imePadding(), // Ensure keyboard doesn't cover content
+                .imePadding()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }, // Ensure keyboard hides on tap outside
             horizontalAlignment = Alignment.Start
         ) {
             Row(
@@ -297,7 +304,7 @@ fun QuickNoteModal(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Delete,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 contentDescription = stringResource(R.string.quick_note_delete_audio),
                                 tint = Color.White.copy(alpha = 0.6f),
                                 modifier = Modifier

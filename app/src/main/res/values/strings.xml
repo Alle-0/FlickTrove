@@ -837,7 +837,9 @@
     <string name="status_released">Released</string>
     <string name="quick_action_folders">Folders</string>
     <string name="quick_action_delete">Delete</string>
-    <string name="filter_sort_watched_at">Watched Date</string>
+    <string name="filter_sort_last_watched_at">Last Watched</string>
+    <string name="filter_sort_first_watched_at">First Watched</string>
+    <string name="filter_sort_rewatch_count">Rewatches</string>
     <string name="filter_sort_added_at">Recently Added</string>
     <string name="filter_sort_release_date">Release Date</string>
     <string name="filter_sort_title">Alphabetical</string>
@@ -1100,4 +1102,17 @@
     <string name="stats_map_no_movies">No movies</string>
     <string name="stats_map_movies">%1$d movies</string>
     <string name="feedback_roadmap_note">Have a complex idea or want to discuss the roadmap? Join r/FlickTrove or open an Issue on GitHub!</string>
+
+    <string name="watch_history_title">Watch History</string>
+    <string name="watch_history_empty">No history available.</string>
+    <string name="watch_history_rewatch">Rewatch</string>
+    <string name="max_rewatch_limit">Maximum rewatch limit reached (99)</string>
+    <string name="watch_history_first_watch">First viewing</string>
+
+    <string name="watch_date_prompt_title">When did you watch it?</string>
+    <string name="watch_date_prompt_now">Just now (Today)</string>
+    <string name="watch_date_prompt_release_date">Release date</string>
+    <string name="watch_date_prompt_custom">Custom date</string>
+    <string name="settings_advanced_prompt_watch_date">Prompt for watch date on Detail Screen</string>
+    <string name="settings_advanced_prompt_watch_date_desc">When marking a movie as seen from its detail screen, show a prompt to choose the exact watch date instead of defaulting to today.</string>
 </resources>

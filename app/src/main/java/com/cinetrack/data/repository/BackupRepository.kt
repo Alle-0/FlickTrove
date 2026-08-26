@@ -316,15 +316,17 @@ class BackupRepository @Inject constructor(
                 // Insert into WatchHistoryDao
                 val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
                 if (incoming.watchedAt != null) watchDatesToInsert.add(incoming.watchedAt!!)
-                watchDatesToInsert.forEach { date ->
+                
+                val sortedDates = watchDatesToInsert.sorted()
+                sortedDates.forEachIndexed { index, date ->
                     watchHistoryDao.insert(
                         WatchHistoryEntity(
                             movieId = incoming.id,
-                            watchedAt = date
+                            watchedAt = date,
+                            isRewatch = index > 0
                         )
                     )
                 }
-
                 val newRating = incoming.personalRating
                 if (newRating != null && newRating > 0.0) {
                     repositoryScope.launch {
@@ -378,15 +380,27 @@ class BackupRepository @Inject constructor(
                 favoriteDao.insert(updated)
                 
                 // Insert into WatchHistoryDao
+                val existingHistory = watchHistoryDao.getWatchHistoryForMovie(updated.id)
+                val existingDates = existingHistory.map { it.watchedAt }.toSet()
+                
                 val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
                 if (incWatched != null) watchDatesToInsert.add(incWatched)
-                watchDatesToInsert.forEach { date ->
-                    watchHistoryDao.insert(
-                        WatchHistoryEntity(
-                            movieId = updated.id,
-                            watchedAt = date
+                
+                val newDates = watchDatesToInsert.filter { it !in existingDates }
+                
+                if (newDates.isNotEmpty()) {
+                    val allDates = (existingDates + newDates).sorted()
+                    // Rebuild history to maintain proper isRewatch flags
+                    watchHistoryDao.deleteByMovieId(updated.id)
+                    allDates.forEachIndexed { index, date ->
+                        watchHistoryDao.insert(
+                            WatchHistoryEntity(
+                                movieId = updated.id,
+                                watchedAt = date,
+                                isRewatch = index > 0
+                            )
                         )
-                    )
+                    }
                 }
 
                 val newRating = updated.personalRating

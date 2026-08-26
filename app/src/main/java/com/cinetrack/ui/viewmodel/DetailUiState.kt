@@ -65,7 +65,7 @@ data class ExternalRatings(
 sealed class DetailEvent {
     object ToggleFavorite : DetailEvent()
     object ToggleWatched : DetailEvent()
-    data class SetWatchState(val state: WatchState) : DetailEvent()
+    data class SetWatchState(val state: WatchState, val customWatchDate: java.time.Instant? = null) : DetailEvent()
     object Refresh : DetailEvent()
     data class Rate(val rating: Double?) : DetailEvent()
     data class UpdateNote(val note: String) : DetailEvent()

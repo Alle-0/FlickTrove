@@ -62,7 +62,8 @@ class VistiViewModel @Inject constructor(
         repository.getFoldersFlow(),
         preferenceRepository.userPreferencesFlow,
         _searchQuery.debounce(300).distinctUntilChanged(),
-        _activeTab
+        _activeTab,
+        repository.getAllWatchHistoryFlow()
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,

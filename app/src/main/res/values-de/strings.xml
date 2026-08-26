@@ -832,7 +832,9 @@
     <string name="status_released">Veröffentlicht</string>
     <string name="quick_action_folders">Ordner</string>
     <string name="quick_action_delete">Löschen</string>
-    <string name="filter_sort_watched_at">Sehdatum</string>
+    <string name="filter_sort_last_watched_at">Letzte Sichtung</string>
+    <string name="filter_sort_first_watched_at">Erste Sichtung</string>
+    <string name="filter_sort_rewatch_count">Rewatches</string>
     <string name="filter_sort_added_at">Zuletzt hinzugefügt</string>
     <string name="filter_sort_release_date">Erscheinungsdatum</string>
     <string name="filter_sort_title">Alphabetisch</string>
@@ -1097,7 +1099,17 @@
     <string name="stats_map_no_movies">Keine Filme</string>
     <string name="stats_map_movies">%1$d Filme</string>
     <string name="feedback_roadmap_note">Haben Sie eine komplexe Idee oder möchten Sie die Roadmap diskutieren? Treten Sie r/FlickTrove bei oder eröffnen Sie ein Issue auf GitHub!</string>
+
+    <string name="watch_history_title">Verlauf</string>
+    <string name="watch_history_empty">Kein Verlauf verfügbar.</string>
+    <string name="watch_history_rewatch">Rewatch</string>
+    <string name="max_rewatch_limit">Maximale Rewatch-Grenze erreicht (99)</string>
+    <string name="watch_history_first_watch">Erstes Ansehen</string>
+
+    <string name="watch_date_prompt_title">Wann hast du ihn gesehen?</string>
+    <string name="watch_date_prompt_now">Jetzt</string>
+    <string name="watch_date_prompt_release_date">Erscheinungsdatum</string>
+    <string name="watch_date_prompt_custom">Benutzerdefiniertes Datum</string>
+    <string name="settings_advanced_prompt_watch_date">Datum auf Detailseite abfragen</string>
+    <string name="settings_advanced_prompt_watch_date_desc">Beim Markieren eines Films als gesehen auf der Detailseite nach dem Datum fragen</string>
 </resources>
-
-
-

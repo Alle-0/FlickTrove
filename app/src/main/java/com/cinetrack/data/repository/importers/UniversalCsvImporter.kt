@@ -169,6 +169,7 @@ class UniversalCsvImporter @Inject constructor(
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
+                                    m.watchedAt?.let { dateStr -> m.extractedWatchDates.add(dateStr) }
                                     Pair(m, folderVal)
                                 }
                             } else if (tmdbVal != null && tmdbVal > 0) {
@@ -191,6 +192,7 @@ class UniversalCsvImporter @Inject constructor(
                                     syncStatus = "pending",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
+                                m.watchedAt?.let { dateStr -> m.extractedWatchDates.add(dateStr) }
                                 Pair(m, folderVal)
                             } else if (!titleVal.isNullOrBlank()) {
                                 val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true) || lowerHeaders.any { it == "tv_show_name" || it == "series_name" || it == "tv_show_id" || it == "s_id" || it == "id_show" }
@@ -221,6 +223,7 @@ class UniversalCsvImporter @Inject constructor(
                                         syncStatus = "pending",
                                         clientUpdatedAt = System.currentTimeMillis()
                                     )
+                                    m.watchedAt?.let { dateStr -> m.extractedWatchDates.add(dateStr) }
                                     Pair(m, folderVal)
                                 }
                             } else null

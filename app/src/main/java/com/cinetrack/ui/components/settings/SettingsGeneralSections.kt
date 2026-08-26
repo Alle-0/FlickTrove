@@ -77,6 +77,27 @@ fun SettingsUILayoutSection(
             }
         )
 
+        val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_clock),
+            title = stringResource(R.string.settings_advanced_prompt_watch_date),
+            description = stringResource(R.string.settings_advanced_prompt_watch_date_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = promptWatchDateOnDetail,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.togglePromptWatchDateOnDetail(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.togglePromptWatchDateOnDetail(!promptWatchDateOnDetail)
+            }
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
             title = stringResource(R.string.settings_folder_bookmarks),
@@ -689,19 +710,13 @@ fun SettingsNotificationsSection(
             title = stringResource(R.string.settings_haptic_feedback),
             description = stringResource(R.string.settings_haptic_feedback_desc),
             trailing = {
-                Switch(
+                FlickTroveSwitch(
                     checked = vibrationEnabled,
                     onCheckedChange = { checked ->
                         if (checked) VibrationHelper.vibrateTick(context)
                         settingsViewModel.toggleVibration(checked) 
                     },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = currentAccentColor,
-                        uncheckedThumbColor = Color.White.copy(alpha = 0.4f),
-                        uncheckedTrackColor = Color.White.copy(alpha = 0.1f),
-                        uncheckedBorderColor = Color.Transparent
-                    )
+                    accentColor = currentAccentColor
                 )
             },
             onClick = {

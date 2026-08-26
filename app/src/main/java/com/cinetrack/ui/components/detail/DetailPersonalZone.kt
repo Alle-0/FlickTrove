@@ -189,25 +189,6 @@ fun DetailPersonalZone(
             )
         }
 
-        if (movie.mediaType == "movie" && onHistoryClick != null && canInteract) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
-            ) {
-                PersonalAction(
-                    label = "Watch History", // TODO: localize
-                    value = "View & Rewatch", // TODO: localize
-                    hasValue = true,
-                    isRateAction = false,
-                    icon = ImageVector.vectorResource(id = R.drawable.ic_eye),
-                    accentColor = accentColor,
-                    isActive = false,
-                    enabled = true,
-                    onClick = onHistoryClick,
-                    modifier = Modifier.weight(1f).fillMaxHeight()
-                )
-            }
-        }
 
         AnimatedVisibility(
             visible = expandedAction != null,

@@ -5,13 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,10 +24,16 @@ import com.cinetrack.R
 import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.ui.theme.PremiumBackground
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,44 +47,76 @@ fun WatchHistoryBottomSheet(
     onDelete: (WatchHistoryEntity) -> Unit,
     hazeState: HazeState? = null
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     var editingHistory by remember { mutableStateOf<WatchHistoryEntity?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    val innerHazeState = remember { HazeState() }
 
-    com.cinetrack.ui.components.shared.FlickTroveBottomSheet(
+    com.cinetrack.ui.components.shared.FlickTroveModal(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
         hazeState = hazeState
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp)
+                .padding(horizontal = 16.dp, vertical = 24.dp)
+                .haze(state = innerHazeState)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Watch History", // TODO: localize
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                Column {
+                    Text(
+                        text = stringResource(id = R.string.watch_history_title),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     )
-                )
+                    
+                    val rewatchCount = if (history.size > 1) history.size - 1 else 0
+                    if (rewatchCount > 0) {
+                        Text(
+                            text = "x$rewatchCount ${stringResource(id = R.string.watch_history_rewatch).lowercase()}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
+                }
 
-                IconButton(
-                    onClick = onAddRewatch,
-                    colors = IconButtonDefaults.iconButtonColors(containerColor = accentColor.copy(alpha = 0.2f))
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Add Rewatch",
-                        tint = accentColor
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .bounceClick(scaleDown = 0.9f, onClick = onAddRewatch)
+                            .clip(CircleShape)
+                            .background(accentColor.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
+                            contentDescription = "Add Rewatch",
+                            tint = accentColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .bounceClick(scaleDown = 0.9f, onClick = onDismiss)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                            contentDescription = "Close",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -86,16 +124,75 @@ fun WatchHistoryBottomSheet(
 
             if (history.isEmpty()) {
                 Text(
-                    text = "No history available.",
+                    text = stringResource(id = R.string.watch_history_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.6f),
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 32.dp)
                 )
             } else {
+            val sortedHistory = history.sortedBy { it.watchedAt }
+            val firstViewing = sortedHistory.firstOrNull()
+            val rewatches = if (sortedHistory.size > 1) sortedHistory.drop(1).sortedByDescending { it.watchedAt } else emptyList()
+
+            if (firstViewing != null) {
+                HistoryItemRow(
+                    item = firstViewing,
+                    accentColor = accentColor,
+                    onEdit = {
+                        editingHistory = it
+                        showDatePicker = true
+                    },
+                    onDelete = null,
+                    label = stringResource(id = R.string.watch_history_first_watch)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (rewatches.isNotEmpty()) {
+                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                
+                val showTopGradient by remember {
+                    derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0 }
+                }
+                
+                val showBottomGradient by remember {
+                    derivedStateOf {
+                        val layoutInfo = listState.layoutInfo
+                        val visibleItemsInfo = layoutInfo.visibleItemsInfo
+                        if (layoutInfo.totalItemsCount == 0 || visibleItemsInfo.isEmpty()) {
+                            false
+                        } else {
+                            val lastVisibleItem = visibleItemsInfo.last()
+                            lastVisibleItem.index < layoutInfo.totalItemsCount - 1 ||
+                            lastVisibleItem.offset + lastVisibleItem.size > layoutInfo.viewportEndOffset
+                        }
+                    }
+                }
+
+                val fadeBrush = Brush.verticalGradient(
+                    0f to if (showTopGradient) Color.Transparent else Color.Black,
+                    0.05f to Color.Black,
+                    0.95f to Color.Black,
+                    1f to if (showBottomGradient) Color.Transparent else Color.Black
+                )
+
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    state = listState,
+                    modifier = Modifier
+                        .heightIn(max = 350.dp)
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(brush = fadeBrush, blendMode = BlendMode.DstIn)
+                        },
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
-                    items(history.sortedByDescending { it.watchedAt }) { item ->
+                    itemsIndexed(
+                        items = rewatches,
+                        key = { _, item -> item.id }
+                    ) { index, item ->
+                        val rewatchNumber = rewatches.size - index
                         HistoryItemRow(
                             item = item,
                             accentColor = accentColor,
@@ -103,87 +200,40 @@ fun WatchHistoryBottomSheet(
                                 editingHistory = it
                                 showDatePicker = true
                             },
-                            onDelete = { onDelete(it) }
+                            onDelete = { onDelete(it) },
+                            label = "${stringResource(id = R.string.watch_history_rewatch)} $rewatchNumber",
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }
+            }
             }
         }
     }
 
     if (showDatePicker && editingHistory != null) {
-        val initialMillis = try {
-            Instant.parse(editingHistory!!.watchedAt).toEpochMilli()
+        val initialLocalDate = try {
+            val zdt = Instant.parse(editingHistory!!.watchedAt).atZone(ZoneId.systemDefault())
+            zdt.toLocalDate()
         } catch (e: Exception) {
-            System.currentTimeMillis()
+            LocalDate.now()
         }
 
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
-
-        DatePickerDialog(
+        com.cinetrack.ui.components.shared.FlickTroveDatePickerModal(
+            initialDate = initialLocalDate,
+            onDateSelected = { selectedDate ->
+                val newIso = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
+                onUpdateDate(editingHistory!!, newIso)
+                showDatePicker = false
+                editingHistory = null
+            },
             onDismissRequest = {
                 showDatePicker = false
                 editingHistory = null
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        // Convert back to ISO string
-                        val newIso = Instant.ofEpochMilli(millis).toString()
-                        onUpdateDate(editingHistory!!, newIso)
-                    }
-                    showDatePicker = false
-                    editingHistory = null
-                }) {
-                    Text("Save", color = accentColor)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showDatePicker = false
-                    editingHistory = null
-                }) {
-                    Text("Cancel", color = Color.White.copy(alpha = 0.7f))
-                }
-            },
-            colors = DatePickerDefaults.colors(
-                containerColor = PremiumBackground,
-                titleContentColor = Color.White,
-                headlineContentColor = Color.White,
-                weekdayContentColor = Color.White.copy(alpha = 0.7f),
-                subheadContentColor = Color.White.copy(alpha = 0.7f),
-                yearContentColor = Color.White,
-                currentYearContentColor = accentColor,
-                selectedYearContentColor = Color.White,
-                selectedYearContainerColor = accentColor,
-                dayContentColor = Color.White,
-                disabledDayContentColor = Color.White.copy(alpha = 0.3f),
-                selectedDayContentColor = Color.White,
-                selectedDayContainerColor = accentColor,
-                todayContentColor = accentColor,
-                todayDateBorderColor = accentColor
-            )
-        ) {
-            DatePicker(
-                state = datePickerState,
-                colors = DatePickerDefaults.colors(
-                    titleContentColor = Color.White,
-                    headlineContentColor = Color.White,
-                    weekdayContentColor = Color.White.copy(alpha = 0.7f),
-                    subheadContentColor = Color.White.copy(alpha = 0.7f),
-                    yearContentColor = Color.White,
-                    currentYearContentColor = accentColor,
-                    selectedYearContentColor = Color.White,
-                    selectedYearContainerColor = accentColor,
-                    dayContentColor = Color.White,
-                    disabledDayContentColor = Color.White.copy(alpha = 0.3f),
-                    selectedDayContentColor = Color.White,
-                    selectedDayContainerColor = accentColor,
-                    todayContentColor = accentColor,
-                    todayDateBorderColor = accentColor
-                )
-            )
-        }
+            hazeState = innerHazeState,
+            accentColor = accentColor
+        )
     }
 }
 
@@ -192,14 +242,16 @@ private fun HistoryItemRow(
     item: WatchHistoryEntity,
     accentColor: Color,
     onEdit: (WatchHistoryEntity) -> Unit,
-    onDelete: (WatchHistoryEntity) -> Unit
+    onDelete: ((WatchHistoryEntity) -> Unit)?,
+    label: String?,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.05f))
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -216,9 +268,9 @@ private fun HistoryItemRow(
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White
             )
-            if (item.isRewatch) {
+            if (label != null) {
                 Text(
-                    text = "Rewatch", // TODO: localize
+                    text = label,
                     style = MaterialTheme.typography.bodySmall,
                     color = accentColor.copy(alpha = 0.8f)
                 )
@@ -226,29 +278,37 @@ private fun HistoryItemRow(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = { onEdit(item) },
-                modifier = Modifier.size(36.dp),
-                colors = IconButtonDefaults.iconButtonColors(containerColor = Color.White.copy(alpha = 0.1f))
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .bounceClick(scaleDown = 0.9f) { onEdit(item) }
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Edit,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                     contentDescription = "Edit Date",
                     tint = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            IconButton(
-                onClick = { onDelete(item) },
-                modifier = Modifier.size(36.dp),
-                colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFFF3D3D).copy(alpha = 0.1f))
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = "Delete",
-                    tint = Color(0xFFFF3D3D),
-                    modifier = Modifier.size(20.dp)
-                )
+            if (onDelete != null) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .bounceClick(scaleDown = 0.9f) { onDelete(item) }
+                        .clip(CircleShape)
+                        .background(Color(0xFFFF3D3D).copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
+                        contentDescription = "Delete",
+                        tint = Color(0xFFFF3D3D),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

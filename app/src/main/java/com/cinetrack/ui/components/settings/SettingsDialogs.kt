@@ -423,7 +423,7 @@ fun FeedbackDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f, fill = false)
-                        .premiumScrollbar(feedbackScrollState)
+                        .premiumScrollbar(feedbackScrollState, width = 3f)
                         .padding(end = 12.dp)
                         .verticalFadingEdges(feedbackScrollState, 16.dp, 16.dp)
                         .verticalScroll(feedbackScrollState)
@@ -500,16 +500,7 @@ fun FeedbackDialog(
                                 shape = RoundedCornerShape(16.dp),
                                 visualTransformation = remember { com.cinetrack.ui.screens.MarkdownVisualTransformation() }
                             )
-                            // Character counter
-                            Text(
-                                text = "${description.text.length}/2000",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = OnSurfaceMuted.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .align(Alignment.End)
-                                    .padding(top = 4.dp, end = 8.dp)
-                            )
-                            // Markdown toolbar
+                            // Markdown toolbar and counter
                             val accentColor = MaterialTheme.colorScheme.primary
                             val mdAction = { prefix: String, suffix: String ->
                                 val sel = description.selection
@@ -528,27 +519,64 @@ fun FeedbackDialog(
                                     modifier = Modifier
                                         .size(32.dp)
                                         .clickable { onClick() }
-                                        .background(Color(0xFF2A2A2A), RoundedCornerShape(8.dp)),
+                                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
+                                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) { content() }
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LazyRow {
-                                item {
-                                    MdBtn(onClick = { mdAction("**", "**") }) { Text("B", fontWeight = FontWeight.Bold, color = Color.White, style = MaterialTheme.typography.titleSmall) }
-                                    MdBtn(onClick = { mdAction("*", "*") }) { Text("I", fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = Color.White, style = MaterialTheme.typography.titleSmall) }
-                                    MdBtn(onClick = { mdAction("~~", "~~") }) { Text("S", textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough, color = Color.White, style = MaterialTheme.typography.titleSmall) }
-                                    MdBtn(onClick = { mdAction("> ", "") }) { Text("\"\"", color = Color.White, style = MaterialTheme.typography.titleSmall) }
-                                    MdBtn(onClick = { mdAction("- ", "") }) { Text("•", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                            
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                LazyRow(verticalAlignment = Alignment.CenterVertically) {
+                                    item {
+                                        MdBtn(onClick = { mdAction("**", "**") }) { Text("B", fontWeight = FontWeight.Bold, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                        MdBtn(onClick = { mdAction("*", "*") }) { Text("I", fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                        MdBtn(onClick = { mdAction("~~", "~~") }) { Text("S", textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough, color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                        MdBtn(onClick = { mdAction("> ", "") }) { Text("\"\"", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                        MdBtn(onClick = { mdAction("- ", "") }) { Text("•", color = Color.White, style = MaterialTheme.typography.titleSmall) }
+                                    }
                                 }
+                                // Character counter
+                                Text(
+                                    text = "${description.text.length}/2000",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = OnSurfaceMuted.copy(alpha = 0.5f),
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.feedback_roadmap_note),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.5f)
-                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            // Roadmap banner
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.03f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_reddit),
+                                    contentDescription = "Reddit",
+                                    tint = Color(0xFFFF4500),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(R.string.feedback_roadmap_note),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    lineHeight = 16.sp
+                                )
+                            }
                         }
                     }
                 }

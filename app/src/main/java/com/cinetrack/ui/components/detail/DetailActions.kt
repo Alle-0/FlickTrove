@@ -22,8 +22,11 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material.icons.automirrored.rounded.*
@@ -87,6 +90,11 @@ fun DetailActions(
     // ancor prima che il ViewModel / Database confermino il salvataggio
     var optimisticWatchState by remember(watchState) { mutableStateOf(watchState) }
     
+    val currentOnStateChange by rememberUpdatedState(onStateChange)
+    val currentOnRemove by rememberUpdatedState(onRemove)
+    val currentOnEpisodesClick by rememberUpdatedState(onEpisodesClick)
+    val currentOnManageRewatches by rememberUpdatedState(onManageRewatches)
+    
     // Use a single transition for all coordinated animations
     val transition = updateTransition(targetState = optimisticWatchState, label = "DetailActionsTransition")
     
@@ -116,14 +124,32 @@ fun DetailActions(
     ) { if (it != WatchState.NONE && movie.isReleased) 68.dp else 0.dp }
 
     val mainPillWeight by transition.animateFloat(
-        transitionSpec = { spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow) },
+        transitionSpec = {
+            if (targetState == WatchState.WATCHED) {
+                tween(800, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
+            } else {
+                spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow)
+            }
+        },
         label = "MainPillWeight"
-    ) { 1f }
+    ) { state ->
+        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
+    }
 
     val mainPillAlpha by transition.animateFloat(
-        transitionSpec = { tween(300) },
+        transitionSpec = { 
+            if (targetState == WatchState.WATCHED) {
+                tween(300, delayMillis = 300)
+            } else if (initialState == WatchState.WATCHED) {
+                tween(400) 
+            } else {
+                tween(300, delayMillis = 100)
+            }
+        },
         label = "MainPillAlpha"
-    ) { 1f }
+    ) { state ->
+        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
+    }
 
     val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
     val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
@@ -172,7 +198,12 @@ fun DetailActions(
     )
 
     // Interaction state for main pill content scale
-    var isPillPressed by remember { mutableStateOf(false) }
+    val pillInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPillPressed by pillInteractionSource.collectIsPressedAsState()
+    LaunchedEffect(isPillPressed) {
+        if (isPillPressed) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+    }
+
     val pillContentScale by animateFloatAsState(
         targetValue = if (isPillPressed) 0.96f else 1f,
         animationSpec = if (isPillPressed) spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
@@ -221,7 +252,11 @@ fun DetailActions(
     ) {
         val maxAvailableWidth = maxWidth
         
-        val targetPillWidth = maxAvailableWidth - spacing - trashWidth
+        val targetPillWidth = if (optimisticWatchState == WatchState.WATCHED && movie.mediaType == "movie") {
+            0.dp
+        } else {
+            maxAvailableWidth - spacing - trashWidth
+        }
         
         val pillWidth by animateDpAsState(
             targetValue = targetPillWidth,
@@ -232,6 +267,14 @@ fun DetailActions(
             label = "PillWidth"
         )
 
+                var isTrashMode by remember { mutableStateOf(
+                    if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
+                ) }
+                val sideButtonInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                val isSideButtonPressed by sideButtonInteractionSource.collectIsPressedAsState()
+                LaunchedEffect(isSideButtonPressed) {
+                    if (isSideButtonPressed) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                }
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Start,
@@ -251,51 +294,42 @@ fun DetailActions(
                         shape = RoundedCornerShape(28.dp),
                         borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                     )
-                .pointerInput(optimisticWatchState, movie.mediaType) {
-                    detectTapGestures(
-                        onPress = {
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                            isPillPressed = true
-                            try {
-                                awaitRelease()
-                            } finally {
-                                isPillPressed = false
+                .clickable(
+                    interactionSource = pillInteractionSource,
+                    indication = null,
+                    onClick = {
+                        if (!movie.isReleased) {
+                            // Simple toggle for unreleased movies and tv series
+                            val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
+                            if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
-                        },
-                        onTap = {
-                            if (!movie.isReleased) {
-                                // Simple toggle for unreleased movies and tv series
-                                val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
-                                if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
-                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            optimisticWatchState = next
+                            currentOnStateChange(next)
+                        } else if (movie.mediaType == "tv") {
+                            if (optimisticWatchState == WatchState.NONE) {
+                                optimisticWatchState = WatchState.BOOKMARKED
+                                currentOnStateChange(WatchState.BOOKMARKED)
+                            } else {
+                                currentOnEpisodesClick?.invoke()
+                            }
+                        } else {
+                            if (optimisticWatchState == WatchState.WATCHED) {
+                                currentOnManageRewatches?.invoke()
+                            } else {
+                                val next = when (optimisticWatchState) {
+                                    WatchState.NONE -> WatchState.BOOKMARKED
+                                    WatchState.BOOKMARKED -> WatchState.WATCHED
+                                    WatchState.WATCHED -> WatchState.NONE
+                                    WatchState.DROPPED -> WatchState.BOOKMARKED
                                 }
                                 optimisticWatchState = next
-                                onStateChange(next)
-                            } else if (movie.mediaType == "tv") {
-                                if (optimisticWatchState == WatchState.NONE) {
-                                    optimisticWatchState = WatchState.BOOKMARKED
-                                    onStateChange(WatchState.BOOKMARKED)
-                                } else {
-                                    onEpisodesClick?.invoke()
-                                }
-                            } else {
-                                if (optimisticWatchState == WatchState.WATCHED) {
-                                    onManageRewatches?.invoke()
-                                } else {
-                                    val next = when (optimisticWatchState) {
-                                        WatchState.NONE -> WatchState.BOOKMARKED
-                                        WatchState.BOOKMARKED -> WatchState.WATCHED
-                                        WatchState.WATCHED -> WatchState.NONE
-                                        WatchState.DROPPED -> WatchState.BOOKMARKED
-                                    }
-                                    optimisticWatchState = next
-                                    onStateChange(next)
-                                }
+                                currentOnStateChange(next)
                             }
                         }
-                    )
-                }
+                    }
+                )
                 .drawBehind {
                     val w = size.width
                     val h = size.height
@@ -449,17 +483,23 @@ fun DetailActions(
             contentAlignment = Alignment.Center
         ) {
             if (trashWidth > 20.dp) {
-                var isTrashMode by remember { mutableStateOf(
-                    if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
-                ) }
 
-                LaunchedEffect(optimisticWatchState) {
+                val isTvCompletedAndEnded = movie.mediaType == "tv" && 
+                                          optimisticWatchState == WatchState.WATCHED && 
+                                          movie.status?.lowercase() in listOf("ended", "canceled", "cancelled")
+
+                LaunchedEffect(optimisticWatchState, movie.status) {
                     if (optimisticWatchState != WatchState.NONE) {
-                        isTrashMode = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
+                        isTrashMode = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
+                            true
+                        } else if (isTvCompletedAndEnded) {
+                            true
+                        } else {
+                            false
+                        }
                     }
                 }
 
-                var isSideButtonPressed by remember { mutableStateOf(false) }
                 val sideButtonScale by animateFloatAsState(
                     targetValue = if (isSideButtonPressed) 0.86f else 1f,
                     animationSpec = if (isSideButtonPressed) spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
@@ -475,18 +515,18 @@ fun DetailActions(
                     Box(
                         modifier = Modifier
                             .size(56.dp)
-                            .pointerInput(onRemove, onStateChange, isTrashMode, movie.mediaType) {
+                            .pointerInput(Unit) {
                                 var dragAccumulator = 0f
                                 detectVerticalDragGestures(
                                     onDragStart = { dragAccumulator = 0f },
                                     onVerticalDrag = { change, dragAmount ->
                                         change.consume()
                                         dragAccumulator += dragAmount
-                                        if (isTrashMode && dragAccumulator > 0f) dragAccumulator = 0f
-                                        if (!isTrashMode && dragAccumulator < 0f) dragAccumulator = 0f
+                                        if (isTrashMode && dragAccumulator < 0f) dragAccumulator = 0f
+                                        if (!isTrashMode && dragAccumulator > 0f) dragAccumulator = 0f
                                         
-                                        if (isTrashMode && dragAccumulator < -30f) {
-                                            if (movie.mediaType == "tv") {
+                                        if (isTrashMode && dragAccumulator > 30f) {
+                                            if (movie.mediaType == "tv" && !isTvCompletedAndEnded) {
                                                 isTrashMode = false
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
@@ -494,7 +534,7 @@ fun DetailActions(
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             }
                                             dragAccumulator = 0f
-                                        } else if (!isTrashMode && dragAccumulator > 30f) {
+                                        } else if (!isTrashMode && dragAccumulator < -30f) {
                                             isTrashMode = true
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             dragAccumulator = 0f
@@ -502,28 +542,23 @@ fun DetailActions(
                                     }
                                 )
                             }
-                            .pointerInput(onRemove, onStateChange, isTrashMode) {
-                                detectTapGestures(
-                                    onPress = {
-                                        isSideButtonPressed = true
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        try { awaitRelease() } finally { isSideButtonPressed = false }
-                                    },
-                                    onTap = { 
-                                        if (isTrashMode) {
-                                            onRemove()
+                            .clickable(
+                                interactionSource = sideButtonInteractionSource,
+                                indication = null,
+                                onClick = { 
+                                    if (isTrashMode) {
+                                        currentOnRemove()
+                                    } else {
+                                        if (movie.mediaType == "tv") {
+                                            val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
+                                            optimisticWatchState = next
+                                            currentOnStateChange(next)
                                         } else {
-                                            if (movie.mediaType == "tv") {
-                                                val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
-                                                optimisticWatchState = next
-                                                onStateChange(next)
-                                            } else {
-                                                onManageRewatches?.invoke()
-                                            }
+                                            currentOnManageRewatches?.invoke()
                                         }
                                     }
-                                )
-                            }
+                                }
+                            )
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
@@ -535,9 +570,9 @@ fun DetailActions(
                             targetState = isTrashMode,
                             transitionSpec = {
                                 if (targetState) {
-                                    slideInVertically { height -> -height } + fadeIn() togetherWith slideOutVertically { height -> height } + fadeOut()
-                                } else {
                                     slideInVertically { height -> height } + fadeIn() togetherWith slideOutVertically { height -> -height } + fadeOut()
+                                } else {
+                                    slideInVertically { height -> -height } + fadeIn() togetherWith slideOutVertically { height -> height } + fadeOut()
                                 }
                             },
                             label = "SideButtonAnim"
@@ -617,15 +652,19 @@ fun DetailActions(
                             }
                         }
                     }
-                     if (optimisticWatchState != WatchState.NONE) {
+                    }
+                }
+            }
+        }
+                     if (optimisticWatchState != WatchState.NONE && (movie.mediaType == "tv" || optimisticWatchState == WatchState.WATCHED)) {
                         val topOffset by animateDpAsState(
-                            targetValue = if (isTrashMode) 0.dp else 8.dp,
-                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 1500f else 200f),
+                            targetValue = if (isTrashMode) 8.dp else 0.dp,
+                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 200f else 1500f),
                             label = "topOffset"
                         )
                         val bottomOffset by animateDpAsState(
-                            targetValue = if (isTrashMode) 4.dp else 12.dp,
-                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 200f else 1500f),
+                            targetValue = if (isTrashMode) 12.dp else 4.dp,
+                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 1500f else 200f),
                             label = "bottomOffset"
                         )
                         val activeColor by animateColorAsState(
@@ -672,9 +711,5 @@ fun DetailActions(
                             )
                         }
                     }
-                    }
-                }
-            }
-        }
     }
 }}

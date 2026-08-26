@@ -105,6 +105,21 @@ class MovieDetailViewModel @Inject constructor(
 
             // Fetch watch history
             viewModelScope.launch {
+                // Backfill for older movies marked as watched before the history feature
+                val local = repository.getMovie(movieId, mediaType)
+                if (local != null && local.watched) {
+                    val currentHistory = repository.getWatchHistoryForMovie(movieId)
+                    if (currentHistory.none { !it.isRewatch }) {
+                        repository.insertWatchHistory(
+                            com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                movieId = movieId,
+                                watchedAt = local.watchedAt ?: java.time.Instant.now().toString(),
+                                isRewatch = false
+                            )
+                        )
+                    }
+                }
+
                 repository.getWatchHistoryForMovieFlow(movieId).collect { history ->
                     _watchHistory.value = history
                 }
@@ -388,7 +403,7 @@ class MovieDetailViewModel @Inject constructor(
         when (event) {
             DetailEvent.ToggleFavorite -> toggleFavorite()
             DetailEvent.ToggleWatched -> toggleWatched()
-            is DetailEvent.SetWatchState -> setWatchState(event.state)
+            is DetailEvent.SetWatchState -> setWatchState(event.state, event.customWatchDate)
             DetailEvent.Refresh -> viewModelScope.launch { fetchFromTMDB(movieId, mediaType == "tv") }
             is DetailEvent.Rate -> updateRating(event.rating)
             is DetailEvent.UpdateNote -> updateNote(event.note)
@@ -598,6 +613,14 @@ class MovieDetailViewModel @Inject constructor(
     fun logRewatch() {
         if (movieId == 0L || mediaType != "movie") return
         viewModelScope.launch {
+            val allHistory = repository.getWatchHistoryForMovie(movieId)
+            val rewatchCount = allHistory.count { it.isRewatch }
+            
+            if (rewatchCount >= 99) {
+                emitMessage(UiText.StringResource(R.string.max_rewatch_limit))
+                return@launch
+            }
+            
             val watchedDate = java.time.Instant.now().toString()
             
             repository.insertWatchHistory(
@@ -639,7 +662,9 @@ class MovieDetailViewModel @Inject constructor(
             val local = repository.getMovie(movieId, mediaType)
             if (local != null) {
                 if (allHistory.isEmpty()) {
-                    repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
+                    if (!history.isRewatch) {
+                        repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
+                    }
                 } else {
                     val latest = allHistory.maxByOrNull { it.watchedAt }
                     if (latest != null && local.watchedAt != latest.watchedAt) {
@@ -693,7 +718,7 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun setWatchState(watchState: WatchState) {
+    private fun setWatchState(watchState: WatchState, customWatchDate: java.time.Instant? = null) {
         val state = uiState.value as? DetailUiState.Success ?: return
         val previousMovie = state.movieEntry
         viewModelScope.launch {
@@ -711,7 +736,15 @@ class MovieDetailViewModel @Inject constructor(
                     if (mediaType == "tv") {
                         updateEpisodesUseCase.markAllWatched(previousMovie).copy(dropped = false)
                     } else {
-                        previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = java.time.Instant.now().toString(), dropped = false)
+                        val watchDateStr = customWatchDate?.toString() ?: java.time.Instant.now().toString()
+                        repository.insertWatchHistory(
+                            com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                movieId = previousMovie.id,
+                                watchedAt = watchDateStr,
+                                isRewatch = false
+                            )
+                        )
+                        previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = watchDateStr, dropped = false)
                     }
                 }
             }

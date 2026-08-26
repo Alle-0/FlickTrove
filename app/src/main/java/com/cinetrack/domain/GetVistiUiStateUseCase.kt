@@ -19,15 +19,26 @@ class GetVistiUiStateUseCase @Inject constructor() {
         foldersFlow: Flow<List<FolderEntity>>,
         preferencesFlow: Flow<UserPreferences>,
         searchQueryFlow: Flow<String>,
-        activeTabFlow: Flow<String>
+        activeTabFlow: Flow<String>,
+        watchHistoryFlow: Flow<List<com.cinetrack.data.local.entities.WatchHistoryEntity>>
     ): Flow<VistiUiState> {
         return combine(
             moviesFlow,
             foldersFlow,
             preferencesFlow,
             searchQueryFlow,
-            activeTabFlow
-        ) { movies, folders, prefs, query, tab ->
+            activeTabFlow,
+            watchHistoryFlow
+        ) { flows ->
+            val movies = flows[0] as List<Movie>
+            val folders = flows[1] as List<FolderEntity>
+            val prefs = flows[2] as UserPreferences
+            val query = flows[3] as String
+            val tab = flows[4] as String
+            val historyList = flows[5] as List<com.cinetrack.data.local.entities.WatchHistoryEntity>
+            
+            val historyMap = historyList.groupBy { it.movieId }
+
             val watchedMovies = movies.filter { it.watched }.distinctBy { "${it.id}_${it.mediaType}" }
             val movieCount = watchedMovies.count { it.mediaType != "tv" }
             val tvCount = watchedMovies.count { it.mediaType == "tv" }
@@ -66,7 +77,7 @@ class GetVistiUiStateUseCase @Inject constructor() {
                 matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider && matchesStatus
             }
 
-            val sorted: List<Movie> = sortMovies(filtered, prefs.vistiSort)
+            val sorted: List<Movie> = sortMovies(filtered, prefs.vistiSort, historyMap)
 
             val movieFolderColors = mutableMapOf<String, MutableList<String>>()
             folders.forEach { folder ->
@@ -92,14 +103,32 @@ class GetVistiUiStateUseCase @Inject constructor() {
         }.flowOn(Dispatchers.Default)
     }
 
-    private fun sortMovies(movies: List<Movie>, sort: SortConfig): List<Movie> {
+    private fun sortMovies(
+        movies: List<Movie>, 
+        sort: SortConfig,
+        historyMap: Map<Long, List<com.cinetrack.data.local.entities.WatchHistoryEntity>>
+    ): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         return when (sort.sortType) {
-            "watched_at" -> {
+            "first_watched_at" -> {
+                if (isDesc) {
+                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap[m.id]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+                } else {
+                    movies.sortedWith(compareBy<Movie> { m -> historyMap[m.id]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+                }
+            }
+            "last_watched_at", "watched_at" -> {
                 if (isDesc) {
                     movies.sortedWith(compareByDescending<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
                     movies.sortedWith(compareBy<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+                }
+            }
+            "rewatch_count" -> {
+                if (isDesc) {
+                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap[m.id]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
+                } else {
+                    movies.sortedWith(compareBy<Movie> { m -> historyMap[m.id]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
                 }
             }
             "release_date" -> {

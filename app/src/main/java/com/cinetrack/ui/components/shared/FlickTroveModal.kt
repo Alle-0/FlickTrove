@@ -73,7 +73,7 @@ fun FlickTroveModal(
                     .fillMaxSize()
                     .zIndex(100f)
                     .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * modalAlpha))
-                    .bounceClick(scaleDown = 1f) { isClosing = true }
+                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { isClosing = true }
                     .graphicsLayer { alpha = modalAlpha },
                 contentAlignment = Alignment.Center
             ) {
@@ -82,7 +82,7 @@ fun FlickTroveModal(
                         .widthIn(max = 450.dp)
                         .fillMaxWidth(0.94f)
                         .padding(horizontal = 16.dp)
-                        .bounceClick(scaleDown = 1f) { /* Consume clicks */ },
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { /* Consume clicks */ },
                     shape = cardShape,
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

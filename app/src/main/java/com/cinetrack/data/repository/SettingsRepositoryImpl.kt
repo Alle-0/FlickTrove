@@ -36,6 +36,11 @@ class SettingsRepositoryImpl @Inject constructor(
         val IGNORED_UPDATE_VERSION = stringPreferencesKey("ignored_update_version")
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
         val HIDE_SAVED_FROM_DISCOVERY = booleanPreferencesKey("hide_saved_from_discovery")
+        val PROMPT_WATCH_DATE_ON_DETAIL = booleanPreferencesKey("prompt_watch_date_on_detail")
+    }
+
+    override val promptWatchDateOnDetail: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.PROMPT_WATCH_DATE_ON_DETAIL] ?: false
     }
 
     override val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -195,6 +200,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleHideSavedFromDiscovery(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HIDE_SAVED_FROM_DISCOVERY] = enabled
+        }
+    }
+
+    override suspend fun togglePromptWatchDateOnDetail(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PROMPT_WATCH_DATE_ON_DETAIL] = enabled
         }
     }
 }

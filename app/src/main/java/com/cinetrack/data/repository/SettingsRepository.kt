@@ -19,6 +19,7 @@ interface SettingsRepository {
     val ignoredUpdateVersion: Flow<String>
     val hasSeenOnboarding: Flow<Boolean>
     val hideSavedFromDiscovery: Flow<Boolean>
+    val promptWatchDateOnDetail: Flow<Boolean>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -36,4 +37,5 @@ interface SettingsRepository {
     suspend fun updateIgnoredUpdateVersion(version: String)
     suspend fun setOnboardingSeen(seen: Boolean)
     suspend fun toggleHideSavedFromDiscovery(enabled: Boolean)
+    suspend fun togglePromptWatchDateOnDetail(enabled: Boolean)
 }

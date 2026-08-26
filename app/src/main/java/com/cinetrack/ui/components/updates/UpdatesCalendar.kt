@@ -34,6 +34,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
+import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -166,11 +167,16 @@ fun CalendarWidget(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onMonthChanged(currentMonth.minusMonths(1)) 
-                }) {
-                    Icon(imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = stringResource(R.string.updates_calendar_prev_month), tint = Color.White)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .bounceClick(scaleDown = 0.8f) {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onMonthChanged(currentMonth.minusMonths(1))
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.updates_calendar_prev_month), tint = Color.White, modifier = Modifier.size(24.dp))
                 }
 
                 val monthName = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault()).replaceFirstChar { it.uppercase() }
@@ -180,7 +186,7 @@ fun CalendarWidget(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.05f))
-                        .clickable { 
+                        .bounceClick(scaleDown = 0.95f) { 
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             onShowMonthPicker()
                         }
@@ -201,11 +207,16 @@ fun CalendarWidget(
                     )
                 }
 
-                IconButton(onClick = { 
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onMonthChanged(currentMonth.plusMonths(1)) 
-                }) {
-                    Icon(imageVector = Icons.Rounded.ChevronRight, contentDescription = "Successivo", tint = Color.White)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .bounceClick(scaleDown = 0.8f) {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onMonthChanged(currentMonth.plusMonths(1))
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_right), contentDescription = "Successivo", tint = Color.White, modifier = Modifier.size(24.dp))
                 }
             }
 
@@ -261,7 +272,7 @@ fun CalendarWidget(
                                             else -> Color.Transparent
                                         }
                                     )
-                                    .clickable {
+                                    .bounceClick(scaleDown = 0.9f) {
                                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         onDateSelected(date)
                                     },
@@ -303,13 +314,16 @@ fun MonthYearPickerDialog(
     initialMonth: YearMonth,
     onMonthSelected: (YearMonth) -> Unit,
     onDismiss: () -> Unit,
-    internalHazeState: HazeState? = null
+    internalHazeState: HazeState? = null,
+    accentColor: Color = Color.Unspecified
 ) {
     val animatedAlpha by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (showMonthPicker) 1f else 0f,
         animationSpec = androidx.compose.animation.core.tween(300),
         label = "dialogAlpha"
     )
+
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     if (animatedAlpha == 0f && !showMonthPicker) return
 
@@ -358,11 +372,17 @@ fun MonthYearPickerDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { selectedYear-- },
-                        modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                            .bounceClick(scaleDown = 0.8f) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                selectedYear-- 
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, contentDescription = stringResource(R.string.updates_calendar_prev_year), tint = Color.White)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.updates_calendar_prev_year), tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                     Text(
                         text = selectedYear.toString(), 
@@ -370,11 +390,17 @@ fun MonthYearPickerDialog(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(
-                        onClick = { selectedYear++ },
-                        modifier = Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                            .bounceClick(scaleDown = 0.8f) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                selectedYear++ 
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Rounded.ChevronRight, contentDescription = stringResource(R.string.updates_calendar_next_year), tint = Color.White)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_right), contentDescription = stringResource(R.string.updates_calendar_next_year), tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 }
 
@@ -391,8 +417,10 @@ fun MonthYearPickerDialog(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.05f))
-                                        .clickable {
+                                        .background(if (isSelected) {
+                                            if (accentColor != Color.Unspecified) accentColor else MaterialTheme.colorScheme.primary
+                                        } else Color.White.copy(alpha = 0.05f))
+                                        .bounceClick(scaleDown = 0.95f) {
                                             onMonthSelected(YearMonth.of(selectedYear, month))
                                             onDismiss()
                                         }

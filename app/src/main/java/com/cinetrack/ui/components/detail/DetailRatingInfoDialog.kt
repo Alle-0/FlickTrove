@@ -61,7 +61,7 @@ fun DetailRatingInfoDialog(
                         alpha = blurAlpha,
                         shape = RoundedCornerShape(32.dp)
                     )
-                    .clickable(enabled = false) {}
+                    .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) {}
             ) {
                 val dialogScrollState = rememberScrollState()
                 Column(

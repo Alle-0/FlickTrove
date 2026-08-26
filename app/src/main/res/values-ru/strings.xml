@@ -76,6 +76,7 @@
     <string name="stats_tab_title">Статистика</string>
     <string name="stats_no_data">Нет данных статистики</string>
     <string name="stats_all_time">Статистика за все время</string>
+    <string name="stats_rewatches">Пересмотры</string>
     <string name="stats_year_prefix">Статистика %d</string>
     <string name="stats_watched_in_year">ПРОСМОТРЕНО В %d</string>
     <string name="stats_your_movies">ВАШИ ФИЛЬМЫ</string>
@@ -836,7 +837,9 @@
     <string name="status_released">Вышел</string>
     <string name="quick_action_folders">Папки</string>
     <string name="quick_action_delete">Удалить</string>
-    <string name="filter_sort_watched_at">Дата просмотра</string>
+    <string name="filter_sort_last_watched_at">Последний просмотр</string>
+    <string name="filter_sort_first_watched_at">Первый просмотр</string>
+    <string name="filter_sort_rewatch_count">Пересмотры</string>
     <string name="filter_sort_added_at">Недавно добавленные</string>
     <string name="filter_sort_release_date">Дата выхода</string>
     <string name="filter_sort_title">По алфавиту</string>
@@ -1096,5 +1099,17 @@
     <string name="stats_map_no_movies">Нет фильмов</string>
     <string name="stats_map_movies">Фильмов: %1$d</string>
     <string name="feedback_roadmap_note">Есть сложная идея или хотите обсудить дорожную карту? Присоединяйтесь к r/FlickTrove или откройте Issue на GitHub!</string>
-</resources>
 
+    <string name="watch_history_title">История просмотров</string>
+    <string name="watch_history_empty">История недоступна.</string>
+    <string name="watch_history_rewatch">Пересмотр</string>
+    <string name="max_rewatch_limit">Достигнут лимит пересмотров (99)</string>
+    <string name="watch_history_first_watch">Первый просмотр</string>
+
+    <string name="watch_date_prompt_title">Когда вы его посмотрели?</string>
+    <string name="watch_date_prompt_now">Сейчас</string>
+    <string name="watch_date_prompt_release_date">Дата выхода</string>
+    <string name="watch_date_prompt_custom">Другая дата</string>
+    <string name="settings_advanced_prompt_watch_date">Спрашивать дату на экране деталей</string>
+    <string name="settings_advanced_prompt_watch_date_desc">При отметке фильма как просмотренного на экране деталей запрашивать дату просмотра</string>
+</resources>

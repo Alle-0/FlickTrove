@@ -226,6 +226,8 @@ fun MovieDetailScreenContent(
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
     val useMovieLogo by viewModel.useMovieLogo.collectAsStateWithLifecycle()
     val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
+    val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
+    var showWatchDatePrompt by remember { mutableStateOf(false) }
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -651,7 +653,13 @@ fun MovieDetailScreenContent(
                                         progress = state.watchedProgress,
                                         accentColor = accentColor,
                                         hazeState = localHazeState,
-                                        onStateChange = { viewModel.onEvent(DetailEvent.SetWatchState(it)) },
+                                        onStateChange = { newState ->
+                                            if (newState == WatchState.WATCHED && promptWatchDateOnDetail && activeMovie.mediaType == "movie") {
+                                                showWatchDatePrompt = true
+                                            } else {
+                                                viewModel.onEvent(DetailEvent.SetWatchState(newState))
+                                            }
+                                        },
                                         onRemove = { viewModel.onEvent(DetailEvent.DeleteMovie) },
                                         onEpisodesClick = { showEpisodesSheet = true },
                                         onManageRewatches = { showWatchHistorySheet = true }
@@ -678,6 +686,27 @@ fun MovieDetailScreenContent(
                                     onUpdateDate = { entity, newDate -> viewModel.updateWatchHistoryDate(entity, newDate) },
                                     onDelete = { entity -> viewModel.deleteWatchHistory(entity) },
                                     hazeState = localHazeState
+                                )
+                            }
+                            
+                            if (showWatchDatePrompt) {
+                                com.cinetrack.ui.components.detail.WatchDatePromptModal(
+                                    hazeState = localHazeState,
+                                    accentColor = accentColor,
+                                    releaseDate = activeMovie.releaseDate?.let { dateStr ->
+                                        try {
+                                            if (dateStr.length >= 10) {
+                                                java.time.LocalDate.parse(dateStr.take(10)).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()
+                                            } else {
+                                                null
+                                            }
+                                        } catch (e: Exception) { null }
+                                    },
+                                    onDismiss = { showWatchDatePrompt = false },
+                                    onDateSelected = { customDate ->
+                                        showWatchDatePrompt = false
+                                        viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, customDate))
+                                    }
                                 )
                             }
                         }
