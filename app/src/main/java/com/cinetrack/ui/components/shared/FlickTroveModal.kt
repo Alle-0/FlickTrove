@@ -37,6 +37,7 @@ fun FlickTroveModal(
     isVisible: Boolean = true,
     onDismissRequest: () -> Unit,
     hazeState: HazeState? = null,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val cardShape = RoundedCornerShape(32.dp)
@@ -69,7 +70,7 @@ fun FlickTroveModal(
 
     if (modalAlpha > 0f) {
         Box(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxSize()
                     .zIndex(100f)
                     .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * modalAlpha))
