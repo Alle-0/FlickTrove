@@ -395,24 +395,35 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                 }
                 
-                // Update trending_stats_weekly
+                // Update trending_stats_weekly and trending_stats_monthly
                 val isNewWatched = (newStatus == "watched" && oldStatus != "watched")
                 val isRemovedWatched = (oldStatus == "watched" && newStatus != "watched")
                 
-                if (countDelta != 0L || isNewWatched || isRemovedWatched) {
+                if (countDelta != 0L || ratingDelta != 0.0 || isNewWatched || isRemovedWatched) {
                     val calendar = java.util.Calendar.getInstance()
                     val year = calendar.get(java.util.Calendar.YEAR)
                     val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
-                    val weekId = "${year}_W$week"
+                    val month = calendar.get(java.util.Calendar.MONTH) + 1
                     
-                    val trendingDocRef = firestore.collection("trending_stats_weekly")
+                    val weekId = "${year}_W$week"
+                    val monthId = "${year}_M${String.format("%02d", month)}"
+                    
+                    val weeklyRef = firestore.collection("trending_stats_weekly")
                         .document(weekId)
+                        .collection("movies")
+                        .document(compositeId)
+                        
+                    val monthlyRef = firestore.collection("trending_stats_monthly")
+                        .document(monthId)
                         .collection("movies")
                         .document(compositeId)
                         
                     val trendingUpdates = mutableMapOf<String, Any>()
                     if (countDelta != 0L) {
                         trendingUpdates["rating_count"] = com.google.firebase.firestore.FieldValue.increment(countDelta)
+                    }
+                    if (ratingDelta != 0.0) {
+                        trendingUpdates["total_rating"] = com.google.firebase.firestore.FieldValue.increment(ratingDelta)
                     }
                     if (isNewWatched) {
                         trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(1L)
@@ -421,7 +432,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                     
                     if (trendingUpdates.isNotEmpty()) {
-                        transaction.set(trendingDocRef, trendingUpdates, SetOptions.merge())
+                        transaction.set(weeklyRef, trendingUpdates, SetOptions.merge())
+                        transaction.set(monthlyRef, trendingUpdates, SetOptions.merge())
                     }
                 }
 

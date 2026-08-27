@@ -26,6 +26,9 @@ import kotlinx.coroutines.Dispatchers
 import com.cinetrack.util.toComposeColorOrNull
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import android.content.Context
 import android.graphics.drawable.BitmapDrawable
@@ -623,15 +626,24 @@ class MovieDetailViewModel @Inject constructor(
             
             val watchedDate = java.time.Instant.now().toString()
             
+            val local = repository.getMovie(movieId, mediaType)
+            val historicalEpisodesJson = if (local?.mediaType == "tv") {
+                try {
+                    Json.encodeToString(local.watchedEpisodes ?: emptyMap<String, List<Int>>())
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+            
             repository.insertWatchHistory(
                 com.cinetrack.data.local.entities.WatchHistoryEntity(
                     movieId = movieId,
                     watchedAt = watchedDate,
-                    isRewatch = true
+                    isRewatch = true,
+                    historicalEpisodes = historicalEpisodesJson
                 )
             )
             
-            val local = repository.getMovie(movieId, mediaType)
             if (local != null) {
                 var updatedMovie = local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis())
                 if (mediaType == "tv") {
@@ -678,7 +690,25 @@ class MovieDetailViewModel @Inject constructor(
                 } else {
                     val latest = allHistory.maxByOrNull { it.watchedAt }
                     if (latest != null && local.watchedAt != latest.watchedAt) {
-                        repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+                        var updatedLocal = local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis())
+                        
+                        if (mediaType == "tv") {
+                            if (history.historicalEpisodes != null) {
+                                try {
+                                    val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
+                                    val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
+                                    updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                } catch (e: Exception) {
+                                    updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                }
+                            } else {
+                                updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                            }
+                        } else {
+                            updatedLocal = updatedLocal.copy(watched = true)
+                        }
+                        
+                        repository.saveMovie(updatedLocal)
                     }
                 }
             }

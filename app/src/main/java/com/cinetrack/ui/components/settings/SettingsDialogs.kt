@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -431,17 +432,37 @@ fun FeedbackDialog(
                     // Rating Section
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    val fraction = offset.x / size.width.toFloat()
+                                    val newRating = (fraction * 5).toInt() + 1
+                                    val clamped = newRating.coerceIn(1, 5)
+                                    if (clamped != rating) {
+                                        rating = clamped
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                }
+                            }
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, _ ->
+                                    val fraction = change.position.x / size.width.toFloat()
+                                    val newRating = (fraction * 5).toInt() + 1
+                                    val clamped = newRating.coerceIn(1, 5)
+                                    if (clamped != rating) {
+                                        rating = clamped
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                }
+                            }
                     ) {
                         (1..5).forEach { index ->
                             val isSelected = index <= rating
                             val starColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.15f)
                             
-                            IconButton(
-                                onClick = { 
-                                    rating = index 
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                },
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier.size(44.dp)
                             ) {
                                 Icon(

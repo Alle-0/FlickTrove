@@ -271,8 +271,8 @@ class MovieRepository @Inject constructor(
                 val oldRating = oldMovie?.personalRating
                 val newRating = movie.personalRating
                 
-                val newStatus = movie.status
-                val oldStatus = oldMovie?.status
+                val newStatus = if (movie.watched) "watched" else "unwatched"
+                val oldStatus = if (oldMovie?.watched == true) "watched" else "unwatched"
 
                 if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp || newRating != oldRating || newStatus != oldStatus) {
                     firebaseRemoteDataSource.updateGlobalMovieStats(

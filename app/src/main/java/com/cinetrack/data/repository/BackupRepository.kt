@@ -344,7 +344,7 @@ class BackupRepository @Inject constructor(
                             oldMvp = null,
                             newRating = newRating,
                             oldRating = null,
-                            newStatus = incoming.status,
+                            newStatus = if (incoming.watched) "watched" else "unwatched",
                             oldStatus = null
                         )
                     }
@@ -412,8 +412,8 @@ class BackupRepository @Inject constructor(
                 val newRating = updated.personalRating
                 val oldRating = local.personalRating
                 
-                val newStatus = updated.status
-                val oldStatus = local.status
+                val newStatus = if (updated.watched) "watched" else "unwatched"
+                val oldStatus = if (local.watched) "watched" else "unwatched"
                 
                 if (newRating != oldRating || newStatus != oldStatus) {
                     repositoryScope.launch {
