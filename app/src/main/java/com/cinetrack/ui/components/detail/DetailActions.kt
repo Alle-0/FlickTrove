@@ -70,6 +70,7 @@ import com.cinetrack.ui.theme.HazeStyles
 @Composable
 fun DetailActions(
     movie: Movie,
+    movieStatus: String? = null,
     watchState: WatchState,
     progress: Float, // 0.0 to 1.0
     accentColor: Color,
@@ -267,9 +268,43 @@ fun DetailActions(
             label = "PillWidth"
         )
 
-                var isTrashMode by remember { mutableStateOf(
-                    if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) true else false
-                ) }
+                val isTvCompletedAndEnded = movie.mediaType == "tv" && 
+                                          optimisticWatchState == WatchState.WATCHED && 
+                                          (movieStatus ?: movie.status)?.lowercase() in listOf("ended", "canceled", "cancelled")
+                
+                val availableSideActions = remember(movie.mediaType, optimisticWatchState, movie.status, movieStatus) {
+                    if (movie.mediaType == "movie") {
+                        if (optimisticWatchState == WatchState.WATCHED) listOf(SideAction.REWATCH, SideAction.TRASH)
+                        else listOf(SideAction.TRASH)
+                    } else {
+                        if (optimisticWatchState == WatchState.WATCHED) {
+                            if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
+                            else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
+                        } else {
+                            listOf(SideAction.DROP, SideAction.TRASH)
+                        }
+                    }
+                }
+                
+                var currentSideActionIndex by remember { mutableIntStateOf(0) }
+                
+                LaunchedEffect(availableSideActions) {
+                    if (currentSideActionIndex >= availableSideActions.size) {
+                        currentSideActionIndex = availableSideActions.size - 1
+                    }
+                    if (optimisticWatchState != WatchState.NONE) {
+                        currentSideActionIndex = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
+                            availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                        } else if (isTvCompletedAndEnded) {
+                            availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                        } else {
+                            0
+                        }
+                    }
+                }
+                
+                val currentSideAction = availableSideActions.getOrElse(currentSideActionIndex) { SideAction.TRASH }
+                val isTrashMode = currentSideAction == SideAction.TRASH
                 val sideButtonInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                 val isSideButtonPressed by sideButtonInteractionSource.collectIsPressedAsState()
                 LaunchedEffect(isSideButtonPressed) {
@@ -484,21 +519,7 @@ fun DetailActions(
         ) {
             if (trashWidth > 20.dp) {
 
-                val isTvCompletedAndEnded = movie.mediaType == "tv" && 
-                                          optimisticWatchState == WatchState.WATCHED && 
-                                          movie.status?.lowercase() in listOf("ended", "canceled", "cancelled")
 
-                LaunchedEffect(optimisticWatchState, movie.status) {
-                    if (optimisticWatchState != WatchState.NONE) {
-                        isTrashMode = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
-                            true
-                        } else if (isTvCompletedAndEnded) {
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                }
 
                 val sideButtonScale by animateFloatAsState(
                     targetValue = if (isSideButtonPressed) 0.86f else 1f,
@@ -517,27 +538,25 @@ fun DetailActions(
                             .size(56.dp)
                             .pointerInput(Unit) {
                                 var dragAccumulator = 0f
+                                var hasActionFired = false
                                 detectVerticalDragGestures(
-                                    onDragStart = { dragAccumulator = 0f },
+                                    onDragStart = { 
+                                        dragAccumulator = 0f 
+                                        hasActionFired = false
+                                    },
                                     onVerticalDrag = { change, dragAmount ->
                                         change.consume()
-                                        dragAccumulator += dragAmount
-                                        if (isTrashMode && dragAccumulator < 0f) dragAccumulator = 0f
-                                        if (!isTrashMode && dragAccumulator > 0f) dragAccumulator = 0f
+                                        if (hasActionFired) return@detectVerticalDragGestures
                                         
-                                        if (isTrashMode && dragAccumulator > 30f) {
-                                            if (movie.mediaType == "tv" && !isTvCompletedAndEnded) {
-                                                isTrashMode = false
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            } else if (movie.mediaType != "tv" && optimisticWatchState == WatchState.WATCHED) {
-                                                isTrashMode = false
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            }
-                                            dragAccumulator = 0f
-                                        } else if (!isTrashMode && dragAccumulator < -30f) {
-                                            isTrashMode = true
+                                        dragAccumulator += dragAmount
+                                        if (dragAccumulator < -40f && currentSideActionIndex < availableSideActions.size - 1) {
+                                            currentSideActionIndex++
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            dragAccumulator = 0f
+                                            hasActionFired = true
+                                        } else if (dragAccumulator > 40f && currentSideActionIndex > 0) {
+                                            currentSideActionIndex--
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            hasActionFired = true
                                         }
                                     }
                                 )
@@ -546,158 +565,187 @@ fun DetailActions(
                                 interactionSource = sideButtonInteractionSource,
                                 indication = null,
                                 onClick = { 
-                                    if (isTrashMode) {
-                                        currentOnRemove()
-                                    } else {
-                                        if (movie.mediaType == "tv") {
+                                    when (currentSideAction) {
+                                        SideAction.TRASH -> currentOnRemove()
+                                        SideAction.DROP -> {
                                             val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
                                             optimisticWatchState = next
                                             currentOnStateChange(next)
-                                        } else {
-                                            currentOnManageRewatches?.invoke()
                                         }
+                                        SideAction.REWATCH -> currentOnManageRewatches?.invoke()
                                     }
                                 }
                             )
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
-                                borderColor = (if (isTrashMode) trashColor else if (movie.mediaType != "tv") displayColor else Color.White).copy(alpha = 0.75f)
+                                borderColor = when(currentSideAction) {
+                                    SideAction.TRASH -> trashColor
+                                    SideAction.REWATCH -> displayColor
+                                    SideAction.DROP -> Color.White
+                                }.copy(alpha = 0.75f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         AnimatedContent(
-                            targetState = isTrashMode,
+                            targetState = currentSideAction,
                             transitionSpec = {
-                                if (targetState) {
-                                    slideInVertically { height -> height } + fadeIn() togetherWith slideOutVertically { height -> -height } + fadeOut()
-                                } else {
-                                    slideInVertically { height -> -height } + fadeIn() togetherWith slideOutVertically { height -> height } + fadeOut()
-                                }
+                                val targetIdx = availableSideActions.indexOf(targetState)
+                                val initialIdx = availableSideActions.indexOf(initialState)
+                                val slideDir = if (targetIdx > initialIdx) 1 else -1
+                                slideInVertically { height -> slideDir * height } + fadeIn() togetherWith slideOutVertically { height -> -slideDir * height } + fadeOut()
                             },
                             label = "SideButtonAnim"
-                        ) { trashMode ->
-                            if (trashMode) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                                    contentDescription = "Remove",
-                                    tint = trashColor,
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .graphicsLayer {
-                                            scaleX = sideButtonScale
-                                            scaleY = sideButtonScale
-                                        }
-                                )
-                            } else {
-                                // Two-layer approach: static box + animated arrow only
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .graphicsLayer {
-                                            scaleX = sideButtonScale
-                                            scaleY = sideButtonScale
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    // Layer 1: static box/container - never animates
+                        ) { action ->
+                            when (action) {
+                                SideAction.TRASH -> {
                                     Icon(
-                                        imageVector = if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_drop_box) else ImageVector.vectorResource(id = R.drawable.ic_ricarica),
-                                        contentDescription = null,
-                                        tint = if (movie.mediaType != "tv") displayColor else Color.White.copy(alpha = 0.8f),
-                                        modifier = Modifier.size(24.dp)
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
+                                        contentDescription = "Remove",
+                                        tint = trashColor,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .graphicsLayer {
+                                                scaleX = sideButtonScale
+                                                scaleY = sideButtonScale
+                                            }
                                     )
-                                    // Layer 2: only the arrow animates, clipped to the button circle
-                                    if (movie.mediaType == "tv") {
+                                }
+                                SideAction.REWATCH -> {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                                        contentDescription = "Rewatch",
+                                        tint = displayColor,
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .graphicsLayer {
+                                                scaleX = sideButtonScale
+                                                scaleY = sideButtonScale
+                                            }
+                                    )
+                                }
+                                SideAction.DROP -> {
+                                    // Two-layer approach: static box + animated arrow only
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .graphicsLayer {
+                                                scaleX = sideButtonScale
+                                                scaleY = sideButtonScale
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        // Layer 1: static box/container - never animates
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_box),
+                                            contentDescription = null,
+                                            tint = Color.White.copy(alpha = 0.8f),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        // Layer 2: only the arrow animates, clipped to the button circle
                                         Box(
                                             modifier = Modifier
                                                 .size(56.dp)
                                                 .clip(CircleShape),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                        androidx.compose.animation.AnimatedContent(
-                                            targetState = optimisticWatchState == WatchState.DROPPED,
-                                            transitionSpec = {
-                                                if (targetState) {
-                                                    // Going DROPPED: up-arrow enters from below, down-arrow exits upward
-                                                    slideInVertically(
-                                                        animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
-                                                    ) { it } + fadeIn(tween(160)) togetherWith
-                                                    slideOutVertically(
-                                                        animationSpec = tween(160)
-                                                    ) { -it } + fadeOut(tween(120))
-                                                } else {
-                                                    // Leaving DROPPED: down-arrow enters from above, up-arrow exits downward
-                                                    slideInVertically(
-                                                        animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
-                                                    ) { -it } + fadeIn(tween(160)) togetherWith
-                                                    slideOutVertically(
-                                                        animationSpec = tween(160)
-                                                    ) { it } + fadeOut(tween(120))
-                                                }
-                                            },
-                                            label = "DropArrowAnim"
-                                        ) { isDropped ->
-                                            Icon(
-                                                imageVector = ImageVector.vectorResource(
-                                                    id = if (isDropped) R.drawable.ic_drop_arrow_up else R.drawable.ic_drop_arrow_down
-                                                ),
-                                                contentDescription = "Drop",
-                                                tint = Color.White.copy(alpha = 0.8f),
-                                                modifier = Modifier.size(24.dp)
-                                            )
+                                            androidx.compose.animation.AnimatedContent(
+                                                targetState = optimisticWatchState == WatchState.DROPPED,
+                                                transitionSpec = {
+                                                    if (targetState) {
+                                                        // Going DROPPED: up-arrow enters from below, down-arrow exits upward
+                                                        slideInVertically(
+                                                            animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
+                                                        ) { it } + fadeIn(tween(160)) togetherWith
+                                                        slideOutVertically(
+                                                            animationSpec = tween(160)
+                                                        ) { -it } + fadeOut(tween(120))
+                                                    } else {
+                                                        // Leaving DROPPED: down-arrow enters from above, up-arrow exits downward
+                                                        slideInVertically(
+                                                            animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
+                                                        ) { -it } + fadeIn(tween(160)) togetherWith
+                                                        slideOutVertically(
+                                                            animationSpec = tween(160)
+                                                        ) { it } + fadeOut(tween(120))
+                                                    }
+                                                },
+                                                label = "DropArrowAnim"
+                                            ) { isDropped ->
+                                                Icon(
+                                                    imageVector = ImageVector.vectorResource(
+                                                        id = if (isDropped) R.drawable.ic_drop_arrow_up else R.drawable.ic_drop_arrow_down
+                                                    ),
+                                                    contentDescription = "Drop",
+                                                    tint = Color.White.copy(alpha = 0.8f),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
+                            } // closes when
+                        } // closes AnimatedContent
+                    } // closes side button Box
+                    
+                    if (optimisticWatchState != WatchState.NONE && availableSideActions.size > 1) {
+                        var previousSideActionIndex by remember { mutableIntStateOf(currentSideActionIndex) }
+                        LaunchedEffect(currentSideActionIndex) {
+                            // Update previous after a slight delay to allow the animation to read it first
+                            kotlinx.coroutines.delay(50)
+                            previousSideActionIndex = currentSideActionIndex
                         }
-                    }
-                    }
-                }
-            }
-        }
-                     if (optimisticWatchState != WatchState.NONE && (movie.mediaType == "tv" || optimisticWatchState == WatchState.WATCHED)) {
+                        
+                        val isMovingDown = currentSideActionIndex > previousSideActionIndex
+                        val isMovingUp = currentSideActionIndex < previousSideActionIndex
+                        
+                        val targetTop = (currentSideActionIndex * 8).dp
+                        val targetBottom = (currentSideActionIndex * 8 + 4).dp
+                        
                         val topOffset by animateDpAsState(
-                            targetValue = if (isTrashMode) 8.dp else 0.dp,
-                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 200f else 1500f),
+                            targetValue = targetTop,
+                            animationSpec = spring(
+                                dampingRatio = 0.65f, 
+                                stiffness = if (isMovingUp) 1500f else if (isMovingDown) 200f else 500f
+                            ),
                             label = "topOffset"
                         )
                         val bottomOffset by animateDpAsState(
-                            targetValue = if (isTrashMode) 12.dp else 4.dp,
-                            animationSpec = spring(dampingRatio = 0.65f, stiffness = if (isTrashMode) 1500f else 200f),
+                            targetValue = targetBottom,
+                            animationSpec = spring(
+                                dampingRatio = 0.65f, 
+                                stiffness = if (isMovingDown) 1500f else if (isMovingUp) 200f else 500f
+                            ),
                             label = "bottomOffset"
                         )
                         val activeColor by animateColorAsState(
-                            targetValue = if (isTrashMode) trashColor else Color.White.copy(alpha = 0.8f),
+                            targetValue = when (currentSideAction) {
+                                SideAction.TRASH -> trashColor
+                                SideAction.REWATCH -> displayColor
+                                SideAction.DROP -> Color.White.copy(alpha = 0.8f)
+                            },
                             label = "activeColor"
                         )
                         
+                        val canvasHeight = ((availableSideActions.size * 8) - 4).dp
                         androidx.compose.foundation.Canvas(
                             modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp)
+                                .padding(start = 12.dp, end = 6.dp)
                                 .width(4.dp)
-                                .height(12.dp)
+                                .height(canvasHeight)
                         ) {
                             val cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx(), 2.dp.toPx())
                             val faintColor = Color.White.copy(alpha = 0.2f)
                             
-                            // Draw background top dot
-                            drawRoundRect(
-                                color = faintColor,
-                                topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                size = androidx.compose.ui.geometry.Size(4.dp.toPx(), 4.dp.toPx()),
-                                cornerRadius = cornerRadius
-                            )
+                            for (i in 0 until availableSideActions.size) {
+                                drawRoundRect(
+                                    color = faintColor,
+                                    topLeft = androidx.compose.ui.geometry.Offset(0f, (i * 8).dp.toPx()),
+                                    size = androidx.compose.ui.geometry.Size(4.dp.toPx(), 4.dp.toPx()),
+                                    cornerRadius = cornerRadius
+                                )
+                            }
                             
-                            // Draw background bottom dot
-                            drawRoundRect(
-                                color = faintColor,
-                                topLeft = androidx.compose.ui.geometry.Offset(0f, 8.dp.toPx()),
-                                size = androidx.compose.ui.geometry.Size(4.dp.toPx(), 4.dp.toPx()),
-                                cornerRadius = cornerRadius
-                            )
-                            
-                            // Draw active morphing capsule
                             val tY = topOffset.toPx()
                             val bY = bottomOffset.toPx()
                             val height = kotlin.math.max(0.1f, bY - tY)
@@ -709,7 +757,15 @@ fun DetailActions(
                                 size = androidx.compose.ui.geometry.Size(4.dp.toPx(), height),
                                 cornerRadius = cornerRadius
                             )
-                        }
-                    }
-    }
-}}
+                        } // closes Canvas
+                    } // closes if
+                } // closes Row
+            } // closes if (trashWidth > 20.dp)
+        } // closes Box (Side Container)
+    } // closes Box (fillMaxSize)
+} // closes BoxWithConstraints
+} // closes fun DetailActions
+
+enum class SideAction {
+    REWATCH, DROP, TRASH
+}

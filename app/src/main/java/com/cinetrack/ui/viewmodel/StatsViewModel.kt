@@ -99,7 +99,11 @@ class StatsViewModel @Inject constructor(
         val includeRewatches = args[3] as Boolean
         val contentLanguage = args[4] as String
 
-        val watchedMovies = movies.filter { it.watched || (it.mediaType == "tv" && (it.dropped || !it.watchedEpisodes.isNullOrEmpty())) }
+        val watchedMovies = movies.filter { movie -> 
+            movie.watched || 
+            (movie.mediaType == "tv" && (movie.dropped || !movie.watchedEpisodes.isNullOrEmpty())) ||
+            watchHistory.any { it.movieId == movie.id }
+        }
         
         // Build the list of years from watchedAt (movies) and watch_history.
         val years = if (includeRewatches) {
@@ -134,7 +138,7 @@ class StatsViewModel @Inject constructor(
         val filteredMovies = when (range) {
             is TimeRange.AllTime -> watchedMovies
             is TimeRange.Year -> watchedMovies.filter { movie ->
-                if (includeRewatches && movie.mediaType == "movie") {
+                if (includeRewatches) {
                     val watchedDate = movie.watchedAt
                     // Check if it was watched in this year according to history, OR fallback to main watchedAt date
                     watchHistory.any { it.movieId == movie.id && it.watchedAt.startsWith(range.year.toString()) } ||
@@ -147,7 +151,7 @@ class StatsViewModel @Inject constructor(
         }
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
         val currentYearMovies = watchedMovies.filter { movie ->
-            if (includeRewatches && movie.mediaType == "movie") {
+            if (includeRewatches) {
                 val watchedDate = movie.watchedAt
                 watchHistory.any { it.movieId == movie.id && it.watchedAt.startsWith(currentYear.toString()) } ||
                 (!watchedDate.isNullOrBlank() && watchedDate.startsWith(currentYear.toString()))
@@ -166,8 +170,8 @@ class StatsViewModel @Inject constructor(
         val currentYearHistory = watchHistory.filter { it.watchedAt.startsWith(currentYear.toString()) }
 
         StatsUiState(
-            stats = calculateStats(filteredMovies, movies, lang, if (includeRewatches) filteredHistory else null),
-            currentYearStats = calculateStats(currentYearMovies, movies, lang, if (includeRewatches) currentYearHistory else null),
+            stats = calculateStats(filteredMovies, movies, lang, if (includeRewatches) filteredHistory else null, watchHistory),
+            currentYearStats = calculateStats(currentYearMovies, movies, lang, if (includeRewatches) currentYearHistory else null, watchHistory),
             timeRange = range,
             includeRewatches = includeRewatches,
             availableYears = years.toImmutableList(),
@@ -197,7 +201,7 @@ class StatsViewModel @Inject constructor(
         }
     }
 
-    private fun calculateStats(filteredWatched: List<Movie>, allMovies: List<Movie>, language: String, filteredHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>? = null): CalculatedStats {
+    private fun calculateStats(filteredWatched: List<Movie>, allMovies: List<Movie>, language: String, filteredHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>? = null, allHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity> = emptyList()): CalculatedStats {
         val watched = filteredWatched.filter { it.watched || (it.mediaType == "tv" && (it.dropped || !it.watchedEpisodes.isNullOrEmpty())) }
         
         // If history is provided, we expand the movies based on how many times they were watched
@@ -212,7 +216,41 @@ class StatsViewModel @Inject constructor(
             watchedMoviesUnique
         }
         
-        val watchedTV = watched.filter { it.mediaType == "tv" }
+        val watchedTVUnique = watched.filter { it.mediaType == "tv" }
+        val watchedTV = if (filteredHistory != null) {
+            watchedTVUnique.flatMap { m ->
+                val historyCount = filteredHistory.count { it.movieId == m.id }
+                val totalHistoryCount = allHistory.count { it.movieId == m.id }
+                
+                val fullWatchCopy = m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false)
+                val result = mutableListOf<Movie>()
+                
+                for (i in 0 until historyCount) {
+                    result.add(fullWatchCopy)
+                }
+                
+                if (m.watched) {
+                    if (totalHistoryCount == 0) {
+                        result.add(m)
+                    }
+                } else {
+                    val currentEps = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                    if (currentEps > 0 || totalHistoryCount == 0) {
+                        result.add(m)
+                    }
+                }
+                
+                result
+            }
+        } else {
+            watchedTVUnique.map { m ->
+                if (allHistory.any { it.movieId == m.id }) {
+                    m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false)
+                } else {
+                    m
+                }
+            }
+        }
 
         // Movies
         var moviesEstimate = false

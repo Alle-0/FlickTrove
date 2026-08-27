@@ -3,7 +3,9 @@ package com.cinetrack.data.local.entities
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "watch_history", indices = [Index("movieId")])
 data class WatchHistoryEntity(
     @PrimaryKey(autoGenerate = true)

@@ -649,6 +649,7 @@ fun MovieDetailScreenContent(
                                 ) {
                                     DetailActions(
                                         movie = activeMovie,
+                                        movieStatus = (state as? DetailUiState.Success)?.details?.status,
                                         watchState = state.watchState,
                                         progress = state.watchedProgress,
                                         accentColor = accentColor,

@@ -49,7 +49,8 @@ class BackupRepository @Inject constructor(
         val backup = BackupData(
             favorites = favoriteDao.getAll(),
             folders = folderDao.getAll(),
-            preferences = preferenceRepository.userPreferencesFlow.first()
+            preferences = preferenceRepository.userPreferencesFlow.first(),
+            watchHistory = watchHistoryDao.getAllWatchHistory()
         )
         json.encodeToString(backup)
     }
@@ -100,6 +101,11 @@ class BackupRepository @Inject constructor(
                 folder.copy(syncStatus = "pending")
             }
             folderDao.insertAll(pendingFolders)
+        }
+        
+        // Restore Watch History
+        if (backup.watchHistory.isNotEmpty()) {
+            watchHistoryDao.insertAll(backup.watchHistory)
         }
         
         // Restore Preferences

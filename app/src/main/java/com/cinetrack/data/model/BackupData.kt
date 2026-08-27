@@ -9,5 +9,6 @@ data class BackupData(
     val exportDate: Long = System.currentTimeMillis(),
     val favorites: List<Movie> = emptyList(),
     val folders: List<FolderEntity> = emptyList(),
-    val preferences: UserPreferences? = null
+    val preferences: UserPreferences? = null,
+    val watchHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity> = emptyList()
 )

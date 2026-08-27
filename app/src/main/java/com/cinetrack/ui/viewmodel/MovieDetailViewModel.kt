@@ -611,7 +611,7 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun logRewatch() {
-        if (movieId == 0L || mediaType != "movie") return
+        if (movieId == 0L) return
         viewModelScope.launch {
             val allHistory = repository.getWatchHistoryForMovie(movieId)
             val rewatchCount = allHistory.count { it.isRewatch }
@@ -633,7 +633,11 @@ class MovieDetailViewModel @Inject constructor(
             
             val local = repository.getMovie(movieId, mediaType)
             if (local != null) {
-                repository.saveMovie(local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis()))
+                var updatedMovie = local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis())
+                if (mediaType == "tv") {
+                    updatedMovie = updatedMovie.copy(watched = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                }
+                repository.saveMovie(updatedMovie)
             }
             
             emitMessage(UiText.DynamicString("Rewatch logged!"))
