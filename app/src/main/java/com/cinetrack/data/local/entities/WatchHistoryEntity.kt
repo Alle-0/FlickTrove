@@ -12,5 +12,6 @@ data class WatchHistoryEntity(
     val id: Long = 0,
     val movieId: Long,
     val watchedAt: String, // ISO-8601 string representation of the watch date
-    val isRewatch: Boolean = false // false if first watch, true if subsequent rewatch
+    val isRewatch: Boolean = false, // false if first watch, true if subsequent rewatch
+    val syncStatus: String = "pending" // can be "pending", "synced", or "deleted"
 )

@@ -3,6 +3,7 @@ package com.cinetrack.data.remote
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.Folder
 import com.cinetrack.data.local.entities.FolderEntity
+import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldPath
@@ -30,6 +31,9 @@ class FirebaseRemoteDataSource @Inject constructor(
 
     private fun getFoldersCollection(uid: String) =
         firestore.collection("users").document(uid).collection("folders")
+
+    private fun getWatchHistoryCollection(uid: String) =
+        firestore.collection("users").document(uid).collection("watch_history")
 
     private fun getPreferencesDoc(uid: String) =
         firestore.collection("users").document(uid).collection("settings").document("preferences")
@@ -191,6 +195,59 @@ class FirebaseRemoteDataSource @Inject constructor(
             }
         }
         return list
+    }
+
+    /**
+     * Batch set Watch History in Firestore
+     */
+    suspend fun batchSetWatchHistory(entries: List<WatchHistoryEntity>) {
+        val uid = userId ?: return
+        val collection = getWatchHistoryCollection(uid)
+        
+        try {
+            val chunks = entries.chunked(40)
+            for (chunk in chunks) {
+                firestore.runBatch { batch ->
+                    for (entry in chunk) {
+                        val docId = "${entry.movieId}_${entry.watchedAt}"
+                        val docRef = collection.document(docId)
+                        batch.set(docRef, entry, SetOptions.merge())
+                    }
+                }.await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error batch setting watch history: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Fetch all Watch History for the current user
+     */
+    suspend fun fetchAllWatchHistory(): List<WatchHistoryEntity> {
+        val uid = userId ?: return emptyList()
+        val list = mutableListOf<WatchHistoryEntity>()
+        try {
+            val snapshot = getWatchHistoryCollection(uid).get().await()
+            for (doc in snapshot.documents) {
+                doc.toObject(WatchHistoryEntity::class.java)?.let { list.add(it) }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching watch history: ${e.message}", e)
+        }
+        return list
+    }
+
+    /**
+     * Delete a single Watch History entry from Firestore
+     */
+    suspend fun deleteWatchHistory(movieId: Long, watchedAt: String) {
+        val uid = userId ?: return
+        val docId = "${movieId}_${watchedAt}"
+        try {
+            getWatchHistoryCollection(uid).document(docId).delete().await()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error deleting watch history $docId: ${e.message}", e)
+        }
     }
 
     /**

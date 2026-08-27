@@ -689,6 +689,34 @@ class MovieRepository @Inject constructor(
                 android.util.Log.e("MovieRepository", "Failed to push pending folder ${folder.id}", e)
             }
         }
+        
+        // Push pending Watch History
+        val pendingHistory = watchHistoryDao.getPendingSync()
+        val historyToDelete = pendingHistory.filter { it.syncStatus == "deleted" }
+        val historyToSync = pendingHistory.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
+        
+        for (history in historyToDelete) {
+            try {
+                firebaseRemoteDataSource.deleteWatchHistory(history.movieId, history.watchedAt)
+                watchHistoryDao.delete(history)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Failed to push pending delete watch history ${history.id}", e)
+            }
+        }
+        
+        if (historyToSync.isNotEmpty()) {
+            try {
+                firebaseRemoteDataSource.batchSetWatchHistory(historyToSync)
+                for (history in historyToSync) {
+                    watchHistoryDao.updateSyncStatus(history.id, "synced")
+                }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Failed to push pending watch history bulk", e)
+            }
+        }
+        
     }
 
     suspend fun syncWithFirebase(
@@ -831,9 +859,58 @@ class MovieRepository @Inject constructor(
             }
             android.util.Log.d("MovieRepository", "Successfully synchronized folders with conflict resolution")
 
-            // 3. Pull Preferences
+            // 3. Pull & Reconcile Watch History
+            val remoteHistory = firebaseRemoteDataSource.fetchAllWatchHistory()
+            val localHistoryList = watchHistoryDao.getAllWatchHistory()
+            val localHistory = localHistoryList.associateBy { "${it.movieId}_${it.watchedAt}" }
+            val remoteHistoryMap = remoteHistory.associateBy { "${it.movieId}_${it.watchedAt}" }
+            
+            val historyToInsert = mutableListOf<com.cinetrack.data.local.entities.WatchHistoryEntity>()
+            val historyToDelete = mutableListOf<com.cinetrack.data.local.entities.WatchHistoryEntity>()
+            
+            for (remoteEntry in remoteHistory) {
+                val key = "${remoteEntry.movieId}_${remoteEntry.watchedAt}"
+                val local = localHistory[key]
+                val remoteEntity = remoteEntry.copy(syncStatus = "synced")
+                
+                if (local == null) {
+                    // Check if there's a pending delete for this entry that failed to push.
+                    // If it is in pendingHistory with syncStatus == "deleted", we shouldn't insert it.
+                    val isPendingDelete = watchHistoryDao.getPendingSync().any { 
+                        it.movieId == remoteEntity.movieId && it.watchedAt == remoteEntity.watchedAt && it.syncStatus == "deleted" 
+                    }
+                    if (!isPendingDelete) {
+                        historyToInsert.add(remoteEntity)
+                    }
+                } else {
+                    // We already have it, do nothing. It's identical.
+                }
+            }
+            
+            for ((key, localEntry) in localHistory) {
+                if (!remoteHistoryMap.containsKey(key)) {
+                    if (localEntry.syncStatus == "synced") {
+                        historyToDelete.add(localEntry)
+                    }
+                }
+            }
+            
+            if (historyToInsert.isNotEmpty()) {
+                val chunks = historyToInsert.chunked(50)
+                chunks.forEach { chunk ->
+                    watchHistoryDao.insertAll(chunk)
+                }
+            }
+            
+            for (entryToDelete in historyToDelete) {
+                watchHistoryDao.delete(entryToDelete)
+            }
+            android.util.Log.d("MovieRepository", "Successfully synchronized watch history")
+
+            // 4. Pull Preferences
             emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
             syncPreferencesWithFirebase()
+            
             emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
@@ -1449,8 +1526,8 @@ class MovieRepository @Inject constructor(
     fun getAllWatchHistoryFlow() = watchHistoryDao.getAllWatchHistoryFlow()
     suspend fun getAllWatchHistory() = watchHistoryDao.getAllWatchHistory()
     suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.insert(history)
-    suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.update(history)
-    suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.delete(history)
+    suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.update(history.copy(syncStatus = "pending"))
+    suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.markDeleted(history.id)
     suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryDao.deleteByMovieId(movieId)
 }
 
