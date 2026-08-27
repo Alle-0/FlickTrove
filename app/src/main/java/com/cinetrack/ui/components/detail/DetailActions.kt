@@ -296,9 +296,7 @@ fun DetailActions(
                         if (movie.mediaType == "tv") {
                             val dropIndex = availableSideActions.indexOf(SideAction.DROP)
                             val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
-                            currentSideActionIndex = if (optimisticWatchState == WatchState.WATCHED && rewatchIndex >= 0) {
-                                rewatchIndex
-                            } else if (dropIndex >= 0) {
+                            currentSideActionIndex = if (dropIndex >= 0) {
                                 dropIndex
                             } else if (rewatchIndex >= 0) {
                                 rewatchIndex
