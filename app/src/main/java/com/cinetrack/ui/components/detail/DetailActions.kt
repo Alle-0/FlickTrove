@@ -281,7 +281,7 @@ fun DetailActions(
                             if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
                             else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
                         } else {
-                            listOf(SideAction.DROP, SideAction.REWATCH, SideAction.TRASH)
+                            listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
                         }
                     }
                 }
@@ -296,8 +296,9 @@ fun DetailActions(
                         if (movie.mediaType == "tv") {
                             val dropIndex = availableSideActions.indexOf(SideAction.DROP)
                             val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
-                            currentSideActionIndex = if (dropIndex >= 0) dropIndex 
+                            currentSideActionIndex = if (optimisticWatchState == WatchState.DROPPED && dropIndex >= 0) dropIndex 
                                                      else if (rewatchIndex >= 0) rewatchIndex 
+                                                     else if (dropIndex >= 0) dropIndex
                                                      else 0
                         } else {
                             currentSideActionIndex = if (optimisticWatchState != WatchState.WATCHED) {
