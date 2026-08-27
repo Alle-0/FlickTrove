@@ -293,12 +293,18 @@ fun DetailActions(
                         currentSideActionIndex = availableSideActions.size - 1
                     }
                     if (optimisticWatchState != WatchState.NONE) {
-                        currentSideActionIndex = if (movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
-                            availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
-                        } else if (isTvCompletedAndEnded) {
-                            availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                        if (movie.mediaType == "tv") {
+                            val dropIndex = availableSideActions.indexOf(SideAction.DROP)
+                            val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
+                            currentSideActionIndex = if (dropIndex >= 0) dropIndex 
+                                                     else if (rewatchIndex >= 0) rewatchIndex 
+                                                     else 0
                         } else {
-                            0
+                            currentSideActionIndex = if (optimisticWatchState != WatchState.WATCHED) {
+                                availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                            } else {
+                                0
+                            }
                         }
                     }
                 }
