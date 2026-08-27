@@ -635,7 +635,13 @@ class MovieDetailViewModel @Inject constructor(
             if (local != null) {
                 var updatedMovie = local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis())
                 if (mediaType == "tv") {
-                    updatedMovie = updatedMovie.copy(watched = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                    updatedMovie = updatedMovie.copy(
+                        watched = false, 
+                        watchedEpisodes = emptyMap(), 
+                        progress = 0.0,
+                        favorite = true,
+                        dropped = false
+                    )
                 }
                 repository.saveMovie(updatedMovie)
             }
