@@ -281,7 +281,7 @@ fun DetailActions(
                             if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
                             else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
                         } else {
-                            listOf(SideAction.DROP, SideAction.TRASH)
+                            listOf(SideAction.DROP, SideAction.REWATCH, SideAction.TRASH)
                         }
                     }
                 }
