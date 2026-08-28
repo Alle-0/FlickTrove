@@ -49,15 +49,20 @@ fun WatchHistoryBottomSheet(
 ) {
     var editingHistory by remember { mutableStateOf<WatchHistoryEntity?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
-    val innerHazeState = remember { HazeState() }
 
-    com.cinetrack.ui.components.shared.FlickTroveModal(
-        onDismissRequest = onDismiss,
-        hazeState = hazeState,
-        modifier = Modifier.haze(state = innerHazeState)
-    ) {
-        Column(
-            modifier = Modifier
+    val modalVisibilityAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (showDatePicker) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+        label = "modalVisibilityAlpha"
+    )
+
+    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = modalVisibilityAlpha }) {
+        com.cinetrack.ui.components.shared.FlickTroveModal(
+            onDismissRequest = onDismiss,
+            hazeState = hazeState
+        ) {
+            Column(
+                modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
@@ -209,7 +214,8 @@ fun WatchHistoryBottomSheet(
             }
             }
         }
-    }
+    } // End of FlickTroveModal
+    } // End of Box
 
     if (showDatePicker && editingHistory != null) {
         val initialLocalDate = try {
@@ -231,7 +237,7 @@ fun WatchHistoryBottomSheet(
                 showDatePicker = false
                 editingHistory = null
             },
-            hazeState = innerHazeState,
+            hazeState = hazeState,
             accentColor = accentColor
         )
     }

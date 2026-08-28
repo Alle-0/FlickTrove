@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -50,13 +51,13 @@ fun FlickTroveDatePickerModal(
 
     FlickTroveModal(
         onDismissRequest = onDismissRequest,
-        hazeState = hazeState
+        hazeState = hazeState,
+        modifier = Modifier.haze(state = internalHazeState)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
-                .haze(state = internalHazeState)
         ) {
             // Header: Selected Date
             val headerFormatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(Locale.getDefault())

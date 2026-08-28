@@ -30,7 +30,8 @@ class GetVistiUiStateUseCase @Inject constructor() {
             searchQueryFlow,
             activeTabFlow,
             watchHistoryFlow
-        ) { flows ->
+        ) { flows
+            ->
             val movies = flows[0] as List<Movie>
             val folders = flows[1] as List<FolderEntity>
             val prefs = flows[2] as UserPreferences
