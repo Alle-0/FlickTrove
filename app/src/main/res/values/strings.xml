@@ -889,10 +889,12 @@
     <string name="person_offline_bio">Full biographical data and extended filmography are not available in offline mode.\nTitles present in your local library are displayed below.</string>
     <string name="whats_new_title">App Updated!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• New floating circular action buttons (Back, Home, Share) layered cleanly over content with Haze Blur
-• Refined bounce click animation applied precisely to inner icons without distorting the glass container
-• Fixed blur interference on icons across Collection and Person detail screens
-• UI polishes and performance improvements</string>
+    <string name="whats_new_fallback_notes">• Multi-Date Watch History: Track every time you rewatch a movie or TV show.
+• Prompt for Watch Date: New setting to choose the exact watch date when marking a title as seen.
+• Symbiont Action Pill: The side actions pill now smartly morphs into a circular Rewatch button.
+• Cloud Sync: Your watch history is securely backed up and synced via Firebase.
+• Enhanced Feedback: Use Markdown formatting and up to 2000 characters when sending feedback.
+• General UI Polish and performance improvements.</string>
     <string name="whats_new_section_title">MAIN HIGHLIGHTS</string>
     <string name="whats_new_btn_start">Awesome, let\'s go!</string>
     <string name="github_update_title">New Update Available</string>
