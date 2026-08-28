@@ -581,6 +581,7 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = updateEpisodesUseCase.batchUpdate(movie, castedMap).copy(dropped = false)
             repository.saveMovie(updated)
+            ensureFirstViewingCreated(updated)
         }
     }
 
@@ -605,7 +606,25 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private    fun deleteMovie() {
+    private suspend fun ensureFirstViewingCreated(movie: Movie, customDate: java.time.Instant? = null) {
+        if (movie.mediaType != "tv") return
+        val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+        if (watchedCount > 0 || movie.watched) {
+            val currentHistory = repository.getWatchHistoryForMovie(movie.id)
+            if (currentHistory.none { !it.isRewatch }) {
+                val watchDateStr = customDate?.toString() ?: java.time.Instant.now().toString()
+                repository.insertWatchHistory(
+                    com.cinetrack.data.local.entities.WatchHistoryEntity(
+                        movieId = movie.id,
+                        watchedAt = watchDateStr,
+                        isRewatch = false
+                    )
+                )
+            }
+        }
+    }
+
+    private fun deleteMovie() {
         val state = uiState.value as? DetailUiState.Success ?: return
         val movie = state.movieEntry
         viewModelScope.launch {
@@ -755,6 +774,9 @@ class MovieDetailViewModel @Inject constructor(
 
             cycleMovieStatusUseCase(current)
             val updated = repository.getMovie(movie.id, movie.mediaType)
+            if (updated != null) {
+                ensureFirstViewingCreated(updated)
+            }
         }
     }
 
@@ -789,6 +811,9 @@ class MovieDetailViewModel @Inject constructor(
                 }
             }
             repository.saveMovie(updated)
+            if (watchState == WatchState.WATCHED && mediaType == "tv") {
+                ensureFirstViewingCreated(updated, customWatchDate)
+            }
         }
     }
 
@@ -823,6 +848,7 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = updateEpisodesUseCase(movie, seasonNumber, currentWatched).copy(dropped = false)
             repository.saveMovie(updated)
+            ensureFirstViewingCreated(updated)
         }
     }
 
@@ -840,6 +866,7 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = updateEpisodesUseCase(movie, seasonNumber, newEpisodes).copy(dropped = false)
             repository.saveMovie(updated)
+            ensureFirstViewingCreated(updated)
         }
     }
 
