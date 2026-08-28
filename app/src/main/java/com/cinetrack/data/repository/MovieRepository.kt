@@ -420,6 +420,7 @@ class MovieRepository @Inject constructor(
 
     suspend fun deleteMovie(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
+        watchHistoryDao.deleteByMovieId(movie.id)
         widgetNotifier.notifyWidgetUpdated()
 
         // --- PUSH RIMOZIONE A TRAKT ---
@@ -472,6 +473,7 @@ class MovieRepository @Inject constructor(
 
     suspend fun markAsDeleted(movie: Movie) {
         favoriteDao.markDeleted(movie.id, movie.mediaType)
+        watchHistoryDao.deleteByMovieId(movie.id)
 
         // --- PUSH RIMOZIONE A TRAKT ---
         val builder = androidx.work.Data.Builder()
