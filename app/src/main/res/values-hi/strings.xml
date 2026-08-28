@@ -836,7 +836,6 @@
     <string name="status_released">रिलीज़ हुई</string>
     <string name="quick_action_folders">फ़ोल्डर</string>
     <string name="quick_action_delete">हटाएँ</string>
-    <string name="filter_sort_watched_at">देखी गई तारीख</string>
     <string name="filter_sort_added_at">हाल ही में जोड़ा गया</string>
     <string name="filter_sort_release_date">रिलीज़ की तारीख</string>
     <string name="filter_sort_title">वर्णानुक्रम</string>

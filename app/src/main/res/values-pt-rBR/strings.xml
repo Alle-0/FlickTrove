@@ -836,7 +836,6 @@
     <string name="status_released">Lançado</string>
     <string name="quick_action_folders">Pastas</string>
     <string name="quick_action_delete">Excluir</string>
-    <string name="filter_sort_watched_at">Data de Visualização</string>
     <string name="filter_sort_added_at">Adicionado Recentemente</string>
     <string name="filter_sort_release_date">Data de Lançamento</string>
     <string name="filter_sort_title">Ordem Alfabética</string>

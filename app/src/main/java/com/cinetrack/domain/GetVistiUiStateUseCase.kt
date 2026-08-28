@@ -14,6 +14,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
 class GetVistiUiStateUseCase @Inject constructor() {
+    @Suppress("UNCHECKED_CAST")
     operator fun invoke(
         moviesFlow: Flow<List<Movie>>,
         foldersFlow: Flow<List<FolderEntity>>,
