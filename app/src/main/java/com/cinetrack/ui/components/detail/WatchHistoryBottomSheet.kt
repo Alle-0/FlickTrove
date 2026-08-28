@@ -217,30 +217,41 @@ fun WatchHistoryBottomSheet(
     } // End of FlickTroveModal
     } // End of Box
 
-    if (showDatePicker && editingHistory != null) {
-        val initialLocalDate = try {
-            val zdt = Instant.parse(editingHistory!!.watchedAt).atZone(ZoneId.systemDefault())
-            zdt.toLocalDate()
+    val initialLocalDate = remember(editingHistory?.watchedAt) {
+        try {
+            if (editingHistory != null) {
+                val zdt = Instant.parse(editingHistory!!.watchedAt).atZone(ZoneId.systemDefault())
+                zdt.toLocalDate()
+            } else {
+                LocalDate.now()
+            }
         } catch (e: Exception) {
             LocalDate.now()
         }
+    }
 
-        com.cinetrack.ui.components.shared.FlickTroveDatePickerModal(
-            initialDate = initialLocalDate,
-            onDateSelected = { selectedDate ->
+    com.cinetrack.ui.components.shared.FlickTroveDatePickerModal(
+        initialDate = initialLocalDate,
+        isVisible = showDatePicker,
+        onDateSelected = { selectedDate ->
+            if (editingHistory != null) {
                 val newIso = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
                 onUpdateDate(editingHistory!!, newIso)
-                showDatePicker = false
+            }
+            showDatePicker = false
+        },
+        onDismissRequest = {
+            if (!showDatePicker) {
+                // Animation finished, safe to clear state
                 editingHistory = null
-            },
-            onDismissRequest = {
+            } else {
+                // User dismissed it
                 showDatePicker = false
-                editingHistory = null
-            },
-            hazeState = hazeState,
-            accentColor = accentColor
-        )
-    }
+            }
+        },
+        hazeState = hazeState,
+        accentColor = accentColor
+    )
 }
 
 @Composable

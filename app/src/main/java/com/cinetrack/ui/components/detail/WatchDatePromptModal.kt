@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -35,18 +36,25 @@ fun WatchDatePromptModal(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
-    if (showDatePicker) {
-        FlickTroveDatePickerModal(
-            initialDate = java.time.LocalDate.now(),
-            onDateSelected = { localDate ->
-                onDateSelected(localDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant())
-                showDatePicker = false
-            },
-            onDismissRequest = { showDatePicker = false },
-            hazeState = hazeState,
-            accentColor = accentColor
-        )
-    } else {
+    val modalVisibilityAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (showDatePicker) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+        label = "modalVisibilityAlpha"
+    )
+
+    FlickTroveDatePickerModal(
+        initialDate = java.time.LocalDate.now(),
+        isVisible = showDatePicker,
+        onDateSelected = { localDate ->
+            onDateSelected(localDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant())
+            showDatePicker = false
+        },
+        onDismissRequest = { showDatePicker = false },
+        hazeState = hazeState,
+        accentColor = accentColor
+    )
+
+    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = modalVisibilityAlpha }) {
         FlickTroveModal(
             hazeState = hazeState,
             onDismissRequest = onDismiss

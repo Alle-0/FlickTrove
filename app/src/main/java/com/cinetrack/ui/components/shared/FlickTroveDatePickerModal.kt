@@ -41,7 +41,8 @@ fun FlickTroveDatePickerModal(
     onDismissRequest: () -> Unit,
     hazeState: HazeState? = null,
     accentColor: Color,
-    disableFutureDates: Boolean = true
+    disableFutureDates: Boolean = true,
+    isVisible: Boolean = true
 ) {
     var selectedDate by remember { mutableStateOf(initialDate ?: LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.from(selectedDate)) }
@@ -50,6 +51,7 @@ fun FlickTroveDatePickerModal(
     val internalHazeState = remember { HazeState() }
 
     FlickTroveModal(
+        isVisible = isVisible,
         onDismissRequest = onDismissRequest,
         hazeState = hazeState,
         modifier = Modifier.haze(state = internalHazeState)
