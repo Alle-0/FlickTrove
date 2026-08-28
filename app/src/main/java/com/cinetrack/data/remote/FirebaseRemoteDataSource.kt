@@ -305,6 +305,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val snapshot = transaction.get(docRef)
                 
                 var countDelta = 0L
+                var ratingDelta = 0.0
                 if (snapshot.exists()) {
                     val updates = mutableMapOf<String, Any>()
                     var needsUpdate = false
@@ -339,8 +340,6 @@ class FirebaseRemoteDataSource @Inject constructor(
                         updates["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
                     }
                     
-                    var ratingDelta = 0.0
-
                     if (newRating != oldRating) {
                         if (oldRating != null && oldRating > 0.0) {
                             ratingDelta -= oldRating
@@ -388,6 +387,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                         initialData["total_rating"] = newRating
                         initialData["rating_count"] = 1L
                         countDelta = 1L
+                        ratingDelta = newRating
                     }
                     
                     if (initialData.isNotEmpty()) {
