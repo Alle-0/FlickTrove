@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import com.cinetrack.util.toComposeColorOrNull
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -166,6 +167,8 @@ class MovieDetailViewModel @Inject constructor(
     private val _characterImages = MutableStateFlow<Map<String, String>>(emptyMap())
     private val _watchHistory = MutableStateFlow<List<com.cinetrack.data.local.entities.WatchHistoryEntity>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
+    
+    private val movieUpdateMutex = kotlinx.coroutines.sync.Mutex()
     
     data class TranslationState(
         val isTranslating: Boolean = false,
@@ -579,30 +582,39 @@ class MovieDetailViewModel @Inject constructor(
         val castedMap = episodes.mapKeys { it.key.toIntOrNull() ?: 0 }
         
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase.batchUpdate(movie, castedMap).copy(dropped = false)
-            repository.saveMovie(updated)
-            ensureFirstViewingCreated(updated)
+            movieUpdateMutex.withLock {
+                val currentMovie = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                val updated = updateEpisodesUseCase.batchUpdate(currentMovie, castedMap).copy(dropped = false)
+                repository.saveMovie(updated)
+                ensureFirstViewingCreated(updated)
+            }
         }
     }
 
     private fun updateRating(rating: Double?) {
         val state = uiState.value as? DetailUiState.Success ?: return
         viewModelScope.launch {
-            // If rating is 0.0 or null, set to null (remove rating)
-            val effectiveRating = if (rating == 0.0) null else rating
-            val updated = state.movieEntry.copy(
-                personalRating = effectiveRating,
-                votedAt = System.currentTimeMillis()
-            )
-            repository.saveMovie(updated)
+            movieUpdateMutex.withLock {
+                val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                // If rating is 0.0 or null, set to null (remove rating)
+                val effectiveRating = if (rating == 0.0) null else rating
+                val updated = currentMovie.copy(
+                    personalRating = effectiveRating,
+                    votedAt = System.currentTimeMillis()
+                )
+                repository.saveMovie(updated)
+            }
         }
     }
 
     private fun updateNote(note: String) {
         val state = uiState.value as? DetailUiState.Success ?: return
         viewModelScope.launch {
-            val updated = state.movieEntry.copy(personalNote = note)
-            repository.saveMovie(updated)
+            movieUpdateMutex.withLock {
+                val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                val updated = currentMovie.copy(personalNote = note)
+                repository.saveMovie(updated)
+            }
         }
     }
 
@@ -737,82 +749,77 @@ class MovieDetailViewModel @Inject constructor(
     private fun toggleFavorite() {
         val state = uiState.value as? DetailUiState.Success ?: return
 
-        // IDEMPOTENCY CHECK: If already watched, do nothing
-        if (state.movieEntry.watched) {
-            return
-        }
-
         viewModelScope.launch {
-            cycleMovieStatusUseCase(state.movieEntry)
-            val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
+            movieUpdateMutex.withLock {
+                val current = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                if (current.watched) return@withLock
+                cycleMovieStatusUseCase(current)
+            }
         }
     }
 
     private fun toggleWatched() {
         val state = uiState.value as? DetailUiState.Success ?: return
 
-        // IDEMPOTENCY CHECK: If already watched, do nothing
-        if (state.movieEntry.watched) {
-            return
-        }
-
         viewModelScope.launch {
-            cycleMovieStatusUseCase(state.movieEntry)
-            val updated = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType)
+            movieUpdateMutex.withLock {
+                val current = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                if (current.watched) return@withLock
+                cycleMovieStatusUseCase(current)
+            }
         }
     }
 
     private fun cycleStatus(movie: Movie) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            
-            // IDEMPOTENCY CHECK: If already watched, do nothing
-            if (current.watched) {
-                return@launch
-            }
-
-            cycleMovieStatusUseCase(current)
-            val updated = repository.getMovie(movie.id, movie.mediaType)
-            if (updated != null) {
-                ensureFirstViewingCreated(updated)
+            movieUpdateMutex.withLock {
+                val current = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                if (current.watched) return@withLock
+                
+                cycleMovieStatusUseCase(current)
+                val updated = repository.getMovie(movie.id, movie.mediaType)
+                if (updated != null) {
+                    ensureFirstViewingCreated(updated)
+                }
             }
         }
     }
 
     private fun setWatchState(watchState: WatchState, customWatchDate: java.time.Instant? = null) {
         val state = uiState.value as? DetailUiState.Success ?: return
-        val previousMovie = state.movieEntry
         viewModelScope.launch {
-            val updated = when (watchState) {
-                WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
-                WatchState.DROPPED -> previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
-                WatchState.BOOKMARKED -> {
-                    if (previousMovie.isReleased) {
-                        previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
-                    } else {
-                        previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
+            movieUpdateMutex.withLock {
+                val previousMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                val updated = when (watchState) {
+                    WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
+                    WatchState.DROPPED -> previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
+                    WatchState.BOOKMARKED -> {
+                        if (previousMovie.isReleased) {
+                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
+                        } else {
+                            previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
+                        }
                     }
-                }
-                WatchState.WATCHED -> {
-                    if (mediaType == "tv") {
-                        updateEpisodesUseCase.markAllWatched(previousMovie).copy(dropped = false)
-                    } else {
-                        val watchDateStr = customWatchDate?.toString() ?: java.time.Instant.now().toString()
-                        repository.insertWatchHistory(
-                            com.cinetrack.data.local.entities.WatchHistoryEntity(
-                                movieId = previousMovie.id,
-                                watchedAt = watchDateStr,
-                                isRewatch = false
+                    WatchState.WATCHED -> {
+                        if (mediaType == "tv") {
+                            updateEpisodesUseCase.markAllWatched(previousMovie).copy(dropped = false)
+                        } else {
+                            val watchDateStr = customWatchDate?.toString() ?: java.time.Instant.now().toString()
+                            repository.insertWatchHistory(
+                                com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                    movieId = previousMovie.id,
+                                    watchedAt = watchDateStr,
+                                    isRewatch = false
+                                )
                             )
-                        )
-                        previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = watchDateStr, dropped = false)
+                            previousMovie.copy(favorite = false, watched = true, reminder = false, watchedAt = watchDateStr, dropped = false)
+                        }
                     }
                 }
-            }
-            repository.saveMovie(updated)
-            if (watchState == WatchState.WATCHED && mediaType == "tv") {
-                ensureFirstViewingCreated(updated, customWatchDate)
+                repository.saveMovie(updated)
+                if (watchState == WatchState.WATCHED && mediaType == "tv") {
+                    ensureFirstViewingCreated(updated, customWatchDate)
+                }
             }
         }
     }
@@ -836,37 +843,42 @@ class MovieDetailViewModel @Inject constructor(
 
     fun toggleEpisode(seasonNumber: Int, episodeNumber: Int) {
         val state = uiState.value as? DetailUiState.Success ?: return
-        val movie = state.movieEntry
-        val currentWatched = movie.watchedEpisodes?.get(seasonNumber.toString())?.toMutableList() ?: mutableListOf()
-        
-        if (currentWatched.contains(episodeNumber)) {
-            currentWatched.remove(episodeNumber)
-        } else {
-            currentWatched.add(episodeNumber)
-        }
-
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase(movie, seasonNumber, currentWatched).copy(dropped = false)
-            repository.saveMovie(updated)
-            ensureFirstViewingCreated(updated)
+            movieUpdateMutex.withLock {
+                val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                val currentWatchedMap = currentMovie.watchedEpisodes?.toMutableMap() ?: mutableMapOf()
+                val currentWatchedList = currentWatchedMap[seasonNumber.toString()]?.toMutableList() ?: mutableListOf()
+                
+                if (currentWatchedList.contains(episodeNumber)) {
+                    currentWatchedList.remove(episodeNumber)
+                } else {
+                    currentWatchedList.add(episodeNumber)
+                }
+                
+                val updated = updateEpisodesUseCase(currentMovie, seasonNumber, currentWatchedList).copy(dropped = false)
+                repository.saveMovie(updated)
+                ensureFirstViewingCreated(updated)
+            }
         }
     }
 
     fun toggleSeason(seasonNumber: Int, allEpisodeNumbers: List<Int>) {
         val state = uiState.value as? DetailUiState.Success ?: return
-        val movie = state.movieEntry
-        val currentWatched = movie.watchedEpisodes?.get(seasonNumber.toString()) ?: emptyList()
-        
-        val newEpisodes = if (currentWatched.size >= allEpisodeNumbers.size) {
-            emptyList<Int>()
-        } else {
-            allEpisodeNumbers
-        }
-
         viewModelScope.launch {
-            val updated = updateEpisodesUseCase(movie, seasonNumber, newEpisodes).copy(dropped = false)
-            repository.saveMovie(updated)
-            ensureFirstViewingCreated(updated)
+            movieUpdateMutex.withLock {
+                val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                val currentWatchedList = currentMovie.watchedEpisodes?.get(seasonNumber.toString()) ?: emptyList()
+                
+                val newEpisodes = if (currentWatchedList.size >= allEpisodeNumbers.size) {
+                    emptyList<Int>()
+                } else {
+                    allEpisodeNumbers
+                }
+
+                val updated = updateEpisodesUseCase(currentMovie, seasonNumber, newEpisodes).copy(dropped = false)
+                repository.saveMovie(updated)
+                ensureFirstViewingCreated(updated)
+            }
         }
     }
 
