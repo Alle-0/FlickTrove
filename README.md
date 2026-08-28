@@ -177,7 +177,6 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
-- [ ] **Rewatch**
 - [ ] **SIMKL Integration:** Alternative cloud sync engine for users.
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
