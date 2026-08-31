@@ -468,6 +468,26 @@ object AccountTab : Tab {
                         }
                     }
                     
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Column(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        AccountMenuButton(
+                            icon = R.drawable.ic_settings,
+                            title = stringResource(id = R.string.main_tab_settings),
+                            hazeState = backgroundHazeState,
+                            onClick = { tabNavigator.current = com.cinetrack.ui.screens.SettingsTab }
+                        )
+
+                        AccountMenuButton(
+                            icon = R.drawable.ic_documento,
+                            title = stringResource(id = R.string.news_tab_title),
+                            hazeState = backgroundHazeState,
+                            onClick = { tabNavigator.current = com.cinetrack.ui.screens.NewsTab }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
                 }

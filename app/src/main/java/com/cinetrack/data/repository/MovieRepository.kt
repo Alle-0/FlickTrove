@@ -1399,6 +1399,37 @@ class MovieRepository @Inject constructor(
     suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(page = page).results
     suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
 
+    suspend fun getTop10FlickTrove(isTv: Boolean): List<Movie> {
+        val compositeIds = firebaseRemoteDataSource.fetchTop10Monthly(isTv)
+        val mediaType = if (isTv) "tv" else "movie"
+        return kotlinx.coroutines.coroutineScope {
+            compositeIds.mapNotNull { compositeId ->
+                val idStr = compositeId.removePrefix("tv_").removePrefix("movie_")
+                val id = idStr.toLongOrNull() ?: return@mapNotNull null
+                async {
+                    try {
+                        val detail = getMovieDetail(id, isTv)
+                        Movie(
+                            id = detail.id.toLong(),
+                            title = detail.title ?: detail.name ?: "",
+                            posterPath = detail.posterPath,
+                            backdropPath = detail.backdropPath,
+                            releaseDate = detail.releaseDate ?: detail.firstAirDate ?: "",
+                            overview = detail.overview ?: "",
+                            voteAverage = detail.voteAverage ?: 0.0,
+                            voteCount = detail.voteCount ?: 0,
+                            genreIds = detail.genres?.map { it.id } ?: emptyList(),
+                            mediaType = mediaType,
+                            runtime = detail.runtime
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }.mapNotNull { it.await() }
+        }
+    }
+
     suspend fun discoverMoviesWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {
         val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
         val resolvedLanguage = if (rawLanguage == "system") {

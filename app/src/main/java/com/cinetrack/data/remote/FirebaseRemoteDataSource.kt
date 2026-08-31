@@ -442,5 +442,40 @@ class FirebaseRemoteDataSource @Inject constructor(
             android.util.Log.e("FirebaseRemoteDataSource", "Error updating global stats for $compositeId", e)
         }
     }
-}
 
+    suspend fun fetchTop10Monthly(isTv: Boolean): List<String> {
+        val calendar = java.util.Calendar.getInstance()
+        val year = calendar.get(java.util.Calendar.YEAR)
+        val month = calendar.get(java.util.Calendar.MONTH) + 1
+        val monthId = "${year}_M${String.format(java.util.Locale.US, "%02d", month)}"
+        
+        return try {
+            val snapshot = firestore.collection("trending_stats_monthly")
+                .document(monthId)
+                .collection("movies")
+                .get()
+                .await()
+                
+            val prefix = if (isTv) "tv_" else "movie_"
+            
+            data class ScoredItem(val compositeId: String, val score: Long)
+            
+            val items = snapshot.documents.mapNotNull { doc ->
+                if (!doc.id.startsWith(prefix)) return@mapNotNull null
+                
+                val views = doc.getLong("view_count") ?: 0L
+                val ratings = doc.getLong("rating_count") ?: 0L
+                val score = views + (ratings * 2)
+                
+                if (score > 0) ScoredItem(doc.id, score) else null
+            }
+            
+            items.sortedByDescending { it.score }
+                 .take(10)
+                 .map { it.compositeId }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching Top 10 Monthly", e)
+            emptyList()
+        }
+    }
+}

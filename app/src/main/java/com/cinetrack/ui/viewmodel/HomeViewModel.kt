@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
+import com.cinetrack.data.model.NewsItem
+import com.cinetrack.data.repository.NewsRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -40,6 +42,17 @@ data class HomeUiState(
     val notificationCount: Int = 0,
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
+    val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
+    val popularMovies: ImmutableList<Movie> = persistentListOf(),
+    val nowPlayingMovies: ImmutableList<Movie> = persistentListOf(),
+    val top10Movies: ImmutableList<Movie> = persistentListOf(),
+    val upcomingMovies: ImmutableList<Movie> = persistentListOf(),
+    val recommendedTv: ImmutableList<Movie> = persistentListOf(),
+    val popularTv: ImmutableList<Movie> = persistentListOf(),
+    val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
+    val top10Tv: ImmutableList<Movie> = persistentListOf(),
+    val upcomingTv: ImmutableList<Movie> = persistentListOf(),
+    val magazineNews: ImmutableList<NewsItem> = persistentListOf(),
     val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences()
 )
 
@@ -48,6 +61,7 @@ class HomeViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val getHomeUiStateUseCase: com.cinetrack.domain.GetHomeUiStateUseCase,
     private val repository: MovieRepository,
+    private val newsRepository: NewsRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
@@ -63,14 +77,74 @@ class HomeViewModel @Inject constructor(
         actionFeedbackManager.emit(message)
     }
 
+    private val _feedState = MutableStateFlow(FeedState())
+
+    init {
+        fetchFeed()
+    }
+
+    private fun fetchFeed() {
+        viewModelScope.launch {
+            try {
+                val recMovies = repository.getTrendingMovies().take(10).toImmutableList()
+                val popMovies = repository.getPopularMovies(page = 2).take(10).toImmutableList()
+                val nowMovies = repository.getNowPlayingMovies().take(10).toImmutableList()
+                val topMovies = repository.getTop10FlickTrove(isTv = false).take(10).toImmutableList()
+                val upcMovies = repository.getUpcomingMovies().take(10).toImmutableList()
+                
+                val recTv = repository.getTrendingTV().take(10).toImmutableList()
+                val popTv = repository.getPopularTV(page = 2).take(10).toImmutableList()
+                val nowTv = repository.getOnTheAirTV().take(10).toImmutableList()
+                val topTv = repository.getTop10FlickTrove(isTv = true).take(10).toImmutableList()
+                val upcTv = repository.getTrendingTV(2).take(10).toImmutableList() // Use trending page 2 as a proxy for upcoming TV for now
+                
+                val news = newsRepository.getNews().take(5).toImmutableList()
+
+                _feedState.value = FeedState(
+                    recommendedMovies = recMovies,
+                    popularMovies = popMovies,
+                    nowPlayingMovies = nowMovies,
+                    top10Movies = topMovies,
+                    upcomingMovies = upcMovies,
+                    recommendedTv = recTv,
+                    popularTv = popTv,
+                    nowStreamingTv = nowTv,
+                    top10Tv = topTv,
+                    upcomingTv = upcTv,
+                    magazineNews = news
+                )
+            } catch (e: Exception) {
+                // handle error silently or emit message
+            }
+        }
+    }
+
     @OptIn(kotlinx.coroutines.FlowPreview::class)
-    val uiState: StateFlow<HomeUiState> = getHomeUiStateUseCase(
-        moviesFlow = repository.getLocalMoviesFlow(),
-        foldersFlow = repository.getFoldersFlow(),
-        preferencesFlow = preferenceRepository.userPreferencesFlow,
-        searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
-        activeTabFlow = _activeTab
-    ).stateIn(
+    val uiState: StateFlow<HomeUiState> = kotlinx.coroutines.flow.combine(
+        getHomeUiStateUseCase(
+            moviesFlow = repository.getLocalMoviesFlow(),
+            foldersFlow = repository.getFoldersFlow(),
+            preferencesFlow = preferenceRepository.userPreferencesFlow,
+            searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
+            activeTabFlow = _activeTab
+        ),
+        _feedState
+    ) { baseState, feedState ->
+        baseState.copy(
+            recommendedMovies = feedState.recommendedMovies,
+            popularMovies = feedState.popularMovies,
+            nowPlayingMovies = feedState.nowPlayingMovies,
+            top10Movies = feedState.top10Movies,
+            upcomingMovies = feedState.upcomingMovies,
+            recommendedTv = feedState.recommendedTv,
+            popularTv = feedState.popularTv,
+            nowStreamingTv = feedState.nowStreamingTv,
+            top10Tv = feedState.top10Tv,
+            upcomingTv = feedState.upcomingTv,
+            magazineNews = feedState.magazineNews,
+            isLoading = baseState.isLoading || feedState.recommendedMovies.isEmpty()
+        )
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = HomeUiState()
@@ -264,3 +338,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
+data class FeedState(
+    val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
+    val popularMovies: ImmutableList<Movie> = persistentListOf(),
+    val nowPlayingMovies: ImmutableList<Movie> = persistentListOf(),
+    val top10Movies: ImmutableList<Movie> = persistentListOf(),
+    val upcomingMovies: ImmutableList<Movie> = persistentListOf(),
+    val recommendedTv: ImmutableList<Movie> = persistentListOf(),
+    val popularTv: ImmutableList<Movie> = persistentListOf(),
+    val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
+    val top10Tv: ImmutableList<Movie> = persistentListOf(),
+    val upcomingTv: ImmutableList<Movie> = persistentListOf(),
+    val magazineNews: ImmutableList<NewsItem> = persistentListOf()
+)

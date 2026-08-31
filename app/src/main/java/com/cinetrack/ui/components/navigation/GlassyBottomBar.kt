@@ -91,6 +91,15 @@ fun GlassyBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             NavItem(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_home),
+                animatedIconRes = null, // TODO: add animation if desired
+                label = "Home",
+                isSelected = selectedRoute == "feed",
+                enabled = !isDimmed,
+                onClick = { onNavigate("feed") },
+                accentColor = accentColor
+            )
+            NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
                 animatedIconRes = R.drawable.ic_segnalibro_anim,
                 label = stringResource(R.string.bottom_bar_to_watch),

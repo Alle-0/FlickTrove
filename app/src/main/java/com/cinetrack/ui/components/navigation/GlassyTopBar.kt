@@ -174,33 +174,37 @@ fun GlassyTopBar(
             ) {
 
                 // Menu/Back Button
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .bounceClick(
-                            enabled = !isDimmed,
-                            onClick = {
-                                onBackPress?.invoke() ?: onMenuClick?.invoke()
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
-                        contentDescription = "Navigation",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    if (onBackPress == null && hasAppUpdateBadge) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .align(Alignment.TopEnd)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .border(1.dp, Color.Black, CircleShape)
+                if (onBackPress != null || onMenuClick != null) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .bounceClick(
+                                enabled = !isDimmed,
+                                onClick = {
+                                    onBackPress?.invoke() ?: onMenuClick?.invoke()
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
+                            contentDescription = "Navigation",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
                         )
+                        if (onBackPress == null && hasAppUpdateBadge) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .align(Alignment.TopEnd)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .border(1.dp, Color.Black, CircleShape)
+                            )
+                        }
                     }
+                } else {
+                    Spacer(modifier = Modifier.size(32.dp)) // Maintain spacing
                 }
 
                 Row(

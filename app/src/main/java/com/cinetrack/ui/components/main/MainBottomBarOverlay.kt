@@ -23,7 +23,8 @@ import com.cinetrack.ui.screens.FlowStatsTab
 import dev.chrisbanes.haze.HazeState
 
 fun isPrimaryMainTab(currentTab: Tab): Boolean {
-    return currentTab is HomeTab ||
+    return currentTab is com.cinetrack.ui.screens.HomeFeedTab ||
+            currentTab is HomeTab ||
             currentTab is VistiTab ||
             currentTab is AccountTab ||
             currentTab is StatsTab ||
@@ -52,6 +53,7 @@ fun BoxScope.MainBottomBarOverlay(
                 isDimmed = isSettingsDialogOpen,
                 onDimmedAreaClick = onDimmedAreaClick,
                 selectedRoute = when (currentTab) {
+                    is com.cinetrack.ui.screens.HomeFeedTab -> "feed"
                     is HomeTab -> "index"
                     is VistiTab -> "visti"
                     is AccountTab, is FoldersTab, is FolderDetailTab, is StatsTab, is FlowTab, is FlowStatsTab -> "account"

@@ -6,10 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.animation.AnimatedContent
@@ -63,7 +60,6 @@ import com.cinetrack.ui.components.main.MainFolderOptionsMenu
 import com.cinetrack.ui.components.main.MainGlobalDialogs
 import com.cinetrack.ui.components.main.MainModalsContainer
 import com.cinetrack.ui.components.main.MainSearchFab
-import com.cinetrack.ui.components.navigation.GlassyDrawer
 import com.cinetrack.ui.components.navigation.GlassyTopBar
 import com.cinetrack.ui.components.shared.FolderEditMode
 import com.cinetrack.ui.components.shared.LocalMovieActions
@@ -77,6 +73,8 @@ import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.util.AppUpdateInfo
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.screens.StatsTab
+import com.cinetrack.ui.screens.HomeTab
+import com.cinetrack.ui.screens.HomeFeedTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
 import dev.chrisbanes.haze.HazeState
@@ -90,9 +88,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
     @Composable
     override fun Content() {
         val rootNavigator = LocalNavigator.currentOrThrow
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
-        val drawerHazeState = remember { HazeState() }
         val contentHazeState = remember { HazeState() }
         val globalHazeState = remember { HazeState() }
         val undoViewModel: UndoViewModel = getViewModel()
@@ -150,7 +146,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val deepLinkIntent = LocalDeepLinkIntent.current
         val movieActions = LocalMovieActions.current
 
-        val initialTab = if (initialTabStr == "visti") VistiTab else HomeTab
+        val initialTab = HomeFeedTab
 
         val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
         val currentUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
@@ -167,10 +163,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 searchOverlay = searchOverlay
             )
 
-            BackHandler(enabled = drawerState.isOpen || currentTab !is HomeTab) {
-                if (drawerState.isOpen) {
-                    scope.launch { drawerState.close() }
-                } else if (currentTab is FolderDetailTab) {
+            BackHandler(enabled = currentTab !is HomeFeedTab) {
+                if (currentTab is FolderDetailTab) {
                     tabNavigator.current = FoldersTab
                 } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) {
                     tabNavigator.current = AccountTab
@@ -179,72 +173,21 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 }
             }
             
-            BackHandler(enabled = currentTab is HomeTab && !drawerState.isOpen) {
+            BackHandler(enabled = currentTab is HomeFeedTab) {
                 showExitConfirmation = true
             }
 
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                gesturesEnabled = updatesOverlayOffset == null &&
-                        settingsOverlayOffset == null &&
-                        !showSurpriseMeOverlay &&
-                        !isFilterModalVisible &&
-                        !isYearPickerVisible &&
-                        !showFolderOptions &&
-                        !showFolderEditDialog &&
-                        !showFolderDeleteConfirm &&
-                        !showExitConfirmation &&
-                        !movieActions.isAnyModalOpen &&
-                        !isSettingsDialogOpen,
-                scrimColor = Color.Black.copy(alpha = 0.5f),
-                drawerContent = {
-                    GlassyDrawer(
-                        hazeState = drawerHazeState,
-                        hasAppUpdateBadge = hasAppUpdateBadge,
-                        selectedRoute = when (currentTab) {
-                            is HomeTab -> null
-                            is DiscoverTab -> DiscoverTab.requestedType
-                            is VistiTab -> "visti"
-                            is RecommendationsTab -> "recommendations"
-                            is FoldersTab -> "my_folders"
-                            is AccountTab -> "account"
-                            is SettingsTab -> "settings"
-                            is NewsTab -> "news"
-                            else -> null
-                        },
-                        onClose = { scope.launch { drawerState.close() } },
-                        onNavigate = { routeStr ->
-                            scope.launch {
-                                drawerState.close()
-                                when (routeStr) {
-                                    "my_folders" -> tabNavigator.current = FoldersTab
-                                    "recommendations" -> tabNavigator.current = RecommendationsTab
-                                    "settings" -> tabNavigator.current = SettingsTab
-                                    "account" -> tabNavigator.current = AccountTab
-                                    "visti" -> tabNavigator.current = VistiTab
-                                    "popular_movies", "now_playing_movies", "upcoming_movies", "popular_tv", "airing_today_tv", "on_the_air_tv" -> {
-                                        DiscoverTab.requestedType = routeStr
-                                        tabNavigator.current = DiscoverTab
-                                    }
-                                    "news" -> tabNavigator.current = NewsTab
-                                    "surprise_me" -> {
-                                        showSurpriseMeOverlay = true
-                                    }
-                                    else -> tabNavigator.current = HomeTab
-                                }
-                            }
-                        }
-                    )
-                }
-            ) {
-                Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
-                    val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
-                    CompositionLocalProvider(
-                        LocalAppPadding provides PaddingValues(bottom = 80.dp),
+            Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
+                val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
+                CompositionLocalProvider(
+                    LocalAppPadding provides PaddingValues(bottom = 80.dp),
                         LocalActiveFilterConfig provides activeFilterConfig,
                         LocalFilterRequest provides { bounds ->
                             filterButtonBounds = bounds
                             isFilterModalVisible = true
+                        },
+                        com.cinetrack.ui.LocalSurpriseMeRequest provides {
+                            showSurpriseMeOverlay = true
                         }
                     ) {
                         Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
@@ -253,13 +196,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     targetState = currentTab,
                                 transitionSpec = {
                                     val targetDepth = when (targetState) {
-                                        is HomeTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
                                         is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
                                     val initialDepth = when (initialState) {
-                                        is HomeTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
                                         is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
@@ -292,7 +235,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                             // Top Bar Layer
                             val title = when (currentTab) {
-                                is HomeTab -> stringResource(R.string.app_name)
+                                is HomeFeedTab -> stringResource(R.string.app_name)
+                                is HomeTab -> stringResource(R.string.bottom_bar_to_watch)
                                 is VistiTab -> stringResource(R.string.main_tab_visti)
                                 is DiscoverTab -> stringResource(R.string.main_tab_discover)
                                 is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
@@ -350,11 +294,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     hazeState = contentHazeState,
                                     isDimmed = isSettingsDialogOpen,
                                     onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
-                                    onMenuClick = { scope.launch { drawerState.open() } },
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) { { tabNavigator.current = AccountTab } } else null,
+                                    onMenuClick = null, // Menu rimosso
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is NewsTab) { { tabNavigator.current = AccountTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                                    onUpdatesClick = if (currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                                    onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else if (currentTab is FoldersTab) { { offset -> showFoldersSortMenu = true; foldersSortMenuOffset = offset } } else null,
                                     hasActiveFilters = discoverHasActiveFilters,
@@ -386,6 +330,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                 onNavigate = { routeStr ->
                                     when (routeStr) {
+                                        "feed" -> tabNavigator.current = HomeFeedTab
                                         "index" -> tabNavigator.current = HomeTab
                                         "visti" -> tabNavigator.current = VistiTab
                                         "account" -> tabNavigator.current = AccountTab
@@ -508,6 +453,5 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     }
                 }
             }
-        }
     }
 }
