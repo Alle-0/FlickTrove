@@ -1108,4 +1108,5 @@
     <string name="watch_date_prompt_custom">Data personalizzata</string>
     <string name="settings_advanced_prompt_watch_date">Chiedi data nella schermata Dettagli</string>
     <string name="settings_advanced_prompt_watch_date_desc">Quando segni un film come visto dalla schermata dettagli, chiedi la data di visione</string>
+    <string name="account_personalize_dashboard">Personalizza Dashboard</string>
 </resources>

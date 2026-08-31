@@ -275,6 +275,118 @@ object SettingsTab : Tab {
 }
 
 @Composable
+fun SettingsOverlayScreen(
+    viewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel,
+    paddingValues: PaddingValues,
+    startX: Float,
+    startY: Float,
+    onBack: () -> Unit,
+    onClosing: () -> Unit,
+    onLoggedOut: () -> Unit,
+    onLoginClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    var isMeasured by remember { mutableStateOf(false) }
+    var hasRevealed by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val revealAmount = remember(hasRevealed) { androidx.compose.animation.core.Animatable(if (hasRevealed) 1f else 0f) }
+    var isClosing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isMeasured) {
+        if (isMeasured && !hasRevealed) {
+            revealAmount.animateTo(
+                targetValue = 1f,
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = 800, 
+                    easing = androidx.compose.animation.core.CubicBezierEasing(0.7f, 0f, 0.2f, 1f)
+                )
+            )
+            hasRevealed = true
+        }
+    }
+
+    val triggerExit = {
+        if (!isClosing) {
+            isClosing = true
+            onClosing()
+            scope.launch {
+                revealAmount.animateTo(
+                    targetValue = 0f,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = 800, 
+                        easing = androidx.compose.animation.core.CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
+                    )
+                )
+                onBack()
+            }
+        }
+    }
+
+    BackHandler(enabled = !isClosing) {
+        triggerExit()
+    }
+
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val width = constraints.maxWidth.toFloat()
+        val height = constraints.maxHeight.toFloat()
+        
+        if (width > 0 && !isMeasured) {
+            LaunchedEffect(Unit) { isMeasured = true }
+        }
+        
+        val center = androidx.compose.ui.geometry.Offset(startX, startY)
+        val maxRadius = remember(center, width, height) {
+            val distTopLeft = kotlin.math.sqrt((center.x * center.x) + (center.y * center.y).toDouble()).toFloat()
+            val distTopRight = kotlin.math.sqrt(((width - center.x) * (width - center.x)) + (center.y * center.y).toDouble()).toFloat()
+            val distBottomLeft = kotlin.math.sqrt((center.x * center.x) + ((height - center.y) * (height - center.y)).toDouble()).toFloat()
+            val distBottomRight = kotlin.math.sqrt(((width - center.x) * (width - center.x)) + ((height - center.y) * (height - center.y)).toDouble()).toFloat()
+            kotlin.math.max(kotlin.math.max(distTopLeft, distTopRight), kotlin.math.max(distBottomLeft, distBottomRight)) * 1.1f
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val radius = revealAmount.value * maxRadius
+                    clip = true
+                    shape = object : androidx.compose.ui.graphics.Shape {
+                        override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
+                            val path = androidx.compose.ui.graphics.Path().apply {
+                                addOval(androidx.compose.ui.geometry.Rect(center = center, radius = radius))
+                            }
+                            return androidx.compose.ui.graphics.Outline.Generic(path)
+                        }
+                    }
+                }
+        ) {
+            val internalHazeState = remember { dev.chrisbanes.haze.HazeState() }
+            val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+            
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                SettingsScreenContent(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    paddingValues = paddingValues,
+                    hazeState = internalHazeState,
+                    scrollState = scrollState,
+                    onLoggedOut = onLoggedOut,
+                    onLoginClick = onLoginClick
+                )
+                
+                Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(10f)) {
+                    com.cinetrack.ui.components.navigation.GlassyTopBar(
+                        hazeState = internalHazeState,
+                        title = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.settings_tab_title),
+                        onBackPress = triggerExit
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun SettingsScreenContent(
     viewModel: AuthViewModel,
     settingsViewModel: SettingsViewModel,

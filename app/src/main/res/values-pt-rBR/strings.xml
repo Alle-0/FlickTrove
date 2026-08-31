@@ -1110,5 +1110,6 @@
     <string name="watch_date_prompt_custom">Data Personalizada</string>
     <string name="settings_advanced_prompt_watch_date">Perguntar a data na Tela de Detalhes</string>
     <string name="settings_advanced_prompt_watch_date_desc">Ao marcar um filme como visto na tela de detalhes, perguntar a data que foi assistido</string>
+    <string name="account_personalize_dashboard">Personalizar painel</string>
 </resources>
 

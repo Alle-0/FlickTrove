@@ -1112,4 +1112,5 @@
     <string name="watch_date_prompt_custom">Другая дата</string>
     <string name="settings_advanced_prompt_watch_date">Спрашивать дату на экране деталей</string>
     <string name="settings_advanced_prompt_watch_date_desc">При отметке фильма как просмотренного на экране деталей запрашивать дату просмотра</string>
+    <string name="account_personalize_dashboard">Персонализировать панель</string>
 </resources>

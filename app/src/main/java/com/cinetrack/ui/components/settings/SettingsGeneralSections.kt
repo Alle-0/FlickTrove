@@ -52,6 +52,7 @@ fun SettingsUILayoutSection(
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
     val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
     val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
+    val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -227,6 +228,9 @@ fun SettingsUILayoutSection(
                 settingsViewModel.toggleUseMovieLogo(!useMovieLogo)
             }
         )
+
+
+
         // App Language
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_world),

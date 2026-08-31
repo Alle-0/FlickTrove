@@ -248,6 +248,7 @@
     <string name="settings_yes_delete">Yes, Delete</string>
     <string name="settings_confirm">Confirm</string>
     <string name="settings_got_it">Got it</string>
+    <string name="account_personalize_dashboard">Personalize dashboard</string>
     <string name="settings_yes_logout">Yes, Logout</string>
     <string name="settings_link_google">Link Google Account</string>
     <string name="settings_close">Close</string>

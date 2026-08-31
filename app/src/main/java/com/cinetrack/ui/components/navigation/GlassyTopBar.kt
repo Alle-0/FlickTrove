@@ -72,7 +72,7 @@ fun GlassyTopBar(
     layoutColumns: Int? = null,
     hasAppUpdateBadge: Boolean = false,
     onEditBackdropClick: (() -> Unit)? = null,
-    onSettingsClick: (() -> Unit)? = null,
+    onSettingsClick: ((Offset) -> Unit)? = null,
     isStatsRewatchesEnabled: Boolean? = null,
     onStatsRewatchToggle: ((Boolean) -> Unit)? = null
 ) {
@@ -308,12 +308,20 @@ fun GlassyTopBar(
                 }
 
                 if (onSettingsClick != null) {
+                    val settingsButtonCenter = remember { arrayOf(Offset.Zero) }
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .onGloballyPositioned { coords ->
+                                val position = coords.positionInWindow()
+                                settingsButtonCenter[0] = Offset(
+                                    x = position.x + coords.size.width / 2f,
+                                    y = position.y + coords.size.height / 2f
+                                )
+                            }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = onSettingsClick
+                                onClick = { onSettingsClick.invoke(settingsButtonCenter[0]) }
                             ),
                         contentAlignment = Alignment.Center
                     ) {

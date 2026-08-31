@@ -140,6 +140,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         var updatesOverlayOffsetX by rememberSaveable { mutableStateOf<Float?>(null) }
         var updatesOverlayOffsetY by rememberSaveable { mutableStateOf<Float?>(null) }
         val updatesOverlayOffset = if (updatesOverlayOffsetX != null && updatesOverlayOffsetY != null) Offset(updatesOverlayOffsetX!!, updatesOverlayOffsetY!!) else null
+
+        var settingsOverlayOffsetX by rememberSaveable { mutableStateOf<Float?>(null) }
+        var settingsOverlayOffsetY by rememberSaveable { mutableStateOf<Float?>(null) }
+        val settingsOverlayOffset = if (settingsOverlayOffsetX != null && settingsOverlayOffsetY != null) Offset(settingsOverlayOffsetX!!, settingsOverlayOffsetY!!) else null
         var isOverlayClosing by remember { mutableStateOf(false) }
         
         var showSurpriseMeOverlay by rememberSaveable { mutableStateOf(false) }
@@ -182,6 +186,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             ModalNavigationDrawer(
                 drawerState = drawerState,
                 gesturesEnabled = updatesOverlayOffset == null &&
+                        settingsOverlayOffset == null &&
                         !showSurpriseMeOverlay &&
                         !isFilterModalVisible &&
                         !isYearPickerVisible &&
@@ -363,8 +368,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         } 
                                     } else null,
                                     onSettingsClick = if (currentTab is AccountTab) {
-                                        {
-                                            settingsViewModel.triggerDashboardSettingsMenu()
+                                        { offset ->
+                                            settingsOverlayOffsetX = offset.x
+                                            settingsOverlayOffsetY = offset.y
                                         }
                                     } else null,
                                     isStatsRewatchesEnabled = statsIncludeRewatches,
@@ -488,6 +494,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             onFolderDeleteConfirmChange = { showFolderDeleteConfirm = it },
                             updatesOverlayOffset = updatesOverlayOffset,
                             onUpdatesOverlayClose = { updatesOverlayOffsetX = null; updatesOverlayOffsetY = null },
+                            settingsOverlayOffset = settingsOverlayOffset,
+                            onSettingsOverlayClose = { settingsOverlayOffsetX = null; settingsOverlayOffsetY = null },
                             onOverlayClosing = { isOverlayClosing = true },
                             showSurpriseMeOverlay = showSurpriseMeOverlay,
                             onSurpriseMeClose = { showSurpriseMeOverlay = false },

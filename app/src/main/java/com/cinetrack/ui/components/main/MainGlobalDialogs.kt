@@ -73,6 +73,8 @@ fun MainGlobalDialogs(
     onFolderDeleteConfirmChange: (Boolean) -> Unit,
     updatesOverlayOffset: Offset?,
     onUpdatesOverlayClose: () -> Unit,
+    settingsOverlayOffset: Offset?,
+    onSettingsOverlayClose: () -> Unit,
     onOverlayClosing: () -> Unit,
     showSurpriseMeOverlay: Boolean,
     onSurpriseMeClose: () -> Unit,
@@ -217,6 +219,27 @@ fun MainGlobalDialogs(
             modifier = Modifier.zIndex(80000f)
         )
     }
+
+    if (settingsOverlayOffset != null) {
+        val authViewModel: com.cinetrack.ui.viewmodel.AuthViewModel = with(screen) { getViewModel<com.cinetrack.ui.viewmodel.AuthViewModel>() }
+        com.cinetrack.ui.screens.SettingsOverlayScreen(
+            viewModel = authViewModel,
+            settingsViewModel = settingsViewModel,
+            paddingValues = PaddingValues(bottom = 80.dp),
+            startX = settingsOverlayOffset.x,
+            startY = settingsOverlayOffset.y,
+            onBack = onSettingsOverlayClose,
+            onClosing = onOverlayClosing,
+            onLoggedOut = {
+                rootNavigator.replaceAll(com.cinetrack.ui.screens.LoginScreen())
+            },
+            onLoginClick = {
+                rootNavigator.push(com.cinetrack.ui.screens.LoginScreen())
+            },
+            modifier = Modifier.zIndex(80000f)
+        )
+    }
+
 
     if (showSurpriseMeOverlay) {
         val surpriseMeViewModel: SurpriseMeViewModel = with(screen) { getViewModel<SurpriseMeViewModel>() }

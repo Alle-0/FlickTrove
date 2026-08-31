@@ -1114,4 +1114,5 @@
     <string name="watch_date_prompt_custom">Fecha personalizada</string>
     <string name="settings_advanced_prompt_watch_date">Preguntar fecha en Detalles</string>
     <string name="settings_advanced_prompt_watch_date_desc">Al marcar una película como vista en la pantalla de detalles, preguntar la fecha de visualización</string>
+    <string name="account_personalize_dashboard">Personalizar panel</string>
 </resources>
