@@ -1112,5 +1112,5 @@
     <string name="settings_advanced_prompt_watch_date">Demander la date sur l\'écran Détails</string>
     <string name="settings_advanced_prompt_watch_date_desc">Lors du marquage d\'un film comme vu depuis l\'écran des détails, demander la date de visionnage</string>
     <string name="account_personalize_dashboard">Personnaliser le tableau de bord</string>
-    <string name="settings_personalize_dashboard_desc">Choisissez les sections à afficher sur l'écran Compte</string>
+    <string name="settings_personalize_dashboard_desc">Choisissez les sections à afficher sur l\'écran Compte</string>
 </resources>
