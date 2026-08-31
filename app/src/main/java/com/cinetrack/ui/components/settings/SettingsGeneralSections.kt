@@ -171,6 +171,17 @@ fun SettingsUILayoutSection(
                 settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
             }
         )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            title = stringResource(R.string.account_personalize_dashboard),
+            description = stringResource(R.string.settings_personalize_dashboard_desc),
+            trailing = { },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.triggerDashboardSettingsMenu()
+            }
+        )
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_strisce),
             title = stringResource(R.string.settings_split_home),
@@ -298,17 +309,6 @@ fun SettingsUILayoutSection(
                         }
                     }
                 }
-            }
-        )
-
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
-            title = stringResource(R.string.account_personalize_dashboard),
-            description = "",
-            trailing = { },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.triggerDashboardSettingsMenu()
             }
         )
     }

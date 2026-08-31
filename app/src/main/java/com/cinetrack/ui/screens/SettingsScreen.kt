@@ -374,11 +374,14 @@ fun SettingsOverlayScreen(
                     onLoginClick = onLoginClick
                 )
                 
+                val isAnyDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(10f)) {
                     com.cinetrack.ui.components.navigation.GlassyTopBar(
                         hazeState = internalHazeState,
                         title = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.settings_tab_title),
-                        onBackPress = triggerExit
+                        onBackPress = triggerExit,
+                        isDimmed = isAnyDialogOpen,
+                        onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() }
                     )
                 }
             }
@@ -401,6 +404,15 @@ fun SettingsScreenContent(
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
+    var showDashboardSettings by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        settingsViewModel.showDashboardSettingsMenu.collect {
+            showDashboardSettings = true
+        }
+    }
+
+
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -816,6 +828,7 @@ fun SettingsScreenContent(
                                 showBackupDialog = false
                                 showExternalMigrationDialog = false
                                 showUnmatchedItemsModal = false
+                                showDashboardSettings = false
                             }
                         )
                 )
@@ -1028,6 +1041,13 @@ fun SettingsScreenContent(
         SettingsLoadingOverlay(
             visible = isBackupLoading,
             activeHazeState = activeHazeState
+        )
+        
+        DashboardSettingsDialog(
+            visible = showDashboardSettings,
+            activeHazeState = activeHazeState,
+            settingsViewModel = settingsViewModel,
+            onDismiss = { showDashboardSettings = false }
         )
     }
 }

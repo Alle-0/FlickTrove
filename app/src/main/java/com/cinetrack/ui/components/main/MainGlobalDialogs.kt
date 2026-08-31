@@ -53,6 +53,10 @@ import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.util.AppUpdateInfo
 import dev.chrisbanes.haze.HazeState
+import androidx.compose.ui.zIndex
+import androidx.activity.compose.BackHandler
+
+
 
 @Composable
 fun MainGlobalDialogs(

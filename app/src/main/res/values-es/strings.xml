@@ -1115,4 +1115,5 @@
     <string name="settings_advanced_prompt_watch_date">Preguntar fecha en Detalles</string>
     <string name="settings_advanced_prompt_watch_date_desc">Al marcar una película como vista en la pantalla de detalles, preguntar la fecha de visualización</string>
     <string name="account_personalize_dashboard">Personalizar panel</string>
+    <string name="settings_personalize_dashboard_desc">Elige qué secciones mostrar en la pantalla de Cuenta</string>
 </resources>

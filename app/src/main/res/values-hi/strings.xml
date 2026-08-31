@@ -1111,5 +1111,6 @@
     <string name="settings_advanced_prompt_watch_date">विवरण स्क्रीन पर देखने की तिथि पूछें</string>
     <string name="settings_advanced_prompt_watch_date_desc">विवरण स्क्रीन से किसी फिल्म को देखा गया के रूप में चिह्नित करते समय, देखने की तिथि पूछें</string>
     <string name="account_personalize_dashboard">डैशबोर्ड को वैयक्तिकृत करें</string>
+    <string name="settings_personalize_dashboard_desc">चुनें कि खाता स्क्रीन पर कौन से अनुभाग प्रदर्शित करने हैं</string>
 </resources>
 
