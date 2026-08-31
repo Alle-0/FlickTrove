@@ -300,6 +300,17 @@ fun SettingsUILayoutSection(
                 }
             }
         )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            title = stringResource(R.string.account_personalize_dashboard),
+            description = "",
+            trailing = { },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.triggerDashboardSettingsMenu()
+            }
+        )
     }
 }
 

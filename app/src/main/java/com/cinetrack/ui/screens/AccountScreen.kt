@@ -468,17 +468,7 @@ object AccountTab : Tab {
                         }
                     }
                     
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                        AccountMenuButton(
-                            icon = R.drawable.ic_settings, // Use appropriate icon, reusing gear for now
-                            title = stringResource(id = R.string.account_personalize_dashboard),
-                            hazeState = backgroundHazeState,
-                            onClick = { settingsViewModel.triggerDashboardSettingsMenu() }
-                        )
-                    }
-                    
                     Spacer(modifier = Modifier.height(32.dp))
                 }
                 }

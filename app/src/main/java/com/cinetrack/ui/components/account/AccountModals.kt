@@ -368,6 +368,7 @@ fun AccountModals(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .zIndex(100000f)
                         .background(Color.Black.copy(alpha = 0.5f))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
