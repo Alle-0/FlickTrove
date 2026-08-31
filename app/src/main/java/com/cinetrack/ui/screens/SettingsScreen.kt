@@ -521,13 +521,13 @@ fun SettingsScreenContent(
         }
     }
 
+    var showUnmatchedItemsModal by remember { mutableStateOf(false) }
+    val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
+
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showFeedbackDialog || 
                            showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
-                           showDeepSyncConfirm
-
-    var showUnmatchedItemsModal by remember { mutableStateOf(false) }
-    val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
+                           showDeepSyncConfirm || showUnmatchedItemsModal || showDashboardSettings
 
     BackHandler(enabled = anyDialogVisible) {
         focusManager.clearFocus()
@@ -545,7 +545,8 @@ fun SettingsScreenContent(
         showWipeSelectionDialog = false
         showWipeLocalDataConfirm = false
         showWipeTotalDataConfirm = false
-        var showUnmatchedItemsModal = false
+        showUnmatchedItemsModal = false
+        showDashboardSettings = false
     }
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
@@ -586,6 +587,12 @@ fun SettingsScreenContent(
             showLogoutConfirm = false
             showBackupDialog = false
             showExternalMigrationDialog = false
+            showDeepSyncConfirm = false
+            showWipeSelectionDialog = false
+            showWipeLocalDataConfirm = false
+            showWipeTotalDataConfirm = false
+            showUnmatchedItemsModal = false
+            showDashboardSettings = false
         }
     }
 
