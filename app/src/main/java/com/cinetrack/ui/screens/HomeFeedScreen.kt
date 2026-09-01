@@ -161,10 +161,14 @@ fun HomeFeedScreenContent(
     }
 
     val heroList = remember(popularList, nowPlayingList) {
-        (popularList + nowPlayingList).distinctBy { it.id }.take(5)
+        (popularList + nowPlayingList).distinctBy { it.id }.take(10)
     }
     
-    val pagerState = rememberPagerState { heroList.size }
+    // Virtual infinite pager state
+    val initialPage = if (heroList.isNotEmpty()) {
+        5000 - (5000 % heroList.size)
+    } else 0
+    val pagerState = rememberPagerState(initialPage = initialPage) { 10000 }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -176,7 +180,7 @@ fun HomeFeedScreenContent(
             LazyColumn(
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
-                    top = 150.dp
+                    top = 165.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()

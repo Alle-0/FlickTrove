@@ -48,27 +48,32 @@ fun HeroSpotlightCarousel(
     if (movies.isEmpty()) return
 
     // Auto-scroll ogni 4 secondi
-    LaunchedEffect(pagerState.pageCount) {
+    LaunchedEffect(pagerState) {
         while (true) {
             delay(4000)
-            val next = (pagerState.currentPage + 1) % pagerState.pageCount
-            pagerState.animateScrollToPage(next, animationSpec = tween(600))
+            if (pagerState.pageCount > 0) {
+                val next = pagerState.currentPage + 1
+                pagerState.animateScrollToPage(next, animationSpec = tween(600))
+            }
         }
     }
 
     Column(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(500.dp)
-                .clip(androidx.compose.foundation.shape.RoundedCornerShape(24.dp))
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                val movie = movies[page]
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            pageSpacing = 16.dp,
+            modifier = Modifier.height(500.dp)
+        ) { virtualPage ->
+            val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
+            val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .clickable { onMovieClick(movie) }
+            ) {
                 val context = LocalContext.current
                 val backdropUrl = buildTmdbImageUrl(
                     movie.backdropPath ?: movie.posterPath,
@@ -76,21 +81,18 @@ fun HeroSpotlightCarousel(
                     ImageQuality.HIGH
                 )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onMovieClick(movie) }
-                ) {
-                    // Backdrop Image
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(backdropUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = movie.title ?: movie.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                // Backdrop Image
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(backdropUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = movie.title ?: movie.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                val bgColor = MaterialTheme.colorScheme.background
 
                     val bgColor = MaterialTheme.colorScheme.background
                     Box(
@@ -213,15 +215,16 @@ fun HeroSpotlightCarousel(
 
                 // Symbiont (worm animato)
                 if (pageCount > 0) {
-                    val scrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction)
-                        .coerceIn(0f, (pageCount - 1).toFloat())
-                    
+                    val virtualScrollPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    val rawFraction = virtualScrollPosition - Math.floor(virtualScrollPosition.toDouble()).toFloat()
+                    val floorPage = (pagerState.currentPage % pageCount + pageCount) % pageCount
+                    val scrollPosition = floorPage + rawFraction
+
                     val floor = scrollPosition.toInt()
                     val fraction = scrollPosition - floor
                     
                     // Logica "worm": 
-                    // 1° metà dello slide: il lato destro si allunga al pallino successivo
-                    // 2° metà dello slide: il lato sinistro lo raggiunge
+                    // Se andiamo oltre l'ultimo indice, il lato destro sfora e il sinistro lo segue.
                     val leftNode = floor + Math.max(0f, (fraction - 0.5f) * 2f)
                     val rightNode = floor + Math.min(1f, fraction * 2f)
                     
@@ -234,6 +237,23 @@ fun HeroSpotlightCarousel(
                         size = Size(rightX - leftX, dotSize.toPx()),
                         cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
                     )
+                    
+                    // Se stiamo completando il loop dall'ultimo al primo elemento, disegniamo anche la parte
+                    // che spunta dal primo pallino.
+                    if (rightNode > pageCount - 1) {
+                        val overlapRightNode = rightNode - pageCount
+                        val overlapLeftNode = Math.max(0f, leftNode - pageCount)
+                        val ovLeftX = overlapLeftNode * distance.toPx()
+                        val ovRightX = (overlapRightNode * distance.toPx()) + dotSize.toPx()
+                        if (ovRightX > ovLeftX) {
+                            drawRoundRect(
+                                color = PrimaryTeal,
+                                topLeft = Offset(ovLeftX, 0f),
+                                size = Size(ovRightX - ovLeftX, dotSize.toPx()),
+                                cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
+                            )
+                        }
+                    }
                 }
             }
         }
