@@ -77,8 +77,8 @@ fun TrovePickCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .height(200.dp)
-                .clip(RoundedCornerShape(20.dp))
                 .bounceClick { onMovieClick(movie) }
+                .clip(RoundedCornerShape(20.dp))
         ) {
             // Backdrop come sfondo della card
             AsyncImage(

@@ -32,6 +32,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
@@ -70,8 +71,8 @@ fun HeroSpotlightCarousel(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(24.dp))
-                    .clickable { onMovieClick(movie) }
             ) {
                 val context = LocalContext.current
                 val backdropUrl = buildTmdbImageUrl(
