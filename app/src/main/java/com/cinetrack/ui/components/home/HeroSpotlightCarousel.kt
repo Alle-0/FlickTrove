@@ -161,7 +161,7 @@ fun HeroSpotlightCarousel(
             }
         }
 
-        // Pallini indicatori
+        // Pallini indicatori (Symbiont / Worm effect)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,17 +169,20 @@ fun HeroSpotlightCarousel(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val scrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction)
+                .coerceIn(0f, (movies.size - 1).toFloat())
+
             repeat(movies.size) { index ->
-                val isSelected = pagerState.currentPage == index
-                val width by animateDpAsState(
-                    targetValue = if (isSelected) 20.dp else 6.dp,
-                    animationSpec = tween(300),
-                    label = "indicatorWidth"
-                )
-                val color by animateColorAsState(
-                    targetValue = if (isSelected) PrimaryTeal else Color.White.copy(alpha = 0.35f),
-                    animationSpec = tween(300),
-                    label = "indicatorColor"
+                val distance = Math.abs(scrollPosition - index).coerceIn(0f, 1f)
+                
+                // Da 6dp (distante) a 20dp (centrato) proporzionale allo scroll
+                val width = 6.dp + (20.dp - 6.dp) * (1f - distance)
+                
+                // Interpolazione colore fluida legata al dito dell'utente
+                val color = androidx.compose.ui.graphics.lerp(
+                    start = Color.White.copy(alpha = 0.35f),
+                    stop = PrimaryTeal,
+                    fraction = 1f - distance
                 )
                 
                 Box(
