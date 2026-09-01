@@ -98,9 +98,9 @@ fun TrovePickCard(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                Color.Black.copy(alpha = 0.85f),
-                                Color.Black.copy(alpha = 0.3f),
-                                Color.Transparent
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.6f),
+                                Color.Black.copy(alpha = 0.95f)
                             )
                         )
                     )
@@ -150,7 +150,12 @@ fun TrovePickCard(
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Black,
                             fontSize = 22.sp,
-                            lineHeight = 26.sp
+                            lineHeight = 26.sp,
+                            shadow = androidx.compose.ui.graphics.Shadow(
+                                color = Color.Black,
+                                offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                blurRadius = 4f
+                            )
                         ),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
