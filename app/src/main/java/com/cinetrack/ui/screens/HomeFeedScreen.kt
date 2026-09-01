@@ -164,19 +164,9 @@ fun HomeFeedScreenContent(
     }
     
     val pagerState = rememberPagerState { heroList.size }
-    
-    val currentBackdropUrl = remember(pagerState.currentPage, heroList) {
-        if (heroList.isNotEmpty() && pagerState.currentPage < heroList.size) {
-            val movie = heroList[pagerState.currentPage]
-            buildTmdbImageUrl(movie.backdropPath ?: movie.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
-        } else null
-    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-        CinematicBackground(
-            modifier = Modifier.fillMaxSize(),
-            backdropUrl = currentBackdropUrl
-        )
+        CinematicBackground(modifier = Modifier.fillMaxSize())
         Box(
             modifier = Modifier            
     .fillMaxSize()
@@ -222,8 +212,7 @@ fun HomeFeedScreenContent(
                         HeroSpotlightCarousel(
                             movies = heroList,
                             pagerState = pagerState,
-                            onMovieClick = onMovieClick,
-                            onAddToTroveClick = { movie -> movieActions.openFolders(movie) }
+                            onMovieClick = onMovieClick
                         )
                     }
                 }
