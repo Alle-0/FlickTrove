@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +47,8 @@ fun HeroSpotlightCarousel(
     modifier: Modifier = Modifier
 ) {
     if (movies.isEmpty()) return
+    
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     // Auto-scroll ogni 4 secondi
     LaunchedEffect(pagerState) {
@@ -130,7 +133,7 @@ fun HeroSpotlightCarousel(
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = stringResource(R.string.home_hero_featured),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = primaryColor,
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.5.sp,
@@ -230,7 +233,7 @@ fun HeroSpotlightCarousel(
                     val rightX = (rightNode * distance.toPx()) + dotSize.toPx()
                     
                     drawRoundRect(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = primaryColor,
                         topLeft = Offset(leftX, 0f),
                         size = Size(rightX - leftX, dotSize.toPx()),
                         cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
@@ -245,7 +248,7 @@ fun HeroSpotlightCarousel(
                         val ovRightX = (overlapRightNode * distance.toPx()) + dotSize.toPx()
                         if (ovRightX > ovLeftX) {
                             drawRoundRect(
-                                color = MaterialTheme.colorScheme.primary,
+                                color = primaryColor,
                                 topLeft = Offset(ovLeftX, 0f),
                                 size = Size(ovRightX - ovLeftX, dotSize.toPx()),
                                 cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
