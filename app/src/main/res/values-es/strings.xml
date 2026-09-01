@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">FlickTrove</string>
+    <string name="hero_add_to_trove">Agregar</string>
+    <string name="hero_details">Detalles</string>
     <string name="shortcut_search_short">Buscar</string>
     <string name="shortcut_search_long">Buscar título</string>
     <string name="shortcut_visti_short">Tu lista</string>

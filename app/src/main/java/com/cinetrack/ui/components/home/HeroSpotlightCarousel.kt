@@ -145,7 +145,7 @@ fun HeroSpotlightCarousel(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add to Trove", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.hero_add_to_trove), color = Color.Black, fontWeight = FontWeight.Bold)
                     }
 
                     FilledTonalButton(
@@ -162,7 +162,7 @@ fun HeroSpotlightCarousel(
                     ) {
                         Icon(Icons.Default.Info, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Details", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.hero_details), fontWeight = FontWeight.Bold)
                     }
                 }
             }
