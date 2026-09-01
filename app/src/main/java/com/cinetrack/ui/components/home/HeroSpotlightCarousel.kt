@@ -93,13 +93,12 @@ fun HeroSpotlightCarousel(
                 )
 
                 val bgColor = MaterialTheme.colorScheme.background
-
-                    val bgColor = MaterialTheme.colorScheme.background
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Transparent,
                                         Color.Transparent,
@@ -179,9 +178,8 @@ fun HeroSpotlightCarousel(
                             )
                         }
                     }
-                }
-            }
-        }
+                } // End Page Box
+            } // End HorizontalPager
 
         // Pallini indicatori (Symbiont / Worm effect)
         Box(
