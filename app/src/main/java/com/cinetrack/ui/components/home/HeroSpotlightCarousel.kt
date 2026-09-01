@@ -128,7 +128,12 @@ fun HeroSpotlightCarousel(
                                 color = PrimaryTeal,
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.5.sp
+                                    letterSpacing = 1.5.sp,
+                                    shadow = androidx.compose.ui.graphics.Shadow(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        offset = androidx.compose.ui.geometry.Offset(1f, 1f),
+                                        blurRadius = 8f
+                                    )
                                 )
                             )
                         }
@@ -140,7 +145,12 @@ fun HeroSpotlightCarousel(
                             style = MaterialTheme.typography.headlineLarge.copy(
                                 fontWeight = FontWeight.Black,
                                 fontSize = 30.sp,
-                                lineHeight = 34.sp
+                                lineHeight = 34.sp,
+                                shadow = androidx.compose.ui.graphics.Shadow(
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                    blurRadius = 16f
+                                )
                             ),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -152,8 +162,14 @@ fun HeroSpotlightCarousel(
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = year,
-                                color = Color.White.copy(alpha = 0.65f),
-                                style = MaterialTheme.typography.bodyMedium
+                                color = Color.White.copy(alpha = 0.85f), // Leggermente più opaco
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    shadow = androidx.compose.ui.graphics.Shadow(
+                                        color = Color.Black.copy(alpha = 0.8f),
+                                        offset = androidx.compose.ui.geometry.Offset(1f, 1f),
+                                        blurRadius = 12f
+                                    )
+                                )
                             )
                         }
                     }
