@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
-import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
@@ -61,7 +60,7 @@ fun TrovePickCard(
             Icon(
                 painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
                 contentDescription = null,
-                tint = PrimaryTeal,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -137,7 +136,7 @@ fun TrovePickCard(
                     // Badge "Pick" text only
                     Text(
                         text = stringResource(R.string.home_trove_pick_badge).uppercase(),
-                        color = PrimaryTeal,
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
@@ -196,7 +195,7 @@ fun TrovePickCard(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                PrimaryTeal.copy(alpha = 0.25f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
                                 Color.Transparent
                             )
                         )

@@ -32,7 +32,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
-import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
@@ -124,13 +123,13 @@ fun HeroSpotlightCarousel(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_star),
                                 contentDescription = null,
-                                tint = PrimaryTeal,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = stringResource(R.string.home_hero_featured),
-                                color = PrimaryTeal,
+                                color = MaterialTheme.colorScheme.primary,
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.5.sp,
@@ -230,7 +229,7 @@ fun HeroSpotlightCarousel(
                     val rightX = (rightNode * distance.toPx()) + dotSize.toPx()
                     
                     drawRoundRect(
-                        color = PrimaryTeal,
+                        color = MaterialTheme.colorScheme.primary,
                         topLeft = Offset(leftX, 0f),
                         size = Size(rightX - leftX, dotSize.toPx()),
                         cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
@@ -245,7 +244,7 @@ fun HeroSpotlightCarousel(
                         val ovRightX = (overlapRightNode * distance.toPx()) + dotSize.toPx()
                         if (ovRightX > ovLeftX) {
                             drawRoundRect(
-                                color = PrimaryTeal,
+                                color = MaterialTheme.colorScheme.primary,
                                 topLeft = Offset(ovLeftX, 0f),
                                 size = Size(ovRightX - ovLeftX, dotSize.toPx()),
                                 cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
