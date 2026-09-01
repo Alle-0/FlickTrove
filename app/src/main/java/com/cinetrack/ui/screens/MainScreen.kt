@@ -250,7 +250,15 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is HomeFeedTab -> stringResource(R.string.app_name)
                                 is HomeTab -> stringResource(R.string.bottom_bar_to_watch)
                                 is VistiTab -> stringResource(R.string.main_tab_visti)
-                                is DiscoverTab -> stringResource(R.string.main_tab_discover)
+                                is DiscoverTab -> {
+                                    when (DiscoverTab.requestedType) {
+                                        "now_playing_movies", "now_playing" -> stringResource(R.string.home_section_now_in_theaters)
+                                        "upcoming_movies", "upcoming", "upcoming_tv" -> stringResource(R.string.home_section_upcoming)
+                                        "airing_today_tv", "on_the_air_tv", "streaming_tv" -> stringResource(R.string.home_section_now_streaming)
+                                        "popular_movies", "popular", "popular_tv" -> stringResource(R.string.home_section_popular)
+                                        else -> stringResource(R.string.main_tab_discover)
+                                    }
+                                }
                                 is RecommendationsTab -> stringResource(R.string.main_tab_recommendations)
                                 is AccountTab -> stringResource(R.string.bottom_bar_account)
                                 is FoldersTab -> stringResource(R.string.main_tab_folders)

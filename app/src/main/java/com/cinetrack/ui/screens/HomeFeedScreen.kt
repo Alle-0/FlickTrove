@@ -202,7 +202,10 @@ fun HomeFeedScreenContent(
                 // 1. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { tabNavigator.current = DiscoverTab })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { 
+                            DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
+                            tabNavigator.current = DiscoverTab 
+                        })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -223,7 +226,10 @@ fun HomeFeedScreenContent(
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
+                                ShowMoreCard(onClick = { 
+                                    DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
+                                    tabNavigator.current = DiscoverTab 
+                                })
                             }
                         }
                     }
@@ -232,7 +238,10 @@ fun HomeFeedScreenContent(
                 // 2. NOW IN THEATERS / NOW STREAMING (2:3 Posters)
                 if (nowPlayingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters), onClick = { tabNavigator.current = DiscoverTab })
+                        HomeSectionTitle(title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters), onClick = { 
+                            DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
+                            tabNavigator.current = DiscoverTab 
+                        })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -253,7 +262,10 @@ fun HomeFeedScreenContent(
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
+                                ShowMoreCard(onClick = { 
+                                    DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
+                                    tabNavigator.current = DiscoverTab 
+                                })
                             }
                         }
                     }
@@ -262,7 +274,10 @@ fun HomeFeedScreenContent(
                 // 3. IN USCITA (2:3 Posters)
                 if (upcomingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_upcoming), onClick = { tabNavigator.current = DiscoverTab })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_upcoming), onClick = { 
+                            DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
+                            tabNavigator.current = DiscoverTab 
+                        })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -283,7 +298,10 @@ fun HomeFeedScreenContent(
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
+                                ShowMoreCard(onClick = { 
+                                    DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
+                                    tabNavigator.current = DiscoverTab 
+                                })
                             }
                         }
                     }
