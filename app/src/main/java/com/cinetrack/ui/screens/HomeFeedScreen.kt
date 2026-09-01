@@ -114,7 +114,10 @@ object HomeFeedTab : Tab {
             isFilterVisible = false,
             onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onMovieClick = { movie -> 
-                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+                val activeTab = viewModel.uiState.value.activeTab
+                val defaultType = if (activeTab == "tv") "tv" else "movie"
+                val finalType = if (movie.mediaType.isNotEmpty()) movie.mediaType else defaultType
+                navigator.push(MovieDetailScreen(movie.id, finalType))
             }
         )
     }
