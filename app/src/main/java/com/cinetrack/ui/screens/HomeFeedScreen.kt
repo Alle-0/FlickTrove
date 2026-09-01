@@ -182,7 +182,19 @@ fun HomeFeedScreenContent(
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (uiState.isLoading) {
-                    items(3) {
+                    item {
+                        // Hero Skeleton
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .height(500.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Color(0xFF1A1A2E))
+                                .shimmerEffect()
+                        )
+                    }
+                    items(2) {
                         Column {
                             Box(
                                 modifier = Modifier
