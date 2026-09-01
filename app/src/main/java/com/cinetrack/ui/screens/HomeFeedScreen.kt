@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -56,6 +57,7 @@ import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.home.HeroSpotlightCarousel
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
@@ -157,9 +159,24 @@ fun HomeFeedScreenContent(
         { m, offset, pos -> movieActions.openActionsPopup(m, offset, pos) }
     }
 
+    val heroList = remember(popularList, nowPlayingList) {
+        (popularList + nowPlayingList).distinctBy { it.id }.take(5)
+    }
     
+    val pagerState = rememberPagerState { heroList.size }
+    
+    val currentBackdropUrl = remember(pagerState.currentPage, heroList) {
+        if (heroList.isNotEmpty() && pagerState.currentPage < heroList.size) {
+            val movie = heroList[pagerState.currentPage]
+            buildTmdbImageUrl(movie.backdropPath ?: movie.posterPath, ImageType.BACKDROP, ImageQuality.HIGH)
+        } else null
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-        CinematicBackground(modifier = Modifier.fillMaxSize())
+        CinematicBackground(
+            modifier = Modifier.fillMaxSize(),
+            backdropUrl = currentBackdropUrl
+        )
         Box(
             modifier = Modifier            
     .fillMaxSize()
@@ -168,7 +185,7 @@ fun HomeFeedScreenContent(
             LazyColumn(
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
-                    top = topPadding + stickyHeaderHeight + 12.dp
+                    top = 0.dp // Reset top padding to let Hero go full bleed
                 ),
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
@@ -196,6 +213,18 @@ fun HomeFeedScreenContent(
                                 }
                             }
                         }
+                    }
+                }
+
+                // HERO CAROUSEL
+                if (heroList.isNotEmpty()) {
+                    item {
+                        HeroSpotlightCarousel(
+                            movies = heroList,
+                            pagerState = pagerState,
+                            onMovieClick = onMovieClick,
+                            onAddToTroveClick = { movie -> movieActions.openFolders(movie) }
+                        )
                     }
                 }
                 

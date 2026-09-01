@@ -16,16 +16,41 @@ import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.theme.PrimaryTeal
 import java.util.*
 
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.compose.AsyncImagePainter
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.alpha
+
 @Composable
 fun CinematicBackground(
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color.Transparent,
-    accentColor: Color? = null
+    accentColor: Color? = null,
+    backdropUrl: String? = null
 ) {
     val baseTint = accentColor ?: MaterialTheme.colorScheme.primary
 
+    Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        if (backdropUrl != null) {
+            // Animated background image crossfade
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(backdropUrl)
+                    .crossfade(1000)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.3f),
+                // Optional: add a blur if supported by the OS or a Modifier.blur, though alpha 0.3 + gradients usually looks nice enough.
+            )
+        }
 
-    Canvas(modifier = modifier.fillMaxSize().background(backgroundColor)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
 
@@ -73,5 +98,6 @@ fun CinematicBackground(
             center = center3,
             radius = radius3
         )
+        }
     }
 }
