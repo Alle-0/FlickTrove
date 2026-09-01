@@ -3,6 +3,7 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">जोड़ें</string>
     <string name="hero_details">विवरण</string>
+    <string name="home_hero_featured">मुख्य</string>
     <string name="home_section_trove_pick">Trove की चुनिंदा फ़िल्म</string>
     <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
     <string name="shortcut_search_short">खोजें</string>

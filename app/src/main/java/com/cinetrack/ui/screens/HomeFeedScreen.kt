@@ -176,7 +176,7 @@ fun HomeFeedScreenContent(
             LazyColumn(
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
-                    top = 0.dp // Reset top padding to let Hero go full bleed
+                    top = 110.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
@@ -360,6 +360,9 @@ fun HomeFeedScreenContent(
                                             onLongPress = stableOnLongPress
                                         )
                                     }
+                                }
+                                item {
+                                    ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
                                 }
                             }
                         }

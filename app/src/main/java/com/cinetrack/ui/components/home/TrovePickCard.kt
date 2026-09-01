@@ -55,21 +55,22 @@ fun TrovePickCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "💎  ",
-                style = MaterialTheme.typography.titleMedium
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
+                contentDescription = null,
+                tint = PrimaryTeal,
+                modifier = Modifier.size(20.dp)
             )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.home_section_trove_pick),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         // Card principale
         Box(
@@ -78,17 +79,6 @@ fun TrovePickCard(
                 .padding(horizontal = 16.dp)
                 .height(200.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            PrimaryTeal.copy(alpha = 0.8f),
-                            PrimaryTeal.copy(alpha = 0.2f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                )
                 .bounceClick { onMovieClick(movie) }
         ) {
             // Backdrop come sfondo della card
@@ -144,27 +134,15 @@ fun TrovePickCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Badge "Pick"
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(PrimaryTeal.copy(alpha = 0.25f))
-                            .border(
-                                width = 0.5.dp,
-                                color = PrimaryTeal.copy(alpha = 0.7f),
-                                shape = RoundedCornerShape(6.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.home_trove_pick_badge),
-                            color = PrimaryTeal,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
+                    // Badge "Pick" text only
+                    Text(
+                        text = stringResource(R.string.home_trove_pick_badge).uppercase(),
+                        color = PrimaryTeal,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
                         )
-                    }
+                    )
 
                     // Titolo
                     Text(
@@ -192,11 +170,20 @@ fun TrovePickCard(
                     // Voto se disponibile
                     val rating = movie.voteAverage
                     if (rating != null && rating > 0.0) {
-                        Text(
-                            text = "⭐ ${"%.1f".format(rating)}",
-                            color = Color.White.copy(alpha = 0.85f),
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
+                                contentDescription = null,
+                                tint = com.cinetrack.ui.theme.NeonPink,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "%.1f".format(rating),
+                                color = Color.White.copy(alpha = 0.85f),
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                        }
                     }
                 }
             }

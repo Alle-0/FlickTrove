@@ -20,8 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.util.ImageQuality
@@ -83,23 +86,24 @@ fun HeroSpotlightCarousel(
                         modifier = Modifier.fillMaxSize()
                     )
 
-                        val bgColor = MaterialTheme.colorScheme.background
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Black.copy(alpha = 0.4f),
-                                            bgColor.copy(alpha = 0.95f),
-                                            bgColor
-                                        ),
-                                        startY = 0f,
-                                        endY = 1400f
-                                    )
+                    val bgColor = MaterialTheme.colorScheme.background
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.2f),
+                                        bgColor.copy(alpha = 0.8f),
+                                        bgColor
+                                    ),
+                                    startY = 0f,
+                                    endY = 1400f
                                 )
-                        )
+                            )
+                    )
 
                     // Titolo e anno
                     Column(
@@ -109,15 +113,23 @@ fun HeroSpotlightCarousel(
                             .padding(horizontal = 24.dp, vertical = 32.dp)
                     ) {
                         // Label categoria
-                        Text(
-                            text = "★ IN EVIDENZA",
-                            color = PrimaryTeal,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.5.sp
-                            ),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_star),
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.home_hero_featured),
+                                color = PrimaryTeal,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.5.sp
+                                )
+                            )
+                        }
 
                         // Titolo
                         Text(
