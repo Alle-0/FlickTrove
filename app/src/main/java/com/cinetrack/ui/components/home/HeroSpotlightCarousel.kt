@@ -162,37 +162,59 @@ fun HeroSpotlightCarousel(
         }
 
         // Pallini indicatori (Symbiont / Worm effect)
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.Center
         ) {
-            val scrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction)
-                .coerceIn(0f, (movies.size - 1).toFloat())
+            val pageCount = movies.size
+            val dotSize = 6.dp
+            val spacing = 8.dp
+            
+            val distance = dotSize + spacing
+            val canvasWidth = dotSize + (distance * (pageCount - 1).coerceAtLeast(0))
+            
+            Canvas(
+                modifier = Modifier
+                    .width(canvasWidth)
+                    .height(dotSize)
+            ) {
+                // Pallini inattivi (base)
+                for (i in 0 until pageCount) {
+                    val cx = (i * distance.toPx()) + (dotSize.toPx() / 2f)
+                    val cy = dotSize.toPx() / 2f
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.35f),
+                        radius = dotSize.toPx() / 2f,
+                        center = Offset(cx, cy)
+                    )
+                }
 
-            repeat(movies.size) { index ->
-                val distance = Math.abs(scrollPosition - index).coerceIn(0f, 1f)
-                
-                // Da 6dp (distante) a 20dp (centrato) proporzionale allo scroll
-                val width = 6.dp + (20.dp - 6.dp) * (1f - distance)
-                
-                // Interpolazione colore fluida legata al dito dell'utente
-                val color = androidx.compose.ui.graphics.lerp(
-                    start = Color.White.copy(alpha = 0.35f),
-                    stop = PrimaryTeal,
-                    fraction = 1f - distance
-                )
-                
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .height(6.dp)
-                        .width(width)
-                        .clip(CircleShape)
-                        .background(color)
-                )
+                // Symbiont (worm animato)
+                if (pageCount > 0) {
+                    val scrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction)
+                        .coerceIn(0f, (pageCount - 1).toFloat())
+                    
+                    val floor = scrollPosition.toInt()
+                    val fraction = scrollPosition - floor
+                    
+                    // Logica "worm": 
+                    // 1° metà dello slide: il lato destro si allunga al pallino successivo
+                    // 2° metà dello slide: il lato sinistro lo raggiunge
+                    val leftNode = floor + Math.max(0f, (fraction - 0.5f) * 2f)
+                    val rightNode = floor + Math.min(1f, fraction * 2f)
+                    
+                    val leftX = leftNode * distance.toPx()
+                    val rightX = (rightNode * distance.toPx()) + dotSize.toPx()
+                    
+                    drawRoundRect(
+                        color = PrimaryTeal,
+                        topLeft = Offset(leftX, 0f),
+                        size = Size(rightX - leftX, dotSize.toPx()),
+                        cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
+                    )
+                }
             }
         }
     }
