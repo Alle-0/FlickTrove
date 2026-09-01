@@ -1112,5 +1112,14 @@
     <string name="settings_advanced_prompt_watch_date_desc">Ao marcar um filme como visto na tela de detalhes, perguntar a data que foi assistido</string>
     <string name="account_personalize_dashboard">Personalizar painel</string>
     <string name="settings_personalize_dashboard_desc">Escolha quais seções exibir na tela Conta</string>
+    <!-- Home Feed Sections -->
+    <string name="home_section_popular">Populares</string>
+    <string name="home_section_now_streaming">Agora no streaming</string>
+    <string name="home_section_now_in_theaters">Agora nos cinemas</string>
+    <string name="home_section_upcoming">Em breve</string>
+    <string name="home_section_recommended">Recomendado para você</string>
+    <string name="home_section_magazine">Notícias da Revista</string>
+    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_see_all">Ver tudo</string>
 </resources>
 

@@ -1114,4 +1114,13 @@
     <string name="settings_advanced_prompt_watch_date_desc">При отметке фильма как просмотренного на экране деталей запрашивать дату просмотра</string>
     <string name="account_personalize_dashboard">Персонализировать панель</string>
     <string name="settings_personalize_dashboard_desc">Выберите, какие разделы отображать на экране Аккаунт</string>
+    <!-- Home Feed Sections -->
+    <string name="home_section_popular">Популярное</string>
+    <string name="home_section_now_streaming">Сейчас в стриминге</string>
+    <string name="home_section_now_in_theaters">Сейчас в кино</string>
+    <string name="home_section_upcoming">Скоро</string>
+    <string name="home_section_recommended">Рекомендовано для вас</string>
+    <string name="home_section_magazine">Новости журнала</string>
+    <string name="home_section_top_10">Топ 10 FlickTrove</string>
+    <string name="home_section_see_all">Смотреть все</string>
 </resources>

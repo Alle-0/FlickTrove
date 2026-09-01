@@ -4,6 +4,8 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -11,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Modifier
@@ -21,6 +25,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -38,6 +43,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import coil.compose.AsyncImage
@@ -52,6 +58,8 @@ import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.components.shared.MovieCardSkeleton
+import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.HomeViewModel
 import com.cinetrack.util.ImageQuality
@@ -118,7 +126,8 @@ fun HomeFeedScreenContent(
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, Rect?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {}
-) {    
+) {
+    val tabNavigator = LocalTabNavigator.current    
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     
@@ -143,8 +152,11 @@ fun HomeFeedScreenContent(
     val recommendedList = if (isTv) uiState.recommendedTv else uiState.recommendedMovies
     val nowPlayingList = if (isTv) uiState.nowStreamingTv else uiState.nowPlayingMovies
     val top10List = if (isTv) uiState.top10Tv else uiState.top10Movies
+    val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
+    val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(movieActions) {
+        { m, offset, pos -> movieActions.openActionsPopup(m, offset, pos) }
+    }
 
-    val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
     
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -155,16 +167,43 @@ fun HomeFeedScreenContent(
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(
-                    bottom = paddingValues.calculateBottomPadding() + 24.dp,
+                    bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
                     top = topPadding + stickyHeaderHeight + 12.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(32.dp),
+                verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
+                if (uiState.isLoading) {
+                    items(3) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 16.dp, end = 16.dp)
+                                    .width(140.dp)
+                                    .height(28.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF1A1A2E))
+                                    .shimmerEffect()
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                userScrollEnabled = false
+                            ) {
+                                items(4) {
+                                    MovieCardSkeleton(width = 120.dp)
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 // 1. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = "Popolari", onClick = { navigator.push(DiscoverTab) })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { tabNavigator.current = DiscoverTab })
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -178,12 +217,13 @@ fun HomeFeedScreenContent(
                                         isFavorite = movie.favorite,
                                         isWatched = movie.watched,
                                         hazeState = activeHazeState,
-                                        onPress = onMovieClick
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress
                                     )
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { navigator.push(DiscoverTab) })
+                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
                             }
                         }
                     }
@@ -192,7 +232,8 @@ fun HomeFeedScreenContent(
                 // 2. NOW IN THEATERS / NOW STREAMING (2:3 Posters)
                 if (nowPlayingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = if (isTv) "Adesso in streaming" else "Adesso al cinema", onClick = { navigator.push(DiscoverTab) })
+                        HomeSectionTitle(title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters), onClick = { tabNavigator.current = DiscoverTab })
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -206,12 +247,13 @@ fun HomeFeedScreenContent(
                                         isFavorite = movie.favorite,
                                         isWatched = movie.watched,
                                         hazeState = activeHazeState,
-                                        onPress = onMovieClick
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress
                                     )
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { navigator.push(DiscoverTab) })
+                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
                             }
                         }
                     }
@@ -220,7 +262,8 @@ fun HomeFeedScreenContent(
                 // 3. IN USCITA (2:3 Posters)
                 if (upcomingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = "In uscita", onClick = { navigator.push(DiscoverTab) })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_upcoming), onClick = { tabNavigator.current = DiscoverTab })
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -234,12 +277,13 @@ fun HomeFeedScreenContent(
                                         isFavorite = movie.favorite,
                                         isWatched = movie.watched,
                                         hazeState = activeHazeState,
-                                        onPress = onMovieClick
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress
                                     )
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { navigator.push(DiscoverTab) })
+                                ShowMoreCard(onClick = { tabNavigator.current = DiscoverTab })
                             }
                         }
                     }
@@ -248,7 +292,8 @@ fun HomeFeedScreenContent(
                 // 4. CONSIGLIATI PER TE (2:3 Posters)
                 if (recommendedList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = "Consigliati per te", onClick = { navigator.push(RecommendationsTab) })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_recommended), onClick = { tabNavigator.current = RecommendationsTab })
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -262,12 +307,13 @@ fun HomeFeedScreenContent(
                                         isFavorite = movie.favorite,
                                         isWatched = movie.watched,
                                         hazeState = activeHazeState,
-                                        onPress = onMovieClick
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress
                                     )
                                 }
                             }
                             item {
-                                ShowMoreCard(onClick = { navigator.push(RecommendationsTab) })
+                                ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
                             }
                         }
                     }
@@ -276,7 +322,8 @@ fun HomeFeedScreenContent(
                 // 5. MAGAZINE NEWS
                 if (uiState.magazineNews.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = "Magazine News", onClick = { navigator.push(NewsTab) })
+                        HomeSectionTitle(title = stringResource(R.string.home_section_magazine), onClick = { tabNavigator.current = NewsTab })
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -286,7 +333,7 @@ fun HomeFeedScreenContent(
                                 NewsArticleCard(article = article, context = context)
                             }
                             item {
-                                ShowMoreCard(onClick = { navigator.push(NewsTab) })
+                                ShowMoreCard(onClick = { tabNavigator.current = NewsTab }, height = 140.dp)
                             }
                         }
                     }
@@ -295,7 +342,8 @@ fun HomeFeedScreenContent(
                 // 6. TOP 10 FLICKTROVE
                 if (top10List.isNotEmpty()) {
                     item {
-                        HomeSectionTitle("Top 10 FlickTrove")
+                        HomeSectionTitle(stringResource(R.string.home_section_top_10))
+                        Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -306,7 +354,8 @@ fun HomeFeedScreenContent(
                                     movie = movie,
                                     rank = index + 1,
                                     hazeState = activeHazeState,
-                                    onPress = onMovieClick
+                                    onPress = onMovieClick,
+                                    onLongPress = stableOnLongPress
                                 )
                             }
                         }
@@ -406,42 +455,40 @@ fun HomeSectionTitle(title: String, onClick: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
-            .let { 
-                if (onClick != null) {
-                    it.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = onClick
-                    ) 
-                } else it 
-            },
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        if (onClick != null) {
-            Icon(
-                imageVector = androidx.compose.material.icons.filled.ArrowForward,
-                contentDescription = "Vedi tutto",
-                tint = Color.White.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.let {
+                if (onClick != null) it.bounceClick { onClick() } else it
+            }
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
+            if (onClick != null) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_right),
+                    contentDescription = stringResource(R.string.home_section_see_all),
+                    tint = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ShowMoreCard(onClick: () -> Unit) {
+fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 180.dp) {
     Box(
         modifier = Modifier
             .width(120.dp)
-            .height(180.dp) // height of MovieCard (typically poster ratio 120 width -> 180 height)
+            .height(height)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White.copy(alpha = 0.1f))
             .bounceClick { onClick() },
@@ -449,7 +496,7 @@ fun ShowMoreCard(onClick: () -> Unit) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                imageVector = androidx.compose.material.icons.filled.ArrowForward,
+                imageVector = ImageVector.vectorResource(R.drawable.ic_right),
                 contentDescription = "Mostra altro",
                 tint = Color.White
             )
@@ -508,82 +555,168 @@ fun BackdropMovieCard(movie: Movie, onPress: (Movie) -> Unit) {
 
 @Composable
 fun NewsArticleCard(article: NewsItem, context: android.content.Context) {
+    // Estrai la fonte dall'URL (es. "screenrant.com" -> "ScreenRant")
+    val source = remember(article.link) {
+        runCatching {
+            android.net.Uri.parse(article.link).host
+                ?.removePrefix("www.")
+                ?.split(".")
+                ?.firstOrNull()
+                ?.replaceFirstChar { it.uppercase() }
+                ?: ""
+        }.getOrDefault("")
+    }
+
     Box(
         modifier = Modifier
-            .width(280.dp)
+            .width(220.dp)
             .height(140.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.DarkGray)
             .bounceClick {
                 val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(article.link))
                 context.startActivity(intent)
             }
+            .clip(RoundedCornerShape(16.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
     ) {
-        article.imageUrl?.let {
+        // Immagine di sfondo
+        if (article.imageUrl != null) {
             AsyncImage(
-                model = it,
+                model = article.imageUrl,
                 contentDescription = article.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().alpha(0.5f)
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
+            )
+        } else {
+            androidx.compose.foundation.layout.Spacer(
+                modifier = Modifier.fillMaxSize().background(Color.DarkGray)
             )
         }
+
+        // Gradient in basso
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.65f)
+                .align(Alignment.BottomStart)
+                .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                .background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.92f))
+                    )
+                )
+        )
+
+        // Testo in basso
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Bottom
+                .align(Alignment.BottomStart)
+                .padding(start = 10.dp, end = 10.dp, bottom = 8.dp)
         ) {
+            if (source.isNotBlank()) {
+                Text(
+                    text = source,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
+                )
+            }
             Text(
                 text = article.title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 16.sp
+                ),
                 color = Color.White,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = article.pubDate.take(16), // simple format
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.6f)
+        }
+
+        // Badge "External link" in alto a destra
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(6.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                .padding(horizontal = 6.dp, vertical = 3.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Link esterno",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(10.dp)
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun Top10MovieCard(movie: Movie, rank: Int, hazeState: HazeState, onPress: (Movie) -> Unit, onLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = { _, _, _ -> }) {
+    val accentColor = MaterialTheme.colorScheme.primary
+
+    Box(
+        modifier = Modifier
+            .width(156.dp)
+            .height(210.dp)
+    ) {
+        // Large outlined rank number — stroke only, accent color, bleeds off left/bottom edge
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .size(width = 100.dp, height = 110.dp)
+                .offset(x = (-8).dp, y = 22.dp)
+        ) {
+            val paint = android.graphics.Paint().apply {
+                isAntiAlias = true
+                textSize = 148.sp.toPx()
+                typeface = android.graphics.Typeface.create(
+                    android.graphics.Typeface.DEFAULT_BOLD,
+                    android.graphics.Typeface.BOLD
+                )
+                style = android.graphics.Paint.Style.STROKE
+                strokeWidth = 3.5f
+                color = android.graphics.Color.argb(
+                    (accentColor.alpha * 200).toInt().coerceIn(0, 255),
+                    (accentColor.red * 255).toInt().coerceIn(0, 255),
+                    (accentColor.green * 255).toInt().coerceIn(0, 255),
+                    (accentColor.blue * 255).toInt().coerceIn(0, 255)
+                )
+            }
+            drawContext.canvas.nativeCanvas.drawText(
+                rank.toString(),
+                0f,
+                size.height * 0.85f,
+                paint
+            )
+        }
+
+        // Poster card shifted right to reveal number on the left
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(start = 30.dp)
+                .width(126.dp)
+        ) {
+            MovieCard(
+                movie = movie,
+                cardWidth = 126.dp,
+                isFavorite = movie.favorite,
+                isWatched = movie.watched,
+                hazeState = hazeState,
+                onPress = onPress,
+                onLongPress = onLongPress
             )
         }
     }
 }
 
-@Composable
-fun Top10MovieCard(movie: Movie, rank: Int, hazeState: HazeState, onPress: (Movie) -> Unit) {
-    Box(
-        modifier = Modifier
-            .width(140.dp)
-            .height(180.dp)
-    ) {
-        // Number behind/left of poster
-        Text(
-            text = rank.toString(),
-            fontSize = 120.sp,
-            fontWeight = FontWeight.Black,
-            color = Color.White.copy(alpha = 0.2f),
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = (-20).dp, y = 20.dp)
-        )
-        
-        // Poster
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(start = 24.dp)
-                .width(116.dp)
-        ) {
-            MovieCard(
-                movie = movie,
-                cardWidth = 116.dp,
-                isFavorite = movie.favorite,
-                isWatched = movie.watched,
-                hazeState = hazeState,
-                onPress = onPress
-            )
-        }
-    }
-}

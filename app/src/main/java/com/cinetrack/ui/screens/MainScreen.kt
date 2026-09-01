@@ -44,7 +44,7 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.CurrentTab
+import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.cinetrack.R
 import com.cinetrack.ui.FilterModalConfig
@@ -154,6 +154,16 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
+            var previousTab by remember { mutableStateOf<Tab>(initialTab) }
+            var _lastTab by remember { mutableStateOf<Tab>(initialTab) }
+
+            LaunchedEffect(currentTab) {
+                // previousTab = il tab in cui eravamo PRIMA di questo cambio
+                if (currentTab != _lastTab) {
+                    previousTab = _lastTab
+                    _lastTab = currentTab
+                }
+            }
 
             MainDeepLinkHandler(
                 deepLinkIntent = deepLinkIntent,
@@ -168,6 +178,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     tabNavigator.current = FoldersTab
                 } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) {
                     tabNavigator.current = AccountTab
+                } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is SettingsTab) {
+                    tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab
                 } else {
                     showExitConfirmation = true
                 }
@@ -295,7 +307,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     isDimmed = isSettingsDialogOpen,
                                     onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                     onMenuClick = null, // Menu rimosso
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is NewsTab) { { tabNavigator.current = AccountTab } } else null,
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,

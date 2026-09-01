@@ -148,129 +148,19 @@ object SettingsTab : Tab {
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
         val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
-        val pendingReveal by settingsViewModel.pendingReveal.collectAsStateWithLifecycle()
-        
-        val graphicsLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
-        var capturedImage by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
-        var isScreenshotReady by remember { mutableStateOf(false) }
-        val animatedRadius = remember { androidx.compose.animation.core.Animatable(0f) }
-        
-        val currentBackgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
-        var oldBackgroundColor by remember { mutableStateOf(androidx.compose.ui.graphics.Color.Black) }
-
-        LaunchedEffect(pendingReveal) {
-            if (pendingReveal != null) {
-                val (colorName, origin) = pendingReveal!!
-                
-                // Save the old background color before applying the new theme
-                oldBackgroundColor = currentBackgroundColor
-                
-                // 1. Capture the image NOW, before we change the theme or structure
-                try {
-                    capturedImage = graphicsLayer.toImageBitmap()
-                } catch (e: Exception) {
-                    // Ignore
-                }
-                
-                // 2. Reset the radius immediately BEFORE we show the top layer
-                animatedRadius.snapTo(0f)
-                
-                // 3. Enable screenshot drawing and clipping
-                isScreenshotReady = true
-                
-                // 4. Apply the new theme
-                settingsViewModel.applyPendingTheme()
-                
-                // 5. Wait a moment to hide the heavy theme recomposition lag
-                kotlinx.coroutines.delay(50)
-                
-                // 6. Animate the circle
-                // We calculate max radius safely here using arbitrary large value 
-                // (2500dp converted to px is approx 7500 on xxhdpi, 10000 is safer)
-                animatedRadius.animateTo(
-                    targetValue = 10000f,
-                    animationSpec = androidx.compose.animation.core.tween(
-                        durationMillis = 900, 
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
-                    )
-                )
-                
-                // 7. Cleanup
-                val finalColor = pendingReveal!!.first
-                capturedImage = null
-                isScreenshotReady = false
-                settingsViewModel.clearPendingReveal()
-                
-                // 8. Update Icon AFTER animation and cleanup
-                settingsViewModel.applyPendingIcon(finalColor)
+        SettingsScreenContent(
+            viewModel = viewModel,
+            settingsViewModel = settingsViewModel,
+            paddingValues = paddingValues,
+            hazeState = hazeState,
+            scrollState = scrollState,
+            onLoggedOut = {
+                navigator.replaceAll(com.cinetrack.ui.screens.LoginScreen())
+            },
+            onLoginClick = {
+                navigator.push(com.cinetrack.ui.screens.LoginScreen())
             }
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Bottom Layer: Old UI Screenshot
-            if (isScreenshotReady && capturedImage != null) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(oldBackgroundColor)
-                ) {
-                    androidx.compose.foundation.Image(
-                        bitmap = capturedImage!!,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                }
-            }
-
-            // Top Layer: The actual UI (records when not animating, clips when animating)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawWithContent {
-                        if (!isScreenshotReady) {
-                            graphicsLayer.record { this@drawWithContent.drawContent() }
-                        }
-                        drawContent()
-                    }
-                    .graphicsLayer {
-                        if (isScreenshotReady && pendingReveal != null) {
-                            val origin = pendingReveal!!.second
-                            clip = true
-                            shape = object : androidx.compose.ui.graphics.Shape {
-                                override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
-                                    val p = androidx.compose.ui.graphics.Path().apply {
-                                        addOval(androidx.compose.ui.geometry.Rect(
-                                            origin.x - animatedRadius.value, 
-                                            origin.y - animatedRadius.value, 
-                                            origin.x + animatedRadius.value, 
-                                            origin.y + animatedRadius.value
-                                        ))
-                                    }
-                                    return androidx.compose.ui.graphics.Outline.Generic(p)
-                                }
-                            }
-                        }
-                    }
-                    .then(
-                        if (isScreenshotReady) Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-                        else Modifier
-                    )
-            ) {
-                SettingsScreenContent(
-                    viewModel = viewModel,
-                    settingsViewModel = settingsViewModel,
-                    paddingValues = paddingValues,
-                    hazeState = hazeState,
-                    scrollState = scrollState,
-                    onLoggedOut = {
-                        navigator.replaceAll(com.cinetrack.ui.screens.LoginScreen())
-                    },
-                    onLoginClick = {
-                        navigator.push(com.cinetrack.ui.screens.LoginScreen())
-                    }
-                )
-            }
-        }
+        )
     }
 }
 
@@ -363,18 +253,104 @@ fun SettingsOverlayScreen(
             val internalHazeState = remember { dev.chrisbanes.haze.HazeState() }
             val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
             
-            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                SettingsScreenContent(
-                    viewModel = viewModel,
-                    settingsViewModel = settingsViewModel,
-                    paddingValues = paddingValues,
-                    hazeState = internalHazeState,
-                    scrollState = scrollState,
-                    onLoggedOut = onLoggedOut,
-                    onLoginClick = onLoginClick
-                )
-                
-                val isAnyDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
+            val pendingReveal by settingsViewModel.pendingReveal.collectAsStateWithLifecycle()
+            
+            val themeGraphicsLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
+            var capturedImage by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+            var isScreenshotReady by remember { mutableStateOf(false) }
+            val themeAnimatedRadius = remember { androidx.compose.animation.core.Animatable(0f) }
+            
+            val currentBackgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+            var oldBackgroundColor by remember { mutableStateOf(androidx.compose.ui.graphics.Color.Black) }
+    
+            LaunchedEffect(pendingReveal) {
+                if (pendingReveal != null) {
+                    val (colorName, origin) = pendingReveal!!
+                    oldBackgroundColor = currentBackgroundColor
+                    try {
+                        capturedImage = themeGraphicsLayer.toImageBitmap()
+                    } catch (e: Exception) { }
+                    
+                    themeAnimatedRadius.snapTo(0f)
+                    isScreenshotReady = true
+                    settingsViewModel.applyPendingTheme()
+                    kotlinx.coroutines.delay(150)
+                    
+                    themeAnimatedRadius.animateTo(
+                        targetValue = 10000f,
+                        animationSpec = androidx.compose.animation.core.tween(
+                            durationMillis = 900, 
+                            easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        )
+                    )
+                    
+                    capturedImage = null
+                    isScreenshotReady = false
+                    settingsViewModel.clearPendingReveal()
+                    settingsViewModel.applyPendingIcon(colorName)
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isScreenshotReady && capturedImage != null) {
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(oldBackgroundColor)
+                    ) {
+                        androidx.compose.foundation.Image(
+                            bitmap = capturedImage!!,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .drawWithContent {
+                            if (!isScreenshotReady) {
+                                themeGraphicsLayer.record { this@drawWithContent.drawContent() }
+                            }
+                            drawContent()
+                        }
+                        .graphicsLayer {
+                            if (isScreenshotReady && pendingReveal != null) {
+                                val origin = pendingReveal!!.second
+                                clip = true
+                                shape = object : androidx.compose.ui.graphics.Shape {
+                                    override fun createOutline(size: androidx.compose.ui.geometry.Size, layoutDirection: androidx.compose.ui.unit.LayoutDirection, density: androidx.compose.ui.unit.Density): androidx.compose.ui.graphics.Outline {
+                                        val p = androidx.compose.ui.graphics.Path().apply {
+                                            addOval(androidx.compose.ui.geometry.Rect(
+                                                origin.x - themeAnimatedRadius.value, 
+                                                origin.y - themeAnimatedRadius.value, 
+                                                origin.x + themeAnimatedRadius.value, 
+                                                origin.y + themeAnimatedRadius.value
+                                            ))
+                                        }
+                                        return androidx.compose.ui.graphics.Outline.Generic(p)
+                                    }
+                                }
+                            }
+                        }
+                        .then(
+                            if (isScreenshotReady) Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                            else Modifier
+                        )
+                ) {
+                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                        SettingsScreenContent(
+                            viewModel = viewModel,
+                            settingsViewModel = settingsViewModel,
+                            paddingValues = paddingValues,
+                            hazeState = internalHazeState,
+                            scrollState = scrollState,
+                            onLoggedOut = onLoggedOut,
+                            onLoginClick = onLoginClick
+                        )
+                        
+                        val isAnyDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
                 Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(10f)) {
                     com.cinetrack.ui.components.navigation.GlassyTopBar(
                         hazeState = internalHazeState,
@@ -385,6 +361,8 @@ fun SettingsOverlayScreen(
                     )
                 }
             }
+        }
+        }
         }
     }
 }
@@ -968,8 +946,9 @@ fun SettingsScreenContent(
             current = accentColorName,
             onDismiss = { showColorDialog = false },
             onSelect = { colorName, origin ->
+                showColorDialog = false
                 scope.launch {
-                    kotlinx.coroutines.delay(350)
+                    kotlinx.coroutines.delay(250) // Attende la chiusura del modal prima di avviare il reveal
                     settingsViewModel.updateAccentColor(colorName, origin)
                 }
             }

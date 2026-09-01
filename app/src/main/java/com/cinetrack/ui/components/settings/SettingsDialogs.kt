@@ -983,7 +983,7 @@ fun ColorSelectionDialog(
                                 )
                             },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
+                            containerColor = previewAccentColor,
                             contentColor = Color.Black
                         )
                     ) {

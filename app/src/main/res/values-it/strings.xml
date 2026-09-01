@@ -1110,4 +1110,13 @@
     <string name="settings_advanced_prompt_watch_date_desc">Quando segni un film come visto dalla schermata dettagli, chiedi la data di visione</string>
     <string name="account_personalize_dashboard">Personalizza Dashboard</string>
     <string name="settings_personalize_dashboard_desc">Scegli quali sezioni mostrare nella schermata Account</string>
+    <!-- Home Feed Sections -->
+    <string name="home_section_popular">Popolari</string>
+    <string name="home_section_now_streaming">Adesso in streaming</string>
+    <string name="home_section_now_in_theaters">Adesso al cinema</string>
+    <string name="home_section_upcoming">In uscita</string>
+    <string name="home_section_recommended">Consigliati per te</string>
+    <string name="home_section_magazine">Magazine News</string>
+    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_see_all">Vedi tutto</string>
 </resources>

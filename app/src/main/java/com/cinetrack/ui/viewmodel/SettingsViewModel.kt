@@ -338,15 +338,20 @@ class SettingsViewModel @Inject constructor(
 
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
-            if (revealOrigin != null) {
+            if (revealOrigin != null && revealOrigin != Offset.Zero) {
                 // Publish the pending reveal BEFORE persisting so the overlay
                 // can capture the screenshot of the old theme.
                 _pendingReveal.value = Pair(color, revealOrigin)
             } else {
                 settingsRepository.updateAccentColor(color)
                 IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
-                movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
+                // Remote sync in background
+                launch {
+                    try {
+                        movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+                    } catch (_: Exception) { }
+                }
             }
         }
     }
@@ -355,8 +360,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _pendingReveal.value?.let { (color, _) ->
                 settingsRepository.updateAccentColor(color)
-                movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
+                // Remote sync in background
+                launch {
+                    try {
+                        movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+                    } catch (_: Exception) { }
+                }
             }
         }
     }

@@ -48,6 +48,13 @@ fun ColorWheel(
     var currentSat by remember { mutableStateOf(initialHsv?.get(1) ?: 1f) }
     var isUserInteracting by remember { mutableStateOf(false) }
 
+    LaunchedEffect(initialHsv) {
+        if (!isUserInteracting && initialHsv != null) {
+            currentHue = initialHsv[0]
+            currentSat = initialHsv[1]
+        }
+    }
+
     // Use Animatable for the selector's fractional position (-1..1, -1..1)
     // This ensures smooth straight-line movement (passing through center)
     val selectorPos = remember { 

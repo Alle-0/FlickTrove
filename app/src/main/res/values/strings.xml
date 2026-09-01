@@ -1119,4 +1119,13 @@
     <string name="watch_date_prompt_custom">Custom date</string>
     <string name="settings_advanced_prompt_watch_date">Prompt for watch date on Detail Screen</string>
     <string name="settings_advanced_prompt_watch_date_desc">When marking a movie as seen from its detail screen, show a prompt to choose the exact watch date instead of defaulting to today.</string>
+    <!-- Home Feed Sections -->
+    <string name="home_section_popular">Popular</string>
+    <string name="home_section_now_streaming">Now Streaming</string>
+    <string name="home_section_now_in_theaters">Now in Theaters</string>
+    <string name="home_section_upcoming">Upcoming</string>
+    <string name="home_section_recommended">Recommended for you</string>
+    <string name="home_section_magazine">Magazine News</string>
+    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_see_all">See all</string>
 </resources>

@@ -1113,4 +1113,13 @@
     <string name="settings_advanced_prompt_watch_date_desc">Lors du marquage d\'un film comme vu depuis l\'écran des détails, demander la date de visionnage</string>
     <string name="account_personalize_dashboard">Personnaliser le tableau de bord</string>
     <string name="settings_personalize_dashboard_desc">Choisissez les sections à afficher sur l\'écran Compte</string>
+    <!-- Home Feed Sections -->
+    <string name="home_section_popular">Populaires</string>
+    <string name="home_section_now_streaming">En streaming</string>
+    <string name="home_section_now_in_theaters">Actuellement au cinéma</string>
+    <string name="home_section_upcoming">À venir</string>
+    <string name="home_section_recommended">Recommandé pour vous</string>
+    <string name="home_section_magazine">Actualités</string>
+    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_see_all">Voir tout</string>
 </resources>

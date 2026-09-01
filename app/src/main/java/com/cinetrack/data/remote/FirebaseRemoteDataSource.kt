@@ -444,14 +444,32 @@ class FirebaseRemoteDataSource @Inject constructor(
     }
 
     suspend fun fetchTop10Monthly(isTv: Boolean): List<String> {
-        val calendar = java.util.Calendar.getInstance()
-        val year = calendar.get(java.util.Calendar.YEAR)
-        val month = calendar.get(java.util.Calendar.MONTH) + 1
-        val monthId = "${year}_M${String.format(java.util.Locale.US, "%02d", month)}"
+        val now = java.util.Calendar.getInstance()
+        
+        // Mese corrente
+        val currYear = now.get(java.util.Calendar.YEAR)
+        val currMonth = now.get(java.util.Calendar.MONTH) + 1
+        val currMonthId = "${currYear}_M${String.format(java.util.Locale.US, "%02d", currMonth)}"
+        
+        // Mese precedente
+        var prevYear = currYear
+        var prevMonth = currMonth - 1
+        if (prevMonth == 0) {
+            prevMonth = 12
+            prevYear -= 1
+        }
+        val prevMonthId = "${prevYear}_M${String.format(java.util.Locale.US, "%02d", prevMonth)}"
         
         return try {
-            val snapshot = firestore.collection("trending_stats_monthly")
-                .document(monthId)
+            // Eseguiamo in sequenza veloce, Firebase cache e pipeline renderanno l'impatto minimo
+            val currSnap = firestore.collection("trending_stats_monthly")
+                .document(currMonthId)
+                .collection("movies")
+                .get()
+                .await()
+                
+            val prevSnap = firestore.collection("trending_stats_monthly")
+                .document(prevMonthId)
                 .collection("movies")
                 .get()
                 .await()
@@ -460,17 +478,27 @@ class FirebaseRemoteDataSource @Inject constructor(
             
             data class ScoredItem(val compositeId: String, val score: Long)
             
-            val items = snapshot.documents.mapNotNull { doc ->
-                if (!doc.id.startsWith(prefix)) return@mapNotNull null
-                
-                val views = doc.getLong("view_count") ?: 0L
-                val ratings = doc.getLong("rating_count") ?: 0L
-                val score = views + (ratings * 2)
-                
-                if (score > 0) ScoredItem(doc.id, score) else null
+            val mergedItems = mutableMapOf<String, Long>()
+            
+            val processDocs = { snap: com.google.firebase.firestore.QuerySnapshot ->
+                for (doc in snap.documents) {
+                    if (doc.id.startsWith(prefix)) {
+                        val views = doc.getLong("view_count") ?: 0L
+                        val ratings = doc.getLong("rating_count") ?: 0L
+                        val score = views + (ratings * 2)
+                        if (score > 0) {
+                            mergedItems[doc.id] = (mergedItems[doc.id] ?: 0L) + score
+                        }
+                    }
+                }
             }
             
-            items.sortedByDescending { it.score }
+            processDocs(prevSnap)
+            processDocs(currSnap)
+            
+            mergedItems.entries
+                 .map { ScoredItem(it.key, it.value) }
+                 .sortedByDescending { it.score }
                  .take(10)
                  .map { it.compositeId }
         } catch (e: Exception) {
