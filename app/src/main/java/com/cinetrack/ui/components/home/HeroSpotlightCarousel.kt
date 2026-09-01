@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.home
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -169,14 +171,24 @@ fun HeroSpotlightCarousel(
         ) {
             repeat(movies.size) { index ->
                 val isSelected = pagerState.currentPage == index
+                val width by animateDpAsState(
+                    targetValue = if (isSelected) 20.dp else 6.dp,
+                    animationSpec = tween(300),
+                    label = "indicatorWidth"
+                )
+                val color by animateColorAsState(
+                    targetValue = if (isSelected) PrimaryTeal else Color.White.copy(alpha = 0.35f),
+                    animationSpec = tween(300),
+                    label = "indicatorColor"
+                )
+                
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
-                        .size(if (isSelected) 8.dp else 6.dp)
+                        .height(6.dp)
+                        .width(width)
                         .clip(CircleShape)
-                        .background(
-                            if (isSelected) PrimaryTeal else Color.White.copy(alpha = 0.35f)
-                        )
+                        .background(color)
                 )
             }
         }

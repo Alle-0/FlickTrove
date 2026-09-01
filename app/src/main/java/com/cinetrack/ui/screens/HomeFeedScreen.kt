@@ -176,7 +176,7 @@ fun HomeFeedScreenContent(
             LazyColumn(
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
-                    top = 110.dp
+                    top = 150.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
