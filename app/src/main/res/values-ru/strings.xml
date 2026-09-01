@@ -3,6 +3,8 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">Добавить</string>
     <string name="hero_details">Подробнее</string>
+    <string name="home_section_trove_pick">Жемчужина Trove</string>
+    <string name="home_trove_pick_badge">ВЫБРАНО ДЛЯ ВАС</string>
     <string name="shortcut_search_short">Поиск</string>
     <string name="shortcut_search_long">Поиск названия</string>
     <string name="shortcut_visti_short">Ваш список</string>

@@ -3,6 +3,8 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">Aggiungi</string>
     <string name="hero_details">Dettagli</string>
+    <string name="home_section_trove_pick">Il Gioiello del Trove</string>
+    <string name="home_trove_pick_badge">SCELTO PER TE</string>
     <string name="shortcut_search_short">Cerca</string>
     <string name="shortcut_search_long">Cerca Titolo</string>
     <string name="shortcut_visti_short">Visti</string>

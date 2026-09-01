@@ -58,6 +58,7 @@ import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.home.HeroSpotlightCarousel
+import com.cinetrack.ui.components.home.TrovePickCard
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
@@ -325,31 +326,41 @@ fun HomeFeedScreenContent(
                     }
                 }
 
-                // 4. CONSIGLIATI PER TE (2:3 Posters)
+                // 4. THE TROVE'S PICK + CONSIGLIATI (se disponibili)
                 if (recommendedList.isNotEmpty()) {
+                    val trovePick = recommendedList.first()
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_recommended), onClick = { tabNavigator.current = RecommendationsTab })
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(recommendedList.size) { index ->
-                                val movie = recommendedList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 120.dp,
-                                        isFavorite = movie.favorite,
-                                        isWatched = movie.watched,
-                                        hazeState = activeHazeState,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress
-                                    )
+                        TrovePickCard(
+                            movie = trovePick,
+                            onMovieClick = onMovieClick
+                        )
+                    }
+                    // Se ci sono altri consigliati, mostra una riga con il resto
+                    if (recommendedList.size > 1) {
+                        item {
+                            HomeSectionTitle(
+                                title = stringResource(R.string.home_section_recommended),
+                                onClick = { tabNavigator.current = RecommendationsTab }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(recommendedList.drop(1).size) { index ->
+                                    val movie = recommendedList.drop(1)[index]
+                                    Box(modifier = Modifier.width(120.dp)) {
+                                        MovieCard(
+                                            movie = movie,
+                                            cardWidth = 120.dp,
+                                            isFavorite = movie.favorite,
+                                            isWatched = movie.watched,
+                                            hazeState = activeHazeState,
+                                            onPress = onMovieClick,
+                                            onLongPress = stableOnLongPress
+                                        )
+                                    }
                                 }
-                            }
-                            item {
-                                ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
                             }
                         }
                     }
