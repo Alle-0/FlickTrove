@@ -51,7 +51,9 @@ fun HeroSpotlightCarousel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .height(500.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(24.dp))
         ) {
             HorizontalPager(
                 state = pagerState,
@@ -81,23 +83,23 @@ fun HeroSpotlightCarousel(
                         modifier = Modifier.fillMaxSize()
                     )
 
-                    // Gradient overlay - blend verso basso
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.Black.copy(alpha = 0.4f),
-                                        Color(0xFF0F0F1A).copy(alpha = 0.95f),
-                                        Color(0xFF0F0F1A)
-                                    ),
-                                    startY = 0f,
-                                    endY = 1400f
+                        val bgColor = MaterialTheme.colorScheme.background
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.4f),
+                                            bgColor.copy(alpha = 0.95f),
+                                            bgColor
+                                        ),
+                                        startY = 0f,
+                                        endY = 1400f
+                                    )
                                 )
-                            )
-                    )
+                        )
 
                     // Titolo e anno
                     Column(
