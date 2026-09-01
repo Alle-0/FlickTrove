@@ -497,12 +497,12 @@ fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 180.
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_right),
-                contentDescription = "Mostra altro",
+                contentDescription = stringResource(R.string.overview_show_more),
                 tint = Color.White
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Mostra altro",
+                text = stringResource(R.string.overview_show_more),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold

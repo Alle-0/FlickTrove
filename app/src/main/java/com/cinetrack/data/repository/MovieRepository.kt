@@ -1365,23 +1365,14 @@ class MovieRepository @Inject constructor(
 
     suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = getRegionFromPrefs()).results
 
-    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> {
-        val today = java.time.LocalDate.now()
-        return tmdbService.discoverMovies(
-            page = page,
-            options = mapOf(
-                "release_date.gte" to today.toString(),
-                "with_release_type" to "2|3",
-                "region" to getRegionFromPrefs(),
-                "sort_by" to "popularity.desc"
-            )
-        ).results
-    }
+    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> = tmdbService.getUpcomingMovies(page = page, region = getRegionFromPrefs()).results
 
     suspend fun getPopularTV(page: Int = 1): List<Movie> = tmdbService.getPopularTV(page = page).results
     suspend fun getAiringTodayTV(page: Int = 1): List<Movie> = tmdbService.getAiringTodayTV(page = page).results
 
-    suspend fun getOnTheAirTV(page: Int = 1): List<Movie> {
+    suspend fun getOnTheAirTV(page: Int = 1): List<Movie> = tmdbService.getOnTheAirTV(page = page).results
+
+    suspend fun getUpcomingTV(page: Int = 1): List<Movie> {
         val today = java.time.LocalDate.now()
         return tmdbService.discoverTV(
             page = page,

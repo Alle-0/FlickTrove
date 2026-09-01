@@ -8,12 +8,16 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
+import com.cinetrack.domain.CalculateMatchScoreUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import java.time.Instant
 import java.time.LocalDate
@@ -59,6 +63,7 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
+    private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase,
     private val getHomeUiStateUseCase: com.cinetrack.domain.GetHomeUiStateUseCase,
     private val repository: MovieRepository,
     private val newsRepository: NewsRepository,
@@ -86,37 +91,109 @@ class HomeViewModel @Inject constructor(
     private fun fetchFeed() {
         viewModelScope.launch {
             try {
-                val recMovies = repository.getTrendingMovies().take(10).toImmutableList()
-                val popMovies = repository.getPopularMovies(page = 2).take(10).toImmutableList()
-                val nowMovies = repository.getNowPlayingMovies().take(10).toImmutableList()
-                val topMovies = repository.getTop10FlickTrove(isTv = false).take(10).toImmutableList()
-                val upcMovies = repository.getUpcomingMovies().take(10).toImmutableList()
-                
-                val recTv = repository.getTrendingTV().take(10).toImmutableList()
-                val popTv = repository.getPopularTV(page = 2).take(10).toImmutableList()
-                val nowTv = repository.getOnTheAirTV().take(10).toImmutableList()
-                val topTv = repository.getTop10FlickTrove(isTv = true).take(10).toImmutableList()
-                val upcTv = repository.getTrendingTV(2).take(10).toImmutableList() // Use trending page 2 as a proxy for upcoming TV for now
-                
-                val news = newsRepository.getNews().take(5).toImmutableList()
+                // Carica i film salvati dall'utente per generare le raccomandazioni
+                val localMovies = repository.getLocalMoviesFlow().first()
+
+                // Genera raccomandazioni personalizzate usando l'algoritmo (identico a RecommendationsViewModel)
+                val recMovies = buildRecommendations(type = "movie", localMovies = localMovies)
+                val recTv = buildRecommendations(type = "tv", localMovies = localMovies)
+
+                // Carica tutte le altre sezioni in parallelo
+                val popMoviesDeferred = async { repository.getPopularMovies().take(10).toImmutableList() }
+                val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).toImmutableList() }
+                val topMoviesDeferred = async { repository.getTop10FlickTrove(isTv = false).take(10).toImmutableList() }
+                val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).toImmutableList() }
+                val popTvDeferred = async { repository.getPopularTV().take(10).toImmutableList() }
+                val nowTvDeferred = async { repository.getOnTheAirTV().take(10).toImmutableList() }
+                val topTvDeferred = async { repository.getTop10FlickTrove(isTv = true).take(10).toImmutableList() }
+                val upcTvDeferred = async { repository.getUpcomingTV().take(10).toImmutableList() }
+                val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
 
                 _feedState.value = FeedState(
                     recommendedMovies = recMovies,
-                    popularMovies = popMovies,
-                    nowPlayingMovies = nowMovies,
-                    top10Movies = topMovies,
-                    upcomingMovies = upcMovies,
+                    popularMovies = popMoviesDeferred.await(),
+                    nowPlayingMovies = nowMoviesDeferred.await(),
+                    top10Movies = topMoviesDeferred.await(),
+                    upcomingMovies = upcMoviesDeferred.await(),
                     recommendedTv = recTv,
-                    popularTv = popTv,
-                    nowStreamingTv = nowTv,
-                    top10Tv = topTv,
-                    upcomingTv = upcTv,
-                    magazineNews = news
+                    popularTv = popTvDeferred.await(),
+                    nowStreamingTv = nowTvDeferred.await(),
+                    top10Tv = topTvDeferred.await(),
+                    upcomingTv = upcTvDeferred.await(),
+                    magazineNews = newsDeferred.await()
                 )
             } catch (e: Exception) {
                 // handle error silently or emit message
             }
         }
+    }
+
+    /**
+     * Algoritmo di raccomandazione: usa i film/serie salvati dall'utente come seed,
+     * chiama l'API TMDB per titoli simili, e filtra con il CalculateMatchScore.
+     * Se l'utente non ha nessun film salvato, restituisce lista vuota (la sezione non viene mostrata).
+     */
+    private suspend fun buildRecommendations(type: String, localMovies: List<Movie>): ImmutableList<Movie> {
+        val matching = if (type == "movie") {
+            localMovies.filter { it.mediaType != "tv" }
+        } else {
+            localMovies.filter { it.mediaType == "tv" }
+        }
+        if (matching.isEmpty()) return persistentListOf()
+
+        // Seleziona i seed migliori (stessa logica di RecommendationsViewModel)
+        val goodCandidates = matching.filter { movie ->
+            (movie.personalRating ?: 0.0) >= 7.0 ||
+            (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
+        }
+        val pool = if (goodCandidates.size >= 3) goodCandidates else matching
+        val seeds = pool
+            .sortedWith(
+                compareByDescending<Movie> { it.personalRating ?: 0.0 }
+                    .thenByDescending { it.watchedAt ?: "" }
+                    .thenByDescending { it.voteAverage ?: 0.0 }
+            )
+            .take(20)
+            .shuffled()
+            .take(3)
+
+        // Chiama API in parallelo per i 3 seed
+        val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        val rawData = coroutineScope {
+            seeds.map { seed ->
+                async {
+                    runCatching {
+                        if (type == "movie") repository.getMovieRecommendations(seed.id)
+                        else repository.getTVRecommendations(seed.id)
+                    }.getOrDefault(emptyList())
+                }
+            }.awaitAll().flatten()
+        }
+
+        // Filtra i già salvati e applica il match score (soglia 65%)
+        var results = rawData
+            .distinctBy { it.id }
+            .filter { movie ->
+                val compositeId = "${type}_${movie.id}"
+                !localCompositeIds.contains(compositeId)
+            }
+            .map { it.copy(mediaType = type) }
+            .filter { movie ->
+                val score = calculateMatchScoreUseCase(movie, matching)
+                score == null || score >= 65
+            }
+
+        // Salvavita: se il filtro ha azzerato tutto, mostra i 10 migliori senza filtro
+        if (results.isEmpty() && rawData.isNotEmpty()) {
+            results = rawData
+                .distinctBy { it.id }
+                .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
+                .map { it.copy(mediaType = type) }
+                .sortedByDescending { calculateMatchScoreUseCase(it, matching) ?: 0 }
+                .take(10)
+        }
+
+        return results.shuffled().take(10).toImmutableList()
     }
 
     @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -142,7 +219,7 @@ class HomeViewModel @Inject constructor(
             top10Tv = feedState.top10Tv,
             upcomingTv = feedState.upcomingTv,
             magazineNews = feedState.magazineNews,
-            isLoading = baseState.isLoading || feedState.recommendedMovies.isEmpty()
+            isLoading = baseState.isLoading || feedState.popularMovies.isEmpty()
         )
     }.stateIn(
         scope = viewModelScope,
