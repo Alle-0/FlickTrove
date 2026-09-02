@@ -18,10 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.util.ColorUtils
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
@@ -40,6 +46,7 @@ fun TrovePickCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var extractedColor by remember { mutableStateOf<Color?>(null) }
     val backdropUrl = buildTmdbImageUrl(
         movie.backdropPath ?: movie.posterPath,
         ImageType.BACKDROP,
@@ -74,7 +81,7 @@ fun TrovePickCard(
         }
 
         // Extracted accent color or fallback to primary
-        val glowColor = movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
+        val glowColor = extractedColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
 
         // Card principale
         Box(
@@ -142,6 +149,19 @@ fun TrovePickCard(
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(posterUrl)
+                        .allowHardware(false)
+                        .listener(
+                            onSuccess = { _, result ->
+                                val bitmap = result.drawable.toBitmap()
+                                if (bitmap.width > 0 && bitmap.height > 0) {
+                                    val rawColor = ColorUtils.extractAverageColor(bitmap)
+                                    if (rawColor != Color.Unspecified) {
+                                        val ambientColor = ColorUtils.darkenForAmbient(rawColor)
+                                        extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                                    }
+                                }
+                            }
+                        )
                         .crossfade(true)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
