@@ -86,22 +86,32 @@ fun TrovePickCard(
         // Extracted accent color or fallback to primary
         val glowColor = extractedColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
 
-        // Card principale
+        // Card principale con glow custom
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .shadow(
-                    elevation = 40.dp,
-                    shape = RoundedCornerShape(20.dp),
-                    spotColor = glowColor.copy(alpha = 0.9f),
-                    ambientColor = glowColor.copy(alpha = 0.6f)
-                )
                 .height(260.dp)
-                .bounceClick { onMovieClick(movie) }
-                .clip(RoundedCornerShape(20.dp))
         ) {
-            // Backdrop come sfondo della card
+            // Glow layer (dietro la card)
+            if (glowColor != Color.Transparent) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(y = 8.dp)
+                        .blur(24.dp)
+                        .background(glowColor.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                )
+            }
+
+            // Card content layer
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .bounceClick { onMovieClick(movie) }
+                    .clip(RoundedCornerShape(20.dp))
+            ) {
+                // Backdrop come sfondo della card
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(backdropUrl)

@@ -469,45 +469,53 @@ fun MovieCard(
         label = "translateY"
     )
 
-    Card(
+    Box(
         modifier = Modifier
             .width(cardWidth)
             .height(cardHeight)
             .then(modifier)
-            .shadow(
-                elevation = 28.dp,
-                shape = RoundedCornerShape(28.dp),
-                spotColor = glowColor.copy(alpha = 0.75f),
-                ambientColor = glowColor.copy(alpha = 0.4f)
-            )
             .graphicsLayer {
                 alpha = cardAlpha
                 scaleX = cardScale
                 scaleY = cardScale
                 translationY = cardTranslateY * density.density
-                clip = false
             }
             .onGloballyPositioned { coordinates ->
                 cardPosition[0] = coordinates.positionInWindow()
                 cardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
-            .clip(RoundedCornerShape(28.dp))
-            .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-            .bounceClickWithOffset(
-                scaleDown = 0.93f, 
-                requireUnconsumed = false,
-                onLongClick = { offset ->
-                    movieActions.updatePopupCardSize(cardSize[0])
-                    onLongPress(movie.apply {
-                        this.favorite = isFavorite
-                        this.watched = isWatched
-                        this.reminder = isReminder
-                        if (personalRating != null) this.personalRating = personalRating
-                    }, offset, cardPosition[0])
-                }
-            ) { offset -> 
-                onPress(movie) 
-            },
+    ) {
+        // Glow layer (dietro la card)
+        if (glowColor != Color.Transparent) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(y = 10.dp)
+                    .blur(20.dp)
+                    .background(glowColor.copy(alpha = 0.5f), RoundedCornerShape(28.dp))
+            )
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(28.dp))
+                .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                .bounceClickWithOffset(
+                    scaleDown = 0.93f, 
+                    requireUnconsumed = false,
+                    onLongClick = { offset ->
+                        movieActions.updatePopupCardSize(cardSize[0])
+                        onLongPress(movie.apply {
+                            this.favorite = isFavorite
+                            this.watched = isWatched
+                            this.reminder = isReminder
+                            if (personalRating != null) this.personalRating = personalRating
+                        }, offset, cardPosition[0])
+                    }
+                ) { offset -> 
+                    onPress(movie) 
+                },
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
     ) {
@@ -793,6 +801,8 @@ fun MovieCard(
                             )
                         }
                     }
+                }
+            }
                 }
             }
         }
