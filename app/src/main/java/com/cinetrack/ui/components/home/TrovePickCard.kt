@@ -27,7 +27,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.util.ColorUtils
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
