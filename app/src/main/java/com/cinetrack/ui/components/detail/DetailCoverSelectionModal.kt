@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.utils.bounceClick
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
@@ -214,13 +215,14 @@ fun DetailCoverSelectionModal(
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White.copy(alpha = 0.15f)
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .bounceClick(onClick = onDismiss)
+                    .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
             }

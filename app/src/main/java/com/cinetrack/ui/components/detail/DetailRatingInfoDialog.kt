@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -24,6 +25,7 @@ import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
@@ -137,13 +139,13 @@ fun DetailRatingInfoDialog(
 
                     // Close Button (Fixed)
                     Spacer(modifier = Modifier.height(20.dp))
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White.copy(alpha = 0.15f)
-                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick(onClick = onDismiss)
+                            .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
                     }
