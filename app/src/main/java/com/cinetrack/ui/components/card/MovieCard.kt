@@ -806,6 +806,7 @@ fun MovieCard(
         }
     }
 }
+}
 
 @Composable
 fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null, isLarge: Boolean = false) {
