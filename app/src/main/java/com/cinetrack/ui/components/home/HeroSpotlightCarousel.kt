@@ -218,18 +218,18 @@ fun HeroSpotlightCarousel(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (year.isNotEmpty()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(androidx.compose.foundation.shape.CircleShape)
-                                            .background(Color.Black.copy(alpha = 0.5f))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = year,
-                                            color = Color.White,
-                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                                    Text(
+                                        text = year,
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            shadow = androidx.compose.ui.graphics.Shadow(
+                                                color = Color.Black.copy(alpha = 0.8f),
+                                                offset = androidx.compose.ui.geometry.Offset(1f, 1f),
+                                                blurRadius = 4f
+                                            )
                                         )
-                                    }
+                                    )
                                 }
                                 genres.forEach { genreName ->
                                     Box(
