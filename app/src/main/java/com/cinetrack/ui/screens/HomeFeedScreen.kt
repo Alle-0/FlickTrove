@@ -217,7 +217,7 @@ fun HomeFeedScreenContent(
     val watchlistList = remember(isTv, uiState.allLocalMovies) {
         val targetType = if (isTv) "tv" else "movie"
         uiState.allLocalMovies
-            .filter { it.reminder && !it.watched && it.mediaType == targetType && it.isReleased }
+            .filter { it.favorite && !it.watched && it.mediaType == targetType }
             .distinctBy { it.id }
             .sortedByDescending { it.createdAt }
     }
