@@ -125,15 +125,29 @@ fun TrovePickCard(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Overlay scuro (orizzontale)
+            // Overlay scuro (orizzontale - per leggibilità testo)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                glowColor.copy(alpha = 0.72f),
-                                glowColor.copy(alpha = 0.18f),
+                                Color.Black.copy(alpha = 0.85f),
+                                Color.Black.copy(alpha = 0.4f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+            // Overlay colorato (leggero tint)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                glowColor.copy(alpha = 0.35f),
+                                glowColor.copy(alpha = 0.15f),
                                 Color.Transparent
                             )
                         )
@@ -147,7 +161,20 @@ fun TrovePickCard(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                glowColor.copy(alpha = 0.45f)
+                                Color.Black.copy(alpha = 0.6f)
+                            )
+                        )
+                    )
+            )
+            // Overlay colorato (verticale in basso)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                glowColor.copy(alpha = 0.2f)
                             )
                         )
                     )
