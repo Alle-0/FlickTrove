@@ -63,6 +63,7 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
+import com.cinetrack.util.toComposeColorOrNull
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.GenericShape
 import dev.chrisbanes.haze.HazeState
@@ -429,6 +430,10 @@ fun MovieCard(
     val cardPosition = remember { arrayOf(Offset.Zero) }
     val cardSize = remember { arrayOf(Size.Zero) }
 
+    val glowColor = remember(movie.accentColor) {
+        movie.accentColor.toComposeColorOrNull() ?: Color.Transparent
+    }
+
     val rippleState = rememberCardRippleState()
 
     // Premium Staggered Entrance Animation States
@@ -469,6 +474,12 @@ fun MovieCard(
             .width(cardWidth)
             .height(cardHeight)
             .then(modifier)
+            .shadow(
+                elevation = 24.dp,
+                shape = RoundedCornerShape(28.dp),
+                spotColor = glowColor.copy(alpha = 0.6f),
+                ambientColor = glowColor.copy(alpha = 0.3f)
+            )
             .graphicsLayer {
                 alpha = cardAlpha
                 scaleX = cardScale
