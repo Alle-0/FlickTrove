@@ -93,6 +93,7 @@ fun TrovePickCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .height(260.dp)
+                .graphicsLayer { clip = false }
         ) {
             // Glow layer (dietro la card)
             if (glowColor != Color.Transparent) {
@@ -100,7 +101,7 @@ fun TrovePickCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .offset(y = 8.dp)
-                        .blur(24.dp)
+                        .blur(24.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
                         .background(glowColor.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
                 )
             }

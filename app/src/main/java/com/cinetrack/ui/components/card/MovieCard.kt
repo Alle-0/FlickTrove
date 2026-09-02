@@ -480,6 +480,7 @@ fun MovieCard(
                 scaleX = cardScale
                 scaleY = cardScale
                 translationY = cardTranslateY * density.density
+                clip = false
             }
             .onGloballyPositioned { coordinates ->
                 cardPosition[0] = coordinates.positionInWindow()
@@ -492,7 +493,7 @@ fun MovieCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .offset(y = 10.dp)
-                    .blur(20.dp)
+                    .blur(20.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
                     .background(glowColor.copy(alpha = 0.5f), RoundedCornerShape(28.dp))
             )
         }
