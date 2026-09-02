@@ -871,7 +871,7 @@ fun NewsArticleCard(article: NewsItem, context: android.content.Context) {
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_right),
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_external_link),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(10.dp)
