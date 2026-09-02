@@ -76,7 +76,7 @@ fun TrovePickCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .height(200.dp)
+                .height(260.dp)
                 .bounceClick { onMovieClick(movie) }
                 .clip(RoundedCornerShape(20.dp))
         ) {
@@ -136,7 +136,7 @@ fun TrovePickCard(
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .width(90.dp)
+                        .width(110.dp)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(12.dp))
                 )
@@ -162,8 +162,8 @@ fun TrovePickCard(
                         color = Color.White,
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Black,
-                            fontSize = 22.sp,
-                            lineHeight = 26.sp,
+                            fontSize = 26.sp,
+                            lineHeight = 30.sp,
                             shadow = androidx.compose.ui.graphics.Shadow(
                                 color = Color.Black,
                                 offset = androidx.compose.ui.geometry.Offset(2f, 2f),
