@@ -3,9 +3,6 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">जोड़ें</string>
     <string name="hero_details">विवरण</string>
-    <string name="home_hero_featured">मुख्य</string>
-    <string name="home_section_trove_pick">Trove की चुनिंदा फ़िल्म</string>
-    <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
     <string name="shortcut_search_short">खोजें</string>
     <string name="shortcut_search_long">शीर्षक खोजें</string>
     <string name="shortcut_visti_short">आपकी सूची</string>
@@ -214,8 +211,6 @@
     <string name="settings_enable_notifications_social_desc">जब कोई आपकी टिप्पणियों का उत्तर दे तो सूचना प्राप्त करें।</string>
     <string name="notification_reply_title">नया उत्तर</string>
     <string name="notification_reply_body">%1$s ने आपकी टिप्पणी का उत्तर दिया।</string>
-    <string name="notification_like_title">नई पसंद</string>
-    <string name="notification_like_body">%1$s ने आपकी टिप्पणी को पसंद किया।</string>
     <string name="settings_haptic_feedback">हैप्टिक फ़ीडबैक</string>
     <string name="settings_haptic_feedback_desc">इंटरफ़ेस क्रियाओं पर कंपन करता है</string>
     <string name="settings_images">छवियाँ</string>
@@ -1128,7 +1123,9 @@
     <string name="home_section_magazine">पत्रिका समाचार</string>
     <string name="home_section_top_10">टॉप 10 FlickTrove</string>
     <string name="home_section_see_all">सभी देखें</string>
-    <string name="home_section_watchlist">आपकी वॉचलिस्ट से</string>
-    <string name="home_section_watchlist_upcoming">आपकी वॉचलिस्ट से जल्द आ रहे हैं</string>
+    <string name="home_section_trove_pick">ट्रोव की पसंद</string>
+    <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
+    <string name="surprise_subtitle">आपकी वॉचलिस्ट से</string>
+    <string name="settings_default_start_feed">होम</string>
 </resources>
 

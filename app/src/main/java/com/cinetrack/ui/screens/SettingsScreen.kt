@@ -438,6 +438,7 @@ fun SettingsScreenContent(
     var reauthErrorMessage by remember { mutableStateOf<String?>(null) }
     var showColorDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showStartScreenDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
@@ -502,9 +503,9 @@ fun SettingsScreenContent(
     var showUnmatchedItemsModal by remember { mutableStateOf(false) }
     val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
 
-    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showFeedbackDialog || 
-                           showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
-                           showExternalMigrationDialog || showBadgesInfoDialog || isBackupLoading ||
+    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
+                           showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
+                           showExternalMigrationDialog || isBackupLoading ||
                            showDeepSyncConfirm || showUnmatchedItemsModal || showDashboardSettings
 
     BackHandler(enabled = anyDialogVisible) {
@@ -513,6 +514,7 @@ fun SettingsScreenContent(
         showReauthDialog = false
         showColorDialog = false
         showLanguageDialog = false
+        showStartScreenDialog = false
         showFeedbackDialog = false
         showBadgesInfoDialog = false
         showCacheConfirm = false
@@ -559,6 +561,7 @@ fun SettingsScreenContent(
             showReauthDialog = false
             showColorDialog = false
             showLanguageDialog = false
+            showStartScreenDialog = false
             showFeedbackDialog = false
             showBadgesInfoDialog = false
             showCacheConfirm = false
@@ -698,7 +701,8 @@ fun SettingsScreenContent(
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
                             onShowBadgesInfo = { showBadgesInfoDialog = true },
-                            onShowLanguageDialog = { showLanguageDialog = true }
+                            onShowLanguageDialog = { showLanguageDialog = true },
+                            onShowStartScreenDialog = { showStartScreenDialog = true }
                         )
                     }
 
@@ -806,6 +810,7 @@ fun SettingsScreenContent(
                                 showDeleteDialog = false
                                 showColorDialog = false
                                 showLanguageDialog = false
+                                showStartScreenDialog = false
                                 showFeedbackDialog = false
                                 showBadgesInfoDialog = false
                                 showCacheConfirm = false
@@ -973,6 +978,22 @@ fun SettingsScreenContent(
                     }
                 }
                 showLanguageDialog = false
+            }
+        )
+
+        val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
+        SettingsStartScreenSelectionDialog(
+            visible = showStartScreenDialog,
+            activeHazeState = activeHazeState,
+            current = defaultStartTab,
+            accentColor = currentAccentColor,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = { showStartScreenDialog = false },
+            onSelect = { value ->
+                if (defaultStartTab != value) {
+                    settingsViewModel.setDefaultStartTab(value)
+                }
+                showStartScreenDialog = false
             }
         )
 

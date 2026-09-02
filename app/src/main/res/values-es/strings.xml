@@ -3,9 +3,6 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">Agregar</string>
     <string name="hero_details">Detalles</string>
-    <string name="home_hero_featured">DESTACADO</string>
-    <string name="home_section_trove_pick">La Joya del Trove</string>
-    <string name="home_trove_pick_badge">ELEGIDO PARA TI</string>
     <string name="shortcut_search_short">Buscar</string>
     <string name="shortcut_search_long">Buscar título</string>
     <string name="shortcut_visti_short">Tu lista</string>
@@ -209,9 +206,7 @@
     <string name="settings_enable_notifications_social">Notificaciones Sociales</string>
     <string name="settings_enable_notifications_social_desc">Recibe una notificación cuando alguien responda a tus comentarios.</string>
     <string name="notification_reply_title">Nueva Respuesta</string>
-    <string name="notification_reply_body">%1$s ha respondido a tu comentario.</string>
-    <string name="notification_like_title">Nuevo Me gusta</string>
-    <string name="notification_like_body">A %1$s le gustó tu comentario.</string>
+    <string name="notification_reply_body">%1$s respondió a tu comentario.</string>
     <string name="settings_haptic_feedback">Respuesta háptica</string>
     <string name="settings_haptic_feedback_desc">Vibra en las acciones de la interfaz</string>
     <string name="settings_images">Imágenes</string>
@@ -1132,6 +1127,8 @@
     <string name="home_section_magazine">Noticias</string>
     <string name="home_section_top_10">Top 10 FlickTrove</string>
     <string name="home_section_see_all">Ver todo</string>
-    <string name="home_section_watchlist">De tu lista de seguimiento</string>
-    <string name="home_section_watchlist_upcoming">Próximamente de tu lista</string>
+    <string name="home_section_trove_pick">La Joya del Trove</string>
+    <string name="home_trove_pick_badge">ELEGIDO PARA TI</string>
+    <string name="surprise_subtitle">De tu watchlist</string>
+    <string name="settings_default_start_feed">HOME</string>
 </resources>

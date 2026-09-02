@@ -38,7 +38,8 @@ fun SettingsUILayoutSection(
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
     onShowBadgesInfo: () -> Unit,
-    onShowLanguageDialog: () -> Unit
+    onShowLanguageDialog: () -> Unit,
+    onShowStartScreenDialog: () -> Unit
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
@@ -273,43 +274,20 @@ fun SettingsUILayoutSection(
             icon = ImageVector.vectorResource(id = R.drawable.ic_home),
             title = stringResource(R.string.settings_default_start_tab),
             description = stringResource(R.string.settings_default_start_tab_desc),
-            trailing = { },
-            onClick = { },
-            customContent = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val options = listOf(
-                        Triple("home", stringResource(R.string.settings_default_start_home), defaultStartTab == "home"),
-                        Triple("visti", stringResource(R.string.settings_default_start_visti), defaultStartTab == "visti")
-                    )
-                    options.forEach { (value, label, isSelected) ->
-                        key(value) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                    .bounceClick { 
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        if (defaultStartTab != value) {
-                                            settingsViewModel.setDefaultStartTab(value)
-                                        }
-                                    }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                                )
-                            }
-                        }
-                    }
+            trailing = {
+                val label = when(defaultStartTab) {
+                    "feed" -> stringResource(R.string.settings_default_start_feed)
+                    "home" -> stringResource(R.string.settings_default_start_home)
+                    "visti" -> stringResource(R.string.settings_default_start_visti)
+                    else -> stringResource(R.string.settings_default_start_feed)
                 }
-            }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = currentAccentColor
+                )
+            },
+            onClick = { onShowStartScreenDialog() }
         )
     }
 }

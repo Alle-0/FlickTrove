@@ -3,9 +3,6 @@
     <string name="app_name">FlickTrove</string>
     <string name="hero_add_to_trove">Adicionar</string>
     <string name="hero_details">Detalhes</string>
-    <string name="home_hero_featured">DESTAQUE</string>
-    <string name="home_section_trove_pick">A Jóia do Trove</string>
-    <string name="home_trove_pick_badge">ESCOLHIDO PARA VOCÊ</string>
     <string name="shortcut_search_short">Buscar</string>
     <string name="shortcut_search_long">Buscar Título</string>
     <string name="shortcut_visti_short">Sua Lista</string>
@@ -214,8 +211,6 @@
     <string name="settings_enable_notifications_social_desc">Seja notificado quando alguém responder aos seus comentários.</string>
     <string name="notification_reply_title">Nova Resposta</string>
     <string name="notification_reply_body">%1$s respondeu ao seu comentário.</string>
-    <string name="notification_like_title">Nova Curtida</string>
-    <string name="notification_like_body">%1$s curtiu seu comentário.</string>
     <string name="settings_haptic_feedback">Feedback tátil</string>
     <string name="settings_haptic_feedback_desc">Vibra nas ações da interface</string>
     <string name="settings_images">Imagens</string>
@@ -1128,7 +1123,9 @@
     <string name="home_section_magazine">Notícias da Revista</string>
     <string name="home_section_top_10">Top 10 FlickTrove</string>
     <string name="home_section_see_all">Ver tudo</string>
-    <string name="home_section_watchlist">Da sua Lista</string>
-    <string name="home_section_watchlist_upcoming">Em breve da sua Lista</string>
+    <string name="home_section_trove_pick">A Escolha do Trove</string>
+    <string name="home_trove_pick_badge">ESCOLHIDO PARA VOCÊ</string>
+    <string name="surprise_subtitle">Da sua watchlist</string>
+    <string name="settings_default_start_feed">HOME</string>
 </resources>
 

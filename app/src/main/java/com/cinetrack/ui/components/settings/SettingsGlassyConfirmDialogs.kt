@@ -928,3 +928,33 @@ fun SettingsLanguageSelectionDialog(
         )
     }
 }
+
+@Composable
+fun SettingsStartScreenSelectionDialog(
+    visible: Boolean,
+    activeHazeState: dev.chrisbanes.haze.HazeState,
+    current: String,
+    accentColor: Color,
+    vibrationEnabled: Boolean,
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit
+) {
+    androidx.compose.animation.AnimatedVisibility(
+        visible = visible,
+        enter = androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(200)),
+        exit = androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(200)),
+        modifier = Modifier.zIndex(100f)
+    ) {
+        val transition = androidx.compose.animation.core.updateTransition(targetState = visible, label = "startScreenDialogTransition")
+        val alpha by transition.animateFloat(transitionSpec = { androidx.compose.animation.core.tween(200) }, label = "blurAlpha") { if (it) 1f else 0f }
+        StartScreenSelectionDialog(
+            hazeState = activeHazeState, 
+            alpha = alpha,
+            current = current,
+            accentColor = accentColor,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = onDismiss,
+            onSelect = onSelect
+        )
+    }
+}

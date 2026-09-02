@@ -146,7 +146,12 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val deepLinkIntent = LocalDeepLinkIntent.current
         val movieActions = LocalMovieActions.current
 
-        val initialTab = HomeFeedTab
+        val initialTab = when (initialTabStr) {
+            "feed" -> HomeFeedTab
+            "home" -> HomeTab
+            "visti" -> VistiTab
+            else -> HomeFeedTab
+        }
 
         val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
         val currentUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }

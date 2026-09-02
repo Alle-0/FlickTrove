@@ -189,6 +189,7 @@
     <string name="settings_language_hi">हिन्दी</string>
     <string name="settings_default_start_tab">Start Screen</string>
     <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
+    <string name="settings_default_start_feed">HOME</string>
     <string name="settings_default_start_home">TO WATCH</string>
     <string name="settings_default_start_visti">WATCHED</string>
     <string name="settings_aesthetics">Aesthetics</string>

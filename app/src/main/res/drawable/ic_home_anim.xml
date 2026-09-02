@@ -18,7 +18,7 @@
                 android:strokeLineJoin="round"
                 android:trimPathStart="0"
                 android:trimPathEnd="0.35"
-                android:trimPathOffset="0.07" />
+                android:trimPathOffset="0.325" />
 
             <!-- SNAKE 2 -->
             <path
@@ -30,7 +30,7 @@
                 android:strokeLineJoin="round"
                 android:trimPathStart="0"
                 android:trimPathEnd="0.35"
-                android:trimPathOffset="0.57" />
+                android:trimPathOffset="0.825" />
 
             <!-- STATIC DOOR AND DOT -->
             <path
@@ -52,14 +52,14 @@
     <!-- Snake 1 Animation (Clockwise) -->
     <target android:name="snake1">
         <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.07" android:valueTo="0.07" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.325" android:valueTo="0.325" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
         </aapt:attr>
     </target>
 
     <!-- Snake 2 Animation (Clockwise) -->
     <target android:name="snake2">
         <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.57" android:valueTo="0.57" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.825" android:valueTo="0.825" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
         </aapt:attr>
     </target>
 

@@ -4,14 +4,17 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.cinetrack.ui.utils.horizontalFadingEdges
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
@@ -49,12 +52,14 @@ fun PersonHighlightsRow(
             text = stringResource(R.string.person_highlights),
             color = Color.White,
             fontSize = 24.sp,
-            fontWeight = FontWeight.Black
+            fontWeight = FontWeight.Black,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             modifier = modifier,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             itemsIndexed(
                 items = knownFor,
@@ -130,15 +135,19 @@ fun PersonFilmographyTabs(
         text = stringResource(R.string.person_filmography),
         color = Color.White,
         fontSize = 24.sp,
-        fontWeight = FontWeight.Black
+        fontWeight = FontWeight.Black,
+        modifier = Modifier.padding(horizontal = 16.dp)
     )
 
+    val scrollState = rememberScrollState()
     Row(
         modifier = modifier
             .padding(vertical = 16.dp)
-            .horizontalScroll(rememberScrollState()),
+            .horizontalFadingEdges(scrollState, leftEdgeWidth = 16.dp, rightEdgeWidth = 16.dp)
+            .horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        Spacer(modifier = Modifier.width(8.dp))
         if (castMoviesCount > 0) {
             CategoryPill(
                 text = stringResource(R.string.person_cast_movie_format, castMoviesCount),
@@ -189,6 +198,7 @@ fun PersonFilmographyTabs(
                 onClick = { onTabChanged("crew_tv") }
             )
         }
+        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 

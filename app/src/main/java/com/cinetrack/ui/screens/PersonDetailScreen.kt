@@ -401,7 +401,7 @@ fun PersonDetailScreenContent(
                                             .take(10)
                                     }
 
-                                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    Column {
                                         PersonHighlightsRow(
                                             knownFor = knownFor,
                                             favoritesMap = favoritesMap,
