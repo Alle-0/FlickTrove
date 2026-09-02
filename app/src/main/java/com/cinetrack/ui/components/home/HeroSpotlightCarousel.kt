@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
+import kotlin.math.absoluteValue
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -91,9 +93,12 @@ fun HeroSpotlightCarousel(
             var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
             val glowColor = dominantColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
 
+            val pageOffset = ((pagerState.currentPage - virtualPage) + pagerState.currentPageOffsetFraction).absoluteValue
+            
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .zIndex(1f - pageOffset)
                     .graphicsLayer { clip = false }
             ) {
                 if (glowColor != Color.Transparent) {
