@@ -1139,4 +1139,5 @@
     <string name="home_section_watchlist">From Your Watchlist</string>
     <string name="home_section_watchlist_upcoming">Coming Soon from Your Watchlist</string>
     <string name="match_score">Match</string>
+    <string name="surprise_subtitle">From your watchlist</string>
 </resources>
