@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +25,7 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.toComposeColor
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
@@ -71,11 +73,20 @@ fun TrovePickCard(
             )
         }
 
+        // Extracted accent color or fallback to primary
+        val glowColor = movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
+
         // Card principale
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .shadow(
+                    elevation = 28.dp,
+                    shape = RoundedCornerShape(20.dp),
+                    spotColor = glowColor,
+                    ambientColor = glowColor
+                )
                 .height(260.dp)
                 .bounceClick { onMovieClick(movie) }
                 .clip(RoundedCornerShape(20.dp))
