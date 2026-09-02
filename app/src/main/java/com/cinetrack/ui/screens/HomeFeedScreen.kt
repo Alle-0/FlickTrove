@@ -323,8 +323,48 @@ fun HomeFeedScreenContent(
                         }
                     }
                 }
+                // 1. DALLA TUA WATCHLIST
+                if (watchlistList.isNotEmpty()) {
+                    item {
+                        HomeSectionTitle(title = stringResource(R.string.home_section_watchlist), onClick = { 
+                            tabNavigator.current = VistiTab 
+                        })
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(watchlistList.take(20).size) { index ->
+                                val movie = watchlistList[index]
+                                Box(modifier = Modifier.width(120.dp)) {
+                                    MovieCard(
+                                        movie = movie,
+                                        cardWidth = 120.dp,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
+                                        hazeState = activeHazeState,
+                                        staggerIndex = index,
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
+                                    )
+                                }
+                            }
+                            if (watchlistList.size > 20) {
+                                item {
+                                    ShowMoreCard(onClick = { 
+                                        tabNavigator.current = VistiTab 
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
                 
-                // 1. POPOLARI (2:3 Posters)
+                // 2. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
                         HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { 
