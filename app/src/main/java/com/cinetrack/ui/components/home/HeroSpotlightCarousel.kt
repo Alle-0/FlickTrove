@@ -44,7 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toBitmap
 import com.cinetrack.ui.utils.ColorUtils
-import com.cinetrack.ui.utils.toComposeColor
+import com.cinetrack.util.toComposeColor
 
 @Composable
 fun HeroSpotlightCarousel(
