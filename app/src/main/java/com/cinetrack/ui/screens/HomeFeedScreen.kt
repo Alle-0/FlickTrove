@@ -334,7 +334,7 @@ fun HomeFeedScreenContent(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(watchlistList.take(20).size) { index ->
+                            items(watchlistList.take(10).size) { index ->
                                 val movie = watchlistList[index]
                                 Box(modifier = Modifier.width(120.dp)) {
                                     MovieCard(
@@ -353,7 +353,7 @@ fun HomeFeedScreenContent(
                                     )
                                 }
                             }
-                            if (watchlistList.size > 20) {
+                            if (watchlistList.size > 10) {
                                 item {
                                     ShowMoreCard(onClick = { 
                                         tabNavigator.current = VistiTab 
