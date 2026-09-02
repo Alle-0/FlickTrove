@@ -119,10 +119,20 @@ fun TrovePickCard(
                 model = ImageRequest.Builder(context)
                     .data(backdropUrl)
                     .crossfade(true)
+                    .allowHardware(false)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onSuccess = { result ->
+                    coroutineScope.launch {
+                        val bitmap = result.result.drawable.toBitmap()
+                        val extracted = ColorUtils.extractAverageColor(bitmap)
+                        if (extracted != Color.Unspecified) {
+                            extractedColor = extracted
+                        }
+                    }
+                }
             )
 
             // Overlay scuro (orizzontale - per leggibilità testo)
