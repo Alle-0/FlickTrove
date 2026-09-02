@@ -1121,7 +1121,7 @@
     <string name="home_section_upcoming">आगामी</string>
     <string name="home_section_recommended">आपके लिए अनुशंसित</string>
     <string name="home_section_magazine">पत्रिका समाचार</string>
-    <string name="home_section_top_10">टॉप 10 FlickTrove</string>
+    <string name="home_section_top_10">टॉप 10 FlickTrove (पिछले 30 दिन)</string>
     <string name="home_section_see_all">सभी देखें</string>
     <string name="home_section_trove_pick">ट्रोव की पसंद</string>
     <string name="home_trove_pick_badge">आपके लिए चुना गया</string>

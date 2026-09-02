@@ -1123,7 +1123,7 @@
     <string name="home_section_upcoming">Demnächst</string>
     <string name="home_section_recommended">Für dich empfohlen</string>
     <string name="home_section_magazine">Magazin News</string>
-    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_top_10">Top 10 FlickTrove (Letzte 30 Tage)</string>
     <string name="home_section_see_all">Alle ansehen</string>
     <string name="home_section_trove_pick">Trove\'s Auswahl</string>
     <string name="home_trove_pick_badge">FÜR DICH AUSGEWÄHLT</string>

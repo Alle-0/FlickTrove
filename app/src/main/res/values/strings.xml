@@ -1134,7 +1134,7 @@
     <string name="home_section_upcoming">Upcoming</string>
     <string name="home_section_recommended">Recommended for you</string>
     <string name="home_section_magazine">Magazine News</string>
-    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_top_10">Top 10 FlickTrove (Last 30 days)</string>
     <string name="home_section_see_all">See all</string>
     <string name="home_section_watchlist">From Your Watchlist</string>
     <string name="home_section_watchlist_upcoming">Coming Soon from Your Watchlist</string>

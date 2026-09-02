@@ -1123,7 +1123,7 @@
     <string name="home_section_upcoming">Скоро</string>
     <string name="home_section_recommended">Рекомендовано для вас</string>
     <string name="home_section_magazine">Новости журнала</string>
-    <string name="home_section_top_10">Топ 10 FlickTrove</string>
+    <string name="home_section_top_10">Топ 10 FlickTrove (Последние 30 дней)</string>
     <string name="home_section_see_all">Смотреть все</string>
     <string name="home_section_trove_pick">Выбор Trove</string>
     <string name="home_trove_pick_badge">ВЫБРАНО ДЛЯ ВАС</string>

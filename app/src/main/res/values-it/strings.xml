@@ -1119,7 +1119,7 @@
     <string name="home_section_upcoming">In uscita</string>
     <string name="home_section_recommended">Consigliati per te</string>
     <string name="home_section_magazine">Magazine News</string>
-    <string name="home_section_top_10">Top 10 FlickTrove</string>
+    <string name="home_section_top_10">Top 10 FlickTrove (Ultimi 30 giorni)</string>
     <string name="home_section_see_all">Vedi tutto</string>
     <string name="home_section_trove_pick">Il Gioiello del Trove</string>
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
