@@ -73,7 +73,9 @@ fun HeroSpotlightCarousel(
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 16.dp,
-            modifier = Modifier.height(500.dp)
+            modifier = Modifier
+                .height(500.dp)
+                .graphicsLayer { clip = false }
         ) { virtualPage ->
             val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
