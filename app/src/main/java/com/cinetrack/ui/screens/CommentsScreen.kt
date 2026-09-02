@@ -89,6 +89,8 @@ class CommentsScreen(
     private val targetCommentId: String? = null
 ) : Screen {
 
+    override val key: String = "CommentsScreen_${mediaType}_${mediaId}_${java.util.UUID.randomUUID()}"
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
