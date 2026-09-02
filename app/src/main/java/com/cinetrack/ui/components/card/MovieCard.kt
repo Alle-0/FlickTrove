@@ -316,15 +316,23 @@ fun MovieActionsPopup(
                         }
                         
                         Spacer(modifier = Modifier.height(4.dp))
-                        MovieMenuItem(
-                            text = stringResource(R.string.card_quick_rate),
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_star),
-                            iconColor = HazeStyles.AccentYellow,
-                            modifier = Modifier.animateEnterExit(
-                                enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
-                            ),
-                            onClick = { onDismiss(); onQuickVote(movie) }
-                        )
+                        val canRate = if (movie.mediaType == "tv") {
+                            movie.favorite || movie.watched
+                        } else {
+                            movie.watched
+                        }
+                        
+                        if (canRate) {
+                            MovieMenuItem(
+                                text = stringResource(R.string.card_quick_rate),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_star),
+                                iconColor = HazeStyles.AccentYellow,
+                                modifier = Modifier.animateEnterExit(
+                                    enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
+                                ),
+                                onClick = { onDismiss(); onQuickVote(movie) }
+                            )
+                        }
                         MovieMenuItem(
                             text = stringResource(R.string.card_quick_note),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
