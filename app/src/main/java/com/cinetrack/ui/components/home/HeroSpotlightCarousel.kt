@@ -38,6 +38,9 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.core.graphics.drawable.toBitmap
+import com.cinetrack.ui.utils.ColorUtils
 
 @Composable
 fun HeroSpotlightCarousel(
@@ -84,18 +87,34 @@ fun HeroSpotlightCarousel(
                     ImageQuality.HIGH
                 )
 
+                val coroutineScope = rememberCoroutineScope()
+                var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
+
                 // Backdrop Image
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(backdropUrl)
                         .crossfade(true)
+                        .allowHardware(false)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onSuccess = { result ->
+                        coroutineScope.launch {
+                            val bitmap = result.result.drawable.toBitmap()
+                            val extracted = ColorUtils.extractAverageColor(bitmap)
+                            if (extracted != Color.Unspecified) {
+                                val ambient = ColorUtils.darkenForAmbient(extracted)
+                                dominantColor = ColorUtils.ensureMinimumLuminance(ambient, 0.15f)
+                            }
+                        }
+                    }
                 )
 
                 val bgColor = MaterialTheme.colorScheme.background
+                val targetColor = dominantColor ?: bgColor
+                val animatedColor by animateColorAsState(targetValue = targetColor, label = "backdropColor")
                 
                 Box(
                     modifier = Modifier
@@ -105,9 +124,9 @@ fun HeroSpotlightCarousel(
                                     colors = listOf(
                                         Color.Transparent,
                                         Color.Transparent,
-                                        Color.Black.copy(alpha = 0.2f),
-                                        bgColor.copy(alpha = 0.8f),
-                                        bgColor
+                                        animatedColor.copy(alpha = 0.3f),
+                                        animatedColor.copy(alpha = 0.85f),
+                                        animatedColor
                                     ),
                                     startY = 0f,
                                     endY = 1400f
@@ -122,63 +141,83 @@ fun HeroSpotlightCarousel(
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp, vertical = 32.dp)
                     ) {
-                        // Label categoria
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_star),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(14.dp)
+
+
+                        // Logo o Titolo
+                        if (!movie.logoPath.isNullOrEmpty()) {
+                            val logoUrl = com.cinetrack.util.buildTmdbImageUrl(movie.logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(logoUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = movie.title ?: movie.name,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .heightIn(max = 100.dp)
+                                    .fillMaxWidth(0.8f)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                        } else {
                             Text(
-                                text = stringResource(R.string.home_hero_featured),
-                                color = primaryColor,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.5.sp,
+                                text = movie.title ?: movie.name ?: "",
+                                color = Color.White,
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 30.sp,
+                                    lineHeight = 34.sp,
                                     shadow = androidx.compose.ui.graphics.Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = androidx.compose.ui.geometry.Offset(1f, 1f),
-                                        blurRadius = 8f
+                                        color = Color.Black.copy(alpha = 0.8f),
+                                        offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                        blurRadius = 16f
                                     )
-                                )
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
-                        // Titolo
-                        Text(
-                            text = movie.title ?: movie.name ?: "",
-                            color = Color.White,
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                fontWeight = FontWeight.Black,
-                                fontSize = 30.sp,
-                                lineHeight = 34.sp,
-                                shadow = androidx.compose.ui.graphics.Shadow(
-                                    color = Color.Black.copy(alpha = 0.8f),
-                                    offset = androidx.compose.ui.geometry.Offset(2f, 2f),
-                                    blurRadius = 16f
-                                )
-                            ),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        // Anno
+                        // Anno e generi
                         val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
-                        if (year.isNotEmpty()) {
+                        val genres = movie.genreIds?.mapNotNull { id ->
+                            val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
+                            list.find { it.id == id }?.name
+                        }?.take(3) ?: emptyList()
+                        
+                        if (year.isNotEmpty() || genres.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = year,
-                                color = Color.White.copy(alpha = 0.85f), // Leggermente più opaco
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    shadow = androidx.compose.ui.graphics.Shadow(
-                                        color = Color.Black.copy(alpha = 0.8f),
-                                        offset = androidx.compose.ui.geometry.Offset(1f, 1f),
-                                        blurRadius = 12f
-                                    )
-                                )
-                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (year.isNotEmpty()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(Color.Black.copy(alpha = 0.5f))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = year,
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                    }
+                                }
+                                genres.forEach { genreName ->
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(Color.White.copy(alpha = 0.2f))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = genreName,
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 } // End Page Box
@@ -216,12 +255,12 @@ fun HeroSpotlightCarousel(
 
                 // Symbiont (worm animato)
                 if (pageCount > 0) {
-                    val virtualScrollPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                    val rawFraction = virtualScrollPosition - Math.floor(virtualScrollPosition.toDouble()).toFloat()
-                    val floorPage = (pagerState.currentPage % pageCount + pageCount) % pageCount
-                    val scrollPosition = floorPage + rawFraction
+                    val virtualScrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction).toFloat()
+                    var scrollPosition = ((virtualScrollPosition % pageCount) + pageCount) % pageCount
+                    // Handle edge cases of floating point precision
+                    if (scrollPosition >= pageCount) scrollPosition = 0f
 
-                    val floor = scrollPosition.toInt()
+                    val floor = kotlin.math.floor(scrollPosition.toDouble()).toFloat()
                     val fraction = scrollPosition - floor
                     
                     // Logica "worm": 

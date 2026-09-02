@@ -56,8 +56,11 @@ data class HomeUiState(
     val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
     val top10Tv: ImmutableList<Movie> = persistentListOf(),
     val upcomingTv: ImmutableList<Movie> = persistentListOf(),
+    val trendingMovies: ImmutableList<Movie> = persistentListOf(),
+    val trendingTv: ImmutableList<Movie> = persistentListOf(),
     val magazineNews: ImmutableList<NewsItem> = persistentListOf(),
-    val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences()
+    val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
+    val allLocalMovies: ImmutableList<Movie> = persistentListOf()
 )
 
 @HiltViewModel
@@ -68,6 +71,7 @@ class HomeViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val newsRepository: NewsRepository,
     private val preferenceRepository: PreferenceRepository,
+    private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
@@ -99,14 +103,62 @@ class HomeViewModel @Inject constructor(
                 val recTv = buildRecommendations(type = "tv", localMovies = localMovies)
 
                 // Carica tutte le altre sezioni in parallelo
-                val popMoviesDeferred = async { repository.getPopularMovies().take(10).toImmutableList() }
-                val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).toImmutableList() }
-                val topMoviesDeferred = async { repository.getTop10FlickTrove(isTv = false).take(10).toImmutableList() }
-                val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).toImmutableList() }
-                val popTvDeferred = async { repository.getPopularTV().take(10).toImmutableList() }
-                val nowTvDeferred = async { repository.getOnTheAirTV().take(10).toImmutableList() }
-                val topTvDeferred = async { repository.getTop10FlickTrove(isTv = true).take(10).toImmutableList() }
-                val upcTvDeferred = async { repository.getUpcomingTV().take(10).toImmutableList() }
+                val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+                val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+                val topMoviesDeferred = async { repository.getTop10FlickTrove(isTv = false).take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+                val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+                val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+                val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+                val topTvDeferred = async { repository.getTop10FlickTrove(isTv = true).take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+                val upcTvDeferred = async { repository.getUpcomingTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+                val trendingMoviesDeferred = async {
+                    val basicTrending = repository.getTrendingMovies().take(10)
+                    kotlinx.coroutines.coroutineScope {
+                        basicTrending.map { movie ->
+                            async {
+                                try {
+                                    val detail = repository.getMovieDetail(movie.id, false)
+                                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+                                    val logos = detail.images?.logos
+                                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+                                    movie.copy(
+                                        mediaType = "movie",
+                                        genreIds = detail.genres?.map { it.id } ?: movie.genreIds
+                                    ).apply {
+                                        this.logoPath = bestLogo?.filePath
+                                    }
+                                } catch (e: Exception) {
+                                    movie.copy(mediaType = "movie")
+                                }
+                            }
+                        }.map { it.await() }.toImmutableList()
+                    }
+                }
+                val trendingTvDeferred = async {
+                    val basicTrending = repository.getTrendingTV().take(10)
+                    kotlinx.coroutines.coroutineScope {
+                        basicTrending.map { tv ->
+                            async {
+                                try {
+                                    val detail = repository.getMovieDetail(tv.id, true)
+                                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+                                    val logos = detail.images?.logos
+                                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+                                    tv.copy(
+                                        mediaType = "tv",
+                                        genreIds = detail.genres?.map { it.id } ?: tv.genreIds
+                                    ).apply {
+                                        this.logoPath = bestLogo?.filePath
+                                    }
+                                } catch (e: Exception) {
+                                    tv.copy(mediaType = "tv")
+                                }
+                            }
+                        }.map { it.await() }.toImmutableList()
+                    }
+                }
                 val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
 
                 _feedState.value = FeedState(
@@ -120,6 +172,8 @@ class HomeViewModel @Inject constructor(
                     nowStreamingTv = nowTvDeferred.await(),
                     top10Tv = topTvDeferred.await(),
                     upcomingTv = upcTvDeferred.await(),
+                    trendingMovies = trendingMoviesDeferred.await(),
+                    trendingTv = trendingTvDeferred.await(),
                     magazineNews = newsDeferred.await()
                 )
             } catch (e: Exception) {
@@ -178,9 +232,11 @@ class HomeViewModel @Inject constructor(
                 !localCompositeIds.contains(compositeId)
             }
             .map { it.copy(mediaType = type) }
-            .filter { movie ->
+            .mapNotNull { movie ->
                 val score = calculateMatchScoreUseCase(movie, matching)
-                score == null || score >= 65
+                if (score == null || score >= 65) {
+                    movie.apply { matchScore = score }
+                } else null
             }
 
         // Salvavita: se il filtro ha azzerato tutto, mostra i 10 migliori senza filtro
@@ -189,7 +245,11 @@ class HomeViewModel @Inject constructor(
                 .distinctBy { it.id }
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
-                .sortedByDescending { calculateMatchScoreUseCase(it, matching) ?: 0 }
+                .map { movie -> 
+                    val score = calculateMatchScoreUseCase(movie, matching)
+                    movie.apply { matchScore = score }
+                }
+                .sortedByDescending { it.matchScore ?: 0 }
                 .take(10)
         }
 
@@ -205,19 +265,33 @@ class HomeViewModel @Inject constructor(
             searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
             activeTabFlow = _activeTab
         ),
-        _feedState
-    ) { baseState, feedState ->
+        _feedState,
+        settingsRepository.hideSavedFromDiscovery
+    ) { baseState, feedState, hideSaved ->
+        val localCompositeIds = if (hideSaved) {
+            baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        } else {
+            emptySet()
+        }
+
+        fun filterList(list: ImmutableList<Movie>): ImmutableList<Movie> {
+            if (!hideSaved) return list
+            return list.filter { !localCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
+        }
+
         baseState.copy(
-            recommendedMovies = feedState.recommendedMovies,
-            popularMovies = feedState.popularMovies,
-            nowPlayingMovies = feedState.nowPlayingMovies,
+            recommendedMovies = filterList(feedState.recommendedMovies),
+            popularMovies = filterList(feedState.popularMovies),
+            nowPlayingMovies = filterList(feedState.nowPlayingMovies),
             top10Movies = feedState.top10Movies,
-            upcomingMovies = feedState.upcomingMovies,
-            recommendedTv = feedState.recommendedTv,
-            popularTv = feedState.popularTv,
-            nowStreamingTv = feedState.nowStreamingTv,
+            upcomingMovies = filterList(feedState.upcomingMovies),
+            recommendedTv = filterList(feedState.recommendedTv),
+            popularTv = filterList(feedState.popularTv),
+            nowStreamingTv = filterList(feedState.nowStreamingTv),
             top10Tv = feedState.top10Tv,
-            upcomingTv = feedState.upcomingTv,
+            upcomingTv = filterList(feedState.upcomingTv),
+            trendingMovies = feedState.trendingMovies,
+            trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
             isLoading = baseState.isLoading || feedState.popularMovies.isEmpty()
         )
@@ -427,5 +501,7 @@ data class FeedState(
     val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
     val top10Tv: ImmutableList<Movie> = persistentListOf(),
     val upcomingTv: ImmutableList<Movie> = persistentListOf(),
+    val trendingMovies: ImmutableList<Movie> = persistentListOf(),
+    val trendingTv: ImmutableList<Movie> = persistentListOf(),
     val magazineNews: ImmutableList<NewsItem> = persistentListOf()
 )

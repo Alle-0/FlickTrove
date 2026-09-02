@@ -71,6 +71,7 @@ import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import com.cinetrack.util.toComposeColor
 
 object HomeFeedTab : Tab {
     override val options: TabOptions
@@ -159,12 +160,65 @@ fun HomeFeedScreenContent(
     val nowPlayingList = if (isTv) uiState.nowStreamingTv else uiState.nowPlayingMovies
     val top10List = if (isTv) uiState.top10Tv else uiState.top10Movies
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
+    
+    SideEffect {
+        movieActions.setupCallbacks(
+            folders = uiState.folders,
+            isItemInFolder = { movie, folderId ->
+                uiState.folders.find { it.id == folderId }?.itemIds?.contains("${if(movie.mediaType.isNotEmpty()) movie.mediaType else uiState.activeTab}_${movie.id}") ?: false
+            },
+            onDelete = { viewModel.deleteMovie(it) },
+            onUpdateRating = { movie, rating -> viewModel.updateRating(movie, rating) },
+            onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
+            onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
+        )
+    }
+
     val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(movieActions) {
         { m, offset, pos -> movieActions.openActionsPopup(m, offset, pos) }
     }
 
-    val heroList = remember(popularList, nowPlayingList) {
-        (popularList + nowPlayingList).distinctBy { it.id }.take(10)
+    val stableOnAction: (Movie) -> Unit = remember(viewModel) { { m -> viewModel.toggleWatched(m) } }
+    val stableOnMessage: (String) -> Unit = remember(viewModel) {
+        { msg -> viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) }
+    }
+
+    val getMovieFolderColors = remember(uiState.movieFolderColors) {
+        { movie: Movie ->
+            val compositeId = "${if(movie.mediaType.isNotEmpty()) movie.mediaType else uiState.activeTab}_${movie.id}"
+            uiState.movieFolderColors[compositeId]?.map { it.toComposeColor() } ?: emptyList()
+        }
+    }
+
+    val isMovieFavorite = remember(uiState.allLocalMovies) {
+        { movie: Movie ->
+            movie.favorite || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.favorite == true
+        }
+    }
+
+    val isMovieWatched = remember(uiState.allLocalMovies) {
+        { movie: Movie ->
+            movie.watched || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.watched == true
+        }
+    }
+
+    val isMovieReminder = remember(uiState.allLocalMovies) {
+        { movie: Movie ->
+            movie.reminder || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.reminder == true
+        }
+    }
+
+    val heroList = remember(isTv, uiState.trendingTv, uiState.trendingMovies) {
+        val trendingList = if (isTv) uiState.trendingTv else uiState.trendingMovies
+        trendingList.take(10)
+    }
+
+    val watchlistList = remember(isTv, uiState.allLocalMovies) {
+        val targetType = if (isTv) "tv" else "movie"
+        uiState.allLocalMovies
+            .filter { it.reminder && !it.watched && it.mediaType == targetType && it.isReleased }
+            .distinctBy { it.id }
+            .sortedByDescending { it.createdAt }
     }
     
     // Virtual infinite pager state
@@ -237,6 +291,38 @@ fun HomeFeedScreenContent(
                     }
                 }
                 
+                // 1.5 DALLA TUA WATCHLIST
+                if (watchlistList.isNotEmpty()) {
+                    item {
+                        HomeSectionTitle(title = stringResource(R.string.home_section_watchlist))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(watchlistList.size) { index ->
+                                val movie = watchlistList[index]
+                                Box(modifier = Modifier.width(120.dp)) {
+                                    MovieCard(
+                                        movie = movie,
+                                        cardWidth = 120.dp,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
+                                        hazeState = activeHazeState,
+                                        staggerIndex = index,
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 // 1. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
@@ -255,11 +341,16 @@ fun HomeFeedScreenContent(
                                     MovieCard(
                                         movie = movie,
                                         cardWidth = 120.dp,
-                                        isFavorite = movie.favorite,
-                                        isWatched = movie.watched,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
+                                        staggerIndex = index,
                                         onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
                                     )
                                 }
                             }
@@ -291,11 +382,16 @@ fun HomeFeedScreenContent(
                                     MovieCard(
                                         movie = movie,
                                         cardWidth = 120.dp,
-                                        isFavorite = movie.favorite,
-                                        isWatched = movie.watched,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
+                                        staggerIndex = index,
                                         onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
                                     )
                                 }
                             }
@@ -327,11 +423,16 @@ fun HomeFeedScreenContent(
                                     MovieCard(
                                         movie = movie,
                                         cardWidth = 120.dp,
-                                        isFavorite = movie.favorite,
-                                        isWatched = movie.watched,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
+                                        staggerIndex = index,
                                         onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
                                     )
                                 }
                             }
@@ -372,11 +473,16 @@ fun HomeFeedScreenContent(
                                         MovieCard(
                                             movie = movie,
                                             cardWidth = 120.dp,
-                                            isFavorite = movie.favorite,
-                                            isWatched = movie.watched,
+                                            isFavorite = isMovieFavorite(movie),
+                                            isWatched = isMovieWatched(movie),
+                                            isReminder = isMovieReminder(movie),
+                                            folderColors = getMovieFolderColors(movie),
                                             hazeState = activeHazeState,
+                                            staggerIndex = index,
                                             onPress = onMovieClick,
-                                            onLongPress = stableOnLongPress
+                                            onLongPress = stableOnLongPress,
+                                            onAction = stableOnAction,
+                                            onMessage = stableOnMessage
                                         )
                                     }
                                 }
@@ -422,9 +528,15 @@ fun HomeFeedScreenContent(
                                 Top10MovieCard(
                                     movie = movie,
                                     rank = index + 1,
+                                    isFavorite = isMovieFavorite(movie),
+                                    isWatched = isMovieWatched(movie),
+                                    folderColors = getMovieFolderColors(movie),
                                     hazeState = activeHazeState,
+                                    staggerIndex = index,
                                     onPress = onMovieClick,
-                                    onLongPress = stableOnLongPress
+                                    onLongPress = stableOnLongPress,
+                                    onAction = stableOnAction,
+                                    onMessage = stableOnMessage
                                 )
                             }
                         }
@@ -730,7 +842,19 @@ fun NewsArticleCard(article: NewsItem, context: android.content.Context) {
 
 
 @Composable
-fun Top10MovieCard(movie: Movie, rank: Int, hazeState: HazeState, onPress: (Movie) -> Unit, onLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = { _, _, _ -> }) {
+fun Top10MovieCard(
+    movie: Movie, 
+    rank: Int, 
+    hazeState: HazeState, 
+    staggerIndex: Int = 0,
+    isFavorite: Boolean = movie.favorite,
+    isWatched: Boolean = movie.watched,
+    folderColors: List<androidx.compose.ui.graphics.Color> = emptyList(),
+    onPress: (Movie) -> Unit, 
+    onLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = { _, _, _ -> },
+    onAction: (Movie) -> Unit = {},
+    onMessage: (String) -> Unit = {}
+) {
     val accentColor = MaterialTheme.colorScheme.primary
 
     Box(
@@ -779,11 +903,15 @@ fun Top10MovieCard(movie: Movie, rank: Int, hazeState: HazeState, onPress: (Movi
             MovieCard(
                 movie = movie,
                 cardWidth = 126.dp,
-                isFavorite = movie.favorite,
-                isWatched = movie.watched,
+                isFavorite = isFavorite,
+                isWatched = isWatched,
+                folderColors = folderColors,
                 hazeState = hazeState,
+                staggerIndex = staggerIndex,
                 onPress = onPress,
-                onLongPress = onLongPress
+                onLongPress = onLongPress,
+                onAction = onAction,
+                onMessage = onMessage
             )
         }
     }

@@ -30,13 +30,14 @@ class GetHomeUiStateUseCase @Inject constructor() {
             .debounce(300)
             .distinctUntilChanged()
 
+        val combinedMovies = combine(moviesFlow, baseMoviesFlow) { all, base -> all to base }
         return combine(
-            baseMoviesFlow,
+            combinedMovies,
             foldersFlow,
             preferencesFlow,
             debouncedSearch,
             activeTabFlow
-        ) { toWatchMovies, folders, prefs, query, tab ->
+        ) { (allMovies, toWatchMovies), folders, prefs, query, tab ->
             
             val movieCount = toWatchMovies.count { it.mediaType != "tv" }
             val tvCount = toWatchMovies.count { it.mediaType == "tv" && !it.dropped }
@@ -113,7 +114,8 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 movieFolderColors = movieFolderColors,
                 folders = folders.toImmutableList(),
                 sortConfig = prefs.homeSort,
-                preferences = prefs
+                preferences = prefs,
+                allLocalMovies = allMovies.toImmutableList()
             )
         }.flowOn(Dispatchers.Default)
     }

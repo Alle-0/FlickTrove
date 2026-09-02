@@ -91,16 +91,29 @@ fun TrovePickCard(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Overlay scuro
+            // Overlay scuro (orizzontale)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.95f),
                                 Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.95f)
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+            // Overlay scuro (verticale in basso)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.9f)
                             )
                         )
                     )
@@ -111,7 +124,7 @@ fun TrovePickCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Poster
@@ -161,32 +174,93 @@ fun TrovePickCard(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    // Anno
+                    // Anno e Generi
                     val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
-                    if (year.isNotEmpty()) {
-                        Text(
-                            text = year,
-                            color = Color.White.copy(alpha = 0.6f),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                    val genres = movie.genreIds?.mapNotNull { id ->
+                        val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
+                        list.find { it.id == id }?.name
+                    }?.take(2) ?: emptyList()
+                    
+                    if (year.isNotEmpty() || genres.isNotEmpty()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (year.isNotEmpty()) {
+                                Text(
+                                    text = year,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                            genres.forEach { genreName ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(Color.White.copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = genreName,
+                                        color = Color.White.copy(alpha = 0.9f),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            }
+                        }
                     }
 
-                    // Voto se disponibile
-                    val rating = movie.voteAverage
-                    if (rating != null && rating > 0.0) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
-                                contentDescription = null,
-                                tint = com.cinetrack.ui.theme.NeonPink,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "%.1f".format(rating),
-                                color = Color.White.copy(alpha = 0.85f),
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
-                            )
+                    // Match Score (se disponibile)
+                    val matchScore = movie.matchScore
+                    if (matchScore != null && matchScore > 0) {
+                        Box(
+                            modifier = Modifier
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "${matchScore}%",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.match_score).uppercase(),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        // Fallback Voto
+                        val rating = movie.voteAverage
+                        if (rating != null && rating > 0.0) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "%.1f".format(rating),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

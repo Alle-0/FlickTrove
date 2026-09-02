@@ -92,7 +92,7 @@ fun GlassyBottomBar(
         ) {
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_home),
-                animatedIconRes = null, // TODO: add animation if desired
+                animatedIconRes = R.drawable.ic_home_anim,
                 label = "Home",
                 isSelected = selectedRoute == "feed",
                 enabled = !isDimmed,

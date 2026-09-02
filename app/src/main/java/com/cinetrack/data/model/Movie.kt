@@ -57,6 +57,7 @@ data class Movie(
     @set:PropertyName("backdrop_path")
     @ColumnInfo(name = "backdrop_path") var backdropPath: String? = null,
     
+
     @SerialName("custom_backdrop_path")
     @get:PropertyName("custom_backdrop_path")
     @set:PropertyName("custom_backdrop_path")
@@ -364,6 +365,15 @@ data class Movie(
     @get:Exclude
     @set:Exclude
     var extractedWatchDates: MutableSet<String> = mutableSetOf()
+
+    @Transient
+    @Ignore
+    @get:Exclude
+    @set:Exclude
+    var logoPath: String? = null
+    
+    @Ignore
+    var matchScore: Int? = null
 
     // --- Computed Properties ---
 

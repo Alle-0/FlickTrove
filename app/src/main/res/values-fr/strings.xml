@@ -210,6 +210,8 @@
     <string name="settings_enable_notifications_social_desc">Recevez une notification lorsque quelqu\'un répond à vos commentaires.</string>
     <string name="notification_reply_title">Nouvelle Réponse</string>
     <string name="notification_reply_body">%1$s a répondu à votre commentaire.</string>
+    <string name="notification_like_title">Nouveau J\'aime</string>
+    <string name="notification_like_body">%1$s a aimé votre commentaire.</string>
     <string name="settings_haptic_feedback">Retour haptique</string>
     <string name="settings_haptic_feedback_desc">Vibre lors des actions sur l\'interface</string>
     <string name="settings_images">Images</string>
@@ -1127,4 +1129,6 @@
     <string name="home_section_magazine">Actualités</string>
     <string name="home_section_top_10">Top 10 FlickTrove</string>
     <string name="home_section_see_all">Voir tout</string>
+    <string name="home_section_watchlist">De ta liste de suivi</string>
+    <string name="home_section_watchlist_upcoming">Bientôt disponible de ta liste</string>
 </resources>

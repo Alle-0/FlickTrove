@@ -291,6 +291,23 @@ class CommentRepository @Inject constructor(
                                 "isRead" to false
                             )
                             notifRef.set(notif).await()
+
+                            val prefsDoc = firestore.collection("users").document(commentOwnerId)
+                                .collection("settings").document("preferences").get().await()
+                            val notificationsSocial = prefsDoc.getBoolean("notificationsSocial") ?: true
+
+                            if (notificationsSocial) {
+                                com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                                    targetUserId = commentOwnerId,
+                                    titleLocKey = "notification_like_title",
+                                    bodyLocKey = "notification_like_body",
+                                    bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
+                                    mediaId = mediaId.toLongOrNull() ?: 0L,
+                                    mediaType = mediaType,
+                                    mediaImage = mediaImage,
+                                    commentId = commentId
+                                )
+                            }
                         } else if (isUnlike) {
                             notifRef.delete().await()
                         }

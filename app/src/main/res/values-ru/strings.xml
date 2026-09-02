@@ -215,6 +215,8 @@
     <string name="settings_enable_notifications_social_desc">Получайте уведомления, когда кто-то отвечает на ваши комментарии.</string>
     <string name="notification_reply_title">Новый ответ</string>
     <string name="notification_reply_body">%1$s ответил(а) на ваш комментарий.</string>
+    <string name="notification_like_title">Новый лайк</string>
+    <string name="notification_like_body">%1$s понравился ваш комментарий.</string>
     <string name="settings_haptic_feedback">Тактильный отклик</string>
     <string name="settings_haptic_feedback_desc">Вибрация при действиях в интерфейсе</string>
     <string name="settings_images">Изображения</string>
@@ -1128,4 +1130,6 @@
     <string name="home_section_magazine">Новости журнала</string>
     <string name="home_section_top_10">Топ 10 FlickTrove</string>
     <string name="home_section_see_all">Смотреть все</string>
+    <string name="home_section_watchlist">Из вашего списка</string>
+    <string name="home_section_watchlist_upcoming">Скоро из вашего списка</string>
 </resources>
