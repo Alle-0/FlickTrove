@@ -99,7 +99,7 @@ data class UserPreferences(
     val showAppEntryAnimation: Boolean = true,
     val useMovieLogo: Boolean = true,
     val lastSyncTimestamp: Long = 0L,
-    val defaultStartTab: String = "home",
+    val defaultStartTab: String = "feed",
     val tvdbJwtToken: String = "",
     val showMyFolders: Boolean = true,
     val showYourFlow: Boolean = true,

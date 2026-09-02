@@ -307,7 +307,7 @@ class SettingsViewModel @Inject constructor(
 
     val defaultStartTab: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.defaultStartTab }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "home")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "feed")
 
     val contentLanguage: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.contentLanguage }

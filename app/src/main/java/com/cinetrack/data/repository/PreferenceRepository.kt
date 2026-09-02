@@ -92,7 +92,7 @@ class PreferenceRepository @Inject constructor(
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
-                defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "home",
+                defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "feed",
                 tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: "",
                 showMyFolders = preferences[PreferencesKeys.SHOW_MY_FOLDERS] ?: true,
                 showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true,
