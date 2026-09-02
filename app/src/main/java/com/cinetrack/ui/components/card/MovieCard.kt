@@ -474,12 +474,6 @@ fun MovieCard(
             .width(cardWidth)
             .height(cardHeight)
             .then(modifier)
-            .shadow(
-                elevation = 24.dp,
-                shape = RoundedCornerShape(28.dp),
-                spotColor = glowColor.copy(alpha = 0.6f),
-                ambientColor = glowColor.copy(alpha = 0.3f)
-            )
             .graphicsLayer {
                 alpha = cardAlpha
                 scaleX = cardScale
@@ -541,6 +535,24 @@ fun MovieCard(
                         )
                     }
                 }
+            }
+
+            // Colored glow from accent color - visible inside the card at the bottom
+            if (glowColor != Color.Transparent) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.55f)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    glowColor.copy(alpha = 0.45f)
+                                )
+                            )
+                        )
+                )
             }
 
             if (showFolderBookmarks) {
