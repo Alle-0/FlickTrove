@@ -22,7 +22,9 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
@@ -46,6 +48,7 @@ fun TrovePickCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     var extractedColor by remember { mutableStateOf<Color?>(null) }
     val backdropUrl = buildTmdbImageUrl(
         movie.backdropPath ?: movie.posterPath,
@@ -154,10 +157,12 @@ fun TrovePickCard(
                             onSuccess = { _, result ->
                                 val bitmap = result.drawable.toBitmap()
                                 if (bitmap.width > 0 && bitmap.height > 0) {
-                                    val rawColor = ColorUtils.extractAverageColor(bitmap)
-                                    if (rawColor != Color.Unspecified) {
-                                        val ambientColor = ColorUtils.darkenForAmbient(rawColor)
-                                        extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                                    coroutineScope.launch {
+                                        val rawColor = ColorUtils.extractAverageColor(bitmap)
+                                        if (rawColor != Color.Unspecified) {
+                                            val ambientColor = ColorUtils.darkenForAmbient(rawColor)
+                                            extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                                        }
                                     }
                                 }
                             }
