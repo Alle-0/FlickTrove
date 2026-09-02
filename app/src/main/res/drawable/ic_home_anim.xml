@@ -2,11 +2,7 @@
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
-        <vector
-            android:width="24dp"
-            android:height="24dp"
-            android:viewportWidth="24"
-            android:viewportHeight="24">
+        <vector android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
 
             <!-- SNAKE 1 -->
             <path
@@ -17,8 +13,8 @@
                 android:strokeLineCap="round"
                 android:strokeLineJoin="round"
                 android:trimPathStart="0"
-                android:trimPathEnd="0.35"
-                android:trimPathOffset="0.07" />
+                android:trimPathEnd="0.44"
+                android:trimPathOffset="0.0" />
 
             <!-- SNAKE 2 -->
             <path
@@ -29,8 +25,8 @@
                 android:strokeLineCap="round"
                 android:strokeLineJoin="round"
                 android:trimPathStart="0"
-                android:trimPathEnd="0.35"
-                android:trimPathOffset="0.57" />
+                android:trimPathEnd="0.405"
+                android:trimPathOffset="0.517" />
 
             <!-- STATIC DOOR AND DOT -->
             <path
@@ -52,14 +48,14 @@
     <!-- Snake 1 Animation (Clockwise) -->
     <target android:name="snake1">
         <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.07" android:valueTo="0.07" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.0" android:valueTo="0.0" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
         </aapt:attr>
     </target>
 
     <!-- Snake 2 Animation (Clockwise) -->
     <target android:name="snake2">
         <aapt:attr name="android:animation">
-            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.57" android:valueTo="0.57" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+            <objectAnimator android:propertyName="trimPathOffset" android:valueFrom="1.517" android:valueTo="0.517" android:duration="1200" android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
         </aapt:attr>
     </target>
 
