@@ -73,11 +73,10 @@ fun HeroSpotlightCarousel(
     Column(modifier = modifier) {
         HorizontalPager(
             state = pagerState,
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 32.dp, bottom = 44.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 16.dp,
             modifier = Modifier
-                .height(576.dp)
-                .graphicsLayer { clip = false }
+                .height(500.dp)
         ) { virtualPage ->
             val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
@@ -89,59 +88,26 @@ fun HeroSpotlightCarousel(
                 ImageQuality.HIGH
             )
 
-            val coroutineScope = rememberCoroutineScope()
-            var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
-            val glowColor = dominantColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
-
-            val pageOffset = ((pagerState.currentPage - virtualPage) + pagerState.currentPageOffsetFraction).absoluteValue
-            
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .zIndex(1f - pageOffset)
-                    .graphicsLayer { clip = false }
+                    .bounceClick { onMovieClick(movie) }
+                    .clip(RoundedCornerShape(24.dp))
             ) {
-                if (glowColor != Color.Transparent) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .offset(y = 12.dp)
-                            .blur(32.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                            .background(glowColor.copy(alpha = 0.85f), RoundedCornerShape(24.dp))
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .bounceClick { onMovieClick(movie) }
-                        .clip(RoundedCornerShape(24.dp))
-                ) {
 
                 // Backdrop Image
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(backdropUrl)
                         .crossfade(true)
-                        .allowHardware(false)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    onSuccess = { result ->
-                        coroutineScope.launch {
-                            val bitmap = result.result.drawable.toBitmap()
-                            val extracted = ColorUtils.extractAverageColor(bitmap)
-                            if (extracted != Color.Unspecified) {
-                                val ambient = ColorUtils.darkenForAmbient(extracted)
-                                dominantColor = ColorUtils.ensureMinimumLuminance(ambient, 0.15f)
-                            }
-                        }
-                    }
+                    modifier = Modifier.fillMaxSize()
                 )
 
                 val bgColor = MaterialTheme.colorScheme.background
-                val targetColor = dominantColor ?: bgColor
+                val targetColor = movie.accentColor?.toComposeColor() ?: bgColor
                 val animatedColor by animateColorAsState(targetValue = targetColor, label = "backdropColor")
                 
                 Box(
@@ -249,7 +215,6 @@ fun HeroSpotlightCarousel(
                         }
                     }
                 } // End Page Box
-            } // End Glow Wrapper
         } // End HorizontalPager
 
         // Pallini indicatori (Symbiont / Worm effect)

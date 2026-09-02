@@ -487,17 +487,6 @@ fun MovieCard(
                 cardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
     ) {
-        // Glow layer (dietro la card)
-        if (glowColor != Color.Transparent) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset(y = 10.dp)
-                    .blur(20.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
-                    .background(glowColor.copy(alpha = 0.85f), RoundedCornerShape(28.dp))
-            )
-        }
-
         Card(
             modifier = Modifier
                 .fillMaxSize()
