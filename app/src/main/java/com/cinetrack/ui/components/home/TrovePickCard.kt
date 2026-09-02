@@ -92,10 +92,10 @@ fun TrovePickCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .shadow(
-                    elevation = 28.dp,
+                    elevation = 40.dp,
                     shape = RoundedCornerShape(20.dp),
-                    spotColor = glowColor,
-                    ambientColor = glowColor
+                    spotColor = glowColor.copy(alpha = 0.9f),
+                    ambientColor = glowColor.copy(alpha = 0.6f)
                 )
                 .height(260.dp)
                 .bounceClick { onMovieClick(movie) }
@@ -301,21 +301,6 @@ fun TrovePickCard(
                     }
                 }
             }
-
-            // Glow teal nell'angolo in alto a destra
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .align(Alignment.TopEnd)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
         }
     }
 }

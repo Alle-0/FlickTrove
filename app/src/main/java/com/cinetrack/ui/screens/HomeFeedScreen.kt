@@ -269,7 +269,7 @@ fun HomeFeedScreenContent(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 userScrollEnabled = false
                             ) {
@@ -300,7 +300,7 @@ fun HomeFeedScreenContent(
                         })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(watchlistList.take(10).size) { index ->
@@ -342,7 +342,7 @@ fun HomeFeedScreenContent(
                         })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(popularList.size) { index ->
@@ -383,7 +383,7 @@ fun HomeFeedScreenContent(
                         })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(nowPlayingList.size) { index ->
@@ -424,7 +424,7 @@ fun HomeFeedScreenContent(
                         })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(upcomingList.size) { index ->
@@ -474,7 +474,7 @@ fun HomeFeedScreenContent(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(recommendedList.drop(1).size) { index ->
@@ -510,7 +510,7 @@ fun HomeFeedScreenContent(
                         HomeSectionTitle(title = stringResource(R.string.home_section_magazine), onClick = { tabNavigator.current = NewsTab })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             items(uiState.magazineNews.size) { index ->
@@ -530,7 +530,7 @@ fun HomeFeedScreenContent(
                         HomeSectionTitle(stringResource(R.string.home_section_top_10))
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(top10List.take(10).size) { index ->
