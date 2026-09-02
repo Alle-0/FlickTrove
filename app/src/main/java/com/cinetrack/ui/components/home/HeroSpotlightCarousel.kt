@@ -16,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -41,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toBitmap
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.toComposeColor
 
 @Composable
 fun HeroSpotlightCarousel(
@@ -74,21 +78,38 @@ fun HeroSpotlightCarousel(
             val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
 
+            val context = LocalContext.current
+            val backdropUrl = buildTmdbImageUrl(
+                movie.backdropPath ?: movie.posterPath,
+                ImageType.BACKDROP,
+                ImageQuality.HIGH
+            )
+
+            val coroutineScope = rememberCoroutineScope()
+            var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
+            val glowColor = dominantColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .bounceClick { onMovieClick(movie) }
-                    .clip(RoundedCornerShape(24.dp))
+                    .graphicsLayer { clip = false }
             ) {
-                val context = LocalContext.current
-                val backdropUrl = buildTmdbImageUrl(
-                    movie.backdropPath ?: movie.posterPath,
-                    ImageType.BACKDROP,
-                    ImageQuality.HIGH
-                )
+                if (glowColor != Color.Transparent) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .offset(y = 12.dp)
+                            .blur(32.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                            .background(glowColor.copy(alpha = 0.85f), RoundedCornerShape(24.dp))
+                    )
+                }
 
-                val coroutineScope = rememberCoroutineScope()
-                var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .bounceClick { onMovieClick(movie) }
+                        .clip(RoundedCornerShape(24.dp))
+                ) {
 
                 // Backdrop Image
                 AsyncImage(
@@ -221,7 +242,8 @@ fun HeroSpotlightCarousel(
                         }
                     }
                 } // End Page Box
-            } // End HorizontalPager
+            } // End Glow Wrapper
+        } // End HorizontalPager
 
         // Pallini indicatori (Symbiont / Worm effect)
         Box(
