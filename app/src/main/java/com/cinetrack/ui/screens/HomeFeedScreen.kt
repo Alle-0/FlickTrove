@@ -291,38 +291,7 @@ fun HomeFeedScreenContent(
                         )
                     }
                 }
-                
-                // 1.5 DALLA TUA WATCHLIST
-                if (watchlistList.isNotEmpty()) {
-                    item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_watchlist))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(watchlistList.size) { index ->
-                                val movie = watchlistList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 120.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+
                 // 1. DALLA TUA WATCHLIST
                 if (watchlistList.isNotEmpty()) {
                     item {
