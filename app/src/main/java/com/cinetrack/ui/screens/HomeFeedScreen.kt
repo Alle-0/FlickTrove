@@ -862,6 +862,8 @@ fun Top10MovieCard(
             .width(156.dp)
             .height(210.dp)
     ) {
+        val bgColor = MaterialTheme.colorScheme.background
+        
         // Large outlined rank number — stroke only, accent color, bleeds off left/bottom edge
         androidx.compose.foundation.Canvas(
             modifier = Modifier
@@ -869,7 +871,7 @@ fun Top10MovieCard(
                 .size(width = 100.dp, height = 110.dp)
                 .offset(x = (-8).dp, y = 22.dp)
         ) {
-            val paint = android.graphics.Paint().apply {
+            val outlinePaint = android.graphics.Paint().apply {
                 isAntiAlias = true
                 textSize = 148.sp.toPx()
                 typeface = android.graphics.Typeface.create(
@@ -877,19 +879,32 @@ fun Top10MovieCard(
                     android.graphics.Typeface.BOLD
                 )
                 style = android.graphics.Paint.Style.STROKE
-                strokeWidth = 3.5f
-                color = android.graphics.Color.argb(
-                    (accentColor.alpha * 200).toInt().coerceIn(0, 255),
-                    (accentColor.red * 255).toInt().coerceIn(0, 255),
-                    (accentColor.green * 255).toInt().coerceIn(0, 255),
-                    (accentColor.blue * 255).toInt().coerceIn(0, 255)
+                strokeWidth = 7f // Double thickness because fill covers inner half
+                strokeJoin = android.graphics.Paint.Join.ROUND
+                strokeCap = android.graphics.Paint.Cap.ROUND
+                color = accentColor.copy(alpha = 0.78f).toArgb()
+            }
+            val fillPaint = android.graphics.Paint().apply {
+                isAntiAlias = true
+                textSize = 148.sp.toPx()
+                typeface = android.graphics.Typeface.create(
+                    android.graphics.Typeface.DEFAULT_BOLD,
+                    android.graphics.Typeface.BOLD
                 )
+                style = android.graphics.Paint.Style.FILL
+                color = bgColor.toArgb()
             }
             drawContext.canvas.nativeCanvas.drawText(
                 rank.toString(),
                 0f,
                 size.height * 0.85f,
-                paint
+                outlinePaint
+            )
+            drawContext.canvas.nativeCanvas.drawText(
+                rank.toString(),
+                0f,
+                size.height * 0.85f,
+                fillPaint
             )
         }
 
