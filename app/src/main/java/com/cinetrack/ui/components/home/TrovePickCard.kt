@@ -119,8 +119,8 @@ fun TrovePickCard(
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
-                                glowColor.copy(alpha = 0.85f),
-                                glowColor.copy(alpha = 0.35f),
+                                glowColor.copy(alpha = 0.72f),
+                                glowColor.copy(alpha = 0.18f),
                                 Color.Transparent
                             )
                         )
@@ -134,7 +134,7 @@ fun TrovePickCard(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                glowColor.copy(alpha = 0.65f)
+                                glowColor.copy(alpha = 0.45f)
                             )
                         )
                     )

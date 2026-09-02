@@ -474,11 +474,18 @@ fun MovieCard(
             .width(cardWidth)
             .height(cardHeight)
             .then(modifier)
+            .shadow(
+                elevation = 28.dp,
+                shape = RoundedCornerShape(28.dp),
+                spotColor = glowColor.copy(alpha = 0.75f),
+                ambientColor = glowColor.copy(alpha = 0.4f)
+            )
             .graphicsLayer {
                 alpha = cardAlpha
                 scaleX = cardScale
                 scaleY = cardScale
                 translationY = cardTranslateY * density.density
+                clip = false
             }
             .onGloballyPositioned { coordinates ->
                 cardPosition[0] = coordinates.positionInWindow()
@@ -537,18 +544,18 @@ fun MovieCard(
                 }
             }
 
-            // Colored glow from accent color - visible inside the card at the bottom
+            // Subtle color tint at bottom from accent color
             if (glowColor != Color.Transparent) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.55f)
+                        .fillMaxHeight(0.35f)
                         .align(Alignment.BottomCenter)
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    glowColor.copy(alpha = 0.45f)
+                                    glowColor.copy(alpha = 0.20f)
                                 )
                             )
                         )
