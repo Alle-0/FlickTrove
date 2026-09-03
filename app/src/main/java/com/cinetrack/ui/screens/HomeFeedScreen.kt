@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Modifier
@@ -243,7 +244,53 @@ fun HomeFeedScreenContent(
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (uiState.isFeedLoading) {
+                if (uiState.hasFeedError) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .hazeGlass(
+                                    state = activeHazeState,
+                                    shape = RoundedCornerShape(24.dp),
+                                    style = HazeStyles.PremiumDark
+                                )
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Warning,
+                                    contentDescription = stringResource(R.string.content_description_error),
+                                    tint = Color(0xFF00E5FF),
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.error_feed_title),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Text(
+                                    text = stringResource(R.string.error_feed_subtitle),
+                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Button(
+                                    onClick = { viewModel.retryFeed() },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(stringResource(R.string.error_state_retry), color = Color.Black, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                } else if (uiState.isFeedLoading) {
                     item {
                         // Hero Skeleton
                         Box(

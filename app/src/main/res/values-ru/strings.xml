@@ -1129,4 +1129,7 @@
     <string name="home_trove_pick_badge">ВЫБРАНО ДЛЯ ВАС</string>
     <string name="surprise_subtitle">Из вашего списка</string>
     <string name="settings_default_start_feed">ГЛАВНАЯ</string>
+    <string name="error_feed_title">Ой! Не удалось загрузить ленту.</string>
+    <string name="error_feed_subtitle">Проверьте подключение и повторите попытку.</string>
+    <string name="content_description_error">Ошибка</string>
 </resources>

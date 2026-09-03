@@ -1128,4 +1128,7 @@
     <string name="home_trove_pick_badge">SÉLECTIONNÉ POUR VOUS</string>
     <string name="surprise_subtitle">De votre watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
+    <string name="error_feed_title">Oups ! Impossible de charger le flux.</string>
+    <string name="error_feed_subtitle">Vérifiez votre connexion et réessayez.</string>
+    <string name="content_description_error">Erreur</string>
 </resources>

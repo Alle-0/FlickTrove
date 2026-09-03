@@ -41,6 +41,7 @@ data class HomeUiState(
     val tvCount: Int = 0,
     val isLoading: Boolean = true,
     val isFeedLoading: Boolean = true,
+    val hasFeedError: Boolean = false,
     val searchQuery: String = "",
     val activeTab: String = "movie",
     val sortConfig: SortConfig = SortConfig(),
@@ -94,6 +95,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun fetchFeed() {
+        _feedState.value = FeedState(isLoaded = false, hasError = false)
         viewModelScope.launch {
             try {
                 // Carica i film salvati dall'utente per generare le raccomandazioni
@@ -184,6 +186,10 @@ class HomeViewModel @Inject constructor(
                 actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
             }
         }
+    }
+
+    fun retryFeed() {
+        fetchFeed()
     }
 
     /**
@@ -298,7 +304,8 @@ class HomeViewModel @Inject constructor(
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
             isLoading = baseState.isLoading,
-            isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError)
+            isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError),
+            hasFeedError = feedState.hasError
         )
     }.stateIn(
         scope = viewModelScope,

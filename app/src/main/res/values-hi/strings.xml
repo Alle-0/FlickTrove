@@ -1127,5 +1127,8 @@
     <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
     <string name="surprise_subtitle">आपकी वॉचलिस्ट से</string>
     <string name="settings_default_start_feed">होम</string>
+    <string name="error_feed_title">उफ़! फ़ीड लोड करने में असमर्थ.</string>
+    <string name="error_feed_subtitle">अपना कनेक्शन जांचें और पुनः प्रयास करें.</string>
+    <string name="content_description_error">त्रुटि</string>
 </resources>
 

@@ -1129,4 +1129,7 @@
     <string name="home_trove_pick_badge">FÜR DICH AUSGEWÄHLT</string>
     <string name="surprise_subtitle">Aus deiner Watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
+    <string name="error_feed_title">Hoppla! Feed konnte nicht geladen werden.</string>
+    <string name="error_feed_subtitle">Überprüfe deine Verbindung und versuche es erneut.</string>
+    <string name="content_description_error">Fehler</string>
 </resources>

@@ -1140,4 +1140,7 @@
     <string name="home_section_watchlist_upcoming">Coming Soon from Your Watchlist</string>
     <string name="match_score">Match</string>
     <string name="surprise_subtitle">From your watchlist</string>
+    <string name="error_feed_title">Oops! Unable to load the feed.</string>
+    <string name="error_feed_subtitle">Check your connection and try again.</string>
+    <string name="content_description_error">Error</string>
 </resources>

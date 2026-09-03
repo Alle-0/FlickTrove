@@ -1125,4 +1125,7 @@
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
     <string name="surprise_subtitle">Dalla tua watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
+    <string name="error_feed_title">Oops! Impossibile caricare il feed.</string>
+    <string name="error_feed_subtitle">Controlla la connessione e riprova.</string>
+    <string name="content_description_error">Errore</string>
 </resources>
