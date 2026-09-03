@@ -15,12 +15,12 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     var size by remember { mutableStateOf(IntSize.Zero) }
     val transition = rememberInfiniteTransition(label = "shimmer")
     
-    // Wider range for a smoother, more premium sweep across the component
+    // Smooth, slow easing curve for a premium Glassmorphism feel
     val startOffsetX by transition.animateFloat(
         initialValue = -size.width.toFloat() * 1.5f,
         targetValue = size.width.toFloat() * 1.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1300, easing = LinearEasing),
+            animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmerOffset"
@@ -29,13 +29,13 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     this.onGloballyPositioned { size = it.size }
         .drawBehind {
             if (size.width > 0) {
-                // High-contrast oblique gradient for a "cool" metallic/glass shine
+                // Soft, translucent glass-like gradient
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF0F0F12), // Deep dark
-                            Color(0xFF282830), // Brighter highlight
-                            Color(0xFF0F0F12)  // Deep dark
+                            Color(0xFF14141B).copy(alpha = 0.8f), // Deep base with alpha
+                            Color(0xFF2A2A35).copy(alpha = 0.6f), // Soft translucent highlight
+                            Color(0xFF14141B).copy(alpha = 0.8f)  // Deep base with alpha
                         ),
                         start = Offset(startOffsetX, 0f),
                         end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())

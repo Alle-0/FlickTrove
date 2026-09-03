@@ -8,7 +8,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
-import com.cinetrack.domain.CalculateMatchScoreUseCase
+import com.cinetrack.domain.usecase.GetHomeFeedUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,6 @@ import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 import com.cinetrack.data.model.NewsItem
-import com.cinetrack.data.repository.NewsRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -61,6 +60,9 @@ data class HomeUiState(
     val trendingMovies: ImmutableList<Movie> = persistentListOf(),
     val trendingTv: ImmutableList<Movie> = persistentListOf(),
     val magazineNews: ImmutableList<NewsItem> = persistentListOf(),
+    val continueWatchingTv: ImmutableList<Movie> = persistentListOf(),
+    val becauseYouWatchedMovie: Pair<Movie, ImmutableList<Movie>>? = null,
+    val becauseYouWatchedTv: Pair<Movie, ImmutableList<Movie>>? = null,
     val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
     val allLocalMovies: ImmutableList<Movie> = persistentListOf()
 )
@@ -68,10 +70,9 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
-    private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase,
+    private val getHomeFeedUseCase: GetHomeFeedUseCase,
     private val getHomeUiStateUseCase: com.cinetrack.domain.GetHomeUiStateUseCase,
     private val repository: MovieRepository,
-    private val newsRepository: NewsRepository,
     private val preferenceRepository: PreferenceRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -98,89 +99,7 @@ class HomeViewModel @Inject constructor(
         _feedState.value = FeedState(isLoaded = false, hasError = false)
         viewModelScope.launch {
             try {
-                // Carica i film salvati dall'utente per generare le raccomandazioni
-                val localMovies = repository.getLocalMoviesFlow().first()
-
-                // Genera raccomandazioni personalizzate usando l'algoritmo (identico a RecommendationsViewModel)
-                val recMovies = buildRecommendations(type = "movie", localMovies = localMovies)
-                val recTv = buildRecommendations(type = "tv", localMovies = localMovies)
-
-                // Carica tutte le altre sezioni in parallelo
-                val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-                val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-                val topMoviesDeferred = async { repository.getTop10FlickTrove(isTv = false).take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-                val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-                val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-                val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-                val topTvDeferred = async { repository.getTop10FlickTrove(isTv = true).take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-                val upcTvDeferred = async { repository.getUpcomingTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-                val trendingMoviesDeferred = async {
-                    val basicTrending = repository.getTrendingMovies().take(10)
-                    kotlinx.coroutines.coroutineScope {
-                        basicTrending.map { movie ->
-                            async {
-                                try {
-                                    val detail = repository.getMovieDetail(movie.id, false)
-                                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-                                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-                                    val logos = detail.images?.logos
-                                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-                                    movie.copy(
-                                        mediaType = "movie",
-                                        genreIds = detail.genres?.map { it.id } ?: movie.genreIds
-                                    ).apply {
-                                        this.logoPath = bestLogo?.filePath
-                                    }
-                                } catch (e: Exception) {
-                                    movie.copy(mediaType = "movie")
-                                }
-                            }
-                        }.map { it.await() }.toImmutableList()
-                    }
-                }
-                val trendingTvDeferred = async {
-                    val basicTrending = repository.getTrendingTV().take(10)
-                    kotlinx.coroutines.coroutineScope {
-                        basicTrending.map { tv ->
-                            async {
-                                try {
-                                    val detail = repository.getMovieDetail(tv.id, true)
-                                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-                                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-                                    val logos = detail.images?.logos
-                                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-                                    tv.copy(
-                                        mediaType = "tv",
-                                        genreIds = detail.genres?.map { it.id } ?: tv.genreIds
-                                    ).apply {
-                                        this.logoPath = bestLogo?.filePath
-                                    }
-                                } catch (e: Exception) {
-                                    tv.copy(mediaType = "tv")
-                                }
-                            }
-                        }.map { it.await() }.toImmutableList()
-                    }
-                }
-                val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
-
-                _feedState.value = FeedState(
-                    isLoaded = true,
-                    hasError = false,
-                    recommendedMovies = recMovies,
-                    popularMovies = popMoviesDeferred.await(),
-                    nowPlayingMovies = nowMoviesDeferred.await(),
-                    top10Movies = topMoviesDeferred.await(),
-                    upcomingMovies = upcMoviesDeferred.await(),
-                    recommendedTv = recTv,
-                    popularTv = popTvDeferred.await(),
-                    nowStreamingTv = nowTvDeferred.await(),
-                    top10Tv = topTvDeferred.await(),
-                    upcomingTv = upcTvDeferred.await(),
-                    trendingMovies = trendingMoviesDeferred.await(),
-                    trendingTv = trendingTvDeferred.await(),
-                    magazineNews = newsDeferred.await()
-                )
+                _feedState.value = getHomeFeedUseCase()
             } catch (e: Exception) {
                 _feedState.value = FeedState(hasError = true)
                 actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
@@ -192,79 +111,6 @@ class HomeViewModel @Inject constructor(
         fetchFeed()
     }
 
-    /**
-     * Algoritmo di raccomandazione: usa i film/serie salvati dall'utente come seed,
-     * chiama l'API TMDB per titoli simili, e filtra con il CalculateMatchScore.
-     * Se l'utente non ha nessun film salvato, restituisce lista vuota (la sezione non viene mostrata).
-     */
-    private suspend fun buildRecommendations(type: String, localMovies: List<Movie>): ImmutableList<Movie> {
-        val matching = if (type == "movie") {
-            localMovies.filter { it.mediaType != "tv" }
-        } else {
-            localMovies.filter { it.mediaType == "tv" }
-        }
-        if (matching.isEmpty()) return persistentListOf()
-
-        // Seleziona i seed migliori (stessa logica di RecommendationsViewModel)
-        val goodCandidates = matching.filter { movie ->
-            (movie.personalRating ?: 0.0) >= 7.0 ||
-            (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
-        }
-        val pool = if (goodCandidates.size >= 3) goodCandidates else matching
-        val seeds = pool
-            .sortedWith(
-                compareByDescending<Movie> { it.personalRating ?: 0.0 }
-                    .thenByDescending { it.watchedAt ?: "" }
-                    .thenByDescending { it.voteAverage ?: 0.0 }
-            )
-            .take(20)
-            .shuffled()
-            .take(3)
-
-        // Chiama API in parallelo per i 3 seed
-        val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
-        val rawData = coroutineScope {
-            seeds.map { seed ->
-                async {
-                    runCatching {
-                        if (type == "movie") repository.getMovieRecommendations(seed.id)
-                        else repository.getTVRecommendations(seed.id)
-                    }.getOrDefault(emptyList())
-                }
-            }.awaitAll().flatten()
-        }
-
-        // Filtra i già salvati e applica il match score (soglia 65%)
-        var results = rawData
-            .distinctBy { it.id }
-            .filter { movie ->
-                val compositeId = "${type}_${movie.id}"
-                !localCompositeIds.contains(compositeId)
-            }
-            .map { it.copy(mediaType = type) }
-            .mapNotNull { movie ->
-                val score = calculateMatchScoreUseCase(movie, matching)
-                if (score == null || score >= 65) {
-                    movie.apply { matchScore = score }
-                } else null
-            }
-
-        // Salvavita: se il filtro ha azzerato tutto, mostra i 10 migliori senza filtro
-        if (results.isEmpty() && rawData.isNotEmpty()) {
-            results = rawData
-                .distinctBy { it.id }
-                .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
-                .map { it.copy(mediaType = type) }
-                .map { movie -> 
-                    val score = calculateMatchScoreUseCase(movie, matching)
-                    movie.apply { matchScore = score }
-                }
-                .sortedByDescending { it.matchScore ?: 0 }
-                .take(10)
-        }
-
-        return results.shuffled().take(10).toImmutableList()
-    }
 
     @OptIn(kotlinx.coroutines.FlowPreview::class)
     val uiState: StateFlow<HomeUiState> = kotlinx.coroutines.flow.combine(
@@ -303,6 +149,9 @@ class HomeViewModel @Inject constructor(
             trendingMovies = feedState.trendingMovies,
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
+            continueWatchingTv = feedState.continueWatchingTv,
+            becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,
+            becauseYouWatchedTv = feedState.becauseYouWatchedTv,
             isLoading = baseState.isLoading,
             isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError),
             hasFeedError = feedState.hasError
@@ -501,21 +350,3 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
-
-data class FeedState(
-    val isLoaded: Boolean = false,
-    val hasError: Boolean = false,
-    val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
-    val popularMovies: ImmutableList<Movie> = persistentListOf(),
-    val nowPlayingMovies: ImmutableList<Movie> = persistentListOf(),
-    val top10Movies: ImmutableList<Movie> = persistentListOf(),
-    val upcomingMovies: ImmutableList<Movie> = persistentListOf(),
-    val recommendedTv: ImmutableList<Movie> = persistentListOf(),
-    val popularTv: ImmutableList<Movie> = persistentListOf(),
-    val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
-    val top10Tv: ImmutableList<Movie> = persistentListOf(),
-    val upcomingTv: ImmutableList<Movie> = persistentListOf(),
-    val trendingMovies: ImmutableList<Movie> = persistentListOf(),
-    val trendingTv: ImmutableList<Movie> = persistentListOf(),
-    val magazineNews: ImmutableList<NewsItem> = persistentListOf()
-)

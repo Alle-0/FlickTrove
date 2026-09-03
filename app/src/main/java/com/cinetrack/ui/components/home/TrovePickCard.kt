@@ -92,25 +92,49 @@ fun TrovePickCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(260.dp)
-                .graphicsLayer { clip = false }
+                .graphicsLayer { clip = false },
+            contentAlignment = Alignment.Center
         ) {
-            // Glow layer (dietro la card)
-            if (glowColor != Color.Transparent) {
-                Box(
+            // Ambilight Glow layer (dietro la card)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp) // Stessa altezza della card per non alterare il layout
+                    .offset(y = 8.dp) // Leggero offset verso il basso
+                    .graphicsLayer {
+                        alpha = 0.55f // Più delicato
+                        scaleX = 1.05f // Espande visivamente ai lati
+                        scaleY = 1.15f // Espande visivamente sopra e sotto senza spingere il testo
+                        clip = false
+                    }
+                    .blur(24.dp) // Effetto sfocatura
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(backdropUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .offset(y = 8.dp)
-                        .blur(24.dp, edgeTreatment = androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded)
-                        .background(glowColor.copy(alpha = 0.85f), RoundedCornerShape(20.dp))
+                        .fillMaxWidth()
+                        .height(260.dp)
+                        .padding(horizontal = 16.dp) 
+                        .align(Alignment.Center)
+                        .graphicsLayer {
+                            // Zoom ridotto
+                            scaleX = 1.0f
+                            scaleY = 1.0f
+                        }
                 )
             }
 
             // Card content layer
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .padding(horizontal = 16.dp)
                     .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(20.dp))
             ) {
@@ -129,7 +153,8 @@ fun TrovePickCard(
                         val bitmap = result.result.drawable.toBitmap()
                         val extracted = ColorUtils.extractAverageColor(bitmap)
                         if (extracted != Color.Unspecified) {
-                            extractedColor = extracted
+                            val ambientColor = ColorUtils.darkenForAmbient(extracted)
+                            extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
                         }
                     }
                 }
@@ -149,21 +174,9 @@ fun TrovePickCard(
                         )
                     )
             )
-            // Overlay colorato (leggero tint)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                glowColor.copy(alpha = 0.35f),
-                                glowColor.copy(alpha = 0.15f),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-            // Overlay scuro (verticale in basso)
+            // (Rimosso Overlay colorato - per preservare i colori originali della copertina)
+            
+            // Overlay scuro (verticale in basso) per testo
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -171,24 +184,12 @@ fun TrovePickCard(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.Black.copy(alpha = 0.6f)
+                                Color.Black.copy(alpha = 0.7f)
                             )
                         )
                     )
             )
-            // Overlay colorato (verticale in basso)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                glowColor.copy(alpha = 0.2f)
-                            )
-                        )
-                    )
-            )
+
 
             // Contenuto card: poster + testo
             Row(
@@ -203,20 +204,6 @@ fun TrovePickCard(
                     model = ImageRequest.Builder(context)
                         .data(posterUrl)
                         .allowHardware(false)
-                        .listener(
-                            onSuccess = { _, result ->
-                                val bitmap = result.drawable.toBitmap()
-                                if (bitmap.width > 0 && bitmap.height > 0) {
-                                    coroutineScope.launch {
-                                        val rawColor = ColorUtils.extractAverageColor(bitmap)
-                                        if (rawColor != Color.Unspecified) {
-                                            val ambientColor = ColorUtils.darkenForAmbient(rawColor)
-                                            extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
-                                        }
-                                    }
-                                }
-                            }
-                        )
                         .crossfade(true)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
