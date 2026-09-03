@@ -73,7 +73,7 @@ fun HeroSpotlightCarousel(
     Column(modifier = modifier) {
         HorizontalPager(
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 24.dp),
+            contentPadding = PaddingValues(horizontal = 64.dp),
             pageSpacing = 16.dp,
             modifier = Modifier
                 .height(500.dp)
