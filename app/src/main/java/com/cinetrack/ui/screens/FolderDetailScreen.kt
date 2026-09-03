@@ -185,7 +185,7 @@ fun FolderDetailScreenContent(
                                 start = 16.dp,
                                 end = 16.dp,
                                 top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 32.dp
+                                bottom = paddingValues.calculateBottomPadding() + 100.dp
                             ),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -261,7 +261,7 @@ fun FolderDetailScreenContent(
                                     start = 16.dp,
                                     end = 16.dp,
                                     top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
-                                    bottom = paddingValues.calculateBottomPadding() + 32.dp
+                                    bottom = paddingValues.calculateBottomPadding() + 100.dp
                                 ),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)

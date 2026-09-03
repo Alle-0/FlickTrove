@@ -88,26 +88,52 @@ fun HeroSpotlightCarousel(
                 ImageQuality.HIGH
             )
 
+            val pageOffset = (
+                (pagerState.currentPage - virtualPage) + pagerState.currentPageOffsetFraction
+            ).absoluteValue
+            
+            val scale = 1f - (pageOffset * 0.15f).coerceIn(0f, 0.15f)
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(24.dp))
             ) {
+
+                var dominantColor by remember { mutableStateOf<Color?>(null) }
 
                 // Backdrop Image
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(backdropUrl)
                         .crossfade(true)
+                        .allowHardware(false)
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    onSuccess = { result ->
+                        val drawable = result.result.drawable
+                        val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                        bitmap?.let { b ->
+                            androidx.palette.graphics.Palette.from(b).generate { palette ->
+                                palette?.dominantSwatch?.rgb?.let { colorInt ->
+                                    dominantColor = Color(colorInt)
+                                } ?: palette?.mutedSwatch?.rgb?.let { colorInt ->
+                                    dominantColor = Color(colorInt)
+                                }
+                            }
+                        }
+                    }
                 )
 
                 val bgColor = MaterialTheme.colorScheme.background
-                val targetColor = movie.accentColor?.toComposeColor() ?: bgColor
+                val targetColor = movie.accentColor?.toComposeColor() ?: dominantColor ?: bgColor
                 val animatedColor by animateColorAsState(targetValue = targetColor, label = "backdropColor")
                 
                 Box(

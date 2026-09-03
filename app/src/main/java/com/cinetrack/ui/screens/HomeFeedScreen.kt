@@ -296,7 +296,7 @@ fun HomeFeedScreenContent(
                 if (watchlistList.isNotEmpty()) {
                     item {
                         HomeSectionTitle(title = stringResource(R.string.home_section_watchlist), onClick = { 
-                            tabNavigator.current = VistiTab 
+                            tabNavigator.current = HomeTab 
                         })
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
@@ -325,7 +325,7 @@ fun HomeFeedScreenContent(
                             if (watchlistList.size > 10) {
                                 item {
                                     ShowMoreCard(onClick = { 
-                                        tabNavigator.current = VistiTab 
+                                        tabNavigator.current = HomeTab 
                                     })
                                 }
                             }
