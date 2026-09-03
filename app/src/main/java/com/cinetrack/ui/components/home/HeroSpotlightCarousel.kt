@@ -124,7 +124,11 @@ fun HeroSpotlightCarousel(
                         val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
                         bitmap?.let { b ->
                             androidx.palette.graphics.Palette.from(b).generate { palette ->
-                                palette?.dominantSwatch?.rgb?.let { colorInt ->
+                                palette?.darkVibrantSwatch?.rgb?.let { colorInt ->
+                                    dominantColor = Color(colorInt)
+                                } ?: palette?.vibrantSwatch?.rgb?.let { colorInt ->
+                                    dominantColor = Color(colorInt)
+                                } ?: palette?.dominantSwatch?.rgb?.let { colorInt ->
                                     dominantColor = Color(colorInt)
                                 } ?: palette?.mutedSwatch?.rgb?.let { colorInt ->
                                     dominantColor = Color(colorInt)
@@ -149,12 +153,9 @@ fun HeroSpotlightCarousel(
                                         animatedColor.copy(alpha = 0.3f),
                                         animatedColor.copy(alpha = 0.85f),
                                         animatedColor
-                                    ),
-                                    startY = 0f,
-                                    endY = 1400f
+                                    )
                                 )
-                            )
-                    )
+                        )
 
                     // Titolo e anno
                     Column(
