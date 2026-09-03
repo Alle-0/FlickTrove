@@ -156,6 +156,7 @@ fun HeroSpotlightCarousel(
                                     )
                                 )
                         )
+                )
 
                     // Titolo e anno
                     Column(
