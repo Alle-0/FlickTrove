@@ -73,6 +73,9 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
 
+- 🎠 **Cinematic Home Feed** *(New in 4.0)*: An immersive, auto-scrolling **Hero Spotlight Carousel** sits at the top, showcasing trending titles with dynamic ambilight glow effects extracted from each backdrop in real-time.
+- 🏆 **The Trove's Pick** *(New in 4.0)*: A premium full-width card that highlights the single best title our proprietary algorithm has curated for you, complete with a personalized Match Score and a real-time dynamic glow.
+- 🥇 **Top 10 FlickTrove** *(New in 4.0)*: Our own custom weekly ranking algorithm surfaces the 10 hottest titles among all users, updated every 30 days.
 - 🔍 **Comprehensive Search**: Access the entire TMDB catalog. Find movies, TV shows, and explore biographical details and filmographies of actors.
 - 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
 - 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
@@ -80,9 +83,9 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
 - ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
-- 🌍 **Localization**: Native multi-language architecture for an international experience (currently English and Italian).
+- 🌍 **Localization**: Native multi-language architecture supporting 8 languages: 🇮🇹 🇬🇧 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳.
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
-- 📅 **Updates Zone**: A dedicated feed to keep track of upcoming episodes, theatrical releases, and latest news.
+- 📅 **Magazine & News Feed**: A dedicated editorial news section with curated articles from top film publications.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
 - 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Cloudflare R2.
 - 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove community.
@@ -139,7 +142,7 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 <details>
 <summary><b><img src="docs/assets/readme_icons/2_server.svg" width="18" height="18" align="absmiddle" /> Technical Deep Dive</b></summary>
 <br>
-FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled via the natively integrated Compose Navigation framework to avoid fragmentation.
+FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled by <b>Voyager</b> (tab + stack navigator) for a fully Compose-native, lifecycle-safe routing. The Home Feed runs on a dedicated <code>GetHomeFeedUseCase</code> that fires all API calls in parallel via coroutines, ensuring the fastest possible load time.
 </details>
 
 ---
@@ -181,6 +184,11 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
+- [ ] **Public Folders:** Make any folder public and shareable via link — let anyone browse your curated collection.
+- [ ] **Badges & Achievements:** Unlock special badges based on your watch history, streaks, genres explored, and community contributions.
+- [ ] **Follow Actors & Directors:** Get notified the moment a followed person announces or releases a new project.
+- [ ] **Production Company Pages:** Dedicated stats and screens for major studios (Paramount, 20th Century, A24, Warner Bros, etc.) — browse their full catalog and see community ratings at a glance.
+- [ ] **Official Website:** A public-facing companion website to showcase your profile, public folders, and stats.
 - [ ] **AI:** ?
 
 ---
