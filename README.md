@@ -182,7 +182,6 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 - [ ] **SIMKL Integration:** Alternative cloud sync engine for users.
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
-- [ ] **Global Trends & Leaderboards:** Discover what's trending this week among other FlickTrove users.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
 - [ ] **Public Folders:** Make any folder public and shareable via link — let anyone browse your curated collection.
 - [ ] **Badges & Achievements:** Unlock special badges based on your watch history, streaks, genres explored, and community contributions.
