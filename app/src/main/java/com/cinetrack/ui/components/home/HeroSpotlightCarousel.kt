@@ -73,7 +73,7 @@ fun HeroSpotlightCarousel(
     Column(modifier = modifier) {
         HorizontalPager(
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 64.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 16.dp,
             modifier = Modifier
                 .height(500.dp)
@@ -88,9 +88,10 @@ fun HeroSpotlightCarousel(
                 ImageQuality.HIGH
             )
 
-            val pageOffset = (
+            val rawPageOffset = (
                 (pagerState.currentPage - virtualPage) + pagerState.currentPageOffsetFraction
-            ).absoluteValue
+            )
+            val pageOffset = rawPageOffset.absoluteValue
             
             val scale = 1f - (pageOffset * 0.15f).coerceIn(0f, 0.15f)
 
@@ -100,6 +101,7 @@ fun HeroSpotlightCarousel(
                     .graphicsLayer {
                         scaleX = scale
                         scaleY = scale
+                        translationX = rawPageOffset * 40.dp.toPx()
                     }
                     .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(24.dp))
