@@ -243,7 +243,7 @@ fun HomeFeedScreenContent(
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (uiState.isLoading) {
+                if (uiState.isFeedLoading) {
                     item {
                         // Hero Skeleton
                         Box(

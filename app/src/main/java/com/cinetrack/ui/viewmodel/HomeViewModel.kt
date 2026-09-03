@@ -40,6 +40,7 @@ data class HomeUiState(
     val movieCount: Int = 0,
     val tvCount: Int = 0,
     val isLoading: Boolean = true,
+    val isFeedLoading: Boolean = true,
     val searchQuery: String = "",
     val activeTab: String = "movie",
     val sortConfig: SortConfig = SortConfig(),
@@ -162,6 +163,8 @@ class HomeViewModel @Inject constructor(
                 val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
 
                 _feedState.value = FeedState(
+                    isLoaded = true,
+                    hasError = false,
                     recommendedMovies = recMovies,
                     popularMovies = popMoviesDeferred.await(),
                     nowPlayingMovies = nowMoviesDeferred.await(),
@@ -177,7 +180,8 @@ class HomeViewModel @Inject constructor(
                     magazineNews = newsDeferred.await()
                 )
             } catch (e: Exception) {
-                // handle error silently or emit message
+                _feedState.value = FeedState(hasError = true)
+                actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
             }
         }
     }
@@ -293,7 +297,8 @@ class HomeViewModel @Inject constructor(
             trendingMovies = feedState.trendingMovies,
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
-            isLoading = baseState.isLoading || feedState.popularMovies.isEmpty()
+            isLoading = baseState.isLoading,
+            isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -491,6 +496,8 @@ class HomeViewModel @Inject constructor(
 }
 
 data class FeedState(
+    val isLoaded: Boolean = false,
+    val hasError: Boolean = false,
     val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
     val popularMovies: ImmutableList<Movie> = persistentListOf(),
     val nowPlayingMovies: ImmutableList<Movie> = persistentListOf(),
