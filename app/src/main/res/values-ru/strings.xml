@@ -1132,4 +1132,6 @@
     <string name="error_feed_title">Ой! Не удалось загрузить ленту.</string>
     <string name="error_feed_subtitle">Проверьте подключение и повторите попытку.</string>
     <string name="content_description_error">Ошибка</string>
+    <string name="home_section_continue_watching">Продолжить просмотр</string>
+    <string name="home_section_because_you_watched">Потому что вы смотрели %s</string>
 </resources>

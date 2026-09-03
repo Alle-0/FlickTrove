@@ -1134,4 +1134,6 @@
     <string name="error_feed_title">¡Ups! No se pudo cargar el feed.</string>
     <string name="error_feed_subtitle">Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="content_description_error">Error</string>
+    <string name="home_section_continue_watching">Continuar viendo</string>
+    <string name="home_section_because_you_watched">Porque viste %s</string>
 </resources>

@@ -1131,4 +1131,6 @@
     <string name="error_feed_title">Oups ! Impossible de charger le flux.</string>
     <string name="error_feed_subtitle">Vérifiez votre connexion et réessayez.</string>
     <string name="content_description_error">Erreur</string>
+    <string name="home_section_continue_watching">Reprendre la lecture</string>
+    <string name="home_section_because_you_watched">Parce que vous avez regardé %s</string>
 </resources>

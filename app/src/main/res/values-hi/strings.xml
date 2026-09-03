@@ -1130,5 +1130,7 @@
     <string name="error_feed_title">उफ़! फ़ीड लोड करने में असमर्थ.</string>
     <string name="error_feed_subtitle">अपना कनेक्शन जांचें और पुनः प्रयास करें.</string>
     <string name="content_description_error">त्रुटि</string>
+    <string name="home_section_continue_watching">देखना जारी रखें</string>
+    <string name="home_section_because_you_watched">क्योंकि आपने %s देखा है</string>
 </resources>
 

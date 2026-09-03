@@ -1143,4 +1143,6 @@
     <string name="error_feed_title">Oops! Unable to load the feed.</string>
     <string name="error_feed_subtitle">Check your connection and try again.</string>
     <string name="content_description_error">Error</string>
+    <string name="home_section_continue_watching">Continue Watching</string>
+    <string name="home_section_because_you_watched">Because you watched %s</string>
 </resources>

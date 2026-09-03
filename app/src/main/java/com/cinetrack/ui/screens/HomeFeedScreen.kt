@@ -347,6 +347,38 @@ fun HomeFeedScreenContent(
                     }
                 }
 
+                // CONTINUA A GUARDARE (TV)
+                if (isTv && uiState.continueWatchingTv.isNotEmpty()) {
+                    item {
+                        HomeSectionTitle(title = stringResource(R.string.home_section_continue_watching), onClick = null)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(uiState.continueWatchingTv.size) { index ->
+                                val movie = uiState.continueWatchingTv[index]
+                                Box(modifier = Modifier.width(110.dp)) {
+                                    MovieCard(
+                                        movie = movie,
+                                        cardWidth = 110.dp,
+                                        isFavorite = isMovieFavorite(movie),
+                                        isWatched = isMovieWatched(movie),
+                                        isReminder = isMovieReminder(movie),
+                                        folderColors = getMovieFolderColors(movie),
+                                        hazeState = activeHazeState,
+                                        staggerIndex = index,
+                                        onPress = onMovieClick,
+                                        onLongPress = stableOnLongPress,
+                                        onAction = stableOnAction,
+                                        onMessage = stableOnMessage
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 // 1. DALLA TUA WATCHLIST
                 if (watchlistList.isNotEmpty()) {
                     item {
@@ -360,10 +392,10 @@ fun HomeFeedScreenContent(
                         ) {
                             items(watchlistList.take(10).size) { index ->
                                 val movie = watchlistList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
+                                Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
-                                        cardWidth = 120.dp,
+                                        cardWidth = 110.dp,
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
@@ -388,45 +420,61 @@ fun HomeFeedScreenContent(
                     }
                 }
                 
-                // CONTINUA A GUARDARE (TV)
-                if (isTv && uiState.continueWatchingTv.isNotEmpty()) {
+                // 4. THE TROVE'S PICK + CONSIGLIATI (se disponibili)
+                if (recommendedList.isNotEmpty()) {
+                    val trovePick = recommendedList.first()
                     item {
-                        HomeSectionTitle(title = "Continua a guardare", onClick = null)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(uiState.continueWatchingTv.size) { index ->
-                                val movie = uiState.continueWatchingTv[index]
-                                Box(modifier = Modifier.width(120.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 120.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
+                        TrovePickCard(
+                            movie = trovePick,
+                            onMovieClick = onMovieClick
+                        )
+                    }
+                    // Se ci sono altri consigliati, mostra una riga con il resto
+                    if (recommendedList.size > 1) {
+                        item {
+                            HomeSectionTitle(
+                                title = stringResource(R.string.home_section_recommended),
+                                onClick = { tabNavigator.current = RecommendationsTab }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(recommendedList.drop(1).size) { index ->
+                                    val movie = recommendedList.drop(1)[index]
+                                    Box(modifier = Modifier.width(110.dp)) {
+                                        MovieCard(
+                                            movie = movie,
+                                            cardWidth = 110.dp,
+                                            isFavorite = isMovieFavorite(movie),
+                                            isWatched = isMovieWatched(movie),
+                                            isReminder = isMovieReminder(movie),
+                                            folderColors = getMovieFolderColors(movie),
+                                            hazeState = activeHazeState,
+                                            staggerIndex = index,
+                                            onPress = onMovieClick,
+                                            onLongPress = stableOnLongPress,
+                                            onAction = stableOnAction,
+                                            onMessage = stableOnMessage
+                                        )
+                                    }
+                                }
+                                item {
+                                    ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
                                 }
                             }
                         }
                     }
                 }
-                
+
                 // PERCHÉ HAI GUARDATO [TITOLO]
                 val becauseYouWatchedData = if (isTv) uiState.becauseYouWatchedTv else uiState.becauseYouWatchedMovie
                 if (becauseYouWatchedData != null && becauseYouWatchedData.second.isNotEmpty()) {
                     val seedMovie = becauseYouWatchedData.first
                     val recs = becauseYouWatchedData.second
                     item {
-                        HomeSectionTitle(title = "Perché hai guardato ${seedMovie.displayName}", onClick = null)
+                        HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName ?: seedMovie.name ?: ""), onClick = null)
                         Spacer(modifier = Modifier.height(16.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
@@ -434,10 +482,10 @@ fun HomeFeedScreenContent(
                         ) {
                             items(recs.size) { index ->
                                 val movie = recs[index]
-                                Box(modifier = Modifier.width(120.dp)) {
+                                Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
-                                        cardWidth = 120.dp,
+                                        cardWidth = 110.dp,
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
@@ -455,6 +503,35 @@ fun HomeFeedScreenContent(
                     }
                 }
                 
+                // 6. TOP 10 FLICKTROVE
+                if (top10List.isNotEmpty()) {
+                    item {
+                        HomeSectionTitle(stringResource(R.string.home_section_top_10))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(top10List.take(10).size) { index ->
+                                val movie = top10List[index]
+                                Top10MovieCard(
+                                    movie = movie,
+                                    rank = index + 1,
+                                    isFavorite = isMovieFavorite(movie),
+                                    isWatched = isMovieWatched(movie),
+                                    folderColors = getMovieFolderColors(movie),
+                                    hazeState = activeHazeState,
+                                    staggerIndex = index,
+                                    onPress = onMovieClick,
+                                    onLongPress = stableOnLongPress,
+                                    onAction = stableOnAction,
+                                    onMessage = stableOnMessage
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // 2. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
@@ -469,10 +546,10 @@ fun HomeFeedScreenContent(
                         ) {
                             items(popularList.size) { index ->
                                 val movie = popularList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
+                                Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
-                                        cardWidth = 120.dp,
+                                        cardWidth = 110.dp,
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
@@ -510,10 +587,10 @@ fun HomeFeedScreenContent(
                         ) {
                             items(nowPlayingList.size) { index ->
                                 val movie = nowPlayingList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
+                                Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
-                                        cardWidth = 120.dp,
+                                        cardWidth = 110.dp,
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
@@ -551,10 +628,10 @@ fun HomeFeedScreenContent(
                         ) {
                             items(upcomingList.size) { index ->
                                 val movie = upcomingList[index]
-                                Box(modifier = Modifier.width(120.dp)) {
+                                Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
-                                        cardWidth = 120.dp,
+                                        cardWidth = 110.dp,
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
@@ -578,54 +655,6 @@ fun HomeFeedScreenContent(
                     }
                 }
 
-                // 4. THE TROVE'S PICK + CONSIGLIATI (se disponibili)
-                if (recommendedList.isNotEmpty()) {
-                    val trovePick = recommendedList.first()
-                    item {
-                        TrovePickCard(
-                            movie = trovePick,
-                            onMovieClick = onMovieClick
-                        )
-                    }
-                    // Se ci sono altri consigliati, mostra una riga con il resto
-                    if (recommendedList.size > 1) {
-                        item {
-                            HomeSectionTitle(
-                                title = stringResource(R.string.home_section_recommended),
-                                onClick = { tabNavigator.current = RecommendationsTab }
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(recommendedList.drop(1).size) { index ->
-                                    val movie = recommendedList.drop(1)[index]
-                                    Box(modifier = Modifier.width(120.dp)) {
-                                        MovieCard(
-                                            movie = movie,
-                                            cardWidth = 120.dp,
-                                            isFavorite = isMovieFavorite(movie),
-                                            isWatched = isMovieWatched(movie),
-                                            isReminder = isMovieReminder(movie),
-                                            folderColors = getMovieFolderColors(movie),
-                                            hazeState = activeHazeState,
-                                            staggerIndex = index,
-                                            onPress = onMovieClick,
-                                            onLongPress = stableOnLongPress,
-                                            onAction = stableOnAction,
-                                            onMessage = stableOnMessage
-                                        )
-                                    }
-                                }
-                                item {
-                                    ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // 5. MAGAZINE NEWS
                 if (uiState.magazineNews.isNotEmpty()) {
                     item {
@@ -641,35 +670,6 @@ fun HomeFeedScreenContent(
                             }
                             item {
                                 ShowMoreCard(onClick = { tabNavigator.current = NewsTab }, height = 140.dp)
-                            }
-                        }
-                    }
-                }
-
-                // 6. TOP 10 FLICKTROVE
-                if (top10List.isNotEmpty()) {
-                    item {
-                        HomeSectionTitle(stringResource(R.string.home_section_top_10))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(top10List.take(10).size) { index ->
-                                val movie = top10List[index]
-                                Top10MovieCard(
-                                    movie = movie,
-                                    rank = index + 1,
-                                    isFavorite = isMovieFavorite(movie),
-                                    isWatched = isMovieWatched(movie),
-                                    folderColors = getMovieFolderColors(movie),
-                                    hazeState = activeHazeState,
-                                    staggerIndex = index,
-                                    onPress = onMovieClick,
-                                    onLongPress = stableOnLongPress,
-                                    onAction = stableOnAction,
-                                    onMessage = stableOnMessage
-                                )
                             }
                         }
                     }

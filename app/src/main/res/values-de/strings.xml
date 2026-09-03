@@ -1132,4 +1132,6 @@
     <string name="error_feed_title">Hoppla! Feed konnte nicht geladen werden.</string>
     <string name="error_feed_subtitle">Überprüfe deine Verbindung und versuche es erneut.</string>
     <string name="content_description_error">Fehler</string>
+    <string name="home_section_continue_watching">Weiter ansehen</string>
+    <string name="home_section_because_you_watched">Weil du %s angesehen hast</string>
 </resources>

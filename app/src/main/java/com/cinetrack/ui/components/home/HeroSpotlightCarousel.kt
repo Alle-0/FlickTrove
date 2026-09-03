@@ -161,11 +161,11 @@ fun HeroSpotlightCarousel(
                     // Titolo e anno
                     Column(
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
+                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 32.dp)
+                            .padding(horizontal = 24.dp, vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
 
                         // Logo o Titolo
                         if (!movie.logoPath.isNullOrEmpty()) {
@@ -185,6 +185,7 @@ fun HeroSpotlightCarousel(
                             Text(
                                 text = movie.title ?: movie.name ?: "",
                                 color = Color.White,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 style = MaterialTheme.typography.headlineLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     fontSize = 30.sp,
@@ -210,7 +211,7 @@ fun HeroSpotlightCarousel(
                         if (year.isNotEmpty() || genres.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (year.isNotEmpty()) {

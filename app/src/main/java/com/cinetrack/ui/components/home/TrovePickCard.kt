@@ -92,6 +92,7 @@ fun TrovePickCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 24.dp) // Aumentato lo spazio naturale per il glow
                 .graphicsLayer { clip = false },
             contentAlignment = Alignment.Center
         ) {
@@ -99,15 +100,13 @@ fun TrovePickCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp) // Stessa altezza della card per non alterare il layout
-                    .offset(y = 8.dp) // Leggero offset verso il basso
+                    .height(340.dp) // Più alto fisicamente (260 card + 80 padding) per far sfumare il blur senza tagli
+                    .offset(y = 12.dp) 
                     .graphicsLayer {
-                        alpha = 0.55f // Più delicato
-                        scaleX = 1.05f // Espande visivamente ai lati
-                        scaleY = 1.15f // Espande visivamente sopra e sotto senza spingere il testo
+                        alpha = 0.55f 
                         clip = false
                     }
-                    .blur(24.dp) // Effetto sfocatura
+                    .blur(24.dp) // Blur aumentato per essere più diffuso e morbido
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
@@ -119,10 +118,10 @@ fun TrovePickCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(260.dp)
-                        .padding(horizontal = 16.dp) 
+                        .padding(horizontal = 24.dp) // Più stretto della card vera (16dp) così sfuma bene ai lati
                         .align(Alignment.Center)
                         .graphicsLayer {
-                            // Zoom ridotto
+                            // Zoom normale
                             scaleX = 1.0f
                             scaleY = 1.0f
                         }

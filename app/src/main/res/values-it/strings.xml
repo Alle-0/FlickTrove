@@ -1128,4 +1128,6 @@
     <string name="error_feed_title">Oops! Impossibile caricare il feed.</string>
     <string name="error_feed_subtitle">Controlla la connessione e riprova.</string>
     <string name="content_description_error">Errore</string>
+    <string name="home_section_continue_watching">Continua a guardare</string>
+    <string name="home_section_because_you_watched">Perché hai guardato %s</string>
 </resources>

@@ -27,10 +27,10 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.theme.FlickTroveTheme
 
 @Composable
-fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 180.dp) {
+fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 165.dp) {
     Box(
         modifier = Modifier
-            .width(120.dp)
+            .width(110.dp)
             .height(height)
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.1f))
