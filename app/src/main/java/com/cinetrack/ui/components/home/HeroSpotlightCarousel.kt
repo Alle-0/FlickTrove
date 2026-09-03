@@ -101,7 +101,7 @@ fun HeroSpotlightCarousel(
                     .graphicsLayer {
                         scaleX = scale
                         scaleY = scale
-                        translationX = rawPageOffset * 22.dp.toPx()
+                        translationX = rawPageOffset * 28.dp.toPx()
                     }
                     .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(24.dp))
