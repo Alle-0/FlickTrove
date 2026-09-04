@@ -45,6 +45,8 @@ class SettingsViewModel @Inject constructor(
     private val movieRepository: MovieRepository,
     private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
     private val traktService: dagger.Lazy<com.cinetrack.data.api.TraktService>,
+    private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository,
+    private val simklService: dagger.Lazy<com.cinetrack.data.api.SimklService>,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val appUpdateManager: com.cinetrack.util.AppUpdateManager,
@@ -206,10 +208,19 @@ class SettingsViewModel @Inject constructor(
     /** Emits true when the session was forcibly cleared after a token-refresh failure. */
     val traktNeedsReconnect: StateFlow<Boolean> = traktAuthRepository.needsReconnect
 
+    val isSimklLoggedIn: StateFlow<Boolean> = simklAuthRepository.isLoggedInFlow.stateIn(viewModelScope, SharingStarted.Lazily, false)
+
     fun disconnectTrakt() {
         traktAuthRepository.clearAuth()
         viewModelScope.launch {
             actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_disconnected)))
+        }
+    }
+
+    fun disconnectSimkl() {
+        viewModelScope.launch {
+            simklAuthRepository.clearAuth()
+            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.simkl_disconnected)))
         }
     }
 
@@ -229,7 +240,6 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun syncTraktNow() {
-        if (!isTraktLoggedIn.value) return
         viewModelScope.launch {
             val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
                 .setInputData(androidx.work.workDataOf("force" to true))
@@ -242,6 +252,7 @@ class SettingsViewModel @Inject constructor(
             actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_manual_sync_started)))
         }
     }
+
 
     fun setAnyDialogOpen(isOpen: Boolean) {
         _isAnyDialogOpen.value = isOpen
@@ -564,6 +575,55 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    fun exchangeSimklCode(code: String) {
+        viewModelScope.launch {
+            try {
+                val response = simklService.get().getAccessToken(
+                    com.cinetrack.data.api.SimklTokenRequest(
+                        code = code,
+                        client_id = com.cinetrack.util.Keys.getSimklKey(),
+                        client_secret = com.cinetrack.util.Keys.getSimklSecret(),
+                        redirect_uri = "flicktrove://simkl_login"
+                    )
+                )
+                simklAuthRepository.saveToken(response.access_token)
+                
+                syncSimklNow()
+                
+                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connected))
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsViewModel", "Simkl token exchange failed", e)
+                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
+            }
+        }
+    }
+
+    val simklSyncWorkInfo = androidx.work.WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkFlow("SimklManualSync")
+        .map { it.firstOrNull() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun syncSimklNow() {
+        viewModelScope.launch {
+            val constraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                .build()
+
+            val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
+                .setConstraints(constraints)
+                .setInputData(androidx.work.workDataOf("force" to true))
+                .build()
+
+            androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                "SimklManualSync",
+                androidx.work.ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+            actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_manual_sync_started))
+        }
+    }
+
 
     fun toggleAdvancedVisualEffects(enabled: Boolean) {
         viewModelScope.launch {

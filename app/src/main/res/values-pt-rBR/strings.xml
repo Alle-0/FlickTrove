@@ -1132,5 +1132,18 @@
     <string name="content_description_error">Erro</string>
     <string name="home_section_continue_watching">Continuar assistindo</string>
     <string name="home_section_because_you_watched">Porque você assistiu %s</string>
+
+    <!-- SIMKL -->
+    <string name="simkl_connected">SIMKL conectado com sucesso!</string>
+    <string name="simkl_disconnected">SIMKL desconectado!</string>
+    <string name="simkl_connect_error">Erro ao conectar ao SIMKL</string>
+    <string name="simkl_connect">Conectar ao SIMKL</string>
+    <string name="simkl_sync_desc">App ➔ SIMKL: Instantâneo\nSIMKL ➔ App: 24h</string>
+    <string name="home_hero_featured">DESTAQUE</string>
+    <string name="home_section_watchlist">Da sua Watchlist</string>
+    <string name="home_section_watchlist_upcoming">Em breve da sua Watchlist</string>
+    <string name="match_score">Compatibilidade</string>
+    <string name="notification_like_body">%1$s curtiu seu comentário.</string>
+    <string name="notification_like_title">Nova Curtida</string>
 </resources>
 

@@ -117,7 +117,9 @@ fun SettingsSyncBackupSection(
     val context = LocalContext.current
     val isTraktLoggedIn by settingsViewModel.isTraktLoggedIn.collectAsStateWithLifecycle()
     val traktNeedsReconnect by settingsViewModel.traktNeedsReconnect.collectAsStateWithLifecycle()
+    val isSimklLoggedIn by settingsViewModel.isSimklLoggedIn.collectAsStateWithLifecycle()
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
+    val simklSyncWorkInfo by settingsViewModel.simklSyncWorkInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
     val externalImportWorkInfo by settingsViewModel.externalImportWorkInfo.collectAsStateWithLifecycle()
 
@@ -194,6 +196,7 @@ fun SettingsSyncBackupSection(
             title = "Trakt.tv",
             description = stringResource(R.string.settings_trakt_sync_desc),
             iconTint = Color.Unspecified,
+            alpha = if (isSimklLoggedIn) 0.35f else 1f,
             onClick = {},
             trailing = {
                 Row(
@@ -227,7 +230,9 @@ fun SettingsSyncBackupSection(
                     } else {
                         SettingsActionButton(
                             text = stringResource(R.string.trakt_connect),
+                            enabled = !isSimklLoggedIn,
                             onClick = {
+                                if (isSimklLoggedIn) return@SettingsActionButton
                                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                 val clientId = Keys.getTraktKey()
                                 // Generate a random state for CSRF protection and save it
@@ -307,6 +312,102 @@ fun SettingsSyncBackupSection(
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    }
+                }
+            }
+        )
+
+        // SIMKL Sync Card
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_simkl_logo),
+            title = "SIMKL",
+            description = stringResource(R.string.simkl_sync_desc),
+            iconTint = Color.Unspecified,
+            alpha = if (isTraktLoggedIn) 0.35f else 1f,
+            onClick = {},
+            trailing = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isSimklLoggedIn) {
+                        SettingsActionButton(
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                            onClick = {
+                                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                settingsViewModel.syncSimklNow()
+                            }
+                        )
+                        SettingsActionButton(
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_x),
+                            tint = Color(0xFFFF5252),
+                            onClick = {
+                                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                settingsViewModel.disconnectSimkl()
+                            }
+                        )
+                    } else {
+                        SettingsActionButton(
+                            text = stringResource(R.string.simkl_connect),
+                            enabled = !isTraktLoggedIn,
+                            onClick = {
+                                if (isTraktLoggedIn) return@SettingsActionButton
+                                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                val clientId = Keys.getSimklKey()
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse(
+                                        "https://simkl.com/oauth/authorize" +
+                                        "?response_type=code" +
+                                        "&client_id=$clientId" +
+                                        "&redirect_uri=flicktrove://simkl_login"
+                                    )
+                                )
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                }
+            },
+            customContent = {
+                // Sync progress indicator
+                if (simklSyncWorkInfo != null && simklSyncWorkInfo!!.state == WorkInfo.State.RUNNING) {
+                    val progressData = simklSyncWorkInfo!!.progress
+                    val current = progressData.getInt("current", 0)
+                    val total = progressData.getInt("total", 0)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (total > 0) {
+                        Text(
+                            text = stringResource(R.string.trakt_syncing_progress, current, total), // Can reuse trakt_syncing_progress string
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = { current.toFloat() / total.toFloat() },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    } else {
+                        val statusString = progressData.getString("status")
+                        if (statusString != null) {
+                            Text(
+                                text = statusString,
+                                color = Color.White.copy(alpha = 0.7f),
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),

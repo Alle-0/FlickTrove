@@ -48,6 +48,7 @@ import androidx.work.BackoffPolicy
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.channels.awaitClose
 import com.cinetrack.worker.TraktInstantWriteWorker
+import com.cinetrack.worker.SimklInstantWriteWorker
 
 @Singleton
 class MovieRepository @Inject constructor(
@@ -112,6 +113,8 @@ class MovieRepository @Inject constructor(
     // --- Local Operations (Bunker: Room First) ---
     suspend fun getLocalMovies(): List<Movie> = favoriteDao.getAll()
     
+    suspend fun getLocalMoviesIncludingDeleted(): List<Movie> = favoriteDao.getAllIncludingDeleted()
+    
     fun getLocalMoviesFlow(): Flow<List<Movie>> = favoriteDao.getAllFlow()
 
     fun getFlowMoviesFlow(): Flow<List<Movie>> = favoriteDao.getFlowMoviesFlow()
@@ -136,6 +139,12 @@ class MovieRepository @Inject constructor(
     fun getMovieFlow(id: Long, mediaType: String): Flow<Movie?> = favoriteDao.getByIdFlow(id, mediaType)
 
     suspend fun getMovie(id: Long, mediaType: String): Movie? = favoriteDao.getById(id, mediaType)
+
+    /** Returns the movie even if it's pending_delete — used by sync workers to prevent resurrection */
+    suspend fun getMovieIncludingDeleted(id: Long, mediaType: String): Movie? = favoriteDao.getByIdIncludingDeleted(id, mediaType)
+
+    /** Physically removes a pending_delete row after the remote API confirms the deletion */
+    suspend fun hardDeleteMovie(id: Long, mediaType: String) = favoriteDao.deleteById(id, mediaType)
 
     suspend fun getShowsForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getShowsForUpdate(limit)
 
@@ -190,14 +199,41 @@ class MovieRepository @Inject constructor(
                     if (movie.watched) {
                         enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
                     } else if (movie.watchedEpisodes.isNullOrEmpty()) {
-                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
+                        // Se è un rewatch, watchedAt NON è null (viene aggiornato con la data del rewatch).
+                        // Se l'utente ha fatto WatchState.NONE, watchedAt diventa null.
+                        // Non rimuoviamo dal server se è un rewatch, altrimenti cancelliamo anni di cronologia!
+                        if (movie.watchedAt == null) {
+                            enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
+                        }
                     }
                 } else {
                     // I film funzionano in modo standard (acceso/spento)
                     val action = if (movie.watched) TraktInstantWriteWorker.ACTION_MARK_WATCHED
-                                 else               TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
+                                 else {
+                                     // Per i film, stesso discorso: se watched = false ma watchedAt != null è un rewatch?
+                                     // In realtà sui film logRewatch non mette watched = false. Lo fa solo WatchState.NONE.
+                                     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
+                                 }
                     enqueue(action)
                 }
+            }
+
+            // rewatch for movies
+            val oldWatchedAt = oldMovie?.watchedAt
+            if (oldWatched == movie.watched && movie.watched && oldWatchedAt != movie.watchedAt && movie.watchedAt != null) {
+                if (movie.mediaType == "movie") {
+                    // For movies, if watchedAt changed but watched state is still true, it's a rewatch.
+                    // Enqueuing ACTION_MARK_WATCHED will send a new play to Trakt/SIMKL.
+                    enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
+                }
+            }
+
+            // dropped changed
+            val oldDropped = oldMovie?.dropped ?: false
+            if (oldDropped != movie.dropped) {
+                val action = if (movie.dropped) TraktInstantWriteWorker.ACTION_MARK_DROPPED
+                             else               TraktInstantWriteWorker.ACTION_REMOVE_DROPPED
+                enqueue(action)
             }
 
             // personalRating changed
@@ -250,7 +286,22 @@ class MovieRepository @Inject constructor(
             }
 
             if (workRequests.isNotEmpty()) {
-                WorkManager.getInstance(context).enqueue(workRequests)
+                androidx.work.WorkManager.getInstance(context)
+                    .enqueueUniqueWork("TRAKT_INSTANT_PUSH", androidx.work.ExistingWorkPolicy.APPEND_OR_REPLACE, workRequests)
+            }
+            
+            // Enqueue SIMKL Instant Write
+            val simklRequests = workRequests.map { traktReq ->
+                androidx.work.OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
+                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(traktReq.workSpec.input)
+                    .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
+                    .build()
+            }
+            
+            if (simklRequests.isNotEmpty()) {
+                androidx.work.WorkManager.getInstance(context)
+                    .enqueueUniqueWork("SIMKL_INSTANT_PUSH", androidx.work.ExistingWorkPolicy.APPEND_OR_REPLACE, simklRequests)
             }
         }
         
@@ -274,7 +325,17 @@ class MovieRepository @Inject constructor(
                 val newStatus = if (movie.watched) "watched" else "unwatched"
                 val oldStatus = if (oldMovie?.watched == true) "watched" else "unwatched"
 
-                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp || newRating != oldRating || newStatus != oldStatus) {
+                var calculatedViewsDelta = 0L
+                if (movie.mediaType == "tv") {
+                    val oldEps = oldMovie?.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                    val newEps = movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                    calculatedViewsDelta = (newEps - oldEps).toLong()
+                } else {
+                    if (newStatus == "watched" && oldStatus != "watched") calculatedViewsDelta = 1L
+                    if (oldStatus == "watched" && newStatus != "watched") calculatedViewsDelta = -1L
+                }
+
+                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp || newRating != oldRating || calculatedViewsDelta != 0L) {
                     firebaseRemoteDataSource.updateGlobalMovieStats(
                         compositeId = movie.compositeId,
                         addedVibes = addedVibes.toList(),
@@ -284,7 +345,8 @@ class MovieRepository @Inject constructor(
                         newRating = newRating,
                         oldRating = oldRating,
                         newStatus = newStatus,
-                        oldStatus = oldStatus
+                        oldStatus = oldStatus,
+                        viewsDelta = calculatedViewsDelta
                     )
                 }
             } catch (e: Exception) {
@@ -419,8 +481,11 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun deleteMovie(movie: Movie) {
+        val updatedMovie = movie.copy(watchedEpisodes = emptyMap())
+        favoriteDao.insert(updatedMovie)
         favoriteDao.markDeleted(movie.id, movie.mediaType)
         watchHistoryDao.deleteByMovieId(movie.id)
+        watchHistoryDao.purgeHistoryForMovie(movie.id)
         widgetNotifier.notifyWidgetUpdated()
 
         // --- PUSH RIMOZIONE A TRAKT ---
@@ -472,8 +537,11 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun markAsDeleted(movie: Movie) {
+        val updatedMovie = movie.copy(watchedEpisodes = emptyMap())
+        favoriteDao.insert(updatedMovie)
         favoriteDao.markDeleted(movie.id, movie.mediaType)
         watchHistoryDao.deleteByMovieId(movie.id)
+        watchHistoryDao.purgeHistoryForMovie(movie.id)
 
         // --- PUSH RIMOZIONE A TRAKT ---
         val builder = androidx.work.Data.Builder()

@@ -64,6 +64,17 @@ class FlickTroveApplication : Application(), Configuration.Provider {
             .setConstraints(traktSyncConstraints)
             .build()
             
+            // --- SIMKL Sync Worker (24h) ---
+            val simklSyncConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                .build()
+
+            val simklSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>(
+                24, java.util.concurrent.TimeUnit.HOURS
+            )
+            .setConstraints(simklSyncConstraints)
+            .build()
+            
             workManager.cancelUniqueWork("ReminderMigration")
             
             workManager.enqueueUniquePeriodicWork(
@@ -88,6 +99,12 @@ class FlickTroveApplication : Application(), Configuration.Provider {
                 "trakt_sync_work",
                 androidx.work.ExistingPeriodicWorkPolicy.KEEP,
                 traktSyncRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "SimklSync",
+                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                simklSyncRequest
             )
 
             // Refresh the home-screen widget daily so upcoming release dates

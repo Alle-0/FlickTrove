@@ -39,6 +39,11 @@ data class Movie(
     @set:PropertyName("imdb_id")
     @ColumnInfo(name = "imdb_id") var imdbId: String? = null,
     
+    @SerialName("simkl_id")
+    @get:PropertyName("simkl_id")
+    @set:PropertyName("simkl_id")
+    @ColumnInfo(name = "simkl_id") var simklId: String? = null,
+    
     // Core Display Info
     @get:PropertyName("title")
     @set:PropertyName("title")

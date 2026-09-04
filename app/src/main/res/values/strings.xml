@@ -1145,4 +1145,11 @@
     <string name="content_description_error">Error</string>
     <string name="home_section_continue_watching">Continue Watching</string>
     <string name="home_section_because_you_watched">Because you watched %s</string>
+
+    <!-- SIMKL -->
+    <string name="simkl_connected">SIMKL connected successfully!</string>
+    <string name="simkl_disconnected">SIMKL disconnected!</string>
+    <string name="simkl_connect_error">Error connecting to SIMKL</string>
+    <string name="simkl_connect">Connect to SIMKL</string>
+    <string name="simkl_sync_desc">App ➔ SIMKL: Instant\nSIMKL ➔ App: 24h</string>
 </resources>

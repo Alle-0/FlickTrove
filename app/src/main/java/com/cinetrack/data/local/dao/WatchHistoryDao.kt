@@ -44,6 +44,9 @@ interface WatchHistoryDao {
     @Query("UPDATE watch_history SET syncStatus = 'deleted' WHERE movieId = :movieId")
     suspend fun deleteByMovieId(movieId: Long)
     
+    @Query("DELETE FROM watch_history WHERE movieId = :movieId")
+    suspend fun purgeHistoryForMovie(movieId: Long)
+    
     @Query("UPDATE watch_history SET syncStatus = :status WHERE id = :id")
     suspend fun updateSyncStatus(id: Long, status: String)
     

@@ -1132,5 +1132,18 @@
     <string name="content_description_error">त्रुटि</string>
     <string name="home_section_continue_watching">देखना जारी रखें</string>
     <string name="home_section_because_you_watched">क्योंकि आपने %s देखा है</string>
+
+    <!-- SIMKL -->
+    <string name="simkl_connected">SIMKL सफलतापूर्वक कनेक्ट हो गया!</string>
+    <string name="simkl_disconnected">SIMKL डिस्कनेक्ट हो गया!</string>
+    <string name="simkl_connect_error">SIMKL से कनेक्ट करने में त्रुटि</string>
+    <string name="simkl_connect">SIMKL से कनेक्ट करें</string>
+    <string name="simkl_sync_desc">ऐप ➔ SIMKL: तुरंत\nSIMKL ➔ ऐप: 24 घंटे</string>
+    <string name="home_hero_featured">विशेष रुप से प्रदर्शित</string>
+    <string name="home_section_watchlist">आपकी वॉचलिस्ट से</string>
+    <string name="home_section_watchlist_upcoming">आपकी वॉचलिस्ट से जल्द आ रहा है</string>
+    <string name="match_score">मैच</string>
+    <string name="notification_like_body">%1$s को आपकी टिप्पणी पसंद आई।</string>
+    <string name="notification_like_title">नई पसंद</string>
 </resources>
 

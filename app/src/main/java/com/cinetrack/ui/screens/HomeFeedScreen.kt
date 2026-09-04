@@ -258,11 +258,8 @@ fun HomeFeedScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
-                                .hazeGlass(
-                                    state = activeHazeState,
-                                    shape = RoundedCornerShape(24.dp),
-                                    style = HazeStyles.PremiumDark
-                                )
+                                .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
                                 .padding(32.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -271,9 +268,9 @@ fun HomeFeedScreenContent(
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Warning,
+                                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_error),
                                     contentDescription = stringResource(R.string.content_description_error),
-                                    tint = Color(0xFF00E5FF),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(48.dp)
                                 )
                                 Text(
@@ -290,7 +287,7 @@ fun HomeFeedScreenContent(
                                 )
                                 Button(
                                     onClick = { viewModel.retryFeed() },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF)),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text(stringResource(R.string.error_state_retry), color = Color.Black, fontWeight = FontWeight.Bold)
@@ -322,7 +319,7 @@ fun HomeFeedScreenContent(
                                     .background(Color(0xFF1A1A2E))
                                     .shimmerEffect()
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            
                             LazyRow(
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -351,7 +348,7 @@ fun HomeFeedScreenContent(
                 if (isTv && uiState.continueWatchingTv.isNotEmpty()) {
                     item {
                         HomeSectionTitle(title = stringResource(R.string.home_section_continue_watching), onClick = null)
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -385,7 +382,7 @@ fun HomeFeedScreenContent(
                         HomeSectionTitle(title = stringResource(R.string.home_section_watchlist), onClick = { 
                             tabNavigator.current = HomeTab 
                         })
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -436,7 +433,7 @@ fun HomeFeedScreenContent(
                                 title = stringResource(R.string.home_section_recommended),
                                 onClick = { tabNavigator.current = RecommendationsTab }
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            
                             LazyRow(
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -475,7 +472,7 @@ fun HomeFeedScreenContent(
                     val recs = becauseYouWatchedData.second
                     item {
                         HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName ?: seedMovie.name ?: ""), onClick = null)
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -507,7 +504,7 @@ fun HomeFeedScreenContent(
                 if (top10List.isNotEmpty()) {
                     item {
                         HomeSectionTitle(stringResource(R.string.home_section_top_10))
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -539,7 +536,7 @@ fun HomeFeedScreenContent(
                             DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
                             tabNavigator.current = DiscoverTab 
                         })
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -580,7 +577,7 @@ fun HomeFeedScreenContent(
                             DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
                             tabNavigator.current = DiscoverTab 
                         })
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -621,7 +618,7 @@ fun HomeFeedScreenContent(
                             DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
                             tabNavigator.current = DiscoverTab 
                         })
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -659,7 +656,7 @@ fun HomeFeedScreenContent(
                 if (uiState.magazineNews.isNotEmpty()) {
                     item {
                         HomeSectionTitle(title = stringResource(R.string.home_section_magazine), onClick = { tabNavigator.current = NewsTab })
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)

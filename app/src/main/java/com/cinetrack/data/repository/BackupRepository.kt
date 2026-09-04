@@ -334,7 +334,21 @@ class BackupRepository @Inject constructor(
                     )
                 }
                 val newRating = incoming.personalRating
-                if (newRating != null && newRating > 0.0) {
+                
+                var calculatedViewsDelta = 0L
+                val isRecentWatch = isRecent(incoming.watchedAt)
+                if (isRecentWatch) {
+                    if (incoming.mediaType == "tv") {
+                        calculatedViewsDelta = incoming.watchedEpisodes?.values?.sumOf { it.size }?.toLong() ?: 0L
+                    } else if (incoming.watched) {
+                        calculatedViewsDelta = 1L
+                    }
+                }
+                
+                val isRecentVote = isRecentTime(incoming.votedAt)
+                val finalRating = if (isRecentVote) newRating else null
+
+                if ((finalRating != null && finalRating > 0.0) || calculatedViewsDelta != 0L) {
                     repositoryScope.launch {
                         firebaseRemoteDataSource.updateGlobalMovieStats(
                             compositeId = incoming.compositeId,
@@ -342,10 +356,11 @@ class BackupRepository @Inject constructor(
                             removedVibes = emptyList(),
                             newMvp = null,
                             oldMvp = null,
-                            newRating = newRating,
+                            newRating = finalRating,
                             oldRating = null,
-                            newStatus = if (incoming.watched) "watched" else "unwatched",
-                            oldStatus = null
+                            newStatus = if (incoming.watched && isRecentWatch) "watched" else "unwatched",
+                            oldStatus = null,
+                            viewsDelta = calculatedViewsDelta
                         )
                     }
                 }
@@ -415,7 +430,17 @@ class BackupRepository @Inject constructor(
                 val newStatus = if (updated.watched) "watched" else "unwatched"
                 val oldStatus = if (local.watched) "watched" else "unwatched"
                 
-                if (newRating != oldRating || newStatus != oldStatus) {
+                var calculatedViewsDelta = 0L
+                if (updated.mediaType == "tv") {
+                    val oldEps = local.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                    val newEps = updated.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                    calculatedViewsDelta = (newEps - oldEps).toLong()
+                } else {
+                    if (newStatus == "watched" && oldStatus != "watched") calculatedViewsDelta = 1L
+                    if (oldStatus == "watched" && newStatus != "watched") calculatedViewsDelta = -1L
+                }
+                
+                if (newRating != oldRating || calculatedViewsDelta != 0L) {
                     repositoryScope.launch {
                         firebaseRemoteDataSource.updateGlobalMovieStats(
                             compositeId = updated.compositeId,
@@ -426,7 +451,8 @@ class BackupRepository @Inject constructor(
                             newRating = newRating,
                             oldRating = oldRating,
                             newStatus = newStatus,
-                            oldStatus = oldStatus
+                            oldStatus = oldStatus,
+                            viewsDelta = calculatedViewsDelta
                         )
                     }
                 }
@@ -463,5 +489,25 @@ class BackupRepository @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun isRecent(dateString: String?): Boolean {
+        if (dateString.isNullOrBlank()) return false
+        return try {
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
+            val date = format.parse(dateString)
+            val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+            date != null && date.time >= thirtyDaysAgo
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isRecentTime(timeMillis: Long?): Boolean {
+        if (timeMillis == null || timeMillis <= 0L) return false
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+        // Handle cases where timeMillis might be in seconds instead of milliseconds
+        val millis = if (timeMillis < 10000000000L) timeMillis * 1000 else timeMillis
+        return millis >= thirtyDaysAgo
     }
 }

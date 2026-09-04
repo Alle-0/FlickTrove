@@ -1,4 +1,5 @@
 package com.cinetrack.ui.components.navigation
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -211,25 +212,44 @@ fun GlassyTopBar(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.wrapContentWidth()
                 ) {
-                if (connectionState == com.cinetrack.util.ConnectionState.OFFLINE) {
-                    Icon(
-                        imageVector = Icons.Rounded.CloudOff,
-                        contentDescription = "Offline",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                } else if (connectionState == com.cinetrack.util.ConnectionState.POOR) {
-                    Icon(
-                        imageVector = Icons.Rounded.Wifi,
-                        contentDescription = "Poor Connection",
-                        tint = Color(0xFFFFA500),
-                        modifier = Modifier.size(20.dp).alpha(0.8f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                val isOffline = connectionState == com.cinetrack.util.ConnectionState.OFFLINE
+                val isPoor = connectionState == com.cinetrack.util.ConnectionState.POOR
+                AnimatedVisibility(
+                    visible = isOffline,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.CloudOff,
+                            contentDescription = "Offline",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
+                AnimatedVisibility(
+                    visible = isPoor,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.Wifi,
+                            contentDescription = "Poor Connection",
+                            tint = Color(0xFFFFA500),
+                            modifier = Modifier.size(20.dp).alpha(0.8f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                 }
 
-                if (isSyncing) {
+                AnimatedVisibility(
+                    visible = isSyncing,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
                     Icon(
                         imageVector = Icons.Rounded.Sync,
                         contentDescription = "Syncing",
@@ -241,238 +261,283 @@ fun GlassyTopBar(
                     )
                 }
 
-                if (onLayoutToggleClick != null && layoutColumns != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = { onLayoutToggleClick.invoke() }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = layoutToggleIcon(layoutColumns),
-                            contentDescription = "Cambia Colonne",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                if (onFilterClick != null) {
-                    val filterButtonCenter = remember { arrayOf(Offset.Zero) }
-                    
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .then(
-                                if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(50))
-                                else Modifier
-                            )
-                            .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
-                                filterButtonCenter[0] = Offset(
-                                    x = position.x + coords.size.width / 2f,
-                                    y = position.y + coords.size.height / 2f
-                                )
-                            }
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = { onFilterClick.invoke(filterButtonCenter[0]) }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                            contentDescription = "Filtri",
-                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                if (onRefreshClick != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = onRefreshClick
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
-                            contentDescription = "Ricarica",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                if (onSettingsClick != null) {
-                    val settingsButtonCenter = remember { arrayOf(Offset.Zero) }
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
-                                settingsButtonCenter[0] = Offset(
-                                    x = position.x + coords.size.width / 2f,
-                                    y = position.y + coords.size.height / 2f
-                                )
-                            }
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = { onSettingsClick.invoke(settingsButtonCenter[0]) }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                            contentDescription = "Impostazioni",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                if (isStatsRewatchesEnabled != null && onStatsRewatchToggle != null) {
-                    val isOptimisticRewatches = remember(isStatsRewatchesEnabled) { mutableStateOf(isStatsRewatchesEnabled) }
-                    
-                    Box(
-                        modifier = Modifier
-                            .height(36.dp)
-                            .wrapContentWidth()
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = {
-                                    isOptimisticRewatches.value = !isOptimisticRewatches.value
-                                    onStatsRewatchToggle(isOptimisticRewatches.value)
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
+                AnimatedVisibility(
+                    visible = onLayoutToggleClick != null && layoutColumns != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onLayoutToggleClick != null && layoutColumns != null) {
                         Box(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(vertical = 6.dp)
-                                .background(
-                                    color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
-                                    shape = CircleShape
-                                )
-                                .padding(horizontal = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(id = R.string.stats_rewatches),
-                                color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.onPrimary else Color.White.copy(alpha = 0.7f),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-
-                if (onEditBackdropClick != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = onEditBackdropClick
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_pencil),
-                            contentDescription = "Modifica Sfondo",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                if (onUpdatesClick != null) {
-                    val updatesButtonCenter = remember { arrayOf(Offset.Zero) }
-
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
-                                updatesButtonCenter[0] = Offset(
-                                    x = position.x + coords.size.width / 2f,
-                                    y = position.y + coords.size.height / 2f
-                                )
-                            }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
+                                .size(32.dp)
                                 .bounceClick(
                                     enabled = !isDimmed,
-                                    onClick = { onUpdatesClick.invoke(updatesButtonCenter[0]) }
+                                    onClick = { onLayoutToggleClick.invoke() }
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
-                                contentDescription = "Aggiornamenti",
+                                imageVector = layoutToggleIcon(layoutColumns),
+                                contentDescription = "Cambia Colonne",
                                 tint = Color.White,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
+                    }
+                }
 
-                        if (notificationCount > 0) {
-                            val isPill = notificationCount > 9
-                            val badgeText = if (notificationCount > 99) "99+" else notificationCount.toString()
+                val filterButtonCenter = remember { arrayOf(Offset.Zero) }
+                AnimatedVisibility(
+                    visible = onFilterClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onFilterClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .then(
+                                    if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(50))
+                                    else Modifier
+                                )
+                                .onGloballyPositioned { coords ->
+                                    val position = coords.positionInWindow()
+                                    filterButtonCenter[0] = Offset(
+                                        x = position.x + coords.size.width / 2f,
+                                        y = position.y + coords.size.height / 2f
+                                    )
+                                }
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = { onFilterClick.invoke(filterButtonCenter[0]) }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                                contentDescription = "Filtri",
+                                tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = onRefreshClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onRefreshClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = onRefreshClick
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                                contentDescription = "Ricarica",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                val settingsButtonCenter = remember { arrayOf(Offset.Zero) }
+                AnimatedVisibility(
+                    visible = onSettingsClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onSettingsClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .onGloballyPositioned { coords ->
+                                    val position = coords.positionInWindow()
+                                    settingsButtonCenter[0] = Offset(
+                                        x = position.x + coords.size.width / 2f,
+                                        y = position.y + coords.size.height / 2f
+                                    )
+                                }
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = { onSettingsClick.invoke(settingsButtonCenter[0]) }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                                contentDescription = "Impostazioni",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                val isOptimisticRewatches = remember(isStatsRewatchesEnabled) { mutableStateOf(isStatsRewatchesEnabled ?: false) }
+                AnimatedVisibility(
+                    visible = isStatsRewatchesEnabled != null && onStatsRewatchToggle != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onStatsRewatchToggle != null) {
+                        Box(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .wrapContentWidth()
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = {
+                                        isOptimisticRewatches.value = !isOptimisticRewatches.value
+                                        onStatsRewatchToggle(isOptimisticRewatches.value)
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    // Keep offset inside the enlarged 36dp box — no overflow, no clipping
-                                    .offset(x = (-1).dp, y = 1.dp)
-                                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
-                                    .then(if (isPill) Modifier.sizeIn(minWidth = 16.dp).height(14.dp) else Modifier.size(14.dp))
-                                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(50))
-                                    .padding(horizontal = if (isPill) 3.dp else 0.dp),
+                                    .fillMaxHeight()
+                                    .padding(vertical = 6.dp)
+                                    .background(
+                                        color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
+                                        shape = CircleShape
+                                    )
+                                    .padding(horizontal = 10.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = badgeText,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 8.sp,
-                                    fontWeight = FontWeight.Black,
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = 8.sp
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.stats_rewatches),
+                                    color = if (isOptimisticRewatches.value) MaterialTheme.colorScheme.onPrimary else Color.White.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold
                                 )
+                            }
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = onEditBackdropClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onEditBackdropClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = onEditBackdropClick
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_pencil),
+                                contentDescription = "Modifica Sfondo",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                val updatesButtonCenter = remember { arrayOf(Offset.Zero) }
+                AnimatedVisibility(
+                    visible = onUpdatesClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onUpdatesClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .onGloballyPositioned { coords ->
+                                    val position = coords.positionInWindow()
+                                    updatesButtonCenter[0] = Offset(
+                                        x = position.x + coords.size.width / 2f,
+                                        y = position.y + coords.size.height / 2f
+                                    )
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClick(
+                                        enabled = !isDimmed,
+                                        onClick = { onUpdatesClick.invoke(updatesButtonCenter[0]) }
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
+                                    contentDescription = "Aggiornamenti",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            if (notificationCount > 0) {
+                                val isPill = notificationCount > 9
+                                val badgeText = if (notificationCount > 99) "99+" else notificationCount.toString()
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        // Keep offset inside the enlarged 36dp box — no overflow, no clipping
+                                        .offset(x = (-1).dp, y = 1.dp)
+                                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
+                                        .then(if (isPill) Modifier.sizeIn(minWidth = 16.dp).height(14.dp) else Modifier.size(14.dp))
+                                        .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(50))
+                                        .padding(horizontal = if (isPill) 3.dp else 0.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = badgeText,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Black,
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 8.sp
+                                    )
+                                }
                             }
                         }
                     }
                 }
                 
-                if (onFolderOptionsClick != null) {
-                    val optionsOffset = remember { arrayOf(Offset.Zero) }
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
-                                optionsOffset[0] = Offset(position.x, position.y + coords.size.height)
-                            }
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = { onFolderOptionsClick(optionsOffset[0]) }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.MoreVert,
-                            contentDescription = "Opzioni",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+                val optionsOffset = remember { arrayOf(Offset.Zero) }
+                AnimatedVisibility(
+                    visible = onFolderOptionsClick != null,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                ) {
+                    if (onFolderOptionsClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .onGloballyPositioned { coords ->
+                                    val position = coords.positionInWindow()
+                                    optionsOffset[0] = Offset(position.x, position.y + coords.size.height)
+                                }
+                                .bounceClick(
+                                    enabled = !isDimmed,
+                                    onClick = { onFolderOptionsClick(optionsOffset[0]) }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.MoreVert,
+                                contentDescription = "Opzioni",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
 

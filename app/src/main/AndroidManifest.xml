@@ -43,6 +43,7 @@
                 <data android:scheme="flicktrove" android:host="media" />
                 <data android:scheme="flicktrove" android:host="detail" />
                 <data android:scheme="flicktrove" android:host="auth" />
+                <data android:scheme="flicktrove" android:host="simkl_login" />
             </intent-filter>
 
             <!-- HTTPS App Links — shared links via WhatsApp etc. -->

@@ -1121,7 +1121,7 @@
     <string name="home_section_magazine">Magazine News</string>
     <string name="home_section_top_10">Top 10 FlickTrove (Ultimi 30 giorni)</string>
     <string name="home_section_see_all">Vedi tutto</string>
-    <string name="home_section_trove_pick">Il Gioiello del Trove</string>
+    <string name="home_section_trove_pick">La Selezione di Trove</string>
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
     <string name="surprise_subtitle">Dalla tua watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
@@ -1130,4 +1130,26 @@
     <string name="content_description_error">Errore</string>
     <string name="home_section_continue_watching">Continua a guardare</string>
     <string name="home_section_because_you_watched">Perché hai guardato %s</string>
+
+    <!-- SIMKL -->
+    <string name="simkl_connected">SIMKL connesso con successo!</string>
+    <string name="simkl_disconnected">SIMKL disconnesso!</string>
+    <string name="simkl_connect_error">Errore di connessione a SIMKL</string>
+    <string name="simkl_connect">Connetti a SIMKL</string>
+    <string name="simkl_sync_desc">App ➔ SIMKL: Istantaneo\nSIMKL ➔ App: 24h</string>
+    <string name="home_hero_featured">IN EVIDENZA</string>
+    <string name="stats_rewatches">Rewatch</string>
+    <string name="notification_like_title">Nuovo "Mi piace"</string>
+    <string name="notification_like_body">A %1$s è piaciuto il tuo commento.</string>
+    <string name="settings_guest">Ospite</string>
+    <string name="settings_start_migration">Avvia Importazione</string>
+    <string name="auth_login">Accedi</string>
+    <string name="auth_create_account">Crea Account</string>
+    <string name="rating_r_label">VM 14</string>
+    <string name="rating_nc17_label">SOLO ADULTI</string>
+    <string name="person_offline_bio">I dati biografici completi e la filmografia estesa non sono disponibili in modalità offline.\nI titoli presenti nella tua libreria locale sono mostrati di seguito.</string>
+    <string name="account_remove_avatar">Rimuovi Avatar</string>
+    <string name="home_section_watchlist">Dalla tua Watchlist</string>
+    <string name="home_section_watchlist_upcoming">Prossimamente dalla tua Watchlist</string>
+    <string name="match_score">Affinità</string>
 </resources>

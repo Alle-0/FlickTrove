@@ -185,7 +185,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (tId != null) Pair(tId, if (it.type == "movie") "movie" else "tv") else null
                 }.toHashSet()
 
-                val localMovies = movieRepository.getLocalMovies()
+                val localMovies = movieRepository.getLocalMoviesIncludingDeleted()
                 val remoteMovieIds = remoteWatchedIds.filter { it.second != "tv" }
 
                 if (isFirstSync || remoteMovieIds.isEmpty()) {
@@ -282,7 +282,13 @@ class TraktSyncWorker @AssistedInject constructor(
                     seasonsMap: Map<String, List<Int>>
                 ) {
                     val totalWatched = seasonsMap.values.sumOf { it.size }
-                    val local = movieRepository.getMovie(showTmdbId, "tv")
+                    val local = movieRepository.getMovieIncludingDeleted(showTmdbId, "tv")
+
+                    // Anti-resurrection guard: if the user explicitly deleted this show, never re-insert it
+                    if (local != null && local.syncStatus == "pending_delete") {
+                        android.util.Log.d("TraktSyncWorker", "SYNC: Show '$showTitle' è pending_delete, skip resurrezione.")
+                        return
+                    }
 
                     if (local == null) {
                         android.util.Log.d("TraktSyncWorker", "SYNC: Show '$showTitle' non in locale, scarico...")
@@ -399,7 +405,7 @@ class TraktSyncWorker @AssistedInject constructor(
 
                 // Logica di Merge o Rimozione (Diff) protetta
                 if (isIntegrityValid) {
-                    val localTvShows = movieRepository.getLocalMovies().filter { it.mediaType == "tv" }
+                    val localTvShows = movieRepository.getLocalMoviesIncludingDeleted().filter { it.mediaType == "tv" }
                     if (isFirstSync || processedShowTmdbIds.isEmpty()) {
                         // Primo collegamento o account vuoto: MERGE caricando gli episodi visti locali su Trakt, nessuna rimozione locale
                         val showsToPush = mutableListOf<com.cinetrack.data.api.TraktShowWithEpisodes>()
@@ -502,7 +508,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         val remoteRatedTmdbIds = (ratedMovies + ratedShows).mapNotNull {
                             it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb
                         }.toHashSet()
-                        val localRatingsToPush = movieRepository.getLocalMovies().filter {
+                        val localRatingsToPush = movieRepository.getLocalMoviesIncludingDeleted().filter {
                             (it.personalRating ?: 0.0) > 0 && !remoteRatedTmdbIds.contains(it.id)
                         }
                         if (localRatingsToPush.isNotEmpty()) {
@@ -537,6 +543,31 @@ class TraktSyncWorker @AssistedInject constructor(
                 }
             }
 
+            // ── Fase 2.5: Sync Dropped (Hidden Items) ───────
+            try {
+                // Fetch sia film che serie nascosti
+                val hiddenShowsRes = traktService.getHiddenProgressWatched(type = "show")
+                val hiddenMoviesRes = traktService.getHiddenProgressWatched(type = "movie")
+                
+                val hiddenShows = if (hiddenShowsRes.isSuccessful) hiddenShowsRes.body() ?: emptyList() else emptyList()
+                val hiddenMovies = if (hiddenMoviesRes.isSuccessful) hiddenMoviesRes.body() ?: emptyList() else emptyList()
+                
+                val hiddenTmdbIds = (hiddenShows.mapNotNull { it.show?.ids?.tmdb } + 
+                                   hiddenMovies.mapNotNull { it.movie?.ids?.tmdb }).map { it.toLong() }.toSet()
+
+                if (hiddenTmdbIds.isNotEmpty()) {
+                    val allMovies = movieRepository.getLocalMoviesFlow().firstOrNull() ?: emptyList()
+                    allMovies.forEach { movie ->
+                        val isHiddenOnTrakt = movie.id in hiddenTmdbIds
+                        if (isHiddenOnTrakt && !movie.dropped) {
+                            movieRepository.saveMovie(movie.copy(dropped = true))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("TraktSyncWorker", "Errore sync dropped (hidden)", e)
+            }
+
             // ── Fase 3: Watchlist (paginata + two-way diff) ──────────────────
             val remoteWatchlistedAt = lastActivities.movies.watchlisted_at
                 ?: lastActivities.shows.watchlisted_at
@@ -564,7 +595,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     }.toHashSet()
 
                     val watchlistUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
-                    val localMovies      = movieRepository.getLocalMovies()
+                    val localMovies      = movieRepository.getLocalMoviesIncludingDeleted()
 
                     // favorite = true per tutto ciò che è in watchlist remota
                     for (item in allRemoteWatchlist) {
@@ -793,7 +824,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     val remoteHiddenIds = hiddenItems.mapNotNull { it.show?.ids?.tmdb }
 
                     val droppedUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
-                    val localMovies = movieRepository.getLocalMovies()
+                    val localMovies = movieRepository.getLocalMoviesIncludingDeleted()
 
                     if (isFirstSync || remoteHiddenIds.isEmpty()) {
                         // Push locale dropped verso Trakt

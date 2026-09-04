@@ -65,31 +65,15 @@ import dev.chrisbanes.haze.HazeState
 
 @Composable
 fun BackupDialog(
-    hazeState: HazeState,
     isBackupLoading: Boolean,
     onDismiss: () -> Unit,
     onExport: () -> Unit,
-    onImport: () -> Unit,
-    alpha: Float = 1f
+    onImport: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth(0.85f)
-                .hazeGlass(
-                    state = hazeState, alpha = alpha,
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .clickable(enabled = false) {}
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
-            ) {
                 Icon(
                     ImageVector.vectorResource(id = R.drawable.ic_cloud),
                     null,
@@ -184,35 +168,17 @@ fun BackupDialog(
                     Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
-        }
-    }
 }
 
 @Composable
 fun ExternalMigrationDialog(
-    hazeState: HazeState,
     onDismiss: () -> Unit,
-    onImport: () -> Unit,
-    alpha: Float = 1f
+    onImport: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth(0.85f)
-                .hazeGlass(
-                    state = hazeState, alpha = alpha,
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .clickable(enabled = false) {}
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
-            ) {
                 Icon(
                     ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                     null,
@@ -286,37 +252,19 @@ fun ExternalMigrationDialog(
                     Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
-        }
-    }
 }
 
 
 @Composable
 fun YamtrackDialog(
-    hazeState: HazeState,
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onImport: () -> Unit,
-    alpha: Float = 1f
+    onImport: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth(0.85f)
-                .hazeGlass(
-                    state = hazeState, alpha = alpha,
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .clickable(enabled = false) {}
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
-            ) {
                 Icon(
                     ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
                     null,
@@ -364,18 +312,14 @@ fun YamtrackDialog(
                     Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                 }
             }
-        }
-    }
 }
 
 @Composable
 fun FeedbackDialog(
-    hazeState: HazeState,
-    onDismiss: () -> Unit,
     initialEmail: String = "",
     isLoading: Boolean = false,
-    onSubmit: (String, String, Int, String) -> Unit,
-    alpha: Float = 1f
+    onDismiss: () -> Unit,
+    onSubmit: (String, String, Int, String) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(initialEmail) }
@@ -384,24 +328,8 @@ fun FeedbackDialog(
     val haptic = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 420.dp)
-                .fillMaxWidth(0.9f)
-                .hazeGlass(
-                    state = hazeState, alpha = alpha,
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .pointerInput(Unit) {
-                    detectTapGestures { focusManager.clearFocus() }
-                }
-        ) {
-            val feedbackScrollState = rememberScrollState()
-            Column(
+    val feedbackScrollState = rememberScrollState()
+    Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -660,8 +588,6 @@ fun FeedbackDialog(
                     )
                 }
             }
-        }
-    }
 }
 
 @Composable
@@ -707,54 +633,28 @@ fun GlassyTextField(
 
 @Composable
 fun ColorSelectionDialog(
-    hazeState: HazeState,
     current: String,
     onDismiss: () -> Unit,
-    onSelect: (String, Offset) -> Unit,
-    alpha: Float = 1f
+    onSelect: (String, Offset) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        var tempSelectedColor by remember { mutableStateOf(current) }
-        var isCustomMode by remember { mutableStateOf(current.startsWith("#")) }
-        
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(24.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures { focusManager.clearFocus() }
-                }
-        ) {
-            val previewAccentColor = remember(tempSelectedColor) {
-                try {
-                    if (tempSelectedColor.startsWith("#")) tempSelectedColor.toComposeColor()
-                    else when(tempSelectedColor) {
-                        "Pink" -> NeonPink
-                        "Purple" -> NeonPurple
-                        "Amber" -> NeonAmber
-                        "Blue" -> NeonBlue
-                        else -> NeonTeal
-                    }
-                } catch(e: Exception) { NeonTeal }
+    var tempSelectedColor by remember { mutableStateOf(current) }
+    var isCustomMode by remember { mutableStateOf(current.startsWith("#")) }
+
+    val previewAccentColor = remember(tempSelectedColor) {
+        try {
+            if (tempSelectedColor.startsWith("#")) tempSelectedColor.toComposeColor()
+            else when(tempSelectedColor) {
+                "Pink" -> NeonPink
+                "Purple" -> NeonPurple
+                "Amber" -> NeonAmber
+                "Blue" -> NeonBlue
+                else -> NeonTeal
             }
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(
-                        state = hazeState, alpha = alpha,
-                        shape = RoundedCornerShape(32.dp),
-                        style = HazeStyles.glassmorphicDialog
-                    )
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-            ) {
-                Column(
+        } catch(e: Exception) { NeonTeal }
+    }
+
+    Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateContentSize(animationSpec = tween(400))
@@ -1002,43 +902,20 @@ fun ColorSelectionDialog(
                         Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.5f))
                     }
                 }
-            }
-        }
-    }
 }
 
 @Composable
 fun LanguageSelectionDialog(
-    hazeState: dev.chrisbanes.haze.HazeState,
     current: String,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,
     accentColor: Color,
-    vibrationEnabled: Boolean,
-    alpha: Float = 1f
+    vibrationEnabled: Boolean
 ) {
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(24.dp)
-                .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(state = hazeState, alpha = alpha, shape = RoundedCornerShape(32.dp), style = HazeStyles.glassmorphicDialog)
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-            ) {
-                Column(
+
+    Column(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -1098,43 +975,20 @@ fun LanguageSelectionDialog(
                         }
                     }
                 }
-            }
-        }
-    }
 }
 
 @Composable
 fun StartScreenSelectionDialog(
-    hazeState: dev.chrisbanes.haze.HazeState,
     current: String,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit,
     accentColor: Color,
-    vibrationEnabled: Boolean,
-    alpha: Float = 1f
+    vibrationEnabled: Boolean
 ) {
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     val context = androidx.compose.ui.platform.LocalContext.current
-    
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(24.dp)
-                .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(state = hazeState, alpha = alpha, shape = RoundedCornerShape(32.dp), style = HazeStyles.glassmorphicDialog)
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-            ) {
-                Column(
+
+    Column(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -1188,9 +1042,6 @@ fun StartScreenSelectionDialog(
                         }
                     }
                 }
-            }
-        }
-    }
 }
 
 private data class DashboardSettingItem(
@@ -1216,31 +1067,11 @@ fun DashboardSettingsDialog(
     val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
     
     val focusManager = LocalFocusManager.current
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .zIndex(100000f)
-            .background(Color.Black.copy(alpha = 0.5f))
-            .clickable(
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                indication = null
-            ) { onDismiss() },
-        contentAlignment = Alignment.Center
+
+    Column(
+        modifier = Modifier.padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .hazeGlass(state = activeHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                .clickable(
-                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                    indication = null
-                ) { focusManager.clearFocus() }
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1404,8 +1235,6 @@ fun DashboardSettingsDialog(
                             )
                         }
                         } // End key(itemKey)
-                    }
-                }
             }
         }
     }

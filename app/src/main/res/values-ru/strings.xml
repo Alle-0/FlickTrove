@@ -1134,4 +1134,17 @@
     <string name="content_description_error">Ошибка</string>
     <string name="home_section_continue_watching">Продолжить просмотр</string>
     <string name="home_section_because_you_watched">Потому что вы смотрели %s</string>
+
+    <!-- SIMKL -->
+    <string name="simkl_connected">SIMKL успешно подключен!</string>
+    <string name="simkl_disconnected">SIMKL отключен!</string>
+    <string name="simkl_connect_error">Ошибка подключения к SIMKL</string>
+    <string name="simkl_connect">Подключиться к SIMKL</string>
+    <string name="simkl_sync_desc">Приложение ➔ SIMKL: Мгновенно\nSIMKL ➔ Приложение: 24ч</string>
+    <string name="home_hero_featured">РЕКОМЕНДУЕМОЕ</string>
+    <string name="home_section_watchlist">Из вашего списка просмотра</string>
+    <string name="home_section_watchlist_upcoming">Скоро из вашего списка просмотра</string>
+    <string name="match_score">Совпадение</string>
+    <string name="notification_like_body">%1$s понравился ваш комментарий.</string>
+    <string name="notification_like_title">Новый лайк</string>
 </resources>

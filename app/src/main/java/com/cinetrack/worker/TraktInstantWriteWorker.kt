@@ -39,7 +39,7 @@ class TraktInstantWriteWorker @AssistedInject constructor(
             "trakt_sync_channel"
         )
             .setContentTitle("Trakt")
-            .setContentText("Sincronizzazione in corso...")
+            .setContentText(applicationContext.getString(com.cinetrack.R.string.auth_syncing))
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setOngoing(true)
             .build()
@@ -139,6 +139,11 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 }
                 ACTION_REMOVE_WATCHED -> {
                     traktService.removeFromHistory(buildSyncRequest(mediaType, ids))
+                    // Hard-delete the pending_delete row once Trakt has confirmed the removal
+                    if (tmdbId != -1L) {
+                        movieRepository.hardDeleteMovie(tmdbId, mediaType)
+                        android.util.Log.d("TraktInstantWriteWorker", "Hard-deleted pending_delete row for $tmdbId ($mediaType)")
+                    }
                 }
 
                 // ── Ratings ───────────────────────────────────────────────────
@@ -173,6 +178,14 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 }
                 ACTION_REMOVE_WATCHLIST -> {
                     traktService.removeFromWatchlist(buildSyncRequest(mediaType, ids))
+                }
+
+                // ── Dropped (Hidden Items in Trakt) ───────────────────────────
+                ACTION_MARK_DROPPED -> {
+                    traktService.addHiddenProgressWatched(buildSyncRequest(mediaType, ids))
+                }
+                ACTION_REMOVE_DROPPED -> {
+                    traktService.removeHiddenProgressWatched(buildSyncRequest(mediaType, ids))
                 }
 
                 // ── Episodes ──────────────────────────────────────────────────
@@ -258,6 +271,8 @@ class TraktInstantWriteWorker @AssistedInject constructor(
 
     companion object {
         const val KEY_ACTION         = "action"
+        const val ACTION_MARK_DROPPED = "ACTION_MARK_DROPPED"
+        const val ACTION_REMOVE_DROPPED = "ACTION_REMOVE_DROPPED"
         const val KEY_MEDIA_TYPE     = "media_type"
         const val KEY_TMDB_ID        = "tmdb_id"
         const val KEY_IMDB_ID        = "imdb_id"

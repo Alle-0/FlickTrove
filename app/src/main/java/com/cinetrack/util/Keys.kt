@@ -10,4 +10,6 @@ object Keys {
     fun getTraktSecret(): String = BuildConfig.TRAKT_CLIENT_SECRET
     fun getSupabaseUrl(): String = BuildConfig.SUPABASE_URL
     fun getGoogleClientId(): String = "535327046678-4pleu2jsmpap5p8m3r3m3s32q8lg7r0c.apps.googleusercontent.com"
+    fun getSimklKey(): String = BuildConfig.SIMKL_CLIENT_ID
+    fun getSimklSecret(): String = BuildConfig.SIMKL_CLIENT_SECRET
 }

@@ -208,7 +208,7 @@ fun TrovePickCard(
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .width(110.dp)
+                        .width(145.dp)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(12.dp))
                 )

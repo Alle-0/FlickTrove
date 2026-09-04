@@ -20,6 +20,9 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete'")
     suspend fun getAll(): List<Movie>
 
+    @Query("SELECT * FROM favorites")
+    suspend fun getAllIncludingDeleted(): List<Movie>
+
     @Query("SELECT * FROM favorites WHERE sync_status != 'pending_delete'")
     fun getAllFlow(): Flow<List<Movie>>
 
@@ -39,6 +42,10 @@ interface FavoriteDao {
 
     @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType AND sync_status != 'pending_delete' LIMIT 1")
     fun getByIdFlow(id: Long, mediaType: String): Flow<Movie?>
+
+    /** Used by sync workers to detect soft-deleted items and prevent resurrection */
+    @Query("SELECT * FROM favorites WHERE id = :id AND media_type = :mediaType LIMIT 1")
+    suspend fun getByIdIncludingDeleted(id: Long, mediaType: String): Movie?
 
     @Query("DELETE FROM favorites WHERE id = :id AND media_type = :mediaType")
     suspend fun deleteById(id: Long, mediaType: String)

@@ -1050,7 +1050,7 @@ fun SettingsScreenContent(
             activeHazeState = activeHazeState
         )
         
-        DashboardSettingsDialog(
+        SettingsDashboardSettingsDialog(
             visible = showDashboardSettings,
             activeHazeState = activeHazeState,
             settingsViewModel = settingsViewModel,

@@ -286,7 +286,8 @@ class FirebaseRemoteDataSource @Inject constructor(
         newRating: Double? = null,
         oldRating: Double? = null,
         newStatus: String? = null,
-        oldStatus: String? = null
+        oldStatus: String? = null,
+        viewsDelta: Long = 0L
     ) {
         val uid = userId ?: return
         try {
@@ -297,6 +298,7 @@ class FirebaseRemoteDataSource @Inject constructor(
             }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRemoteDataSource", "Error checking ban status: ${e.message}", e)
+            return // Prevent spam if user doc fails
         }
 
         val docRef = getGlobalMovieStats(compositeId)
@@ -399,7 +401,13 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val isNewWatched = (newStatus == "watched" && oldStatus != "watched")
                 val isRemovedWatched = (oldStatus == "watched" && newStatus != "watched")
                 
-                if (countDelta != 0L || ratingDelta != 0.0 || isNewWatched || isRemovedWatched) {
+                var finalViewsDelta = viewsDelta
+                if (compositeId.startsWith("movie_") && viewsDelta == 0L) {
+                    if (isNewWatched) finalViewsDelta = 1L
+                    if (isRemovedWatched) finalViewsDelta = -1L
+                }
+                
+                if (countDelta != 0L || ratingDelta != 0.0 || finalViewsDelta != 0L) {
                     val calendar = java.util.Calendar.getInstance()
                     val year = calendar.get(java.util.Calendar.YEAR)
                     val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
@@ -425,10 +433,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                     if (ratingDelta != 0.0) {
                         trendingUpdates["total_rating"] = com.google.firebase.firestore.FieldValue.increment(ratingDelta)
                     }
-                    if (isNewWatched) {
-                        trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(1L)
-                    } else if (isRemovedWatched) {
-                        trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(-1L)
+                    if (finalViewsDelta != 0L) {
+                        trendingUpdates["view_count"] = com.google.firebase.firestore.FieldValue.increment(finalViewsDelta)
                     }
                     
                     if (trendingUpdates.isNotEmpty()) {

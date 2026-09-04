@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -205,6 +206,7 @@ fun SettingsItem(
     tint: Color = Color.White,
     borderColor: Color? = null,
     isExternal: Boolean = false,
+    alpha: Float = 1f,
     trailing: @Composable (() -> Unit)? = null,
     customContent: @Composable (ColumnScope.() -> Unit)? = null,
     iconTint: Color? = null,
@@ -217,6 +219,7 @@ fun SettingsItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .alpha(alpha)
             .clip(RoundedCornerShape(20.dp))
             .bounceClick { 
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -464,14 +467,16 @@ fun SettingsActionButton(
     text: String? = null,
     icon: ImageVector? = null,
     tint: Color = Color.White,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .background(Color.White.copy(alpha = if (enabled) 0.1f else 0.05f))
+            .clickable(enabled = enabled) { onClick() }
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .alpha(if (enabled) 1f else 0.5f),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

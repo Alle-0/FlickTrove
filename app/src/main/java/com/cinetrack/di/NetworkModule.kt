@@ -10,6 +10,8 @@ import com.cinetrack.data.api.TraktAuthenticator
 import com.cinetrack.data.api.TvdbApi
 import com.cinetrack.data.api.TvdbAuthInterceptor
 import com.cinetrack.data.api.TvdbAuthenticator
+import com.cinetrack.data.api.SimklAuthInterceptor
+import com.cinetrack.data.api.SimklService
 import com.cinetrack.util.Keys
 import dagger.Module
 import dagger.Provides
@@ -234,6 +236,34 @@ object NetworkModule {
             .create(GithubService::class.java)
     }
 
+
+    @Provides
+    @Singleton
+    @Named("simkl_okhttp")
+    fun provideSimklOkHttpClient(
+        okHttpClient: OkHttpClient,
+        simklAuthInterceptor: SimklAuthInterceptor
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptor(simklAuthInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("simkl_retrofit")
+    fun provideSimklRetrofit(json: Json, @Named("simkl_okhttp") okHttpClient: OkHttpClient): Retrofit {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.simkl.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSimklService(@Named("simkl_retrofit") retrofit: Retrofit): SimklService = retrofit.create(SimklService::class.java)
 
     @Provides
     @Named("tmdb_api_key")
