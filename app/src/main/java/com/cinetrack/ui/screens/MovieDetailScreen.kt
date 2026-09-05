@@ -108,12 +108,18 @@ import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.ui.components.dialog.EpisodesBottomSheet
+import com.cinetrack.ui.components.shared.shimmerEffect
 
 data class MovieDetailScreen(
     val movieId: Long,
     val mediaType: String,
     val openComments: Boolean = false,
-    val targetCommentId: String? = null
+    val targetCommentId: String? = null,
+    val preloadedTitle: String? = null,
+    val preloadedPosterPath: String? = null,
+    val preloadedBackdropPath: String? = null,
+    val preloadedLogoPath: String? = null,
+    val preloadedAccentColor: String? = null
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
     @Composable
@@ -159,8 +165,15 @@ data class MovieDetailScreen(
 
         MovieDetailScreenContent(
             viewModel = viewModel,
+            movieId = movieId,
+            mediaType = mediaType,
             openComments = openComments,
             targetCommentId = targetCommentId,
+            preloadedTitle = preloadedTitle,
+            preloadedPosterPath = preloadedPosterPath,
+            preloadedBackdropPath = preloadedBackdropPath,
+            preloadedLogoPath = preloadedLogoPath,
+            preloadedAccentColor = preloadedAccentColor,
             settingsViewModel = settingsViewModel,
             paddingValues = PaddingValues(0.dp),
             onBackClick = { navigator.pop() },
@@ -188,8 +201,15 @@ data class MovieDetailScreen(
 @Composable
 fun MovieDetailScreenContent(
     viewModel: MovieDetailViewModel,
+    movieId: Long,
+    mediaType: String,
     openComments: Boolean = false,
     targetCommentId: String? = null,
+    preloadedTitle: String? = null,
+    preloadedPosterPath: String? = null,
+    preloadedBackdropPath: String? = null,
+    preloadedLogoPath: String? = null,
+    preloadedAccentColor: String? = null,
     settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
     paddingValues: PaddingValues,
     sharedTransitionScope: SharedTransitionScope? = null,
@@ -285,7 +305,11 @@ fun MovieDetailScreenContent(
             val imageType = if (movie.customBackdropPath != null || movie.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, currentImageQuality)
             if (imageUrl != null) {
-                viewModel.fetchAccentColor(imageUrl, movie)
+                // Determine target aspect ratio (ScreenWidth / 480dp)
+                val configuration = context.resources.configuration
+                val screenWidthDp = configuration.screenWidthDp.toFloat()
+                val targetAspectRatio = screenWidthDp / 480f
+                viewModel.fetchAccentColor(imageUrl, movie, targetAspectRatio = targetAspectRatio)
             }
         }
     }
@@ -422,7 +446,12 @@ fun MovieDetailScreenContent(
                     val state = cachedSuccess
                     if (state != null) {
                         val activeMovie = state.movieEntry
-                        val rawTargetAccentColor = activeMovie.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
+                        
+                        // Use preloadedAccentColor as fallback if extractedColor is not yet available
+                        // This prevents the screen from reverting to the default color before the new extraction finishes.
+                        val fallbackColor = extractedColor ?: preloadedAccentColor?.toComposeColor(fallbackAccentColor) ?: fallbackAccentColor
+                        val rawTargetAccentColor = activeMovie.accentColor.toComposeColor(fallbackColor)
+                        
                         val targetAccentColor = remember(rawTargetAccentColor) {
                             ColorUtils.ensureVividAccent(rawTargetAccentColor)
                         }
@@ -441,6 +470,7 @@ fun MovieDetailScreenContent(
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     DetailBackdrop(
+                                        sharedElementKey = "movie_backdrop_${activeMovie.id}",
                                         backdropPath = activeMovie.customBackdropPath ?: activeMovie.backdropPath,
                                         posterPath = activeMovie.posterPath,
                                         accentColor = accentColor,
@@ -633,6 +663,7 @@ fun MovieDetailScreenContent(
                                         onLongPress = actionsState.onLongPress,
                                         onAction = { movie -> viewModel.onEvent(DetailEvent.CycleStatus(movie)) },
                                         onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) },
+                                        onCollectionClick = { id, name -> navigator.push(com.cinetrack.ui.screens.CollectionDetailScreen(id, name)) },
                                         animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))

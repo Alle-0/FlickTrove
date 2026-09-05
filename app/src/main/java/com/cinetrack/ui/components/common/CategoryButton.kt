@@ -1,7 +1,6 @@
 package com.cinetrack.ui.components.common
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -14,14 +13,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,19 +41,17 @@ fun CategoryButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
         color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
         contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else Color.White.copy(alpha = 0.6f),
         shape = CircleShape,
-        modifier = Modifier
-            .height(36.dp)
+        modifier = Modifier.height(36.dp)
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = text.uppercase(), 
+                text = text.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Black,
-                letterSpacing = 1.sp,
-                modifier = Modifier
+                letterSpacing = 1.sp
             )
         }
     }
@@ -68,9 +63,10 @@ fun CategoryTabSelector(
     counts: List<Int>? = null,
     selectedIndex: Int,
     onOptionClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tabWidth: androidx.compose.ui.unit.Dp = 116.dp
 ) {
-    val tabHeight = 36.dp
+    val tabHeight = 34.dp
     val haptic = LocalHapticFeedback.current
 
     BoxWithConstraints(
@@ -78,72 +74,90 @@ fun CategoryTabSelector(
             .height(tabHeight)
             .wrapContentWidth()
     ) {
-        val calculatedWidth = maxWidth / options.size
-        val tabWidth = androidx.compose.ui.unit.min(120.dp, calculatedWidth)
-        val tabWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { tabWidth.toPx() }
+        val requestedTabWidthPx = with(LocalDensity.current) { tabWidth.toPx() }
+        val maxAvailableWidthPx = constraints.maxWidth.toFloat()
         
-        val coroutineScope = rememberCoroutineScope()
-        val offsetAnimatable = remember { androidx.compose.animation.core.Animatable(selectedIndex * tabWidthPx) }
+        // If the total requested width exceeds available width, the layout will squish the tabs.
+        // We calculate the real tab width to ensure the indicator matches the actual rendered tab size.
+        val realTabWidthPx = if (maxAvailableWidthPx > 0 && maxAvailableWidthPx < requestedTabWidthPx * options.size) {
+            maxAvailableWidthPx / options.size
+        } else {
+            requestedTabWidthPx
+        }
+        val realTabWidth = with(LocalDensity.current) { realTabWidthPx.toDp() }
 
-        androidx.compose.runtime.LaunchedEffect(selectedIndex, tabWidthPx) {
+        val coroutineScope = rememberCoroutineScope()
+        val offsetAnimatable = remember { Animatable(selectedIndex * realTabWidthPx) }
+
+        LaunchedEffect(selectedIndex, realTabWidthPx) {
             offsetAnimatable.animateTo(
-                targetValue = selectedIndex * tabWidthPx,
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                targetValue = selectedIndex * realTabWidthPx,
+                animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
             )
         }
 
-        val maxOffset = tabWidthPx * (options.size - 1)
+        val maxOffset = realTabWidthPx * (options.size - 1)
         val currentIndicatorOffset = offsetAnimatable.value.coerceIn(0f, maxOffset)
 
+        // Stretch deformation based on velocity
+        val velocity = offsetAnimatable.velocity
+        // The faster it moves, the more it stretches horizontally
+        val stretchFactor = 1f + (kotlin.math.abs(velocity) / realTabWidthPx) * 0.05f
+        // Snap to exactly 1f when velocity is near zero to prevent RenderNode float artifacts (1px horizontal line glitch)
+        val currentScaleX = if (kotlin.math.abs(velocity) < 10f) 1f else stretchFactor.coerceIn(1f, 1.35f)
+
         // Sliding Highlighter
-        Surface(
+        Box(
             modifier = Modifier
-                .offset { androidx.compose.ui.unit.IntOffset(currentIndicatorOffset.roundToInt(), 0) }
-                .padding(4.dp)
-                .width(tabWidth - 8.dp)
-                .height(tabHeight - 8.dp),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-            shape = CircleShape
-        ) {}
+                .offset { IntOffset(currentIndicatorOffset.roundToInt(), 0) }
+                .graphicsLayer { scaleX = currentScaleX }
+                .padding(3.dp)
+                .width(realTabWidth - 6.dp)
+                .height(tabHeight - 6.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                    shape = CircleShape
+                )
+        )
 
         // Content
-        Row(modifier = Modifier
-            .width(tabWidth * options.size)
-            .fillMaxHeight()
-            .pointerInput(selectedIndex, tabWidthPx) {
-                detectHorizontalDragGestures(
-                    onDragEnd = {
-                        val currentPos = offsetAnimatable.value
-                        val targetIndex = (currentPos / tabWidthPx).roundToInt().coerceIn(0, options.size - 1)
-                        if (targetIndex != selectedIndex) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onOptionClick(targetIndex)
-                        } else {
+        Row(
+            modifier = Modifier
+                .width(realTabWidth * options.size)
+                .fillMaxHeight()
+                .pointerInput(selectedIndex, realTabWidthPx) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            val targetIndex = (offsetAnimatable.value / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                            if (targetIndex != selectedIndex) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onOptionClick(targetIndex)
+                            } else {
+                                coroutineScope.launch {
+                                    offsetAnimatable.animateTo(
+                                        targetValue = selectedIndex * realTabWidthPx,
+                                        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
+                                    )
+                                }
+                            }
+                        },
+                        onDragCancel = {
                             coroutineScope.launch {
                                 offsetAnimatable.animateTo(
-                                    targetValue = selectedIndex * tabWidthPx,
-                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                                    targetValue = selectedIndex * realTabWidthPx,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
                                 )
                             }
                         }
-                    },
-                    onDragCancel = { 
+                    ) { change, dragAmount ->
+                        change.consume()
                         coroutineScope.launch {
-                            offsetAnimatable.animateTo(
-                                targetValue = selectedIndex * tabWidthPx,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                            offsetAnimatable.snapTo(
+                                (offsetAnimatable.value + dragAmount).coerceIn(0f, maxOffset)
                             )
                         }
                     }
-                ) { change, dragAmount ->
-                    change.consume()
-                    coroutineScope.launch {
-                        offsetAnimatable.snapTo(
-                            (offsetAnimatable.value + dragAmount).coerceIn(0f, maxOffset)
-                        )
-                    }
                 }
-            }
         ) {
             options.forEachIndexed { index, title ->
                 val isSelected = index == selectedIndex
@@ -151,7 +165,7 @@ fun CategoryTabSelector(
                     targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
                     label = "textColor"
                 )
-                
+
                 val interactionSource = remember { MutableInteractionSource() }
                 val isPressed by interactionSource.collectIsPressedAsState()
                 val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "tabScale")
@@ -160,40 +174,32 @@ fun CategoryTabSelector(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .graphicsLayer {
-                            scaleX = scale
-                            scaleY = scale
-                        }
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) { onOptionClick(index) },
+                        .graphicsLayer { scaleX = scale; scaleY = scale }
+                        .clickable(interactionSource = interactionSource, indication = null) { onOptionClick(index) },
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
-                        val isLongTitle = title.length > 8
                         Text(
                             text = title.uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = if (isLongTitle) (-0.3).sp else 0.5.sp,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.sp,
                             color = textColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
-                        
+
                         if (counts != null && counts.size > index) {
-                            Spacer(modifier = Modifier.width(4.dp))
-                            
-                            // Number in a circle/badge
+                            Spacer(modifier = Modifier.width(3.dp))
                             Box(
                                 modifier = Modifier
-                                    .size(18.dp)
+                                    .size(17.dp)
                                     .background(
                                         color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.1f),
                                         shape = CircleShape
@@ -203,7 +209,7 @@ fun CategoryTabSelector(
                                 Text(
                                     text = counts[index].toString(),
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 9.sp,
+                                        fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold
                                     ),
                                     color = textColor

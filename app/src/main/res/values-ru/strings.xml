@@ -224,7 +224,7 @@
     <string name="settings_external_migration">Универсальный импорт данных</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Любой CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Резервная копия устройства FlickTrove</string>
-    <string name="settings_trakt_sync_desc">Приложение ➔ Trakt: Мгновенно\nTrakt ➔ Приложение: 24ч</string>
+    <string name="settings_trakt_sync_desc">Приложение ➔ Trakt: Мгновенно\nTrakt ➔ Приложение: 6ч</string>
     <string name="settings_sync_missing_details">Синхронизировать недостающие данные</string>
     <string name="settings_sync_missing_details_desc">Загрузить недостающие данные для старых фильмов в вашей библиотеке. Используйте только при крайней необходимости (ресурсоемкая фоновая операция).</string>
     <string name="settings_dialog_deep_sync_title">Внимание: Глубокая синхронизация</string>
@@ -1140,7 +1140,7 @@
     <string name="simkl_disconnected">SIMKL отключен!</string>
     <string name="simkl_connect_error">Ошибка подключения к SIMKL</string>
     <string name="simkl_connect">Подключиться к SIMKL</string>
-    <string name="simkl_sync_desc">Приложение ➔ SIMKL: Мгновенно\nSIMKL ➔ Приложение: 24ч</string>
+    <string name="simkl_sync_desc">Приложение ➔ SIMKL: Мгновенно\nSIMKL ➔ Приложение: 6ч</string>
     <string name="home_hero_featured">РЕКОМЕНДУЕМОЕ</string>
     <string name="home_section_watchlist">Из вашего списка просмотра</string>
     <string name="home_section_watchlist_upcoming">Скоро из вашего списка просмотра</string>

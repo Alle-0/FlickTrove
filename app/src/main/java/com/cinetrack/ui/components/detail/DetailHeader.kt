@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.composed
 import coil.request.ImageRequest
+import coil.compose.SubcomposeAsyncImageContent
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.ExternalRatings
 import androidx.compose.foundation.BorderStroke
@@ -54,6 +55,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.LocalAdvancedVisualEffects
+import com.cinetrack.ui.navigation.sharedElementIfAvailable
 
 /**
  * DetailHeader
@@ -120,27 +122,8 @@ fun DetailHeader(
     ) {
         // Title & Tagline
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (logoPath != null) {
-                val imageUrl = com.cinetrack.util.buildTmdbImageUrl(logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
-                val context = LocalContext.current
-                val request = remember(imageUrl) {
-                    ImageRequest.Builder(context)
-                        .data(imageUrl)
-                        .crossfade(true)
-                        .crossfade(500)
-                        .build()
-                }
-                coil.compose.AsyncImage(
-                    model = request,
-                    contentDescription = movie.displayName,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f) // Takes up to 60% of width
-                        .heightIn(max = 100.dp) // Max height to avoid huge logos
-                        .padding(bottom = 8.dp),
-                    alignment = Alignment.CenterStart
-                )
-            } else {
+            @Composable
+            fun FallbackTitleText() {
                 Text(
                     text = movie.displayName.ifEmpty { "-" },
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -155,6 +138,38 @@ fun DetailHeader(
                         .fillMaxWidth()
                         .padding(bottom = 6.dp)
                 )
+            }
+
+            if (logoPath != null) {
+                val imageUrl = com.cinetrack.util.buildTmdbImageUrl(logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
+                val context = LocalContext.current
+                val request = remember(imageUrl) {
+                    ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .crossfade(500)
+                        .build()
+                }
+                coil.compose.SubcomposeAsyncImage(
+                    model = request,
+                    contentDescription = movie.title ?: movie.name ?: "",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f) // Takes up to 60% of width
+                        .heightIn(max = 100.dp) // Max height to avoid huge logos
+                        .padding(bottom = 8.dp)
+                        .sharedElementIfAvailable("movie_logo_${movie.id}"),
+                    alignment = Alignment.CenterStart
+                ) {
+                    val state = painter.state
+                    if (state is coil.compose.AsyncImagePainter.State.Error) {
+                        FallbackTitleText()
+                    } else {
+                        SubcomposeAsyncImageContent()
+                    }
+                }
+            } else {
+                FallbackTitleText()
             }
 
             movie.tagline?.let {

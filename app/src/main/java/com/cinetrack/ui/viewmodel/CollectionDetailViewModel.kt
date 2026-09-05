@@ -18,6 +18,7 @@ import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.toHexString
 import com.cinetrack.ui.utils.ErrorMapper
 import com.cinetrack.ui.utils.UiText
 import com.cinetrack.util.toComposeColorOrNull
@@ -71,7 +72,7 @@ class CollectionDetailViewModel @Inject constructor(
     val scrollState = androidx.compose.foundation.ScrollState(0)
     val animatedMovieIds = mutableSetOf<String>()
 
-    fun fetchAccentColor(imageUrl: String, forceReload: Boolean = false) {
+    fun fetchAccentColor(imageUrl: String, forceReload: Boolean = false, targetAspectRatio: Float? = null) {
         if (forceReload || _extractedColor.value == null) {
             viewModelScope.launch(Dispatchers.Default) {
                 try {
@@ -85,15 +86,10 @@ class CollectionDetailViewModel @Inject constructor(
                     if (result is SuccessResult) {
                         val bitmap = result.drawable.toBitmap()
                         if (bitmap.width > 0 && bitmap.height > 0) {
-                            val rawColor = ColorUtils.extractAverageColor(bitmap)
-                            if (rawColor != Color.Unspecified) {
-                                val ambientColor = ColorUtils.darkenForAmbient(rawColor)
-                                val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
-                                _extractedColor.value = finalColor
-                                val r = (finalColor.red * 255).toInt().coerceIn(0, 255)
-                                val g = (finalColor.green * 255).toInt().coerceIn(0, 255)
-                                val b = (finalColor.blue * 255).toInt().coerceIn(0, 255)
-                                val hexString = String.format("#%02X%02X%02X", r, g, b)
+                            val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
+                            if (color != Color.Unspecified) {
+                                _extractedColor.value = color
+                                val hexString = color.toHexString()
                                 repository.saveCachedColor("collection:${_collectionId.value}", hexString)
                             }
                         }

@@ -150,14 +150,16 @@ fun GlassyTopBar(
 
                 LaunchedEffect(title) {
                     if (displayedTitle != title) {
-                        // Animate out (parallel)
-                        launch { titleAlpha.animateTo(0f, tween(100, easing = FastOutSlowInEasing)) }
-                        titleBlur.animateTo(6f, tween(100, easing = FastOutSlowInEasing))
+                        // Animate out: Blur inizia subito, il fade ritarda un attimo così si vede il testo sfocato
+                        launch { titleBlur.animateTo(12f, tween(150, easing = FastOutSlowInEasing)) }
+                        titleAlpha.animateTo(0f, tween(100, delayMillis = 50, easing = LinearEasing))
+                        
                         // Swap while invisible
                         displayedTitle = title
-                        // Animate in (parallel)
+                        
+                        // Animate in: Appare sfocato e poi si mette a fuoco
                         launch { titleAlpha.animateTo(1f, tween(150, easing = FastOutSlowInEasing)) }
-                        titleBlur.animateTo(0f, tween(150, easing = FastOutSlowInEasing))
+                        titleBlur.animateTo(0f, tween(200, delayMillis = 50, easing = FastOutSlowInEasing))
                     }
                 }
 
@@ -219,37 +221,53 @@ fun GlassyTopBar(
             ) {
 
                 // Menu/Back Button
-                if (onBackPress != null || onMenuClick != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .bounceClick(
-                                enabled = !isDimmed,
-                                onClick = {
-                                    onBackPress?.invoke() ?: onMenuClick?.invoke()
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
+                Box(
+                    modifier = Modifier.size(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val isNavVisible = onBackPress != null || onMenuClick != null
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isNavVisible,
+                        enter = fadeIn(iconEnterSpec) + scaleIn(iconEnterSpec, initialScale = 0.7f),
+                        exit = fadeOut(iconEnterSpec) + scaleOut(iconEnterSpec, targetScale = 0.7f)
                     ) {
-                        Icon(
-                            imageVector = if (onBackPress != null) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
-                            contentDescription = "Navigation",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        if (onBackPress == null && hasAppUpdateBadge) {
+                        androidx.compose.animation.AnimatedContent(
+                            targetState = onBackPress != null,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(220, delayMillis = 90)) + scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 90)) togetherWith fadeOut(animationSpec = tween(90)) + scaleOut(targetScale = 0.92f, animationSpec = tween(90))
+                            },
+                            label = "NavIconAnim"
+                        ) { isBack ->
                             Box(
                                 modifier = Modifier
-                                    .size(8.dp)
-                                    .align(Alignment.TopEnd)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .border(1.dp, Color.Black, CircleShape)
-                            )
+                                    .fillMaxSize()
+                                    .bounceClick(
+                                        enabled = !isDimmed,
+                                        onClick = {
+                                            if (isBack) onBackPress?.invoke() else onMenuClick?.invoke()
+                                        }
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isBack) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_menu),
+                                    contentDescription = "Navigation",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                if (!isBack && hasAppUpdateBadge) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .align(Alignment.TopEnd)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary)
+                                            .border(1.dp, Color.Black, CircleShape)
+                                    )
+                                }
+                            }
                         }
                     }
-                } else {
-                    Spacer(modifier = Modifier.size(32.dp)) // Maintain spacing
                 }
 
                 Row(

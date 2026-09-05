@@ -9,7 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltAndroidApp
-class FlickTroveApplication : Application(), Configuration.Provider {
+class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageLoaderFactory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -18,6 +18,14 @@ class FlickTroveApplication : Application(), Configuration.Provider {
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    override fun newImageLoader(): coil.ImageLoader {
+        return coil.ImageLoader.Builder(this)
+            .components {
+                add(coil.decode.SvgDecoder.Factory())
+            }
+            .build()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -59,7 +67,7 @@ class FlickTroveApplication : Application(), Configuration.Provider {
                 .build()
 
             val traktSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>(
-                24, java.util.concurrent.TimeUnit.HOURS
+                6, java.util.concurrent.TimeUnit.HOURS
             )
             .setConstraints(traktSyncConstraints)
             .build()
@@ -70,7 +78,7 @@ class FlickTroveApplication : Application(), Configuration.Provider {
                 .build()
 
             val simklSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>(
-                24, java.util.concurrent.TimeUnit.HOURS
+                6, java.util.concurrent.TimeUnit.HOURS
             )
             .setConstraints(simklSyncConstraints)
             .build()
@@ -129,6 +137,26 @@ class FlickTroveApplication : Application(), Configuration.Provider {
                 .setConstraints(localConstraints)
                 .build()
             workManager.enqueue(immediateWidgetRefresh)
+            
+            // Trigger an immediate sync for SIMKL on startup to keep data fresh
+            val immediateSimklSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
+                .setConstraints(simklSyncConstraints)
+                .build()
+            workManager.enqueueUniqueWork(
+                "SimklSyncStartup",
+                androidx.work.ExistingWorkPolicy.KEEP,
+                immediateSimklSync
+            )
+
+            // Trigger an immediate sync for Trakt on startup to keep data fresh
+            val immediateTraktSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
+                .setConstraints(traktSyncConstraints)
+                .build()
+            workManager.enqueueUniqueWork(
+                "TraktSyncStartup",
+                androidx.work.ExistingWorkPolicy.KEEP,
+                immediateTraktSync
+            )
         }
     }
 }

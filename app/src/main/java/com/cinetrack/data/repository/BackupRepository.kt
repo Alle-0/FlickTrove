@@ -311,6 +311,9 @@ class BackupRepository @Inject constructor(
         // 2. Unisci con il database locale e salva in favoriteDao
         val totalToSave = mergedIncoming.size
         var currentSaved = 0
+        
+        val bulkStatsUpdates = mutableListOf<com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate>()
+
         for (incoming in mergedIncoming.values) {
             currentSaved++
             if (currentSaved % 5 == 0 || currentSaved == totalToSave) {
@@ -349,20 +352,14 @@ class BackupRepository @Inject constructor(
                 val finalRating = if (isRecentVote) newRating else null
 
                 if ((finalRating != null && finalRating > 0.0) || calculatedViewsDelta != 0L) {
-                    repositoryScope.launch {
-                        firebaseRemoteDataSource.updateGlobalMovieStats(
+                    bulkStatsUpdates.add(
+                        com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
                             compositeId = incoming.compositeId,
-                            addedVibes = emptyList(),
-                            removedVibes = emptyList(),
-                            newMvp = null,
-                            oldMvp = null,
-                            newRating = finalRating,
-                            oldRating = null,
-                            newStatus = if (incoming.watched && isRecentWatch) "watched" else "unwatched",
-                            oldStatus = null,
-                            viewsDelta = calculatedViewsDelta
+                            viewsDelta = calculatedViewsDelta,
+                            ratingDelta = finalRating ?: 0.0,
+                            ratingCountDelta = if (finalRating != null && finalRating > 0.0) 1L else 0L
                         )
-                    }
+                    )
                 }
             } else {
                 val combinedEps = mutableMapOf<String, MutableSet<Int>>()
@@ -427,35 +424,49 @@ class BackupRepository @Inject constructor(
                 val newRating = updated.personalRating
                 val oldRating = local.personalRating
                 
-                val newStatus = if (updated.watched) "watched" else "unwatched"
-                val oldStatus = if (local.watched) "watched" else "unwatched"
+                val isRecentWatch = isRecent(incWatched)
                 
                 var calculatedViewsDelta = 0L
-                if (updated.mediaType == "tv") {
-                    val oldEps = local.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    val newEps = updated.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    calculatedViewsDelta = (newEps - oldEps).toLong()
-                } else {
-                    if (newStatus == "watched" && oldStatus != "watched") calculatedViewsDelta = 1L
-                    if (oldStatus == "watched" && newStatus != "watched") calculatedViewsDelta = -1L
-                }
-                
-                if (newRating != oldRating || calculatedViewsDelta != 0L) {
-                    repositoryScope.launch {
-                        firebaseRemoteDataSource.updateGlobalMovieStats(
-                            compositeId = updated.compositeId,
-                            addedVibes = emptyList(),
-                            removedVibes = emptyList(),
-                            newMvp = null,
-                            oldMvp = null,
-                            newRating = newRating,
-                            oldRating = oldRating,
-                            newStatus = newStatus,
-                            oldStatus = oldStatus,
-                            viewsDelta = calculatedViewsDelta
-                        )
+                if (isRecentWatch) {
+                    if (updated.mediaType == "tv") {
+                        // For TV, only count new episodes added during this import
+                        val incEps = incoming.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                        val locEps = local.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                        val newEpsCount = (updated.watchedEpisodes?.values?.sumOf { it.size } ?: 0) - locEps
+                        if (newEpsCount > 0) {
+                            calculatedViewsDelta = newEpsCount.toLong()
+                        }
+                    } else {
+                        val newStatus = if (updated.watched) "watched" else "unwatched"
+                        val oldStatus = if (local.watched) "watched" else "unwatched"
+                        if (newStatus == "watched" && oldStatus != "watched") calculatedViewsDelta = 1L
+                        if (oldStatus == "watched" && newStatus != "watched") calculatedViewsDelta = -1L
                     }
                 }
+                
+                val isRecentVote = isRecentTime(incoming.votedAt)
+                val ratingDiff = if (isRecentVote && newRating != null) {
+                    if (oldRating == null) newRating else (newRating - oldRating)
+                } else 0.0
+                
+                val ratingCountDelta = if (isRecentVote && newRating != null && oldRating == null) 1L else 0L
+
+                if (ratingDiff != 0.0 || calculatedViewsDelta != 0L || ratingCountDelta != 0L) {
+                    bulkStatsUpdates.add(
+                        com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                            compositeId = updated.compositeId,
+                            viewsDelta = calculatedViewsDelta,
+                            ratingDelta = ratingDiff,
+                            ratingCountDelta = ratingCountDelta
+                        )
+                    )
+                }
+            }
+        }
+        
+        if (bulkStatsUpdates.isNotEmpty()) {
+            repositoryScope.launch {
+                firebaseRemoteDataSource.updateTrendingStatsBulk(bulkStatsUpdates)
             }
         }
 

@@ -246,11 +246,11 @@ object AccountTab : Tab {
                 val result = loader.execute(request)
                 if (result is SuccessResult) {
                     val bitmap = (result.drawable as BitmapDrawable).bitmap
-                    val raw = ColorUtils.extractAverageColor(bitmap)
-                    rawExtractedColor = raw
-                    val ambientColor = ColorUtils.darkenForAmbient(raw)
-                    val finalColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
-                    extractedColor = finalColor
+                    val color = ColorUtils.extractAccentColor(bitmap)
+                    if (color != Color.Unspecified) {
+                        rawExtractedColor = color
+                        extractedColor = color
+                    }
                 }
             } else {
                 extractedColor = null

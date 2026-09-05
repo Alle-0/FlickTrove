@@ -142,7 +142,7 @@ class SimklInstantWriteWorker @AssistedInject constructor(
         ids: com.cinetrack.data.api.SimklIds,
         encodedEps: String
     ): SimklSyncHistoryRequest {
-        val episodesList = mutableListOf<com.cinetrack.data.api.SimklEpisode>()
+        val seasonsMap = mutableMapOf<Int, MutableList<com.cinetrack.data.api.SimklSeasonEpisode>>()
         
         // Formato stringa: "1:1,2,3;2:5,6"
         val seasons = encodedEps.split(";").mapNotNull { part ->
@@ -151,12 +151,14 @@ class SimklInstantWriteWorker @AssistedInject constructor(
             val seasonNum = part.substring(0, colonIdx).toIntOrNull() ?: return@mapNotNull null
             val epNums = part.substring(colonIdx + 1).split(",").mapNotNull { it.trim().toIntOrNull() }
             
+            val eps = seasonsMap.getOrPut(seasonNum) { mutableListOf() }
             epNums.forEach { epNum ->
-                episodesList.add(com.cinetrack.data.api.SimklEpisode(season = seasonNum, episode = epNum))
+                eps.add(com.cinetrack.data.api.SimklSeasonEpisode(episode = epNum, number = epNum))
             }
         }
+        val seasonsList = seasonsMap.map { com.cinetrack.data.api.SimklSeason(season = it.key, number = it.key, episodes = it.value) }
         
-        val showWithEps = com.cinetrack.data.api.SimklHistoryItem(ids = ids, episodes = episodesList.takeIf { it.isNotEmpty() })
+        val showWithEps = com.cinetrack.data.api.SimklHistoryItem(ids = ids, seasons = seasonsList.takeIf { it.isNotEmpty() })
         
         return if (mediaType == "anime") {
             SimklSyncHistoryRequest(anime = listOf(showWithEps))

@@ -219,7 +219,7 @@
     <string name="settings_external_migration">Importation universelle de données</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, Tous CSV/JSON/ZIP</string>
     <string name="settings_device_backup">Sauvegarde FlickTrove sur l\'appareil</string>
-    <string name="settings_trakt_sync_desc">App âž” Trakt : Instantané\nTrakt âž” App : 24h</string>
+    <string name="settings_trakt_sync_desc">App ➔ Trakt : Instantané\nTrakt ➔ App : 6h</string>
     <string name="settings_sync_missing_details">Synchroniser les détails manquants</string>
     <string name="settings_sync_missing_details_desc">Récupérez les données manquantes pour les films anciens de votre bibliothèque. À utiliser uniquement si strictement nécessaire (opération intensive en arrière-plan).</string>
     <string name="settings_dialog_deep_sync_title">Avertissement : Synchronisation intensive</string>
@@ -1139,7 +1139,7 @@
     <string name="simkl_disconnected">SIMKL déconnecté !</string>
     <string name="simkl_connect_error">Erreur de connexion à SIMKL</string>
     <string name="simkl_connect">Se connecter à SIMKL</string>
-    <string name="simkl_sync_desc">App ➔ SIMKL : Instantané\nSIMKL ➔ App : 24h</string>
+    <string name="simkl_sync_desc">App ➔ SIMKL : Instantané\nSIMKL ➔ App : 6h</string>
     <string name="home_hero_featured">EN VEDETTE</string>
     <string name="home_section_watchlist">De votre Watchlist</string>
     <string name="home_section_watchlist_upcoming">Prochainement dans votre Watchlist</string>

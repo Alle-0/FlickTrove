@@ -756,6 +756,7 @@ fun UpdatesScreen(
                                     options = options,
                                     counts = counts,
                                     selectedIndex = remindersCategoryTab,
+                                    tabWidth = 140.dp,
                                     onOptionClick = { index ->
                                         remindersCategoryTab = index
                                         scope.launch { remindersListState.scrollToItem(0) }

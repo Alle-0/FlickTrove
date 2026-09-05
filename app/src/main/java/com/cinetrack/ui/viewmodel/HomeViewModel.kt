@@ -83,6 +83,8 @@ class HomeViewModel @Inject constructor(
     
     val movieGridState = LazyGridState()
     val tvGridState = LazyGridState()
+    val feedListState = androidx.compose.foundation.lazy.LazyListState()
+    var feedPagerIndex: Int? = null
     val animatedMovieIds = mutableSetOf<String>()
     
     fun emitMessage(message: UiText) {
@@ -135,13 +137,18 @@ class HomeViewModel @Inject constructor(
             return list.filter { !localCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
         }
 
+        val allLocalCompositeIds = baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        fun forceFilterRecommendations(list: ImmutableList<Movie>): ImmutableList<Movie> {
+            return list.filter { !allLocalCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
+        }
+
         baseState.copy(
-            recommendedMovies = filterList(feedState.recommendedMovies),
+            recommendedMovies = forceFilterRecommendations(feedState.recommendedMovies),
             popularMovies = filterList(feedState.popularMovies),
             nowPlayingMovies = filterList(feedState.nowPlayingMovies),
             top10Movies = feedState.top10Movies,
             upcomingMovies = filterList(feedState.upcomingMovies),
-            recommendedTv = filterList(feedState.recommendedTv),
+            recommendedTv = forceFilterRecommendations(feedState.recommendedTv),
             popularTv = filterList(feedState.popularTv),
             nowStreamingTv = filterList(feedState.nowStreamingTv),
             top10Tv = feedState.top10Tv,
@@ -149,7 +156,10 @@ class HomeViewModel @Inject constructor(
             trendingMovies = feedState.trendingMovies,
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
-            continueWatchingTv = feedState.continueWatchingTv,
+            continueWatchingTv = feedState.continueWatchingTv.filter { tv ->
+                val localTv = baseState.allLocalMovies.find { it.id == tv.id && it.mediaType == "tv" }
+                localTv == null || (!localTv.watched && !localTv.dropped)
+            }.toImmutableList(),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,
             becauseYouWatchedTv = feedState.becauseYouWatchedTv,
             isLoading = baseState.isLoading,

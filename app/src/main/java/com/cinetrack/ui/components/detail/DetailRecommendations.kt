@@ -12,6 +12,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +50,7 @@ fun DetailRecommendations(
     onLongPress: (Movie, Offset, Offset) -> Unit = { _, _, _ -> },
     onAction: (Movie) -> Unit,
     onMessage: (String) -> Unit,
+    onCollectionClick: ((Long, String) -> Unit)? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     modifier: Modifier = Modifier
 ) {
@@ -112,26 +116,49 @@ fun DetailRecommendations(
                         .fillMaxWidth()
                         .padding(top = 24.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.detail_collection),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 3.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
-                    )
-                    
-                    Text(
-                        text = collection.name,
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-0.5).sp
-                        ),
-                        color = Color.White,
-                        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                enabled = onCollectionClick != null,
+                                onClick = { onCollectionClick?.invoke(collection.id.toLong(), collection.name) }
+                            )
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.detail_collection),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 3.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = collection.name,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = (-0.5).sp
+                                    ),
+                                    color = Color.White
+                                )
+                                if (onCollectionClick != null) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = Icons.Rounded.KeyboardArrowRight,
+                                        contentDescription = "View Collection",
+                                        tint = Color.White.copy(alpha = 0.5f),
+                                        modifier = Modifier.padding(start = 12.dp).size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
 
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),

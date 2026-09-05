@@ -170,7 +170,7 @@ fun FolderDetailScreenContent(
                 is FolderDetailUiState.Loading -> {
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
-                        val gap = 8.dp
+                        val gap = 12.dp
                         val padding = 16.dp
                         val cardWidth = if (columns > 1) {
                             (maxWidth - (padding * 2) - (gap * (columns - 1))) / columns
@@ -187,7 +187,7 @@ fun FolderDetailScreenContent(
                                 top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
                                 bottom = paddingValues.calculateBottomPadding() + 100.dp
                             ),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             userScrollEnabled = false
                         ) {
@@ -263,7 +263,7 @@ fun FolderDetailScreenContent(
                                     top = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp + 60.dp + 16.dp,
                                     bottom = paddingValues.calculateBottomPadding() + 100.dp
                                 ),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 if (state.movies.isEmpty()) {

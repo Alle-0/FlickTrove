@@ -30,12 +30,14 @@ import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.navigation.sharedElementIfAvailable
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.toComposeColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
@@ -50,20 +52,43 @@ fun TrovePickCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
     var extractedColor by remember { mutableStateOf<Color?>(null) }
+    val imageQuality = com.cinetrack.util.LocalImageQuality.current
     val backdropUrl = buildTmdbImageUrl(
         movie.backdropPath ?: movie.posterPath,
         ImageType.BACKDROP,
-        ImageQuality.HIGH
+        imageQuality
     )
     val posterUrl = buildTmdbImageUrl(
         movie.posterPath,
         ImageType.POSTER,
-        ImageQuality.MEDIUM
+        imageQuality
+    )
+    val hasAnimated = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (!hasAnimated.value) {
+            hasAnimated.value = true
+        }
+    }
+
+    val cardAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (hasAnimated.value) 1f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 400, easing = androidx.compose.animation.core.LinearOutSlowInEasing),
+        label = "alpha"
     )
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    val cardTranslateY by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (hasAnimated.value) 0f else 60f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessMedium),
+        label = "translateY"
+    )
+
+    Column(modifier = modifier.fillMaxWidth().graphicsLayer {
+        this.alpha = cardAlpha
+        this.translationY = cardTranslateY
+    }) {
         // Titolo sezione
         Row(
             modifier = Modifier
@@ -135,7 +160,7 @@ fun TrovePickCard(
                     .height(260.dp)
                     .padding(horizontal = 16.dp)
                     .bounceClick { onMovieClick(movie) }
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(36.dp)) // Angoli molto arrotondati per un look morbido
             ) {
                 // Backdrop come sfondo della card
             AsyncImage(
@@ -146,14 +171,15 @@ fun TrovePickCard(
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().sharedElementIfAvailable("movie_backdrop_${movie.id}"),
                 onSuccess = { result ->
                     coroutineScope.launch {
                         val bitmap = result.result.drawable.toBitmap()
-                        val extracted = ColorUtils.extractAverageColor(bitmap)
-                        if (extracted != Color.Unspecified) {
-                            val ambientColor = ColorUtils.darkenForAmbient(extracted)
-                            extractedColor = ColorUtils.ensureMinimumLuminance(ambientColor, 0.25f)
+                        val cardWidthDp = configuration.screenWidthDp - 32f
+                        val cardAspectRatio = cardWidthDp / 260f
+                        val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
+                        if (color != Color.Unspecified) {
+                            extractedColor = color
                         }
                     }
                 }
@@ -210,7 +236,7 @@ fun TrovePickCard(
                     modifier = Modifier
                         .width(145.dp)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(24.dp)) // Aumentato per bilanciare l'esterno ultra arrotondato
                 )
 
                 // Testo
@@ -228,23 +254,40 @@ fun TrovePickCard(
                         )
                     )
 
-                    // Titolo
-                    Text(
-                        text = movie.title ?: movie.name ?: "",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 26.sp,
-                            lineHeight = 30.sp,
-                            shadow = androidx.compose.ui.graphics.Shadow(
-                                color = Color.Black,
-                                offset = androidx.compose.ui.geometry.Offset(2f, 2f),
-                                blurRadius = 4f
-                            )
-                        ),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    // Titolo o Logo
+                    if (!movie.logoPath.isNullOrEmpty()) {
+                        val logoUrl = buildTmdbImageUrl(movie.logoPath, ImageType.LOGO, imageQuality)
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(logoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = movie.title ?: movie.name,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .heightIn(max = 60.dp) // Leggermente più piccolo del carosello hero
+                                .fillMaxWidth(0.9f)
+                                .sharedElementIfAvailable("movie_logo_${movie.id}"),
+                            alignment = Alignment.CenterStart
+                        )
+                    } else {
+                        Text(
+                            text = movie.title ?: movie.name ?: "",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 26.sp,
+                                lineHeight = 30.sp,
+                                shadow = androidx.compose.ui.graphics.Shadow(
+                                    color = Color.Black,
+                                    offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
                     // Anno e Generi
                     val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
@@ -275,7 +318,10 @@ fun TrovePickCard(
                                     Text(
                                         text = genreName,
                                         color = Color.White.copy(alpha = 0.9f),
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }

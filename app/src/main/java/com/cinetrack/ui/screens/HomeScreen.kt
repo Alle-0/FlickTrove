@@ -119,7 +119,17 @@ object HomeTab : Tab {
             onToggleFilter = { visible, bounds -> if (visible) filterRequest?.invoke(bounds) },
             onActionModalVisibilityChanged = { isActionModalVisible = it },
             onMovieClick = { movie -> 
-                navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+                navigator.push(
+                    MovieDetailScreen(
+                        movieId = movie.id,
+                        mediaType = movie.mediaType,
+                        preloadedTitle = movie.title ?: movie.name,
+                        preloadedPosterPath = movie.posterPath,
+                        preloadedBackdropPath = movie.backdropPath,
+                        preloadedLogoPath = movie.logoPath,
+                        preloadedAccentColor = movie.accentColor
+                    )
+                )
             }
         )
     }

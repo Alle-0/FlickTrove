@@ -146,7 +146,10 @@ fun CollectionDetailScreenContent(
             val imageType = if (collection.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, currentImageQuality)
             if (imageUrl != null) {
-                viewModel.fetchAccentColor(imageUrl)
+                // Determine target aspect ratio (ScreenWidth / 480dp)
+                val screenWidthDp = configuration.screenWidthDp.toFloat()
+                val targetAspectRatio = screenWidthDp / 480f
+                viewModel.fetchAccentColor(imageUrl, targetAspectRatio = targetAspectRatio)
             }
         }
     }

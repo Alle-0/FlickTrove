@@ -44,10 +44,9 @@ fun DetailSkeleton(
 
             // Shift content up to overlap backdrop
             Column(
-                modifier = Modifier
-                    .offset(y = (-140).dp)
+                modifier = Modifier.offset(y = (-140).dp)
             ) {
-                // 2. Header Skeleton (16dp padding)
+                // 2. Header Skeleton
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -61,9 +60,9 @@ fun DetailSkeleton(
                             .clip(RoundedCornerShape(8.dp))
                             .shimmerEffect()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     // Tagline
                     Box(
                         modifier = Modifier
@@ -85,7 +84,7 @@ fun DetailSkeleton(
                             .shimmerEffect()
                     )
 
-                    // Fused Container
+                    // Fused Container (rating + year + runtime)
                     val containerShape = RoundedCornerShape(28.dp)
                     Box(
                         modifier = Modifier
@@ -141,174 +140,7 @@ fun DetailSkeleton(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 3. MetaRows Skeleton (24dp padding)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    // Genres FlowRow
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(modifier = Modifier.width(70.dp).height(28.dp).clip(RoundedCornerShape(20.dp)).shimmerEffect())
-                        Box(modifier = Modifier.width(85.dp).height(28.dp).clip(RoundedCornerShape(20.dp)).shimmerEffect())
-                        Box(modifier = Modifier.width(60.dp).height(28.dp).clip(RoundedCornerShape(20.dp)).shimmerEffect())
-                    }
-
-                    // Watch Providers Section
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // "DOVE GUARDARE" Label
-                        Box(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(12.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmerEffect()
-                        )
-                        
-                        // "IN STREAMING" Label
-                        Box(
-                            modifier = Modifier
-                                .width(80.dp)
-                                .height(10.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .shimmerEffect()
-                        )
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            repeat(4) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .shimmerEffect()
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 4. Plot Skeleton (24dp padding)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth().height(18.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                    Box(modifier = Modifier.fillMaxWidth().height(18.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                    Box(modifier = Modifier.fillMaxWidth(0.8f).height(18.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                    Box(modifier = Modifier.fillMaxWidth(0.5f).height(18.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 5. Personal Zone Skeleton
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(72.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(modifier = Modifier.weight(1f).fillMaxHeight().clip(CircleShape).shimmerEffect())
-                    Box(modifier = Modifier.weight(1f).fillMaxHeight().clip(CircleShape).shimmerEffect())
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 6. Cast Skeleton
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(modifier = Modifier.width(100.dp).height(24.dp).clip(RoundedCornerShape(6.dp)).shimmerEffect())
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        repeat(4) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(modifier = Modifier.size(64.dp).clip(CircleShape).shimmerEffect())
-                                Box(modifier = Modifier.width(50.dp).height(12.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 7. Technical Details Skeleton
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(modifier = Modifier.width(150.dp).height(24.dp).clip(RoundedCornerShape(6.dp)).shimmerEffect())
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        repeat(3) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Box(modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect())
-                                Box(modifier = Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(12.dp)).shimmerEffect())
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 8. Trailers Skeleton
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(modifier = Modifier.width(120.dp).height(24.dp).clip(RoundedCornerShape(6.dp)).shimmerEffect())
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        repeat(2) {
-                            Box(
-                                modifier = Modifier
-                                    .size(width = 220.dp, height = 124.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // 9. Recommendations & Collection Skeleton
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(modifier = Modifier.width(140.dp).height(24.dp).clip(RoundedCornerShape(6.dp)).shimmerEffect())
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        repeat(3) {
-                            Box(
-                                modifier = Modifier
-                                    .size(width = 110.dp, height = 165.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .shimmerEffect()
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(140.dp))
+                DetailSkeletonBottomPart()
             }
         }
 
@@ -328,5 +160,80 @@ fun DetailSkeleton(
                     .shimmerEffect()
             )
         }
+    }
+}
+
+@Composable
+fun DetailSkeletonBottomPart() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Overview lines
+        repeat(4) { i ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(if (i == 3) 0.6f else 1f)
+                    .height(14.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Genres row
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(28.dp)
+                        .clip(CircleShape)
+                        .shimmerEffect()
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Cast section title
+        Box(
+            modifier = Modifier
+                .width(80.dp)
+                .height(18.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .shimmerEffect()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Cast row
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            repeat(4) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .shimmerEffect()
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(52.dp)
+                            .height(10.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(120.dp))
     }
 }

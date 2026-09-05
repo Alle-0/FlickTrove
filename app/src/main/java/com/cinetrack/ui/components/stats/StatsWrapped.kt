@@ -186,7 +186,10 @@ fun WrappedBannerPill(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = rotation }
+                            modifier = Modifier
+                                .size(24.dp)
+                                .offset(x = 1.5.dp)
+                                .graphicsLayer { rotationZ = rotation }
                         )
                     }
                 }

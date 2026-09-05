@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.R
+import com.cinetrack.ui.navigation.sharedElementIfAvailable
 
 /**
  * DetailBackdrop
@@ -32,6 +33,7 @@ import com.cinetrack.R
  */
 @Composable
 fun DetailBackdrop(
+    sharedElementKey: String? = null,
     backdropPath: String?,
     posterPath: String?,
     accentColor: Color,
@@ -57,25 +59,25 @@ fun DetailBackdrop(
         if (path != null) {
             val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
             val context = LocalContext.current
-            Crossfade(
-                targetState = imageUrl,
-                animationSpec = tween(durationMillis = 700),
-                label = "BackdropCrossfade"
-            ) { targetUrl ->
-                val request = remember(targetUrl) {
-                    ImageRequest.Builder(context)
-                        .data(targetUrl)
-                        .crossfade(true)
-                        .crossfade(700)
-                        .build()
-                }
-                AsyncImage(
-                    model = request,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+            val request = remember(imageUrl) {
+                ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .crossfade(700)
+                    .build()
             }
+            AsyncImage(
+                model = request,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().let { m ->
+                    if (sharedElementKey != null) {
+                        m.sharedElementIfAvailable(sharedElementKey)
+                    } else {
+                        m
+                    }
+                }
+            )
         }
 
         // 3. GRADIENTE PURO E NATIVO: Multi-step gradient for premium blending

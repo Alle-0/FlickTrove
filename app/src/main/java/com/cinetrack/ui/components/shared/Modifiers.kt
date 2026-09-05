@@ -33,9 +33,9 @@ fun Modifier.shimmerEffect(): Modifier = composed {
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF14141B).copy(alpha = 0.8f), // Deep base with alpha
-                            Color(0xFF2A2A35).copy(alpha = 0.6f), // Soft translucent highlight
-                            Color(0xFF14141B).copy(alpha = 0.8f)  // Deep base with alpha
+                            Color(0xFF0B0B0E), // Very dark base
+                            Color(0xFF16161D), // Subtle highlight
+                            Color(0xFF0B0B0E)  // Very dark base
                         ),
                         start = Offset(startOffsetX, 0f),
                         end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())

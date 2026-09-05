@@ -356,12 +356,19 @@ class StatsViewModel @Inject constructor(
                 }
             }
         }
-        val topCast = castMap.entries
-            .sortedByDescending { it.value.count }
-            .take(50)
-            .map { (id, accum) -> PersonStat(id, accum.name, accum.profilePath, accum.count) }
-            .toImmutableList()
-
+        val topCast = kotlinx.coroutines.coroutineScope {
+            castMap.entries
+                .sortedByDescending { it.value.count }
+                .take(50)
+                .map { (id, accum) ->
+                    kotlinx.coroutines.async {
+                        val cachedPath = repository.getCachedPersonProfilePath(id)
+                        PersonStat(id, accum.name, cachedPath ?: accum.profilePath, accum.count)
+                    }
+                }
+                .awaitAll()
+                .toImmutableList()
+        }
         // Top Directors
         data class DirAccum(val name: String, var profilePath: String?, var count: Int)
         val directorMap = mutableMapOf<Long, DirAccum>()
@@ -379,14 +386,20 @@ class StatsViewModel @Inject constructor(
                 }
             }
         }
-        val topDirectors = directorMap.values.sortedByDescending { it.count }.take(10).map {
-            PersonStat(
-                id = directorMap.entries.find { entry -> entry.value == it }?.key ?: 0,
-                name = it.name,
-                profilePath = it.profilePath,
-                count = it.count
-            )
-        }.toImmutableList()
+        val topDirectors = kotlinx.coroutines.coroutineScope {
+            directorMap.values.sortedByDescending { it.count }.take(10).map { accum ->
+                kotlinx.coroutines.async {
+                    val id = directorMap.entries.find { entry -> entry.value == accum }?.key ?: 0
+                    val cachedPath = repository.getCachedPersonProfilePath(id)
+                    PersonStat(
+                        id = id,
+                        name = accum.name,
+                        profilePath = cachedPath ?: accum.profilePath,
+                        count = accum.count
+                    )
+                }
+            }.awaitAll().toImmutableList()
+        }
         
         // Countries
         val countryCounts = mutableMapOf<String, Int>()

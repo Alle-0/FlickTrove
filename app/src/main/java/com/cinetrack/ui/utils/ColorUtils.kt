@@ -14,101 +14,72 @@ import kotlinx.coroutines.withContext
 
 object ColorUtils {
     /**
-     * Extracts the dominant vibrant color from a bitmap.
-     * Samples the image and groups pixels into hue buckets, prioritizing vibrant
-     * and mid-luminance pixels over dark shadows or highlights.
+     * Extracts the dominant ambient color from a bitmap using Android's Palette API.
+     *
+     * @param bitmap       The source bitmap.
+     * @param useBottomHalf If true, only the bottom 50% of the image is sampled.
+     * @param targetAspectRatio If provided, computes the visible area assuming ContentScale.Crop
+     *                          and Center alignment, ignoring cropped-out edges.
+     * @param fallback     Returned when extraction fails.
      */
+    suspend fun extractAccentColor(
+        bitmap: Bitmap,
+        useBottomHalf: Boolean = false,
+        targetAspectRatio: Float? = null,
+        fallback: Color = Color.Unspecified
+    ): Color = withContext(Dispatchers.Default) {
+        if (bitmap.width <= 0 || bitmap.height <= 0) return@withContext fallback
+
+        val builder = androidx.palette.graphics.Palette.Builder(bitmap)
+
+        if (useBottomHalf) {
+            builder.setRegion(0, bitmap.height / 2, bitmap.width, bitmap.height)
+        } else if (targetAspectRatio != null && targetAspectRatio > 0) {
+            val imageAspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+            val visibleWidth: Int
+            val visibleHeight: Int
+
+            if (targetAspectRatio > imageAspectRatio) {
+                // Target is wider, so height is cropped
+                visibleWidth = bitmap.width
+                visibleHeight = (bitmap.width / targetAspectRatio).toInt().coerceAtMost(bitmap.height)
+            } else {
+                // Target is taller, so width is cropped
+                visibleHeight = bitmap.height
+                visibleWidth = (bitmap.height * targetAspectRatio).toInt().coerceAtMost(bitmap.width)
+            }
+
+            val left = (bitmap.width - visibleWidth) / 2
+            val top = (bitmap.height - visibleHeight) / 2
+            builder.setRegion(left, top, left + visibleWidth, top + visibleHeight)
+        }
+
+        val palette = builder.generate()
+        val colorInt = palette.dominantSwatch?.rgb
+            ?: palette.mutedSwatch?.rgb
+            ?: palette.vibrantSwatch?.rgb
+            ?: return@withContext fallback
+
+        val raw = Color(colorInt)
+        val ambient = darkenForAmbient(raw)
+        ensureMinimumLuminance(ambient, 0.25f)
+    }
+
+    /**
+     * @deprecated Use [extractAccentColor] instead.
+     * Kept for backwards-compatibility with call sites not yet migrated.
+     */
+    @Deprecated(
+        message = "Use extractAccentColor() which uses Palette and samples the bottom half of the image for a better ambient color.",
+        replaceWith = ReplaceWith("extractAccentColor(bitmap)")
+    )
     suspend fun extractAverageColor(bitmap: Bitmap, defaultFallback: Color = Color.Unspecified): Color = withContext(Dispatchers.Default) {
         if (bitmap.width <= 0 || bitmap.height <= 0) return@withContext defaultFallback
-
-        val scaledWidth = min(48, bitmap.width)
-        val scaledHeight = min(48, bitmap.height)
-        val smallBitmap = if (bitmap.width == scaledWidth && bitmap.height == scaledHeight) {
-            bitmap
-        } else {
-            Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
-        }
-
-        val pixels = IntArray(scaledWidth * scaledHeight)
-        smallBitmap.getPixels(pixels, 0, scaledWidth, 0, 0, scaledWidth, scaledHeight)
-        if (smallBitmap != bitmap) {
-            smallBitmap.recycle()
-        }
-
-        val bucketCounts = IntArray(36)
-        val bucketRed = LongArray(36)
-        val bucketGreen = LongArray(36)
-        val bucketBlue = LongArray(36)
-        val bucketScore = FloatArray(36)
-
-        val hsv = FloatArray(3)
-        var totalColorPixels = 0
-        var fallbackR = 0L
-        var fallbackG = 0L
-        var fallbackB = 0L
-        var fallbackCount = 0
-
-        for (pixel in pixels) {
-            val alpha = (pixel shr 24) and 0xFF
-            if (alpha < 128) continue
-
-            val r = (pixel shr 16) and 0xFF
-            val g = (pixel shr 8) and 0xFF
-            val b = pixel and 0xFF
-
-            AndroidColor.colorToHSV(pixel, hsv)
-            val hue = hsv[0] // 0..360
-            val sat = hsv[1] // 0..1
-            val value = hsv[2] // 0..1
-
-            if (value >= 0.15f && value <= 0.92f) {
-                fallbackR += r
-                fallbackG += g
-                fallbackB += b
-                fallbackCount++
-            }
-
-            if (value < 0.18f || (value > 0.92f && sat < 0.2f) || sat < 0.18f) continue
-
-            val bucketIdx = min(35, max(0, (hue / 10f).toInt()))
-            bucketCounts[bucketIdx]++
-            bucketRed[bucketIdx] += r.toLong()
-            bucketGreen[bucketIdx] += g.toLong()
-            bucketBlue[bucketIdx] += b.toLong()
-
-            val lumBonus = if (value in 0.35f..0.85f) 1.5f else 1.0f
-            bucketScore[bucketIdx] += sat * lumBonus
-            totalColorPixels++
-        }
-
-        if (totalColorPixels == 0) {
-            if (fallbackCount > 0) {
-                return@withContext Color(
-                    AndroidColor.rgb(
-                        (fallbackR / fallbackCount).toInt().coerceIn(0, 255),
-                        (fallbackG / fallbackCount).toInt().coerceIn(0, 255),
-                        (fallbackB / fallbackCount).toInt().coerceIn(0, 255)
-                    )
-                )
-            }
-            return@withContext defaultFallback
-        }
-
-        var bestBucket = 0
-        var maxScore = -1f
-        for (i in 0 until 36) {
-            if (bucketCounts[i] > 0 && bucketScore[i] > maxScore) {
-                maxScore = bucketScore[i]
-                bestBucket = i
-            }
-        }
-
-        val count = bucketCounts[bestBucket]
-        val avgR = (bucketRed[bestBucket] / count).toInt().coerceIn(0, 255)
-        val avgG = (bucketGreen[bestBucket] / count).toInt().coerceIn(0, 255)
-        val avgB = (bucketBlue[bestBucket] / count).toInt().coerceIn(0, 255)
-
-        Color(AndroidColor.rgb(avgR, avgG, avgB))
+        val palette = androidx.palette.graphics.Palette.Builder(bitmap).generate()
+        val colorInt = palette.dominantSwatch?.rgb
+            ?: palette.mutedSwatch?.rgb
+            ?: palette.vibrantSwatch?.rgb
+        if (colorInt != null) Color(colorInt) else defaultFallback
     }
 
     /**
@@ -220,4 +191,12 @@ object ColorUtils {
     fun contentColorForAccent(color: Color): Color {
         return if (color.luminance() > 0.38f) Color(0xFF000000) else Color.White
     }
+}
+
+/** Converts a Compose [Color] to a CSS-style hex string (e.g. "#FF3A2C"). */
+fun Color.toHexString(): String {
+    val r = (red * 255).toInt().coerceIn(0, 255)
+    val g = (green * 255).toInt().coerceIn(0, 255)
+    val b = (blue * 255).toInt().coerceIn(0, 255)
+    return String.format("#%02X%02X%02X", r, g, b)
 }

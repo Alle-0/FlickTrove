@@ -223,7 +223,7 @@
     <string name="settings_external_migration">यूनिवर्सल डेटा इम्पोर्ट</string>
     <string name="settings_external_migration_desc">Trakt, Letterboxd, IMDb, TVTime, सभी CSV/JSON/ZIP</string>
     <string name="settings_device_backup">FlickTrove डिवाइस बैकअप</string>
-    <string name="settings_trakt_sync_desc">ऐप ➔ Trakt: तुरंत\nTrakt ➔ ऐप: 24 घंटे</string>
+    <string name="settings_trakt_sync_desc">ऐप ➔ Trakt: तुरंत\nTrakt ➔ ऐप: 6 घंटे</string>
     <string name="settings_sync_missing_details">छूटे हुए विवरण सिंक करें</string>
     <string name="settings_sync_missing_details_desc">अपनी लाइब्रेरी में पुरानी फ़िल्मों का छूटा हुआ डेटा प्राप्त करें। केवल तभी उपयोग करें जब अत्यंत आवश्यक हो (गहन पृष्ठभूमि ऑपरेशन)।</string>
     <string name="settings_dialog_deep_sync_title">चेतावनी: गहन सिंक</string>
@@ -1138,7 +1138,7 @@
     <string name="simkl_disconnected">SIMKL डिस्कनेक्ट हो गया!</string>
     <string name="simkl_connect_error">SIMKL से कनेक्ट करने में त्रुटि</string>
     <string name="simkl_connect">SIMKL से कनेक्ट करें</string>
-    <string name="simkl_sync_desc">ऐप ➔ SIMKL: तुरंत\nSIMKL ➔ ऐप: 24 घंटे</string>
+    <string name="simkl_sync_desc">ऐप ➔ SIMKL: तुरंत\nSIMKL ➔ ऐप: 6 घंटे</string>
     <string name="home_hero_featured">विशेष रुप से प्रदर्शित</string>
     <string name="home_section_watchlist">आपकी वॉचलिस्ट से</string>
     <string name="home_section_watchlist_upcoming">आपकी वॉचलिस्ट से जल्द आ रहा है</string>

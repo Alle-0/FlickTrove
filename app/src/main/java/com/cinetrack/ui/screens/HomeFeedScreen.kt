@@ -128,7 +128,17 @@ object HomeFeedTab : Tab {
                 val activeTab = viewModel.uiState.value.activeTab
                 val defaultType = if (activeTab == "tv") "tv" else "movie"
                 val finalType = if (movie.mediaType.isNotEmpty()) movie.mediaType else defaultType
-                navigator.push(MovieDetailScreen(movie.id, finalType))
+                navigator.push(
+                    MovieDetailScreen(
+                        movieId = movie.id,
+                        mediaType = finalType,
+                        preloadedTitle = movie.title ?: movie.name,
+                        preloadedPosterPath = movie.posterPath,
+                        preloadedBackdropPath = movie.backdropPath,
+                        preloadedLogoPath = movie.logoPath,
+                        preloadedAccentColor = movie.accentColor
+                    )
+                )
             }
         )
     }
@@ -226,7 +236,7 @@ fun HomeFeedScreenContent(
     val watchlistList = remember(isTv, uiState.allLocalMovies) {
         val targetType = if (isTv) "tv" else "movie"
         uiState.allLocalMovies
-            .filter { it.favorite && !it.watched && it.mediaType == targetType }
+            .filter { it.favorite && !it.watched && it.mediaType == targetType && it.isReleased }
             .distinctBy { it.id }
             .sortedByDescending { it.createdAt }
     }
@@ -235,7 +245,11 @@ fun HomeFeedScreenContent(
     val initialPage = if (heroList.isNotEmpty()) {
         5000 - (5000 % heroList.size)
     } else 0
-    val pagerState = rememberPagerState(initialPage = initialPage) { 10000 }
+    val pagerState = rememberPagerState(initialPage = viewModel.feedPagerIndex ?: initialPage) { 10000 }
+
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.feedPagerIndex = pagerState.currentPage
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -245,6 +259,7 @@ fun HomeFeedScreenContent(
                 .haze(activeHazeState, style = HazeStyles.PremiumDark)
         ) {
             LazyColumn(
+                state = viewModel.feedListState,
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
                     top = 165.dp
@@ -301,20 +316,22 @@ fun HomeFeedScreenContent(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = 32.dp)
                                 .height(500.dp)
-                                .clip(RoundedCornerShape(24.dp))
+                                .clip(RoundedCornerShape(36.dp))
                                 .background(Color(0xFF1A1A2E))
                                 .shimmerEffect()
                         )
                     }
-                    items(2) {
+                    
+                    item {
+                        // Standard Row Skeleton
                         Column {
                             Box(
                                 modifier = Modifier
                                     .padding(start = 16.dp, end = 16.dp)
-                                    .width(140.dp)
-                                    .height(28.dp)
+                                    .width(160.dp)
+                                    .height(24.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Color(0xFF1A1A2E))
                                     .shimmerEffect()
@@ -326,7 +343,45 @@ fun HomeFeedScreenContent(
                                 userScrollEnabled = false
                             ) {
                                 items(4) {
-                                    MovieCardSkeleton(width = 120.dp)
+                                    MovieCardSkeleton(width = 110.dp)
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        // Trove Pick Card Skeleton
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(vertical = 24.dp)
+                                .height(260.dp)
+                                .clip(RoundedCornerShape(36.dp))
+                                .background(Color(0xFF1A1A2E))
+                                .shimmerEffect()
+                        )
+                    }
+
+                    items(2) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 16.dp, end = 16.dp)
+                                    .width(140.dp)
+                                    .height(24.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFF1A1A2E))
+                                    .shimmerEffect()
+                            )
+                            
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                userScrollEnabled = false
+                            ) {
+                                items(4) {
+                                    MovieCardSkeleton(width = 110.dp)
                                 }
                             }
                         }

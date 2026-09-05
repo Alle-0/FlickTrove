@@ -28,8 +28,48 @@ class GetHomeFeedUseCase @Inject constructor(
         val localMovies = repository.getLocalMoviesFlow().first()
 
         // Genera raccomandazioni personalizzate usando l'algoritmo
-        val recMovies = buildRecommendations(type = "movie", localMovies = localMovies)
-        val recTv = buildRecommendations(type = "tv", localMovies = localMovies)
+        val recMoviesDeferred = coroutineScope { async { 
+            val recs = buildRecommendations(type = "movie", localMovies = localMovies)
+            if (recs.isNotEmpty()) {
+                val first = recs.first()
+                try {
+                    val detail = repository.getMovieDetail(first.id, false)
+                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+                    val logos = detail.images?.logos
+                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+                    val newList = recs.toMutableList()
+                    newList[0] = first.copy(genreIds = detail.genres?.map { it.id } ?: first.genreIds).apply { 
+                        this.logoPath = bestLogo?.filePath 
+                        this.matchScore = first.matchScore
+                    }
+                    newList.toImmutableList()
+                } catch (e: Exception) { recs }
+            } else recs
+        } }
+
+        val recTvDeferred = coroutineScope { async { 
+            val recs = buildRecommendations(type = "tv", localMovies = localMovies)
+            if (recs.isNotEmpty()) {
+                val first = recs.first()
+                try {
+                    val detail = repository.getMovieDetail(first.id, true)
+                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+                    val logos = detail.images?.logos
+                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+                    val newList = recs.toMutableList()
+                    newList[0] = first.copy(genreIds = detail.genres?.map { it.id } ?: first.genreIds).apply { 
+                        this.logoPath = bestLogo?.filePath 
+                        this.matchScore = first.matchScore
+                    }
+                    newList.toImmutableList()
+                } catch (e: Exception) { recs }
+            } else recs
+        } }
+
+        val recMovies = recMoviesDeferred.await()
+        val recTv = recTvDeferred.await()
 
         return coroutineScope {
             // Carica tutte le altre sezioni in parallelo
@@ -96,7 +136,7 @@ class GetHomeFeedUseCase @Inject constructor(
                     movie.mediaType == "tv" && 
                     !movie.watched && 
                     !movie.dropped && 
-                    !movie.watchedEpisodes.isNullOrEmpty()
+                    (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0
                 }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
             }
             

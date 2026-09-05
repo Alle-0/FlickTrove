@@ -2,6 +2,7 @@ package com.cinetrack.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -59,6 +60,7 @@ object FlowStatsTab : Tab {
 
     @Composable
     override fun Content() {
+        val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow.parent
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val activeHazeState = hazeState ?: remember { HazeState() }
@@ -168,7 +170,12 @@ object FlowStatsTab : Tab {
                         
                         // Top MVPs
                         if (flowUiState.topMvps.isNotEmpty()) {
-                            TopMvpsSection(mvps = flowUiState.topMvps)
+                            TopMvpsSection(
+                                mvps = flowUiState.topMvps,
+                                onActorClick = { id, profilePath ->
+                                    navigator?.push(com.cinetrack.ui.screens.PersonDetailScreen(id, profilePath))
+                                }
+                            )
                             Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
@@ -288,7 +295,10 @@ fun TopVibesSection(vibes: List<com.cinetrack.ui.viewmodel.VibeStat>) {
 }
 
 @Composable
-fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
+fun TopMvpsSection(
+    mvps: List<com.cinetrack.ui.viewmodel.MvpStat>,
+    onActorClick: (Long, String?) -> Unit = { _, _ -> }
+) {
     SectionTitle(stringResource(R.string.flow_top_mvps))
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -304,7 +314,9 @@ fun TopMvpsSection(mvps: List<com.cinetrack.ui.viewmodel.MvpStat>) {
                 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(96.dp)
+                modifier = Modifier
+                    .width(96.dp)
+                    .clickable { onActorClick(mvp.id, mvp.profilePath) }
             ) {
                 Box {
                     if (imageUrl != null) {

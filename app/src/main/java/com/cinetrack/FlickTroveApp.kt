@@ -35,6 +35,9 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.components.common.UndoToast
 import com.cinetrack.ui.components.common.GlobalErrorToast
+import androidx.compose.animation.SharedTransitionLayout
+import com.cinetrack.ui.navigation.LocalSharedTransitionScope
+import com.cinetrack.ui.navigation.LocalAnimatedVisibilityScope
 
 private val initialSystemLocale = java.util.Locale.getDefault()
 
@@ -165,8 +168,10 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Navigator(SplashScreen()) { navigator ->
+                    SharedTransitionLayout {
+                        val sharedTransitionScope = this
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Navigator(SplashScreen()) { navigator ->
                             CompositionLocalProvider(
                                 com.cinetrack.ui.LocalSearchOverlay provides { offset, genreId, genreName, keywordId, keywordName ->
                                     searchOverlayTriggerX = offset?.x ?: -1f
@@ -239,16 +244,21 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     ) { screen ->
-                                        Box(modifier = Modifier.fillMaxSize()) {
-                                            screen.Content()
-                                            
-                                            if (isSearchOverlayOpen && screen.key == searchOverlaySourceScreenKey) {
-                                                Box(modifier = Modifier.fillMaxSize().zIndex(100000f)) {
-                                                    val context = LocalContext.current
-                                                    var currentContext = context
-                                                    while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
-                                                        currentContext = currentContext.baseContext
-                                                    }
+                                        val animatedVisibilityScope = this
+                                        CompositionLocalProvider(
+                                            LocalSharedTransitionScope provides sharedTransitionScope,
+                                            LocalAnimatedVisibilityScope provides animatedVisibilityScope
+                                        ) {
+                                            Box(modifier = Modifier.fillMaxSize()) {
+                                                screen.Content()
+                                                
+                                                if (isSearchOverlayOpen && screen.key == searchOverlaySourceScreenKey) {
+                                                    Box(modifier = Modifier.fillMaxSize().zIndex(100000f)) {
+                                                        val context = LocalContext.current
+                                                        var currentContext = context
+                                                        while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+                                                            currentContext = currentContext.baseContext
+                                                        }
                                                     val activity = currentContext as? androidx.activity.ComponentActivity
                                                     
                                                     val viewModel = if (activity != null) {
@@ -299,6 +309,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     }
+                                    }
                                     } // end haze Box
                                     
                                     com.cinetrack.ui.components.dialog.GuestAuthDialog(
@@ -310,6 +321,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                 }
                             }
                         }
+                    }
                     }
 
                     

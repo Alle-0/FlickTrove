@@ -41,7 +41,8 @@ class SimklSyncWorker @AssistedInject constructor(
     private val simklService: SimklService,
     private val tmdbService: TMDBService,
     private val authRepository: SimklAuthRepository,
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieRepository,
+    private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -105,41 +106,78 @@ class SimklSyncWorker @AssistedInject constructor(
             
             val force = inputData.getBoolean("force", false)
             val isFirstSync = !authRepository.isFirstSyncCompleted()
+            val isFullDownload = isFirstSync || force
+            
+            val bulkStatsUpdates = mutableListOf<com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate>()
             
             updateProgress("App ➔ SIMKL: Pushing local changes...")
-            pushPendingChanges(force || isFirstSync)
+            pushPendingChanges() // ONLY push pending_sync (offline edits)
             
             val activities = simklService.getActivities()
             val remoteLastSync = activities.all ?: ""
             val localLastSync = authRepository.getLastSyncTime() ?: ""
 
-            if (!force && !isFirstSync && remoteLastSync == localLastSync) {
+            if (!isFullDownload && remoteLastSync == localLastSync) {
                 // Nothing changed on the server
                 return@withContext Result.success()
             }
 
-            if (isFirstSync) {
+            if (isFullDownload) {
                 updateProgress("SIMKL ➔ App: Downloading library...")
                 val movies = simklService.getSyncMovies()
-                processPhaseItems(movies, isMovie = true)
-                
                 val shows = simklService.getSyncShows()
-                processPhaseItems(shows, isMovie = false)
-
                 val anime = simklService.getSyncAnime()
-                processPhaseItems(anime, isMovie = false)
 
-                authRepository.setFirstSyncCompleted(true)
+                processPhaseItems(movies, isMovie = true, bulkStatsUpdates)
+                processPhaseItems(shows, isMovie = false, bulkStatsUpdates)
+                processPhaseItems(anime, isMovie = false, bulkStatsUpdates)
+
+                val remoteTmdbIds = (movies + shows + anime).mapNotNull { 
+                    it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb ?: it.anime?.ids?.tmdb 
+                }.mapNotNull { it.toLongOrNull() }.toSet()
+
+                val allLocal = movieRepository.getLocalMovies()
+
+                if (isFirstSync) {
+                    // MERGE BIDIREZIONALE: Push su SIMKL solo di ciò che è locale ma manca sul server
+                    val localMissingOnSimkl = allLocal.filter { 
+                        (it.watched || it.favorite || it.dropped || it.watchedEpisodes?.isNotEmpty() == true) && 
+                        !remoteTmdbIds.contains(it.id) 
+                    }
+                    if (localMissingOnSimkl.isNotEmpty()) {
+                        android.util.Log.d("SimklSyncWorker", "SYNC MERGE: Primo sync -> Push di ${localMissingOnSimkl.size} elementi mancanti su SIMKL")
+                        pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "movie" }, isMovie = true)
+                        pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "tv" }, isMovie = false)
+                    }
+                } else {
+                    // FORCE SYNC MANUALE: Cleanup orfani (Sync Distruttivo)
+                    val orphans = allLocal.filter { 
+                        (it.watched || it.favorite || it.dropped) && !remoteTmdbIds.contains(it.id) 
+                    }
+                    if (orphans.isNotEmpty()) {
+                        android.util.Log.d("SimklSyncWorker", "SYNC: Removing ${orphans.size} orphaned items deleted from SIMKL")
+                        val cleared = orphans.map { 
+                            it.copy(watched = false, favorite = false, dropped = false, syncStatus = "synced") 
+                        }
+                        movieRepository.saveMoviesBulk(cleared)
+                    }
+                }
+
+                if (isFirstSync) authRepository.setFirstSyncCompleted(true)
                 authRepository.saveLastSyncTime(remoteLastSync)
             } else {
                 updateProgress("SIMKL ➔ App: Downloading updates...")
                 // We use the localLastSync to fetch only what changed since our last successful sync
                 val delta = simklService.getSyncAllItems(localLastSync)
-                processPhaseItems(delta.movies ?: emptyList(), isMovie = true)
-                processPhaseItems(delta.shows ?: emptyList(), isMovie = false)
-                processPhaseItems(delta.anime ?: emptyList(), isMovie = false)
+                processPhaseItems(delta.movies ?: emptyList(), isMovie = true, bulkStatsUpdates)
+                processPhaseItems(delta.shows ?: emptyList(), isMovie = false, bulkStatsUpdates)
+                processPhaseItems(delta.anime ?: emptyList(), isMovie = false, bulkStatsUpdates)
                 
                 authRepository.saveLastSyncTime(remoteLastSync)
+            }
+
+            if (bulkStatsUpdates.isNotEmpty()) {
+                firebaseRemoteDataSource.updateTrendingStatsBulk(bulkStatsUpdates)
             }
 
             updateProgress("Sync complete!", 100, 100)
@@ -150,72 +188,17 @@ class SimklSyncWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun pushPendingChanges(forceFullSync: Boolean) {
+    private suspend fun pushPendingChanges() {
         val allLocal = movieRepository.getLocalMovies()
         
-        // Se forceFullSync è true, eseguiamo un MERGE: inviamo a SIMKL tutto il nostro
-        // DB locale (visti, watchlist, dropped). Questo copre il caso del primo login.
-        val pendingItems = if (forceFullSync) {
-            allLocal.filter { it.watched || it.favorite || it.dropped }
-        } else {
-            allLocal.filter { it.syncStatus == "pending_sync" }
-        }
-        
+        val pendingItems = allLocal.filter { it.syncStatus == "pending_sync" }
         if (pendingItems.isEmpty()) return
 
         val pendingMovies = pendingItems.filter { it.mediaType == "movie" }
         val pendingTv = pendingItems.filter { it.mediaType == "tv" }
 
-        suspend fun pushItems(items: List<Movie>, isMovie: Boolean) {
-            val watchedToPush = items.filter { it.watched }
-            val watchlistToPush = items.filter { it.favorite && !it.watched }
-            val droppedToPush = items.filter { it.dropped }
-
-            // IMPORTANTE: Come per Trakt, NON inviamo mai l'history completo delle Serie TV
-            // in modo massivo perché segnerebbe la serie come 100% vista su SIMKL. 
-            // Gli episodi vengono tracciati uno per uno tramite SimklInstantWriteWorker.
-            if (isMovie && watchedToPush.isNotEmpty()) {
-                val historyItems = watchedToPush.map { 
-                    SimklHistoryItem(ids = SimklIds(tmdb = it.id.toString())) 
-                }
-                historyItems.chunked(50).forEach { batch ->
-                    try {
-                        val request = SimklSyncHistoryRequest(movies = batch)
-                        simklService.addToHistory(request)
-                        delay(1000)
-                    } catch (e: Exception) { e.printStackTrace() }
-                }
-            }
-
-            if (watchlistToPush.isNotEmpty()) {
-                val watchlistItems = watchlistToPush.map { 
-                    SimklMediaItem(ids = SimklIds(tmdb = it.id.toString())) 
-                }
-                watchlistItems.chunked(50).forEach { batch ->
-                    try {
-                        val request = if (isMovie) SimklSyncWatchlistRequest(movies = batch) else SimklSyncWatchlistRequest(shows = batch)
-                        simklService.addToWatchlist(request)
-                        delay(1000)
-                    } catch (e: Exception) { e.printStackTrace() }
-                }
-            }
-
-            if (droppedToPush.isNotEmpty()) {
-                val droppedItems = droppedToPush.map { 
-                    SimklMediaItem(ids = SimklIds(tmdb = it.id.toString())) 
-                }
-                droppedItems.chunked(50).forEach { batch ->
-                    try {
-                        val request = if (isMovie) SimklAddToListRequest(to="dropped", movies = batch) else SimklAddToListRequest(to="dropped", shows = batch)
-                        simklService.addToList(request)
-                        delay(1000)
-                    } catch (e: Exception) { e.printStackTrace() }
-                }
-            }
-        }
-
-        pushItems(pendingMovies, isMovie = true)
-        pushItems(pendingTv, isMovie = false)
+        pushItemsToSimkl(pendingMovies, isMovie = true)
+        pushItemsToSimkl(pendingTv, isMovie = false)
 
         val syncedUpdates = pendingItems.map { 
             it.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis()) 
@@ -223,7 +206,78 @@ class SimklSyncWorker @AssistedInject constructor(
         movieRepository.saveMoviesBulk(syncedUpdates)
     }
 
-    private suspend fun processPhaseItems(items: List<com.cinetrack.data.api.SimklSyncItemResponse>, isMovie: Boolean) {
+    private suspend fun pushItemsToSimkl(items: List<Movie>, isMovie: Boolean) {
+        if (items.isEmpty()) return
+        
+        val watchedToPush = items.filter { it.watched }
+        val watchlistToPush = items.filter { it.favorite && !it.watched }
+        val droppedToPush = items.filter { it.dropped }
+
+        val historyItemsToPush = if (isMovie) {
+            watchedToPush.map { SimklHistoryItem(ids = SimklIds(tmdb = it.id.toString())) }
+        } else {
+            val tvHistory = mutableListOf<SimklHistoryItem>()
+            items.forEach { show ->
+                val seasonsList = mutableListOf<com.cinetrack.data.api.SimklSeason>()
+                show.watchedEpisodes?.forEach { (seasonStr, epNums) ->
+                    val seasonNum = seasonStr.toIntOrNull() ?: return@forEach
+                    val episodesList = epNums.map { com.cinetrack.data.api.SimklSeasonEpisode(episode = it, number = it) }
+                    seasonsList.add(com.cinetrack.data.api.SimklSeason(season = seasonNum, number = seasonNum, episodes = episodesList))
+                }
+                if (seasonsList.isNotEmpty()) {
+                    tvHistory.add(SimklHistoryItem(
+                        ids = SimklIds(tmdb = show.id.toString()),
+                        seasons = seasonsList
+                    ))
+                } else if (show.watched) {
+                    tvHistory.add(SimklHistoryItem(ids = SimklIds(tmdb = show.id.toString())))
+                }
+            }
+            tvHistory
+        }
+
+        if (historyItemsToPush.isNotEmpty()) {
+            historyItemsToPush.chunked(50).forEach { batch ->
+                try {
+                    val request = if (isMovie) SimklSyncHistoryRequest(movies = batch) else SimklSyncHistoryRequest(shows = batch)
+                    simklService.addToHistory(request)
+                    delay(1000)
+                } catch (e: Exception) { e.printStackTrace() }
+            }
+        }
+
+        if (watchlistToPush.isNotEmpty()) {
+            val watchlistItems = watchlistToPush.map { 
+                SimklMediaItem(ids = SimklIds(tmdb = it.id.toString())) 
+            }
+            watchlistItems.chunked(50).forEach { batch ->
+                try {
+                    val request = if (isMovie) SimklSyncWatchlistRequest(movies = batch) else SimklSyncWatchlistRequest(shows = batch)
+                    simklService.addToWatchlist(request)
+                    delay(1000)
+                } catch (e: Exception) { e.printStackTrace() }
+            }
+        }
+
+        if (droppedToPush.isNotEmpty()) {
+            val droppedItems = droppedToPush.map { 
+                SimklMediaItem(ids = SimklIds(tmdb = it.id.toString())) 
+            }
+            droppedItems.chunked(50).forEach { batch ->
+                try {
+                    val request = if (isMovie) SimklAddToListRequest(to="dropped", movies = batch) else SimklAddToListRequest(to="dropped", shows = batch)
+                    simklService.addToList(request)
+                    delay(1000)
+                } catch (e: Exception) { e.printStackTrace() }
+            }
+        }
+    }
+
+    private suspend fun processPhaseItems(
+        items: List<com.cinetrack.data.api.SimklSyncItemResponse>,
+        isMovie: Boolean,
+        bulkStatsUpdates: MutableList<com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate>
+    ) {
         val total = items.size
         if (total == 0) return
 
@@ -245,20 +299,44 @@ class SimklSyncWorker @AssistedInject constructor(
                 android.util.Log.d("SimklSyncWorker", "SYNC: Item $tmdbId è pending_delete, skip resurrezione.")
                 continue
             }
+            
+            val isWatched = item.status == "completed"
+            val isWatchlist = item.status == "plantowatch"
+            val isDropped = item.status == "dropped"
+            val newRating = item.user_rating?.toDouble()
 
             if (local != null) {
                 // Update local to match SIMKL state
-                val isWatched = item.status == "completed"
-                val isWatchlist = item.status == "plantowatch"
-                val isDropped = item.status == "dropped"
-                updatesToSave.add(
-                    local.copy(
-                        watched = isWatched || local.watched,
-                        favorite = isWatchlist || local.favorite,
-                        dropped = isDropped || local.dropped,
-                        syncStatus = "synced"
-                    )
+                val oldWatched = local.watched
+                val oldRating = local.personalRating
+                
+                val updated = local.copy(
+                    watched = isWatched || local.watched,
+                    favorite = isWatchlist || local.favorite,
+                    dropped = isDropped || local.dropped,
+                    personalRating = newRating ?: local.personalRating,
+                    syncStatus = "synced"
                 )
+                updatesToSave.add(updated)
+                
+                if (isRecent(item.last_watched_at)) {
+                    var viewsDelta = 0L
+                    if (isWatched && !oldWatched) viewsDelta = 1L
+                    
+                    val ratingDiff = if (newRating != null) newRating - (oldRating ?: 0.0) else 0.0
+                    val countDelta = if (newRating != null && oldRating == null) 1L else 0L
+                    
+                    if (viewsDelta != 0L || ratingDiff != 0.0 || countDelta != 0L) {
+                        bulkStatsUpdates.add(
+                            com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                compositeId = updated.compositeId,
+                                viewsDelta = viewsDelta,
+                                ratingDelta = ratingDiff,
+                                ratingCountDelta = countDelta
+                            )
+                        )
+                    }
+                }
             } else {
                 missingTmdbIds.add(tmdbId)
             }
@@ -288,13 +366,35 @@ class SimklSyncWorker @AssistedInject constructor(
                                 val isWatched = itemData?.status == "completed"
                                 val isWatchlist = itemData?.status == "plantowatch"
                                 val isDropped = itemData?.status == "dropped"
+                                val newRating = itemData?.user_rating?.toDouble()
                                 
                                 val newMovie = MovieMapper.mapResponseToMovie(tmdbRes, mediaType).copy(
                                     watched = isWatched,
                                     favorite = isWatchlist,
                                     dropped = isDropped,
+                                    personalRating = newRating,
                                     syncStatus = "synced"
                                 )
+                                
+                                if (isRecent(itemData?.last_watched_at)) {
+                                    var viewsDelta = 0L
+                                    if (isWatched) viewsDelta = 1L
+                                    
+                                    val ratingDiff = newRating ?: 0.0
+                                    val countDelta = if (newRating != null) 1L else 0L
+                                    
+                                    if (viewsDelta != 0L || ratingDiff != 0.0 || countDelta != 0L) {
+                                        bulkStatsUpdates.add(
+                                            com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                                compositeId = newMovie.compositeId,
+                                                viewsDelta = viewsDelta,
+                                                ratingDelta = ratingDiff,
+                                                ratingCountDelta = countDelta
+                                            )
+                                        )
+                                    }
+                                }
+                                
                                 newMovie
                             } catch (e: Exception) {
                                 android.util.Log.e("SimklSyncWorker", "Failed to fetch TMDB details for ID $tmdbId. Skipping.", e)
@@ -316,5 +416,23 @@ class SimklSyncWorker @AssistedInject constructor(
         if (updatesToSave.isNotEmpty()) {
             movieRepository.saveMoviesBulk(updatesToSave)
         }
+    }
+
+    private fun isRecent(dateString: String?): Boolean {
+        if (dateString.isNullOrBlank()) return false
+        return try {
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
+            val date = format.parse(dateString)
+            val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+            date != null && date.time >= thirtyDaysAgo
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isRecentTime(timestamp: Long?): Boolean {
+        if (timestamp == null || timestamp == 0L) return false
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+        return timestamp >= thirtyDaysAgo
     }
 }

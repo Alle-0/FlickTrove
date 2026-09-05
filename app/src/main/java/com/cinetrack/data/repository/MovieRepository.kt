@@ -1370,6 +1370,21 @@ class MovieRepository @Inject constructor(
         return response
     }
 
+    suspend fun getCachedPersonProfilePath(id: Long): String? {
+        val cacheKey = "person:$id"
+        val inMemory = memoryDetailsCache[cacheKey] as? Person
+        if (inMemory?.profilePath != null) return inMemory.profilePath
+        try {
+            val cachedJson = cacheDao.getDetail(id, "person")
+            if (cachedJson != null) {
+                val parsed = json.decodeFromString<Person>(cachedJson)
+                memoryDetailsCache[cacheKey] = parsed
+                return parsed.profilePath
+            }
+        } catch (e: Exception) { }
+        return null
+    }
+
     suspend fun fetchSeasonDetails(id: Long, seasonNumber: Int): Season = tmdbService.getSeasonDetails(id, seasonNumber)
 
     fun getCollectionDetailsFlow(id: Long): Flow<com.cinetrack.data.api.CollectionResponse> = flow {

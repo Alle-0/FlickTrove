@@ -7,6 +7,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.navigation.sharedElementIfAvailable
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
@@ -70,7 +74,29 @@ fun HeroSpotlightCarousel(
         }
     }
 
-    Column(modifier = modifier) {
+    val hasAnimated = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!hasAnimated.value) {
+            hasAnimated.value = true
+        }
+    }
+
+    val carouselAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (hasAnimated.value) 1f else 0f,
+        animationSpec = tween(durationMillis = 400, easing = androidx.compose.animation.core.LinearOutSlowInEasing),
+        label = "alpha"
+    )
+
+    val carouselTranslateY by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (hasAnimated.value) 0f else 60f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessMedium),
+        label = "translateY"
+    )
+
+    Column(modifier = modifier.graphicsLayer {
+        this.alpha = carouselAlpha
+        this.translationY = carouselTranslateY
+    }) {
         HorizontalPager(
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 24.dp),
@@ -82,10 +108,12 @@ fun HeroSpotlightCarousel(
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
 
             val context = LocalContext.current
+            val configuration = LocalConfiguration.current
+            val imageQuality = com.cinetrack.util.LocalImageQuality.current
             val backdropUrl = buildTmdbImageUrl(
                 movie.backdropPath ?: movie.posterPath,
                 ImageType.BACKDROP,
-                ImageQuality.HIGH
+                imageQuality
             )
 
             val rawPageOffset = (
@@ -104,10 +132,11 @@ fun HeroSpotlightCarousel(
                         translationX = rawPageOffset * 28.dp.toPx()
                     }
                     .bounceClick { onMovieClick(movie) }
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(36.dp))
             ) {
 
                 var dominantColor by remember { mutableStateOf<Color?>(null) }
+                val coroutineScope = rememberCoroutineScope()
 
                 // Backdrop Image
                 AsyncImage(
@@ -118,22 +147,14 @@ fun HeroSpotlightCarousel(
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().sharedElementIfAvailable("movie_backdrop_${movie.id}"),
                     onSuccess = { result ->
-                        val drawable = result.result.drawable
-                        val bitmap = (drawable as? android.graphics.drawable.BitmapDrawable)?.bitmap
-                        bitmap?.let { b ->
-                            androidx.palette.graphics.Palette.from(b).generate { palette ->
-                                palette?.darkVibrantSwatch?.rgb?.let { colorInt ->
-                                    dominantColor = Color(colorInt)
-                                } ?: palette?.vibrantSwatch?.rgb?.let { colorInt ->
-                                    dominantColor = Color(colorInt)
-                                } ?: palette?.dominantSwatch?.rgb?.let { colorInt ->
-                                    dominantColor = Color(colorInt)
-                                } ?: palette?.mutedSwatch?.rgb?.let { colorInt ->
-                                    dominantColor = Color(colorInt)
-                                }
-                            }
+                        val bitmap = result.result.drawable.toBitmap()
+                        coroutineScope.launch {
+                            val cardWidthDp = configuration.screenWidthDp - 64f
+                            val cardAspectRatio = cardWidthDp / 500f
+                            val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
+                            if (color != Color.Unspecified) dominantColor = color
                         }
                     }
                 )
@@ -180,6 +201,7 @@ fun HeroSpotlightCarousel(
                                 modifier = Modifier
                                     .heightIn(max = 100.dp)
                                     .fillMaxWidth(0.8f)
+                                    .sharedElementIfAvailable("movie_logo_${movie.id}")
                             )
                         } else {
                             Text(
@@ -210,14 +232,18 @@ fun HeroSpotlightCarousel(
                         
                         if (year.isNotEmpty() || genres.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(6.dp))
-                            Row(
+                            @OptIn(ExperimentalLayoutApi::class)
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalArrangement = Arrangement.Center,
+                                maxLines = 1
                             ) {
                                 if (year.isNotEmpty()) {
                                     Text(
                                         text = year,
                                         color = Color.White,
+                                        modifier = Modifier.align(Alignment.CenterVertically),
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             fontWeight = FontWeight.Bold,
                                             shadow = androidx.compose.ui.graphics.Shadow(
@@ -231,6 +257,7 @@ fun HeroSpotlightCarousel(
                                 genres.forEach { genreName ->
                                     Box(
                                         modifier = Modifier
+                                            .align(Alignment.CenterVertically)
                                             .clip(androidx.compose.foundation.shape.CircleShape)
                                             .background(Color.White.copy(alpha = 0.2f))
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -238,7 +265,10 @@ fun HeroSpotlightCarousel(
                                         Text(
                                             text = genreName,
                                             color = Color.White,
-                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+                                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }

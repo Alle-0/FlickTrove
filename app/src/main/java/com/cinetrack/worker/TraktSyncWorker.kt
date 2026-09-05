@@ -29,7 +29,8 @@ class TraktSyncWorker @AssistedInject constructor(
     private val traktService: TraktService,
     private val tmdbService: TMDBService,
     private val traktAuthRepository: TraktAuthRepository,
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieRepository,
+    private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -86,6 +87,7 @@ class TraktSyncWorker @AssistedInject constructor(
         }
 
         try {
+            val bulkStatsUpdates = mutableListOf<com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate>()
             // Promuovi a Foreground Service per bypassare il limite dei 10 minuti di Android
             setForeground(getForegroundInfo())
 
@@ -157,6 +159,14 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (!localMovie.watched) {
                         val updated = localMovie.copy(watched = true, watchedAt = item.watched_at)
                         moviesToUpdate.add(updated)
+                        if (isRecent(item.watched_at)) {
+                            bulkStatsUpdates.add(
+                                com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                    compositeId = updated.compositeId,
+                                    viewsDelta = 1L
+                                )
+                            )
+                        }
                     }
                     continue
                 }
@@ -171,6 +181,15 @@ class TraktSyncWorker @AssistedInject constructor(
                     var newMovie = MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
                     newMovie = newMovie.copy(watched = true, watchedAt = item.watched_at)
                     moviesToUpdate.add(newMovie)
+                    
+                    if (isRecent(item.watched_at)) {
+                        bulkStatsUpdates.add(
+                            com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                compositeId = newMovie.compositeId,
+                                viewsDelta = 1L
+                            )
+                        )
+                    }
 
                     delay(50)
                 } catch (e: Exception) {
@@ -279,7 +298,8 @@ class TraktSyncWorker @AssistedInject constructor(
                 suspend fun processShowEpisodes(
                     showTmdbId: Long,
                     showTitle: String,
-                    seasonsMap: Map<String, List<Int>>
+                    seasonsMap: Map<String, List<Int>>,
+                    lastWatchedAt: String? = null
                 ) {
                     val totalWatched = seasonsMap.values.sumOf { it.size }
                     val local = movieRepository.getMovieIncludingDeleted(showTmdbId, "tv")
@@ -310,6 +330,15 @@ class TraktSyncWorker @AssistedInject constructor(
                             )
                             android.util.Log.e("TRAKT_DEBUG", "SYNC: Nuovo show scaricato '$showTitle' (Visti: $totalWatched/$totalEps, favorite: ${newShow.favorite}, watched: ${newShow.watched}, progress: $progressVal)")
                             episodeUpdates.add(newShow)
+                            
+                            if (isRecent(lastWatchedAt) && totalWatched > 0) {
+                                bulkStatsUpdates.add(
+                                    com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                        compositeId = newShow.compositeId,
+                                        viewsDelta = totalWatched.toLong()
+                                    )
+                                )
+                            }
                         } catch (e: Exception) {
                             android.util.Log.e("TraktSyncWorker", "Errore download TMDB per $showTitle", e)
                         }
@@ -344,6 +373,19 @@ class TraktSyncWorker @AssistedInject constructor(
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
                             )
+                            
+                            if (isRecent(lastWatchedAt)) {
+                                val localWatched = local.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                                val delta = totalWatched - localWatched
+                                if (delta > 0) {
+                                    bulkStatsUpdates.add(
+                                        com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                            compositeId = local.compositeId,
+                                            viewsDelta = delta.toLong()
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -391,7 +433,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         android.util.Log.e("TRAKT_DEBUG", "SYNC SHOW DEBUG '$showTitle': tmdbId=$showTmdbId, seasons=${remoteShow.seasons?.size}, mergedEps=$totalMergedCount")
                     }
 
-                    processShowEpisodes(showTmdbId, showTitle, finalEps)
+                    processShowEpisodes(showTmdbId, showTitle, finalEps, remoteShow.last_watched_at)
                 }
 
                 // Processa anche eventuali serie TV presenti in historyAccumulator non restituite da getWatchedShows
@@ -400,7 +442,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     processedShowTmdbIds.add(showTmdbId)
                     val showTitle = historyShowTitles[showTmdbId] ?: "Unknown"
                     val finalEps = seasonsMap.mapValues { (_, eps) -> eps.sorted() }
-                    processShowEpisodes(showTmdbId, showTitle, finalEps)
+                    processShowEpisodes(showTmdbId, showTitle, finalEps) // Fallback doesn't have an exact last_watched_at for the whole show
                 }
 
                 // Logica di Merge o Rimozione (Diff) protetta
@@ -482,7 +524,22 @@ class TraktSyncWorker @AssistedInject constructor(
                             // Merge rule: remote wins; conserva locale se remote è assente
                             val newRating = item.rating.toDouble().takeIf { it > 0 } ?: local.personalRating
                             if (newRating != local.personalRating) {
-                                ratingUpdates.add(local.copy(personalRating = newRating))
+                                val updated = local.copy(personalRating = newRating)
+                                ratingUpdates.add(updated)
+                                
+                                if (isRecent(item.rated_at) && newRating != null) {
+                                    val ratingDiff = newRating - (local.personalRating ?: 0.0)
+                                    val countDelta = if (local.personalRating == null) 1L else 0L
+                                    if (ratingDiff != 0.0 || countDelta != 0L) {
+                                        bulkStatsUpdates.add(
+                                            com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                                compositeId = updated.compositeId,
+                                                ratingDelta = ratingDiff,
+                                                ratingCountDelta = countDelta
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         } else {
                             // FIX: Se il film votato non esiste localmente, lo scarichiamo da TMDB
@@ -494,8 +551,19 @@ class TraktSyncWorker @AssistedInject constructor(
                                 }
                                 
                                 var newMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
-                                newMovie = newMovie.copy(personalRating = item.rating.toDouble())
+                                val newRating = item.rating.toDouble()
+                                newMovie = newMovie.copy(personalRating = newRating)
                                 ratingUpdates.add(newMovie)
+                                
+                                if (isRecent(item.rated_at) && newRating > 0) {
+                                    bulkStatsUpdates.add(
+                                        com.cinetrack.data.remote.FirebaseRemoteDataSource.TrendingStatUpdate(
+                                            compositeId = newMovie.compositeId,
+                                            ratingDelta = newRating,
+                                            ratingCountDelta = 1L
+                                        )
+                                    )
+                                }
                                 
                                 delay(50) // Evita il rate limiting
                             } catch (e: Exception) {
@@ -883,11 +951,33 @@ class TraktSyncWorker @AssistedInject constructor(
                 traktAuthRepository.markFirstSyncCompleted()
                 android.util.Log.e("TRAKT_DEBUG", "SYNC MERGE: Primo sync completato e contrassegnato con successo.")
             }
+            
+            if (bulkStatsUpdates.isNotEmpty()) {
+                firebaseRemoteDataSource.updateTrendingStatsBulk(bulkStatsUpdates)
+            }
 
             Result.success()
         } catch (e: Exception) {
             android.util.Log.e("TraktSyncWorker", "Errore durante la sync", e)
             Result.retry()
         }
+    }
+
+    private fun isRecent(dateString: String?): Boolean {
+        if (dateString.isNullOrBlank()) return false
+        return try {
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
+            val date = format.parse(dateString)
+            val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+            date != null && date.time >= thirtyDaysAgo
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isRecentTime(timestamp: Long?): Boolean {
+        if (timestamp == null || timestamp == 0L) return false
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+        return timestamp >= thirtyDaysAgo
     }
 }

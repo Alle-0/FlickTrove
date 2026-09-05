@@ -63,7 +63,21 @@ data class SimklSyncHistoryRequest(
 data class SimklHistoryItem(
     val ids: SimklIds,
     val watched_at: String? = null,
-    val episodes: List<SimklEpisode>? = null
+    val episodes: List<SimklEpisode>? = null,
+    val seasons: List<SimklSeason>? = null
+)
+
+@Serializable
+data class SimklSeason(
+    val season: Int? = null,
+    val number: Int? = null,
+    val episodes: List<SimklSeasonEpisode>
+)
+
+@Serializable
+data class SimklSeasonEpisode(
+    val episode: Int? = null,
+    val number: Int? = null
 )
 
 @Serializable
