@@ -300,8 +300,8 @@ class SimklSyncWorker @AssistedInject constructor(
                 continue
             }
             
-            val isWatched = item.status == "completed"
-            val isWatchlist = item.status == "plantowatch"
+            val isWatched = item.status == "completed" || item.status == "watching" || item.status == "watched" || !item.last_watched_at.isNullOrBlank()
+            val isWatchlist = item.status == "plantowatch" || item.status == "plan_to_watch"
             val isDropped = item.status == "dropped"
             val newRating = item.user_rating?.toDouble()
 
@@ -311,9 +311,9 @@ class SimklSyncWorker @AssistedInject constructor(
                 val oldRating = local.personalRating
                 
                 val updated = local.copy(
-                    watched = isWatched || local.watched,
-                    favorite = isWatchlist || local.favorite,
-                    dropped = isDropped || local.dropped,
+                    watched = isWatched,
+                    favorite = isWatchlist,
+                    dropped = isDropped,
                     personalRating = newRating ?: local.personalRating,
                     syncStatus = "synced"
                 )
@@ -363,8 +363,8 @@ class SimklSyncWorker @AssistedInject constructor(
                                     val matchItem = if (isMovie) it.movie else (it.show ?: it.anime)
                                     matchItem?.ids?.tmdb == tmdbId.toString() 
                                 }
-                                val isWatched = itemData?.status == "completed"
-                                val isWatchlist = itemData?.status == "plantowatch"
+                                val isWatched = itemData?.status == "completed" || itemData?.status == "watching" || itemData?.status == "watched" || !itemData?.last_watched_at.isNullOrBlank()
+                                val isWatchlist = itemData?.status == "plantowatch" || itemData?.status == "plan_to_watch"
                                 val isDropped = itemData?.status == "dropped"
                                 val newRating = itemData?.user_rating?.toDouble()
                                 
