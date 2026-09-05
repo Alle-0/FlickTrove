@@ -8,6 +8,9 @@ import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -201,7 +204,7 @@ class StatsViewModel @Inject constructor(
         }
     }
 
-    private fun calculateStats(filteredWatched: List<Movie>, allMovies: List<Movie>, language: String, filteredHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>? = null, allHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity> = emptyList()): CalculatedStats {
+    private suspend fun calculateStats(filteredWatched: List<Movie>, allMovies: List<Movie>, language: String, filteredHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>? = null, allHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity> = emptyList()): CalculatedStats {
         val watched = filteredWatched.filter { it.watched || (it.mediaType == "tv" && (it.dropped || !it.watchedEpisodes.isNullOrEmpty())) }
         
         // If history is provided, we expand the movies based on how many times they were watched
@@ -356,14 +359,19 @@ class StatsViewModel @Inject constructor(
                 }
             }
         }
-        val topCast = kotlinx.coroutines.coroutineScope {
+        val topCast = coroutineScope {
             castMap.entries
                 .sortedByDescending { it.value.count }
                 .take(50)
                 .map { (id, accum) ->
-                    kotlinx.coroutines.async {
-                        val cachedPath = repository.getCachedPersonProfilePath(id)
-                        PersonStat(id, accum.name, cachedPath ?: accum.profilePath, accum.count)
+                    async {
+                        val cachedProfile = movieRepository.getCachedPersonProfilePath(id)
+                        PersonStat(
+                            id = id,
+                            name = accum.name,
+                            count = accum.count,
+                            profilePath = cachedProfile ?: accum.profilePath
+                        )
                     }
                 }
                 .awaitAll()

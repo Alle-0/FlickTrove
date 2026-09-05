@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
@@ -316,7 +317,7 @@ fun TopMvpsSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .width(96.dp)
-                    .clickable { onActorClick(mvp.id, mvp.profilePath) }
+                    .clickable { onActorClick(mvp.actorId, mvp.profilePath) }
             ) {
                 Box {
                     if (imageUrl != null) {
