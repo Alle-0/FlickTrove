@@ -241,8 +241,9 @@ class SettingsViewModel @Inject constructor(
 
     fun syncTraktNow() {
         viewModelScope.launch {
+            val inputData = androidx.work.workDataOf("force" to true)
             val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
-                .setInputData(androidx.work.workDataOf("force" to true))
+                .setInputData(inputData)
                 .build() // No constraints for forced manual sync
             androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
                 "TraktManualSync",
