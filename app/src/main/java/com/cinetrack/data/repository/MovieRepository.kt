@@ -524,7 +524,16 @@ class MovieRepository @Inject constructor(
                 .build()
         }
 
-        WorkManager.getInstance(context).enqueue(workRequests)
+        // --- PUSH RIMOZIONE A SIMKL ---
+        val simklRequests = workRequests.map { traktReq ->
+            OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
+                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .setInputData(traktReq.workSpec.input)
+                .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+        }
+
+        WorkManager.getInstance(context).enqueue(workRequests + simklRequests)
         // ------------------------------
         
         repositoryScope.launch {
@@ -552,12 +561,18 @@ class MovieRepository @Inject constructor(
             builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
         }
 
-        WorkManager.getInstance(context).enqueue(
-            OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .setInputData(builder.build())
-                .build()
-        )
+        val traktRequest = OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
+            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(builder.build())
+            .build()
+            
+        val simklRequest = OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
+            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(builder.build())
+            .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(listOf(traktRequest, simklRequest))
 
         repositoryScope.launch {
             try {
