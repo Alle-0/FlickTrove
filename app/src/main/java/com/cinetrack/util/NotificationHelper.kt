@@ -110,20 +110,28 @@ object NotificationHelper {
         val bodyText = context.getString(R.string.notif_new_release_body, movieTitle)
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
                 .setContentText(context.getString(R.string.notif_new_release_body, movieTitle))
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
-                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ACCENT_COLOR)
                 .setColorized(true)
@@ -157,20 +165,28 @@ object NotificationHelper {
         val bodyText = context.getString(R.string.notif_new_release_body, movieTitle)
 
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
                 .setContentText(context.getString(R.string.notif_new_release_body, movieTitle))
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_release_title, mediaLabel))
-                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ACCENT_COLOR)
                 .setColorized(true)
@@ -219,20 +235,28 @@ object NotificationHelper {
         val bodyText = context.getString(R.string.notif_new_episode_body, episodeString, showTitle)
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
                 .setContentText(bodyText)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
-                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ACCENT_COLOR)
                 .setColorized(true)
@@ -265,20 +289,28 @@ object NotificationHelper {
         val bodyText = context.getString(R.string.notif_new_episode_body, episodeString, showTitle)
 
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
+                    .setSummaryText(context.getString(R.string.notif_reminder_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, RELEASE_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
                 .setContentText(bodyText)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_episode_title, episodeString))
-                        .setSummaryText(context.getString(R.string.notif_reminder_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ACCENT_COLOR)
                 .setColorized(true)
@@ -324,20 +356,28 @@ object NotificationHelper {
         }
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                    .setSummaryText(context.getString(R.string.notif_update_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, EPISODES_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_episodes_title))
                 .setContentText(bodyText)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
-                        .setSummaryText(context.getString(R.string.notif_update_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setColor(ACCENT_COLOR)
                 .setContentIntent(pendingIntent)
@@ -373,20 +413,28 @@ object NotificationHelper {
         }
 
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val largeIcon = loadPosterBitmap(context, posterPath)
-                ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+            val actualPoster = loadPosterBitmap(context, posterPath)
+            val largeIcon = actualPoster ?: getBitmapFromVectorDrawable(context, R.drawable.ic_launcher_foreground_vector)
+
+            val style = if (actualPoster != null) {
+                NotificationCompat.BigPictureStyle()
+                    .bigPicture(actualPoster)
+                    .bigLargeIcon(null as android.graphics.Bitmap?)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                    .setSummaryText(bodyText)
+            } else {
+                NotificationCompat.BigTextStyle()
+                    .bigText(bodyText)
+                    .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
+                    .setSummaryText(context.getString(R.string.notif_update_summary))
+            }
 
             val notification = NotificationCompat.Builder(context, EPISODES_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(largeIcon)
                 .setContentTitle(context.getString(R.string.notif_new_episodes_title))
                 .setContentText(bodyText)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(bodyText)
-                        .setBigContentTitle(context.getString(R.string.notif_new_episodes_title))
-                        .setSummaryText(context.getString(R.string.notif_update_summary))
-                )
+                .setStyle(style)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setColor(ACCENT_COLOR)
                 .setContentIntent(pendingIntent)
