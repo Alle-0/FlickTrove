@@ -365,12 +365,12 @@ class StatsViewModel @Inject constructor(
                 .take(50)
                 .map { (id, accum) ->
                     async {
-                        val cachedProfile = movieRepository.getCachedPersonProfilePath(id)
+                        val cachedProfile = repository.getCachedPersonProfilePath(id)
                         PersonStat(
                             id = id,
                             name = accum.name,
-                            count = accum.count,
-                            profilePath = cachedProfile ?: accum.profilePath
+                            profilePath = cachedProfile ?: accum.profilePath,
+                            count = accum.count
                         )
                     }
                 }
@@ -394,9 +394,9 @@ class StatsViewModel @Inject constructor(
                 }
             }
         }
-        val topDirectors = kotlinx.coroutines.coroutineScope {
+        val topDirectors = coroutineScope {
             directorMap.values.sortedByDescending { it.count }.take(10).map { accum ->
-                kotlinx.coroutines.async {
+                async {
                     val id = directorMap.entries.find { entry -> entry.value == accum }?.key ?: 0
                     val cachedPath = repository.getCachedPersonProfilePath(id)
                     PersonStat(
