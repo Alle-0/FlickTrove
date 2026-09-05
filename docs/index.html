@@ -1,925 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlickTrove — Movie & TV Show Tracker for Android</title>
-  <meta name="description"
-    content="FlickTrove is the ultimate cinema and TV show companion for Android. Track movies, TV series, actors, and release notifications with a stunning interface, dynamic color palettes, and fluid animations.">
-  <meta name="keywords"
-    content="FlickTrove, Android movie tracker, TV show tracker, cinema app, movie diary, watchlist manager, offline movie app, TV release reminders, cinema calendar">
-  <meta name="author" content="Alessandro (Alle-0)">
-  <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#0B0F19">
-  <link rel="canonical" href="https://alle-0.github.io/FlickTrove/">
-
-  <!-- Open Graph / Facebook / LinkedIn / Discord -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://alle-0.github.io/FlickTrove/">
-  <meta property="og:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
-  <meta property="og:description"
-    content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
-  <meta property="og:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
-  <meta property="og:image:type" content="image/png">
-  <meta property="og:image:width" content="512">
-  <meta property="og:image:height" content="512">
-  <meta property="og:site_name" content="FlickTrove">
-  <meta property="og:locale" content="en_US">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://alle-0.github.io/FlickTrove/">
-  <meta name="twitter:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
-  <meta name="twitter:description"
-    content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
-  <meta name="twitter:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
-
-  <!-- Schema.org JSON-LD Structured Data for App Indexing & Google Search Site Name -->
-  <script type="application/ld+json">
-  [
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "FlickTrove",
-      "url": "https://alle-0.github.io/FlickTrove/",
-      "image": "https://alle-0.github.io/FlickTrove/assets/icon-512.png"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "FlickTrove",
-      "operatingSystem": "Android",
-      "applicationCategory": "EntertainmentApplication",
-      "description": "FlickTrove is a premium visual experience for Android for tracking movies and TV shows, featuring a unique glassmorphic interface, dynamic color palettes, and fluid animations.",
-      "url": "https://alle-0.github.io/FlickTrove/",
-      "image": "https://alle-0.github.io/FlickTrove/assets/icon-512.png",
-      "author": {
-        "@type": "Person",
-        "name": "Alessandro (Alle-0)",
-        "url": "https://github.com/Alle-0"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0.00",
-        "priceCurrency": "USD"
-      },
-      "downloadUrl": "https://github.com/Alle-0/FlickTrove/releases/latest"
-    }
-  ]
-  </script>
-
-  <link rel="stylesheet" href="styles.css?v=39">
-  <!-- Favicons and App Icons for Googlebot & Browsers -->
-  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
-  <link rel="icon" type="image/png" href="assets/icon.png">
-  <link rel="icon" type="image/svg+xml" href="assets/Icon.svg">
-  <link rel="apple-touch-icon" href="assets/icon-512.png">
-  <link rel="shortcut icon" href="favicon.ico">
-  <!-- AOS Library for scroll animations -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-</head>
-
-<body>
-  <!-- Background Glow Orbs & Ambient Mouse Tracking -->
-  <div class="bg-glow-1"></div>
-  <div class="bg-glow-2"></div>
-  <div class="bg-mouse-glow"></div>
-
-  <!-- Cinema Projector & Volumetric Light Beam -->
-  <div class="cinema-projector-container">
-    <div class="projector-beam"></div>
-  </div>
-
-  <!-- Interactive 3D Particle & Cinema Dust Canvas -->
-  <canvas id="cyber-canvas"></canvas>
-
-
-
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="nav-logo">
-        <img src="assets/Icon.svg" alt="FlickTrove Logo">
-        <span>FlickTrove</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#screenshots">Showcase</a></li>
-        <li><a href="#faq">FAQ</a></li>
-        <li><a href="privacy.html">Privacy</a></li>
-        <li><a href="terms.html">Terms</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="https://github.com/Alle-0/FlickTrove/release/latest" target="_blank" class="nav-github-link"
-          title="FlickTrove on GitHub">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-            </path>
-          </svg>
-          <span>Download APK</span>
-        </a>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlickTrove — Premium Cinema & TV Show Tracker for Android</title>
+    <meta name="description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
+    <meta name="keywords" content="FlickTrove, Android movie tracker, TV show tracker, cinema app, movie diary, watchlist manager, offline movie app, TV release reminders, cinema calendar">
+    <meta name="author" content="Alessandro (Alle-0)">
+    
+    <!-- Open Graph / Facebook / LinkedIn / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://alle-0.github.io/FlickTrove/">
+    <meta property="og:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
+    <meta property="og:description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
+    <meta property="og:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FlickTrove — Premium Cinema & TV Show Tracker for Android">
+    <meta name="twitter:description" content="Track movies, TV series, and actors with breathtaking style. Unique glassmorphic interface, dynamic color palettes, and fluid animations for Android.">
+    <meta name="twitter:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="icon" type="image/svg+xml" href="assets/Icon.svg">
+    
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" crossorigin href="./assets/docs_src-D_Nov7hd.css">
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar" data-aos="fade-down" data-aos-duration="800">
+      <div class="container nav-content">
+        <div class="logo">
+          <img src="./favicon.png" alt="FlickTrove Logo" />
+          FlickTrove
+        </div>
+        <div>
+          <a href="#features" class="btn btn-glass" style="margin-right: 12px; padding: 8px 16px;">Scopri di più</a>
+          <a href="#" class="btn btn-primary" style="padding: 8px 16px;">Scarica l'App</a>
+        </div>
       </div>
-      <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
-        <span class="hamburger-bar bar-1"></span>
-        <span class="hamburger-bar bar-2"></span>
-        <span class="hamburger-bar bar-3"></span>
-      </button>
-    </div>
-  </nav>
+    </nav>
 
-  <!-- Mobile Frosted Drawer Menu -->
-  <div class="mobile-drawer">
-    <ul class="mobile-drawer-links">
-      <li><a href="#features" class="drawer-link">Features</a></li>
-      <li><a href="#screenshots" class="drawer-link">Showcase</a></li>
-      <li><a href="#faq" class="drawer-link">FAQ</a></li>
-      <li><a href="privacy.html" class="drawer-link">Privacy Policy</a></li>
-      <li><a href="terms.html" class="drawer-link">Terms of Service</a></li>
-    </ul>
-    <div class="mobile-drawer-cta">
-      <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank"
-        class="btn-primary magnetic-btn"><img src="assets/icons/scaricare.svg" alt="Download"
-          style="width: 16px; height: 16px; margin-right: 6px; vertical-align: -2px; filter: brightness(0);">Download
-        APK</a>
-    </div>
-  </div>
-
-  <!-- Hero Section with Staggered Entrance Animation -->
-  <main>
+    <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-content">
-          <div class="hero-badge hero-anim delay-1 cinema-badge">
-            <img src="assets/icons/ciak.svg" class="badge-icon" alt="">
-            <span>THE CINEMA & TV COMPANION</span>
-          </div>
-          <h1 class="hero-anim delay-2">FlickTrove: A fast, clean <span class="gradient-text">private cinema
-              diary.</span></h1>
-          <p class="hero-anim delay-3">Track movies & TV shows with breathtaking style. Rich community features, 100%
-            offline-first, and completely ad-free.<br><span class="hero-typed-wrapper">Crafted specifically for <span
-                id="typed-output" class="gradient-blue-flick" style="font-weight: 700;">true cinephiles.</span></span>
-          </p>
-
-          <div class="hero-cta hero-anim delay-4">
-            <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank"
-              class="btn-primary magnetic-btn">
-              <img src="assets/icons/scaricare.svg" alt="Download"
-                style="width: 18px; height: 18px; filter: brightness(0);">
-              Download APK
-            </a>
-            <a href="#screenshots" class="btn-secondary magnetic-btn">
-              <img src="assets/icons/eye.svg" alt=""
-                style="width: 18px; height: 18px; margin-right: 6px; filter: brightness(0) invert(1);">
-              View Screenshots
-            </a>
-          </div>
-
-          <!-- Quick Trust Badges below CTA -->
-          <div class="hero-trust hero-anim delay-4">
-            <span><img src="assets/icons/tick_pieno.svg" alt=""
-                style="width: 15px; height: 15px; filter: invert(1); opacity: 0.85;"> Super Fast & Smooth</span>
-            <span><img src="assets/icons/tick_pieno.svg" alt=""
-                style="width: 15px; height: 15px; filter: invert(1); opacity: 0.85;"> 100% Private & Offline</span>
-            <span><img src="assets/icons/tick_pieno.svg" alt=""
-                style="width: 15px; height: 15px; filter: invert(1); opacity: 0.85;"> Zero Ads or Tracking</span>
-          </div>
+      <div class="container">
+        <div class="hero-pill" data-aos="zoom-in" data-aos-duration="1000">
+          ✨ La nuova versione 2.0 è ora disponibile
         </div>
-
-        <div class="hero-visual-stage hero-anim delay-3">
-          <div class="phone-mockup-container">
-            <!-- Background Glows inside mockup container -->
-            <div class="mockup-ambient-glow teal-glow"></div>
-            <div class="mockup-ambient-glow purple-glow"></div>
-
-            <!-- Phone 2 (Background / Tilted & Layered Behind) -->
-            <div class="phone-mockup phone-mockup-bg">
-              <div class="phone-frame">
-                <div class="phone-screen">
-                  <img src="assets/screenshot_home.webp" alt="FlickTrove Dashboard" loading="lazy">
-                </div>
-              </div>
-            </div>
-
-            <!-- Phone 1 (Foreground / Main) -->
-            <div class="phone-mockup phone-mockup-main">
-              <div class="phone-frame">
-                <div class="phone-screen">
-                  <img src="assets/screenshot_dune.webp" alt="FlickTrove Film Details" loading="lazy">
-                </div>
-              </div>
-            </div>
-
-            <!-- Floating Glassmorphic Badges -->
-            <div class="glass-float-badge badge-top-left">
-              <div class="badge-icon-wrap teal"><img src="assets/icons/palette.svg" alt=""></div>
-              <div class="badge-text">
-                <strong>Dynamic Colors</strong>
-                <span>Adapts to every movie poster</span>
-              </div>
-            </div>
-
-            <div class="glass-float-badge badge-bottom-right">
-              <div class="badge-icon-wrap purple"><img src="assets/icons/bell_vibra.svg" alt=""></div>
-              <div class="badge-text">
-                <strong>Instant Reminders</strong>
-                <span>New episode alerts</span>
-              </div>
-            </div>
-
-            <div class="glass-float-badge badge-bottom-left">
-              <div class="badge-icon-wrap gold">⚡</div>
-              <div class="badge-text">
-                <strong>Always Available</strong>
-                <span>Works instant & offline</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==========================================================================
-         UNIVERSAL IMPORT & SMART MERGE BANNER
-         ========================================================================== -->
-    <section id="universal-import-section" class="universal-import-section">
-      <div class="cyber-migration-hub">
-        <!-- Top Sleek Header -->
-        <div class="hub-header">
-          
-          <h2 class="blur-word-reveal">Switching Apps? <span class="gradient-teal">Electric Synapse Sync</span></h2>
-          <p class="blur-word-reveal">Bring your entire watch history from TV Time, Trakt, Letterboxd, IMDb and others
-            directly into FlickTrove.</p>
-        </div>
-
-        <!-- Electric Synapse Stage -->
-        <div class="synapse-stage" id="synapse-stage-container">
-          <!-- SVG Electric Beams Background spanning full stage -->
-          <svg class="electric-beams-svg" id="electric-beams-svg" viewBox="0 0 1000 400" preserveAspectRatio="none">
-            <defs>
-              <filter id="electric-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3.5" result="blur1" />
-                <feGaussianBlur stdDeviation="1.5" result="blur2" />
-                <feMerge>
-                  <feMergeNode in="blur1" />
-                  <feMergeNode in="blur2" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              <linearGradient id="beam-tvtime" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFC800" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
-              </linearGradient>
-              <linearGradient id="beam-trakt" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#ED1C24" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
-              </linearGradient>
-              <linearGradient id="beam-letterboxd" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#00E054" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
-              </linearGradient>
-              <linearGradient id="beam-imdb" x1="100%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stop-color="#F5C518" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0.95" />
-              </linearGradient>
-            </defs>
-
-            <!-- Electric Path Lines -->
-            <path class="electric-line" id="line-tvtime" d="M 0 0" stroke="url(#beam-tvtime)" stroke-width="2.5"
-              fill="none" filter="url(#electric-glow)" />
-            <path class="electric-line" id="line-trakt" d="M 0 0" stroke="url(#beam-trakt)" stroke-width="2.5"
-              fill="none" filter="url(#electric-glow)" />
-            <path class="electric-line" id="line-letterboxd" d="M 0 0" stroke="url(#beam-letterboxd)" stroke-width="2.5"
-              fill="none" filter="url(#electric-glow)" />
-            <path class="electric-line" id="line-imdb" d="M 0 0" stroke="url(#beam-imdb)" stroke-width="2.5" fill="none"
-              filter="url(#electric-glow)" />
-
-            <!-- Animated Electric Pulses -->
-            <circle class="electric-bolt bolt-tvtime" r="5.5" fill="#FFC800" filter="url(#electric-glow)">
-              <animateMotion id="bolt-motion-tvtime" path="M 0 0" dur="1.8s" repeatCount="indefinite" />
-            </circle>
-            <circle class="electric-bolt bolt-trakt" r="5.5" fill="#ED1C24" filter="url(#electric-glow)">
-              <animateMotion id="bolt-motion-trakt" path="M 0 0" dur="2.1s" repeatCount="indefinite" />
-            </circle>
-            <circle class="electric-bolt bolt-letterboxd" r="5.5" fill="#00E054" filter="url(#electric-glow)">
-              <animateMotion id="bolt-motion-letterboxd" path="M 0 0" dur="1.9s" repeatCount="indefinite" />
-            </circle>
-            <circle class="electric-bolt bolt-imdb" r="5.5" fill="#F5C518" filter="url(#electric-glow)">
-              <animateMotion id="bolt-motion-imdb" path="M 0 0" dur="2.3s" repeatCount="indefinite" />
-            </circle>
-          </svg>
-
-          <!-- Left Apps Column / Arc -->
-          <div class="synapse-nodes left-nodes">
-            <div class="node-chip chip-tvtime" id="chip-node-tvtime" data-app="TV Time" data-color="#FFC800">
-              <span class="chip-icon chip-bg-tvtime"><img src="https://cdn.simpleicons.org/tvtime/000000"
-                  alt="TV Time"></span>
-              <div class="chip-info"><strong>TV Time</strong></div>
-              <div class="node-socket left-socket" id="socket-tvtime"></div>
-            </div>
-            <div class="node-chip chip-trakt" id="chip-node-trakt" data-app="Trakt.tv" data-color="#ED1C24">
-              <span class="chip-icon chip-bg-trakt"><img src="https://cdn.simpleicons.org/trakt/FFFFFF"
-                  alt="Trakt.tv"></span>
-              <div class="chip-info"><strong>Trakt.tv</strong></div>
-              <div class="node-socket left-socket" id="socket-trakt"></div>
-            </div>
-          </div>
-
-          <!-- Central FlickTrove Core -->
-          <div class="synapse-center-area">
-            <div class="flicktrove-core" id="flicktrove-core-reactor">
-              <div class="core-rings">
-                <div class="ring ring-outer"></div>
-                <div class="ring ring-inner"></div>
-              </div>
-              <div class="core-logo">
-                <img src="assets/icon-512.png" alt="FlickTrove Core"
-                  onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-weight:900;font-size:1.4rem;color:#2DD4BF;\'>FT</span>';">
-              </div>
-              <div class="core-label">FLICKTROVE CORE</div>
-            </div>
-          </div>
-
-          <!-- Right Apps Column / Arc -->
-          <div class="synapse-nodes right-nodes">
-            <div class="node-chip chip-letterboxd" id="chip-node-letterboxd" data-app="Letterboxd" data-color="#00E054">
-              <div class="node-socket right-socket" id="socket-letterboxd"></div>
-              <span class="chip-icon chip-bg-letterboxd"><img src="https://cdn.simpleicons.org/letterboxd/FFFFFF"
-                  alt="Letterboxd"></span>
-              <div class="chip-info"><strong>Letterboxd</strong></div>
-            </div>
-            <div class="node-chip chip-imdb" id="chip-node-imdb" data-app="IMDb" data-color="#F5C518">
-              <div class="node-socket right-socket" id="socket-imdb"></div>
-              <span class="chip-icon chip-bg-imdb"><img src="https://cdn.simpleicons.org/imdb/000000" alt="IMDb"></span>
-              <div class="chip-info"><strong>IMDb</strong></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom Compact Universal & Smart Merge Bar -->
-        <div class="synapse-footer-bar">
-          <div class="universal-pill-node chip-universal" data-app="CSV / JSON / ZIP" data-color="#2DD4BF">
-            <span class="chip-icon chip-bg-universal">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2DD4BF" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="9" y1="13" x2="15" y2="13" />
-                <line x1="9" y1="17" x2="15" y2="17" />
-              </svg>
-            </span>
-            <div class="chip-info"><strong>Universal CSV / JSON / ZIP</strong>
-            </div>
-            
-          </div>
-
-          <div class="smart-merge-compact">
-            <span class="merge-shield-icon"><img src="assets/icons/scudo_privacy.svg" alt="Shield"
-                style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);" /></span>
-            <div class="merge-info">
-              <strong>Intelligent Smart Merge Protection</strong>
-              <span>Automatically combines external histories with your existing library without duplicates.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==========================================================================
-         CINEMATIC HOLOGRAPHIC COVER STAGE & DYNAMIC COLOR SHOWCASE (NO MARQUEE)
-         ========================================================================== -->
-    <section id="cinematic-stage-section" class="cinematic-stage-section">
-      <div class="stage-ambient-background" id="stage-ambient-bg"></div>
-
-      <div class="section-header">
-        <div class="import-badge border-rotate-glow" style="margin-bottom: 1rem;">
-          <span class="badge-dot pulse-teal"></span>
-          <span>COIL DYNAMIC COLOR EXTRACTION</span>
-        </div>
-        <h2 class="blur-word-reveal">Your Library, <span class="gradient-teal">Alive with Color</span></h2>
-        <p class="blur-word-reveal">Hover over any title below. FlickTrove analyzes the artwork in real time and
-          transforms your entire UI palette to match the mood of what you're watching.</p>
-      </div>
-
-      <div class="holographic-stage-container">
-        <!-- Cover 1: Dune -->
-        <div class="holographic-cover-card" data-color-1="#FFB300" data-color-2="#FF6D00" data-color-3="#E65100"
-          data-title="Dune: Part Two" data-palette="Desert Amber">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
-            alt="Dune: Part Two" loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-ribbon-bookmark">
-            <div class="ribbon-holes">
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-            </div>
-          </div>
-          <div class="card-top-badge">HOT</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Dune: Part Two</h4>
-                <span class="tag-pill teal">★ 8.5</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:20px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 2: Spider-Verse -->
-        <div class="holographic-cover-card" data-color-1="#FF007F" data-color-2="#2979FF" data-color-3="#B388FF"
-          data-title="Spider-Man: Across the Spider-Verse" data-palette="Neon Magenta">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"
-            alt="Spider-Man: Across the Spider-Verse" loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-top-badge">NEW</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Across the Spider-Verse</h4>
-                <span class="tag-pill teal">★ 9.0</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 3: Blade Runner 2049 -->
-        <div class="holographic-cover-card" data-color-1="#00E5FF" data-color-2="#FF3D00" data-color-3="#FF9100"
-          data-title="Blade Runner 2049" data-palette="Cyber Cyan">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg"
-            alt="Blade Runner 2049" loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Blade Runner 2049</h4>
-                <span class="tag-pill teal">★ 7.5</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 4: The Bear -->
-        <div class="holographic-cover-card" data-color-1="#64B5F6" data-color-2="#FFC107" data-color-3="#ECEFF1"
-          data-title="The Bear" data-palette="Kitchen Steel">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/eKfVzzEazSIjJMrw9ADa2x8ksLz.jpg" alt="The Bear"
-            loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-ribbon-bookmark">
-            <div class="ribbon-holes">
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-            </div>
-          </div>
-          <div class="card-top-badge">HOT</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>The Bear</h4>
-                <span class="tag-pill teal">★ 8.5</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 5: Interstellar -->
-        <div class="holographic-cover-card" data-color-1="#FFD54F" data-color-2="#4527A0" data-color-3="#FFFFFF"
-          data-title="Interstellar" data-palette="Cosmic Gold">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Interstellar"
-            loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-top-badge">MASTERPIECE</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Interstellar</h4>
-                <span class="tag-pill teal">★ 8.5</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 6: Oppenheimer -->
-        <div class="holographic-cover-card" data-color-1="#FF6D00" data-color-2="#FFAB00" data-color-3="#D50000"
-          data-title="Oppenheimer" data-palette="Atomic Fire">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="Oppenheimer"
-            loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-ribbon-bookmark">
-            <div class="ribbon-holes">
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-            </div>
-          </div>
-          <div class="card-top-badge">HOT</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Oppenheimer</h4>
-                <span class="tag-pill teal">★ 9.5</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 7: Succession -->
-        <div class="holographic-cover-card" data-color-1="#00E676" data-color-2="#1B5E20" data-color-3="#CDE300"
-          data-title="Succession" data-palette="Emerald Trust">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg" alt="Succession"
-            loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Succession</h4>
-                <span class="tag-pill teal">★ 7.0</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cover 8: Arcane -->
-        <div class="holographic-cover-card" data-color-1="#2979FF" data-color-2="#00E5FF" data-color-3="#D500F9"
-          data-title="Arcane" data-palette="Hextech Neon">
-          <div class="cover-glow"></div>
-          <img src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/abf8tHznhSvl9BAElD2cQeRr7do.jpg" alt="Arcane"
-            loading="lazy" onerror="this.src='assets/icon-512.png'">
-          <div class="card-ribbon-bookmark">
-            <div class="ribbon-holes">
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-              <span class="ribbon-hole"></span><span class="ribbon-hole"></span>
-            </div>
-          </div>
-          <div class="card-top-badge">NEW</div>
-          <div class="cover-overlay">
-            <div></div>
-            <div class="card-bottom-bar">
-              <div class="card-title-area">
-                <h4>Arcane</h4>
-                <span class="tag-pill teal">★ 7.0</span>
-              </div>
-              <div class="card-watch-circle">
-                <img src="assets/icons/eye.svg" alt="Watch"
-                  style="width:22px;height:22px;filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg);">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Cinema Energy Pipeline & Flow Construction Diagram -->
-    <!-- Features Section - Standard Blocks -->
-    <section id="features" class="standard-features-section">
-      
-    <!-- Connecting Energy Tracks placed BEHIND .pipeline-container stretching off-screen to left & right -->
-        <svg class="pipeline-flow-svg" viewBox="0 0 1600 240" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="pipe-rainbow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="5%" stop-color="#2DD4BF" />
-              <stop offset="50%" stop-color="#BB86FC" />
-              <stop offset="95%" stop-color="#FFB300" />
-            </linearGradient>
-          </defs>
-          <path class="pipe-base-track"
-            d="M -100 120 C 150 20, 380 220, 520 120 C 650 20, 720 220, 800 120 C 880 20, 950 220, 1080 120 C 1220 20, 1450 220, 1700 120" />
-          <path class="pipe-energy-beam"
-            d="M -100 120 C 150 20, 380 220, 520 120 C 650 20, 720 220, 800 120 C 880 20, 950 220, 1080 120 C 1220 20, 1450 220, 1700 120"
-            stroke="url(#pipe-rainbow-grad)" />
-          <circle class="energy-packet packet-1" r="7" cx="0" cy="0" />
-          <circle class="energy-packet packet-2" r="6" cx="0" cy="0" />
-          <circle class="energy-packet packet-3" r="8" cx="0" cy="0" />
-        </svg>
-<div class="section-header">
-        <h2>Crafted for <span class="gradient-gold">Cinephiles</span></h2>
-        <p>Everything you need to organize, explore, and track your cinematic life.</p>
-      </div>
-
-      <div class="features-container">
-        <div class="feature-block">
-          <div class="feature-content" data-aos="fade-right">
-            <div class="feature-badge">Discovery Engine</div>
-            <h3>Discover & Smart Search</h3>
-            <p>Explore popular movies, TV series, and upcoming releases. Search instantly and discover what is trending today.</p>
-            <ul class="feature-list">
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Explore the massive TMDB catalog</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Fast and intuitive search engine</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Discover similar movies and series</li>
-            </ul>
-          </div>
-          <div class="feature-image" data-aos="fade-left" data-aos-delay="200">
-            <img src="assets/feature_discover.jpg" alt="Discover and Search">
-          </div>
-        </div>
-
-        <div class="feature-block reverse">
-          <div class="feature-content" data-aos="fade-left">
-            <div class="feature-badge">Insights</div>
-            <h3>Deep Statistics</h3>
-            <p>Track your watched movies, favorite episodes, and total viewing hours. Understand your tastes with advanced charts and metrics.</p>
-            <ul class="feature-list">
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Detailed watch-time analytics</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Genre preferences breakdown</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Personal milestones tracking</li>
-            </ul>
-          </div>
-          <div class="feature-image" data-aos="fade-right" data-aos-delay="200">
-            <img src="assets/feature_stats.jpg" alt="Advanced Statistics">
-          </div>
-        </div>
-
-        <div class="feature-block">
-          <div class="feature-content" data-aos="fade-right">
-            <div class="feature-badge">Collections</div>
-            <h3>Organize with Folders</h3>
-            <p>Organize your watchlist into custom folders. Personalize each collection with distinct colors and track your favorites.</p>
-            <ul class="feature-list">
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Unlimited custom lists</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Personalized covers and colors</li>
-              <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M3 12.9927L4.74392 14.3281"/><path d="M8.17444 16.955C9.17434 17.7207 10.6057 17.5302 11.3706 16.5296L20.1843 5"/></svg> Advanced sorting and filtering</li>
-            </ul>
-          </div>
-          <div class="feature-image" data-aos="fade-left" data-aos-delay="200">
-            <img src="assets/feature_folders.png" alt="Custom Folders">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Screenshots Showcase Section -->
-    <section id="screenshots" class="showcase-section">
-      <div class="section-header">
-        <h2>Visual Excellence in <span class="gradient-text">Every Detail</span></h2>
-        <p>Sleek dark modes, ultra-frosted glass blur effects, and immersive movie banners.<br><span
-            style="font-size: 0.92rem; color: var(--accent-teal); margin-top: 0.5rem; display: inline-block;"><img
-              src="assets/icons/lente.svg" alt=""
-              style="width: 15px; height: 15px; margin-right: 5px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 3px var(--accent-teal));">Click
-            any screenshot to zoom in high definition</span></p>
-      </div>
-
-      <div class="screenshots-grid">
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_home.png" alt="Home & Blur Effect" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon" alt=""><span>Home &
-              Blur</span></div>
-        </div>
-
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_explore.png" alt="Recommendations" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
-              alt=""><span>Explore</span></div>
-        </div>
-
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_dune.png" alt="Immersive Details" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
-              alt=""><span>Immersive</span></div>
-        </div>
-
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_stats.jpg" alt="Advanced Statistics" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
-              alt=""><span>Statistics</span></div>
-        </div>
-
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_folders.png" alt="Custom Folders" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
-              alt=""><span>Folders</span></div>
-        </div>
-
-        <div class="screenshot-item" title="Click to zoom">
-          <img src="assets/showcase_detail.png" alt="Deep Details" loading="lazy">
-          <div class="screenshot-caption"><img src="assets/icons/eye.svg" class="caption-icon"
-              alt=""><span>Details</span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Cinematic Double Filmstrip Perforation Divider (Twin Reel Marquee) -->
-    <div class="filmstrip-wrapper">
-      <div class="filmstrip-divider strip-left">
-        <div class="film-holes"></div>
-        <div class="film-line"></div>
-        <div class="film-holes"></div>
-      </div>
-      <div class="filmstrip-divider strip-right">
-        <div class="film-holes"></div>
-        <div class="film-line"></div>
-        <div class="film-holes"></div>
-      </div>
-    </div>
-
-    <!-- Essential FAQ Section -->
-    <section id="faq" class="faq-section">
-      <div class="section-header">
-        <h2>Essential <span class="gradient-gold">FAQ</span></h2>
-        <p>Quick answers about FlickTrove.</p>
-      </div>
-
-      <div class="faq-list">
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>Why choose FlickTrove over other tracking apps?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            Unlike traditional tracking apps that feel cluttered and ad-heavy, FlickTrove focuses on speed, privacy, and
-            visual elegance. Built to feel ultra-smooth and native on your Android device, it features dynamic color
-            atmospheres that adapt to movie posters, complete global cinema catalogs, and instant offline access with
-            automatic cloud backup—all
-            completely free and ad-free.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>Is FlickTrove 100% free and offline-compatible?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            Yes! FlickTrove is a free passion project for cinema lovers. Your data is saved directly on your device for
-            instant offline access, and automatically synchronizes securely when you are online if an account is
-            created.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>Can I migrate my watchlist from other platforms?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            Absolutely! FlickTrove features a seamless import/export tool allowing you to transfer your historical watch
-            data, custom folders, and ratings without losing a single movie or show.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question">
-            <span>How does the Global Rating System work?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            When you assign a rating to a movie or a TV show, your rating score is mathematically aggregated (averaged) with ratings from other users to generate a "Global FlickTrove Rating". This global rating is completely anonymous, public to all users, and cannot be traced back to your personal profile or identity.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Final Download CTA -->
-    <section class="download-cta-section">
-      <div class="cta-card">
-        <div class="cta-content">
-          <h2>Ready to elevate your tracking?</h2>
-          <p>Join true cinephiles and track your library locally with absolute privacy and stunning visuals.</p>
-          <div class="cta-actions">
-            <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" class="btn-primary magnetic-btn">
-              <img src="assets/icons/scaricare.svg" alt="Download" style="width: 18px; height: 18px; margin-right: 6px; filter: brightness(0);">
-              Download APK
-            </a>
-          </div>
-        </div>
-        <div class="cta-visual">
-          <img src="assets/Icon.svg" alt="FlickTrove" class="cta-logo-glow">
-        </div>
-      </div>
-    </section>
-    <!-- Support Section (Ko-fi) -->
-    <section id="support" class="support-section">
-      <div class="support-container" data-aos="fade-up">
-        <h2 class="blur-word-reveal" style="margin-bottom: 2rem;">Support the <span class="gradient-teal">Development</span></h2>
-        <p class="blur-word-reveal" style="max-width: 600px; margin: 0 auto 2.5rem; color: var(--text-secondary); line-height: 1.6;">
-          FlickTrove is completely free and open-source. Se l'app ti piace e vuoi supportare il suo sviluppo continuo, offrimi un caffè su Ko-fi!
+        <h1 data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+          Traccia. Scopri. <br/>Vivi le tue Serie.
+        </h1>
+        <p data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400">
+          FlickTrove è il compagno definitivo per gli amanti del cinema. Organizza le tue visioni, crea cartelle personalizzate e analizza le tue statistiche, tutto in un'unica app dal design premium.
         </p>
-        
-        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-        <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#5edbb1', 'B4H123UU65');kofiwidget2.draw();</script>
+        <div class="hero-cta" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="600">
+          <a href="#" class="btn btn-primary">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"></path></svg>
+            Scarica per Android
+          </a>
+          <a href="#features" class="btn btn-glass">
+            Esplora le Funzioni
+          </a>
+        </div>
       </div>
     </section>
-  </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-col">
-        <a href="index.html" class="nav-logo" style="margin-bottom: 1rem;">
-          <img src="assets/Icon.svg" alt="Logo">
-          <span>FlickTrove</span>
-        </a>
-        <p>A premium Android personal library crafted for true cinephiles.</p>
+    <!-- Features Section -->
+    <section id="features" class="features">
+      <div class="container">
+        <div class="features-header" data-aos="fade-up">
+          <h2>Tutto quello che ti serve</h2>
+          <p style="color: var(--text-muted); font-size: 18px;">Un set di strumenti potentissimo avvolto in un design minimale.</p>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Card 1 (Large) -->
+          <div class="bento-card large" data-aos="fade-up" data-aos-delay="100">
+            <div class="feature-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+            </div>
+            <h3>Statistiche Avanzate</h3>
+            <p>Ottieni insight dettagliati sulle tue abitudini di visione. Scopri i tuoi attori preferiti, i generi più visti e quanto tempo hai passato guardando le tue serie TV preferite con grafici interattivi e accattivanti.</p>
+          </div>
+
+          <!-- Card 2 (Small) -->
+          <div class="bento-card small" data-aos="fade-up" data-aos-delay="200">
+            <div class="feature-icon" style="color: var(--accent)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h3>Tracking Perfetto</h3>
+            <p>Segna gli episodi visti in un tocco. Non perderai mai più il filo della tua serie TV preferita.</p>
+          </div>
+
+          <!-- Card 3 (Small) -->
+          <div class="bento-card small" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-icon" style="color: #38bdf8">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+            </div>
+            <h3>Cartelle Smart</h3>
+            <p>Crea raccolte personalizzate e tag per organizzare la tua enorme libreria di titoli senza sforzo.</p>
+          </div>
+
+          <!-- Card 4 (Large) -->
+          <div class="bento-card large" data-aos="fade-up" data-aos-delay="400">
+            <div class="feature-icon" style="color: #a78bfa">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </div>
+            <h3>Sincronizzazione Cloud</h3>
+            <p>I tuoi dati sono al sicuro e sincronizzati su tutti i tuoi dispositivi. Goditi FlickTrove ovunque tu sia, e mantieni i tuoi progressi sempre aggiornati con un semplice tap, senza configurazioni complesse.</p>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="footer-col">
-        <h4>Navigation</h4>
-        <ul class="footer-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#screenshots">Showcase</a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <li><a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank">Download APK</a></li>
-        </ul>
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="logo" style="font-size: 20px;">
+            <img src="./favicon.png" alt="Logo" style="width: 24px; height: 24px;"/>
+            FlickTrove
+          </div>
+          <div class="footer-links">
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Termini di Servizio</a>
+            <a href="mailto:support@flicktrove.com">Supporto</a>
+          </div>
+        </div>
+        <div class="copyright">
+          &copy; 2026 FlickTrove. Tutti i diritti riservati.
+        </div>
       </div>
+    </footer>
 
-      <div class="footer-col">
-        <h4>Legal & Privacy</h4>
-        <ul class="footer-links">
-          <li><a href="privacy.html">Privacy Policy</a></li>
-          <li><a href="terms.html">Terms of Service</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Data Sources</h4>
-        <ul class="footer-links">
-          <li><a href="https://www.themoviedb.org/" target="_blank">TMDB</a></li>
-          <li><a href="https://thetvdb.com/" target="_blank">TheTVDB</a></li>
-          <li><a href="https://giphy.com/" target="_blank">Giphy</a></li>
-          <li><a href="https://www.imdb.com/" target="_blank">IMDb</a></li>
-          <li><a href="https://trakt.tv/" target="_blank">Trakt</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <p>&copy; 2026 FlickTrove. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <!-- Neon Top Scroll Laser Bar -->
-  <div id="scroll-progress">
-    <div id="scroll-laser"></div>
-  </div>
-
-  <!-- Holographic Screenshot Zoom Lightbox Modal -->
-  <div id="screenshot-modal" class="lightbox-modal">
-    <div class="lightbox-backdrop"></div>
-    <div class="lightbox-content">
-      <button class="lightbox-close" aria-label="Close modal">✕</button>
-      <div class="lightbox-img-wrapper">
-        <img id="lightbox-img" src="" alt="Zoomed Screenshot">
-      </div>
-      <div id="lightbox-caption" class="lightbox-caption-text"></div>
-    </div>
-  </div>
-
-  <!-- Powerful Online Interactive CDN Libraries (Tilt 3D, Typed.js, Lenis Smooth Scroll) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
-  <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script src="script.js?v=37"></script>
-
-
-</body>
-
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        once: true,
+        offset: 50,
+      });
+    </script>
+  </body>
 </html>
-
-
-
-
-

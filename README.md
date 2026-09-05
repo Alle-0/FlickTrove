@@ -180,7 +180,6 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
 
-- [ ] **SIMKL Integration:** Alternative cloud sync engine for users.
 - [ ] **Social Integration:** Follow your friends and browse their personal libraries.
 - [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
 - [ ] **Public Folders:** Make any folder public and shareable via link — let anyone browse your curated collection.
@@ -240,6 +239,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 📺 [TheTVDB API](https://thetvdb.com/api-information) - For TV show data and artwork
 - 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
+- 📡 [SIMKL API](https://simkl.docs.apiary.io/) - For bidirectional sync and tracking
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
