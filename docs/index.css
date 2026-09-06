@@ -1448,13 +1448,34 @@ main {
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
   font-size: 14px;
-  transition: color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   line-height: 2;
   display: inline-block;
+  position: relative;
 }
 
 .footer-links-col a:hover {
   color: #ffffff;
+  transform: translateX(6px);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.footer-links-col a::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #aa3bff;
+  box-shadow: 0 0 8px #aa3bff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-links-col a:hover::before {
+  transform: translateY(-50%) scale(1);
 }
 
 .footer-links-col .credit-title {
