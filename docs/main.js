@@ -95,25 +95,66 @@ const initShowcaseAnimations = () => {
     duration: 0.5,
     ease: 'power2.out'
   }, 0.2);
+};
 
-  // --- PHASE 3: VISUAL FEATURES REVEAL ---
-  const featureRows = gsap.utils.toArray('.feature-row');
-  featureRows.forEach((row) => {
-    const visual = row.querySelector('.feature-visual');
-    const text = row.querySelector('.feature-text');
+// --- PHASE 3: VISUAL FEATURES SWAP IN PLACE ---
+const initVisualFeaturesSwap = () => {
+  const rows = gsap.utils.toArray('.feature-swap-item');
+  if (rows.length < 2) return;
 
-    gsap.from([visual, text], {
-      scrollTrigger: {
-        trigger: row,
-        start: "top 80%",
-      },
-      y: 60,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-      stagger: 0.2
-    });
+  // Set initial states: First item visible, others hidden and pushed down
+  gsap.set(rows[0], { opacity: 1, y: 0, scale: 1, autoAlpha: 1, pointerEvents: 'auto' });
+  gsap.set(rows.slice(1), { opacity: 0, y: 80, scale: 0.95, autoAlpha: 0, pointerEvents: 'none' });
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.visual-features',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.8,
+      pin: '.features-sticky-container'
+    }
   });
+
+  // Transition from Row 1 to Row 2:
+  tl.to(rows[0], {
+    opacity: 0,
+    y: -80,
+    scale: 0.94,
+    autoAlpha: 0,
+    pointerEvents: 'none',
+    ease: 'power2.inOut',
+    duration: 1
+  }, 0.8)
+  .to(rows[1], {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    autoAlpha: 1,
+    pointerEvents: 'auto',
+    ease: 'power2.inOut',
+    duration: 1
+  }, 0.8)
+
+  // Transition from Row 2 to Row 3:
+  .to(rows[1], {
+    opacity: 0,
+    y: -80,
+    scale: 0.94,
+    autoAlpha: 0,
+    pointerEvents: 'none',
+    ease: 'power2.inOut',
+    duration: 1
+  }, 2.4)
+  .to(rows[2], {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    autoAlpha: 1,
+    pointerEvents: 'auto',
+    ease: 'power2.inOut',
+    duration: 1
+  }, 2.4);
 };
 
 // --- NAVBAR PROGRESS ANIMATION ---
@@ -328,6 +369,7 @@ const initPortalZoom = () => {
 // Initialize animations (module scripts are deferred automatically)
 initHeroAnimations();
 initShowcaseAnimations();
+initVisualFeaturesSwap();
 initPortalZoom();
 initNavbarProgress();
 initFAQ();

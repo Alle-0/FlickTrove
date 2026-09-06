@@ -659,29 +659,51 @@ main {
   z-index: 20;
 }
 
-/* --- PHASE 3: VISUAL FEATURES --- */
+/* --- PHASE 3: VISUAL FEATURES (PINNED SWAP) --- */
 .visual-features {
-  padding: 120px 0;
+  height: 320vh;
   position: relative;
   z-index: 20;
 }
 
-.feature-row {
+.features-sticky-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.features-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5%;
+}
+
+.feature-swap-item {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 80px;
   max-width: 1200px;
-  margin: 0 auto 160px auto;
-  padding: 0 5%;
+  margin: 0 auto;
+  will-change: transform, opacity;
 }
 
-.feature-row:nth-child(even) {
+.feature-swap-item:nth-child(even) {
   flex-direction: row-reverse;
-}
-
-.feature-row:last-child {
-  margin-bottom: 0;
 }
 
 .feature-visual {
@@ -1129,7 +1151,6 @@ main {
 .portal-zoom-section {
   height: 380vh;
   position: relative;
-  background: #090C10;
   z-index: 6;
 }
 
@@ -1160,7 +1181,7 @@ main {
   border-radius: 44px;
   border: 12px solid #14181f;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.1),
     0 30px 80px rgba(0, 0, 0, 0.8),
     0 0 70px rgba(var(--primary-color-rgb), 0.25);
@@ -1932,8 +1953,10 @@ main {
 }
 
 @media (max-width: 768px) {
+
   /* Strict viewport containment */
-  html, body {
+  html,
+  body {
     overflow-x: hidden !important;
     max-width: 100vw;
     width: 100%;
@@ -1949,9 +1972,11 @@ main {
     margin: 0;
     padding: 0.65rem 1.25rem;
   }
+
   .nav-links {
     display: none !important;
   }
+
   .hamburger-menu {
     display: flex !important;
     align-items: center;
@@ -1974,6 +1999,7 @@ main {
     align-items: center;
     overflow: hidden;
   }
+
   .hero-container {
     grid-template-columns: 1fr;
     gap: 2.5rem;
@@ -1981,22 +2007,26 @@ main {
     width: 100%;
     max-width: 100%;
   }
+
   .hero-text-col {
     align-items: center;
     text-align: center;
   }
+
   .hero-title {
     text-align: center;
     font-size: clamp(2rem, 7.5vw, 2.6rem);
     line-height: 1.15;
     word-break: break-word;
   }
+
   .hero-subtitle {
     text-align: center;
     font-size: 1rem;
     line-height: 1.5;
     padding: 0 0.5rem;
   }
+
   .hero-visual,
   .hero-visual-col {
     margin-top: 60px !important;
@@ -2009,6 +2039,7 @@ main {
     align-items: center;
     height: 380px;
   }
+
   .hero-composition {
     height: 380px;
     transform: scale(0.65);
@@ -2037,6 +2068,7 @@ main {
     overflow-x: hidden !important;
     width: 100vw;
   }
+
   .sticky-container {
     overflow: hidden;
     display: flex !important;
@@ -2044,34 +2076,41 @@ main {
     justify-content: flex-start !important;
     align-items: center !important;
   }
+
   .showcase-bg-text {
     position: relative !important;
     top: 0 !important;
     left: 0 !important;
     transform: none !important;
     font-size: 2.5rem !important;
-    color: #fff !important; /* Full opacity */
+    color: #fff !important;
+    /* Full opacity */
     -webkit-text-fill-color: #fff !important;
     mix-blend-mode: normal !important;
     background: none !important;
     opacity: 1 !important;
     text-align: center;
-    margin: 120px auto 40px auto !important; /* 120px top margin clears the navbar */
+    margin: 120px auto 40px auto !important;
+    /* 120px top margin clears the navbar */
     line-height: 1.1;
     z-index: 10;
     display: block;
     white-space: normal;
   }
+
   .phones-wrapper,
   .showcase-container {
-    transform: scale(0.55) !important; /* Aggressive scale down */
+    transform: scale(0.55) !important;
+    /* Aggressive scale down */
     transform-origin: top center !important;
-    margin-bottom: -300px !important; /* Pull up the next section to close the massive gap caused by scaling */
+    margin-bottom: -300px !important;
+    /* Pull up the next section to close the massive gap caused by scaling */
     display: flex;
     justify-content: center;
     position: relative;
     width: 100%;
   }
+
   .phone-label {
     font-size: 1.2rem !important;
   }
@@ -2082,13 +2121,16 @@ main {
     padding: 40px 0;
     gap: 16px;
   }
+
   .marquee-track {
     gap: 16px;
   }
+
   .marquee-pill {
     padding: 8px 16px;
     font-size: 13px;
   }
+
   .marquee-pill img {
     width: 16px;
     height: 16px;
@@ -2099,20 +2141,25 @@ main {
     padding: 80px 5%;
     gap: 28px;
   }
+
   .faq-header h2 {
     font-size: 2rem !important;
   }
+
   .faq-header p {
     font-size: 0.95rem;
   }
+
   .faq-question {
     padding: 20px 18px;
     font-size: 1.05rem;
   }
+
   .faq-answer {
     padding: 0 18px;
     font-size: 0.92rem;
   }
+
   .faq-answer-inner {
     padding-bottom: 20px;
   }
@@ -2121,6 +2168,7 @@ main {
   .final-cta-section {
     padding: 120px 5%;
   }
+
   .final-cta-section h2 {
     font-size: 2.5rem !important;
     line-height: 1.1;
@@ -2131,6 +2179,7 @@ main {
   .visual-features {
     padding: 60px 0;
   }
+
   .feature-row {
     display: flex !important;
     flex-direction: column !important;
@@ -2138,15 +2187,18 @@ main {
     padding: 0 5%;
     margin-bottom: 80px;
   }
+
   .feature-text {
     order: 1;
     width: 100% !important;
     text-align: center;
   }
+
   .feature-row:nth-child(odd) .feature-visual,
   .feature-row:nth-child(even) .feature-visual {
     transform: none !important;
   }
+
   .feature-visual {
     order: 2;
     width: 100% !important;
@@ -2155,43 +2207,52 @@ main {
     aspect-ratio: auto;
     border-radius: 20px;
   }
+
   .sync-grid-ui {
     width: 100%;
     padding: 20px 14px;
     gap: 16px;
   }
+
   .sync-grid {
     gap: 10px;
   }
+
   .integration-card {
     padding: 10px 8px;
     gap: 10px;
     border-radius: 12px;
   }
+
   .int-icon {
     width: 36px;
     height: 36px;
     min-width: 36px;
     border-radius: 10px;
   }
+
   .int-icon svg {
     width: 20px;
     height: 20px;
   }
+
   .int-info h4 {
     font-size: 0.85rem;
     margin-bottom: 2px;
   }
+
   .int-info p {
     font-size: 0.68rem;
     line-height: 1.25;
     word-break: break-word;
   }
+
   .sync-footer {
     font-size: 0.75rem;
     margin-top: 8px;
     padding-bottom: 4px;
   }
+
   .feature-text h2 {
     font-size: 2.2rem;
   }
@@ -2200,10 +2261,12 @@ main {
   .portal-zoom-section {
     height: 300vh;
   }
+
   .reveal-word {
     font-size: 2.5rem;
     letter-spacing: -1px;
   }
+
   .portal-device {
     width: 250px;
     height: 500px;
@@ -2246,4 +2309,3 @@ main {
     margin: 0;
   }
 }
-
