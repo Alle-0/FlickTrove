@@ -1151,34 +1151,45 @@ main {
 }
 
 /* --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT OVERLAY --- */
-.portal-zoom-section {
+.portal-zoom-section,
+.scroll-reveal-section {
   height: 220vh;
   position: relative;
   z-index: 6;
 }
 
-.portal-sticky {
+.portal-sticky,
+.reveal-sticky {
+  position: sticky;
+  top: 0;
   width: 100%;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* This forces it to the absolute center */
   overflow: hidden;
   perspective: 1200px;
+  z-index: 1; /* Keep it below the navbar (which should be higher) */
 }
 
 .portal-stage {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100vh;
   padding: 0 5%;
+  box-sizing: border-box;
 }
 
 .portal-device {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 320px;
   height: 640px;
   border-radius: 44px;
@@ -1191,6 +1202,7 @@ main {
   will-change: transform, border-radius, border-width;
   transform-origin: center center;
   background: #090C10;
+  z-index: 5;
 }
 
 .portal-device img {
@@ -1223,26 +1235,25 @@ main {
   pointer-events: none;
 }
 
-/* Text placed directly in the center of the image / stage */
-.portal-title {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* Text placed directly in the center of the viewport */
+.portal-title,
+.scroll-reveal-section h2 {
+  position: relative;
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   font-family: var(--font-heading);
-  line-height: 1.1;
+  line-height: 1.2;
   text-align: center;
   user-select: none;
   z-index: 20;
   pointer-events: none;
-  margin: 0;
+  margin: 0 auto;
   will-change: opacity, transform, filter;
 }
 
 .reveal-word {
   display: inline-block;
+  margin-right: 0.25em; /* Forces a space between words */
   font-size: clamp(2.8rem, 5.2vw, 4.6rem);
   font-weight: 900;
   letter-spacing: -2px;
@@ -2269,6 +2280,7 @@ main {
   .reveal-word {
     font-size: 2.2rem;
     letter-spacing: -1px;
+    margin-right: 0.2em;
   }
 
   .portal-device {

@@ -345,6 +345,8 @@ const initPortalZoom = () => {
   const overlay = document.querySelector('.portal-fade-overlay');
   if (!device || !stage || !title) return;
 
+  gsap.set(device, { xPercent: -50, yPercent: -50 });
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '.portal-zoom-section',
@@ -381,6 +383,8 @@ const initPortalZoom = () => {
   // 2. While words illuminate, the phone enlarges simultaneously towards the camera
   .to(device, {
     scale: 24,
+    xPercent: -50,
+    yPercent: -50,
     borderRadius: 0,
     borderWidth: 0,
     boxShadow: 'none',
