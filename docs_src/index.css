@@ -208,13 +208,12 @@ main {
 
 /* Scroll Progress Bar */
 .scroll-progress-container {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  border-radius: 100px;
-  overflow: hidden;
+  height: 3px;
+  z-index: 99999;
 }
 
 .scroll-progress-bar {
