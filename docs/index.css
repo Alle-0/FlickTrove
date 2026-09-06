@@ -1518,6 +1518,8 @@ main {
   display: flex;
   width: 100%;
   overflow: hidden;
+  padding: 24px 0; /* Prevents shadow and scale clipping */
+  margin: -24px 0; /* Offsets padding to keep intended layout */
 }
 
 .marquee-track {
