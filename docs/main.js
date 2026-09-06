@@ -255,9 +255,73 @@ const initFAQAnimation = () => {
   });
 };
 
+// --- PHASE 6: PART 1 - TEXT SCRUBBING REVEAL ---
+const initScrollRevealText = () => {
+  const words = gsap.utils.toArray('.reveal-word');
+  if (!words.length) return;
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.scroll-reveal-section',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.6,
+      pin: '.reveal-sticky'
+    }
+  });
+
+  // Words 0 & 1 ("Stop searching.") turn crisp white
+  tl.to([words[0], words[1]], {
+    color: '#FFFFFF',
+    textShadow: '0 0 30px rgba(255, 255, 255, 0.3)',
+    stagger: 0.2,
+    ease: 'power1.inOut'
+  }, 0)
+  // Words 2 & 3 ("Start watching.") turn luminous FlickTrove Teal
+  .to([words[2], words[3]], {
+    color: '#2DD4BF',
+    textShadow: '0 0 50px rgba(45, 212, 191, 0.6)',
+    stagger: 0.2,
+    ease: 'power1.inOut'
+  }, 0.35);
+};
+
+// --- PHASE 6: PART 2 - PORTAL ZOOM (APPLE IMMERSION) ---
+const initPortalZoom = () => {
+  const device = document.querySelector('.portal-device');
+  const overlay = document.querySelector('.portal-fade-overlay');
+  if (!device) return;
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.portal-zoom-section',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1,
+      pin: '.portal-sticky'
+    }
+  });
+
+  tl.to(device, {
+    scale: 26,
+    borderRadius: 0,
+    borderWidth: 0,
+    boxShadow: 'none',
+    ease: 'power2.inOut',
+    duration: 3
+  }, 0)
+  .to(overlay, {
+    opacity: 0.95,
+    ease: 'power2.in',
+    duration: 1
+  }, 2.1);
+};
+
 // Initialize animations (module scripts are deferred automatically)
 initHeroAnimations();
 initShowcaseAnimations();
+initScrollRevealText();
+initPortalZoom();
 initNavbarProgress();
 initFAQ();
 initFAQAnimation();
