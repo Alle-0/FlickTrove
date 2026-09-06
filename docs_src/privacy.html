@@ -37,30 +37,24 @@
 </head>
 
 <body>
-  <!-- Background Glow Orbs & Ambient Mouse Tracking -->
-  <div class="bg-glow-1"></div>
-  <div class="bg-glow-2"></div>
-  <div class="bg-mouse-glow"></div>
+  <!-- Global Background Glows -->
+  <div class="global-glow-container" style="position: fixed; inset: 0; pointer-events: none; z-index: 0;">
+    <div class="global-glow glow-1"></div>
+    <div class="global-glow glow-2"></div>
+    <div class="global-glow glow-3"></div>
+  </div>
 
-  <!-- Interactive 3D Particle Starfield Canvas -->
-  <canvas id="cyber-canvas"></canvas>
-
-  <!-- Custom Interactive JS Mouse Cursor -->
-  <div class="cursor-dot"></div>
-  <div class="cursor-outline"></div>
-
-  <!-- Navigation Bar (Minimal for legal pages) -->
-  <nav class="navbar" style="position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: flex-start; z-index: 100;">
-    <a href="index.html" class="nav-logo" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 1.25rem;">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      Back to Home
-    </a>
-  </nav>
-
-  <main>
+  <main class="legal-page-wrapper">
     <div class="legal-container">
-      <div class="legal-header">
-        <h1>Privacy Policy</h1>
+      
+      <a href="index.html" class="legal-back-button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Home
+      </a>
+
+      <div class="legal-glass-panel">
+        <div class="legal-header">
+          <h1><span class="text-gradient">Privacy Policy</span></h1>
         <p class="updated-date">Last Updated: August 21, 2026</p>
       </div>
 
@@ -122,6 +116,7 @@
         <p>We reserve the right to update or modify this Privacy Policy at any time. Any changes will be reflected on
           this page with an updated revision date. Continued use of the application implies acceptance of the revised
           policy.</p>
+      </div>
       </div>
     </div>
   </main>
