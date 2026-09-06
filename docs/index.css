@@ -1797,38 +1797,43 @@ main {
 
   /* Showcase Section (The Peek Effect without breaking GSAP ScrollTrigger) */
   .showcase-section {
-    overflow: hidden;
+    overflow-x: hidden !important;
+    width: 100vw;
   }
   .sticky-container {
     overflow: hidden;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px 0;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
   }
   .showcase-bg-text {
-    position: relative;
-    top: auto;
-    left: auto;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
     transform: none !important;
-    font-size: 2.2rem;
-    text-align: center;
-    margin-bottom: 20px;
-    white-space: normal;
-    line-height: 1.1;
+    font-size: 2.5rem !important;
+    color: #fff !important; /* Full opacity */
+    -webkit-text-fill-color: #fff !important;
+    mix-blend-mode: normal !important;
+    background: none !important;
     opacity: 1 !important;
+    text-align: center;
+    margin: 120px auto 40px auto !important; /* 120px top margin clears the navbar */
+    line-height: 1.1;
     z-index: 10;
-    max-width: 90%;
+    display: block;
+    white-space: normal;
   }
-  .phones-wrapper {
-    position: relative;
+  .phones-wrapper,
+  .showcase-container {
+    transform: scale(0.55) !important; /* Aggressive scale down */
+    transform-origin: top center !important;
+    margin-bottom: -300px !important; /* Pull up the next section to close the massive gap caused by scaling */
     display: flex;
     justify-content: center;
-    align-items: center;
+    position: relative;
     width: 100%;
-    transform: scale(0.65);
-    transform-origin: top center;
-    margin-bottom: -150px;
   }
   .phone-label {
     font-size: 1.2rem !important;
