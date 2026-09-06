@@ -255,14 +255,15 @@ const initFAQAnimation = () => {
   });
 };
 
-// --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT SCRUBBING (APPLE KEYNOTE STYLE) ---
+// --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT OVERLAY (APPLE KEYNOTE STYLE) ---
 const initPortalZoom = () => {
   const stage = document.querySelector('.portal-stage');
   const title = document.querySelector('.portal-title');
   const words = gsap.utils.toArray('.reveal-word');
   const device = document.querySelector('.portal-device');
+  const scrim = document.querySelector('.portal-device-scrim');
   const overlay = document.querySelector('.portal-fade-overlay');
-  if (!device || !stage) return;
+  if (!device || !stage || !title) return;
 
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -274,23 +275,23 @@ const initPortalZoom = () => {
     }
   });
 
-  // 1. Words illuminate sequentially above the phone
+  // 1. Words in the center illuminate sequentially right in the middle of the device
   tl.to([words[0], words[1]], {
     color: '#FFFFFF',
-    textShadow: '0 0 30px rgba(255, 255, 255, 0.3)',
+    textShadow: '0 0 35px rgba(255, 255, 255, 0.4)',
     stagger: 0.25,
     ease: 'power1.inOut',
     duration: 1
   }, 0)
   .to([words[2], words[3]], {
     color: '#2DD4BF',
-    textShadow: '0 0 50px rgba(45, 212, 191, 0.6)',
+    textShadow: '0 0 60px rgba(45, 212, 191, 0.7)',
     stagger: 0.25,
     ease: 'power1.inOut',
     duration: 1
-  }, 0.5)
+  }, 0.4)
 
-  // 2. While words illuminate, the phone enlarges simultaneously towards the viewer
+  // 2. While words illuminate, the phone enlarges simultaneously towards the camera
   .to(device, {
     scale: 26,
     borderRadius: 0,
@@ -300,16 +301,23 @@ const initPortalZoom = () => {
     duration: 3.5
   }, 0.2)
 
-  // 3. As the phone grows bigger and swallows the view, the title elegantly lifts and fades
+  // 3. As you fly through the words, the text zooms forward and fades out gracefully
   .to(title, {
+    scale: 1.6,
     opacity: 0,
-    y: -50,
-    filter: 'blur(8px)',
+    filter: 'blur(10px)',
     ease: 'power2.in',
     duration: 1
   }, 0.9)
 
-  // 4. Toward the end of the zoom, fade into dark to seamlessly transition to the Marquee
+  // 4. Scrim fades away so the movie artwork is crystal clear during immersion
+  .to(scrim, {
+    opacity: 0,
+    ease: 'power1.out',
+    duration: 1
+  }, 0.8)
+
+  // 5. Toward the end of the zoom, fade into dark to seamlessly transition to the Marquee
   .to(overlay, {
     opacity: 0.98,
     ease: 'power2.in',

@@ -1125,7 +1125,7 @@ main {
   }
 }
 
-/* --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT SCRUBBING --- */
+/* --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT OVERLAY --- */
 .portal-zoom-section {
   height: 380vh;
   position: relative;
@@ -1144,48 +1144,28 @@ main {
 }
 
 .portal-stage {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
   width: 100%;
+  height: 100vh;
   padding: 0 5%;
-}
-
-.portal-title {
-  font-family: var(--font-heading);
-  line-height: 1.15;
-  text-align: center;
-  margin-bottom: 32px;
-  user-select: none;
-  z-index: 10;
-  will-change: opacity, transform, filter;
-}
-
-.reveal-word {
-  display: inline-block;
-  font-size: 3.8rem;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  color: rgba(255, 255, 255, 0.15);
-  transition: color 0.1s ease, text-shadow 0.1s ease;
-  will-change: color, text-shadow;
 }
 
 .portal-device {
   position: relative;
-  width: 280px;
-  height: 560px;
-  border-radius: 40px;
-  border: 10px solid #14181f;
+  width: 320px;
+  height: 640px;
+  border-radius: 44px;
+  border: 12px solid #14181f;
   overflow: hidden;
   box-shadow: 
     0 0 0 1px rgba(255, 255, 255, 0.1),
     0 30px 80px rgba(0, 0, 0, 0.8),
-    0 0 60px rgba(var(--primary-color-rgb), 0.2);
+    0 0 70px rgba(var(--primary-color-rgb), 0.25);
   will-change: transform, border-radius, border-width;
-  transform-origin: center top;
+  transform-origin: center center;
   background: #090C10;
 }
 
@@ -1194,6 +1174,17 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.portal-device-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(9, 12, 16, 0.55);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
 .portal-fade-overlay {
@@ -1205,6 +1196,34 @@ main {
   background: #090C10;
   opacity: 0;
   pointer-events: none;
+}
+
+/* Text placed directly in the center of the image / stage */
+.portal-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 900px;
+  font-family: var(--font-heading);
+  line-height: 1.1;
+  text-align: center;
+  user-select: none;
+  z-index: 20;
+  pointer-events: none;
+  margin: 0;
+  will-change: opacity, transform, filter;
+}
+
+.reveal-word {
+  display: inline-block;
+  font-size: 5rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: rgba(255, 255, 255, 0.15);
+  transition: color 0.1s ease, text-shadow 0.1s ease;
+  will-change: color, text-shadow;
 }
 
 /* --- PHASE 3.5: FEATURES MARQUEE --- */
@@ -2181,18 +2200,15 @@ main {
   .portal-zoom-section {
     height: 300vh;
   }
-  .portal-title {
-    margin-bottom: 20px;
-  }
   .reveal-word {
-    font-size: 2.2rem;
-    letter-spacing: -0.5px;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
   }
   .portal-device {
-    width: 220px;
-    height: 440px;
-    border-radius: 32px;
-    border-width: 8px;
+    width: 250px;
+    height: 500px;
+    border-radius: 36px;
+    border-width: 9px;
   }
 
   /* Footer */
