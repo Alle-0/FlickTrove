@@ -661,7 +661,7 @@ main {
 
 /* --- PHASE 3: VISUAL FEATURES (PINNED SWAP) --- */
 .visual-features {
-  height: 350vh;
+  height: 250vh;
   position: relative;
   z-index: 20;
 }
@@ -709,14 +709,15 @@ main {
 }
 
 .feature-visual {
-  width: 50%;
-  aspect-ratio: 4/3;
+  width: 52%;
+  min-height: 440px;
+  aspect-ratio: 16/11;
   position: relative;
   border-radius: 24px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .feature-row:nth-child(odd) .feature-visual {
@@ -737,7 +738,7 @@ main {
 }
 
 .feature-text {
-  width: 45%;
+  width: 44%;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1151,7 +1152,7 @@ main {
 
 /* --- PHASE 6: UNIFIED PORTAL ZOOM & TEXT OVERLAY --- */
 .portal-zoom-section {
-  height: 380vh;
+  height: 220vh;
   position: relative;
   z-index: 6;
 }

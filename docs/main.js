@@ -359,34 +359,34 @@ const initPortalZoom = () => {
   tl.to([words[0], words[1]], {
     color: '#FFFFFF',
     textShadow: '0 0 35px rgba(255, 255, 255, 0.4)',
-    stagger: 0.2,
+    stagger: 0.15,
     ease: 'power1.inOut',
-    duration: 0.8
+    duration: 0.6
   }, 0)
   .to([words[2], words[3]], {
     color: '#2DD4BF',
     textShadow: '0 0 50px rgba(45, 212, 191, 0.6)',
-    stagger: 0.2,
+    stagger: 0.15,
     ease: 'power1.inOut',
-    duration: 0.8
-  }, 0.35)
+    duration: 0.6
+  }, 0.25)
   .to([words[4], words[5]], {
     color: '#2DD4BF',
     textShadow: '0 0 70px rgba(45, 212, 191, 0.85)',
-    stagger: 0.2,
+    stagger: 0.15,
     ease: 'power1.inOut',
-    duration: 0.8
-  }, 0.7)
+    duration: 0.6
+  }, 0.5)
 
   // 2. While words illuminate, the phone enlarges simultaneously towards the camera
   .to(device, {
-    scale: 26,
+    scale: 24,
     borderRadius: 0,
     borderWidth: 0,
     boxShadow: 'none',
     ease: 'power2.inOut',
-    duration: 3.5
-  }, 0.2)
+    duration: 2.2
+  }, 0.15)
 
   // 3. While zooming in, the image itself dissolves and blurs out (sfuma),
   // while the text remains crisp, glowing, and fully visible in the center!
@@ -394,22 +394,22 @@ const initPortalZoom = () => {
     opacity: 0,
     filter: 'blur(20px)',
     ease: 'power2.inOut',
-    duration: 2.2
-  }, 0.8)
+    duration: 1.5
+  }, 0.5)
 
   // 4. Scrim also fades away cleanly with the image
   .to(scrim, {
     opacity: 0,
     ease: 'power1.out',
-    duration: 1.5
-  }, 0.8)
+    duration: 1.0
+  }, 0.5)
 
   // 5. The illuminated title stays fully visible and sharp, with a subtle majestic float
   .to(title, {
-    scale: 1.1,
+    scale: 1.08,
     ease: 'power1.out',
-    duration: 2.5
-  }, 0.4);
+    duration: 2.0
+  }, 0.3);
 };
 
 // Initialize animations (module scripts are deferred automatically)
