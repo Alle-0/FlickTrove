@@ -309,6 +309,9 @@ fun AttributionRow(
         "Trakt.tv" -> R.drawable.ic_trakt_logo
         "TheTVDB" -> R.drawable.ic_tvdb_logo
         "GIPHY" -> R.drawable.ic_giphy_logo
+        "SIMKL" -> R.drawable.ic_simkl_logo
+        "Rotten Tomatoes" -> R.drawable.ic_rottentomatoes_logo
+        "Metacritic" -> R.drawable.ic_metacritic_logo
         else -> null
     }
 

@@ -1,7 +1,14 @@
 package com.cinetrack.ui.components.settings
 
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -630,34 +637,88 @@ fun SettingsSupportSection(
         )
         
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         var creditsExpanded by remember { mutableStateOf(false) }
         val rotation by androidx.compose.animation.core.animateFloatAsState(
-            targetValue = if (creditsExpanded) 90f else 0f
+            targetValue = if (creditsExpanded) 180f else 0f
         )
 
-        SettingsItem(
-            icon = Icons.Rounded.Info,
-            title = "Credits & Attributions",
-            onClick = { 
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                creditsExpanded = !creditsExpanded 
-            },
-            trailing = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                    contentDescription = null,
-                    tint = OnSurfaceMuted,
-                    modifier = Modifier.size(20.dp).rotate(rotation)
-                )
-            },
-            customContent = {
-                androidx.compose.animation.AnimatedVisibility(visible = creditsExpanded) {
+        // Pill-shaped card that expands vertically
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White.copy(alpha = 0.04f),
+            tonalElevation = 0.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.08f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+            ) {
+                // Header row — clickable
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable {
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            creditsExpanded = !creditsExpanded
+                        }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Icon badge
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.06f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(14.dp))
+
+                    Text(
+                        text = "Credits & Attributions",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = Color.White,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Icon(
+                        imageVector = Icons.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = OnSurfaceMuted,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(rotation)
+                    )
+                }
+
+                // Expandable content — slides down vertically
+                AnimatedVisibility(
+                    visible = creditsExpanded,
+                    enter = expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
+                    exit = shrinkVertically(animationSpec = tween(250)) + fadeOut(animationSpec = tween(200))
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         AttributionRow(
                             brand = "GIPHY",
@@ -694,7 +755,7 @@ fun SettingsSupportSection(
                     }
                 }
             }
-        )
+        }
     }
 }
 
