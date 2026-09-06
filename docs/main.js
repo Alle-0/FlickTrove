@@ -215,41 +215,41 @@ const initMagneticCTA = () => {
 
 // --- PHASE 5: FAQ ACCORDION LOGIC ---
 const initFAQ = () => {
-  const faqQuestions = document.querySelectorAll('.faq-question');
+  // Global event delegation for bulletproof click handling
+  document.addEventListener('click', (e) => {
+    const question = e.target.closest('.faq-question');
+    if (!question) return;
 
-  faqQuestions.forEach((question) => {
-    question.addEventListener('click', () => {
-      const parentItem = question.closest('.faq-item');
-      if (!parentItem) return;
+    const parentItem = question.closest('.faq-item');
+    if (!parentItem) return;
 
-      const isAlreadyActive = parentItem.classList.contains('active');
+    const isAlreadyActive = parentItem.classList.contains('active');
 
-      // Close all accordion items
-      document.querySelectorAll('.faq-item').forEach((item) => {
-        item.classList.remove('active');
-        const btn = item.querySelector('.faq-question');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
-      });
-
-      // If it wasn't active, expand it
-      if (!isAlreadyActive) {
-        parentItem.classList.add('active');
-        question.setAttribute('aria-expanded', 'true');
-      }
+    // Close all accordion items
+    document.querySelectorAll('.faq-item').forEach((item) => {
+      item.classList.remove('active');
+      const btn = item.querySelector('.faq-question');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
+
+    // If it wasn't active, expand it
+    if (!isAlreadyActive) {
+      parentItem.classList.add('active');
+      question.setAttribute('aria-expanded', 'true');
+    }
   });
 };
 
 const initFAQAnimation = () => {
-  gsap.from('.faq-header > *, .faq-item', {
+  gsap.from('.faq-header', {
     y: 30,
     opacity: 0,
     duration: 0.8,
-    stagger: 0.1,
     ease: 'power3.out',
     scrollTrigger: {
       trigger: '.faq-section',
-      start: 'top 85%'
+      start: 'top 90%',
+      once: true
     }
   });
 };
