@@ -105,19 +105,19 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Screenshot_20260808_114542.png" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Screenshot_20260816_203605.png" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Screenshot_20260629_114856.png" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/HomeFeed.webp" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MyFolders.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_MoneyHeist.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
       <td align="center"><br><b>Custom Folders</b></td>
-      <td align="center"><br><b>Interactive Map</b></td>
+      <td align="center"><br><b>For You</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/1786182293491.jpg" width="240" alt="Stats Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Screenshot_20260818_181727.png" width="240" alt="Folders Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Screenshot_20260813_082544.png" width="240" alt="Interactive Map"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/GeneralStats.webp" width="240" alt="Stats Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MyFolders.webp" width="240" alt="Folders Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/TrovesPick.webp" width="240" alt="Trove's Pick"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>

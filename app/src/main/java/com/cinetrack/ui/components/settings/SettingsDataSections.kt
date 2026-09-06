@@ -656,6 +656,18 @@ fun SettingsSupportSection(
                 brand = "Trakt.tv",
                 text = stringResource(R.string.settings_trakt_notice)
             )
+            AttributionRow(
+                brand = "SIMKL",
+                text = stringResource(R.string.settings_simkl_notice)
+            )
+            AttributionRow(
+                brand = "Rotten Tomatoes",
+                text = stringResource(R.string.settings_rotten_tomatoes_notice)
+            )
+            AttributionRow(
+                brand = "Metacritic",
+                text = stringResource(R.string.settings_metacritic_notice)
+            )
         }
     }
 }
