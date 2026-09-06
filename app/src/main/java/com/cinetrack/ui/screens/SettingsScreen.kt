@@ -213,6 +213,28 @@ fun SettingsOverlayScreen(
         }
     }
 
+    // When user taps "Replay Tutorial", close the overlay first so the tutorial
+    // dialog appears on top and not hidden underneath the settings overlay (zIndex 80000).
+    LaunchedEffect(Unit) {
+        settingsViewModel.replayTutorialEvent.collect {
+            if (!isClosing) {
+                isClosing = true
+                onClosing()
+                scope.launch {
+                    revealAmount.animateTo(
+                        targetValue = 0f,
+                        animationSpec = androidx.compose.animation.core.tween(
+                            durationMillis = 600,
+                            easing = androidx.compose.animation.core.CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
+                        )
+                    )
+                    settingsViewModel.resetOnboarding()
+                    onBack()
+                }
+            }
+        }
+    }
+
     BackHandler(enabled = !isClosing) {
         triggerExit()
     }
@@ -787,7 +809,7 @@ fun SettingsScreenContent(
                         SettingsFooterSection(
                             updateInfo = updateInfo,
                             accentColor = currentAccentColor,
-                            onReplayTutorial = { settingsViewModel.resetOnboarding() }
+                            onReplayTutorial = { settingsViewModel.requestReplayTutorial() }
                         )
                     }
 

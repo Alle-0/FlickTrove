@@ -150,6 +150,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    // Fired when the user taps "Replay Tutorial" from inside the settings overlay.
+    // The overlay collects this event, animates out first, then resets onboarding
+    // so the tutorial dialog appears on top instead of underneath.
+    private val _replayTutorialEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val replayTutorialEvent = _replayTutorialEvent.asSharedFlow()
+
+    fun requestReplayTutorial() {
+        _replayTutorialEvent.tryEmit(Unit)
+    }
+
     val hideSavedFromDiscovery = settingsRepository.hideSavedFromDiscovery.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

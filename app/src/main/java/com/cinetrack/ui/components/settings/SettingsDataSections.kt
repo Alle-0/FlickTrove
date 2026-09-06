@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -644,55 +645,56 @@ fun SettingsSupportSection(
             },
             trailing = {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_external_link), // Or another right arrow, using this as fallback if chevron isn't there
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = OnSurfaceMuted,
-                    modifier = Modifier.size(16.dp).rotate(rotation)
+                    modifier = Modifier.size(20.dp).rotate(rotation)
                 )
+            },
+            customContent = {
+                androidx.compose.animation.AnimatedVisibility(visible = creditsExpanded) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AttributionRow(
+                            brand = "GIPHY",
+                            text = stringResource(R.string.settings_giphy_notice)
+                        )
+                        AttributionRow(
+                            brand = "TMDB",
+                            text = stringResource(R.string.settings_tmdb_notice)
+                        )
+                        AttributionRow(
+                            brand = "OMDb API",
+                            text = stringResource(R.string.settings_omdb_notice)
+                        )
+                        AttributionRow(
+                            brand = "TheTVDB",
+                            text = stringResource(R.string.settings_tvdb_notice)
+                        )
+                        AttributionRow(
+                            brand = "Trakt.tv",
+                            text = stringResource(R.string.settings_trakt_notice)
+                        )
+                        AttributionRow(
+                            brand = "SIMKL",
+                            text = stringResource(R.string.settings_simkl_notice)
+                        )
+                        AttributionRow(
+                            brand = "Rotten Tomatoes",
+                            text = stringResource(R.string.settings_rotten_tomatoes_notice)
+                        )
+                        AttributionRow(
+                            brand = "Metacritic",
+                            text = stringResource(R.string.settings_metacritic_notice)
+                        )
+                    }
+                }
             }
         )
-
-        androidx.compose.animation.AnimatedVisibility(visible = creditsExpanded) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AttributionRow(
-                    brand = "GIPHY",
-                    text = stringResource(R.string.settings_giphy_notice)
-                )
-                AttributionRow(
-                    brand = "TMDB",
-                    text = stringResource(R.string.settings_tmdb_notice)
-                )
-                AttributionRow(
-                    brand = "OMDb API",
-                    text = stringResource(R.string.settings_omdb_notice)
-                )
-                AttributionRow(
-                    brand = "TheTVDB",
-                    text = stringResource(R.string.settings_tvdb_notice)
-                )
-                AttributionRow(
-                    brand = "Trakt.tv",
-                    text = stringResource(R.string.settings_trakt_notice)
-                )
-                AttributionRow(
-                    brand = "SIMKL",
-                    text = stringResource(R.string.settings_simkl_notice)
-                )
-                AttributionRow(
-                    brand = "Rotten Tomatoes",
-                    text = stringResource(R.string.settings_rotten_tomatoes_notice)
-                )
-                AttributionRow(
-                    brand = "Metacritic",
-                    text = stringResource(R.string.settings_metacritic_notice)
-                )
-            }
-        }
     }
 }
 
