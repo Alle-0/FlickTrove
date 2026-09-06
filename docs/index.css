@@ -114,26 +114,18 @@ main {
   }
 }
 
-/* --- CUSTOM SCROLLBAR --- */
+/* --- HIDE SCROLLBAR FOR IMMERSIVE CINEMATIC EXPERIENCE --- */
+html,
+body {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 ::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-color);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(var(--primary-color-rgb), 0.3);
-  border-radius: 10px;
-  border: 3px solid var(--bg-color);
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--primary-color-rgb), 0.6);
-  border: 3px solid var(--bg-color);
-  background-clip: padding-box;
+  display: none;
+  width: 0px;
+  height: 0px;
+  background: transparent;
 }
 
 /* --- FLOATING NAVBAR --- */
