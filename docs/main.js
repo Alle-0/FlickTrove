@@ -149,3 +149,22 @@ initHeroAnimations();
 initShowcaseAnimations();
 initNavbarProgress();
 initCTAAnimation();
+
+// --- MOBILE MENU LOGIC ---
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+const mobileLinks = document.querySelectorAll('.mobile-link');
+
+if (hamburgerBtn && mobileMenu) {
+  hamburgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('active');
+    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+  });
+
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  });
+}

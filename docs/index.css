@@ -1565,3 +1565,131 @@ main {
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
   z-index: 10;
 }
+
+/* =========================================
+   MOBILE OPTIMIZATIONS (Max-width 768px)
+   ========================================= */
+
+/* Hide Hamburger and Overlay on Desktop by default */
+.hamburger-menu {
+  display: none;
+  cursor: pointer;
+  z-index: 10001;
+}
+
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(9, 12, 16, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 10000;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.mobile-menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  text-align: center;
+}
+
+.mobile-link {
+  color: white;
+  text-decoration: none;
+  font-size: 2rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.mobile-link:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  /* Body Overflow */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Global Typography & Spacing */
+  section {
+    padding: 60px 0;
+  }
+
+  /* Navbar */
+  .floating-navbar {
+    width: 95%;
+    padding: 0.75rem 1.5rem;
+  }
+  .nav-links {
+    display: none;
+  }
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Hero Section */
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 0 2rem;
+    padding-top: 8rem;
+  }
+  .hero-text-col {
+    align-items: center;
+    text-align: center;
+  }
+  .hero-title {
+    text-align: center;
+    font-size: 2.8rem;
+  }
+  .hero-subtitle {
+    text-align: center;
+  }
+  .hero-visual-col {
+    transform: scale(0.75); /* Keep pills orbiting properly without overflow */
+    margin-top: -2rem;
+  }
+  
+  /* Showcase Section (Peek Effect) */
+  .showcase-section {
+    transform: scale(0.6);
+    transform-origin: top center;
+    /* Scale down the whole showcase to fit the center phone and let side ones peek */
+    height: 180vh; /* Adjust height for the smaller scale to maintain scroll speed */
+  }
+  .showcase-bg-text {
+    font-size: 15vw; /* Adjust background text size */
+  }
+
+  /* Features Marquee */
+  .features-marquee-section {
+    padding: 30px 0;
+    gap: 20px;
+  }
+  .marquee-pill {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+  .marquee-pill img {
+    width: 18px;
+    height: 18px;
+  }
+}

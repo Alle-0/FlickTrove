@@ -699,7 +699,7 @@ fun SettingsSupportSection(
                     )
 
                     Icon(
-                        imageVector = Icons.Rounded.KeyboardArrowRight,
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                         contentDescription = null,
                         tint = OnSurfaceMuted,
                         modifier = Modifier

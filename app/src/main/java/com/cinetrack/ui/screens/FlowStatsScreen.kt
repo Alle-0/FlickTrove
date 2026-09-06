@@ -44,6 +44,7 @@ import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.stats.YearSelectionButton
 import com.cinetrack.ui.components.stats.YearSelectionModal
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.TimeRange
 
 object FlowStatsTab : Tab {
@@ -61,7 +62,7 @@ object FlowStatsTab : Tab {
 
     @Composable
     override fun Content() {
-        val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow.parent
+        val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow.parent ?: cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val activeHazeState = hazeState ?: remember { HazeState() }
@@ -317,7 +318,7 @@ fun TopMvpsSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .width(96.dp)
-                    .clickable { onActorClick(mvp.actorId, mvp.profilePath) }
+                    .bounceClick { onActorClick(mvp.actorId, mvp.profilePath) }
             ) {
                 Box {
                     if (imageUrl != null) {
