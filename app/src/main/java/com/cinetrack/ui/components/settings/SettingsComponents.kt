@@ -337,6 +337,9 @@ fun AttributionRow(
                         "TheTVDB" -> Color(0xFF31B057)
                         "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
                         "GIPHY" -> Color.Black
+                        "SIMKL" -> Color(0xFF1B1B1B)
+                        "Rotten Tomatoes" -> Color(0xFFFA320A)
+                        "Metacritic" -> Color(0xFFFFCC33)
                         else -> Color.White.copy(alpha = 0.05f)
                     }
                 )
@@ -365,15 +368,18 @@ fun AttributionRow(
                         "OMDb API" -> "OMDb"
                         "TheTVDB" -> "TVDB"
                         "GIPHY" -> "GIPHY"
+                        "SIMKL" -> "SIMKL"
+                        "Rotten Tomatoes" -> "RT"
+                        "Metacritic" -> "MC"
                         else -> brand.take(1)
                     },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY") 9.sp else 14.sp
+                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY" || brand == "SIMKL") 9.sp else 14.sp
                     ),
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Visible,
-                    color = if (brand == "OMDb API") Color.Black else Color.White
+                    color = if (brand == "OMDb API" || brand == "Metacritic") Color.Black else Color.White
                 )
             }
         }

@@ -244,6 +244,9 @@
     <string name="settings_omdb_notice">Дополнительные данные и оценки предоставлены OMDb API.</string>
     <string name="settings_tvdb_notice">Метаданные сериалов предоставлены TheTVDB.</string>
     <string name="settings_trakt_notice">Синхронизация и статистика от Trakt.tv.</string>
+    <string name="settings_simkl_notice">Синхронизация и статистика от SIMKL.</string>
+    <string name="settings_rotten_tomatoes_notice">Дополнительные данные и рейтинги предоставлены Rotten Tomatoes.</string>
+    <string name="settings_metacritic_notice">Дополнительные данные и рейтинги предоставлены Metacritic.</string>
     <string name="settings_made_with">Разработано с </string>
     <string name="settings_for_lovers"> для любителей кино</string>
     <string name="settings_cancel">Отмена</string>

@@ -239,6 +239,9 @@
     <string name="settings_omdb_notice">Données et notes supplémentaires fournies par l\'API OMDb.</string>
     <string name="settings_tvdb_notice">Métadonnées des séries fournies par TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronisation et statistiques propulsées par Trakt.tv.</string>
+    <string name="settings_simkl_notice">Synchronisation et statistiques propulsées par SIMKL.</string>
+    <string name="settings_rotten_tomatoes_notice">Données supplémentaires et évaluations fournies par Rotten Tomatoes.</string>
+    <string name="settings_metacritic_notice">Données supplémentaires et évaluations fournies par Metacritic.</string>
     <string name="settings_made_with">Développé avec </string>
     <string name="settings_for_lovers"> pour les passionnés de cinéma</string>
     <string name="settings_cancel">Annuler</string>

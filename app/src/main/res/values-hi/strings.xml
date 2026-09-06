@@ -243,6 +243,9 @@
     <string name="settings_omdb_notice">OMDb API द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
     <string name="settings_tvdb_notice">TheTVDB द्वारा प्रदान किया गया सीरीज़ मेटाडेटा।</string>
     <string name="settings_trakt_notice">Trakt.tv द्वारा संचालित सिंक और आँकड़े।</string>
+    <string name="settings_simkl_notice">SIMKL द्वारा संचालित सिंक और आँकड़े।</string>
+    <string name="settings_rotten_tomatoes_notice">Rotten Tomatoes द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
+    <string name="settings_metacritic_notice">Metacritic द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
     <string name="settings_made_with">इसके साथ विकसित किया गया: </string>
     <string name="settings_for_lovers"> फ़िल्म प्रेमियों के लिए</string>
     <string name="settings_cancel">रद्द करें</string>
