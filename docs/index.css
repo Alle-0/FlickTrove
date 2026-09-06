@@ -1826,9 +1826,38 @@ main {
   }
 
   /* Footer */
-  .footer-container {
-    grid-template-columns: 1fr;
-    gap: 32px;
+  .footer-container,
+  .footer-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 40px !important;
+  }
+
+  .footer-brand-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .footer-copy {
+    margin-top: 0;
+  }
+
+  .footer-links-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-links-col h4 {
+    margin-bottom: 4px;
+  }
+
+  .footer-links-col a,
+  .footer-links-col p,
+  .footer-links-col span {
+    line-height: 1.2;
+    margin: 0;
   }
 }
 
