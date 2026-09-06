@@ -36,23 +36,6 @@ const initHeroAnimations = () => {
     delay: 0.2
   });
 
-  // --- HERO FLOATING PILLOWS PARALLAX ---
-  gsap.to(".pillow-1", { 
-    y: -15, 
-    duration: 3.5, 
-    repeat: -1, 
-    yoyo: true, 
-    ease: "sine.inOut" 
-  });
-  
-  gsap.to(".pillow-2", { 
-    y: 15, 
-    duration: 4.2, 
-    repeat: -1, 
-    yoyo: true, 
-    ease: "sine.inOut", 
-    delay: 0.5 
-  });
 };
 
 // --- PHASE 2: SHOWCASE ANIMATIONS ---
