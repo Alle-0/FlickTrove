@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -635,7 +636,7 @@ fun SettingsSupportSection(
         )
 
         SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_info),
+            icon = Icons.Rounded.Info,
             title = "Credits & Attributions",
             onClick = { 
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
@@ -646,7 +647,7 @@ fun SettingsSupportSection(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_external_link), // Or another right arrow, using this as fallback if chevron isn't there
                     contentDescription = null,
                     tint = OnSurfaceMuted,
-                    modifier = Modifier.size(16.dp).androidx.compose.ui.draw.rotate(rotation)
+                    modifier = Modifier.size(16.dp).rotate(rotation)
                 )
             }
         )
