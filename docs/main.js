@@ -351,21 +351,28 @@ const initPortalZoom = () => {
     }
   });
 
-  // 1. Words in the center illuminate sequentially right in the middle of the device
+  // 1. Words in the center illuminate sequentially in three rhythmic beats
   tl.to([words[0], words[1]], {
     color: '#FFFFFF',
     textShadow: '0 0 35px rgba(255, 255, 255, 0.4)',
-    stagger: 0.25,
+    stagger: 0.2,
     ease: 'power1.inOut',
-    duration: 1
+    duration: 0.8
   }, 0)
   .to([words[2], words[3]], {
     color: '#2DD4BF',
-    textShadow: '0 0 60px rgba(45, 212, 191, 0.7)',
-    stagger: 0.25,
+    textShadow: '0 0 50px rgba(45, 212, 191, 0.6)',
+    stagger: 0.2,
     ease: 'power1.inOut',
-    duration: 1
-  }, 0.4)
+    duration: 0.8
+  }, 0.35)
+  .to([words[4], words[5]], {
+    color: '#2DD4BF',
+    textShadow: '0 0 70px rgba(45, 212, 191, 0.85)',
+    stagger: 0.2,
+    ease: 'power1.inOut',
+    duration: 0.8
+  }, 0.7)
 
   // 2. While words illuminate, the phone enlarges simultaneously towards the camera
   .to(device, {
