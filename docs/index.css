@@ -1771,16 +1771,26 @@ main {
     padding: 60px 0;
   }
   .feature-row {
-    margin-bottom: 70px;
-    padding: 0 1.25rem;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 32px;
+    padding: 0 5%;
+    margin-bottom: 80px;
+  }
+  .feature-text {
+    order: 1;
+    width: 100% !important;
+    text-align: center;
   }
   .feature-row:nth-child(odd) .feature-visual,
   .feature-row:nth-child(even) .feature-visual {
     transform: none !important;
   }
   .feature-visual {
-    width: 100%;
+    order: 2;
+    width: 100% !important;
+    max-width: 320px;
+    margin: 0 auto;
     aspect-ratio: auto;
     border-radius: 20px;
   }
