@@ -1766,13 +1766,60 @@ main {
     height: 16px;
   }
 
-  /* Visual features rows */
+  /* Visual features rows & Mockup cards */
   .visual-features {
     padding: 60px 0;
   }
   .feature-row {
     margin-bottom: 70px;
     padding: 0 1.25rem;
+    gap: 32px;
+  }
+  .feature-row:nth-child(odd) .feature-visual,
+  .feature-row:nth-child(even) .feature-visual {
+    transform: none !important;
+  }
+  .feature-visual {
+    width: 100%;
+    aspect-ratio: auto;
+    border-radius: 20px;
+  }
+  .sync-grid-ui {
+    width: 100%;
+    padding: 20px 14px;
+    gap: 16px;
+  }
+  .sync-grid {
+    gap: 10px;
+  }
+  .integration-card {
+    padding: 10px 8px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+  .int-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+  }
+  .int-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .int-info h4 {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+  }
+  .int-info p {
+    font-size: 0.68rem;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+  .sync-footer {
+    font-size: 0.75rem;
+    margin-top: 8px;
+    padding-bottom: 4px;
   }
   .feature-text h2 {
     font-size: 2.2rem;
