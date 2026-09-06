@@ -1199,7 +1199,7 @@ main {
 
 .legal-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   padding: 0 5%;
   animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -1267,7 +1267,8 @@ main {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 24px;
-  padding: 60px;
+  padding: 50px 60px;
+  width: 100%;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
@@ -1337,6 +1338,7 @@ main {
     padding: 32px 24px;
     border-radius: 16px;
   }
+
   .legal-header h1 {
     font-size: 2.5rem;
   }
@@ -1428,7 +1430,9 @@ main {
   margin-bottom: 20px;
 }
 
-.footer-links-col a, .footer-links-col p, .footer-links-col span {
+.footer-links-col a,
+.footer-links-col p,
+.footer-links-col span {
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
   font-size: 14px;
@@ -1470,5 +1474,13 @@ main {
 @media (max-width: 600px) {
   .footer-container {
     grid-template-columns: 1fr;
+  }
+
+  .legal-glass-panel {
+    padding: 30px;
+  }
+
+  .legal-header h1 {
+    font-size: 2.5rem;
   }
 }
