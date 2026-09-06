@@ -151,11 +151,22 @@ main {
   align-items: center;
   padding: 1rem 2rem;
   border-radius: 100px;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  /* Removed overflow: hidden to fix backdrop-filter bug on Chrome */
+  background: transparent;
+}
+
+.floating-navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .nav-brand {
