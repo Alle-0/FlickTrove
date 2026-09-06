@@ -150,6 +150,7 @@ const initVisualFeaturesSwap = () => {
   tl.to(rows[0], {
     opacity: 0,
     xPercent: -120,
+    yPercent: -50,
     scale: 0.92,
     filter: 'blur(10px)',
     autoAlpha: 0,
@@ -160,6 +161,7 @@ const initVisualFeaturesSwap = () => {
   .to(rows[1], {
     opacity: 1,
     xPercent: 0,
+    yPercent: -50,
     scale: 1,
     filter: 'blur(0px)',
     autoAlpha: 1,
@@ -172,6 +174,7 @@ const initVisualFeaturesSwap = () => {
   .to(rows[1], {
     opacity: 0,
     xPercent: 120,
+    yPercent: -50,
     scale: 0.92,
     filter: 'blur(10px)',
     autoAlpha: 0,
@@ -182,6 +185,7 @@ const initVisualFeaturesSwap = () => {
   .to(rows[2], {
     opacity: 1,
     xPercent: 0,
+    yPercent: -50,
     scale: 1,
     filter: 'blur(0px)',
     autoAlpha: 1,
