@@ -138,25 +138,19 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
                 .build()
             workManager.enqueue(immediateWidgetRefresh)
             
-            // Trigger an immediate sync for SIMKL on startup to keep data fresh
-            val immediateSimklSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
-                .setConstraints(simklSyncConstraints)
-                .build()
-            workManager.enqueueUniqueWork(
-                "SimklSyncStartup",
-                androidx.work.ExistingWorkPolicy.KEEP,
-                immediateSimklSync
-            )
-
-            // Trigger an immediate sync for Trakt on startup to keep data fresh
+            // Trigger an immediate sync for Trakt and SIMKL on app startup.
+            // Both workers are optimized to abort early if there are no new changes on the server.
             val immediateTraktSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
                 .setConstraints(traktSyncConstraints)
                 .build()
-            workManager.enqueueUniqueWork(
-                "TraktSyncStartup",
-                androidx.work.ExistingWorkPolicy.KEEP,
-                immediateTraktSync
-            )
+            workManager.enqueueUniqueWork("TraktStartupSync", androidx.work.ExistingWorkPolicy.KEEP, immediateTraktSync)
+            
+            val immediateSimklSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
+                .setConstraints(simklSyncConstraints)
+                .build()
+            workManager.enqueueUniqueWork("SimklStartupSync", androidx.work.ExistingWorkPolicy.KEEP, immediateSimklSync)
+
+
         }
     }
 }

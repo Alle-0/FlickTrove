@@ -239,8 +239,10 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 📺 [TheTVDB API](https://thetvdb.com/api-information) - For TV show data and artwork
 - 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
-- 📡 [SIMKL API](https://simkl.docs.apiary.io/) - For bidirectional sync and tracking
+- 📡 [SIMKL API](https://api.simkl.org/) - For bidirectional sync and tracking
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
+- 🍅 [Rotten Tomatoes](https://www.rottentomatoes.com/) - For critic and audience scores
+- Ⓜ️ [Metacritic](https://www.metacritic.com/) - For aggregated critic reviews
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 

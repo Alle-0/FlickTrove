@@ -25,6 +25,13 @@
   <meta name="twitter:description" content="Terms of Service and user guidelines for the FlickTrove Android App.">
   <meta name="twitter:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;900&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="./index.css">
   <link rel="icon" href="assets/Icon.svg">
 </head>
@@ -42,49 +49,13 @@
   <div class="cursor-dot"></div>
   <div class="cursor-outline"></div>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="nav-logo">
-        <img src="assets/Icon.svg" alt="FlickTrove Logo">
-        <span>FlickTrove</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html#features">Features</a></li>
-        <li><a href="index.html#screenshots">Showcase</a></li>
-        <li><a href="index.html#faq">FAQ</a></li>
-        <li><a href="privacy.html">Privacy</a></li>
-        <li><a href="terms.html" class="active">Terms</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="https://github.com/Alle-0/FlickTrove" target="_blank" class="nav-github-btn magnetic-btn"><img
-            src="assets/icons/star_piena.svg" alt="star"
-            style="width: 16px; height: 16px; margin-right: 5px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub</a>
-      </div>
-      <button class="mobile-menu-btn" aria-label="Toggle navigation menu">
-        <span class="hamburger-bar bar-1"></span>
-        <span class="hamburger-bar bar-2"></span>
-        <span class="hamburger-bar bar-3"></span>
-      </button>
-    </div>
+  <!-- Navigation Bar (Minimal for legal pages) -->
+  <nav class="navbar" style="position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: flex-start; z-index: 100;">
+    <a href="index.html" class="nav-logo" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 1.25rem;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to Home
+    </a>
   </nav>
-
-  <!-- Mobile Frosted Drawer Menu -->
-  <div class="mobile-drawer">
-    <ul class="mobile-drawer-links">
-      <li><a href="index.html#features" class="drawer-link">Features</a></li>
-      <li><a href="index.html#screenshots" class="drawer-link">Showcase</a></li>
-      <li><a href="index.html#faq" class="drawer-link">FAQ</a></li>
-      <li><a href="privacy.html" class="drawer-link">Privacy Policy</a></li>
-      <li><a href="terms.html" class="drawer-link">Terms of Service</a></li>
-    </ul>
-    <div class="mobile-drawer-cta">
-      <a href="https://github.com/Alle-0/FlickTrove" target="_blank" class="btn-primary magnetic-btn"><img
-          src="assets/icons/star_piena.svg" alt="star"
-          style="width: 16px; height: 16px; margin-right: 6px; vertical-align: -2px; filter: invert(1) drop-shadow(0 0 4px #F6E05E);">GitHub
-        Repo</a>
-    </div>
-  </div>
 
   <main>
     <div class="legal-container">
@@ -144,37 +115,58 @@
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-col">
-        <a href="index.html" class="nav-logo" style="margin-bottom: 1rem;">
-          <img src="assets/Icon.svg" alt="Logo">
+  <footer class="site-footer">
+    <div class="footer-container">
+
+      <!-- Brand Column -->
+      <div class="footer-brand-col">
+        <div class="footer-logo">
+          <img src="/assets/Icon.svg" alt="FlickTrove Logo" style="width: 32px; height: 32px;">
           <span>FlickTrove</span>
-        </a>
-        <p>A premium Android personal library crafted for true cinephiles.</p>
+        </div>
+        <p class="footer-tagline">
+          The ultimate personal cinema and TV show companion. Designed with passion, built for offline.
+        </p>
+        <p class="footer-copy">© 2026 FlickTrove. All rights reserved.</p>
       </div>
 
-      <div class="footer-col">
+      <!-- Links Column 1 -->
+      <div class="footer-links-col">
         <h4>Navigation</h4>
-        <ul class="footer-links">
-          <li><a href="index.html#features">Features</a></li>
-          <li><a href="index.html#screenshots">Showcase</a></li>
-          <li><a href="index.html#faq">FAQ</a></li>
-          <li><a href="https://github.com/Alle-0/FlickTrove">GitHub Repo</a></li>
-        </ul>
+        <a href="index.html#features">Features</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
       </div>
 
-      <div class="footer-col">
-        <h4>Legal & Privacy</h4>
-        <ul class="footer-links">
-          <li><a href="privacy.html">Privacy Policy</a></li>
-          <li><a href="terms.html">Terms of Service</a></li>
-        </ul>
+      <!-- Links Column 2 -->
+      <div class="footer-links-col">
+        <h4>Community & Code</h4>
+        <a href="https://www.reddit.com/r/FlickTrove/" target="_blank">Reddit</a>
+        <a href="https://github.com/Alle-0/FlickTrove" target="_blank">GitHub</a>
       </div>
-    </div>
 
-    <div class="footer-bottom">
-      <p>&copy; 2026 FlickTrove. All rights reserved.</p>
+      <!-- Links Column 3 -->
+      <div class="footer-links-col">
+        <h4>Powered By</h4>
+        <div class="powered-by-list">
+          <a href="https://www.themoviedb.org/" target="_blank">TMDB</a>
+          <a href="https://thetvdb.com/" target="_blank">TheTVDB</a>
+          <a href="https://www.omdbapi.com/" target="_blank">OMDb</a>
+          <a href="https://trakt.tv/" target="_blank">Trakt</a>
+          <a href="https://simkl.com/" target="_blank">SIMKL</a>
+          <a href="https://giphy.com/" target="_blank">Giphy</a>
+          <a href="https://www.rottentomatoes.com/" target="_blank">Rotten Tomatoes</a>
+          <a href="https://www.metacritic.com/" target="_blank">Metacritic</a>
+        </div>
+      </div>
+
+      <!-- Links Column 4 -->
+      <div class="footer-links-col">
+        <h4>Credits</h4>
+        <span class="credit-title">Developed by</span>
+        <a href="https://github.com/Alle-0" target="_blank" class="credit-link">Alessandro Basile</a>
+      </div>
+
     </div>
   </footer>
 

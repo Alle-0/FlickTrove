@@ -124,9 +124,10 @@ class SimklSyncWorker @AssistedInject constructor(
 
             if (isFullDownload) {
                 updateProgress("SIMKL ➔ App: Downloading library...")
-                val movies = simklService.getSyncMovies()
-                val shows = simklService.getSyncShows()
-                val anime = simklService.getSyncAnime()
+                val allItems = simklService.getSyncAllItems("2010-01-01T00:00:00Z")
+                val movies = allItems.movies ?: emptyList()
+                val shows = allItems.shows ?: emptyList()
+                val anime = allItems.anime ?: emptyList()
 
                 processPhaseItems(movies, isMovie = true, bulkStatsUpdates)
                 processPhaseItems(shows, isMovie = false, bulkStatsUpdates)

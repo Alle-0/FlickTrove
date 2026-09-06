@@ -1,60 +1,151 @@
-import './style.css'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.js'
+// Phase 1: Core Engine & Hero Section
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+// 1. Initialize Lenis for smooth scrolling
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+  direction: 'vertical',
+  gestureDirection: 'vertical',
+  smooth: true,
+  mouseMultiplier: 1,
+  smoothTouch: false,
+  touchMultiplier: 2,
+  infinite: false,
+});
 
-<div class="ticks"></div>
+// 2. Sync Lenis with GSAP ScrollTrigger
+// Note: We use global variables 'gsap' and 'ScrollTrigger' provided by CDNs in index.html.
+gsap.registerPlugin(ScrollTrigger);
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+lenis.on('scroll', ScrollTrigger.update);
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+gsap.ticker.add((time) => {
+  lenis.raf(time * 1000);
+});
 
-setupCounter(document.querySelector('#counter'))
+gsap.ticker.lagSmoothing(0);
+
+// 3. Hero entrance animations using GSAP
+const initHeroAnimations = () => {
+  gsap.from('.hero-anim-item', {
+    y: 40,
+    opacity: 0,
+    duration: 1,
+    stagger: 0.2,
+    ease: 'power3.out',
+    delay: 0.2
+  });
+
+  // --- HERO FLOATING PILLOWS PARALLAX ---
+  gsap.to(".pillow-1", { 
+    y: -15, 
+    duration: 3.5, 
+    repeat: -1, 
+    yoyo: true, 
+    ease: "sine.inOut" 
+  });
+  
+  gsap.to(".pillow-2", { 
+    y: 15, 
+    duration: 4.2, 
+    repeat: -1, 
+    yoyo: true, 
+    ease: "sine.inOut", 
+    delay: 0.5 
+  });
+};
+
+// --- PHASE 2: SHOWCASE ANIMATIONS ---
+const initShowcaseAnimations = () => {
+  // Set initial state
+  gsap.set('.phone', { xPercent: 0, yPercent: 0, rotation: 0, scale: 1 });
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.showcase-section',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true,
+      pin: '.sticky-container'
+    }
+  });
+
+  tl.fromTo('.showcase-bg-text', 
+    { opacity: 0, scale: 0.8 },
+    { opacity: 1, scale: 1, ease: 'none' }, 
+    0
+  )
+  .to('.left-phone', {
+    xPercent: -120,
+    rotation: -12,
+    ease: 'none'
+  }, 0)
+  .to('.right-phone', {
+    xPercent: 120,
+    rotation: 12,
+    ease: 'none'
+  }, 0)
+  .to('.center-phone', {
+    scale: 1,
+    ease: 'none'
+  }, 0)
+  .to('.phone-label', {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    ease: 'power2.out'
+  }, 0.2);
+
+  // --- PHASE 3: VISUAL FEATURES REVEAL ---
+  const featureRows = gsap.utils.toArray('.feature-row');
+  featureRows.forEach((row) => {
+    const visual = row.querySelector('.feature-visual');
+    const text = row.querySelector('.feature-text');
+
+    gsap.from([visual, text], {
+      scrollTrigger: {
+        trigger: row,
+        start: "top 80%",
+      },
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out",
+      stagger: 0.2
+    });
+  });
+};
+
+// --- NAVBAR PROGRESS ANIMATION ---
+const initNavbarProgress = () => {
+  gsap.to('.scroll-progress-bar', {
+    width: '100%',
+    ease: 'none',
+    scrollTrigger: {
+      trigger: document.documentElement,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true
+    }
+  });
+};
+
+const initCTAAnimation = () => {
+  gsap.from('.final-cta-section > *', {
+    y: 50,
+    opacity: 0,
+    duration: 1,
+    stagger: 0.1,
+    ease: "power3.out",
+    scrollTrigger: {
+      trigger: '.final-cta-section',
+      start: 'top 80%'
+    }
+  });
+};
+
+// Initialize animations (module scripts are deferred automatically)
+initHeroAnimations();
+initShowcaseAnimations();
+initNavbarProgress();
+initCTAAnimation();
