@@ -302,6 +302,7 @@ const initPortalZoom = () => {
   const title = document.querySelector('.portal-title');
   const words = gsap.utils.toArray('.reveal-word');
   const device = document.querySelector('.portal-device');
+  const deviceImg = document.querySelector('.portal-device img');
   const scrim = document.querySelector('.portal-device-scrim');
   const overlay = document.querySelector('.portal-fade-overlay');
   if (!device || !stage || !title) return;
@@ -342,28 +343,28 @@ const initPortalZoom = () => {
     duration: 3.5
   }, 0.2)
 
-  // 3. As you fly through the words, the text zooms forward and fades out gracefully
-  .to(title, {
-    scale: 1.6,
+  // 3. While zooming in, the image itself dissolves and blurs out (sfuma),
+  // while the text remains crisp, glowing, and fully visible in the center!
+  .to(deviceImg, {
     opacity: 0,
-    filter: 'blur(10px)',
-    ease: 'power2.in',
-    duration: 1
-  }, 0.9)
+    filter: 'blur(20px)',
+    ease: 'power2.inOut',
+    duration: 2.2
+  }, 0.8)
 
-  // 4. Scrim fades away so the movie artwork is crystal clear during immersion
+  // 4. Scrim also fades away cleanly with the image
   .to(scrim, {
     opacity: 0,
     ease: 'power1.out',
-    duration: 1
+    duration: 1.5
   }, 0.8)
 
-  // 5. Toward the end of the zoom, fade into dark to seamlessly transition to the Marquee
-  .to(overlay, {
-    opacity: 0.98,
-    ease: 'power2.in',
-    duration: 1.2
-  }, 2.3);
+  // 5. The illuminated title stays fully visible and sharp, with a subtle majestic float
+  .to(title, {
+    scale: 1.1,
+    ease: 'power1.out',
+    duration: 2.5
+  }, 0.4);
 };
 
 // Initialize animations (module scripts are deferred automatically)

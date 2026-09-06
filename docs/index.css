@@ -1195,6 +1195,7 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
+  will-change: opacity, filter;
 }
 
 .portal-device-scrim {
