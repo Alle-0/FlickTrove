@@ -380,7 +380,7 @@
 
       <div class="faq-container">
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false" onclick="toggleFAQ(this)">
+          <button type="button" class="faq-question" aria-expanded="false" onclick="toggleFAQ(this, event)">
             <span>Is FlickTrove completely free and ad-free?</span>
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
@@ -395,7 +395,7 @@
         </div>
 
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false" onclick="toggleFAQ(this)">
+          <button type="button" class="faq-question" aria-expanded="false" onclick="toggleFAQ(this, event)">
             <span>Can I import my library from Trakt, SIMKL, or TV Time?</span>
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
@@ -410,7 +410,7 @@
         </div>
 
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false" onclick="toggleFAQ(this)">
+          <button type="button" class="faq-question" aria-expanded="false" onclick="toggleFAQ(this, event)">
             <span>Does FlickTrove work offline?</span>
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
@@ -426,7 +426,7 @@
         </div>
 
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false" onclick="toggleFAQ(this)">
+          <button type="button" class="faq-question" aria-expanded="false" onclick="toggleFAQ(this, event)">
             <span>Where does the movie and TV show data come from?</span>
             <span class="faq-icon" aria-hidden="true">+</span>
           </button>
@@ -441,7 +441,11 @@
         </div>
       </div>
       <script>
-        function toggleFAQ(btn) {
+        function toggleFAQ(btn, event) {
+          if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
           var item = btn.closest('.faq-item');
           if (!item) return;
           var wasActive = item.classList.contains('active');
@@ -537,7 +541,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <!-- App Script -->
-  <script src="main.js?v=2.2"></script>
+  <script src="main.js?v=2.3"></script>
 </body>
 
 </html>
