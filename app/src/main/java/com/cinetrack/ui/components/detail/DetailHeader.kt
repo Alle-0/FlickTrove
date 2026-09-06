@@ -432,7 +432,23 @@ fun DetailHeader(
                                 else -> Color(0xFFFF0000)
                             }
                             ModernRatingItem(
-                                badge = { Badge("MC", mcColor, Color.Black) },
+                                badge = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(mcColor),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = com.cinetrack.R.drawable.ic_metacritic_logo),
+                                            contentDescription = "Metacritic Logo",
+                                            modifier = Modifier
+                                                .size(14.dp),
+                                            contentScale = ContentScale.Fit
+                                        )
+                                    }
+                                },
                                 value = ratings.metacritic?.replace("/100", "") ?: "-",
                                 subValue = "Score",
                                 onClick = {
