@@ -144,11 +144,81 @@ const initCTAAnimation = () => {
   });
 };
 
+// --- MAGNETIC CTA BUTTON EFFECT (Vercel & Linear style) ---
+const initMagneticCTA = () => {
+  // Only enable on desktop with fine mouse pointer
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+  const buttons = document.querySelectorAll('.btn-download');
+
+  buttons.forEach(btn => {
+    const innerContent = btn.querySelectorAll('.icon-download, span');
+
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - (rect.left + rect.width / 2);
+      const y = e.clientY - (rect.top + rect.height / 2);
+
+      // Magnetic physical attraction towards cursor
+      gsap.to(btn, {
+        x: x * 0.35,
+        y: y * 0.35,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+
+      // Subtle depth parallax on inner content
+      gsap.to(innerContent, {
+        x: x * 0.15,
+        y: y * 0.15,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      // Elastic spring snap-back to origin
+      gsap.to(btn, {
+        x: 0,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: 'elastic.out(1.2, 0.4)'
+      });
+
+      gsap.to(innerContent, {
+        x: 0,
+        y: 0,
+        duration: 0.7,
+        ease: 'elastic.out(1.1, 0.4)'
+      });
+    });
+
+    // Tactile micro-bounce on click
+    btn.addEventListener('mousedown', () => {
+      gsap.to(btn, {
+        scale: 0.93,
+        duration: 0.1,
+        ease: 'power2.out'
+      });
+    });
+
+    btn.addEventListener('mouseup', () => {
+      gsap.to(btn, {
+        scale: 1.02,
+        duration: 0.45,
+        ease: 'elastic.out(1.4, 0.35)'
+      });
+    });
+  });
+};
+
 // Initialize animations (module scripts are deferred automatically)
 initHeroAnimations();
 initShowcaseAnimations();
 initNavbarProgress();
 initCTAAnimation();
+initMagneticCTA();
 
 // --- MOBILE MENU LOGIC ---
 const hamburgerBtn = document.getElementById('hamburger-btn');

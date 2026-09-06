@@ -522,8 +522,9 @@ main {
   text-decoration: none;
   overflow: hidden;
   /* Fondamentale per nascondere il riflesso animato */
-  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   cursor: pointer;
+  will-change: transform;
 }
 
 /* L'effetto "Riflesso di luce" invisibile di default */
@@ -550,9 +551,8 @@ main {
 
 /* --- HOVER EFFECTS --- */
 
-/* 1. Il bottone si solleva, si illumina di ciano e il bordo si colora */
+/* 1. Il bottone si illumina di ciano e il bordo si colora */
 .btn-download:hover {
-  transform: translateY(-3px) scale(1.02);
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(var(--primary-color-rgb), 0.4);
   /* Accento Teal di FlickTrove */
