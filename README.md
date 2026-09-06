@@ -106,7 +106,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/HomeFeed.webp" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MyFolders.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/YourList-Watched.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_MoneyHeist.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
