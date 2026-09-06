@@ -1266,14 +1266,14 @@ main {
 }
 
 .faq-item:hover {
-  border-color: rgba(0, 212, 255, 0.35);
+  border-color: rgba(var(--primary-color-rgb), 0.35);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .faq-item.active {
-  border-color: rgba(0, 212, 255, 0.5);
+  border-color: rgba(var(--primary-color-rgb), 0.5);
   background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(var(--primary-color-rgb), 0.12);
 }
 
 .faq-question {
@@ -1301,7 +1301,7 @@ main {
 }
 
 .faq-item.active .faq-question {
-  color: #00d4ff;
+  color: var(--primary-color);
 }
 
 .faq-icon {
@@ -1321,7 +1321,7 @@ main {
 
 .faq-item.active .faq-icon {
   transform: rotate(45deg);
-  color: #00d4ff;
+  color: var(--primary-color);
 }
 
 /* CRITICAL: The Smooth Open Trick */
