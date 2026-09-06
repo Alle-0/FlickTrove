@@ -97,14 +97,44 @@ const initShowcaseAnimations = () => {
   }, 0.2);
 };
 
-// --- PHASE 3: VISUAL FEATURES SWAP IN PLACE ---
+// --- PHASE 3: VISUAL FEATURES HORIZONTAL SWAP (LEFT / RIGHT AND VICE-VERSA) ---
 const initVisualFeaturesSwap = () => {
   const rows = gsap.utils.toArray('.feature-swap-item');
   if (rows.length < 2) return;
 
-  // Set initial states: First item visible, others hidden and pushed down
-  gsap.set(rows[0], { opacity: 1, y: 0, scale: 1, autoAlpha: 1, pointerEvents: 'auto' });
-  gsap.set(rows.slice(1), { opacity: 0, y: 80, scale: 0.95, autoAlpha: 0, pointerEvents: 'none' });
+  // Set initial states:
+  // Row 1 (Universal Sync): visible in center
+  gsap.set(rows[0], {
+    opacity: 1,
+    xPercent: 0,
+    yPercent: -50,
+    scale: 1,
+    filter: 'blur(0px)',
+    autoAlpha: 1,
+    pointerEvents: 'auto'
+  });
+
+  // Row 2 (Alive with Color): waiting offscreen to the RIGHT (+120%)
+  gsap.set(rows[1], {
+    opacity: 0,
+    xPercent: 120,
+    yPercent: -50,
+    scale: 0.92,
+    filter: 'blur(10px)',
+    autoAlpha: 0,
+    pointerEvents: 'none'
+  });
+
+  // Row 3 (Always Offline): waiting offscreen to the LEFT (-120%) (vice-versa)
+  gsap.set(rows[2], {
+    opacity: 0,
+    xPercent: -120,
+    yPercent: -50,
+    scale: 0.92,
+    filter: 'blur(10px)',
+    autoAlpha: 0,
+    pointerEvents: 'none'
+  });
 
   const tl = gsap.timeline({
     scrollTrigger: {
@@ -116,45 +146,49 @@ const initVisualFeaturesSwap = () => {
     }
   });
 
-  // Transition from Row 1 to Row 2:
+  // --- TRANSITION 1: Row 1 exits to the LEFT (-120%), Row 2 enters from the RIGHT (120% -> 0%) ---
   tl.to(rows[0], {
     opacity: 0,
-    y: -80,
-    scale: 0.94,
+    xPercent: -120,
+    scale: 0.92,
+    filter: 'blur(10px)',
     autoAlpha: 0,
     pointerEvents: 'none',
     ease: 'power2.inOut',
-    duration: 1
+    duration: 1.2
   }, 0.8)
   .to(rows[1], {
     opacity: 1,
-    y: 0,
+    xPercent: 0,
     scale: 1,
+    filter: 'blur(0px)',
     autoAlpha: 1,
     pointerEvents: 'auto',
     ease: 'power2.inOut',
-    duration: 1
+    duration: 1.2
   }, 0.8)
 
-  // Transition from Row 2 to Row 3:
+  // --- TRANSITION 2: Row 2 exits to the RIGHT (120%) (vice-versa), Row 3 enters from the LEFT (-120% -> 0%) (vice-versa) ---
   .to(rows[1], {
     opacity: 0,
-    y: -80,
-    scale: 0.94,
+    xPercent: 120,
+    scale: 0.92,
+    filter: 'blur(10px)',
     autoAlpha: 0,
     pointerEvents: 'none',
     ease: 'power2.inOut',
-    duration: 1
-  }, 2.4)
+    duration: 1.2
+  }, 2.8)
   .to(rows[2], {
     opacity: 1,
-    y: 0,
+    xPercent: 0,
     scale: 1,
+    filter: 'blur(0px)',
     autoAlpha: 1,
     pointerEvents: 'auto',
     ease: 'power2.inOut',
-    duration: 1
-  }, 2.4);
+    duration: 1.2
+  }, 2.8);
 };
 
 // --- NAVBAR PROGRESS ANIMATION ---

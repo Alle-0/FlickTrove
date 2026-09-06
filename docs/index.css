@@ -661,7 +661,7 @@ main {
 
 /* --- PHASE 3: VISUAL FEATURES (PINNED SWAP) --- */
 .visual-features {
-  height: 320vh;
+  height: 350vh;
   position: relative;
   z-index: 20;
 }
@@ -684,22 +684,25 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5%;
+  padding: 0;
 }
 
 .feature-swap-item {
   position: absolute;
   top: 50%;
-  left: 5%;
-  right: 5%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 1200px;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 80px;
-  max-width: 1200px;
   margin: 0 auto;
-  will-change: transform, opacity;
+  padding: 0 5%;
+  box-sizing: border-box;
+  will-change: transform, opacity, filter;
 }
 
 .feature-swap-item:nth-child(even) {
