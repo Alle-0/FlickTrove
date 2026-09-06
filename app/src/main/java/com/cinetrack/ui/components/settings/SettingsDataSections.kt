@@ -629,45 +629,68 @@ fun SettingsSupportSection(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Attribution Row with better styling
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            AttributionRow(
-                brand = "GIPHY",
-                text = stringResource(R.string.settings_giphy_notice)
-            )
-            AttributionRow(
-                brand = "TMDB",
-                text = stringResource(R.string.settings_tmdb_notice)
-            )
-            AttributionRow(
-                brand = "OMDb API",
-                text = stringResource(R.string.settings_omdb_notice)
-            )
-            AttributionRow(
-                brand = "TheTVDB",
-                text = stringResource(R.string.settings_tvdb_notice)
-            )
-            AttributionRow(
-                brand = "Trakt.tv",
-                text = stringResource(R.string.settings_trakt_notice)
-            )
-            AttributionRow(
-                brand = "SIMKL",
-                text = stringResource(R.string.settings_simkl_notice)
-            )
-            AttributionRow(
-                brand = "Rotten Tomatoes",
-                text = stringResource(R.string.settings_rotten_tomatoes_notice)
-            )
-            AttributionRow(
-                brand = "Metacritic",
-                text = stringResource(R.string.settings_metacritic_notice)
-            )
+        var creditsExpanded by remember { mutableStateOf(false) }
+        val rotation by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (creditsExpanded) 90f else 0f
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_info),
+            title = "Credits & Attributions",
+            onClick = { 
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                creditsExpanded = !creditsExpanded 
+            },
+            trailing = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_external_link), // Or another right arrow, using this as fallback if chevron isn't there
+                    contentDescription = null,
+                    tint = OnSurfaceMuted,
+                    modifier = Modifier.size(16.dp).androidx.compose.ui.draw.rotate(rotation)
+                )
+            }
+        )
+
+        androidx.compose.animation.AnimatedVisibility(visible = creditsExpanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp, bottom = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AttributionRow(
+                    brand = "GIPHY",
+                    text = stringResource(R.string.settings_giphy_notice)
+                )
+                AttributionRow(
+                    brand = "TMDB",
+                    text = stringResource(R.string.settings_tmdb_notice)
+                )
+                AttributionRow(
+                    brand = "OMDb API",
+                    text = stringResource(R.string.settings_omdb_notice)
+                )
+                AttributionRow(
+                    brand = "TheTVDB",
+                    text = stringResource(R.string.settings_tvdb_notice)
+                )
+                AttributionRow(
+                    brand = "Trakt.tv",
+                    text = stringResource(R.string.settings_trakt_notice)
+                )
+                AttributionRow(
+                    brand = "SIMKL",
+                    text = stringResource(R.string.settings_simkl_notice)
+                )
+                AttributionRow(
+                    brand = "Rotten Tomatoes",
+                    text = stringResource(R.string.settings_rotten_tomatoes_notice)
+                )
+                AttributionRow(
+                    brand = "Metacritic",
+                    text = stringResource(R.string.settings_metacritic_notice)
+                )
+            }
         }
     }
 }
