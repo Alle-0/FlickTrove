@@ -1528,19 +1528,17 @@ main {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  /* Increased vertical gap between the two rows */
-  padding: 40px 0;
+  padding: 60px 0;
   position: relative;
+  overflow: hidden;
+  width: 100%;
 }
-
-
 
 .marquee-track {
   display: flex;
-  gap: 32px;
-  /* Increased gap to 32px for more breathing room */
+  gap: 24px;
+  width: max-content;
   align-items: center;
-  /* animation: scroll-left 30s linear infinite; (Assuming this is defined elsewhere) */
 }
 
 /* Pause animation on hover */
@@ -1567,14 +1565,12 @@ main {
 }
 
 /* =========================================
-   MOBILE OPTIMIZATIONS (Max-width 768px)
+   MOBILE & TABLET OPTIMIZATIONS
    ========================================= */
 
-/* Hide Hamburger and Overlay on Desktop by default */
+/* Desktop defaults */
 .hamburger-menu {
   display: none;
-  cursor: pointer;
-  z-index: 10001;
 }
 
 .mobile-menu-overlay {
@@ -1584,33 +1580,56 @@ main {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(9, 12, 16, 0.8);
+  background: rgba(9, 12, 16, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  z-index: 10000;
+  z-index: 100000;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
 .mobile-menu-overlay.active {
   display: flex;
   opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-menu-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.mobile-menu-close:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .mobile-menu-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.2rem;
   text-align: center;
 }
 
 .mobile-link {
-  color: white;
+  color: #ffffff;
   text-decoration: none;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-family: var(--font-heading);
   font-weight: 700;
   opacity: 0.8;
@@ -1619,38 +1638,66 @@ main {
 
 .mobile-link:hover {
   opacity: 1;
-  transform: scale(1.1);
+  transform: scale(1.08);
+}
+
+@media (max-width: 900px) {
+  .footer-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
 }
 
 @media (max-width: 768px) {
-  /* Body Overflow */
-  body {
-    overflow-x: hidden;
-  }
-
-  /* Global Typography & Spacing */
-  section {
-    padding: 60px 0;
+  /* Strict viewport containment */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    width: 100%;
   }
 
   /* Navbar */
   .floating-navbar {
-    width: 95%;
-    padding: 0.75rem 1.5rem;
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0.65rem 1.25rem;
   }
   .nav-links {
-    display: none;
+    display: none !important;
   }
   .hamburger-menu {
-    display: block;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    flex-shrink: 0;
   }
 
   /* Hero Section */
+  .hero {
+    height: auto !important;
+    min-height: 100vh;
+    padding-top: 110px;
+    padding-bottom: 40px;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+  }
   .hero-container {
     grid-template-columns: 1fr;
-    gap: 3rem;
-    padding: 0 2rem;
-    padding-top: 8rem;
+    gap: 2.5rem;
+    padding: 0 1.25rem;
+    width: 100%;
+    max-width: 100%;
   }
   .hero-text-col {
     align-items: center;
@@ -1658,38 +1705,83 @@ main {
   }
   .hero-title {
     text-align: center;
-    font-size: 2.8rem;
+    font-size: clamp(2rem, 7.5vw, 2.6rem);
+    line-height: 1.15;
+    word-break: break-word;
   }
   .hero-subtitle {
     text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0 0.5rem;
   }
   .hero-visual-col {
-    transform: scale(0.75); /* Keep pills orbiting properly without overflow */
-    margin-top: -2rem;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 380px;
   }
-  
-  /* Showcase Section (Peek Effect) */
+  .hero-composition {
+    height: 380px;
+    transform: scale(0.65);
+    transform-origin: center center;
+  }
+
+  /* Showcase Section (The Peek Effect without breaking GSAP ScrollTrigger) */
   .showcase-section {
-    transform: scale(0.6);
-    transform-origin: top center;
-    /* Scale down the whole showcase to fit the center phone and let side ones peek */
-    height: 180vh; /* Adjust height for the smaller scale to maintain scroll speed */
+    overflow: hidden;
+  }
+  .sticky-container {
+    overflow: hidden;
+  }
+  .phone-frame {
+    width: 220px;
+    height: 460px;
+    border-radius: 32px;
+  }
+  .phone-label {
+    font-size: 0.85rem;
   }
   .showcase-bg-text {
-    font-size: 15vw; /* Adjust background text size */
+    font-size: 11vw;
   }
 
   /* Features Marquee */
   .features-marquee-section {
     padding: 30px 0;
-    gap: 20px;
+    gap: 16px;
+  }
+  .marquee-track {
+    gap: 16px;
   }
   .marquee-pill {
-    padding: 10px 20px;
+    padding: 9px 18px;
     font-size: 0.85rem;
   }
   .marquee-pill img {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
-}
+
+  /* Visual features rows */
+  .visual-features {
+    padding: 60px 0;
+  }
+  .feature-row {
+    margin-bottom: 70px;
+    padding: 0 1.25rem;
+  }
+  .feature-text h2 {
+    font-size: 2.2rem;
+  }
+
+  /* Footer */
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+

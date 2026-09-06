@@ -153,6 +153,7 @@ initCTAAnimation();
 // --- MOBILE MENU LOGIC ---
 const hamburgerBtn = document.getElementById('hamburger-btn');
 const mobileMenu = document.getElementById('mobile-menu');
+const mobileMenuClose = document.getElementById('mobile-menu-close');
 const mobileLinks = document.querySelectorAll('.mobile-link');
 
 if (hamburgerBtn && mobileMenu) {
@@ -160,6 +161,13 @@ if (hamburgerBtn && mobileMenu) {
     mobileMenu.classList.toggle('active');
     document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
   });
+
+  if (mobileMenuClose) {
+    mobileMenuClose.addEventListener('click', () => {
+      mobileMenu.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
 
   mobileLinks.forEach(link => {
     link.addEventListener('click', () => {
