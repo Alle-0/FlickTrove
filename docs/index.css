@@ -1593,8 +1593,6 @@ body {
   border-radius: 24px;
   padding: 50px 60px;
   width: 100%;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
 }
 
