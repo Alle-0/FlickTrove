@@ -154,8 +154,7 @@ main {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  /* Important for the progress bar to stay inside the border radius */
+  /* Removed overflow: hidden to fix backdrop-filter bug on Chrome */
 }
 
 .nav-brand {
@@ -214,6 +213,8 @@ main {
   left: 0;
   width: 100%;
   height: 2px;
+  border-radius: 100px;
+  overflow: hidden;
 }
 
 .scroll-progress-bar {
