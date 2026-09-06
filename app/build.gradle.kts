@@ -174,6 +174,7 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))
 }
 

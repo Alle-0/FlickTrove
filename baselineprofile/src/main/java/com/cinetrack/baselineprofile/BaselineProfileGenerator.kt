@@ -6,6 +6,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.Until
+import java.util.regex.Pattern
 
 @RunWith(AndroidJUnit4::class)
 class BaselineProfileGenerator {
@@ -22,52 +25,58 @@ class BaselineProfileGenerator {
                 pressHome()
                 startActivityAndWait()
 
-                // Optional: You can simulate user interactions here
-                // We first need to bypass the Login screen if it appears
-                // Wait for the guest button to appear (timeout 5 seconds)
-                val guestButton = device.wait(androidx.test.uiautomator.Until.findObject(By.text("Continua come Ospite")), 5000)
+                // Bypass the Login screen by entering as Guest
+                val guestButtonPattern = Pattern.compile("(?i)Enter as Guest|Entra come Ospite|Continua come Ospite|Continue as Guest")
+                val guestButton = device.wait(Until.findObject(By.text(guestButtonPattern)), 6000)
                 if (guestButton != null) {
                     guestButton.click()
                     device.waitForIdle()
                     
-                    // Wait for the confirm button in the modal to appear (timeout 5 seconds)
-                    val confirmGuestButton = device.wait(androidx.test.uiautomator.Until.findObject(By.text("Accedi come Ospite")), 5000)
+                    // Wait for the confirm button in the modal to appear
+                    val confirmPattern = Pattern.compile("(?i)Accept and Continue|Accetta e Continua|Accedi come Ospite|Sign in as Guest")
+                    val confirmGuestButton = device.wait(Until.findObject(By.text(confirmPattern)), 6000)
                     if (confirmGuestButton != null) {
                         confirmGuestButton.click()
                         device.waitForIdle()
                     }
                 }
                 
-                // Wait a bit for the Home to load
-                device.wait(androidx.test.uiautomator.Until.hasObject(By.desc("Cerca")), 10000)
+                // Wait for the Home screen to appear by waiting for the Search button
+                val searchPattern = Pattern.compile("(?i)Cerca|Search")
+                val searchButton = device.wait(Until.findObject(By.desc(searchPattern)), 12000)
 
-                // We click the Search button to precompile the SearchScreen and related components
-                val searchButton = device.findObject(By.desc("Cerca"))
-                if (searchButton != null) {
-                    searchButton.click()
+                // Scroll the feed using coordinates to avoid StaleObjectException on recomposed Compose items
+                val midX = device.displayWidth / 2
+                val startY = (device.displayHeight * 0.75).toInt()
+                val endY = (device.displayHeight * 0.25).toInt()
+
+                device.swipe(midX, startY, midX, endY, 25)
+                device.waitForIdle()
+                device.swipe(midX, endY, midX, startY, 25)
+                device.waitForIdle()
+
+                // Click Search FAB to open the search screen
+                val currentSearchButton = searchButton ?: device.findObject(By.desc(searchPattern))
+                if (currentSearchButton != null) {
+                    currentSearchButton.click()
                     device.waitForIdle()
-                    
-                    // Digita una query di ricerca per far apparire le MovieCard
-                    val searchField = device.wait(androidx.test.uiautomator.Until.findObject(By.clazz("android.widget.EditText")), 5000)
+
+                    // Wait for the search input field and type a query
+                    val searchField = device.wait(Until.findObject(By.clazz("android.widget.EditText")), 8000)
                     if (searchField != null) {
                         searchField.text = "Batman"
                         device.waitForIdle()
                         device.pressEnter()
                         device.waitForIdle()
                     }
-                    
-                    // Aspettiamo che carichi i risultati della ricerca (le MovieCard)
-                    val scrollableList = device.wait(androidx.test.uiautomator.Until.findObject(By.scrollable(true)), 10000)
-                    if (scrollableList != null) {
-                        // Ignoriamo la metà inferiore dello schermo nel caso in cui la tastiera sia aperta
-                        scrollableList.setGestureMargins(0, 0, 0, device.displayHeight / 2)
-                        
-                        // Scorriamo per forzare il rendering e la pre-compilazione di più MovieCard
-                        scrollableList.scroll(androidx.test.uiautomator.Direction.DOWN, 1f)
-                        device.waitForIdle()
-                    }
+
+                    // Wait a moment for search results to render and scroll through them
+                    Thread.sleep(2500)
+                    device.swipe(midX, startY, midX, endY, 25)
+                    device.waitForIdle()
                 }
             }
         )
     }
 }
+

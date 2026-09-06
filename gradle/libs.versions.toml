@@ -36,6 +36,7 @@ androidxTestExtJunit = "1.2.1"
 androidxTestEspresso = "3.6.1"
 credentials = "1.3.0"
 googleid = "1.1.1"
+profileinstaller = "1.4.1"
 
 [libraries]
 liquid = { group = "io.github.fletchmckee.liquid", name = "liquid", version.ref = "liquid" }
@@ -104,6 +105,7 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
