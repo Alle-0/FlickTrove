@@ -465,6 +465,42 @@ main {
   }
 }
 
+/* --- FLOATING PILLOWS --- */
+.floating-pillow {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  z-index: 30;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.floating-pillow img {
+  width: 18px;
+  height: 18px;
+}
+
+.pillow-1 {
+  top: 15%;
+  right: 5%;
+}
+
+.pillow-2 {
+  bottom: 18%;
+  left: 5%;
+}
+
 /* Stile base del bottone */
 .btn-download {
   position: relative;
@@ -1724,10 +1760,13 @@ main {
     line-height: 1.5;
     padding: 0 0.5rem;
   }
+  .hero-visual,
   .hero-visual-col {
+    margin-top: 60px !important;
+    position: relative;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1737,6 +1776,23 @@ main {
     height: 380px;
     transform: scale(0.65);
     transform-origin: center center;
+  }
+
+  .floating-pillow {
+    display: inline-flex !important;
+    transform: scale(0.75);
+    transform-origin: center center;
+    z-index: 35;
+  }
+
+  .pillow-1 {
+    top: -5%;
+    right: -5%;
+  }
+
+  .pillow-2 {
+    bottom: 15%;
+    left: -10%;
   }
 
   /* Showcase Section (The Peek Effect without breaking GSAP ScrollTrigger) */
