@@ -213,10 +213,53 @@ const initMagneticCTA = () => {
   });
 };
 
+// --- PHASE 5: FAQ ACCORDION LOGIC ---
+const initFAQ = () => {
+  const faqQuestions = document.querySelectorAll('.faq-question');
+
+  faqQuestions.forEach((question) => {
+    question.addEventListener('click', () => {
+      const parentItem = question.closest('.faq-item');
+      if (!parentItem) return;
+
+      const isAlreadyActive = parentItem.classList.contains('active');
+
+      // Close all accordion items
+      document.querySelectorAll('.faq-item').forEach((item) => {
+        item.classList.remove('active');
+        const btn = item.querySelector('.faq-question');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      });
+
+      // If it wasn't active, expand it
+      if (!isAlreadyActive) {
+        parentItem.classList.add('active');
+        question.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+};
+
+const initFAQAnimation = () => {
+  gsap.from('.faq-header > *, .faq-item', {
+    y: 30,
+    opacity: 0,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '.faq-section',
+      start: 'top 85%'
+    }
+  });
+};
+
 // Initialize animations (module scripts are deferred automatically)
 initHeroAnimations();
 initShowcaseAnimations();
 initNavbarProgress();
+initFAQ();
+initFAQAnimation();
 initCTAAnimation();
 initMagneticCTA();
 
