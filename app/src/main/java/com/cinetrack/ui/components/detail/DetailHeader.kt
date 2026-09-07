@@ -76,6 +76,7 @@ fun DetailHeader(
     onRatingClick: () -> Unit = {},
     hasAlternativeCovers: Boolean = false,
     onCoverSelectClick: (() -> Unit)? = null,
+    isOffline: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -143,7 +144,7 @@ fun DetailHeader(
             if (logoPath != null) {
                 val imageUrl = com.cinetrack.util.buildTmdbImageUrl(logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
                 val context = LocalContext.current
-                val request = remember(imageUrl) {
+                val request = remember(imageUrl, isOffline) {
                     ImageRequest.Builder(context)
                         .data(imageUrl)
                         .crossfade(true)

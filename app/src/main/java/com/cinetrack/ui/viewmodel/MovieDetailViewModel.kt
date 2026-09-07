@@ -73,6 +73,33 @@ class MovieDetailViewModel @Inject constructor(
         .map { it == com.cinetrack.util.ConnectionState.OFFLINE }
         .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), false)
 
+    init {
+        viewModelScope.launch {
+            var wasOffline = false
+            networkMonitor.connectionState
+                .distinctUntilChanged()
+                .collect { state ->
+                    val isNowOnline = state == com.cinetrack.util.ConnectionState.ONLINE
+                    if (isNowOnline && wasOffline && movieId != 0L) {
+                        onNetworkRestored()
+                    }
+                    wasOffline = (state == com.cinetrack.util.ConnectionState.OFFLINE)
+                }
+        }
+    }
+
+    private fun onNetworkRestored() {
+        viewModelScope.launch {
+            if (_error.value != null) {
+                _error.value = null
+            }
+            fetchFromTMDB(movieId, mediaType == "tv")
+            val comments = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
+            if (comments.isNotEmpty() || _appComments.value.isEmpty()) {
+                _appComments.value = comments
+            }
+        }
+    }
 
     var movieId: Long = 0L
         private set

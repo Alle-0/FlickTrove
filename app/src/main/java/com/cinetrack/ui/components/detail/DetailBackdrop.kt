@@ -38,6 +38,7 @@ fun DetailBackdrop(
     posterPath: String?,
     accentColor: Color,
     backgroundColor: Color = Color.Black,
+    isOffline: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val path = backdropPath ?: posterPath
@@ -59,7 +60,7 @@ fun DetailBackdrop(
         if (path != null) {
             val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
             val context = LocalContext.current
-            val request = remember(imageUrl) {
+            val request = remember(imageUrl, isOffline) {
                 ImageRequest.Builder(context)
                     .data(imageUrl)
                     .crossfade(true)

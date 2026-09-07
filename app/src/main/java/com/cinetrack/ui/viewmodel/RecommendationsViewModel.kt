@@ -98,12 +98,25 @@ class RecommendationsViewModel @Inject constructor(
         }
         val immutableMovieFolderColors = movieFolderColors.mapValues { it.value.toImmutableList() }.toImmutableMap()
 
+        val watchedCompositeIds = favorites
+            .filter { it.watched || !it.watchedEpisodes.isNullOrEmpty() || it.watchedAt != null }
+            .flatMap { movie ->
+                val normType = if (movie.mediaType == "tv") "tv" else "movie"
+                listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
+            }
+            .toSet()
+
+        val displayRecommendations = recommended.filter { rec ->
+            val compId = "${mediaType}_${rec.id}"
+            !watchedCompositeIds.contains(compId)
+        }
+
         RecommendationsUiState(
             mediaType = mediaType,
             isLoading = isLoading,
             isNextPageLoading = isNextLoading,
             isEndReached = isEnd,
-            recommendedMovies = recommended.toImmutableList(),
+            recommendedMovies = displayRecommendations.toImmutableList(),
             favorites = favorites.toImmutableList(),
             movieFolderColors = immutableMovieFolderColors,
             folders = folders.toImmutableList(),
@@ -142,7 +155,8 @@ class RecommendationsViewModel @Inject constructor(
             currentPage = 1
             _isEndReached.value = false
             val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
-            fetchRecommendations(currentState.mediaType, currentState.favorites, page = 1, hideSaved = hideSaved)
+            val allLocalMovies = repository.getLocalMoviesFlow().first()
+            fetchRecommendations(currentState.mediaType, allLocalMovies, page = 1, hideSaved = hideSaved)
         }
     }
 
@@ -154,7 +168,8 @@ class RecommendationsViewModel @Inject constructor(
             _isNextPageLoading.value = true
             currentPage++
             val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
-            fetchRecommendations(currentState.mediaType, currentState.favorites, page = currentPage, isAppend = true, hideSaved = hideSaved)
+            val allLocalMovies = repository.getLocalMoviesFlow().first()
+            fetchRecommendations(currentState.mediaType, allLocalMovies, page = currentPage, isAppend = true, hideSaved = hideSaved)
         }
     }
 
@@ -297,7 +312,21 @@ class RecommendationsViewModel @Inject constructor(
 
             val results = mutableListOf<Movie>()
             // Use compositeId (mediaType_id) to avoid false matches between movies and TV shows with same TMDB numeric id
-            val localCompositeIds = favorites.map { "${it.mediaType}_${it.id}" }.toSet()
+            val watchedCompositeIds = favorites
+                .filter { it.watched || !it.watchedEpisodes.isNullOrEmpty() || it.watchedAt != null }
+                .flatMap { movie ->
+                    val normType = if (movie.mediaType == "tv") "tv" else "movie"
+                    listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
+                }
+                .toSet()
+
+            val localCompositeIds = favorites
+                .flatMap { movie ->
+                    val normType = if (movie.mediaType == "tv") "tv" else "movie"
+                    listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
+                }
+                .toSet()
+
             val existingIds = _recommendedMovies.value.map { it.id }.toSet()
 
             // Utilizziamo coroutineScope e async per fare le 3 chiamate API in parallelo!
@@ -316,7 +345,8 @@ class RecommendationsViewModel @Inject constructor(
             results.addAll(
                 rawData.filter { movie ->
                     val compositeId = "${type}_${movie.id}"
-                    val isHidden = hideSaved && localCompositeIds.contains(compositeId)
+                    val isWatched = watchedCompositeIds.contains(compositeId)
+                    val isHidden = isWatched || (hideSaved && localCompositeIds.contains(compositeId))
                     !isHidden && !existingIds.contains(movie.id)
                 }.map { it.copy(mediaType = type) }
             )

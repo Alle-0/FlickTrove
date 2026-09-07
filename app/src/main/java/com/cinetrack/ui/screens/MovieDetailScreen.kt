@@ -475,6 +475,7 @@ fun MovieDetailScreenContent(
                                         posterPath = activeMovie.posterPath,
                                         accentColor = accentColor,
                                         backgroundColor = animatedBgColor,
+                                        isOffline = isOffline,
                                         modifier = Modifier
                                             .haze(backdropHazeState, style = HazeStyles.PremiumDark)
                                             .pointerInput(Unit) {
@@ -491,7 +492,7 @@ fun MovieDetailScreenContent(
                                     modifier = Modifier
                                         .offset(y = (-140).dp)
                                         .padding(bottom = paddingValues.calculateBottomPadding() + 60.dp)
-                                ) {
+                                 ) {
                                     DetailHeader(
                                         movie = activeMovie,
                                         ratings = state.externalRatings,
@@ -509,7 +510,8 @@ fun MovieDetailScreenContent(
                                         sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
-                                        onCoverSelectClick = { showCoverSelectionSheet = true }
+                                        onCoverSelectClick = { showCoverSelectionSheet = true },
+                                        isOffline = isOffline
                                     )
 
                                     DetailMetaRows(
