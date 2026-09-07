@@ -590,6 +590,75 @@ data class Movie(
         return totalCount
     }
 
+    fun calculateNextEpisode(): NextEpisodeInfo? {
+        if (mediaType != "tv" || seasons.isNullOrEmpty()) return null
+
+        val validSeasons = seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sortedBy { it.seasonNumber }
+        if (validSeasons.isNullOrEmpty()) return null
+
+        val todayIso = try {
+            java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+        } catch (e: Exception) {
+            "2026-01-01"
+        }
+
+        var nextAiringSeason: Int? = null
+        var nextAiringEpNum: Int? = null
+        if (!nextEpisodeString.isNullOrBlank() && (nextEpisodeAirDate.isNullOrBlank() || nextEpisodeAirDate!! > todayIso)) {
+            try {
+                val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(nextEpisodeString!!)
+                if (match != null) {
+                    nextAiringSeason = match.groupValues[1].toIntOrNull()
+                    nextAiringEpNum = match.groupValues[2].toIntOrNull()
+                }
+            } catch (_: Exception) {}
+        }
+
+        val totalAiredEpisodes = validSeasons.sumOf { getReleasedEpisodeCountForSeason(it, todayIso, nextAiringSeason, nextAiringEpNum) }
+        val totalWatchedEpisodes = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+        val overallProgress = if (totalAiredEpisodes > 0) (totalWatchedEpisodes.toFloat() / totalAiredEpisodes).coerceIn(0f, 1f) else 0f
+
+        for (season in validSeasons) {
+            val airedCount = getReleasedEpisodeCountForSeason(season, todayIso, nextAiringSeason, nextAiringEpNum)
+            if (airedCount <= 0) continue
+
+            val watchedInSeason = watchedEpisodes?.get(season.seasonNumber.toString()) ?: emptyList()
+            // Find first un-watched episode within 1..airedCount
+            for (ep in 1..airedCount) {
+                if (!watchedInSeason.contains(ep)) {
+                    val remainingInSeason = (airedCount - watchedInSeason.count { it in 1..airedCount })
+                    val remainingTotal = maxOf(0, totalAiredEpisodes - totalWatchedEpisodes)
+                    val totalExpected = numberOfEpisodes ?: totalAiredEpisodes
+                    val isLast = remainingTotal <= 1 && totalAiredEpisodes >= totalExpected
+                    return NextEpisodeInfo(
+                        seasonNumber = season.seasonNumber,
+                        episodeNumber = ep,
+                        remainingInSeason = remainingInSeason,
+                        remainingTotal = remainingTotal,
+                        progress = overallProgress,
+                        isLastEpisodeOfSeries = isLast,
+                        isUpToDateWithAirDate = false
+                    )
+                }
+            }
+        }
+
+        // If we reached here, all currently aired episodes have been watched!
+        val lastSeasonNum = validSeasons.lastOrNull()?.seasonNumber ?: 1
+        val isEntireSeriesCompleted = (numberOfEpisodes != null && numberOfEpisodes!! > 0 && totalWatchedEpisodes >= numberOfEpisodes!!) ||
+                (status?.lowercase() in listOf("ended", "canceled", "cancelled") && totalWatchedEpisodes >= totalAiredEpisodes)
+
+        return NextEpisodeInfo(
+            seasonNumber = nextAiringSeason ?: lastSeasonNum,
+            episodeNumber = nextAiringEpNum ?: 1,
+            remainingInSeason = 0,
+            remainingTotal = 0,
+            progress = 1f,
+            isLastEpisodeOfSeries = isEntireSeriesCompleted,
+            isUpToDateWithAirDate = !isEntireSeriesCompleted
+        )
+    }
+
     // --- Emotional Check-In (Peek-a-boo) – local only, not synced to Firestore or kotlinx.serialization ---
 
     // --- Firestore Resilient Deserialization Proxies ---

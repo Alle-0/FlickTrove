@@ -136,14 +136,72 @@ object MovieMapper {
         )
     }
 
-    fun extractCertification(response: MovieDetailResponse, type: String): String? {
+    val SUPPORTED_RATING_COUNTRIES = setOf("IT", "DE", "FR", "ES", "BR", "RU", "IN", "GB", "US")
+
+    fun extractCertificationWithCountry(
+        response: MovieDetailResponse, 
+        type: String, 
+        preferredCountry: String = "IT"
+    ): Pair<String, String>? {
+        val targetCountry = if (preferredCountry.uppercase() in SUPPORTED_RATING_COUNTRIES) preferredCountry.uppercase() else "US"
         return if (type == "movie") {
-            val usReleases = response.releaseDates?.results?.find { it.iso31661 == "US" }
-            usReleases?.releaseDates?.firstOrNull { it.certification.isNotEmpty() }?.certification
-                ?: response.releaseDates?.results?.find { it.iso31661 == "IT" }?.releaseDates?.firstOrNull { it.certification.isNotEmpty() }?.certification
+            // 1. Try preferred target country
+            val targetCert = response.releaseDates?.results
+                ?.find { it.iso31661.equals(targetCountry, ignoreCase = true) }
+                ?.releaseDates?.firstOrNull { it.certification.isNotBlank() }?.certification?.trim()
+            if (!targetCert.isNullOrBlank()) {
+                Pair(targetCountry, targetCert)
+            } else {
+                // 2. Try US fallback
+                val usCert = response.releaseDates?.results
+                    ?.find { it.iso31661.equals("US", ignoreCase = true) }
+                    ?.releaseDates?.firstOrNull { it.certification.isNotBlank() }?.certification?.trim()
+                if (!usCert.isNullOrBlank()) {
+                    Pair("US", usCert)
+                } else {
+                    // 3. Fallback to first available country (preferring supported)
+                    val firstSupported = response.releaseDates?.results?.firstOrNull { r ->
+                        r.iso31661.uppercase() in SUPPORTED_RATING_COUNTRIES && r.releaseDates.any { it.certification.isNotBlank() }
+                    }
+                    val firstItem = firstSupported ?: response.releaseDates?.results?.firstOrNull { r ->
+                        r.releaseDates.any { it.certification.isNotBlank() }
+                    }
+                    val firstCert = firstItem?.releaseDates?.firstOrNull { it.certification.isNotBlank() }?.certification?.trim()
+                    if (!firstCert.isNullOrBlank()) {
+                        Pair(firstItem.iso31661, firstCert)
+                    } else null
+                }
+            }
         } else {
-            response.contentRatings?.results?.find { it.iso31661 == "US" }?.rating
-                ?: response.contentRatings?.results?.find { it.iso31661 == "IT" }?.rating
+            // TV Shows
+            // 1. Try preferred target country
+            val targetRating = response.contentRatings?.results
+                ?.find { it.iso31661.equals(targetCountry, ignoreCase = true) }
+                ?.rating?.trim()
+            if (!targetRating.isNullOrBlank()) {
+                Pair(targetCountry, targetRating)
+            } else {
+                // 2. Try US fallback
+                val usRating = response.contentRatings?.results
+                    ?.find { it.iso31661.equals("US", ignoreCase = true) }
+                    ?.rating?.trim()
+                if (!usRating.isNullOrBlank()) {
+                    Pair("US", usRating)
+                } else {
+                    // 3. Fallback to first available country (preferring supported)
+                    val firstSupported = response.contentRatings?.results?.firstOrNull { 
+                        it.iso31661.uppercase() in SUPPORTED_RATING_COUNTRIES && it.rating.isNotBlank() 
+                    }
+                    val firstRating = firstSupported ?: response.contentRatings?.results?.firstOrNull { it.rating.isNotBlank() }
+                    if (firstRating != null) {
+                        Pair(firstRating.iso31661, firstRating.rating.trim())
+                    } else null
+                }
+            }
         }
+    }
+
+    fun extractCertification(response: MovieDetailResponse, type: String): String? {
+        return extractCertificationWithCountry(response, type)?.second
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.cinetrack.ui.utils.bounceClick
 import kotlin.math.abs
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -149,7 +150,7 @@ fun OnboardingDialog(
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.08f))
                                     .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                    .clickable {
+                                    .bounceClick {
                                         coroutineScope.launch {
                                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                         }
@@ -176,7 +177,7 @@ fun OnboardingDialog(
                             ),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
-                                .clickable { onDismiss() }
+                                .bounceClick { onDismiss() }
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -300,23 +301,22 @@ fun OnboardingDialog(
 
                     // Action Button
                     val isLastPage = pagerState.currentPage == slides.size - 1
-                    Button(
-                        onClick = {
-                            if (isLastPage) {
-                                onDismiss()
-                            } else {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = accentColor
-                        ),
-                        shape = RoundedCornerShape(16.dp),
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(accentColor)
+                            .bounceClick {
+                                if (isLastPage) {
+                                    onDismiss()
+                                } else {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (isLastPage) stringResource(R.string.onboarding_start) else stringResource(R.string.onboarding_next),

@@ -8,6 +8,7 @@ import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,7 +51,6 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.data.model.Season
 import com.cinetrack.ui.viewmodel.DetailUiState
 import com.cinetrack.ui.viewmodel.DetailEvent
-import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -204,6 +204,10 @@ fun EpisodesBottomSheet(
         }
     }
 
+    val settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val episodesLayout by settingsViewModel.episodesLayout.collectAsStateWithLifecycle()
+    val isAccordion = episodesLayout == "ACCORDION"
+
     ModalBottomSheet(
         onDismissRequest = dismissAndSync,
         sheetState = sheetState,
@@ -219,7 +223,7 @@ fun EpisodesBottomSheet(
             Box(
                 modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.85f)
+                .fillMaxHeight(0.88f)
                 .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
         ) {
             Column(
@@ -242,158 +246,186 @@ fun EpisodesBottomSheet(
                     )
                 }
 
-            val fetchedSeasonData = seasonDetails[selectedSeasonNumber]
-            val fallbackSeasonData = movie.seasons?.find { it.seasonNumber == selectedSeasonNumber }
-            val currentSeasonData = fetchedSeasonData ?: fallbackSeasonData?.let {
-                val epCount = it.episodeCount ?: 0
-                it.copy(
-                    episodes = it.episodes ?: (1..epCount).map { epNum ->
-                        Episode(
-                            episodeNumber = epNum,
-                            name = context.getString(R.string.person_offline_title), // Using existing offline string "Offline"
-                            overview = null,
-                            stillPath = null,
-                            airDate = null
-                        )
-                    }
-                )
-            }
-
-            // Non-draggable content area
-            Column(
-                modifier = Modifier.blockBottomSheetVerticalDrag()
-            ) {
-                // Header
-                Header(movie, dismissAndSync)
-
-                // Season Selector
-                val seasons = successState?.details?.seasons?.mapNotNull { it.seasonNumber } ?: (1..(movie.numberOfSeasons ?: 1)).toList()
-                val completedSeasons = seasons.mapNotNull { seasonNum ->
-                    val seasonData = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }
-                        ?: seasonDetails[seasonNum]
-                    if (seasonData != null && isSeasonFullyWatched(localWatchedEpisodes, seasonNum, seasonData)) seasonNum else null
-                }.toSet()
-
-                SeasonSelector(
-                    seasons = seasons,
-                    selectedSeason = selectedSeasonNumber,
-                    completedSeasons = completedSeasons,
-                    onSeasonSelected = { selectedSeasonNumber = it }
+                // Header with Layout Toggle and Close
+                Header(
+                    movie = movie,
+                    isAccordion = isAccordion,
+                    onToggleLayout = {
+                        val next = if (isAccordion) "STANDARD" else "ACCORDION"
+                        settingsViewModel.updateEpisodesLayout(next)
+                    },
+                    onDismiss = dismissAndSync
                 )
 
-                // Bulk Action
-                if (currentSeasonData != null) {
-                    val todayIso = remember {
-                        try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
-                    }
-                    val releasedEps = currentSeasonData.episodes?.filter { ep ->
-                        val epDate = ep.airDate
-                        if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
-                        else if (!currentSeasonData.airDate.isNullOrBlank()) currentSeasonData.airDate.take(10) <= todayIso
-                        else true
-                    }?.map { it.episodeNumber } ?: emptyList<Int>()
-                    val allEps = currentSeasonData.episodes?.map { it.episodeNumber } ?: emptyList<Int>()
-                    val targetEps = if (releasedEps.isNotEmpty()) releasedEps else allEps
-
-                    BulkAction(
-                        isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
-                        onToggle = { 
-                            if (isDropped) return@BulkAction
-                            val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
-                            val nextWatched = if (currentWatched.size >= targetEps.size) {
-                                emptyList()
-                            } else {
-                                targetEps
-                            }
-                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
-                        },
-                        onLongClick = {
-                            if (isDropped) return@BulkAction
-                            localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to targetEps)
-                        }
+                if (isAccordion) {
+                    // Accordion (TV Time style) layout
+                    EpisodesAccordionView(
+                        movie = movie,
+                        viewModel = viewModel,
+                        localWatchedEpisodes = localWatchedEpisodes,
+                        onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
+                        onEpisodeInfoClick = { selectedEpisodeForInfo = it },
+                        isDropped = isDropped,
+                        nestedScrollConnection = nestedScrollConnection,
+                        modifier = Modifier.fillMaxSize()
                     )
-                }
+                } else {
+                    // Standard horizontal chip layout
+                    val fetchedSeasonData = seasonDetails[selectedSeasonNumber]
+                    val fallbackSeasonData = movie.seasons?.find { it.seasonNumber == selectedSeasonNumber }
+                    val currentSeasonData = fetchedSeasonData ?: fallbackSeasonData?.let {
+                        val epCount = it.episodeCount ?: 0
+                        it.copy(
+                            episodes = it.episodes ?: (1..epCount).map { epNum ->
+                                Episode(
+                                    episodeNumber = epNum,
+                                    name = context.getString(R.string.person_offline_title),
+                                    overview = null,
+                                    stillPath = null,
+                                    airDate = null
+                                )
+                            }
+                        )
+                    }
 
-                // Instruction text
-                Text(
-                    text = stringResource(R.string.episodes_long_press_info),
-                    modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp),
-                    color = Color.White.copy(alpha = 0.4f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+                    // Non-draggable content area
+                    Column(
+                        modifier = Modifier.blockBottomSheetVerticalDrag()
+                    ) {
+                        // Season Selector
+                        val seasons = successState?.details?.seasons?.mapNotNull { it.seasonNumber } ?: (1..(movie.numberOfSeasons ?: 1)).toList()
+                        val completedSeasons = seasons.mapNotNull { seasonNum ->
+                            val seasonData = successState?.details?.seasons?.find { it.seasonNumber == seasonNum }
+                                ?: seasonDetails[seasonNum]
+                            if (seasonData != null && isSeasonFullyWatched(localWatchedEpisodes, seasonNum, seasonData)) seasonNum else null
+                        }.toSet()
 
-            // Episode List
-            if (loadingSeason) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .blockBottomSheetVerticalDrag(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFF00E676))
-                }
-            } else {
-                val listState = rememberLazyListState()
+                        SeasonSelector(
+                            seasons = seasons,
+                            selectedSeason = selectedSeasonNumber,
+                            completedSeasons = completedSeasons,
+                            onSeasonSelected = { selectedSeasonNumber = it }
+                        )
 
-                LaunchedEffect(currentSeasonData, selectedSeasonNumber) {
-                    val episodes = currentSeasonData?.episodes
-                    if (!episodes.isNullOrEmpty()) {
-                        val watched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
-                        val targetIndex = episodes.indexOfFirst { it.episodeNumber !in watched }
-                        if (targetIndex >= 0) {
-                            listState.animateScrollToItem(targetIndex)
-                        } else {
-                            listState.animateScrollToItem(0)
+                        // Bulk Action
+                        if (currentSeasonData != null) {
+                            val todayIso = remember {
+                                try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+                            }
+                            val releasedEps = currentSeasonData.episodes?.filter { ep ->
+                                val epDate = ep.airDate
+                                if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
+                                else if (!currentSeasonData.airDate.isNullOrBlank()) currentSeasonData.airDate.take(10) <= todayIso
+                                else true
+                            }?.map { it.episodeNumber } ?: emptyList<Int>()
+                            val allEps = currentSeasonData.episodes?.map { it.episodeNumber } ?: emptyList<Int>()
+                            val targetEps = if (releasedEps.isNotEmpty()) releasedEps else allEps
+
+                            BulkAction(
+                                isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
+                                onToggle = { 
+                                    if (isDropped) return@BulkAction
+                                    val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
+                                    val nextWatched = if (currentWatched.size >= targetEps.size) {
+                                        emptyList()
+                                    } else {
+                                        targetEps
+                                    }
+                                    localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to nextWatched)
+                                },
+                                onLongClick = {
+                                    if (isDropped) return@BulkAction
+                                    localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to targetEps)
+                                }
+                            )
+                        }
+
+                        // Instruction text
+                        Text(
+                            text = stringResource(R.string.episodes_long_press_info),
+                            modifier = Modifier.padding(horizontal = 32.dp).padding(bottom = 12.dp),
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // Episode List
+                    if (loadingSeason) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blockBottomSheetVerticalDrag(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFF00E676))
+                        }
+                    } else {
+                        val listState = rememberLazyListState()
+
+                        LaunchedEffect(currentSeasonData, selectedSeasonNumber) {
+                            val episodes = currentSeasonData?.episodes
+                            if (!episodes.isNullOrEmpty()) {
+                                val watched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
+                                val targetIndex = episodes.indexOfFirst { it.episodeNumber !in watched }
+                                if (targetIndex >= 0) {
+                                    listState.animateScrollToItem(targetIndex)
+                                } else {
+                                    listState.animateScrollToItem(0)
+                                }
+                            }
+                        }
+
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .nestedScroll(nestedScrollConnection)
+                                .premiumScrollbar(listState)
+                                .verticalFadingEdges(listState, 16.dp, 16.dp),
+                            contentPadding = PaddingValues(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(
+                                items = currentSeasonData?.episodes ?: emptyList<Episode>(),
+                                key = { it.episodeNumber },
+                                contentType = { "episode" }
+                            ) { episode ->
+                                EpisodeCard(
+                                    episode = episode,
+                                    isWatched = (localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList<Int>()).contains(episode.episodeNumber),
+                                    onToggle = { 
+                                        if (isDropped) return@EpisodeCard
+                                        val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()]?.toMutableList() ?: mutableListOf()
+                                        if (currentWatched.contains(episode.episodeNumber)) {
+                                            currentWatched.remove(episode.episodeNumber)
+                                        } else {
+                                            currentWatched.add(episode.episodeNumber)
+                                        }
+                                        localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to currentWatched)
+                                    },
+                                    onInfoClick = { selectedEpisodeForInfo = episode }
+                                )
+                            }
                         }
                     }
                 }
-
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .nestedScroll(nestedScrollConnection)
-                        .premiumScrollbar(listState)
-                        .verticalFadingEdges(listState, 16.dp, 16.dp),
-                    contentPadding = PaddingValues(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(
-                        items = currentSeasonData?.episodes ?: emptyList<Episode>(),
-                        key = { it.episodeNumber },
-                        contentType = { "episode" }
-                    ) { episode ->
-                        EpisodeCard(
-                            episode = episode,
-                            isWatched = (localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList<Int>()).contains(episode.episodeNumber),
-                            onToggle = { 
-                                if (isDropped) return@EpisodeCard
-                                val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()]?.toMutableList() ?: mutableListOf()
-                                if (currentWatched.contains(episode.episodeNumber)) {
-                                    currentWatched.remove(episode.episodeNumber)
-                                } else {
-                                    currentWatched.add(episode.episodeNumber)
-                                }
-                                localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to currentWatched)
-                            },
-                            onInfoClick = { selectedEpisodeForInfo = episode }
-                        )
-                    }
-                }
             }
         }
         }
-    }
     }
 }
 
 @Composable
-private fun Header(movie: Movie, onDismiss: () -> Unit) {
+private fun Header(
+    movie: Movie,
+    isAccordion: Boolean,
+    onToggleLayout: () -> Unit,
+    onDismiss: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 32.dp),
+            .padding(horizontal = 24.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -407,21 +439,48 @@ private fun Header(movie: Movie, onDismiss: () -> Unit) {
             Text(
                 movie.name ?: movie.title ?: "",
                 color = Color.White,
-                fontSize = 24.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
+
+        // Layout Toggle Button (Chips vs Accordion)
         Surface(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
+                .bounceClick { onToggleLayout() },
+            color = Color.White.copy(alpha = 0.06f),
+            shape = CircleShape
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = if (isAccordion) R.drawable.ic_grid else R.drawable.ic_lista),
+                    contentDescription = stringResource(R.string.episodes_layout_toggle),
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        // Close Button
+        Surface(
+            modifier = Modifier
+                .size(44.dp)
                 .bounceClick { onDismiss() },
             color = Color.White.copy(alpha = 0.06f),
             shape = CircleShape
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
@@ -546,7 +605,7 @@ private fun BulkAction(
 }
 
 @Composable
-private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Unit, onInfoClick: () -> Unit) {
+internal fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Unit, onInfoClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -621,7 +680,7 @@ private fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Un
     }
 }
 
-private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, currentSeasonNumber: Int, seasonData: Season): Boolean {
+internal fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, currentSeasonNumber: Int, seasonData: Season): Boolean {
     val watched = localWatchedEpisodes[currentSeasonNumber.toString()]?.toSet() ?: emptySet()
     if (watched.isEmpty()) return false
     val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
@@ -642,7 +701,7 @@ private fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, c
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
+internal fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)

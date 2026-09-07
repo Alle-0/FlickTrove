@@ -716,15 +716,23 @@ fun SettingsScreenContent(
                         DonationBanner(modifier = Modifier.padding(bottom = 16.dp))
                     }
 
+                    // Section: Preferenze Generali
+                    item {
+                        SettingsGeneralPreferencesSection(
+                            settingsViewModel = settingsViewModel,
+                            currentAccentColor = currentAccentColor,
+                            onShowLanguageDialog = { showLanguageDialog = true },
+                            onShowStartScreenDialog = { showStartScreenDialog = true }
+                        )
+                    }
+
                     // Section: Interfaccia e Layout
                     item {
                         SettingsUILayoutSection(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
-                            onShowBadgesInfo = { showBadgesInfoDialog = true },
-                            onShowLanguageDialog = { showLanguageDialog = true },
-                            onShowStartScreenDialog = { showStartScreenDialog = true }
+                            onShowBadgesInfo = { showBadgesInfoDialog = true }
                         )
                     }
 

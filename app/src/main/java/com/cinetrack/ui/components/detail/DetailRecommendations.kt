@@ -14,7 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -150,7 +150,7 @@ fun DetailRecommendations(
                                 )
                                 if (onCollectionClick != null) {
                                     androidx.compose.material3.Icon(
-                                        imageVector = Icons.Rounded.KeyboardArrowRight,
+                                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                                         contentDescription = "View Collection",
                                         tint = Color.White.copy(alpha = 0.5f),
                                         modifier = Modifier.padding(start = 12.dp).size(20.dp)
@@ -178,6 +178,7 @@ fun DetailRecommendations(
                                 isWatched = movie.watched,
                                 isReminder = movie.reminder,
                                 progress = movie.progress?.toFloat() ?: 0f,
+                                personalRating = movie.personalRating,
                                 animatedVisibilityScope = if (isCurrent) null else animatedVisibilityScope,
                                 staggerIndex = index,
                                 onPress = { if (!isCurrent) onMovieClick(movie) },
@@ -234,6 +235,7 @@ fun DetailRecommendations(
                             isWatched = movie.watched,
                             isReminder = movie.reminder,
                             progress = movie.progress?.toFloat() ?: 0f,
+                            personalRating = movie.personalRating,
                             animatedVisibilityScope = animatedVisibilityScope,
                             staggerIndex = index,
                             onPress = { onMovieClick(movie) },

@@ -222,7 +222,7 @@ fun HomeScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 16.dp, 
+                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
                         top = topPadding + stickyHeaderHeight + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -267,7 +267,7 @@ fun HomeScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 16.dp, 
+                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
                         top = topPadding + stickyHeaderHeight + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -327,6 +327,8 @@ fun HomeScreenContent(
                                 } ?: emptyList()
                             }
 
+                            val isTvTab = uiState.activeTab == "tv"
+                            val nextEpisode = if (isTvTab) movie.calculateNextEpisode() else null
                             if (columns == 1) {
                                 com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie,
@@ -343,6 +345,30 @@ fun HomeScreenContent(
                                     onPress = stableOnPress,
                                     onAction = stableOnAction,
                                     onLongPress = stableOnLongPress,
+                                    onMessage = stableOnMessage,
+                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) { { m -> viewModel.markNextEpisodeWatched(m) } } else null
+                                )
+                            } else if (isTvTab && nextEpisode != null) {
+                                val isUpdating = viewModel.updatingShowIds[movie.id] == true
+                                com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
+                                    movie = movie,
+                                    cardWidth = cardWidth,
+                                    isUpdating = isUpdating,
+                                    isFavorite = movie.favorite,
+                                    isWatched = movie.watched,
+                                    isReminder = movie.reminder,
+                                    progress = (movie.progress ?: 0.0).toFloat(),
+                                    personalRating = movie.personalRating,
+                                    folderColors = folderColors,
+                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                    showBadges = uiState.preferences.showBadges,
+                                    hazeState = hazeState,
+                                    staggerIndex = index,
+                                    hasAnimatedSet = viewModel.animatedMovieIds,
+                                    onPress = stableOnPress,
+                                    onLongPress = stableOnLongPress,
+                                    onAction = stableOnAction,
+                                    onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
                                     onMessage = stableOnMessage
                                 )
                             } else {

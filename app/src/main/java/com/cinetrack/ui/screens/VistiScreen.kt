@@ -193,7 +193,7 @@ fun VistiScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 16.dp, 
+                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
                         top = topPadding + stickyHeaderHeight + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -227,7 +227,7 @@ fun VistiScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp, 
                         end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 16.dp, 
+                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
                         top = topPadding + stickyHeaderHeight + 12.dp
                     ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),

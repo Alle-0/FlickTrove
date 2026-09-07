@@ -14,10 +14,10 @@ import androidx.compose.ui.unit.dp
 
 fun Modifier.premiumScrollbar(
     state: ScrollState,
-    width: Float = 6f,
-    paddingEnd: Float = 4f,
+    width: Float = 2.5f,
+    paddingEnd: Float = 3f,
     paddingVertical: Float = 20f,
-    color: Color = Color.White.copy(alpha = 0.5f)
+    color: Color = Color.White.copy(alpha = 0.35f)
 ): Modifier = drawWithContent {
     drawContent()
     
@@ -41,10 +41,10 @@ fun Modifier.premiumScrollbar(
 
 fun Modifier.premiumScrollbar(
     state: androidx.compose.foundation.lazy.LazyListState,
-    width: Float = 6f,
-    paddingEnd: Float = 4f,
+    width: Float = 2.5f,
+    paddingEnd: Float = 3f,
     paddingVertical: Float = 20f,
-    color: Color = Color.White.copy(alpha = 0.5f)
+    color: Color = Color.White.copy(alpha = 0.35f)
 ): Modifier = drawWithContent {
     drawContent()
     
@@ -72,10 +72,10 @@ fun Modifier.premiumScrollbar(
 
 fun Modifier.premiumScrollbar(
     state: androidx.compose.foundation.lazy.grid.LazyGridState,
-    width: Float = 6f,
-    paddingEnd: Float = 4f,
+    width: Float = 2.5f,
+    paddingEnd: Float = 3f,
     paddingVertical: Float = 20f,
-    color: Color = Color.White.copy(alpha = 0.5f)
+    color: Color = Color.White.copy(alpha = 0.35f)
 ): Modifier = drawWithContent {
     drawContent()
     

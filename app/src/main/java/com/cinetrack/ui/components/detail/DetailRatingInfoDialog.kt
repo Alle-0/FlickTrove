@@ -34,7 +34,10 @@ import dev.chrisbanes.haze.HazeState
 fun DetailRatingInfoDialog(
     visible: Boolean,
     onDismiss: () -> Unit,
-    hazeState: HazeState
+    hazeState: HazeState,
+    countryCode: String? = null,
+    isTv: Boolean = false,
+    onViewGuideClick: (() -> Unit)? = null
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -102,43 +105,236 @@ fun DetailRatingInfoDialog(
                             .verticalFadingEdges(dialogScrollState, 16.dp, 16.dp)
                             .verticalScroll(dialogScrollState)
                     ) {
-                        // Film (MPAA)
-                        Text(
-                            stringResource(R.string.detail_rating_movies_usa),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White.copy(alpha = 0.5f)
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_g))
-                            RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
-                            RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
-                            RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
-                            RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
-                            RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
-                        }
+                        when (countryCode?.uppercase()) {
+                            "IT" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_it),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("T", Color(0xFF4CAF50), stringResource(R.string.detail_rating_it_t))
+                                    RatingLegendItem("6+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_it_6))
+                                    RatingLegendItem("VM14", Color(0xFFFF9800), stringResource(R.string.detail_rating_it_14))
+                                    RatingLegendItem("VM18", Color(0xFFF44336), stringResource(R.string.detail_rating_it_18))
+                                }
+                            }
+                            "DE" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_de),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("FSK 0", Color(0xFF4CAF50), stringResource(R.string.detail_rating_de_0))
+                                    RatingLegendItem("FSK 6", Color(0xFFFFC107), stringResource(R.string.detail_rating_de_6))
+                                    RatingLegendItem("FSK 12", Color(0xFF8BC34A), stringResource(R.string.detail_rating_de_12))
+                                    RatingLegendItem("FSK 16", Color(0xFFFF9800), stringResource(R.string.detail_rating_de_16))
+                                    RatingLegendItem("FSK 18", Color(0xFFF44336), stringResource(R.string.detail_rating_de_18))
+                                }
+                            }
+                            "FR" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_fr),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("U", Color(0xFF4CAF50), stringResource(R.string.detail_rating_fr_u))
+                                    RatingLegendItem("10", Color(0xFFFFC107), stringResource(R.string.detail_rating_fr_10))
+                                    RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_fr_12))
+                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_fr_16))
+                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_fr_18))
+                                }
+                            }
+                            "ES" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_es),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("APTA", Color(0xFF4CAF50), stringResource(R.string.detail_rating_es_apta))
+                                    RatingLegendItem("7", Color(0xFFFFC107), stringResource(R.string.detail_rating_es_7))
+                                    RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_es_12))
+                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_es_16))
+                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_es_18))
+                                }
+                            }
+                            "BR" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_br),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("L", Color(0xFF4CAF50), stringResource(R.string.detail_rating_br_l))
+                                    RatingLegendItem("10", Color(0xFF8BC34A), stringResource(R.string.detail_rating_br_10))
+                                    RatingLegendItem("12", Color(0xFFFFC107), stringResource(R.string.detail_rating_br_12))
+                                    RatingLegendItem("14", Color(0xFFFF9800), stringResource(R.string.detail_rating_br_14))
+                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_br_16))
+                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_br_18))
+                                }
+                            }
+                            "RU" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_ru),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("0+", Color(0xFF4CAF50), stringResource(R.string.detail_rating_ru_0))
+                                    RatingLegendItem("6+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_ru_6))
+                                    RatingLegendItem("12+", Color(0xFFFF9800), stringResource(R.string.detail_rating_ru_12))
+                                    RatingLegendItem("16+", Color(0xFFFF5722), stringResource(R.string.detail_rating_ru_16))
+                                    RatingLegendItem("18+", Color(0xFFF44336), stringResource(R.string.detail_rating_ru_18))
+                                }
+                            }
+                            "IN" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_in),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("U", Color(0xFF4CAF50), stringResource(R.string.detail_rating_in_u))
+                                    RatingLegendItem("UA", Color(0xFFFF9800), stringResource(R.string.detail_rating_in_ua))
+                                    RatingLegendItem("A", Color(0xFFF44336), stringResource(R.string.detail_rating_in_a))
+                                    RatingLegendItem("S", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_in_s))
+                                }
+                            }
+                            "GB" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_gb),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("U", Color(0xFF4CAF50), stringResource(R.string.detail_rating_gb_u))
+                                    RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_gb_pg))
+                                    RatingLegendItem("12A", Color(0xFFFF9800), stringResource(R.string.detail_rating_gb_12))
+                                    RatingLegendItem("15", Color(0xFFFF5722), stringResource(R.string.detail_rating_gb_15))
+                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_gb_18))
+                                }
+                            }
+                            else -> {
+                                // Default / US Fallback
+                                if (isTv) {
+                                    Text(
+                                        stringResource(R.string.detail_rating_tv_usa),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White.copy(alpha = 0.5f)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
+                                        RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
+                                        RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
+                                        RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
+                                        RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
+                                        RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
+                                    }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(20.dp))
 
-                        // Serie TV (TV Parental Guidelines)
-                        Text(
-                            stringResource(R.string.detail_rating_tv_usa),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White.copy(alpha = 0.5f)
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
-                            RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
-                            RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
-                            RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
-                            RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
-                            RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
+                                    Text(
+                                        stringResource(R.string.detail_rating_movies_usa),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White.copy(alpha = 0.5f)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_g))
+                                        RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
+                                        RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
+                                        RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
+                                        RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
+                                        RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
+                                    }
+                                } else {
+                                    Text(
+                                        stringResource(R.string.detail_rating_movies_usa),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White.copy(alpha = 0.5f)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_g))
+                                        RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
+                                        RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
+                                        RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
+                                        RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
+                                        RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
+                                    }
+
+                                    Spacer(modifier = Modifier.height(20.dp))
+
+                                    Text(
+                                        stringResource(R.string.detail_rating_tv_usa),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White.copy(alpha = 0.5f)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
+                                        RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
+                                        RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
+                                        RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
+                                        RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
+                                        RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    // Close Button (Fixed)
+                    // Action buttons (Fixed)
                     Spacer(modifier = Modifier.height(20.dp))
+                    
+                    if (onViewGuideClick != null) {
+                        val accent = MaterialTheme.colorScheme.primary
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .bounceClick(onClick = {
+                                        onDismiss()
+                                        onViewGuideClick()
+                                    })
+                                    .background(accent.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                                    .border(0.5.dp, accent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.detail_rating_view_guide),
+                                    color = accent,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                    contentDescription = null,
+                                    tint = accent,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

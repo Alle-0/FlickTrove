@@ -210,6 +210,36 @@ fun HomeFeedScreenContent(
         }
     }
 
+    val resolveLocalMovie = remember(uiState.allLocalMovies) {
+        { remoteMovie: Movie ->
+            val local = uiState.allLocalMovies.find { it.id == remoteMovie.id && it.mediaType == remoteMovie.mediaType }
+            if (local != null) {
+                local.copy(
+                    genreIds = if (!remoteMovie.genreIds.isNullOrEmpty()) remoteMovie.genreIds else local.genreIds
+                ).apply {
+                    this.logoPath = remoteMovie.logoPath ?: local.logoPath
+                    this.matchScore = remoteMovie.matchScore ?: local.matchScore
+                }
+            } else {
+                remoteMovie
+            }
+        }
+    }
+
+    val getMovieProgress = remember(uiState.allLocalMovies) {
+        { movie: Movie ->
+            val local = uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }
+            val effective = local ?: movie
+            (effective.progress ?: 0.0).toFloat().let { p ->
+                if (p > 0f) p
+                else if (effective.mediaType == "tv" && !effective.watchedEpisodes.isNullOrEmpty() && (effective.numberOfEpisodes ?: 0) > 0) {
+                    val totalWatched = effective.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                    (totalWatched.toFloat() / effective.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                } else 0f
+            }
+        }
+    }
+
     val isMovieFavorite = remember(uiState.allLocalMovies) {
         { movie: Movie ->
             movie.favorite || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.favorite == true
@@ -408,21 +438,30 @@ fun HomeFeedScreenContent(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(uiState.continueWatchingTv.size) { index ->
-                                val movie = uiState.continueWatchingTv[index]
+                            items(
+                                count = uiState.continueWatchingTv.size,
+                                key = { index -> uiState.continueWatchingTv[index].id }
+                            ) { index ->
+                                val rawMovie = uiState.continueWatchingTv[index]
+                                val movie = resolveLocalMovie(rawMovie)
+                                val isUpdating = viewModel.updatingShowIds[movie.id] == true
                                 Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
+                                    com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
                                         movie = movie,
                                         cardWidth = 110.dp,
+                                        isUpdating = isUpdating,
                                         isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
+                                        isWatched = movie.watched,
+                                        isReminder = movie.reminder,
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,
                                         onPress = onMovieClick,
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
+                                        onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
                                         onMessage = stableOnMessage
                                     )
                                 }
@@ -451,6 +490,8 @@ fun HomeFeedScreenContent(
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,
@@ -494,7 +535,8 @@ fun HomeFeedScreenContent(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(recommendedList.drop(1).size) { index ->
-                                    val movie = recommendedList.drop(1)[index]
+                                    val rawMovie = recommendedList.drop(1)[index]
+                                    val movie = resolveLocalMovie(rawMovie)
                                     Box(modifier = Modifier.width(110.dp)) {
                                         MovieCard(
                                             movie = movie,
@@ -502,6 +544,8 @@ fun HomeFeedScreenContent(
                                             isFavorite = isMovieFavorite(movie),
                                             isWatched = isMovieWatched(movie),
                                             isReminder = isMovieReminder(movie),
+                                            progress = getMovieProgress(movie),
+                                            personalRating = movie.personalRating,
                                             folderColors = getMovieFolderColors(movie),
                                             hazeState = activeHazeState,
                                             staggerIndex = index,
@@ -533,7 +577,8 @@ fun HomeFeedScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(recs.size) { index ->
-                                val movie = recs[index]
+                                val rawMovie = recs[index]
+                                val movie = resolveLocalMovie(rawMovie)
                                 Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
@@ -541,6 +586,8 @@ fun HomeFeedScreenContent(
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,
@@ -565,12 +612,16 @@ fun HomeFeedScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(top10List.take(10).size) { index ->
-                                val movie = top10List[index]
+                                val rawMovie = top10List[index]
+                                val movie = resolveLocalMovie(rawMovie)
                                 Top10MovieCard(
                                     movie = movie,
                                     rank = index + 1,
                                     isFavorite = isMovieFavorite(movie),
                                     isWatched = isMovieWatched(movie),
+                                    isReminder = isMovieReminder(movie),
+                                    progress = getMovieProgress(movie),
+                                    personalRating = movie.personalRating,
                                     folderColors = getMovieFolderColors(movie),
                                     hazeState = activeHazeState,
                                     staggerIndex = index,
@@ -597,7 +648,8 @@ fun HomeFeedScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(popularList.size) { index ->
-                                val movie = popularList[index]
+                                val rawMovie = popularList[index]
+                                val movie = resolveLocalMovie(rawMovie)
                                 Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
@@ -605,6 +657,8 @@ fun HomeFeedScreenContent(
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,
@@ -638,7 +692,8 @@ fun HomeFeedScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(nowPlayingList.size) { index ->
-                                val movie = nowPlayingList[index]
+                                val rawMovie = nowPlayingList[index]
+                                val movie = resolveLocalMovie(rawMovie)
                                 Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
@@ -646,6 +701,8 @@ fun HomeFeedScreenContent(
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,
@@ -679,7 +736,8 @@ fun HomeFeedScreenContent(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(upcomingList.size) { index ->
-                                val movie = upcomingList[index]
+                                val rawMovie = upcomingList[index]
+                                val movie = resolveLocalMovie(rawMovie)
                                 Box(modifier = Modifier.width(110.dp)) {
                                     MovieCard(
                                         movie = movie,
@@ -687,6 +745,8 @@ fun HomeFeedScreenContent(
                                         isFavorite = isMovieFavorite(movie),
                                         isWatched = isMovieWatched(movie),
                                         isReminder = isMovieReminder(movie),
+                                        progress = getMovieProgress(movie),
+                                        personalRating = movie.personalRating,
                                         folderColors = getMovieFolderColors(movie),
                                         hazeState = activeHazeState,
                                         staggerIndex = index,

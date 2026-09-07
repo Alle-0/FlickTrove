@@ -136,7 +136,11 @@ class GetHomeFeedUseCase @Inject constructor(
                     movie.mediaType == "tv" && 
                     !movie.watched && 
                     !movie.dropped && 
-                    (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0
+                    (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0 &&
+                    run {
+                        val next = movie.calculateNextEpisode()
+                        next != null && !next.isUpToDateWithAirDate
+                    }
                 }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
             }
             

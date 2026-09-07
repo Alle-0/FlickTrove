@@ -150,6 +150,7 @@
     <string name="stats_share_line_decade">📅 सुनहरा दशक: %1$s\n</string>
     <string name="stats_share_line_outro">\nFlickTrove पर अपनी सिनेमाई यात्रा को ट्रैक करें! 🍿</string>
     <string name="settings_tab_title">सेटिंग्स</string>
+    <string name="settings_general">सामान्य</string>
     <string name="settings_ui_layout">इंटरफ़ेस और लेआउट</string>
     <string name="settings_hide_saved">सहेजे गए शीर्षक छिपाएं</string>
     <string name="settings_hide_saved_desc">डिस्कवर और विवरणों से देखी गई फिल्मों और वॉचलिस्ट आइटम को फ़िल्टर करता है।</string>
@@ -160,6 +161,14 @@
     <string name="settings_badges_meaning">बैज का अर्थ</string>
     <string name="settings_layout_toggle">लेआउट बटन</string>
     <string name="settings_layout_toggle_desc">होम में कॉलम की संख्या बदलने के लिए एक बटन दिखाता है</string>
+    <string name="settings_episodes_layout">एपिसोड लेआउट</string>
+    <string name="settings_episodes_layout_desc">मानक चिप्स या टीवी टाइम-शैली अकॉर्डियन के बीच बदलें</string>
+    <string name="settings_episodes_layout_chips">चिप्स (मानक)</string>
+    <string name="settings_episodes_layout_accordion">अकॉर्डियन (TV Time)</string>
+    <string name="episodes_up_next">आगे देखें</string>
+    <string name="episodes_all_caught_up">आप पूरी तरह अपडेट हैं!</string>
+    <string name="episodes_all_episodes">सभी सीज़न</string>
+    <string name="episodes_layout_toggle">लेआउट बदलें</string>
     <string name="settings_split_home">होम रिलीज़ को विभाजित करें</string>
     <string name="settings_split_home_desc">होम में रिलीज़ हुए शीर्षकों को आगामी शीर्षकों से अलग करता है</string>
     <string name="settings_split_dropped">छोड़ी गई सीरीज़ दिखाएँ</string>
@@ -373,20 +382,36 @@
     <string name="detail_content_desc_folder">फ़ोल्डर</string>
     <string name="detail_content_desc_back">वापस</string>
     <string name="detail_rating_legend_title">रेटिंग लेजेंड</string>
-    <string name="detail_rating_movies_usa">?? फ़िल्में (USA / MPAA)</string>
+    <string name="detail_rating_movies_usa">फ़िल्में (USA / MPAA)</string>
     <string name="detail_rating_g">सामान्य दर्शक।</string>
     <string name="detail_rating_pg">माता-पिता के मार्गदर्शन का सुझाव दिया गया।</string>
     <string name="detail_rating_pg13">माता-पिता को कड़ी चेतावनी (13 वर्ष से कम)।</string>
     <string name="detail_rating_r">प्रतिबंधित (17 वर्ष से कम आयु वालों के लिए माता-पिता की आवश्यकता है)।</string>
     <string name="detail_rating_nc17">17 वर्ष और उससे कम आयु वालों को प्रवेश नहीं।</string>
     <string name="detail_rating_nr">रेट नहीं किया गया।</string>
-    <string name="detail_rating_tv_usa">?? टीवी शो (USA / टीवी दिशानिर्देश)</string>
+    <string name="detail_rating_tv_usa">टीवी शो (USA / टीवी दिशानिर्देश)</string>
     <string name="detail_rating_tvy">सभी बच्चे।</string>
     <string name="detail_rating_tvy7">बड़े बच्चों (7+) के लिए निर्देशित।</string>
     <string name="detail_rating_tvg">सामान्य दर्शक।</string>
     <string name="detail_rating_tvpg">माता-पिता के मार्गदर्शन का सुझाव दिया गया।</string>
     <string name="detail_rating_tv14">माता-पिता को कड़ी चेतावनी (14 वर्ष से कम)।</string>
     <string name="detail_rating_tvma">केवल वयस्क दर्शक।</string>
+    <string name="detail_rating_view_guide">सामग्री विवरण देखें</string>
+    <string name="detail_parents_guide_title">माता-पिता की मार्गदर्शिका</string>
+    <string name="guide_severity_none">कोई नहीं</string>
+    <string name="guide_severity_mild">हल्का</string>
+    <string name="guide_severity_moderate">मध्यम</string>
+    <string name="guide_severity_severe">गंभीर</string>
+    <string name="guide_cat_sex">यौन और नग्नता</string>
+    <string name="guide_cat_violence">हिंसा और रक्तपात</string>
+    <string name="guide_cat_profanity">अपशब्द</string>
+    <string name="guide_cat_alcohol">शराब और नशीले पदार्थ</string>
+    <string name="guide_cat_frightening">डरावने और तीव्र दृश्य</string>
+    <string name="detail_rating_country_in">फिल्म प्रमाणन (भारत / CBFC)</string>
+    <string name="detail_rating_in_u">अप्रतिबंधित सार्वजनिक प्रदर्शन (U - सभी आयु वर्ग)।</string>
+    <string name="detail_rating_in_ua">माता-पिता का मार्गदर्शन (UA - 12 वर्ष से कम आयु)।</string>
+    <string name="detail_rating_in_a">केवल वयस्कों के लिए (A - 18+)।</string>
+    <string name="detail_rating_in_s">विशेष दर्शकों के लिए (S)।</string>
     <string name="detail_translate_comment">समीक्षा का अनुवाद करें</string>
     <string name="detail_translate_download_prompt">अनुवाद मॉडल (लगभग 30MB) शायद अभी डाउनलोड नहीं हुआ है। सेलुलर डेटा पर डाउनलोड करने की अनुमति दें?</string>
     <string name="detail_translate_yes_cellular">हाँ, सेलुलर का उपयोग करें</string>
@@ -1148,5 +1173,15 @@
     <string name="match_score">मैच</string>
     <string name="notification_like_body">%1$s को आपकी टिप्पणी पसंद आई।</string>
     <string name="notification_like_title">नई पसंद</string>
+
+    <!-- Series Progress Tracking -->
+    <string name="msg_episode_watched">देखा गया चिह्नित किया गया: %1$s</string>
+    <string name="msg_series_completed">%1$s पूर्ण हुआ!</string>
+    <string name="lbl_coming_soon">जल्द आ रहा है</string>
+    <string name="lbl_up_to_date">अप टू डेट</string>
+    <string name="lbl_until_date">%1$s तक</string>
+    <string name="lbl_episodes_remaining">%1$d शेष</string>
+    <string name="lbl_next_episode">अगला: %1$s</string>
+    <string name="cd_mark_episode_watched">एपिसोड %1$s को देखा गया चिह्नित करें</string>
 </resources>
 

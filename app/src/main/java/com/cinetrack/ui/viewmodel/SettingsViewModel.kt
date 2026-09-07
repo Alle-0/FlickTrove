@@ -297,6 +297,9 @@ class SettingsViewModel @Inject constructor(
     val vibrationEnabled: StateFlow<Boolean> = settingsRepository.vibrationEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val episodesLayout: StateFlow<String> = settingsRepository.episodesLayout
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "STANDARD")
+
     val advancedVisualEffectsEnabled: StateFlow<Boolean> = settingsRepository.advancedVisualEffectsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -423,6 +426,12 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, context.getString(statusRes)))
+        }
+    }
+
+    fun updateEpisodesLayout(layout: String) {
+        viewModelScope.launch {
+            settingsRepository.updateEpisodesLayout(layout)
         }
     }
 

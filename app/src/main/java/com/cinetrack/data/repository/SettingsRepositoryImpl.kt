@@ -37,6 +37,11 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
         val HIDE_SAVED_FROM_DISCOVERY = booleanPreferencesKey("hide_saved_from_discovery")
         val PROMPT_WATCH_DATE_ON_DETAIL = booleanPreferencesKey("prompt_watch_date_on_detail")
+        val EPISODES_LAYOUT = stringPreferencesKey("episodes_layout")
+    }
+
+    override val episodesLayout: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.EPISODES_LAYOUT] ?: "STANDARD"
     }
 
     override val promptWatchDateOnDetail: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -206,6 +211,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun togglePromptWatchDateOnDetail(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.PROMPT_WATCH_DATE_ON_DETAIL] = enabled
+        }
+    }
+
+    override suspend fun updateEpisodesLayout(layout: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.EPISODES_LAYOUT] = layout
         }
     }
 }

@@ -20,6 +20,7 @@ interface SettingsRepository {
     val hasSeenOnboarding: Flow<Boolean>
     val hideSavedFromDiscovery: Flow<Boolean>
     val promptWatchDateOnDetail: Flow<Boolean>
+    val episodesLayout: Flow<String>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -38,4 +39,5 @@ interface SettingsRepository {
     suspend fun setOnboardingSeen(seen: Boolean)
     suspend fun toggleHideSavedFromDiscovery(enabled: Boolean)
     suspend fun togglePromptWatchDateOnDetail(enabled: Boolean)
+    suspend fun updateEpisodesLayout(layout: String)
 }

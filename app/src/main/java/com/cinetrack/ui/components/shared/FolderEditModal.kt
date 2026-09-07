@@ -170,24 +170,26 @@ fun FolderEditDialog(
                     
                     Spacer(Modifier.height(32.dp))
                     
-                    Button(
-                        onClick = { 
-                            pendingSave = Pair(name, selectedColor)
-                            isDismissing = true
-                        },
-                        enabled = if (editMode == FolderEditMode.NAME) name.isNotBlank() && name != initialName else selectedColor != initialColor,
+                    val isSaveEnabled = if (editMode == FolderEditMode.NAME) name.isNotBlank() && name != initialName else selectedColor != initialColor
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black,
-                            disabledContainerColor = Color.White.copy(alpha = 0.2f),
-                            disabledContentColor = Color.Black.copy(alpha = 0.5f)
-                        )
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (isSaveEnabled) Color.White else Color.White.copy(alpha = 0.2f)
+                            )
+                            .bounceClick(enabled = isSaveEnabled) {
+                                pendingSave = Pair(name, selectedColor)
+                                isDismissing = true
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(stringResource(R.string.action_save).uppercase(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                        Text(
+                            stringResource(R.string.action_save).uppercase(),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = if (isSaveEnabled) Color.Black else Color.Black.copy(alpha = 0.5f)
+                        )
                     }
                 }
             }

@@ -32,6 +32,21 @@ data class Season(
 
 @Serializable
 @Stable
+data class NextEpisodeInfo(
+    val seasonNumber: Int,
+    val episodeNumber: Int,
+    val remainingInSeason: Int,
+    val remainingTotal: Int,
+    val progress: Float,
+    val isLastEpisodeOfSeries: Boolean = false,
+    val isUpToDateWithAirDate: Boolean = false
+) {
+    val episodeCode: String
+        get() = "S${seasonNumber.toString().padStart(2, '0')} E${episodeNumber.toString().padStart(2, '0')}"
+}
+
+@Serializable
+@Stable
 data class PersonData(
     val id: Long = 0L,
     val name: String = "",

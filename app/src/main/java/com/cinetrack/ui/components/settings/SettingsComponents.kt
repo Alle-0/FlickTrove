@@ -3,9 +3,8 @@ package com.cinetrack.ui.components.settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -86,11 +85,10 @@ fun SettingsSection(
                 shape = RoundedCornerShape(32.dp)
             )
     ) {
-        // Section Header (Clickable for Accordion)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
+                .bounceClick(scaleDown = 0.98f) {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     isExpanded = !isExpanded
                 }
@@ -210,21 +208,28 @@ fun SettingsItem(
     trailing: @Composable (() -> Unit)? = null,
     customContent: @Composable (ColumnScope.() -> Unit)? = null,
     iconTint: Color? = null,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val itemThemeColor = borderColor ?: tint
     val finalIconTint = iconTint ?: itemThemeColor
+    val isClickable = onClick != null
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .alpha(alpha)
             .clip(RoundedCornerShape(20.dp))
-            .bounceClick { 
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onClick() 
-            }
+            .then(
+                if (isClickable) {
+                    Modifier.bounceClick { 
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onClick?.invoke() 
+                    }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         Column(
             modifier = Modifier
@@ -425,10 +430,7 @@ fun BadgeLegendItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onToggle(!enabled) }
+            .bounceClick(scaleDown = 0.98f) { onToggle(!enabled) }
     ) {
         Box(
             modifier = Modifier
@@ -483,7 +485,7 @@ fun SettingsActionButton(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White.copy(alpha = if (enabled) 0.1f else 0.05f))
-            .clickable(enabled = enabled) { onClick() }
+            .bounceClick(enabled = enabled) { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .alpha(if (enabled) 1f else 0.5f),
         horizontalArrangement = Arrangement.Center,
@@ -531,7 +533,7 @@ fun DonationBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(32.dp))
             .background(Color(0xFF1E1E26))
             .background(glowBrush) // Apply glow on top of base dark color
             .border(
@@ -542,7 +544,7 @@ fun DonationBanner(
                         Color.White.copy(alpha = 0.05f)
                     )
                 ),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(32.dp)
             )
             .padding(20.dp)
     ) {
@@ -555,7 +557,7 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -567,7 +569,7 @@ fun DonationBanner(
                         .border(
                             width = 2.dp,
                             color = Color(0xFFFF8B89).copy(alpha = 0.5f),
-                            shape = androidx.compose.foundation.shape.CircleShape
+                            shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -613,7 +615,7 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -622,7 +624,7 @@ fun DonationBanner(
                                 )
                             )
                         )
-                        .clickable {
+                        .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
@@ -649,7 +651,7 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -658,9 +660,9 @@ fun DonationBanner(
                                 )
                             )
                         )
-                        .clickable {
+                        .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            uriHandler.openUri("https://paypal.me/alle0")
+                            uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
                         .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
@@ -684,3 +686,61 @@ fun DonationBanner(
         }
     }
 }
+
+@Composable
+fun SettingsDialogConfirmButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = Color.Black
+) {
+    val haptic = LocalHapticFeedback.current
+    Box(
+        modifier = modifier
+            .height(50.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f))
+            .bounceClick(enabled = enabled) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            color = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun SettingsDialogCancelButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val haptic = LocalHapticFeedback.current
+    Box(
+        modifier = modifier
+            .height(50.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .bounceClick(enabled = enabled) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+

@@ -881,24 +881,25 @@ fun FolderCreateDialog(
                 
                 Spacer(Modifier.height(32.dp))
                 
-                Button(
-                    onClick = { 
-                        pendingCreate = Triple(name, "folder", selectedColor)
-                        isDismissing = true
-                    },
-                    enabled = name.isNotBlank(),
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black,
-                        disabledContainerColor = Color.White.copy(alpha = 0.2f),
-                        disabledContentColor = Color.Black.copy(alpha = 0.5f)
-                    )
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (name.isNotBlank()) Color.White else Color.White.copy(alpha = 0.2f)
+                        )
+                        .bounceClick(enabled = name.isNotBlank()) {
+                            pendingCreate = Triple(name, "folder", selectedColor)
+                            isDismissing = true
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.folders_create_button), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                    Text(
+                        stringResource(R.string.folders_create_button),
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = if (name.isNotBlank()) Color.Black else Color.Black.copy(alpha = 0.5f)
+                    )
                 }
                 }
             }

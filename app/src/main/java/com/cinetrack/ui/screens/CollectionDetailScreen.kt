@@ -293,24 +293,44 @@ fun CollectionDetailScreenContent(
                                     folderColors.map { Color(android.graphics.Color.parseColor(it)) }
                                 }
                                 val fav = uiState.favorites.find { it.id == movie.id }
-                                val isFavorite = fav?.favorite == true
-                                val isWatched = fav?.watched == true
-                                val isReminder = fav?.reminder == true
+                                val effectiveMovie = if (fav != null) {
+                                    fav.copy(
+                                        genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds
+                                    ).apply {
+                                        this.logoPath = movie.logoPath ?: fav.logoPath
+                                        this.matchScore = movie.matchScore ?: fav.matchScore
+                                    }
+                                } else {
+                                    if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                                }
+                                val isFavorite = effectiveMovie.favorite
+                                val isWatched = effectiveMovie.watched
+                                val isReminder = effectiveMovie.reminder
+                                val progress = (effectiveMovie.progress ?: 0.0).toFloat().let { p ->
+                                    if (p > 0f) p
+                                    else if (effectiveMovie.mediaType == "tv" && !effectiveMovie.watchedEpisodes.isNullOrEmpty() && (effectiveMovie.numberOfEpisodes ?: 0) > 0) {
+                                        val totalWatched = effectiveMovie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                                        (totalWatched.toFloat() / effectiveMovie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                                    } else 0f
+                                }
+                                val personalRating = effectiveMovie.personalRating
 
                                 MovieCard(
-                                    movie = movie,
+                                    movie = effectiveMovie,
                                     cardWidth = cardWidth,
                                     isFavorite = isFavorite,
                                     isWatched = isWatched,
                                     isReminder = isReminder,
+                                    progress = progress,
+                                    personalRating = personalRating,
                                     folderColors = folderColorObjects,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                     showBadges = uiState.preferences.showBadges,
                                     showAdvancedBadges = false,
                                     hazeState = rootHazeState,
                                     staggerIndex = index,
-                                    onPress = { onMovieClick(movie) },
-                                    onAction = { viewModel.toggleFavorite(movie) },
+                                    onPress = { onMovieClick(effectiveMovie) },
+                                    onAction = { viewModel.toggleFavorite(effectiveMovie) },
                                     onLongPress = { m, pressOffset, cardPos ->
                                         actionsState.onLongPress(m, pressOffset, cardPos)
                                     },

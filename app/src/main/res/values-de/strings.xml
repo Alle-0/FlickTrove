@@ -148,6 +148,7 @@
     <string name="stats_share_line_decade">📅 Goldenes Jahrzehnt: %1$s\n</string>
     <string name="stats_share_line_outro">\nVerfolge deine Filmreise auf FlickTrove! 🍿</string>
     <string name="settings_tab_title">Einstellungen</string>
+    <string name="settings_general">Allgemein</string>
     <string name="settings_ui_layout">Benutzeroberfläche und Layout</string>
     <string name="settings_hide_saved">Gespeicherte Titel ausblenden</string>
     <string name="settings_hide_saved_desc">Blendet angesehene Filme und Watchlist-Titel in Entdecken und Details aus.</string>
@@ -158,6 +159,14 @@
     <string name="settings_badges_meaning">Badge-Bedeutung</string>
     <string name="settings_layout_toggle">Layout-Button</string>
     <string name="settings_layout_toggle_desc">Zeigt einen Button zum Ändern der Spaltenanzahl auf der Startseite</string>
+    <string name="settings_episodes_layout">Episoden-Layout</string>
+    <string name="settings_episodes_layout_desc">Zwischen Standard-Chips und Akkordeon im TV Time-Stil wechseln</string>
+    <string name="settings_episodes_layout_chips">Chips (Standard)</string>
+    <string name="settings_episodes_layout_accordion">Akkordeon (TV Time)</string>
+    <string name="episodes_up_next">ALS NÄCHSTES</string>
+    <string name="episodes_all_caught_up">Du bist auf dem neuesten Stand!</string>
+    <string name="episodes_all_episodes">ALLE STAFFELN</string>
+    <string name="episodes_layout_toggle">Layout umschalten</string>
     <string name="settings_split_home">Neuerscheinungen trennen</string>
     <string name="settings_split_home_desc">Trennt bereits erschienene Titel von kommenden Titeln auf der Startseite</string>
     <string name="settings_split_dropped">Abgebrochene Serien anzeigen</string>
@@ -369,20 +378,37 @@
     <string name="detail_content_desc_folder">Ordner</string>
     <string name="detail_content_desc_back">Zurück</string>
     <string name="detail_rating_legend_title">Bewertungslegende</string>
-    <string name="detail_rating_movies_usa">🇺🇸 Filme (USA / MPAA)</string>
+    <string name="detail_rating_movies_usa">Filme (USA / MPAA)</string>
     <string name="detail_rating_g">Für alle Altersgruppen freigegeben.</string>
     <string name="detail_rating_pg">Begleitung durch Eltern empfohlen.</string>
     <string name="detail_rating_pg13">Dringende Warnung an Eltern (Unter 13).</string>
     <string name="detail_rating_r">Eingeschränkt (Unter 17 nur in Begleitung eines Elternteils oder Erziehungsberechtigten).</string>
     <string name="detail_rating_nc17">Keine Personen unter 17 Jahren zugelassen.</string>
     <string name="detail_rating_nr">Ohne Bewertung.</string>
-    <string name="detail_rating_tv_usa">🇺🇸 TV-Sendungen (USA / TV-Richtlinien)</string>
+    <string name="detail_rating_tv_usa">TV-Sendungen (USA / TV-Richtlinien)</string>
     <string name="detail_rating_tvy">Für alle Kinder.</string>
     <string name="detail_rating_tvy7">Für ältere Kinder gerichtet (7+).</string>
     <string name="detail_rating_tvg">Allgemeines Publikum.</string>
     <string name="detail_rating_tvpg">Begleitung durch Eltern empfohlen.</string>
     <string name="detail_rating_tv14">Dringende Warnung an Eltern (Unter 14).</string>
     <string name="detail_rating_tvma">Nur für erwachsenes Publikum.</string>
+    <string name="detail_rating_view_guide">Inhaltliche Details ansehen</string>
+    <string name="detail_parents_guide_title">Elternratgeber</string>
+    <string name="guide_severity_none">Keine</string>
+    <string name="guide_severity_mild">Leicht</string>
+    <string name="guide_severity_moderate">Mäßig</string>
+    <string name="guide_severity_severe">Stark</string>
+    <string name="guide_cat_sex">Sex &amp; Nacktheit</string>
+    <string name="guide_cat_violence">Gewalt &amp; Gore</string>
+    <string name="guide_cat_profanity">Obszöne Sprache</string>
+    <string name="guide_cat_alcohol">Alkohol &amp; Drogen</string>
+    <string name="guide_cat_frightening">Schock &amp; Grusel</string>
+    <string name="detail_rating_country_de">Freiwillige Selbstkontrolle (Deutschland / FSK)</string>
+    <string name="detail_rating_de_0">Freigegeben ohne Altersbeschränkung (Ab 0 Jahren).</string>
+    <string name="detail_rating_de_6">Freigegeben ab 6 Jahren.</string>
+    <string name="detail_rating_de_12">Freigegeben ab 12 Jahren.</string>
+    <string name="detail_rating_de_16">Freigegeben ab 16 Jahren.</string>
+    <string name="detail_rating_de_18">Keine Jugendfreigabe (Ab 18 Jahren).</string>
     <string name="detail_translate_comment">Bewertung übersetzen</string>
     <string name="detail_translate_download_prompt">Das Übersetzungsmodell (ca. 30MB) ist möglicherweise noch nicht heruntergeladen. Herunterladen über mobile Daten erlauben?</string>
     <string name="detail_translate_yes_cellular">Ja, mobile Daten nutzen</string>
@@ -1151,4 +1177,14 @@
     <string name="notification_like_body">%1$s gefällt dein Kommentar.</string>
     <string name="notification_like_title">Neues Gefällt mir</string>
     <string name="stats_rewatches">Rewatches</string>
+
+    <!-- Series Progress Tracking -->
+    <string name="msg_episode_watched">Als gesehen markiert: %1$s</string>
+    <string name="msg_series_completed">%1$s abgeschlossen!</string>
+    <string name="lbl_coming_soon">Demnächst</string>
+    <string name="lbl_up_to_date">Aktuell</string>
+    <string name="lbl_until_date">bis %1$s</string>
+    <string name="lbl_episodes_remaining">noch %1$d</string>
+    <string name="lbl_next_episode">Nächste: %1$s</string>
+    <string name="cd_mark_episode_watched">Folge %1$s als gesehen markieren</string>
 </resources>

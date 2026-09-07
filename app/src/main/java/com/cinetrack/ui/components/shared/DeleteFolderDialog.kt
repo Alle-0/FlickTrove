@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -150,34 +151,34 @@ fun DeleteFolderDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         // Delete - high priority
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                pendingConfirm = true
-                                isDismissing = true
-                            },
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = ErrorRed,
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(ErrorRed)
+                                .bounceClick {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    pendingConfirm = true
+                                    isDismissing = true
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.folder_delete_action), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.folder_delete_action), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black), color = Color.White)
+                            }
                         }
 
                         // Cancel
-                        TextButton(
-                            onClick = { isDismissing = true },
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
-                            shape = RoundedCornerShape(16.dp)
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .bounceClick { isDismissing = true },
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = stringResource(R.string.action_cancel).uppercase(),

@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -75,11 +77,18 @@ fun UnmatchedItemsModal(
                                 )
                             }
                         }
-                        IconButton(onClick = onClose) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .bounceClick { onClose() },
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                 contentDescription = "Close",
-                                tint = MaterialTheme.colorScheme.onBackground
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -131,9 +140,12 @@ fun UnmatchedItemsModal(
                                         )
                                     }
                                     
-                                    IconButton(
-                                        onClick = { onRemoveItem(item) },
-                                        modifier = Modifier.size(36.dp)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .bounceClick { onRemoveItem(item) },
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),

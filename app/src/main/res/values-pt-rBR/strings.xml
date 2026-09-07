@@ -150,6 +150,7 @@
     <string name="stats_share_line_decade">📅 Década de ouro: %1$s\n</string>
     <string name="stats_share_line_outro">\nAcompanhe sua jornada cinematográfica no FlickTrove! 🍿</string>
     <string name="settings_tab_title">Configurações</string>
+    <string name="settings_general">Geral</string>
     <string name="settings_ui_layout">Interface e Layout</string>
     <string name="settings_hide_saved">Ocultar títulos salvos</string>
     <string name="settings_hide_saved_desc">Oculta filmes e séries assistidos ou na lista de interesses das seções Descobrir e detalhes.</string>
@@ -160,6 +161,14 @@
     <string name="settings_badges_meaning">Significado do Emblema</string>
     <string name="settings_layout_toggle">Botão de Layout</string>
     <string name="settings_layout_toggle_desc">Mostra um botão para alterar o número de colunas no Início</string>
+    <string name="settings_episodes_layout">Layout dos Episódios</string>
+    <string name="settings_episodes_layout_desc">Alterne entre abas padrão ou sanfona no estilo TV Time</string>
+    <string name="settings_episodes_layout_chips">Abas (Padrão)</string>
+    <string name="settings_episodes_layout_accordion">Sanfona (TV Time)</string>
+    <string name="episodes_up_next">A SEGUIR</string>
+    <string name="episodes_all_caught_up">Você está em dia com a série!</string>
+    <string name="episodes_all_episodes">TODAS AS TEMPORADAS</string>
+    <string name="episodes_layout_toggle">Alternar Layout</string>
     <string name="settings_split_home">Dividir Lançamentos no Início</string>
     <string name="settings_split_home_desc">Separa os títulos já lançados dos próximos no Início</string>
     <string name="settings_split_dropped">Mostrar Séries Abandonadas</string>
@@ -373,20 +382,38 @@
     <string name="detail_content_desc_folder">Pasta</string>
     <string name="detail_content_desc_back">Voltar</string>
     <string name="detail_rating_legend_title">Legenda de Classificação</string>
-    <string name="detail_rating_movies_usa">?? Filmes (EUA / MPAA)</string>
+    <string name="detail_rating_movies_usa">Filmes (EUA / MPAA)</string>
     <string name="detail_rating_g">Público em Geral.</string>
     <string name="detail_rating_pg">Orientação Parental Sugerida.</string>
     <string name="detail_rating_pg13">Orientação Parental Rigorosa (Menores de 13).</string>
     <string name="detail_rating_r">Restrito (Menores de 17 anos requerem a companhia de um dos pais).</string>
     <string name="detail_rating_nc17">Proibido para Menores de 17.</string>
     <string name="detail_rating_nr">Sem Classificação.</string>
-    <string name="detail_rating_tv_usa">?? Séries de TV (EUA / Classificação de TV)</string>
+    <string name="detail_rating_tv_usa">Séries de TV (EUA / Classificação de TV)</string>
     <string name="detail_rating_tvy">Todas as Crianças.</string>
     <string name="detail_rating_tvy7">Crianças Mais Velhas (7+).</string>
     <string name="detail_rating_tvg">Público em Geral.</string>
     <string name="detail_rating_tvpg">Orientação Parental Sugerida.</string>
     <string name="detail_rating_tv14">Orientação Parental Rigorosa (Menores de 14).</string>
     <string name="detail_rating_tvma">Apenas Público Adulto.</string>
+    <string name="detail_rating_view_guide">Ver detalhes do conteúdo</string>
+    <string name="detail_parents_guide_title">Guia dos pais</string>
+    <string name="guide_severity_none">Nenhum</string>
+    <string name="guide_severity_mild">Leve</string>
+    <string name="guide_severity_moderate">Moderado</string>
+    <string name="guide_severity_severe">Severo</string>
+    <string name="guide_cat_sex">Sexo e nudez</string>
+    <string name="guide_cat_violence">Violência e gore</string>
+    <string name="guide_cat_profanity">Linguagem imprópria</string>
+    <string name="guide_cat_alcohol">Álcool e drogas</string>
+    <string name="guide_cat_frightening">Cenas assustadoras e intensas</string>
+    <string name="detail_rating_country_br">Classificação Indicativa (Brasil / ClassInd)</string>
+    <string name="detail_rating_br_l">Livre para todos os públicos.</string>
+    <string name="detail_rating_br_10">Não recomendado para menores de 10 anos.</string>
+    <string name="detail_rating_br_12">Não recomendado para menores de 12 anos.</string>
+    <string name="detail_rating_br_14">Não recomendado para menores de 14 anos.</string>
+    <string name="detail_rating_br_16">Não recomendado para menores de 16 anos.</string>
+    <string name="detail_rating_br_18">Não recomendado para menores de 18 anos.</string>
     <string name="detail_translate_comment">Traduzir avaliação</string>
     <string name="detail_translate_download_prompt">O modelo de tradução (cerca de 30MB) pode ainda não ter sido baixado. Permitir o download usando dados móveis?</string>
     <string name="detail_translate_yes_cellular">Sim, usar dados móveis</string>
@@ -1148,5 +1175,15 @@
     <string name="match_score">Compatibilidade</string>
     <string name="notification_like_body">%1$s curtiu seu comentário.</string>
     <string name="notification_like_title">Nova Curtida</string>
+
+    <!-- Series Progress Tracking -->
+    <string name="msg_episode_watched">Marcado como assistido: %1$s</string>
+    <string name="msg_series_completed">%1$s concluída!</string>
+    <string name="lbl_coming_soon">Em breve</string>
+    <string name="lbl_up_to_date">Em dia</string>
+    <string name="lbl_until_date">até %1$s</string>
+    <string name="lbl_episodes_remaining">faltam %1$d</string>
+    <string name="lbl_next_episode">Próximo: %1$s</string>
+    <string name="cd_mark_episode_watched">Marcar episódio %1$s como assistido</string>
 </resources>
 

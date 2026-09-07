@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,13 +32,74 @@ import com.cinetrack.util.VibrationHelper
 import com.cinetrack.ui.utils.bounceClick
 
 @Composable
+fun SettingsGeneralPreferencesSection(
+    settingsViewModel: SettingsViewModel,
+    currentAccentColor: Color,
+    onShowLanguageDialog: () -> Unit,
+    onShowStartScreenDialog: () -> Unit
+) {
+    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
+    val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
+
+    SettingsSection(
+        title = stringResource(R.string.settings_general),
+        icon = ImageVector.vectorResource(id = R.drawable.ic_settings)
+    ) {
+        // App Language
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_world),
+            title = stringResource(R.string.settings_language),
+            description = stringResource(R.string.settings_language_desc),
+            trailing = {
+                val label = when(contentLanguage) {
+                    "system" -> stringResource(R.string.settings_language_system)
+                    "en" -> stringResource(R.string.settings_language_en)
+                    "it" -> stringResource(R.string.settings_language_it)
+                    "es" -> stringResource(R.string.settings_language_es)
+                    "fr" -> stringResource(R.string.settings_language_fr)
+                    "de" -> stringResource(R.string.settings_language_de)
+                    "pt" -> stringResource(R.string.settings_language_pt)
+                    "ru" -> stringResource(R.string.settings_language_ru)
+                    "hi" -> stringResource(R.string.settings_language_hi)
+                    else -> contentLanguage
+                }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = currentAccentColor
+                )
+            },
+            onClick = { onShowLanguageDialog() }
+        )
+        // Start Screen
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_home),
+            title = stringResource(R.string.settings_default_start_tab),
+            description = stringResource(R.string.settings_default_start_tab_desc),
+            trailing = {
+                val label = when(defaultStartTab) {
+                    "feed" -> stringResource(R.string.settings_default_start_feed)
+                    "home" -> stringResource(R.string.settings_default_start_home)
+                    "visti" -> stringResource(R.string.settings_default_start_visti)
+                    else -> stringResource(R.string.settings_default_start_feed)
+                }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = currentAccentColor
+                )
+            },
+            onClick = { onShowStartScreenDialog() }
+        )
+    }
+}
+
+@Composable
 fun SettingsUILayoutSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
-    onShowBadgesInfo: () -> Unit,
-    onShowLanguageDialog: () -> Unit,
-    onShowStartScreenDialog: () -> Unit
+    onShowBadgesInfo: () -> Unit
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
@@ -49,11 +109,6 @@ fun SettingsUILayoutSection(
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
-    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
-    val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
-    val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
-    val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
-    val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -126,10 +181,16 @@ fun SettingsUILayoutSection(
             description = stringResource(R.string.settings_badges_desc),
             trailing = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        onShowBadgesInfo() 
-                    }) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .bounceClick { 
+                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                onShowBadgesInfo() 
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Info,
                             contentDescription = "Info Badge",
@@ -221,6 +282,7 @@ fun SettingsUILayoutSection(
                 settingsViewModel.toggleSplitDroppedHome(!showSplitDroppedHome)
             }
         )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
             title = stringResource(R.string.settings_use_movie_logo),
@@ -240,175 +302,7 @@ fun SettingsUILayoutSection(
                 settingsViewModel.toggleUseMovieLogo(!useMovieLogo)
             }
         )
-
-
-
-        // App Language
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_world),
-            title = stringResource(R.string.settings_language),
-            description = stringResource(R.string.settings_language_desc),
-            trailing = {
-                val label = when(contentLanguage) {
-                    "system" -> stringResource(R.string.settings_language_system)
-                    "en" -> stringResource(R.string.settings_language_en)
-                    "it" -> stringResource(R.string.settings_language_it)
-                    "es" -> stringResource(R.string.settings_language_es)
-                    "fr" -> stringResource(R.string.settings_language_fr)
-                    "de" -> stringResource(R.string.settings_language_de)
-                    "pt" -> stringResource(R.string.settings_language_pt)
-                    "ru" -> stringResource(R.string.settings_language_ru)
-                    "hi" -> stringResource(R.string.settings_language_hi)
-                    else -> contentLanguage
-                }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = currentAccentColor
-                )
-            },
-            onClick = { onShowLanguageDialog() }
-        )
-        // Start Screen
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_home),
-            title = stringResource(R.string.settings_default_start_tab),
-            description = stringResource(R.string.settings_default_start_tab_desc),
-            trailing = {
-                val label = when(defaultStartTab) {
-                    "feed" -> stringResource(R.string.settings_default_start_feed)
-                    "home" -> stringResource(R.string.settings_default_start_home)
-                    "visti" -> stringResource(R.string.settings_default_start_visti)
-                    else -> stringResource(R.string.settings_default_start_feed)
-                }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = currentAccentColor
-                )
-            },
-            onClick = { onShowStartScreenDialog() }
-        )
     }
-}
-
-@Composable
-fun SettingsLanguageSection(
-    settingsViewModel: SettingsViewModel,
-    currentAccentColor: Color,
-    vibrationEnabled: Boolean
-) {
-    val context = LocalContext.current
-    val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
-
-    SettingsItem(
-        icon = ImageVector.vectorResource(id = R.drawable.ic_world),
-        title = stringResource(R.string.settings_language),
-        description = stringResource(R.string.settings_language_desc),
-        trailing = { },
-        onClick = { },
-        customContent = {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val options = listOf(
-                    Triple("system", stringResource(R.string.settings_language_system), contentLanguage == "system"),
-                    Triple("en", stringResource(R.string.settings_language_en), contentLanguage == "en"),
-                    Triple("it", stringResource(R.string.settings_language_it), contentLanguage == "it"),
-                    Triple("es", stringResource(R.string.settings_language_es), contentLanguage == "es"),
-                    Triple("fr", stringResource(R.string.settings_language_fr), contentLanguage == "fr"),
-                    Triple("de", stringResource(R.string.settings_language_de), contentLanguage == "de"),
-                    Triple("pt", stringResource(R.string.settings_language_pt), contentLanguage == "pt"),
-                    Triple("ru", stringResource(R.string.settings_language_ru), contentLanguage == "ru"),
-                    Triple("hi", stringResource(R.string.settings_language_hi), contentLanguage == "hi")
-                )
-                options.forEach { (value, label, isSelected) ->
-                    key(value) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                .bounceClick { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    if (contentLanguage != value) {
-                                        settingsViewModel.updateContentLanguage(value) {
-                                            var actContext = context
-                                            while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
-                                                actContext = (actContext as android.content.ContextWrapper).baseContext
-                                            }
-                                            (actContext as? android.app.Activity)?.recreate()
-                                        }
-                                    }
-                                }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun SettingsStartTabSection(
-    settingsViewModel: SettingsViewModel,
-    currentAccentColor: Color,
-    vibrationEnabled: Boolean
-) {
-    val context = LocalContext.current
-    val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
-
-    SettingsItem(
-        icon = ImageVector.vectorResource(id = R.drawable.ic_home),
-        title = stringResource(R.string.settings_default_start_tab),
-        description = stringResource(R.string.settings_default_start_tab_desc),
-        trailing = { },
-        onClick = { },
-        customContent = {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val options = listOf(
-                    Triple("home", stringResource(R.string.settings_default_start_home), defaultStartTab == "home"),
-                    Triple("visti", stringResource(R.string.settings_default_start_visti), defaultStartTab == "visti")
-                )
-                options.forEach { (value, label, isSelected) ->
-                    key(value) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                .bounceClick { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    if (defaultStartTab != value) {
-                                        settingsViewModel.setDefaultStartTab(value)
-                                    }
-                                }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable

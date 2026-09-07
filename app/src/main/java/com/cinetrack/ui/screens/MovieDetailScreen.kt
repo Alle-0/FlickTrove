@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -248,6 +249,7 @@ fun MovieDetailScreenContent(
     val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
+    var parentsGuideYOffset by remember { mutableStateOf<Float?>(null) }
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -637,7 +639,22 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor
                                     )
 
-                                    Spacer(modifier = Modifier.height(40.dp))
+                                    val cert = state.externalRatings.certification
+                                    val country = state.externalRatings.certificationCountry
+                                    if (!cert.isNullOrBlank()) {
+                                        Spacer(modifier = Modifier.height(56.dp))
+                                        DetailParentsGuide(
+                                            certification = cert,
+                                            countryCode = country,
+                                            accentColor = accentColor,
+                                            modifier = Modifier.onGloballyPositioned { coordinates ->
+                                                parentsGuideYOffset = coordinates.positionInParent().y
+                                            }
+                                        )
+                                        Spacer(modifier = Modifier.height(56.dp))
+                                    } else {
+                                        Spacer(modifier = Modifier.height(48.dp))
+                                    }
 
                                     if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
                                         DetailTrailers(
@@ -794,10 +811,26 @@ fun MovieDetailScreenContent(
 
 
 
+    val currentRatings = (cachedSuccess?.externalRatings) ?: (uiState as? DetailUiState.Success)?.externalRatings
+    val isTvShow = (cachedSuccess?.movieEntry?.mediaType ?: (uiState as? DetailUiState.Success)?.movieEntry?.mediaType) == "tv"
+
     DetailRatingInfoDialog(
         visible = showRatingInfoDialog,
         onDismiss = { showRatingInfoDialog = false },
-        hazeState = rootHazeState
+        hazeState = rootHazeState,
+        countryCode = currentRatings?.certificationCountry ?: "US",
+        isTv = isTvShow,
+        onViewGuideClick = if (!currentRatings?.certification.isNullOrBlank()) {
+            {
+                scope.launch {
+                    parentsGuideYOffset?.let {
+                        scrollState.animateScrollTo(it.toInt())
+                    } ?: run {
+                        scrollState.animateScrollTo(scrollState.maxValue)
+                    }
+                }
+            }
+        } else null
     )
     // Translation Prompt Dialog
     DetailTranslationPromptModal(

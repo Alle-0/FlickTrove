@@ -151,6 +151,7 @@
     <string name="stats_share_line_decade">📅 Золотое десятилетие: %1$s\n</string>
     <string name="stats_share_line_outro">\nОтслеживайте свое кино-путешествие в FlickTrove! 🍿</string>
     <string name="settings_tab_title">Настройки</string>
+    <string name="settings_general">Общие</string>
     <string name="settings_ui_layout">Интерфейс и компоновка</string>
     <string name="settings_hide_saved">Скрыть сохраненные элементы</string>
     <string name="settings_hide_saved_desc">Скрывает просмотренные фильмы и элементы из списка наблюдения в Обзоре и деталях.</string>
@@ -161,6 +162,14 @@
     <string name="settings_badges_meaning">Значение значков</string>
     <string name="settings_layout_toggle">Кнопка изменения вида</string>
     <string name="settings_layout_toggle_desc">Отображает кнопку для изменения количества столбцов на Главной</string>
+    <string name="settings_episodes_layout">Вид списка эпизодов</string>
+    <string name="settings_episodes_layout_desc">Переключение между вкладками и аккордеоном в стиле TV Time</string>
+    <string name="settings_episodes_layout_chips">Вкладки (Стандарт)</string>
+    <string name="settings_episodes_layout_accordion">Аккордеон (TV Time)</string>
+    <string name="episodes_up_next">ДАЛЕЕ К ПРОСМОТРУ</string>
+    <string name="episodes_all_caught_up">Вы посмотрели все серии!</string>
+    <string name="episodes_all_episodes">ВСЕ СЕЗОНЫ</string>
+    <string name="episodes_layout_toggle">Изменить вид</string>
     <string name="settings_split_home">Разделение релизов на Главной</string>
     <string name="settings_split_home_desc">Отделяет вышедшие тайтлы от предстоящих на Главной странице</string>
     <string name="settings_split_dropped">Показывать брошенные сериалы</string>
@@ -374,20 +383,37 @@
     <string name="detail_content_desc_folder">Папка</string>
     <string name="detail_content_desc_back">Назад</string>
     <string name="detail_rating_legend_title">Обозначения рейтингов</string>
-    <string name="detail_rating_movies_usa">?? Фильмы (США / MPAA)</string>
+    <string name="detail_rating_movies_usa">Фильмы (США / MPAA)</string>
     <string name="detail_rating_g">Нет возрастных ограничений.</string>
     <string name="detail_rating_pg">Рекомендуется присутствие родителей.</string>
     <string name="detail_rating_pg13">Детям до 13 лет просмотр не желателен.</string>
     <string name="detail_rating_r">Лицам до 17 лет обязательно присутствие взрослого.</string>
     <string name="detail_rating_nc17">Лицам до 18 лет просмотр запрещен.</string>
     <string name="detail_rating_nr">Без рейтинга.</string>
-    <string name="detail_rating_tv_usa">?? Сериалы (США / TV Guidelines)</string>
+    <string name="detail_rating_tv_usa">Сериалы (США / TV Guidelines)</string>
     <string name="detail_rating_tvy">Для всех детей.</string>
     <string name="detail_rating_tvy7">Для детей старше 7 лет.</string>
     <string name="detail_rating_tvg">Для любой аудитории.</string>
     <string name="detail_rating_tvpg">Рекомендуется присутствие родителей.</string>
     <string name="detail_rating_tv14">Детям до 14 лет просмотр не желателен.</string>
     <string name="detail_rating_tvma">Только для взрослой аудитории.</string>
+    <string name="detail_rating_view_guide">Подробнее о содержании</string>
+    <string name="detail_parents_guide_title">Руководство для родителей</string>
+    <string name="guide_severity_none">Нет</string>
+    <string name="guide_severity_mild">Легко</string>
+    <string name="guide_severity_moderate">Умеренно</string>
+    <string name="guide_severity_severe">Сильно</string>
+    <string name="guide_cat_sex">Секс и нагота</string>
+    <string name="guide_cat_violence">Насилие и жестокость</string>
+    <string name="guide_cat_profanity">Ненормативная лексика</string>
+    <string name="guide_cat_alcohol">Алкоголь и наркотики</string>
+    <string name="guide_cat_frightening">Пугающие и напряжённые сцены</string>
+    <string name="detail_rating_country_ru">Возрастная классификация (Россия / РАРС)</string>
+    <string name="detail_rating_ru_0">Для любой зрительской аудитории (0+).</string>
+    <string name="detail_rating_ru_6">Для детей старше 6 лет (6+).</string>
+    <string name="detail_rating_ru_12">Для детей старше 12 лет (12+).</string>
+    <string name="detail_rating_ru_16">Для детей старше 16 лет (16+).</string>
+    <string name="detail_rating_ru_18">Запрещено для детей (18+).</string>
     <string name="detail_translate_comment">Перевести отзыв</string>
     <string name="detail_translate_download_prompt">Модель перевода (около 30 МБ) еще не загружена. Разрешить загрузку через мобильную сеть?</string>
     <string name="detail_translate_yes_cellular">Да, использовать моб. сеть</string>
@@ -1150,4 +1176,14 @@
     <string name="match_score">Совпадение</string>
     <string name="notification_like_body">%1$s понравился ваш комментарий.</string>
     <string name="notification_like_title">Новый лайк</string>
+
+    <!-- Series Progress Tracking -->
+    <string name="msg_episode_watched">Отмечено как просмотренное: %1$s</string>
+    <string name="msg_series_completed">%1$s завершен!</string>
+    <string name="lbl_coming_soon">Скоро</string>
+    <string name="lbl_up_to_date">Всё просмотрено</string>
+    <string name="lbl_until_date">до %1$s</string>
+    <string name="lbl_episodes_remaining">ещё %1$d</string>
+    <string name="lbl_next_episode">Далее: %1$s</string>
+    <string name="cd_mark_episode_watched">Отметить эпизод %1$s как просмотренный</string>
 </resources>

@@ -116,8 +116,12 @@ class DetailUiStateMapper @Inject constructor(
 
         fun Movie.hydrate(): Movie {
             val local = localMoviesMap["${this.mediaType}_${this.id}"]
+                ?: localMoviesMap["movie_${this.id}"]
+                ?: localMoviesMap["tv_${this.id}"]
+                ?: localMovies.find { it.id == this.id }
             return if (local != null) {
                 this.copy(
+                    mediaType = if (this.mediaType.isNotBlank()) this.mediaType else local.mediaType,
                     favorite = local.favorite,
                     watched = local.watched,
                     reminder = local.reminder,
@@ -135,7 +139,9 @@ class DetailUiStateMapper @Inject constructor(
                     favoriteActorTmdbPath = local.favoriteActorTmdbPath,
                     customBackdropPath = local.customBackdropPath
                 )
-            } else this
+            } else {
+                if (this.mediaType.isBlank()) this.copy(mediaType = "movie") else this
+            }
         }
 
         val finalMovie = effectiveMovie.copy(

@@ -534,12 +534,12 @@ fun AccountModals(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (isCheckingName) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                                     } else {
                                         Text(
                                             stringResource(R.string.account_save), 
                                             fontWeight = FontWeight.Bold, 
-                                            color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                            color = if (isSaveEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                         )
                                     }
                                 }

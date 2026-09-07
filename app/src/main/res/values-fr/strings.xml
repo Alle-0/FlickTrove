@@ -148,6 +148,7 @@
     <string name="stats_share_line_decade">ðŸ“… Décennie d\'or : %1$s\n</string>
     <string name="stats_share_line_outro">\nSuivez votre parcours cinématographique sur FlickTrove ! ðŸ�¿</string>
     <string name="settings_tab_title">Paramètres</string>
+    <string name="settings_general">Général</string>
     <string name="settings_ui_layout">Interface et disposition</string>
     <string name="settings_hide_saved">Masquer les titres enregistrés</string>
     <string name="settings_hide_saved_desc">Masque les films et séries regardés ou à voir dans les sections Découvrir et détails.</string>
@@ -158,6 +159,14 @@
     <string name="settings_badges_meaning">Signification des badges</string>
     <string name="settings_layout_toggle">Bouton de disposition</string>
     <string name="settings_layout_toggle_desc">Affiche un bouton pour modifier le nombre de colonnes sur l\'accueil</string>
+    <string name="settings_episodes_layout">Disposition des épisodes</string>
+    <string name="settings_episodes_layout_desc">Basculez entre onglets standards ou accordéon façon TV Time</string>
+    <string name="settings_episodes_layout_chips">Onglets (Standard)</string>
+    <string name="settings_episodes_layout_accordion">Accordéon (TV Time)</string>
+    <string name="episodes_up_next">À SUIVRE</string>
+    <string name="episodes_all_caught_up">Vous êtes à jour dans la série !</string>
+    <string name="episodes_all_episodes">TOUTES LES SAISONS</string>
+    <string name="episodes_layout_toggle">Changer de disposition</string>
     <string name="settings_split_home">Séparer les sorties sur l\'accueil</string>
     <string name="settings_split_home_desc">Sépare les titres sortis des titres à venir sur l\'accueil</string>
     <string name="settings_split_dropped">Afficher les séries abandonnées</string>
@@ -369,20 +378,37 @@
     <string name="detail_content_desc_folder">Dossier</string>
     <string name="detail_content_desc_back">Retour</string>
     <string name="detail_rating_legend_title">Légende des classifications</string>
-    <string name="detail_rating_movies_usa">ðŸ‡ºðŸ‡¸ Films (USA / MPAA)</string>
+    <string name="detail_rating_movies_usa">Films (USA / MPAA)</string>
     <string name="detail_rating_g">Tous publics.</string>
     <string name="detail_rating_pg">Accord parental souhaitable.</string>
     <string name="detail_rating_pg13">Avertissement strict aux parents (Moins de 13 ans).</string>
     <string name="detail_rating_r">Accès restreint (Moins de 17 ans accompagnés d\'un adulte).</string>
     <string name="detail_rating_nc17">Interdit aux 17 ans et moins.</string>
     <string name="detail_rating_nr">Non classé.</string>
-    <string name="detail_rating_tv_usa">ðŸ‡ºðŸ‡¸ Séries TV (USA / Recommandations TV)</string>
+    <string name="detail_rating_tv_usa">Séries TV (USA / Recommandations TV)</string>
     <string name="detail_rating_tvy">Pour tous les enfants.</string>
     <string name="detail_rating_tvy7">Destiné aux enfants plus âgés (7+).</string>
     <string name="detail_rating_tvg">Tous publics.</string>
     <string name="detail_rating_tvpg">Accord parental souhaitable.</string>
     <string name="detail_rating_tv14">Avertissement strict aux parents (Moins de 14 ans).</string>
     <string name="detail_rating_tvma">Réservé à un public averti.</string>
+    <string name="detail_rating_view_guide">Voir les détails du contenu</string>
+    <string name="detail_parents_guide_title">Guide parental</string>
+    <string name="guide_severity_none">Aucun</string>
+    <string name="guide_severity_mild">Léger</string>
+    <string name="guide_severity_moderate">Modéré</string>
+    <string name="guide_severity_severe">Sévère</string>
+    <string name="guide_cat_sex">Sexe et nudité</string>
+    <string name="guide_cat_violence">Violence et gore</string>
+    <string name="guide_cat_profanity">Grossièretés</string>
+    <string name="guide_cat_alcohol">Alcool et drogues</string>
+    <string name="guide_cat_frightening">Scènes effrayantes &amp; Intenses</string>
+    <string name="detail_rating_country_fr">Classification CNC (France)</string>
+    <string name="detail_rating_fr_u">Tous publics (Aucun avertissement).</string>
+    <string name="detail_rating_fr_10">Interdit aux moins de 10 ans.</string>
+    <string name="detail_rating_fr_12">Interdit aux moins de 12 ans.</string>
+    <string name="detail_rating_fr_16">Interdit aux moins de 16 ans.</string>
+    <string name="detail_rating_fr_18">Interdit aux moins de 18 ans.</string>
     <string name="detail_translate_comment">Traduire la critique</string>
     <string name="detail_translate_download_prompt">Le modèle de traduction (environ 30 Mo) n\'est peut-être pas encore téléchargé. Autoriser le téléchargement via les données mobiles ?</string>
     <string name="detail_translate_yes_cellular">Oui, utiliser les données mobiles</string>
@@ -1150,4 +1176,14 @@
     <string name="notification_like_body">%1$s a aimé votre commentaire.</string>
     <string name="notification_like_title">Nouveau J\'aime</string>
     <string name="stats_rewatches">Visionnages répétés</string>
+
+    <!-- Series Progress Tracking -->
+    <string name="msg_episode_watched">Marqué comme vu : %1$s</string>
+    <string name="msg_series_completed">%1$s terminée !</string>
+    <string name="lbl_coming_soon">À venir</string>
+    <string name="lbl_up_to_date">À jour</string>
+    <string name="lbl_until_date">jusqu\'au %1$s</string>
+    <string name="lbl_episodes_remaining">encore %1$d</string>
+    <string name="lbl_next_episode">Suivant : %1$s</string>
+    <string name="cd_mark_episode_watched">Marquer l\'épisode %1$s comme vu</string>
 </resources>

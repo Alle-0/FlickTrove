@@ -1,7 +1,10 @@
 package com.cinetrack.ui.components.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,6 +32,7 @@ import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.GlassmorphicModal
+import com.cinetrack.ui.utils.bounceClick
 
 @Composable
 fun DeleteAccountDialog(
@@ -72,22 +76,18 @@ fun DeleteAccountDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_yes_delete),
                     onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF5252)
-                    )
-                ) {
-                    Text(stringResource(R.string.settings_yes_delete), fontWeight = FontWeight.Bold, color = Color.White)
-                }
+                    containerColor = Color(0xFFFF5252),
+                    contentColor = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -169,26 +169,22 @@ fun ReauthDeleteAccountDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_yes_delete),
                     onClick = {
                         focusManager.clearFocus()
                         if (password.isNotBlank()) onConfirm(password)
                     },
                     enabled = password.isNotBlank(),
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF5252)
-                    )
-                ) {
-                    Text(stringResource(R.string.settings_yes_delete), fontWeight = FontWeight.Bold, color = Color.White)
-                }
+                    containerColor = Color(0xFFFF5252),
+                    contentColor = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -234,22 +230,18 @@ fun ClearCacheConfirmDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_confirm),
                     onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(stringResource(R.string.settings_confirm), fontWeight = FontWeight.Bold)
-                }
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -298,22 +290,18 @@ fun DeepSyncConfirmDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_confirm),
                     onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(stringResource(R.string.settings_confirm), fontWeight = FontWeight.Bold)
-                }
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -401,16 +389,13 @@ fun BadgesInfoDialog(
             }
             
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
+            SettingsDialogConfirmButton(
+                text = stringResource(R.string.settings_got_it),
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(stringResource(R.string.settings_got_it), fontWeight = FontWeight.Bold)
-            }
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.Black,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -460,22 +445,18 @@ fun WipeDataConfirmDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = buttonText,
                     onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF9800)
-                    )
-                ) {
-                    Text(buttonText, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                }
+                    containerColor = Color(0xFFFF9800),
+                    contentColor = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -523,22 +504,18 @@ fun LogoutConfirmDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
-                Button(
+                )
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_yes_logout),
                     onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(stringResource(R.string.settings_yes_logout), fontWeight = FontWeight.Bold)
-                }
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -588,42 +565,42 @@ fun WipeDataSelectionDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
-                    onClick = onSelectLocal,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .bounceClick { onSelectLocal() }
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 8.dp)) {
-                        Text(stringResource(id = R.string.settings_wipe_local_data_title), fontWeight = FontWeight.Bold)
-                        Text(stringResource(id = R.string.settings_wipe_local_data_desc), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(id = R.string.settings_wipe_local_data_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text(stringResource(id = R.string.settings_wipe_local_data_desc), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), textAlign = TextAlign.Center)
                     }
                 }
                 
-                Button(
-                    onClick = onSelectTotal,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF9800).copy(alpha = 0.2f),
-                        contentColor = Color(0xFFFF9800)
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFFF9800).copy(alpha = 0.2f))
+                        .border(1.dp, Color(0xFFFF9800).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .bounceClick { onSelectTotal() }
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 8.dp)) {
-                        Text(stringResource(id = R.string.settings_wipe_total_data_title), fontWeight = FontWeight.Bold)
-                        Text(stringResource(id = R.string.settings_wipe_total_data_desc), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(id = R.string.settings_wipe_total_data_title), fontWeight = FontWeight.Bold, color = Color(0xFFFF9800))
+                        Text(stringResource(id = R.string.settings_wipe_total_data_desc), style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF9800).copy(alpha = 0.8f), textAlign = TextAlign.Center)
                     }
                 }
                 
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
+                )
             }
         }
     }

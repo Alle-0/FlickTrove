@@ -29,6 +29,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import androidx.compose.runtime.mutableStateMapOf
+import com.cinetrack.domain.UpdateEpisodesUseCase
 
 data class HomeUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
@@ -75,7 +77,8 @@ class HomeViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val updateEpisodesUseCase: UpdateEpisodesUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -86,6 +89,7 @@ class HomeViewModel @Inject constructor(
     val feedListState = androidx.compose.foundation.lazy.LazyListState()
     var feedPagerIndex: Int? = null
     val animatedMovieIds = mutableSetOf<String>()
+    val updatingShowIds = mutableStateMapOf<Long, Boolean>()
     
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
@@ -156,9 +160,13 @@ class HomeViewModel @Inject constructor(
             trendingMovies = feedState.trendingMovies,
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
-            continueWatchingTv = feedState.continueWatchingTv.filter { tv ->
+            continueWatchingTv = feedState.continueWatchingTv.mapNotNull { tv ->
                 val localTv = baseState.allLocalMovies.find { it.id == tv.id && it.mediaType == "tv" }
-                localTv == null || (!localTv.watched && !localTv.dropped)
+                val effectiveTv = localTv ?: tv
+                if (!effectiveTv.watched && !effectiveTv.dropped) {
+                    val next = effectiveTv.calculateNextEpisode()
+                    if (next != null && !next.isUpToDateWithAirDate) effectiveTv else null
+                } else null
             }.toImmutableList(),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,
             becauseYouWatchedTv = feedState.becauseYouWatchedTv,
@@ -236,6 +244,57 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
+            }
+        }
+    }
+
+    fun markNextEpisodeWatched(movie: Movie) {
+        if (updatingShowIds[movie.id] == true) return
+
+        viewModelScope.launch {
+            updatingShowIds[movie.id] = true
+            try {
+                val localMovie = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                val nextInfo = localMovie.calculateNextEpisode()
+                if (nextInfo == null || nextInfo.isUpToDateWithAirDate) {
+                    return@launch
+                }
+
+                val currentWatched = localMovie.watchedEpisodes?.toMutableMap() ?: mutableMapOf()
+                val seasonKey = nextInfo.seasonNumber.toString()
+                val seasonEps = currentWatched[seasonKey]?.toMutableList() ?: mutableListOf()
+
+                if (!seasonEps.contains(nextInfo.episodeNumber)) {
+                    seasonEps.add(nextInfo.episodeNumber)
+                }
+                currentWatched[seasonKey] = seasonEps
+
+                val updatedMovie = updateEpisodesUseCase(localMovie, nextInfo.seasonNumber, seasonEps).copy(dropped = false)
+                val finalMovie = if (nextInfo.isLastEpisodeOfSeries) {
+                    updatedMovie.copy(
+                        watched = true,
+                        favorite = false,
+                        reminder = false
+                    )
+                } else {
+                    updatedMovie
+                }
+
+                repository.saveMovie(finalMovie)
+
+                if (nextInfo.isLastEpisodeOfSeries) {
+                    actionFeedbackManager.emit(
+                        UiText.StringResource(R.string.msg_series_completed, movie.name ?: movie.title ?: "")
+                    )
+                } else {
+                    actionFeedbackManager.emit(
+                        UiText.StringResource(R.string.msg_episode_watched, nextInfo.episodeCode)
+                    )
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
+            } finally {
+                updatingShowIds.remove(movie.id)
             }
         }
     }

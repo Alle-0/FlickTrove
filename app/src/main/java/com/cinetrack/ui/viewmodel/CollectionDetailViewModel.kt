@@ -174,7 +174,9 @@ class CollectionDetailViewModel @Inject constructor(
             try {
                 repository.getCollectionDetailsFlow(id).collect { details ->
                     // Sort parts by release date chronologically so saga films are in correct viewing sequence!
-                    val sortedParts = details.parts.sortedBy { movie ->
+                    val sortedParts = details.parts.map { movie ->
+                        if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                    }.sortedBy { movie ->
                         movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
                     }
                     _collection.value = details.copy(parts = sortedParts)
@@ -199,8 +201,9 @@ class CollectionDetailViewModel @Inject constructor(
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
             try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val local = repository.getMovie(movie.id, targetMediaType)
+                val current = local ?: movie.copy(mediaType = targetMediaType)
                 val previousState = current.copy()
 
                 if (current.watched) {
@@ -209,7 +212,7 @@ class CollectionDetailViewModel @Inject constructor(
 
                 cycleMovieStatusUseCase(current)
 
-                val updated = repository.getMovie(movie.id, movie.mediaType)
+                val updated = repository.getMovie(movie.id, targetMediaType)
                 val actionMsgRes = when {
                     updated == null -> R.string.msg_action_removed
                     updated.watched -> R.string.msg_action_watched
@@ -235,32 +238,35 @@ class CollectionDetailViewModel @Inject constructor(
 
     fun updateRating(movie: Movie, rating: Double) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val local = repository.getMovie(movie.id, targetMediaType)
+            val current = local ?: movie.copy(mediaType = targetMediaType)
             repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
         }
     }
 
     fun updateNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val local = repository.getMovie(movie.id, targetMediaType)
+            val current = local ?: movie.copy(mediaType = targetMediaType)
             repository.saveMovie(current.copy(personalNote = note))
         }
     }
 
     fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
         viewModelScope.launch {
-            val compositeId = "${movie.mediaType}_${movie.id}"
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val compositeId = "${targetMediaType}_${movie.id}"
             val newItemIds = if (folder.itemIds.contains(compositeId)) {
                 folder.itemIds - compositeId
             } else {
                 folder.itemIds + compositeId
             }
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-            val local = repository.getMovie(movie.id, movie.mediaType)
+            val local = repository.getMovie(movie.id, targetMediaType)
             if (local == null) {
-                repository.saveMovie(movie)
+                repository.saveMovie(movie.copy(mediaType = targetMediaType))
             }
         }
     }
@@ -268,7 +274,9 @@ class CollectionDetailViewModel @Inject constructor(
     fun deleteMovie(movie: Movie) {
         viewModelScope.launch {
             try {
-                repository.deleteMovie(movie)
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
+                repository.deleteMovie(movieToDelete)
                 actionFeedbackManager.emit(UiText.StringResource(com.cinetrack.R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
                     try {
                         repository.saveMovie(movie)

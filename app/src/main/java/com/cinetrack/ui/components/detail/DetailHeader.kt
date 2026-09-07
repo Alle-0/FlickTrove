@@ -91,7 +91,15 @@ fun DetailHeader(
         label = "HeaderExpansion"
     )
 
-    val targetExtraHeight = 160.dp // Even more compact
+    val hasAwards = !ratings.awards.isNullOrBlank() && ratings.awards != "N/A"
+    val hasBottomBadges = (movie.revenue ?: 0L) > 0 || !ratings.certification.isNullOrBlank()
+
+    val targetExtraHeight = when {
+        hasAwards && hasBottomBadges -> 164.dp
+        !hasAwards && hasBottomBadges -> 118.dp
+        hasAwards && !hasBottomBadges -> 120.dp
+        else -> 74.dp
+    }
     val targetHeight = if (isExpanded) targetExtraHeight else 0.dp
     val animatedHeight by animateDpAsState(
         targetValue = targetHeight,
@@ -507,16 +515,22 @@ fun DetailHeader(
                                 }
                             }
                             ratings.certification?.let { cert ->
-                                val certColor = when (cert.uppercase()) {
-                                    "G", "TV-G", "U" -> Color(0xFF4CAF50)
-                                    "PG", "TV-PG", "12" -> Color(0xFF8BC34A)
-                                    "PG-13", "TV-14", "15" -> Color(0xFFFF9800)
-                                    "R", "TV-MA", "18", "NC-17" -> Color(0xFFF44336)
+                                val cleanCert = cert.trim().uppercase(java.util.Locale.ROOT)
+                                val certColor = when (cleanCert) {
+                                    "G", "TV-G", "TV-Y", "U", "T", "0", "L", "APTA", "0+" -> Color(0xFF4CAF50)
+                                    "PG", "TV-PG", "TV-Y7", "6", "6+", "7", "10", "UA" -> Color(0xFF8BC34A)
+                                    "PG-13", "TV-14", "12", "12+", "12A", "14", "14+", "VM14", "15" -> Color(0xFFFF9800)
+                                    "R", "TV-MA", "16", "16+", "18", "18+", "VM18", "NC-17", "A" -> Color(0xFFF44336)
                                     else -> Color.White
+                                }
+                                val displayValue = if (!ratings.certificationCountry.isNullOrBlank()) {
+                                    "${ratings.certificationCountry} · $cert"
+                                } else {
+                                    cert
                                 }
                                 MetaBadge(
                                     label = "RATED",
-                                    value = cert,
+                                    value = displayValue,
                                     valueColor = certColor,
                                     showValueBox = true,
                                     onClick = onRatingClick

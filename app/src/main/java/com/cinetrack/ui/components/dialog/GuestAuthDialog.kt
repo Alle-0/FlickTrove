@@ -19,6 +19,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
+import androidx.compose.ui.draw.clip
+import com.cinetrack.ui.utils.bounceClick
 
 private val DialogShape = RoundedCornerShape(28.dp)
 
@@ -84,32 +86,38 @@ fun GuestAuthDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Button(
-                            onClick = onDismiss,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.White.copy(alpha = 0.12f)
-                            )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = 0.12f))
+                                .bounceClick { onDismiss() },
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = stringResource(R.string.auth_guest_dialog_cancel),
-                                color = Color.White
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
-                        Button(
-                            onClick = {
-                                onDismiss()
-                                val rootNav = navigator?.parent ?: navigator
-                                rootNav?.push(com.cinetrack.ui.screens.LoginScreen())
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .bounceClick {
+                                    onDismiss()
+                                    val rootNav = navigator?.parent ?: navigator
+                                    rootNav?.push(com.cinetrack.ui.screens.LoginScreen())
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = stringResource(R.string.auth_btn_login),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }

@@ -315,7 +315,24 @@ class MovieDetailViewModel @Inject constructor(
 
                 // Start caching and secondary background syncs AFTER initial display
                 viewModelScope.launch(Dispatchers.IO) {
-                    _externalRatings.update { it.copy(certification = com.cinetrack.data.mapper.MovieMapper.extractCertification(response, if (isTv) "tv" else "movie")) }
+                    val prefs = preferenceRepository.userPreferencesFlow.first()
+                    val rawLang = prefs.contentLanguage
+                    val userCountry = if (rawLang == "system") {
+                        java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
+                    } else {
+                        when (rawLang.lowercase()) {
+                            "it" -> "IT"
+                            "de" -> "DE"
+                            "fr" -> "FR"
+                            "es" -> "ES"
+                            "pt", "pt_br", "pt-br" -> "BR"
+                            "ru" -> "RU"
+                            "hi" -> "IN"
+                            else -> java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
+                        }
+                    }
+                    val certPair = com.cinetrack.data.mapper.MovieMapper.extractCertificationWithCountry(response, if (isTv) "tv" else "movie", userCountry)
+                    _externalRatings.update { it.copy(certification = certPair?.second, certificationCountry = certPair?.first) }
                     val imdbId = response.externalIds?.imdbId
                     fetchExternalRatings(imdbId, id)
 
@@ -526,8 +543,9 @@ class MovieDetailViewModel @Inject constructor(
     private fun updateMovieRating(movie: Movie, rating: Double?) {
         viewModelScope.launch {
             val effectiveRating = if (rating == 0.0) null else rating
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val local = repository.getMovie(movie.id, targetMediaType)
+            val current = local ?: movie.copy(mediaType = targetMediaType)
             current.personalRating = effectiveRating
             current.votedAt = System.currentTimeMillis()
             repository.saveMovie(current)
@@ -536,8 +554,9 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun updateMovieNote(movie: Movie, note: String) {
         viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val local = repository.getMovie(movie.id, targetMediaType)
+            val current = local ?: movie.copy(mediaType = targetMediaType)
             current.personalNote = note
             repository.saveMovie(current)
         }
@@ -545,12 +564,15 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun deleteMovieItem(movie: Movie) {
         viewModelScope.launch {
-            repository.deleteMovie(movie)
+            val targetMediaType = movie.mediaType.ifBlank { "movie" }
+            val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
+            repository.deleteMovie(movieToDelete)
         }
     }
 
     private fun toggleMovieFolderMembership(movie: Movie, folder: FolderEntity) {
-        val itemId = "${movie.mediaType}_${movie.id}"
+        val targetMediaType = movie.mediaType.ifBlank { "movie" }
+        val itemId = "${targetMediaType}_${movie.id}"
         val newItemIds = if (folder.itemIds.contains(itemId)) {
             folder.itemIds - itemId
         } else {
@@ -558,9 +580,9 @@ class MovieDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = Instant.now().toString()))
-            val local = repository.getMovie(movie.id, movie.mediaType)
+            val local = repository.getMovie(movie.id, targetMediaType)
             if (local == null) {
-                repository.saveMovie(movie)
+                repository.saveMovie(movie.copy(mediaType = targetMediaType))
             }
         }
     }
@@ -801,11 +823,12 @@ class MovieDetailViewModel @Inject constructor(
     private fun cycleStatus(movie: Movie) {
         viewModelScope.launch {
             movieUpdateMutex.withLock {
-                val current = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val current = repository.getMovie(movie.id, targetMediaType) ?: movie.copy(mediaType = targetMediaType)
                 if (current.watched) return@withLock
                 
                 cycleMovieStatusUseCase(current)
-                val updated = repository.getMovie(movie.id, movie.mediaType)
+                val updated = repository.getMovie(movie.id, targetMediaType)
                 if (updated != null) {
                     ensureFirstViewingCreated(updated)
                 }
@@ -907,16 +930,6 @@ class MovieDetailViewModel @Inject constructor(
                 repository.saveMovie(updated)
                 ensureFirstViewingCreated(updated)
             }
-        }
-    }
-
-    private fun extractCertification(details: MovieDetailResponse, isTv: Boolean): String? {
-        return if (isTv) {
-            details.contentRatings?.results?.find { it.iso31661 == "US" }?.rating
-                ?: details.contentRatings?.results?.firstOrNull()?.rating
-        } else {
-            details.releaseDates?.results?.find { it.iso31661 == "US" }?.releaseDates?.firstOrNull { it.certification.isNotEmpty() }?.certification
-                ?: details.releaseDates?.results?.firstOrNull()?.releaseDates?.firstOrNull { it.certification.isNotEmpty() }?.certification
         }
     }
 

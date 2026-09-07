@@ -39,7 +39,6 @@ fun DetailTechnicalInfo(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
-            .padding(bottom = 32.dp)
     ) {
         Text(
             text = stringResource(R.string.detail_technical_info),

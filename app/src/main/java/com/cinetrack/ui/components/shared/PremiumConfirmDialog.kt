@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -142,34 +143,34 @@ fun PremiumConfirmDialog(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onConfirm()
-                                onDismiss()
-                            },
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = accentColor,
-                                contentColor = if (type == ConfirmType.DANGER) Color.White else Color.Black
-                            ),
-                            shape = RoundedCornerShape(18.dp)
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(accentColor)
+                                .bounceClick {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onConfirm()
+                                    onDismiss()
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = confirmLabel,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.ExtraBold,
+                                color = if (type == ConfirmType.DANGER) Color.White else Color.Black
                             )
                         }
 
-                        TextButton(
-                            onClick = onDismiss,
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(56.dp),
-                            shape = RoundedCornerShape(18.dp)
+                                .height(50.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .bounceClick { onDismiss() },
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = cancelLabel,

@@ -413,6 +413,7 @@ fun MovieCard(
     showBadges: Boolean = true,
     showAdvancedBadges: Boolean = false,
     showActionButton: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
     hasAnimatedSet: MutableSet<String>? = null,
@@ -490,7 +491,7 @@ fun MovieCard(
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(28.dp))
+                .clip(shape)
                 .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
                 .bounceClickWithOffset(
                     scaleDown = 0.93f, 
@@ -507,7 +508,7 @@ fun MovieCard(
                 ) { offset -> 
                     onPress(movie) 
                 },
-        shape = RoundedCornerShape(28.dp),
+        shape = shape,
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {

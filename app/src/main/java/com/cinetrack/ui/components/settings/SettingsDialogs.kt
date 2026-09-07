@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -164,9 +163,11 @@ fun BackupDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 }
 
@@ -180,7 +181,7 @@ fun ExternalMigrationDialog(
         modifier = Modifier.padding(24.dp)
     ) {
                 Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+                    ImageVector.vectorResource(id = R.drawable.ic_documento),
                     null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(48.dp)
@@ -189,8 +190,7 @@ fun ExternalMigrationDialog(
                 Text(
                     stringResource(R.string.settings_external_migration_dialog_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -201,32 +201,7 @@ fun ExternalMigrationDialog(
                 )
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Tip: sync missing details after import
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        stringResource(R.string.settings_import_tip_sync),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Universal import (primary)
+                // Primary Action Button (Select File)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -248,9 +223,11 @@ fun ExternalMigrationDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 }
 
@@ -308,9 +285,11 @@ fun YamtrackDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.settings_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                }
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 }
 
@@ -475,7 +454,7 @@ fun FeedbackDialog(
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
-                                        .clickable { onClick() }
+                                        .bounceClick { onClick() }
                                         .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(8.dp))
                                         .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
@@ -577,16 +556,12 @@ fun FeedbackDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TextButton(
+                SettingsDialogCancelButton(
+                    text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
                     enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        stringResource(R.string.settings_cancel),
-                        color = Color.White.copy(alpha = 0.5f)
-                    )
-                }
+                )
             }
 }
 
@@ -698,7 +673,7 @@ fun ColorSelectionDialog(
                                         .size(42.dp)
                                         .clip(CircleShape)
                                         .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent)
-                                        .clickable { 
+                                        .bounceClick { 
                                             isCustomMode = false
                                             tempSelectedColor = name
                                         },
@@ -742,7 +717,7 @@ fun ColorSelectionDialog(
                                         color = if (customSelected) Color.White else Color.Transparent,
                                         shape = CircleShape
                                     )
-                                    .clickable { isCustomMode = true },
+                                    .bounceClick { isCustomMode = true },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -868,39 +843,39 @@ fun ColorSelectionDialog(
                     // Track the screen-space centre of the Conferma button
                     val confirmButtonCenter = remember { arrayOf(Offset.Zero) }
 
-                    Button(
-                        onClick = {
-                            onSelect(tempSelectedColor, confirmButtonCenter[0])
-                            onDismiss()
-                        },
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(50.dp)
                             .onGloballyPositioned { coords ->
                                 val pos = coords.positionInWindow()
                                 confirmButtonCenter[0] = Offset(
                                     x = pos.x + coords.size.width / 2f,
                                     y = pos.y + coords.size.height / 2f
                                 )
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(previewAccentColor)
+                            .bounceClick {
+                                onSelect(tempSelectedColor, confirmButtonCenter[0])
+                                onDismiss()
                             },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = previewAccentColor,
-                            contentColor = Color.Black
-                        )
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = stringResource(R.string.settings_confirm),
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
                         )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    TextButton(
+                    SettingsDialogCancelButton(
+                        text = stringResource(R.string.settings_cancel),
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.5f))
-                    }
+                    )
                 }
 }
 
@@ -970,9 +945,11 @@ fun LanguageSelectionDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) {
-                            Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.7f))
-                        }
+                        SettingsDialogCancelButton(
+                            text = stringResource(R.string.settings_cancel),
+                            onClick = onDismiss,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
                     }
                 }
 }
@@ -1037,9 +1014,11 @@ fun StartScreenSelectionDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) {
-                            Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.7f))
-                        }
+                        SettingsDialogCancelButton(
+                            text = stringResource(R.string.settings_cancel),
+                            onClick = onDismiss,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
                     }
                 }
 }

@@ -9,15 +9,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,6 +40,7 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.VibrationHelper
 import com.cinetrack.util.Keys
 import com.google.firebase.auth.FirebaseUser
+import com.cinetrack.ui.utils.bounceClick
 
 @Composable
 fun SettingsImagesStorageSection(
@@ -81,7 +79,7 @@ fun SettingsImagesStorageSection(
                                 .weight(1f)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                .clickable { 
+                                .bounceClick { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.updateImageQuality(value) 
                                 }
@@ -206,7 +204,6 @@ fun SettingsSyncBackupSection(
             description = stringResource(R.string.settings_trakt_sync_desc),
             iconTint = Color.Unspecified,
             alpha = if (isSimklLoggedIn) 0.35f else 1f,
-            onClick = {},
             trailing = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -339,7 +336,6 @@ fun SettingsSyncBackupSection(
             description = stringResource(R.string.simkl_sync_desc),
             iconTint = Color.Unspecified,
             alpha = if (isTraktLoggedIn) 0.35f else 1f,
-            onClick = {},
             trailing = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -640,7 +636,7 @@ fun SettingsSupportSection(
 
         var creditsExpanded by remember { mutableStateOf(false) }
         val rotation by androidx.compose.animation.core.animateFloatAsState(
-            targetValue = if (creditsExpanded) 180f else 0f
+            targetValue = if (creditsExpanded) 90f else 0f
         )
 
         // Pill-shaped card that expands vertically
@@ -663,7 +659,7 @@ fun SettingsSupportSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .clickable {
+                        .bounceClick(scaleDown = 0.98f) {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                             creditsExpanded = !creditsExpanded
                         }
@@ -699,11 +695,11 @@ fun SettingsSupportSection(
                     )
 
                     Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = null,
                         tint = OnSurfaceMuted,
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(18.dp)
                             .rotate(rotation)
                     )
                 }
@@ -781,7 +777,7 @@ fun SettingsFooterSection(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .padding(bottom = 12.dp)
-                    .clickable {
+                    .bounceClick {
                         uriHandler.openUri(updateInfo.htmlUrl)
                     }
             ) {
@@ -811,7 +807,7 @@ fun SettingsFooterSection(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .padding(bottom = 12.dp)
-                    .clickable {
+                    .bounceClick {
                         uriHandler.openUri("https://github.com/Alle-0/FlickTrove/releases/latest")
                     }
             ) {
@@ -842,7 +838,7 @@ fun SettingsFooterSection(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(bottom = 14.dp)
-                .clickable { onReplayTutorial() }
+                .bounceClick { onReplayTutorial() }
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),

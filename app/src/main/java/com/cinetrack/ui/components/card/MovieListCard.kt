@@ -11,9 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material.icons.rounded.Tv
-import androidx.compose.material.icons.rounded.NotificationsNone
-import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -72,9 +71,13 @@ fun MovieListCard(
     onPress: (Movie) -> Unit = {},
     onLongPress: (Movie, Offset, Offset) -> Unit = { _, _, _ -> },
     onAction: (Movie) -> Unit = {},
-    onMessage: (String) -> Unit = {}
+    onMessage: (String) -> Unit = {},
+    onQuickMarkWatched: ((Movie) -> Unit)? = null
 ) {
     val isTv = movie.mediaType == "tv"
+    val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
+        if (isTv) movie.calculateNextEpisode() else null
+    }
     val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -180,7 +183,7 @@ fun MovieListCard(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Icon(
-                        imageVector = if (isTv) Icons.Rounded.Tv else Icons.Rounded.Movie,
+                        imageVector = if (isTv) ImageVector.vectorResource(id = R.drawable.ic_tv) else ImageVector.vectorResource(id = R.drawable.ic_ciack),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.08f),
                         modifier = Modifier
@@ -275,6 +278,7 @@ fun MovieListCard(
                     }
                 }
 
+                val isReleased = movie.isReleased
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (releaseYear.isNotEmpty()) {
                         Text(
@@ -285,11 +289,44 @@ fun MovieListCard(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                     if (hasRating) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size((12 * multiplier).dp)
+                            )
+                            Text(
+                                text = vote,
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black, fontSize = (12.5f * multiplier).sp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    if (isTv && nextInfo != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        val isUpToDate = isReleased && nextInfo.isUpToDateWithAirDate
+                        val statusText = when {
+                            !isReleased -> stringResource(R.string.lbl_coming_soon)
+                            isUpToDate -> stringResource(R.string.lbl_up_to_date)
+                            else -> nextInfo.episodeCode
+                        }
+                        val statusColor = if (isUpToDate) Color(0xFF10B981) else MaterialTheme.colorScheme.primary
                         Text(
-                            text = "★ $vote",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Black, fontSize = (13 * multiplier).sp),
-                            color = MaterialTheme.colorScheme.primary
+                            text = statusText,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp),
+                            color = statusColor
                         )
+                        if (isReleased && !isUpToDate && nextInfo.remainingInSeason > 0) {
+                            Text(
+                                text = " • ${nextInfo.remainingInSeason}",
+                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
+                                color = Color.White.copy(alpha = 0.55f)
+                            )
+                        }
                     }
                 }
                 
@@ -336,8 +373,13 @@ fun MovieListCard(
                             if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                             else onMessage(context.getString(R.string.card_hint_manage_reminder))
                         } else if (isTv) {
-                            if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                            else onMessage(context.getString(R.string.card_hint_manage_episodes))
+                            if (!isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate) {
+                                onQuickMarkWatched(movie)
+                            } else if (!isWatched && !isFavorite && !isReminder) {
+                                onAction(movie)
+                            } else {
+                                onMessage(context.getString(R.string.card_hint_manage_episodes))
+                            }
                         } else {
                             // Normal behavior for released movies
                             onAction(movie)
@@ -361,7 +403,10 @@ fun MovieListCard(
                 val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
                 val isOcchio = isReleased && (isReminder || isFavorite)
 
+                val isQuickWatch = isTv && !isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
+
                 val actionBg = when {
+                    isQuickWatch -> appAccent.copy(alpha = 0.15f)
                     isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                     isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
@@ -369,6 +414,7 @@ fun MovieListCard(
                 }
 
                 val actionBorder = when {
+                    isQuickWatch -> appAccent.copy(alpha = 0.45f)
                     isWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
@@ -376,6 +422,7 @@ fun MovieListCard(
                 }.copy(alpha = 0.3f)
 
                 val actionTint = when {
+                    isQuickWatch -> appAccent
                     isWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
@@ -405,17 +452,26 @@ fun MovieListCard(
                         bellHasInitialized = true
                     }
                     
+                    val isTick = isQuickWatch || isWatched
+                    val isPlus = !isWatched && isReleased && !isOcchio
+                    val iconSize = when {
+                        isTick -> 13.dp
+                        !isReleased -> if (isBellOutlined) 20.dp else 21.dp
+                        isOcchio -> 18.dp
+                        else -> 16.dp
+                    }
+
                     Icon(
                         imageVector = when {
-                            isWatched -> com.cinetrack.ui.assets.CustomIcons.PremiumCheck
-                            !isReleased -> if (isReminder || isFavorite) com.cinetrack.ui.assets.CustomIcons.PremiumBellFilled else Icons.Rounded.NotificationsNone
-                            isOcchio -> androidx.compose.material.icons.Icons.Rounded.Visibility
+                            isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
+                            !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
+                            isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
                             else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
                         },
                         contentDescription = "Action",
                         tint = actionTint,
                         modifier = Modifier
-                            .size(if (isBellOutlined) 20.dp else 18.dp)
+                            .size(iconSize)
                             .graphicsLayer {
                                 if (!isReleased && (isReminder || isFavorite)) {
                                     rotationZ = bellRotation.value

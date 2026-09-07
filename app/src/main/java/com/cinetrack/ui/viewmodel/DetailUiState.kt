@@ -59,7 +59,8 @@ data class ExternalRatings(
     val trakt: Double? = null,
     val traktVotes: String? = null,
     val awards: String? = null,
-    val certification: String? = null
+    val certification: String? = null,
+    val certificationCountry: String? = null
 )
 
 sealed class DetailEvent {
