@@ -871,6 +871,7 @@
     <string name="filter_sort_title">Titolo alfabetico</string>
     <string name="filter_sort_personal_rating">Voto personale</string>
     <string name="filter_sort_runtime">Durata totale</string>
+    <string name="filter_sort_remaining_episodes">Episodi rimanenti</string>
     <string name="filter_dir_desc">Decrescente</string>
     <string name="filter_dir_asc">Crescente</string>
     <string name="msg_action_removed">\"%1$s\" rimosso</string>

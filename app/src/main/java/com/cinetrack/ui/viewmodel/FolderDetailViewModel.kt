@@ -194,8 +194,28 @@ class FolderDetailViewModel @Inject constructor(
             "vote_average" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "personal_rating" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "runtime" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "remaining_episodes" -> if (isDesc) {
+                filtered.sortedWith(compareByDescending<Movie> { getRemainingEpisodes(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            } else {
+                filtered.sortedWith(compareBy<Movie> {
+                    val rem = getRemainingEpisodes(it)
+                    if (rem == 0) Int.MAX_VALUE else rem
+                }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            }
             else -> filtered
         }
+    }
+
+    private fun getRemainingEpisodes(movie: Movie): Int {
+        if (movie.mediaType != "tv") return 0
+        val info = movie.calculateNextEpisode()
+        if (info != null) {
+            if (info.isUpToDateWithAirDate) return 0
+            return if (info.remainingTotal > 0) info.remainingTotal else info.remainingInSeason
+        }
+        val watched = movie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+        val total = movie.numberOfEpisodes ?: 0
+        return maxOf(0, total - watched)
     }
 
     private fun getMovieDuration(movie: Movie): Int {

@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.card
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -10,6 +11,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -395,19 +399,21 @@ fun ContinueWatchingSeriesCard(
                 .background(Color(0xFF1E1E22))
                 .bounceClick(scaleDown = 0.98f) { onPress(movie) }
         ) {
-            // Netflix-style horizontal series progress bar along the junction
+            // Pill progress bar tra le due sezioni per l'intera larghezza
             if (isReleased) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(2.5.dp)
-                        .background(Color.White.copy(alpha = 0.08f))
+                        .height(3.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.10f))
                 ) {
                     if (animatedSeriesProgress > 0f) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .fillMaxWidth(fraction = animatedSeriesProgress)
+                                .clip(CircleShape)
                                 .background(if (isUpToDate) UpToDateGreen else appAccent)
                         )
                     }
@@ -417,8 +423,8 @@ fun ContinueWatchingSeriesCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 38.dp)
-                    .padding(start = 11.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
+                    .defaultMinSize(minHeight = 36.dp)
+                    .padding(start = 11.dp, end = 8.dp, top = if (isReleased) 7.dp else 7.dp, bottom = 7.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -448,6 +454,62 @@ fun ContinueWatchingSeriesCard(
                             style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                         )
                     }
+                }
+
+                // Bell reminder button on the right (matching 24dp size and alignment)
+                val isReminderActive = isReminder || isFavorite
+                val bellBg = if (isReminderActive) appAccent.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.08f)
+                val bellBorder = if (isReminderActive) appAccent.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.15f)
+                val bellTint = if (isReminderActive) appAccent else Color.White.copy(alpha = 0.85f)
+
+                val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                var bellHasInitialized by remember { mutableStateOf(false) }
+
+                LaunchedEffect(isReminder, isFavorite) {
+                    if (bellHasInitialized && isReminderActive) {
+                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                    }
+                    bellHasInitialized = true
+                }
+
+                val haptic = LocalHapticFeedback.current
+                val hintReminder = stringResource(R.string.card_hint_manage_reminder)
+
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .bounceClick(
+                            scaleDown = 0.85f,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (!isReminderActive) {
+                                    onAction(movie)
+                                } else {
+                                    onMessage(hintReminder)
+                                }
+                            }
+                        )
+                        .background(color = bellBg, shape = CircleShape)
+                        .border(width = 1.dp, color = bellBorder, shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isReminderActive) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell),
+                        contentDescription = stringResource(R.string.card_hint_manage_reminder),
+                        tint = bellTint,
+                        modifier = Modifier
+                            .size(if (isReminderActive) 14.dp else 13.dp)
+                            .graphicsLayer {
+                                if (isReminderActive) {
+                                    rotationZ = bellRotation.value
+                                    transformOrigin = TransformOrigin(0.5f, 0.2f)
+                                }
+                            }
+                    )
                 }
             } else if (isUpToDate) {
                 // UP TO DATE STATE

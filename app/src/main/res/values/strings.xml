@@ -925,6 +925,7 @@
     <string name="filter_sort_title">Alphabetical</string>
     <string name="filter_sort_personal_rating">Personal Rating</string>
     <string name="filter_sort_runtime">Total Runtime</string>
+    <string name="filter_sort_remaining_episodes">Remaining Episodes</string>
     <string name="filter_dir_desc">Descending</string>
     <string name="filter_dir_asc">Ascending</string>
     <string name="msg_action_removed">\"%1$s\" removed</string>

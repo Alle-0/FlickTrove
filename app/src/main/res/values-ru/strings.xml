@@ -876,6 +876,7 @@
     <string name="filter_sort_title">По алфавиту</string>
     <string name="filter_sort_personal_rating">Личная оценка</string>
     <string name="filter_sort_runtime">Общая продолжительность</string>
+    <string name="filter_sort_remaining_episodes">Оставшиеся серии</string>
     <string name="filter_dir_desc">По убыванию</string>
     <string name="filter_dir_asc">По возрастанию</string>
     <string name="msg_action_removed">\"%1$s\" удалено</string>

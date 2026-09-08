@@ -230,14 +230,14 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(12.dp)
-                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
+                .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+                .padding(horizontal = 10.dp, vertical = 4.5.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.news_external_link),
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -245,7 +245,7 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
                     painter = painterResource(id = R.drawable.ic_external_link),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(11.dp)
                 )
             }
         }

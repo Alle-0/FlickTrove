@@ -871,6 +871,7 @@
     <string name="filter_sort_title">वर्णानुक्रम</string>
     <string name="filter_sort_personal_rating">व्यक्तिगत रेटिंग</string>
     <string name="filter_sort_runtime">कुल रनटाइम</string>
+    <string name="filter_sort_remaining_episodes">शेष एपिसोड</string>
     <string name="filter_dir_desc">अवरोही</string>
     <string name="filter_dir_asc">आरोही</string>
     <string name="msg_action_removed">\"%1$s\" हटा दिया गया</string>

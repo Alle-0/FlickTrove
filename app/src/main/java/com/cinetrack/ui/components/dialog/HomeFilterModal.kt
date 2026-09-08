@@ -376,6 +376,9 @@ fun HomeFilterModal(
                                                 add(FilterOption("title", stringResource(R.string.filter_sort_title)))
                                                 add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
                                                 add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
+                                                if (category != "movie") {
+                                                    add(FilterOption("remaining_episodes", stringResource(R.string.filter_sort_remaining_episodes)))
+                                                }
                                             }
                                         }
 

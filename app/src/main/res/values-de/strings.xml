@@ -871,6 +871,7 @@
     <string name="filter_sort_title">Alphabetisch</string>
     <string name="filter_sort_personal_rating">Persönliche Bewertung</string>
     <string name="filter_sort_runtime">Gesamtlaufzeit</string>
+    <string name="filter_sort_remaining_episodes">Verbleibende Episoden</string>
     <string name="filter_dir_desc">Absteigend</string>
     <string name="filter_dir_asc">Aufsteigend</string>
     <string name="msg_action_removed">„%1$s“ entfernt</string>

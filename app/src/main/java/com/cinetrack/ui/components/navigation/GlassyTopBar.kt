@@ -325,8 +325,8 @@ fun GlassyTopBar(
 
                 AnimatedVisibility(
                     visible = onLayoutToggleClick != null && layoutColumns != null,
-                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow), initialScale = 0.7f) + slideInVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it },
-                    exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow), targetScale = 0.7f) + slideOutVertically(spring(stiffness = Spring.StiffnessMediumLow)) { -it }
+                    enter = iconEnter,
+                    exit = iconExit
                 ) {
                     Box(
                         modifier = Modifier

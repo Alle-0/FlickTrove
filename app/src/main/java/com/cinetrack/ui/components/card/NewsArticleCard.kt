@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -124,22 +125,25 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
             )
         }
 
-        // Badge "External link" in alto a destra
+        // Badge "External link" in alto a destra a pillola
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(6.dp)
-                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
-                .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
-                .padding(horizontal = 6.dp, vertical = 3.dp)
+                .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
+                .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+                .padding(horizontal = 8.dp, vertical = 3.5.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Link esterno",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = stringResource(R.string.news_external_link),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
                     color = Color.White
                 )
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(3.5.dp))
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_external_link),
                     contentDescription = null,

@@ -405,8 +405,37 @@ class HomeViewModel @Inject constructor(
                     movies.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
+            "remaining_episodes" -> {
+                if (isDesc) {
+                    movies.sortedWith(
+                        compareByDescending<Movie> { getRemainingEpisodes(it) }
+                            .thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                } else {
+                    movies.sortedWith(
+                        compareBy<Movie> {
+                            val rem = getRemainingEpisodes(it)
+                            if (rem == 0) Int.MAX_VALUE else rem
+                        }.thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                }
+            }
             else -> movies
         }
+    }
+
+    private fun getRemainingEpisodes(movie: Movie): Int {
+        if (movie.mediaType != "tv") return 0
+        val info = movie.calculateNextEpisode()
+        if (info != null) {
+            if (info.isUpToDateWithAirDate) return 0
+            return if (info.remainingTotal > 0) info.remainingTotal else info.remainingInSeason
+        }
+        val watched = movie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+        val total = movie.numberOfEpisodes ?: 0
+        return maxOf(0, total - watched)
     }
 
     private fun getMovieDuration(movie: Movie): Int {
