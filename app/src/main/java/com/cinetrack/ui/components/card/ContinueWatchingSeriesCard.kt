@@ -397,7 +397,7 @@ fun ContinueWatchingSeriesCard(
                     )
                 )
                 .background(Color(0xFF1E1E22))
-                .bounceClick(scaleDown = 0.98f) { onPress(movie) }
+                .bounceClick(scaleDown = 0.92f) { onPress(movie) }
         ) {
             // Pill progress bar tra le due sezioni per l'intera larghezza
             if (isReleased) {

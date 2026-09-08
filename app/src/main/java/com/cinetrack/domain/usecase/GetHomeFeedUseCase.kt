@@ -80,8 +80,8 @@ class GetHomeFeedUseCase @Inject constructor(
                 val result = rawTop.toMutableList()
                 if (result.size < 10) {
                     try {
-                        val popularFallback = repository.getPopularMovies()
-                        for (movie in popularFallback) {
+                        val trendingFallback = repository.getTrendingMovies()
+                        for (movie in trendingFallback) {
                             if (result.none { it.id == movie.id }) {
                                 result.add(movie)
                                 if (result.size >= 10) break
@@ -101,8 +101,8 @@ class GetHomeFeedUseCase @Inject constructor(
                 val result = rawTop.toMutableList()
                 if (result.size < 10) {
                     try {
-                        val popularFallback = repository.getPopularTV()
-                        for (tv in popularFallback) {
+                        val trendingFallback = repository.getTrendingTV()
+                        for (tv in trendingFallback) {
                             if (result.none { it.id == tv.id }) {
                                 result.add(tv)
                                 if (result.size >= 10) break

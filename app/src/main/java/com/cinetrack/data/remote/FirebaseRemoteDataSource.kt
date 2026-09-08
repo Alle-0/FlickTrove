@@ -10,6 +10,9 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -542,41 +545,40 @@ class FirebaseRemoteDataSource @Inject constructor(
     suspend fun fetchTop10Monthly(isTv: Boolean): List<String> {
         val now = java.util.Calendar.getInstance()
         
-        // Mese corrente
-        val currYear = now.get(java.util.Calendar.YEAR)
-        val currMonth = now.get(java.util.Calendar.MONTH) + 1
-        val currMonthId = "${currYear}_M${String.format(java.util.Locale.US, "%02d", currMonth)}"
-        
-        // Mese precedente
-        var prevYear = currYear
-        var prevMonth = currMonth - 1
-        if (prevMonth == 0) {
-            prevMonth = 12
-            prevYear -= 1
+        // Rolling 4 settimane (28 giorni ~ ultimi 30 gg mobili reali)
+        val weekIds = (0 until 4).map { i ->
+            val cal = java.util.Calendar.getInstance().apply {
+                timeInMillis = now.timeInMillis
+                add(java.util.Calendar.WEEK_OF_YEAR, -i)
+            }
+            val year = cal.get(java.util.Calendar.YEAR)
+            val week = cal.get(java.util.Calendar.WEEK_OF_YEAR)
+            "${year}_W$week"
         }
-        val prevMonthId = "${prevYear}_M${String.format(java.util.Locale.US, "%02d", prevMonth)}"
         
         return try {
-            // Eseguiamo in sequenza veloce, Firebase cache e pipeline renderanno l'impatto minimo
-            val currSnap = firestore.collection("trending_stats_monthly")
-                .document(currMonthId)
-                .collection("movies")
-                .get()
-                .await()
-                
-            val prevSnap = firestore.collection("trending_stats_monthly")
-                .document(prevMonthId)
-                .collection("movies")
-                .get()
-                .await()
-                
+            val snaps = coroutineScope {
+                weekIds.map { weekId ->
+                    async {
+                        try {
+                            firestore.collection("trending_stats_weekly")
+                                .document(weekId)
+                                .collection("movies")
+                                .get()
+                                .await()
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }.awaitAll().filterNotNull()
+            }
+            
             val prefix = if (isTv) "tv_" else "movie_"
             
             data class ScoredItem(val compositeId: String, val score: Long)
-            
             val mergedItems = mutableMapOf<String, Long>()
             
-            val processDocs = { snap: com.google.firebase.firestore.QuerySnapshot ->
+            for (snap in snaps) {
                 for (doc in snap.documents) {
                     if (doc.id.startsWith(prefix)) {
                         val views = doc.getLong("view_count") ?: 0L
@@ -589,16 +591,13 @@ class FirebaseRemoteDataSource @Inject constructor(
                 }
             }
             
-            processDocs(prevSnap)
-            processDocs(currSnap)
-            
             mergedItems.entries
                  .map { ScoredItem(it.key, it.value) }
                  .sortedByDescending { it.score }
                  .take(10)
                  .map { it.compositeId }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching Top 10 Monthly", e)
+            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching Top 10 Rolling 30 Days", e)
             emptyList()
         }
     }

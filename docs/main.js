@@ -136,10 +136,10 @@ const initVisualFeaturesSwap = () => {
     pointerEvents: 'none'
   });
 
-  // Row 3 (Always Offline): waiting offscreen to the LEFT (-120%) (vice-versa)
+  // Row 3 (Always Offline): waiting offscreen to the RIGHT (+120%)
   gsap.set(rows[2], {
     opacity: 0,
-    xPercent: -120,
+    xPercent: 120,
     yPercent: -50,
     scale: 0.92,
     filter: `blur(${blurVal})`,
@@ -181,10 +181,10 @@ const initVisualFeaturesSwap = () => {
     duration: 1.2
   }, 0.8)
 
-  // --- TRANSITION 2: Row 2 exits to the RIGHT (120%) (vice-versa), Row 3 enters from the LEFT (-120% -> 0%) (vice-versa) ---
+  // --- TRANSITION 2: Row 2 exits to the LEFT (-120%), Row 3 enters from the RIGHT (120% -> 0%) ---
   .to(rows[1], {
     opacity: 0,
-    xPercent: 120,
+    xPercent: -120,
     yPercent: -50,
     scale: 0.92,
     filter: `blur(${blurVal})`,
