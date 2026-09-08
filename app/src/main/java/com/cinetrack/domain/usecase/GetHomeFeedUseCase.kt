@@ -75,11 +75,45 @@ class GetHomeFeedUseCase @Inject constructor(
             // Carica tutte le altre sezioni in parallelo
             val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
             val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-            val topMoviesDeferred = async { repository.getTop10FlickTrove(isTv = false).take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+            val topMoviesDeferred = async { 
+                val rawTop = repository.getTop10FlickTrove(isTv = false)
+                val result = rawTop.toMutableList()
+                if (result.size < 10) {
+                    try {
+                        val popularFallback = repository.getPopularMovies()
+                        for (movie in popularFallback) {
+                            if (result.none { it.id == movie.id }) {
+                                result.add(movie)
+                                if (result.size >= 10) break
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // ignore fallback error
+                    }
+                }
+                result.take(10).map { it.copy(mediaType = "movie") }.toImmutableList() 
+            }
             val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
             val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
             val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-            val topTvDeferred = async { repository.getTop10FlickTrove(isTv = true).take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+            val topTvDeferred = async { 
+                val rawTop = repository.getTop10FlickTrove(isTv = true)
+                val result = rawTop.toMutableList()
+                if (result.size < 10) {
+                    try {
+                        val popularFallback = repository.getPopularTV()
+                        for (tv in popularFallback) {
+                            if (result.none { it.id == tv.id }) {
+                                result.add(tv)
+                                if (result.size >= 10) break
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // ignore fallback error
+                    }
+                }
+                result.take(10).map { it.copy(mediaType = "tv") }.toImmutableList() 
+            }
             val upcTvDeferred = async { repository.getUpcomingTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
             val trendingMoviesDeferred = async {
                 val basicTrending = repository.getTrendingMovies().take(10)

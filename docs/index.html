@@ -169,6 +169,7 @@
     <div class="mobile-menu-content">
       <a href="#features" class="mobile-link">Features</a>
       <a href="#faq" class="mobile-link">FAQ</a>
+      <a href="#support" class="mobile-link">Support 🍿</a>
       <a href="terms.html" class="mobile-link">Terms</a>
       <a href="privacy.html" class="mobile-link">Privacy</a>
       <a href="https://www.reddit.com/r/FlickTrove/" target="_blank" class="mobile-link">Reddit</a>
@@ -200,7 +201,8 @@
             offline-first architecture.</p>
 
           <div class="hero-anim-item">
-            <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank"
+              rel="noopener noreferrer">
               <!-- Icona SVG personalizzata (Arrow + Tray) -->
               <svg class="icon-download" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 xmlns="http://www.w3.org/2000/svg">
@@ -283,6 +285,12 @@
     <!-- Phase 3: Visual Features Showcase (Pinned Feature Swap) -->
     <section class="visual-features" id="features">
       <div class="features-sticky-container">
+        <!-- Section Header -->
+        <div class="features-section-header">
+          <span class="features-kicker">Core Capabilities</span>
+          <h2 class="features-main-title">Crafted for cinema lovers.</h2>
+        </div>
+
         <div class="features-stage">
 
           <!-- Row 1 (Universal Sync) -->
@@ -318,8 +326,8 @@
                     </div>
                     <div class="integration-card">
                       <div class="int-icon csv">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                          stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                           <polyline points="14 2 14 8 20 8"></polyline>
                           <line x1="8" y1="13" x2="16" y2="13"></line>
@@ -334,8 +342,8 @@
                     </div>
                     <div class="integration-card">
                       <div class="int-icon json">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                          stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"></path>
                           <path d="M4 12v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"></path>
                           <path d="M4 12h16"></path>
@@ -404,7 +412,7 @@
             <span class="reveal-word">watching.</span>
             <br>
             <span class="reveal-word">Track</span>
-            <span class="reveal-word">everything.</span>
+            <span class="reveal-word">stories.</span>
           </h2>
         </div>
       </div>
@@ -553,7 +561,7 @@
           var item = btn.closest('.faq-item');
           if (!item) return;
           var wasActive = item.classList.contains('active');
-          document.querySelectorAll('.faq-item').forEach(function(el) {
+          document.querySelectorAll('.faq-item').forEach(function (el) {
             el.classList.remove('active');
             var b = el.querySelector('.faq-question');
             if (b) b.setAttribute('aria-expanded', 'false');
@@ -566,13 +574,79 @@
       </script>
     </section>
 
+    <!-- Phase 5.5: Support the Indie Developer (Horizontal 2-Column Tip Jar) -->
+    <section class="support-dev-section" id="support">
+      <!-- Visual Anchor / Section Kicker -->
+      <div class="support-kicker">
+        <span class="kicker-line"></span>
+        <span class="kicker-text">Support The Project</span>
+        <span class="kicker-line"></span>
+      </div>
+
+      <div class="support-card glass-panel">
+        <div class="support-glow"></div>
+        
+        <!-- Left Column: Context & Message -->
+        <div class="support-col-left">
+          <div class="support-icon-wrap">🍿</div>
+          <div class="support-text-wrap">
+            <h3 class="support-title">Buy the dev a popcorn</h3>
+            <p class="support-subtitle">100% free, private & ad-free. Fuel the solo development of FlickTrove.</p>
+          </div>
+        </div>
+
+        <!-- Right Column: Chips & Payment Actions -->
+        <div class="support-col-right">
+          <!-- Thematic Quick Chips (Pre-filled via PayPal) -->
+          <div class="support-chips-row">
+            <a href="https://www.paypal.me/AlessandroBasile0/3" target="_blank" rel="noopener noreferrer" class="support-chip" title="Tip $3 via PayPal">
+              <span class="chip-icon">🍿</span>
+              <span class="chip-amount">$3</span>
+              <span class="chip-label">Popcorn</span>
+            </a>
+            <a href="https://www.paypal.me/AlessandroBasile0/8" target="_blank" rel="noopener noreferrer" class="support-chip featured" title="Tip $8 via PayPal">
+              <span class="chip-icon">🎟️</span>
+              <span class="chip-amount">$8</span>
+              <span class="chip-label">Ticket</span>
+            </a>
+            <a href="https://www.paypal.me/AlessandroBasile0/15" target="_blank" rel="noopener noreferrer" class="support-chip" title="Tip $15 via PayPal">
+              <span class="chip-icon">🎬</span>
+              <span class="chip-amount">$15</span>
+              <span class="chip-label">Director</span>
+            </a>
+          </div>
+
+          <!-- Payment Actions -->
+          <div class="support-actions">
+            <a href="https://ko-fi.com/alleO" target="_blank" rel="noopener noreferrer" class="support-btn btn-kofi">
+              <svg class="support-btn-icon kofi-icon" width="20" height="15" viewBox="70 135 390 235" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#FFFFFF" d="M380.19,276.5A196.26,196.26,0,0,1,352,277.78V185.62h19.2a38.37,38.37,0,0,1,32,15.36,45.65,45.65,0,0,1,10.24,29.44A42.87,42.87,0,0,1,380.19,276.5Zm79.37-64a83.86,83.86,0,0,0-37.13-57.61A98.23,98.23,0,0,0,366.11,137H84.49a16.37,16.37,0,0,0-14.08,15.36v3.84s-1.28,124.17,1.28,192a42.11,42.11,0,0,0,42.24,39.68s129.29,0,190.73-1.28h9c35.84-9,38.4-42.24,38.4-60.16C422.43,329,472.36,279.06,459.56,212.5Z"/>
+                <path fill="#FF5E5B" d="M208.66,334.11c3.84,1.28,5.12,0,5.12,0s44.8-41,65.28-65.29c17.92-21.76,19.2-56.32-11.52-70.4s-56.32,15.36-56.32,15.36a50.44,50.44,0,0,0-70.41-7.68l-1.28,1.28c-15.36,16.64-10.24,44.8,1.28,60.16a771.87,771.87,0,0,0,65.29,64Z"/>
+              </svg>
+              <span>Ko-fi</span>
+            </a>
+
+            <a href="https://www.paypal.me/AlessandroBasile0" target="_blank" rel="noopener noreferrer" class="support-btn btn-paypal">
+              <svg class="support-btn-icon paypal-icon" width="16" height="18" viewBox="0 0 38 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#001C64" d="M37.146 22.26c-1.006 5.735-5.685 10.07-11.825 10.07h-3.898c-.795 0-1.596.736-1.723 1.55l-1.707 10.835c-.099.617-.388.822-1.013.822h-6.27c-.634 0-.784-.212-.689-.837l.72-7.493-7.526-.389c-.633 0-.862-.345-.772-.977l5.135-32.56c.099-.617.483-.882 1.106-.882h13.023c6.269 0 10.235 4.22 10.72 9.692 3.73 2.52 5.474 5.873 4.72 10.168z"/>
+                <path fill="#0070E0" d="M12.649 25.075l-1.907 12.133-1.206 7.612a1.034 1.034 0 001.016 1.19h6.622a1.27 1.27 0 001.253-1.072l1.743-11.06a1.27 1.27 0 011.253-1.071h3.898A12.46 12.46 0 0037.617 22.26c.675-4.307-1.492-8.228-5.201-10.165a9.96 9.96 0 01-.12 1.37 12.461 12.461 0 01-12.295 10.54h-6.1a1.268 1.268 0 00-1.252 1.07z"/>
+                <path fill="#00457C" d="M10.741 37.208H3.03a1.035 1.035 0 01-1.018-1.192L7.208 3.072A1.268 1.268 0 018.46 2H21.7c6.269 0 10.827 4.562 10.72 10.089a11.567 11.567 0 00-5.399-1.287H15.983a1.27 1.27 0 00-1.254 1.071l-2.08 13.202-1.908 12.133z"/>
+              </svg>
+              <span>PayPal</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Phase 4: Final CTA -->
     <section class="final-cta-section">
       <div class="cinematic-orb"></div>
       <h2>Ready to build your <span class="text-gradient">ultimate watchlist</span>?</h2>
       <p>Download FlickTrove for Android today. 100% Free.</p>
       <div class="cta-btn-wrapper" style="position: relative; z-index: 10;">
-        <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank"
+          rel="noopener noreferrer">
           <!-- Icona SVG personalizzata (Arrow + Tray) -->
           <svg class="icon-download" width="24" height="24" viewBox="0 0 24 24" fill="none"
             xmlns="http://www.w3.org/2000/svg">
@@ -607,16 +681,21 @@
 
       <div class="footer-links-col">
         <h4>Navigation</h4>
-        <a href="#features">Features</a>
-        <a href="#faq">FAQ</a>
-        <a href="terms.html">Terms</a>
-        <a href="privacy.html">Privacy</a>
+        <div class="navigation-list">
+          <a href="#features">Features</a>
+          <a href="#faq">FAQ</a>
+          <a href="#support">Support 🍿</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
       </div>
 
       <div class="footer-links-col">
         <h4>Community & Code</h4>
-        <a href="https://www.reddit.com/r/FlickTrove/" target="_blank">Reddit</a>
-        <a href="https://github.com/Alle-0/FlickTrove" target="_blank">GitHub</a>
+        <div class="community-list">
+          <a href="https://www.reddit.com/r/FlickTrove/" target="_blank">Reddit</a>
+          <a href="https://github.com/Alle-0/FlickTrove" target="_blank">GitHub</a>
+        </div>
       </div>
 
       <div class="footer-links-col">

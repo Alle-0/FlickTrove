@@ -17,13 +17,16 @@ const lenis = new Lenis({
 // Note: We use global variables 'gsap' and 'ScrollTrigger' provided by CDNs in index.html.
 gsap.registerPlugin(ScrollTrigger);
 
+// Prevent iOS Safari address bar resize events from recalculating ScrollTrigger pins and causing jumps
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 lenis.on('scroll', ScrollTrigger.update);
 
 gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
 
-gsap.ticker.lagSmoothing(0);
+gsap.ticker.lagSmoothing(500, 33);
 
 // 3. Hero entrance animations using GSAP
 const initHeroAnimations = () => {
@@ -60,12 +63,16 @@ const initShowcaseAnimations = () => {
   // Set initial state
   gsap.set('.phone', { xPercent: 0, yPercent: 0, rotation: 0, scale: 1 });
 
+  const isMobile = window.innerWidth <= 768;
+  const xOffset = isMobile ? 68 : 120;
+  const rotAngle = isMobile ? 7 : 12;
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '.showcase-section',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: true,
+      scrub: isMobile ? 0.6 : true,
       pin: '.sticky-container'
     }
   });
@@ -76,13 +83,13 @@ const initShowcaseAnimations = () => {
     0
   )
   .to('.left-phone', {
-    xPercent: -120,
-    rotation: -12,
+    xPercent: -xOffset,
+    rotation: -rotAngle,
     ease: 'none'
   }, 0)
   .to('.right-phone', {
-    xPercent: 120,
-    rotation: 12,
+    xPercent: xOffset,
+    rotation: rotAngle,
     ease: 'none'
   }, 0)
   .to('.center-phone', {
@@ -102,6 +109,10 @@ const initVisualFeaturesSwap = () => {
   const rows = gsap.utils.toArray('.feature-swap-item');
   if (rows.length < 2) return;
 
+  const isMobile = window.innerWidth <= 768;
+  const blurVal = isMobile ? '0px' : '10px';
+  const scrubVal = isMobile ? 0.5 : 0.8;
+
   // Set initial states:
   // Row 1 (Universal Sync): visible in center
   gsap.set(rows[0], {
@@ -120,7 +131,7 @@ const initVisualFeaturesSwap = () => {
     xPercent: 120,
     yPercent: -50,
     scale: 0.92,
-    filter: 'blur(10px)',
+    filter: `blur(${blurVal})`,
     autoAlpha: 0,
     pointerEvents: 'none'
   });
@@ -131,7 +142,7 @@ const initVisualFeaturesSwap = () => {
     xPercent: -120,
     yPercent: -50,
     scale: 0.92,
-    filter: 'blur(10px)',
+    filter: `blur(${blurVal})`,
     autoAlpha: 0,
     pointerEvents: 'none'
   });
@@ -141,7 +152,7 @@ const initVisualFeaturesSwap = () => {
       trigger: '.visual-features',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 0.8,
+      scrub: scrubVal,
       pin: '.features-sticky-container'
     }
   });
@@ -152,7 +163,7 @@ const initVisualFeaturesSwap = () => {
     xPercent: -120,
     yPercent: -50,
     scale: 0.92,
-    filter: 'blur(10px)',
+    filter: `blur(${blurVal})`,
     autoAlpha: 0,
     pointerEvents: 'none',
     ease: 'power2.inOut',
@@ -176,7 +187,7 @@ const initVisualFeaturesSwap = () => {
     xPercent: 120,
     yPercent: -50,
     scale: 0.92,
-    filter: 'blur(10px)',
+    filter: `blur(${blurVal})`,
     autoAlpha: 0,
     pointerEvents: 'none',
     ease: 'power2.inOut',
@@ -347,73 +358,78 @@ const initPortalZoom = () => {
 
   gsap.set(device, { xPercent: -50, yPercent: -50 });
 
+  const isMobile = window.innerWidth <= 768;
+  const targetScale = isMobile ? 6.5 : 24;
+  const scrubSpeed = isMobile ? 0.6 : 1.2;
+  const imgBlur = isMobile ? '8px' : '24px';
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '.portal-zoom-section',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 0.8,
+      scrub: scrubSpeed,
       pin: '.portal-sticky'
     }
   });
 
-  // 1. Words in the center illuminate sequentially in three rhythmic beats
+  // 1. Words in the center illuminate much slower and progressively in three distinct rhythmic beats
   tl.to([words[0], words[1]], {
     color: '#FFFFFF',
     textShadow: '0 0 35px rgba(255, 255, 255, 0.4)',
-    stagger: 0.15,
+    stagger: 0.25,
     ease: 'power1.inOut',
-    duration: 0.6
+    duration: 0.9
   }, 0)
   .to([words[2], words[3]], {
     color: '#2DD4BF',
     textShadow: '0 0 50px rgba(45, 212, 191, 0.6)',
-    stagger: 0.15,
+    stagger: 0.25,
     ease: 'power1.inOut',
-    duration: 0.6
-  }, 0.25)
+    duration: 0.9
+  }, 0.9)
   .to([words[4], words[5]], {
     color: '#2DD4BF',
     textShadow: '0 0 70px rgba(45, 212, 191, 0.85)',
-    stagger: 0.15,
+    stagger: 0.25,
     ease: 'power1.inOut',
-    duration: 0.6
-  }, 0.5)
+    duration: 1.0
+  }, 1.8)
 
-  // 2. While words illuminate, the phone enlarges simultaneously towards the camera
+  // 2. The phone enlarges simultaneously towards the camera alongside the entire text sequence
   .to(device, {
-    scale: 24,
+    scale: targetScale,
     xPercent: -50,
     yPercent: -50,
     borderRadius: 0,
     borderWidth: 0,
     boxShadow: 'none',
+    backgroundColor: 'transparent',
     ease: 'power2.inOut',
-    duration: 2.2
-  }, 0.15)
+    duration: 3.2
+  }, 0.2)
 
-  // 3. While zooming in, the image itself dissolves and blurs out (sfuma),
-  // while the text remains crisp, glowing, and fully visible in the center!
+  // 3. While zooming in, the image dissolves and blurs out gradually
   .to(deviceImg, {
     opacity: 0,
-    filter: 'blur(20px)',
+    filter: `blur(${imgBlur})`,
     ease: 'power2.inOut',
-    duration: 1.5
-  }, 0.5)
+    duration: 2.0
+  }, 0.8)
 
   // 4. Scrim also fades away cleanly with the image
   .to(scrim, {
     opacity: 0,
     ease: 'power1.out',
-    duration: 1.0
-  }, 0.5)
+    duration: 1.5
+  }, 0.8)
 
   // 5. The illuminated title stays fully visible and sharp, with a subtle majestic float
   .to(title, {
     scale: 1.08,
     ease: 'power1.out',
-    duration: 2.0
-  }, 0.3);
+    duration: 3.0
+  }, 0.5);
 };
 
 // Initialize animations (module scripts are deferred automatically)
