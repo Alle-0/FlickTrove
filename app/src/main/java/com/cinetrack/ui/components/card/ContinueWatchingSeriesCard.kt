@@ -290,6 +290,21 @@ fun ContinueWatchingSeriesCard(
         label = "seasonProgress"
     )
 
+    // Calculate total series progress for the Netflix-style horizontal progress bar
+    val totalSeriesProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress, nextInfo.progress, isUpToDate) {
+        if (isUpToDate) 1f
+        else if (progress > 0f) progress
+        else if (!movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
+            val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+            (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+        } else nextInfo.progress
+    }
+    val animatedSeriesProgress by animateFloatAsState(
+        targetValue = totalSeriesProgress.coerceIn(0f, 1f),
+        animationSpec = tween(400, easing = FastOutSlowInEasing),
+        label = "seriesTotalProgress"
+    )
+
     val density = LocalDensity.current
 
     // Premium Staggered Entrance Animation States (applies to the entire series card: poster + protrusion)
@@ -335,7 +350,7 @@ fun ContinueWatchingSeriesCard(
                 clip = false
             }
     ) {
-        // --- 1. MovieCard al naturale on top (with flat bottom connecting to protrusion) ---
+        // --- 1. MovieCard al naturale on top (clean locandina without duplicate eye action button) ---
         MovieCard(
             movie = movie,
             cardWidth = effectiveWidth,
@@ -344,6 +359,7 @@ fun ContinueWatchingSeriesCard(
             isReminder = isReminder,
             progress = progress,
             personalRating = personalRating,
+            showActionButton = false,
             shape = RoundedCornerShape(
                 topStart = cornerRadius,
                 topEnd = cornerRadius,
@@ -364,11 +380,10 @@ fun ContinueWatchingSeriesCard(
             onMessage = onMessage
         )
 
-        // --- 2. Attached Bottom Protrusion ("protuberanza verso il basso") ---
-        Row(
+        // --- 2. Attached Bottom Protrusion with Netflix-style Series Progress Bar ---
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 38.dp)
                 .clip(
                     RoundedCornerShape(
                         topStart = 0.dp,
@@ -379,10 +394,34 @@ fun ContinueWatchingSeriesCard(
                 )
                 .background(Color(0xFF1E1E22))
                 .bounceClick(scaleDown = 0.98f) { onPress(movie) }
-                .padding(start = 11.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Netflix-style horizontal series progress bar along the junction
+            if (isReleased) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.5.dp)
+                        .background(Color.White.copy(alpha = 0.08f))
+                ) {
+                    if (animatedSeriesProgress > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fraction = animatedSeriesProgress)
+                                .background(if (isUpToDate) UpToDateGreen else appAccent)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 38.dp)
+                    .padding(start = 11.dp, end = 8.dp, top = 7.dp, bottom = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
             if (!isReleased) {
                 // UNRELEASED STATE: Serie non ancora uscita ("In arrivo")
                 Column(
@@ -494,3 +533,5 @@ fun ContinueWatchingSeriesCard(
         }
     }
 }
+}
+

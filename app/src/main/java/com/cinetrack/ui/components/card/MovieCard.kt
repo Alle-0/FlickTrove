@@ -629,7 +629,7 @@ fun MovieCard(
                         .align(Alignment.BottomStart)
                         .padding(
                             start = if (isLarge) 16.dp else 12.dp, 
-                            end = if (isLarge) 52.dp else 36.dp, 
+                            end = if (!showActionButton) (if (isLarge) 16.dp else 12.dp) else (if (isLarge) 52.dp else 36.dp), 
                             bottom = if (hasRating) (if (isLarge) 13.dp else 9.dp) else (if (isLarge) 15.dp else 11.dp)
                         ),
                     verticalArrangement = Arrangement.spacedBy(1.dp)
