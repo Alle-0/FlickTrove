@@ -23,12 +23,12 @@ class GetHomeFeedUseCase @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase
 ) {
-    suspend operator fun invoke(): FeedState {
+    suspend operator fun invoke(): FeedState = coroutineScope {
         // Carica i film salvati dall'utente per generare le raccomandazioni
         val localMovies = repository.getLocalMoviesFlow().first()
 
-        // Genera raccomandazioni personalizzate usando l'algoritmo
-        val recMoviesDeferred = coroutineScope { async { 
+        // Lancia tutte le sezioni in parallelo all'unisono
+        val recMoviesDeferred = async { 
             val recs = buildRecommendations(type = "movie", localMovies = localMovies)
             if (recs.isNotEmpty()) {
                 val first = recs.first()
@@ -46,9 +46,9 @@ class GetHomeFeedUseCase @Inject constructor(
                     newList.toImmutableList()
                 } catch (e: Exception) { recs }
             } else recs
-        } }
+        }
 
-        val recTvDeferred = coroutineScope { async { 
+        val recTvDeferred = async { 
             val recs = buildRecommendations(type = "tv", localMovies = localMovies)
             if (recs.isNotEmpty()) {
                 val first = recs.first()
@@ -66,142 +66,114 @@ class GetHomeFeedUseCase @Inject constructor(
                     newList.toImmutableList()
                 } catch (e: Exception) { recs }
             } else recs
-        } }
-
-        val recMovies = recMoviesDeferred.await()
-        val recTv = recTvDeferred.await()
-
-        return coroutineScope {
-            // Carica tutte le altre sezioni in parallelo
-            val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-            val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-            val topMoviesDeferred = async { 
-                val rawTop = repository.getTop10FlickTrove(isTv = false)
-                val result = rawTop.toMutableList()
-                if (result.size < 10) {
-                    try {
-                        val trendingFallback = repository.getTrendingMovies()
-                        for (movie in trendingFallback) {
-                            if (result.none { it.id == movie.id }) {
-                                result.add(movie)
-                                if (result.size >= 10) break
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // ignore fallback error
-                    }
-                }
-                result.take(10).map { it.copy(mediaType = "movie") }.toImmutableList() 
-            }
-            val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
-            val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-            val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-            val topTvDeferred = async { 
-                val rawTop = repository.getTop10FlickTrove(isTv = true)
-                val result = rawTop.toMutableList()
-                if (result.size < 10) {
-                    try {
-                        val trendingFallback = repository.getTrendingTV()
-                        for (tv in trendingFallback) {
-                            if (result.none { it.id == tv.id }) {
-                                result.add(tv)
-                                if (result.size >= 10) break
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // ignore fallback error
-                    }
-                }
-                result.take(10).map { it.copy(mediaType = "tv") }.toImmutableList() 
-            }
-            val upcTvDeferred = async { repository.getUpcomingTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
-            val trendingMoviesDeferred = async {
-                val basicTrending = repository.getTrendingMovies().take(10)
-                coroutineScope {
-                    basicTrending.map { movie ->
-                        async {
-                            try {
-                                val detail = repository.getMovieDetail(movie.id, false)
-                                val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-                                val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-                                val logos = detail.images?.logos
-                                val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-                                movie.copy(
-                                    mediaType = "movie",
-                                    genreIds = detail.genres?.map { it.id } ?: movie.genreIds
-                                ).apply {
-                                    this.logoPath = bestLogo?.filePath
-                                }
-                            } catch (e: Exception) {
-                                movie.copy(mediaType = "movie")
-                            }
-                        }
-                    }.map { it.await() }.toImmutableList()
-                }
-            }
-            val trendingTvDeferred = async {
-                val basicTrending = repository.getTrendingTV().take(10)
-                coroutineScope {
-                    basicTrending.map { tv ->
-                        async {
-                            try {
-                                val detail = repository.getMovieDetail(tv.id, true)
-                                val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-                                val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-                                val logos = detail.images?.logos
-                                val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-                                tv.copy(
-                                    mediaType = "tv",
-                                    genreIds = detail.genres?.map { it.id } ?: tv.genreIds
-                                ).apply {
-                                    this.logoPath = bestLogo?.filePath
-                                }
-                            } catch (e: Exception) {
-                                tv.copy(mediaType = "tv")
-                            }
-                        }
-                    }.map { it.await() }.toImmutableList()
-                }
-            }
-            val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
-            
-            val continueWatchingTvDeferred = async {
-                localMovies.filter { movie ->
-                    movie.mediaType == "tv" && 
-                    !movie.watched && 
-                    !movie.dropped && 
-                    (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0 &&
-                    run {
-                        val next = movie.calculateNextEpisode()
-                        next != null && !next.isUpToDateWithAirDate
-                    }
-                }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
-            }
-            
-            val becauseYouWatchedMovieDeferred = async { buildBecauseYouWatched("movie", localMovies) }
-            val becauseYouWatchedTvDeferred = async { buildBecauseYouWatched("tv", localMovies) }
-
-            FeedState(
-                isLoaded = true,
-                hasError = false,
-                recommendedMovies = recMovies,
-                popularMovies = popMoviesDeferred.await(),
-                nowPlayingMovies = nowMoviesDeferred.await(),
-                top10Movies = topMoviesDeferred.await(),
-                upcomingMovies = upcMoviesDeferred.await(),
-                recommendedTv = recTv,
-                popularTv = popTvDeferred.await(),
-                nowStreamingTv = nowTvDeferred.await(),
-                top10Tv = topTvDeferred.await(),
-                upcomingTv = upcTvDeferred.await(),
-                trendingMovies = trendingMoviesDeferred.await(),
-                trendingTv = trendingTvDeferred.await(),
-                magazineNews = newsDeferred.await(),
-                continueWatchingTv = continueWatchingTvDeferred.await(),
-                becauseYouWatchedMovie = becauseYouWatchedMovieDeferred.await(),
-                becauseYouWatchedTv = becauseYouWatchedTvDeferred.await()
-            )
         }
+
+        val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+        val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+        val topMoviesDeferred = async { 
+            val rawTop = repository.getTop10FlickTrove(isTv = false)
+            val result = rawTop.toMutableList()
+            if (result.size < 10) {
+                try {
+                    val trendingFallback = repository.getTrendingMovies()
+                    for (movie in trendingFallback) {
+                        if (result.none { it.id == movie.id }) {
+                            result.add(movie)
+                            if (result.size >= 10) break
+                        }
+                    }
+                } catch (e: Exception) {
+                    // ignore fallback error
+                }
+            }
+            result.take(10).map { it.copy(mediaType = "movie") }.toImmutableList() 
+        }
+        val upcMoviesDeferred = async { repository.getUpcomingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+        val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+        val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+        val topTvDeferred = async { 
+            val rawTop = repository.getTop10FlickTrove(isTv = true)
+            val result = rawTop.toMutableList()
+            if (result.size < 10) {
+                try {
+                    val trendingFallback = repository.getTrendingTV()
+                    for (tv in trendingFallback) {
+                        if (result.none { it.id == tv.id }) {
+                            result.add(tv)
+                            if (result.size >= 10) break
+                        }
+                    }
+                } catch (e: Exception) {
+                    // ignore fallback error
+                }
+            }
+            result.take(10).map { it.copy(mediaType = "tv") }.toImmutableList() 
+        }
+        val upcTvDeferred = async { repository.getUpcomingTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
+        val trendingMoviesDeferred = async {
+            val basic = repository.getTrendingMovies().take(10)
+            coroutineScope {
+                basic.map { movie ->
+                    async {
+                        val logo = repository.getMovieLogo(movie.id, isTv = false)
+                        movie.copy(mediaType = "movie").apply {
+                            this.logoPath = logo
+                        }
+                    }
+                }.awaitAll().toImmutableList()
+            }
+        }
+        val trendingTvDeferred = async {
+            val basic = repository.getTrendingTV().take(10)
+            coroutineScope {
+                basic.map { tv ->
+                    async {
+                        val logo = repository.getMovieLogo(tv.id, isTv = true)
+                        tv.copy(mediaType = "tv").apply {
+                            this.logoPath = logo
+                        }
+                    }
+                }.awaitAll().toImmutableList()
+            }
+        }
+        val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
+        
+        val continueWatchingTvDeferred = async {
+            localMovies.filter { movie ->
+                movie.mediaType == "tv" && 
+                !movie.watched && 
+                !movie.dropped && 
+                (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0 &&
+                run {
+                    val next = movie.calculateNextEpisode()
+                    next != null && !next.isUpToDateWithAirDate
+                }
+            }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
+        }
+        
+        val becauseYouWatchedMovieDeferred = async { buildBecauseYouWatched("movie", localMovies) }
+        val becauseYouWatchedTvDeferred = async { buildBecauseYouWatched("tv", localMovies) }
+
+        FeedState(
+            isLoaded = true,
+            hasError = false,
+            recommendedMovies = recMoviesDeferred.await(),
+            popularMovies = popMoviesDeferred.await(),
+            nowPlayingMovies = nowMoviesDeferred.await(),
+            top10Movies = topMoviesDeferred.await(),
+            upcomingMovies = upcMoviesDeferred.await(),
+            recommendedTv = recTvDeferred.await(),
+            popularTv = popTvDeferred.await(),
+            nowStreamingTv = nowTvDeferred.await(),
+            top10Tv = topTvDeferred.await(),
+            upcomingTv = upcTvDeferred.await(),
+            trendingMovies = trendingMoviesDeferred.await(),
+            trendingTv = trendingTvDeferred.await(),
+            magazineNews = newsDeferred.await(),
+            continueWatchingTv = continueWatchingTvDeferred.await(),
+            becauseYouWatchedMovie = becauseYouWatchedMovieDeferred.await(),
+            becauseYouWatchedTv = becauseYouWatchedTvDeferred.await()
+        )
     }
 
     private suspend fun buildRecommendations(type: String, localMovies: List<Movie>): ImmutableList<Movie> {

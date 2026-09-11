@@ -171,7 +171,7 @@ fun AccountModals(
         kotlinx.coroutines.delay(500)
         try {
             val doc = Firebase.firestore.collection("usernames").document(nameInput.lowercase()).get().await()
-            nameAvailable = !doc.exists()
+            nameAvailable = !doc.exists() || doc.getString("uid") == currentUser?.uid
             if (!nameAvailable!!) {
                 nameError = context.getString(R.string.account_error_name_taken)
             }
@@ -499,7 +499,7 @@ fun AccountModals(
                                                     val newNameDoc = Firebase.firestore.collection("usernames").document(nameInput.lowercase())
                                                     
                                                     val existingDoc = newNameDoc.get().await()
-                                                    if (existingDoc.exists()) {
+                                                    if (existingDoc.exists() && existingDoc.getString("uid") != currentUser!!.uid) {
                                                         isCheckingName = false
                                                         nameAvailable = false
                                                         nameError = context.getString(R.string.account_error_name_taken)
@@ -507,7 +507,9 @@ fun AccountModals(
                                                     }
                                                     
                                                     Firebase.firestore.runTransaction { transaction ->
-                                                        transaction.delete(oldNameDoc)
+                                                        if (oldNameDoc.path != newNameDoc.path) {
+                                                            transaction.delete(oldNameDoc)
+                                                        }
                                                         transaction.set(newNameDoc, hashMapOf("uid" to currentUser!!.uid, "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp()))
                                                         transaction.update(
                                                             Firebase.firestore.collection("users").document(currentUser!!.uid),

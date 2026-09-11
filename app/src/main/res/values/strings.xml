@@ -625,6 +625,15 @@
     <string name="widget_release_date_prefix">Releasing on: %1$s</string>
     <string name="widget_no_releases">No upcoming titles!</string>
     <string name="widget_no_img">No Img</string>
+    <string name="widget_tv_episodes_name">Upcoming Episodes</string>
+    <string name="widget_next_episodes">NEXT EPISODES</string>
+    <string name="widget_no_episodes">No upcoming episodes!</string>
+    <string name="widget_episode_on">On: %1$s</string>
+    <string name="widget_mark_watched">Mark as watched</string>
+    <string name="widget_now_watching_name">Now Watching</string>
+    <string name="widget_now_watching_title">NOW WATCHING</string>
+    <string name="widget_now_watching_empty">All caught up! No episodes waiting.</string>
+    <string name="widget_available_since">Since: %1$s</string>
     <string name="comments_screen_title">Discussion</string>
     <string name="comments_screen_title_with_media">Discussion: %1$s</string>
     <string name="comment_translate">Translate</string>

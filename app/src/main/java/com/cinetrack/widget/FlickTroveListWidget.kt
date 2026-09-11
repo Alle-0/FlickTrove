@@ -107,7 +107,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
             // Sort by release date ascending and take top 5
             val topUpcoming = upcomingMovies.sortedBy { movie ->
                 movie.releaseDate ?: movie.firstAirDate
-            }.take(15) // Can show more items in a vertical list
+            }.take(8) // Keep list compact to stay well within Binder transaction limits
             
             val loadedList = mutableListOf<Pair<Movie, Bitmap?>>()
             
@@ -118,11 +118,12 @@ class FlickTroveListWidget : GlanceAppWidget() {
                     try {
                         val request = ImageRequest.Builder(context)
                             .data(buildTmdbImageUrl(posterPath, ImageType.POSTER, ImageQuality.LOW))
-                            .size(300) // Keep it small to avoid RemoteViews memory limit
+                            .size(104, 156)
+                            .bitmapConfig(Bitmap.Config.RGB_565)
                             .allowHardware(false)
                             .build()
                         val result = context.imageLoader.execute(request)
-                        bitmap = result.drawable?.toBitmap()
+                        bitmap = result.drawable?.toBitmap(width = 104, height = 156, config = Bitmap.Config.RGB_565)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

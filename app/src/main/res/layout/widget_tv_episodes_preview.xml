@@ -12,12 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
         android:layout_marginBottom="6dp"
         android:gravity="center_vertical">
 
-        <!-- Red bar -->
+        <!-- Red Accent Bar -->
         <FrameLayout
             android:layout_width="4dp"
             android:layout_height="16dp"
@@ -28,19 +28,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="PROSSIMAMENTE"
+            android:text="@string/widget_next_episodes"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />
 
         <FrameLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@drawable/widget_search_bg">
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:layout_gravity="center"
                 android:tint="#FFFFFF"
                 android:src="@drawable/ic_lente" />
@@ -54,47 +54,59 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:gravity="center_vertical">
 
-        <!-- Fake Poster -->
+        <!-- Poster Thumbnail -->
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="60dp"
             android:clipToOutline="true"
             android:background="@drawable/widget_poster_bg">
-            
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/mock_inception_poster"
+                android:src="@drawable/mock_stranger_things_poster"
                 android:scaleType="centerCrop" />
         </FrameLayout>
 
-        <!-- Text -->
+        <!-- Metadata Column -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp">
+            android:layout_marginStart="12dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Inception"
+                android:text="Stranger Things"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
-                android:text="16 LUG 2010"
+                android:text="S5 E1"
+                android:textColor="#E50914"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Il 15 Ott 2026"
                 android:textColor="#AAAAAA"
-                android:textSize="11sp" />
+                android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -113,47 +125,59 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:gravity="center_vertical">
 
-        <!-- Fake Poster 2 -->
+        <!-- Poster Thumbnail 2 -->
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="60dp"
             android:clipToOutline="true"
             android:background="@drawable/widget_poster_bg">
-            
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/mock_interstellar_poster"
+                android:src="@drawable/mock_tlou_poster"
                 android:scaleType="centerCrop" />
         </FrameLayout>
 
-        <!-- Text -->
+        <!-- Metadata Column -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp">
+            android:layout_marginStart="12dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Interstellar"
+                android:text="The Last of Us"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
-                android:text="07 NOV 2014"
+                android:text="S2 E1"
+                android:textColor="#E50914"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Il 23 Ott 2026"
                 android:textColor="#AAAAAA"
-                android:textSize="11sp" />
+                android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 

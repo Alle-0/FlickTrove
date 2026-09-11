@@ -19,3 +19,11 @@ data class MovieDetailCacheEntity(
     val data: String, // Full JSON blob from API
     @ColumnInfo(name = "updated_at") val updatedAt: Long
 )
+
+@Entity(tableName = "home_feed_cache")
+data class HomeFeedCacheEntity(
+    @PrimaryKey val id: String = "home_feed",
+    val data: String, // Full JSON blob of CachedFeedData
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = System.currentTimeMillis()
+)
+

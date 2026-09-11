@@ -574,6 +574,15 @@
     <string name="widget_release_date_prefix">रिलीज़ हो रहा है: %1$s</string>
     <string name="widget_no_releases">कोई आगामी शीर्षक नहीं!</string>
     <string name="widget_no_img">कोई छवि नहीं</string>
+    <string name="widget_tv_episodes_name">आगामी एपिसोड</string>
+    <string name="widget_next_episodes">आगामी एपिसोड</string>
+    <string name="widget_no_episodes">कोई आगामी एपिसोड नहीं!</string>
+    <string name="widget_episode_on">तारीख: %1$s</string>
+    <string name="widget_mark_watched">देखा हुआ चिह्नित करें</string>
+    <string name="widget_now_watching_name">अभी देख रहे हैं</string>
+    <string name="widget_now_watching_title">अभी देख रहे हैं</string>
+    <string name="widget_now_watching_empty">सब देख लिया! कोई एपिसोड प्रतीक्षा में नहीं।</string>
+    <string name="widget_available_since">से: %1$s</string>
     <string name="comments_screen_title">चर्चा</string>
     <string name="comments_screen_title_with_media">चर्चा: %1$s</string>
     <string name="comment_translate">अनुवाद करें</string>

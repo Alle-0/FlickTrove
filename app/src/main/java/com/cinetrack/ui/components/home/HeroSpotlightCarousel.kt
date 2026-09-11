@@ -57,10 +57,11 @@ fun HeroSpotlightCarousel(
     movies: List<Movie>,
     pagerState: PagerState,
     onMovieClick: (Movie) -> Unit,
+    onResolveLogo: (suspend (Movie) -> String?)? = null,
     modifier: Modifier = Modifier
 ) {
     if (movies.isEmpty()) return
-    
+
     val primaryColor = MaterialTheme.colorScheme.primary
 
     // Auto-scroll ogni 4 secondi
@@ -106,6 +107,18 @@ fun HeroSpotlightCarousel(
         ) { virtualPage ->
             val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
+
+            var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
+            LaunchedEffect(movie.id, movie.logoPath) {
+                if (localLogoPath.isNullOrEmpty()) {
+                    val fetched = onResolveLogo?.invoke(movie)
+                    if (!fetched.isNullOrEmpty()) {
+                        localLogoPath = fetched
+                    }
+                } else {
+                    localLogoPath = movie.logoPath
+                }
+            }
 
             val context = LocalContext.current
             val configuration = LocalConfiguration.current
@@ -189,8 +202,9 @@ fun HeroSpotlightCarousel(
                     ) {
 
                         // Logo o Titolo
-                        if (!movie.logoPath.isNullOrEmpty()) {
-                            val logoUrl = com.cinetrack.util.buildTmdbImageUrl(movie.logoPath, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
+                        val activeLogo = localLogoPath ?: movie.logoPath
+                        if (!activeLogo.isNullOrEmpty()) {
+                            val logoUrl = com.cinetrack.util.buildTmdbImageUrl(activeLogo, com.cinetrack.util.ImageType.LOGO, com.cinetrack.util.LocalImageQuality.current)
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data(logoUrl)

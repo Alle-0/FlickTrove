@@ -36,6 +36,25 @@ object WidgetUpdater {
                         FlickTroveListWidget().update(context, glanceId)
                     } catch (e: Exception) {}
                 }
+                // Aggiorna FlickTroveTvEpisodesWidget
+                val widget3Component = android.content.ComponentName(context, FlickTroveTvEpisodesWidgetReceiver::class.java)
+                val widget3Ids = appWidgetManager.getAppWidgetIds(widget3Component)
+                widget3Ids.forEach { id ->
+                    try {
+                        val glanceId = manager.getGlanceIdBy(id)
+                        FlickTroveTvEpisodesWidget().update(context, glanceId)
+                    } catch (e: Exception) {}
+                }
+
+                // Aggiorna FlickTroveNowWatchingWidget
+                val widget4Component = android.content.ComponentName(context, FlickTroveNowWatchingWidgetReceiver::class.java)
+                val widget4Ids = appWidgetManager.getAppWidgetIds(widget4Component)
+                widget4Ids.forEach { id ->
+                    try {
+                        val glanceId = manager.getGlanceIdBy(id)
+                        FlickTroveNowWatchingWidget().update(context, glanceId)
+                    } catch (e: Exception) {}
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

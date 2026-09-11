@@ -151,28 +151,34 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    suspend fun isUsernameAvailable(username: String): Boolean {
+    suspend fun isUsernameAvailable(username: String, forUid: String? = null): Boolean {
         if (username.isBlank() || username.length < 3) return false
         return try {
             val document = Firebase.firestore.collection("usernames").document(username.lowercase()).get().await()
-            !document.exists()
+            if (!document.exists()) {
+                true
+            } else if (forUid != null && document.getString("uid") == forUid) {
+                true
+            } else {
+                false
+            }
         } catch (e: Exception) {
             false
         }
     }
 
-    suspend fun generateUniqueUsername(baseName: String): String {
+    suspend fun generateUniqueUsername(baseName: String, forUid: String? = null): String {
         var currentName = baseName.replace(Regex("[^a-zA-Z0-9_]"), "")
         if (currentName.length < 3) currentName = "User" + (100..999).random()
         if (currentName.length > 15) currentName = currentName.substring(0, 15)
         
-        var isAvailable = isUsernameAvailable(currentName)
+        var isAvailable = isUsernameAvailable(currentName, forUid)
         var count = 1
         var finalName = currentName
         while (!isAvailable) {
             val suffix = "_${(10..9999).random()}"
             finalName = currentName.take(20 - suffix.length) + suffix
-            isAvailable = isUsernameAvailable(finalName)
+            isAvailable = isUsernameAvailable(finalName, forUid)
             count++
             if (count > 10) break
         }
@@ -202,7 +208,7 @@ class AuthViewModel @Inject constructor(
                 val baseName = fallbackName?.takeIf { it.isNotBlank() } 
                     ?: fallbackEmail?.substringBefore("@") 
                     ?: "User"
-                val uniqueName = generateUniqueUsername(baseName)
+                val uniqueName = generateUniqueUsername(baseName, uid)
                 
                 currentUser?.updateProfile(com.google.firebase.auth.userProfileChangeRequest {
                     displayName = uniqueName
@@ -248,7 +254,7 @@ class AuthViewModel @Inject constructor(
                         viewModelScope.launch {
                             try {
                                 val baseName = email.substringBefore("@")
-                                val uniqueName = generateUniqueUsername(baseName)
+                                val uniqueName = generateUniqueUsername(baseName, uid)
 
                                 auth.currentUser?.updateProfile(userProfileChangeRequest {
                                     displayName = uniqueName
@@ -290,7 +296,7 @@ class AuthViewModel @Inject constructor(
                         viewModelScope.launch {
                             try {
                                 val baseName = email.substringBefore("@")
-                                val uniqueName = generateUniqueUsername(baseName)
+                                val uniqueName = generateUniqueUsername(baseName, uid)
 
                                 auth.currentUser?.updateProfile(userProfileChangeRequest {
                                     displayName = uniqueName
@@ -341,7 +347,7 @@ class AuthViewModel @Inject constructor(
                         viewModelScope.launch {
                             if (isNewUser) {
                                 val baseName = result.user?.displayName ?: "User"
-                                val uniqueName = generateUniqueUsername(baseName)
+                                val uniqueName = generateUniqueUsername(baseName, uid)
                                 
                                 try {
                                     auth.currentUser?.updateProfile(userProfileChangeRequest {
@@ -410,7 +416,7 @@ class AuthViewModel @Inject constructor(
                         viewModelScope.launch {
                             if (isNewUser) {
                                 val baseName = result.user?.displayName ?: "User"
-                                val uniqueName = generateUniqueUsername(baseName)
+                                val uniqueName = generateUniqueUsername(baseName, uid)
                                 
                                 try {
                                     auth.currentUser?.updateProfile(userProfileChangeRequest {
@@ -510,10 +516,22 @@ class AuthViewModel @Inject constructor(
         }
 
         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_deleting)) }
+        val uid = user.uid
+        val displayName = user.displayName
         
         user.delete()
             .addOnSuccessListener {
                 viewModelScope.launch {
+                    try {
+                        val batch = Firebase.firestore.batch()
+                        batch.delete(Firebase.firestore.collection("users").document(uid))
+                        if (!displayName.isNullOrBlank()) {
+                            batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
+                        }
+                        batch.commit().await()
+                    } catch (e: Exception) {
+                        // ignore
+                    }
                     movieRepository.clearAllData()
                     auth.signOut()
                     _processState.update { AuthState.Unauthenticated }
@@ -542,12 +560,24 @@ class AuthViewModel @Inject constructor(
     fun deleteAccountWithReauth(password: String, onComplete: (Boolean) -> Unit) {
         val user = auth.currentUser ?: return
         val email = user.email ?: return
+        val uid = user.uid
+        val displayName = user.displayName
         _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_deleting)) }
         viewModelScope.launch {
             try {
                 val credential = EmailAuthProvider.getCredential(email, password)
                 user.reauthenticate(credential).await()
                 user.delete().await()
+                try {
+                    val batch = Firebase.firestore.batch()
+                    batch.delete(Firebase.firestore.collection("users").document(uid))
+                    if (!displayName.isNullOrBlank()) {
+                        batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
+                    }
+                    batch.commit().await()
+                } catch (e: Exception) {
+                    // ignore
+                }
                 movieRepository.clearAllData()
                 auth.signOut()
                 _processState.update { AuthState.Unauthenticated }

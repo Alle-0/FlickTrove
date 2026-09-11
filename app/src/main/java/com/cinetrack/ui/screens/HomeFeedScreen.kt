@@ -3,6 +3,13 @@ package com.cinetrack.ui.screens
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -297,7 +304,7 @@ fun HomeFeedScreenContent(
                 verticalArrangement = Arrangement.spacedBy(48.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (uiState.hasFeedError) {
+                if (uiState.hasFeedError && heroList.isEmpty() && popularList.isEmpty()) {
                     item {
                         Box(
                             modifier = Modifier
@@ -340,7 +347,7 @@ fun HomeFeedScreenContent(
                             }
                         }
                     }
-                } else if (uiState.isFeedLoading) {
+                } else if (uiState.isFeedLoading && heroList.isEmpty() && popularList.isEmpty()) {
                     item {
                         // Hero Skeleton
                         Box(
@@ -424,7 +431,8 @@ fun HomeFeedScreenContent(
                         HeroSpotlightCarousel(
                             movies = heroList,
                             pagerState = pagerState,
-                            onMovieClick = onMovieClick
+                            onMovieClick = onMovieClick,
+                            onResolveLogo = { movie -> viewModel.resolveMovieLogo(movie) }
                         )
                     }
                 }
@@ -432,38 +440,42 @@ fun HomeFeedScreenContent(
                 // CONTINUA A GUARDARE (TV)
                 if (isTv && uiState.continueWatchingTv.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_continue_watching), onClick = null)
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(
-                                count = uiState.continueWatchingTv.size,
-                                key = { index -> uiState.continueWatchingTv[index].id }
-                            ) { index ->
-                                val rawMovie = uiState.continueWatchingTv[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                val isUpdating = viewModel.updatingShowIds[movie.id] == true
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isUpdating = isUpdating,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = movie.watched,
-                                        isReminder = movie.reminder,
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
-                                        onMessage = stableOnMessage
-                                    )
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_continue_watching), onClick = null)
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(
+                                        count = uiState.continueWatchingTv.size,
+                                        key = { index -> uiState.continueWatchingTv[index].id }
+                                    ) { index ->
+                                        val rawMovie = uiState.continueWatchingTv[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        val isUpdating = viewModel.updatingShowIds[movie.id] == true
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isUpdating = isUpdating,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = movie.watched,
+                                                isReminder = movie.reminder,
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -473,40 +485,44 @@ fun HomeFeedScreenContent(
                 // 1. DALLA TUA WATCHLIST
                 if (watchlistList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_watchlist), onClick = { 
-                            tabNavigator.current = HomeTab 
-                        })
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(watchlistList.take(10).size) { index ->
-                                val movie = watchlistList[index]
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                            if (watchlistList.size > 10) {
-                                item {
-                                    ShowMoreCard(onClick = { 
-                                        tabNavigator.current = HomeTab 
-                                    })
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_watchlist), onClick = { 
+                                    tabNavigator.current = HomeTab 
+                                })
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(watchlistList.take(10).size) { index ->
+                                        val movie = watchlistList[index]
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = isMovieWatched(movie),
+                                                isReminder = isMovieReminder(movie),
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
+                                    if (watchlistList.size > 10) {
+                                        item {
+                                            ShowMoreCard(onClick = { 
+                                                tabNavigator.current = HomeTab 
+                                            })
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -517,30 +533,118 @@ fun HomeFeedScreenContent(
                 if (recommendedList.isNotEmpty()) {
                     val trovePick = recommendedList.first()
                     item {
-                        TrovePickCard(
-                            movie = trovePick,
-                            onMovieClick = onMovieClick
-                        )
+                        AnimatedHomeSection {
+                            TrovePickCard(
+                                movie = trovePick,
+                                onMovieClick = onMovieClick
+                            )
+                        }
                     }
                     // Se ci sono altri consigliati, mostra una riga con il resto
                     if (recommendedList.size > 1) {
                         item {
-                            HomeSectionTitle(
-                                title = stringResource(R.string.home_section_recommended),
-                                onClick = { tabNavigator.current = RecommendationsTab }
-                            )
-                            
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(recommendedList.drop(1).size) { index ->
-                                    val rawMovie = recommendedList.drop(1)[index]
-                                    val movie = resolveLocalMovie(rawMovie)
-                                    Box(modifier = Modifier.width(110.dp)) {
-                                        MovieCard(
+                            AnimatedHomeSection {
+                                Column {
+                                    HomeSectionTitle(
+                                        title = stringResource(R.string.home_section_recommended),
+                                        onClick = { tabNavigator.current = RecommendationsTab }
+                                    )
+                                    
+                                    LazyRow(
+                                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        items(recommendedList.drop(1).size) { index ->
+                                            val rawMovie = recommendedList.drop(1)[index]
+                                            val movie = resolveLocalMovie(rawMovie)
+                                            Box(modifier = Modifier.width(110.dp)) {
+                                                MovieCard(
+                                                    movie = movie,
+                                                    cardWidth = 110.dp,
+                                                    isFavorite = isMovieFavorite(movie),
+                                                    isWatched = isMovieWatched(movie),
+                                                    isReminder = isMovieReminder(movie),
+                                                    progress = getMovieProgress(movie),
+                                                    personalRating = movie.personalRating,
+                                                    folderColors = getMovieFolderColors(movie),
+                                                    hazeState = activeHazeState,
+                                                    staggerIndex = index,
+                                                    onPress = onMovieClick,
+                                                    onLongPress = stableOnLongPress,
+                                                    onAction = stableOnAction,
+                                                    onMessage = stableOnMessage
+                                                )
+                                            }
+                                        }
+                                        item {
+                                            ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // PERCHÉ HAI GUARDATO [TITOLO]
+                val becauseYouWatchedData = if (isTv) uiState.becauseYouWatchedTv else uiState.becauseYouWatchedMovie
+                if (becauseYouWatchedData != null && becauseYouWatchedData.second.isNotEmpty()) {
+                    val seedMovie = becauseYouWatchedData.first
+                    val recs = becauseYouWatchedData.second
+                    item {
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName ?: seedMovie.name ?: ""), onClick = null)
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(recs.size) { index ->
+                                        val rawMovie = recs[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = isMovieWatched(movie),
+                                                isReminder = isMovieReminder(movie),
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 6. TOP 10 FLICKTROVE
+                if (top10List.isNotEmpty()) {
+                    item {
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(stringResource(R.string.home_section_top_10))
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(top10List.take(10).size) { index ->
+                                        val rawMovie = top10List[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        Top10MovieCard(
                                             movie = movie,
-                                            cardWidth = 110.dp,
+                                            rank = index + 1,
                                             isFavorite = isMovieFavorite(movie),
                                             isWatched = isMovieWatched(movie),
                                             isReminder = isMovieReminder(movie),
@@ -556,80 +660,6 @@ fun HomeFeedScreenContent(
                                         )
                                     }
                                 }
-                                item {
-                                    ShowMoreCard(onClick = { tabNavigator.current = RecommendationsTab })
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // PERCHÉ HAI GUARDATO [TITOLO]
-                val becauseYouWatchedData = if (isTv) uiState.becauseYouWatchedTv else uiState.becauseYouWatchedMovie
-                if (becauseYouWatchedData != null && becauseYouWatchedData.second.isNotEmpty()) {
-                    val seedMovie = becauseYouWatchedData.first
-                    val recs = becauseYouWatchedData.second
-                    item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName ?: seedMovie.name ?: ""), onClick = null)
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(recs.size) { index ->
-                                val rawMovie = recs[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // 6. TOP 10 FLICKTROVE
-                if (top10List.isNotEmpty()) {
-                    item {
-                        HomeSectionTitle(stringResource(R.string.home_section_top_10))
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(top10List.take(10).size) { index ->
-                                val rawMovie = top10List[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                Top10MovieCard(
-                                    movie = movie,
-                                    rank = index + 1,
-                                    isFavorite = isMovieFavorite(movie),
-                                    isWatched = isMovieWatched(movie),
-                                    isReminder = isMovieReminder(movie),
-                                    progress = getMovieProgress(movie),
-                                    personalRating = movie.personalRating,
-                                    folderColors = getMovieFolderColors(movie),
-                                    hazeState = activeHazeState,
-                                    staggerIndex = index,
-                                    onPress = onMovieClick,
-                                    onLongPress = stableOnLongPress,
-                                    onAction = stableOnAction,
-                                    onMessage = stableOnMessage
-                                )
                             }
                         }
                     }
@@ -638,42 +668,46 @@ fun HomeFeedScreenContent(
                 // 2. POPOLARI (2:3 Posters)
                 if (popularList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { 
-                            DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
-                            tabNavigator.current = DiscoverTab 
-                        })
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(popularList.size) { index ->
-                                val rawMovie = popularList[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                            item {
-                                ShowMoreCard(onClick = { 
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_popular), onClick = { 
                                     DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
                                     tabNavigator.current = DiscoverTab 
                                 })
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(popularList.size) { index ->
+                                        val rawMovie = popularList[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = isMovieWatched(movie),
+                                                isReminder = isMovieReminder(movie),
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
+                                    item {
+                                        ShowMoreCard(onClick = { 
+                                            DiscoverTab.requestedType = if (isTv) "popular_tv" else "popular_movies"
+                                            tabNavigator.current = DiscoverTab 
+                                        })
+                                    }
+                                }
                             }
                         }
                     }
@@ -682,42 +716,46 @@ fun HomeFeedScreenContent(
                 // 2. NOW IN THEATERS / NOW STREAMING (2:3 Posters)
                 if (nowPlayingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters), onClick = { 
-                            DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
-                            tabNavigator.current = DiscoverTab 
-                        })
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(nowPlayingList.size) { index ->
-                                val rawMovie = nowPlayingList[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                            item {
-                                ShowMoreCard(onClick = { 
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters), onClick = { 
                                     DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
                                     tabNavigator.current = DiscoverTab 
                                 })
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(nowPlayingList.size) { index ->
+                                        val rawMovie = nowPlayingList[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = isMovieWatched(movie),
+                                                isReminder = isMovieReminder(movie),
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
+                                    item {
+                                        ShowMoreCard(onClick = { 
+                                            DiscoverTab.requestedType = if (isTv) "on_the_air_tv" else "now_playing_movies"
+                                            tabNavigator.current = DiscoverTab 
+                                        })
+                                    }
+                                }
                             }
                         }
                     }
@@ -726,42 +764,46 @@ fun HomeFeedScreenContent(
                 // 3. IN USCITA (2:3 Posters)
                 if (upcomingList.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_upcoming), onClick = { 
-                            DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
-                            tabNavigator.current = DiscoverTab 
-                        })
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(upcomingList.size) { index ->
-                                val rawMovie = upcomingList[index]
-                                val movie = resolveLocalMovie(rawMovie)
-                                Box(modifier = Modifier.width(110.dp)) {
-                                    MovieCard(
-                                        movie = movie,
-                                        cardWidth = 110.dp,
-                                        isFavorite = isMovieFavorite(movie),
-                                        isWatched = isMovieWatched(movie),
-                                        isReminder = isMovieReminder(movie),
-                                        progress = getMovieProgress(movie),
-                                        personalRating = movie.personalRating,
-                                        folderColors = getMovieFolderColors(movie),
-                                        hazeState = activeHazeState,
-                                        staggerIndex = index,
-                                        onPress = onMovieClick,
-                                        onLongPress = stableOnLongPress,
-                                        onAction = stableOnAction,
-                                        onMessage = stableOnMessage
-                                    )
-                                }
-                            }
-                            item {
-                                ShowMoreCard(onClick = { 
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_upcoming), onClick = { 
                                     DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
                                     tabNavigator.current = DiscoverTab 
                                 })
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(upcomingList.size) { index ->
+                                        val rawMovie = upcomingList[index]
+                                        val movie = resolveLocalMovie(rawMovie)
+                                        Box(modifier = Modifier.width(110.dp)) {
+                                            MovieCard(
+                                                movie = movie,
+                                                cardWidth = 110.dp,
+                                                isFavorite = isMovieFavorite(movie),
+                                                isWatched = isMovieWatched(movie),
+                                                isReminder = isMovieReminder(movie),
+                                                progress = getMovieProgress(movie),
+                                                personalRating = movie.personalRating,
+                                                folderColors = getMovieFolderColors(movie),
+                                                hazeState = activeHazeState,
+                                                staggerIndex = index,
+                                                onPress = onMovieClick,
+                                                onLongPress = stableOnLongPress,
+                                                onAction = stableOnAction,
+                                                onMessage = stableOnMessage
+                                            )
+                                        }
+                                    }
+                                    item {
+                                        ShowMoreCard(onClick = { 
+                                            DiscoverTab.requestedType = if (isTv) "upcoming_tv" else "upcoming_movies"
+                                            tabNavigator.current = DiscoverTab 
+                                        })
+                                    }
+                                }
                             }
                         }
                     }
@@ -770,18 +812,22 @@ fun HomeFeedScreenContent(
                 // 5. MAGAZINE NEWS
                 if (uiState.magazineNews.isNotEmpty()) {
                     item {
-                        HomeSectionTitle(title = stringResource(R.string.home_section_magazine), onClick = { tabNavigator.current = NewsTab })
-                        
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(uiState.magazineNews.size) { index ->
-                                val article = uiState.magazineNews[index]
-                                NewsArticleCard(article = article, context = context)
-                            }
-                            item {
-                                ShowMoreCard(onClick = { tabNavigator.current = NewsTab }, height = 140.dp)
+                        AnimatedHomeSection {
+                            Column {
+                                HomeSectionTitle(title = stringResource(R.string.home_section_magazine), onClick = { tabNavigator.current = NewsTab })
+                                
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    items(uiState.magazineNews.size) { index ->
+                                        val article = uiState.magazineNews[index]
+                                        NewsArticleCard(article = article, context = context)
+                                    }
+                                    item {
+                                        ShowMoreCard(onClick = { tabNavigator.current = NewsTab }, height = 140.dp)
+                                    }
+                                }
                             }
                         }
                     }
@@ -874,4 +920,39 @@ fun HomeFeedScreenContent(
         }
     }
 }
+
+@Composable
+private fun AnimatedHomeSection(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    var hasAppeared by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasAppeared = true
+    }
+
+    val alpha by animateFloatAsState(
+        targetValue = if (hasAppeared) 1f else 0f,
+        animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing),
+        label = "sectionAlpha"
+    )
+    val translateY by animateFloatAsState(
+        targetValue = if (hasAppeared) 0f else 36f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "sectionTranslateY"
+    )
+
+    Box(
+        modifier = modifier.graphicsLayer {
+            this.alpha = alpha
+            this.translationY = translateY
+        }
+    ) {
+        content()
+    }
+}
+
 

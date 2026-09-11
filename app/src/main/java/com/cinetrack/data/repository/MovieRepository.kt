@@ -19,6 +19,8 @@ import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
 import com.cinetrack.data.local.entities.MovieDetailCacheEntity
 import com.cinetrack.data.local.entities.ColorCacheEntity
+import com.cinetrack.data.local.entities.HomeFeedCacheEntity
+import com.cinetrack.data.model.CachedFeedData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -1210,10 +1212,24 @@ class MovieRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    suspend fun fetchMovieDetails(id: Long, isTv: Boolean): com.cinetrack.data.api.MovieDetailResponse {
+    suspend fun fetchMovieDetails(id: Long, isTv: Boolean, forceRefresh: Boolean = false): com.cinetrack.data.api.MovieDetailResponse {
         val mediaType = if (isTv) "tv" else "movie"
+        val cacheKey = "$mediaType:$id"
+        if (!forceRefresh) {
+            (memoryDetailsCache[cacheKey] as? com.cinetrack.data.api.MovieDetailResponse)?.let { return it }
+            try {
+                val cachedJson = cacheDao.getDetail(id, mediaType)
+                if (cachedJson != null) {
+                    val cachedResponse = json.decodeFromString<com.cinetrack.data.api.MovieDetailResponse>(cachedJson)
+                    memoryDetailsCache[cacheKey] = cachedResponse
+                    return cachedResponse
+                }
+            } catch (e: Exception) {
+                // Ignore cache parse error, fallback to network
+            }
+        }
         val response = if (isTv) tmdbService.getTVDetails(id) else tmdbService.getMovieDetails(id)
-        memoryDetailsCache["$mediaType:$id"] = response
+        memoryDetailsCache[cacheKey] = response
         try {
             cacheDao.saveDetailWithLRU(
                 MovieDetailCacheEntity(
@@ -1228,6 +1244,71 @@ class MovieRepository @Inject constructor(
         }
         return response
     }
+
+    suspend fun getCachedHomeFeed(): CachedFeedData? {
+        return try {
+            val jsonStr = cacheDao.getHomeFeed("home_feed") ?: return null
+            json.decodeFromString<CachedFeedData>(jsonStr)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun saveCachedHomeFeed(feed: CachedFeedData) {
+        try {
+            val jsonStr = json.encodeToString(feed)
+            cacheDao.saveHomeFeed(
+                HomeFeedCacheEntity(
+                    id = "home_feed",
+                    data = jsonStr,
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
+        } catch (e: Exception) {
+            // Ignore cache write errors
+        }
+    }
+
+    suspend fun getMovieLogo(id: Long, isTv: Boolean): String? {
+        val mediaType = if (isTv) "tv" else "movie"
+        val cacheKey = "logo:$mediaType:$id"
+        (memoryDetailsCache[cacheKey] as? String)?.let { return it }
+
+        // Check if full detail is already cached in memory or Room
+        val cachedDetail = (memoryDetailsCache["$mediaType:$id"] as? com.cinetrack.data.api.MovieDetailResponse)
+            ?: try {
+                val jsonStr = cacheDao.getDetail(id, mediaType)
+                jsonStr?.let { json.decodeFromString<com.cinetrack.data.api.MovieDetailResponse>(it) }
+            } catch (e: Exception) { null }
+
+        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+        val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+
+        if (cachedDetail?.images?.logos != null) {
+            val logos = cachedDetail.images.logos
+            val best = logos.firstOrNull { it.iso6391 == currentLang } ?: logos.firstOrNull { it.iso6391 == "en" } ?: logos.firstOrNull()
+            val path = best?.filePath
+            if (path != null) {
+                memoryDetailsCache[cacheKey] = path
+                return path
+            }
+        }
+
+        return try {
+            val response = if (isTv) tmdbService.getTVBasicDetails(id) else tmdbService.getMovieBasicDetails(id)
+            val logos = response.images?.logos
+            val best = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+            val path = best?.filePath
+            if (path != null) {
+                memoryDetailsCache[cacheKey] = path
+            }
+            path
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
 
     suspend fun searchMovies(query: String, page: Int = 1): List<Movie> = tmdbService.searchMovie(query, page = page).results
     suspend fun searchMovieWithYear(query: String, year: String?): Movie? {

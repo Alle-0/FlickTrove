@@ -576,6 +576,15 @@
     <string name="widget_release_date_prefix">Lança em: %1$s</string>
     <string name="widget_no_releases">Nenhum título a caminho!</string>
     <string name="widget_no_img">Sem Img</string>
+    <string name="widget_tv_episodes_name">Próximos Episódios</string>
+    <string name="widget_next_episodes">PRÓXIMOS EPISÓDIOS</string>
+    <string name="widget_no_episodes">Nenhum episódio a caminho!</string>
+    <string name="widget_episode_on">Em: %1$s</string>
+    <string name="widget_mark_watched">Marcar como assistido</string>
+    <string name="widget_now_watching_name">Assistindo agora</string>
+    <string name="widget_now_watching_title">ASSISTINDO AGORA</string>
+    <string name="widget_now_watching_empty">Tudo em dia! Nenhum episódio aguardando.</string>
+    <string name="widget_available_since">Desde: %1$s</string>
     <string name="comments_screen_title">Discussão</string>
     <string name="comments_screen_title_with_media">Discussão: %1$s</string>
     <string name="comment_translate">Traduzir</string>

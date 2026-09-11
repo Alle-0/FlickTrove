@@ -192,7 +192,32 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/flicktrove_list_widget_info" />
-        </receiver>        <service
+        </receiver>        
+
+        <receiver
+            android:name=".widget.FlickTroveTvEpisodesWidgetReceiver"
+            android:label="@string/widget_tv_episodes_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/flicktrove_tv_episodes_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.FlickTroveNowWatchingWidgetReceiver"
+            android:label="@string/widget_now_watching_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/flicktrove_now_watching_widget_info" />
+        </receiver>
+        <service
             android:name=".util.FCMService"
             android:exported="false">
             <intent-filter>

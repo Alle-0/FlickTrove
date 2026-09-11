@@ -413,6 +413,7 @@ fun MovieCard(
     showBadges: Boolean = true,
     showAdvancedBadges: Boolean = false,
     showActionButton: Boolean = true,
+    bounceEnabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
@@ -494,7 +495,8 @@ fun MovieCard(
                 .clip(shape)
                 .cardRipple(rippleState, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
                 .bounceClickWithOffset(
-                    scaleDown = 0.93f, 
+                    scaleDown = 0.93f,
+                    animateOnPress = bounceEnabled,
                     requireUnconsumed = false,
                     onLongClick = { offset ->
                         movieActions.updatePopupCardSize(cardSize[0])

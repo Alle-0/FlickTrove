@@ -12,35 +12,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
         android:layout_marginBottom="6dp"
         android:gravity="center_vertical">
 
-        <!-- Red bar -->
+        <!-- Green Accent Bar -->
         <FrameLayout
             android:layout_width="4dp"
             android:layout_height="16dp"
-            android:background="#E50914" />
+            android:background="#1DB954" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="PROSSIMAMENTE"
+            android:text="@string/widget_now_watching_title"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />
 
         <FrameLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@drawable/widget_search_bg">
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:layout_gravity="center"
                 android:tint="#FFFFFF"
                 android:src="@drawable/ic_lente" />
@@ -54,48 +54,66 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:gravity="center_vertical">
 
-        <!-- Fake Poster -->
+        <!-- Poster Thumbnail -->
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="60dp"
             android:clipToOutline="true"
             android:background="@drawable/widget_poster_bg">
-            
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/mock_inception_poster"
+                android:src="@drawable/mock_bear_poster"
                 android:scaleType="centerCrop" />
         </FrameLayout>
 
-        <!-- Text -->
+        <!-- Metadata Column -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp">
+            android:layout_marginStart="12dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Inception"
+                android:text="The Bear"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
-                android:text="16 LUG 2010"
-                android:textColor="#AAAAAA"
-                android:textSize="11sp" />
+                android:text="S3 E1"
+                android:textColor="#1DB954"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
+
+        <!-- Checkmark Button -->
+        <FrameLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/widget_check_circle_bg">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:tint="#FFFFFF"
+                android:src="@drawable/ic_tick" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Divider -->
@@ -113,48 +131,66 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
         android:gravity="center_vertical">
 
-        <!-- Fake Poster 2 -->
+        <!-- Poster Thumbnail 2 -->
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="60dp"
             android:clipToOutline="true"
             android:background="@drawable/widget_poster_bg">
-            
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/mock_interstellar_poster"
+                android:src="@drawable/mock_severance_poster"
                 android:scaleType="centerCrop" />
         </FrameLayout>
 
-        <!-- Text -->
+        <!-- Metadata Column -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp">
+            android:layout_marginStart="12dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Interstellar"
+                android:text="Severance"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
-                android:text="07 NOV 2014"
-                android:textColor="#AAAAAA"
-                android:textSize="11sp" />
+                android:text="S2 E1"
+                android:textColor="#1DB954"
+                android:textSize="11sp"
+                android:textStyle="bold" />
         </LinearLayout>
+
+        <!-- Checkmark Button -->
+        <FrameLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/widget_check_circle_bg">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:tint="#FFFFFF"
+                android:src="@drawable/ic_tick" />
+        </FrameLayout>
     </LinearLayout>
 
 </LinearLayout>

@@ -576,6 +576,15 @@
     <string name="widget_release_date_prefix">Выходит: %1$s</string>
     <string name="widget_no_releases">Нет предстоящих релизов!</string>
     <string name="widget_no_img">Нет фото</string>
+    <string name="widget_tv_episodes_name">Следующие эпизоды</string>
+    <string name="widget_next_episodes">СЛЕДУЮЩИЕ ЭПИЗОДЫ</string>
+    <string name="widget_no_episodes">Нет предстоящих эпизодов!</string>
+    <string name="widget_episode_on">Дата: %1$s</string>
+    <string name="widget_mark_watched">Отметить как просмотренное</string>
+    <string name="widget_now_watching_name">Смотрю сейчас</string>
+    <string name="widget_now_watching_title">СМОТРЮ СЕЙЧАС</string>
+    <string name="widget_now_watching_empty">Всё просмотрено! Нет ожидающих эпизодов.</string>
+    <string name="widget_available_since">С: %1$s</string>
     <string name="comments_screen_title">Обсуждение</string>
     <string name="comments_screen_title_with_media">Обсуждение: %1$s</string>
     <string name="comment_translate">Перевести</string>

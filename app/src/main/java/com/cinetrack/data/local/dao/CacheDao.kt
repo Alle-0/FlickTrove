@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.cinetrack.data.local.entities.ColorCacheEntity
+import com.cinetrack.data.local.entities.HomeFeedCacheEntity
 import com.cinetrack.data.local.entities.MovieDetailCacheEntity
 
 @Dao
@@ -32,4 +33,12 @@ interface CacheDao {
 
     @Query("SELECT data FROM movie_details_cache WHERE id = :id AND media_type = :mediaType LIMIT 1")
     suspend fun getDetail(id: Long, mediaType: String): String?
+
+    // --- Home Feed Cache ---
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveHomeFeed(feed: HomeFeedCacheEntity)
+
+    @Query("SELECT data FROM home_feed_cache WHERE id = :id LIMIT 1")
+    suspend fun getHomeFeed(id: String = "home_feed"): String?
 }
+

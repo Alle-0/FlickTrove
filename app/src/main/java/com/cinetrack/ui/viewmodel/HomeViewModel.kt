@@ -102,20 +102,61 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun fetchFeed() {
-        _feedState.value = FeedState(isLoaded = false, hasError = false)
         viewModelScope.launch {
+            // 1. Legge prima la cache Room per un rendering istantaneo (T=0ms)
+            val cachedData = repository.getCachedHomeFeed()
+            if (cachedData != null) {
+                _feedState.value = cachedData.toFeedState()
+            } else if (!_feedState.value.isLoaded) {
+                _feedState.value = FeedState(isLoaded = false, hasError = false)
+            }
+
+            // 2. Esegue il refresh di rete in background
             try {
-                _feedState.value = getHomeFeedUseCase()
+                val freshFeed = getHomeFeedUseCase()
+                _feedState.value = freshFeed
+                // Salva nella cache Room per i successivi accessi
+                repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed))
             } catch (e: Exception) {
-                _feedState.value = FeedState(hasError = true)
-                actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
+                // Se non c'è cache pregressa, mostra lo stato di errore
+                if (!_feedState.value.isLoaded) {
+                    _feedState.value = FeedState(hasError = true)
+                    actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
+                }
             }
         }
     }
 
+    suspend fun resolveMovieLogo(movie: Movie): String? {
+        if (!movie.logoPath.isNullOrEmpty()) return movie.logoPath
+        return try {
+            val isTv = movie.mediaType == "tv"
+            val logo = repository.getMovieLogo(movie.id, isTv)
+            if (logo != null) {
+                movie.logoPath = logo
+                val currentFeed = _feedState.value
+                val updatedMovies = currentFeed.trendingMovies.map {
+                    if (it.id == movie.id) it.apply { this.logoPath = logo } else it
+                }.toImmutableList()
+                val updatedTv = currentFeed.trendingTv.map {
+                    if (it.id == movie.id) it.apply { this.logoPath = logo } else it
+                }.toImmutableList()
+                _feedState.value = currentFeed.copy(
+                    trendingMovies = updatedMovies,
+                    trendingTv = updatedTv
+                )
+            }
+            logo
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
     fun retryFeed() {
         fetchFeed()
     }
+
 
 
     @OptIn(kotlinx.coroutines.FlowPreview::class)

@@ -571,6 +571,15 @@
     <string name="widget_release_date_prefix">Estreno el: %1$s</string>
     <string name="widget_no_releases">¡No hay próximos estrenos!</string>
     <string name="widget_no_img">Sin imagen</string>
+    <string name="widget_tv_episodes_name">Próximos episodios</string>
+    <string name="widget_next_episodes">PRÓXIMOS EPISODIOS</string>
+    <string name="widget_no_episodes">¡No hay próximos episodios!</string>
+    <string name="widget_episode_on">El: %1$s</string>
+    <string name="widget_mark_watched">Marcar como visto</string>
+    <string name="widget_now_watching_name">Viendo ahora</string>
+    <string name="widget_now_watching_title">VIENDO AHORA</string>
+    <string name="widget_now_watching_empty">¡Al día! No hay episodios pendientes.</string>
+    <string name="widget_available_since">Desde: %1$s</string>
     <string name="comments_screen_title">Discusión</string>
     <string name="comments_screen_title_with_media">Discusión: %1$s</string>
     <string name="comment_translate">Traducir</string>

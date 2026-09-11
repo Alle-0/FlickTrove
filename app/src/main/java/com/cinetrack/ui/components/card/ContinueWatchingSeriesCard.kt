@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.card
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -12,6 +13,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,10 +44,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.PlatformTextStyle
@@ -310,6 +319,8 @@ fun ContinueWatchingSeriesCard(
     )
 
     val density = LocalDensity.current
+    val coroutineScope = rememberCoroutineScope()
+    val pressScale = remember { Animatable(1f) }
 
     // Premium Staggered Entrance Animation States (applies to the entire series card: poster + protrusion)
     val compositeId = "${movie.id}_${movie.mediaType}"
@@ -348,10 +359,33 @@ fun ContinueWatchingSeriesCard(
             .width(effectiveWidth)
             .graphicsLayer {
                 alpha = cardAlpha
-                scaleX = cardScale
-                scaleY = cardScale
+                scaleX = cardScale * pressScale.value
+                scaleY = cardScale * pressScale.value
                 translationY = cardTranslateY * density.density
                 clip = false
+            }
+            .pointerInput(Unit) {
+                // requireUnconsumed = false: cattura il press anche se figli lo consumano
+                // In questo modo MovieCard e protrusion animano come un'unica unità
+                var pressJob: Job? = null
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    pressJob?.cancel()
+                    pressJob = coroutineScope.launch {
+                        pressScale.animateTo(
+                            targetValue = 0.92f,
+                            animationSpec = spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                        )
+                    }
+                    waitForUpOrCancellation()
+                    coroutineScope.launch {
+                        pressJob?.join()
+                        pressScale.animateTo(
+                            targetValue = 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy)
+                        )
+                    }
+                }
             }
     ) {
         // --- 1. MovieCard al naturale on top (clean locandina without duplicate eye action button) ---
@@ -364,6 +398,7 @@ fun ContinueWatchingSeriesCard(
             progress = progress,
             personalRating = personalRating,
             showActionButton = false,
+            bounceEnabled = false, // la scala è gestita dall'outer Column (pressScale)
             shape = RoundedCornerShape(
                 topStart = cornerRadius,
                 topEnd = cornerRadius,
@@ -397,7 +432,9 @@ fun ContinueWatchingSeriesCard(
                     )
                 )
                 .background(Color(0xFF1E1E22))
-                .bounceClick(scaleDown = 0.92f) { onPress(movie) }
+                // animateOnPress=false: il click e l'haptic funzionano,
+                // ma la scala visiva è delegata all'outer Column (pressScale)
+                .bounceClick(scaleDown = 0.92f, animateOnPress = false) { onPress(movie) }
         ) {
             // Pill progress bar tra le due sezioni per l'intera larghezza
             if (isReleased) {

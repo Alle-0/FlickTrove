@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 @OptIn(ExperimentalFoundationApi::class)
 fun Modifier.bounceClick(
     scaleDown: Float = 0.92f,
+    animateOnPress: Boolean = true,
     onLongClick: (() -> Unit)? = null,
     vibrateOnLongClick: Boolean = true,
     requireUnconsumed: Boolean = false,
@@ -36,6 +37,7 @@ fun Modifier.bounceClick(
     onClick: () -> Unit
 ): Modifier = bounceClickWithOffset(
     scaleDown = scaleDown,
+    animateOnPress = animateOnPress,
     onLongClick = onLongClick?.let { action -> { _ -> action() } },
     vibrateOnLongClick = vibrateOnLongClick,
     requireUnconsumed = requireUnconsumed,
@@ -53,6 +55,7 @@ val LocalVibrationEnabled = staticCompositionLocalOf { true }
 @OptIn(ExperimentalFoundationApi::class)
 fun Modifier.bounceClickWithOffset(
     scaleDown: Float = 0.92f,
+    animateOnPress: Boolean = true,
     onLongClick: ((Offset) -> Unit)? = null,
     vibrateOnLongClick: Boolean = true,
     requireUnconsumed: Boolean = false,
@@ -71,9 +74,10 @@ fun Modifier.bounceClickWithOffset(
     val currentOnLongClick by rememberUpdatedState(onLongClick)
     val currentOnPress by rememberUpdatedState(onPress)
 
-    LaunchedEffect(interactionSource, enabled) {
-        if (!enabled) {
+    LaunchedEffect(interactionSource, enabled, animateOnPress) {
+        if (!enabled || !animateOnPress) {
             scale.snapTo(1f)
+            if (!animateOnPress) return@LaunchedEffect // solo click, nessuna animazione
             return@LaunchedEffect
         }
         var pressJob: kotlinx.coroutines.Job? = null
