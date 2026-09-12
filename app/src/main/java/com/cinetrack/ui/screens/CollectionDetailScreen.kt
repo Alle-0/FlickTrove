@@ -141,13 +141,17 @@ fun CollectionDetailScreenContent(
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
     val scrollState = rememberScrollState()
-    val scrollThreshold = with(density) { 100.dp.toPx() }
+    val scrollThreshold = with(density) { 370.dp.toPx() }
     val scrollProgress by remember {
         derivedStateOf { (scrollState.value.toFloat() / scrollThreshold).coerceIn(0f, 1f) }
     }
     val isScrolling = scrollState.isScrollInProgress
-    val isMerged = scrollProgress >= 0.85f
-    val targetSymbioteProgress = if (isScrolling || isMerged) scrollProgress else 0f
+    val isMerged = scrollProgress >= 0.75f
+    val targetSymbioteProgress = when {
+        isMerged -> 1f
+        isScrolling -> scrollProgress
+        else -> 0f
+    }
 
     val symbioteProgress by animateFloatAsState(
         targetValue = targetSymbioteProgress,

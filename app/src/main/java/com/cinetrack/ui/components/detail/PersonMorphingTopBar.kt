@@ -273,7 +273,7 @@ fun SimpleMorphingTopBar(
                     }
 
                     // Center Title
-                    val personTitleAlpha = ((currentEffectiveProgress - 0.72f) / 0.28f).coerceIn(0f, 1f)
+                    val personTitleAlpha = ((currentEffectiveProgress - 0.68f) / 0.32f).coerceIn(0f, 1f)
                     if (personTitleAlpha > 0.01f) {
                         Text(
                             text = title,

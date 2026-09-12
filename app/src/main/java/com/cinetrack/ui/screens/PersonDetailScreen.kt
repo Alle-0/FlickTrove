@@ -158,7 +158,7 @@ fun PersonDetailScreenContent(
 
     val scrollState = rememberLazyListState()
     val density = LocalDensity.current
-    val scrollThreshold = with(density) { 320.dp.toPx() }
+    val scrollThreshold = with(density) { 470.dp.toPx() }
     val scrollProgress by remember {
         derivedStateOf {
             if (scrollState.firstVisibleItemIndex > 0) 1f
@@ -168,9 +168,14 @@ fun PersonDetailScreenContent(
     
     val isScrolling = scrollState.isScrollInProgress
     val isTransitioning = animatedVisibilityScope?.transition?.let { it.currentState != it.targetState } ?: false
-    val isMerged = scrollProgress >= 1f && !isTransitioning
+    val isMerged = scrollProgress >= 0.75f && !isTransitioning
     
-    val targetSymbioteProgress = if (isScrolling || isMerged) scrollProgress else 0f
+    val targetSymbioteProgress = when {
+        isTransitioning -> 0f
+        isMerged -> 1f
+        isScrolling -> scrollProgress
+        else -> 0f
+    }
     
     val symbioteProgress by animateFloatAsState(
         targetValue = targetSymbioteProgress,
