@@ -1225,6 +1225,13 @@
     <string name="content_description_error">Error</string>
     <string name="home_section_continue_watching">Continue Watching</string>
     <string name="home_section_because_you_watched">Because you watched %s</string>
+    <string name="home_section_because_you_watched_generic">Because You Watched</string>
+    <string name="home_section_in_theaters_streaming">In Theaters &amp; Streaming</string>
+    <string name="settings_home_feed_sections">Home Feed Sections</string>
+    <string name="settings_home_feed_sections_desc">Reorder sections and customize visibility</string>
+    <string name="settings_section_always_on">Always on</string>
+    <string name="settings_home_feed_reset">Reset to default</string>
+    <string name="settings_msg_home_feed_reset">Home feed layout reset to default</string>
 
     <!-- SIMKL -->
     <string name="simkl_connected">SIMKL connected successfully!</string>

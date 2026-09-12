@@ -43,8 +43,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.cinetrack.util.VibrationHelper
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -1218,3 +1220,343 @@ fun DashboardSettingsDialog(
         }
     }
 }
+
+data class HomeSectionSettingRow(
+    val key: String,
+    val iconRes: Int,
+    val titleRes: Int,
+    val canToggle: Boolean,
+    val checked: Boolean = true,
+    val onCheckedChange: (Boolean) -> Unit = {}
+)
+
+@Composable
+fun HomeSectionsOrderDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
+    onDismiss: () -> Unit
+) {
+    if (!visible) return
+
+    val showHomeContinueWatching by settingsViewModel.showHomeContinueWatching.collectAsStateWithLifecycle()
+    val showHomeWatchlist by settingsViewModel.showHomeWatchlist.collectAsStateWithLifecycle()
+    val showHomeBecauseYouWatched by settingsViewModel.showHomeBecauseYouWatched.collectAsStateWithLifecycle()
+    val homeSectionOrder by settingsViewModel.homeSectionOrder.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
+
+    var localOrder by remember(homeSectionOrder) { mutableStateOf(homeSectionOrder) }
+    var draggedItemKey by remember { mutableStateOf<String?>(null) }
+    var dragOffset by remember { mutableStateOf(0f) }
+    var dropTrigger by remember { mutableIntStateOf(0) }
+    var itemHeightPx by remember { mutableStateOf(0f) }
+
+    Column(
+        modifier = Modifier
+            .padding(24.dp)
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.settings_home_feed_sections),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    stringResource(R.string.settings_home_feed_sections_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .bounceClick {
+                            if (vibrationEnabled) {
+                                VibrationHelper.vibrateClick(context)
+                            }
+                            localOrder = com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER
+                            dropTrigger++
+                            settingsViewModel.resetHomeFeedSectionsToDefault()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                        contentDescription = stringResource(R.string.settings_home_feed_reset),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .bounceClick { onDismiss() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val draggedIndex = localOrder.indexOf(draggedItemKey)
+        val visualTargetIndex = remember(draggedIndex, dragOffset, itemHeightPx) {
+            if (draggedIndex == -1 || itemHeightPx == 0f) -1
+            else {
+                val offsetSlots = (dragOffset / itemHeightPx).roundToInt()
+                (draggedIndex + offsetSlots).coerceIn(0, localOrder.size - 1)
+            }
+        }
+
+        val currentDraggedIndex by rememberUpdatedState(draggedIndex)
+        val currentVisualTargetIndex by rememberUpdatedState(visualTargetIndex)
+        val currentLocalOrder by rememberUpdatedState(localOrder)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            localOrder.forEachIndexed { index, itemKey ->
+                androidx.compose.runtime.key(itemKey) {
+                    val isDragging = draggedItemKey == itemKey
+                    val translationTarget = when {
+                        isDragging -> dragOffset
+                        draggedIndex != -1 && visualTargetIndex != -1 -> {
+                            if (draggedIndex < index && index <= visualTargetIndex) {
+                                -itemHeightPx
+                            } else if (draggedIndex > index && index >= visualTargetIndex) {
+                                itemHeightPx
+                            } else {
+                                0f
+                            }
+                        }
+                        else -> 0f
+                    }
+                    val translation = remember(dropTrigger) { androidx.compose.animation.core.Animatable(0f) }
+
+                    androidx.compose.runtime.LaunchedEffect(translationTarget) {
+                        if (!isDragging) {
+                            translation.animateTo(
+                                targetValue = translationTarget,
+                                animationSpec = androidx.compose.animation.core.spring(
+                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                                )
+                            )
+                        }
+                    }
+
+                    val finalTranslation = if (isDragging) dragOffset else translation.value
+
+                    val rowInfo = when (itemKey) {
+                        com.cinetrack.data.model.HomeFeedSectionConstants.CONTINUE_WATCHING -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_clessidra,
+                            titleRes = R.string.home_section_continue_watching,
+                            canToggle = true,
+                            checked = showHomeContinueWatching,
+                            onCheckedChange = { settingsViewModel.toggleShowHomeContinueWatching(it) }
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.WATCHLIST -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_segnalibro,
+                            titleRes = R.string.home_section_watchlist,
+                            canToggle = true,
+                            checked = showHomeWatchlist,
+                            onCheckedChange = { settingsViewModel.toggleShowHomeWatchlist(it) }
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.TROVE_PICK -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_sparkle,
+                            titleRes = R.string.home_section_trove_pick,
+                            canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.BECAUSE_YOU_WATCHED -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_eye,
+                            titleRes = R.string.home_section_because_you_watched_generic,
+                            canToggle = true,
+                            checked = showHomeBecauseYouWatched,
+                            onCheckedChange = { settingsViewModel.toggleShowHomeBecauseYouWatched(it) }
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.TOP_10 -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_trophy,
+                            titleRes = R.string.home_section_top_10,
+                            canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.POPULAR -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_star,
+                            titleRes = R.string.home_section_popular,
+                            canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.NOW_PLAYING -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_cinema,
+                            titleRes = R.string.home_section_in_theaters_streaming,
+                            canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.UPCOMING -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_calendario,
+                            titleRes = R.string.home_section_upcoming,
+                            canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.NEWS -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_documento,
+                            titleRes = R.string.home_section_magazine,
+                            canToggle = false
+                        )
+                        else -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_ciak,
+                            titleRes = R.string.home_section_popular,
+                            canToggle = false
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onGloballyPositioned { coordinates ->
+                                if (itemHeightPx == 0f) {
+                                    itemHeightPx = coordinates.size.height.toFloat() + with(density) { 10.dp.toPx() }
+                                }
+                            }
+                            .zIndex(if (isDragging) 1f else 0f)
+                            .graphicsLayer { translationY = finalTranslation }
+                            .background(
+                                if (isDragging) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.03f),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .border(
+                                1.dp,
+                                if (isDragging) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.06f),
+                                RoundedCornerShape(14.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.DragHandle,
+                            contentDescription = "Drag to reorder",
+                            tint = if (isDragging) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(24.dp)
+                                .pointerInput(itemKey) {
+                                    detectDragGestures(
+                                        onDragStart = { 
+                                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                            draggedItemKey = itemKey 
+                                        },
+                                        onDragEnd = { 
+                                            if (currentDraggedIndex != -1 && currentVisualTargetIndex != -1 && currentDraggedIndex != currentVisualTargetIndex) {
+                                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                                val newList = currentLocalOrder.toMutableList()
+                                                val item = newList.removeAt(currentDraggedIndex)
+                                                newList.add(currentVisualTargetIndex, item)
+                                                localOrder = newList
+                                                settingsViewModel.updateHomeSectionOrder(newList)
+                                            }
+                                            draggedItemKey = null
+                                            dragOffset = 0f
+                                            dropTrigger++
+                                        },
+                                        onDragCancel = { 
+                                            draggedItemKey = null
+                                            dragOffset = 0f 
+                                        },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            dragOffset += dragAmount.y
+                                        }
+                                    )
+                                }
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.White.copy(alpha = 0.06f))
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = rowInfo.iconRes),
+                                contentDescription = null,
+                                tint = if (rowInfo.canToggle && !rowInfo.checked) Color.White.copy(alpha = 0.35f) else Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = stringResource(rowInfo.titleRes),
+                            color = if (rowInfo.canToggle && !rowInfo.checked) {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        if (rowInfo.canToggle) {
+                            FlickTroveSwitch(
+                                checked = rowInfo.checked,
+                                onCheckedChange = {
+                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                    rowInfo.onCheckedChange(it)
+                                },
+                                accentColor = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            // Badge Sempre attiva con icona lucchetto
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_lock),
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.settings_section_always_on),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

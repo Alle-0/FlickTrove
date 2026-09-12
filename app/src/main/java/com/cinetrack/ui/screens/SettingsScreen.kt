@@ -405,6 +405,7 @@ fun SettingsScreenContent(
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
     var showDashboardSettings by remember { mutableStateOf(false) }
+    var showHomeSectionsDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         settingsViewModel.showDashboardSettingsMenu.collect {
@@ -732,7 +733,8 @@ fun SettingsScreenContent(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
-                            onShowBadgesInfo = { showBadgesInfoDialog = true }
+                            onShowBadgesInfo = { showBadgesInfoDialog = true },
+                            onShowHomeSectionsOrderDialog = { showHomeSectionsDialog = true }
                         )
                     }
 
@@ -1085,6 +1087,13 @@ fun SettingsScreenContent(
             activeHazeState = activeHazeState,
             settingsViewModel = settingsViewModel,
             onDismiss = { showDashboardSettings = false }
+        )
+
+        com.cinetrack.ui.components.settings.SettingsHomeSectionsOrderDialog(
+            visible = showHomeSectionsDialog,
+            activeHazeState = activeHazeState,
+            settingsViewModel = settingsViewModel,
+            onDismiss = { showHomeSectionsDialog = false }
         )
     }
 }

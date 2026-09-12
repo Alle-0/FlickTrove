@@ -1196,4 +1196,12 @@
     <string name="lbl_episodes_remaining">ещё %1$d</string>
     <string name="lbl_next_episode">Далее: %1$s</string>
     <string name="cd_mark_episode_watched">Отметить эпизод %1$s как просмотренный</string>
+    <string name="home_section_because_you_watched_generic">Потому что вы смотрели...</string>
+    <string name="home_section_in_theaters_streaming">В кино и в сети</string>
+    <string name="settings_home_feed_sections">Разделы главной ленты</string>
+    <string name="settings_home_feed_sections_desc">Изменение порядка и настройка видимости</string>
+    <string name="settings_section_always_on">Всегда включено</string>
+    <string name="settings_home_feed_reset">Сбросить по умолчанию</string>
+    <string name="settings_msg_home_feed_reset">Макет главной ленты сброшен по умолчанию</string>
 </resources>
+

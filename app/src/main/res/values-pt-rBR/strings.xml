@@ -1195,5 +1195,13 @@
     <string name="lbl_episodes_remaining">faltam %1$d</string>
     <string name="lbl_next_episode">Próximo: %1$s</string>
     <string name="cd_mark_episode_watched">Marcar episódio %1$s como assistido</string>
+    <string name="home_section_because_you_watched_generic">Porque você assistiu...</string>
+    <string name="home_section_in_theaters_streaming">Nos cinemas e no streaming</string>
+    <string name="settings_home_feed_sections">Seções do feed inicial</string>
+    <string name="settings_home_feed_sections_desc">Reorganize as seções e personalize a visibilidade</string>
+    <string name="settings_section_always_on">Sempre ativo</string>
+    <string name="settings_home_feed_reset">Restaurar padrão</string>
+    <string name="settings_msg_home_feed_reset">Layout do feed inicial restaurado para o padrão</string>
 </resources>
+
 

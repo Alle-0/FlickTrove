@@ -361,6 +361,22 @@ class SettingsViewModel @Inject constructor(
         .map { it.dashboardCardOrder }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("stats", "folders", "flow"))
 
+    val showHomeContinueWatching: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showHomeContinueWatching }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val showHomeWatchlist: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showHomeWatchlist }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val showHomeBecauseYouWatched: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showHomeBecauseYouWatched }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val homeSectionOrder: StateFlow<List<String>> = preferenceRepository.userPreferencesFlow
+        .map { it.homeSectionOrder }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER)
+
     fun updateAccentColor(color: String, revealOrigin: Offset? = null) {
         viewModelScope.launch {
             if (revealOrigin != null && revealOrigin != Offset.Zero) {
@@ -494,6 +510,45 @@ class SettingsViewModel @Inject constructor(
     fun updateDashboardCardOrder(order: List<String>) {
         viewModelScope.launch {
             preferenceRepository.updateDashboardCardOrder(order)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun toggleShowHomeContinueWatching(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowHomeContinueWatching(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun toggleShowHomeWatchlist(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowHomeWatchlist(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun toggleShowHomeBecauseYouWatched(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowHomeBecauseYouWatched(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun resetHomeFeedSectionsToDefault() {
+        viewModelScope.launch {
+            preferenceRepository.updateHomeSectionOrder(com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER)
+            preferenceRepository.updateShowHomeContinueWatching(true)
+            preferenceRepository.updateShowHomeWatchlist(true)
+            preferenceRepository.updateShowHomeBecauseYouWatched(true)
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_home_feed_reset))
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun updateHomeSectionOrder(order: List<String>) {
+        viewModelScope.launch {
+            preferenceRepository.updateHomeSectionOrder(order)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }

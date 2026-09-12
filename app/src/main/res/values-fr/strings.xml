@@ -1196,4 +1196,12 @@
     <string name="lbl_episodes_remaining">encore %1$d</string>
     <string name="lbl_next_episode">Suivant : %1$s</string>
     <string name="cd_mark_episode_watched">Marquer l\'épisode %1$s comme vu</string>
+    <string name="home_section_because_you_watched_generic">Parce que vous avez regardé...</string>
+    <string name="home_section_in_theaters_streaming">Au cinéma et en streaming</string>
+    <string name="settings_home_feed_sections">Sections du fil d\'accueil</string>
+    <string name="settings_home_feed_sections_desc">Réorganisez les sections et personnalisez la visibilité</string>
+    <string name="settings_section_always_on">Toujours active</string>
+    <string name="settings_home_feed_reset">Rétablir par défaut</string>
+    <string name="settings_msg_home_feed_reset">Mise en page de l\'accueil réinitialisée par défaut</string>
 </resources>
+

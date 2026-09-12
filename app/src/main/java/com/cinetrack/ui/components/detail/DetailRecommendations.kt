@@ -10,12 +10,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -119,12 +120,15 @@ fun DetailRecommendations(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(
-                                enabled = onCollectionClick != null,
-                                onClick = { onCollectionClick?.invoke(collection.id.toLong(), collection.name) }
-                            )
                             .padding(horizontal = 24.dp)
-                            .padding(bottom = 24.dp),
+                            .padding(bottom = 24.dp)
+                            .then(
+                                if (onCollectionClick != null) {
+                                    Modifier.bounceClick {
+                                        onCollectionClick(collection.id.toLong(), collection.name)
+                                    }
+                                } else Modifier
+                            ),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -149,11 +153,11 @@ fun DetailRecommendations(
                                     color = Color.White
                                 )
                                 if (onCollectionClick != null) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                                         contentDescription = "View Collection",
                                         tint = Color.White.copy(alpha = 0.5f),
-                                        modifier = Modifier.padding(start = 12.dp).size(20.dp)
+                                        modifier = Modifier.padding(start = 8.dp).size(20.dp)
                                     )
                                 }
                             }

@@ -92,11 +92,13 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
 
     data class SubPath(
         val path: android.graphics.Path,
+        val composePath: androidx.compose.ui.graphics.Path,
         val measure: android.graphics.PathMeasure,
         val length: Float,
         val startX: Float,
         val startY: Float,
-        val entryAngleRad: Float
+        val ax: Float,
+        val ay: Float
     )
 
     val (logoBounds, subPaths) = remember {
@@ -115,7 +117,10 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
             else
                 0f
 
-            SubPath(p, m, m.length, pos[0], pos[1], entryAngle)
+            val ax = cos(entryAngle)
+            val ay = sin(entryAngle)
+
+            SubPath(p, p.asComposePath(), m, m.length, pos[0], pos[1], ax, ay)
         }
 
         // Bounding box PURA
@@ -128,10 +133,17 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
     }
 
     val drawBuffers = remember { List(subPaths.size) { androidx.compose.ui.graphics.Path() } }
+    val strokeStyle = remember {
+        Stroke(width = 10f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+    }
+
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val iconSizePx = remember(density) { with(density) { 265.dp.toPx() } }
+    val sf = remember(iconSizePx) { iconSizePx / 768f }
 
     // ── Animazione (Decomposizione Inversa) ───────────────────────────────────
 
-    val progress  = remember { Animatable(1f) }
+    val progress = remember { Animatable(1f) }
 
     LaunchedEffect(Unit) {
         // Pausa iniziale per far combaciare con la fine della splash nativa
@@ -149,8 +161,6 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
         kotlinx.coroutines.delay(800L)
         onAnimationEnd()
     }
-
-    val globalP = progress.value
 
     // ── Gradiente (Coordinate native dell'SVG) ────────────────────────────────
 
@@ -178,14 +188,11 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
         )
     }
 
-    // ── Canvas ────────────────────────────────────────────────────────────────
+    // ── Canvas (Lettura di progress.value in DrawScope per ZERO ricomposizioni) ─
 
     Canvas(modifier = modifier) {
-        // Traslazione PERFETTA per farla combaciare con l'icona di sistema Android
-        // La splash screen nativa su Android 12+ impone una dimensione di 288dp
-        val iconSizePx = 265.dp.toPx()
-        val sf = iconSizePx / 768f
-        
+        val globalP = progress.value
+
         // Centriamo il viewport 768x768 (che ha centro in 384, 384) nello schermo
         val originX = size.width  / 2f - 384f * sf
         val originY = size.height / 2f - 384f * sf
@@ -203,7 +210,6 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
                     val delay = idx * STAGGER
                     val pp = ((globalP - delay) / (1f - delay)).coerceIn(0f, 1f)
                     if (pp <= 0f) return@forEachIndexed
-                    // Disabling the strand skipping performance optimization to ensure all pieces are drawn.
 
                     // ── Modello cinematico: la variabile "u" ──────────────────
                     // Rappresenta la posizione della punta dell'ago lungo il tracciato
@@ -222,16 +228,13 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
                     }
 
                     // Il corpo dell'ago ha una lunghezza ESATTA pari a sp.length.
-                    // Questo garantisce il "trasferimento di massa" perfetto:
-                    // quando la testa (u) arriva in fondo alla curva (sp.length),
-                    // la coda (u - sp.length) arriva a 0 (fine della linea dritta).
                     val head = u
                     val tail = u - sp.length
 
                     val sx = sp.startX
                     val sy = sp.startY
-                    val ax = cos(sp.entryAngleRad)
-                    val ay = sin(sp.entryAngleRad)
+                    val ax = sp.ax
+                    val ay = sp.ay
 
                     // 1. Tratto Dritto (Fuori dal Path)
                     val headOnStraight = head.coerceAtMost(0f)
@@ -256,13 +259,21 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
                     val tailOnCurve = tail.coerceAtLeast(0f)
 
                     if (headOnCurve > tailOnCurve) {
-                        drawBuffers[idx].reset()
-                        sp.measure.getSegment(tailOnCurve, headOnCurve, drawBuffers[idx].asAndroidPath(), true)
-                        drawPath(
-                            path  = drawBuffers[idx],
-                            brush = gradient,
-                            style = Stroke(width = 10f, cap = StrokeCap.Round, join = StrokeJoin.Round)
-                        )
+                        if (headOnCurve >= sp.length && tailOnCurve <= 0f) {
+                            drawPath(
+                                path  = sp.composePath,
+                                brush = gradient,
+                                style = strokeStyle
+                            )
+                        } else {
+                            drawBuffers[idx].reset()
+                            sp.measure.getSegment(tailOnCurve, headOnCurve, drawBuffers[idx].asAndroidPath(), true)
+                            drawPath(
+                                path  = drawBuffers[idx],
+                                brush = gradient,
+                                style = strokeStyle
+                            )
+                        }
                     }
                 }
                 }

@@ -52,6 +52,10 @@ class PreferenceRepository @Inject constructor(
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
         val SHOW_GENERAL_STATS = booleanPreferencesKey("show_general_stats")
         val DASHBOARD_CARD_ORDER = stringPreferencesKey("dashboard_card_order")
+        val SHOW_HOME_CONTINUE_WATCHING = booleanPreferencesKey("show_home_continue_watching")
+        val SHOW_HOME_WATCHLIST = booleanPreferencesKey("show_home_watchlist")
+        val SHOW_HOME_BECAUSE_YOU_WATCHED = booleanPreferencesKey("show_home_because_you_watched")
+        val HOME_SECTION_ORDER = stringPreferencesKey("home_section_order")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -99,7 +103,13 @@ class PreferenceRepository @Inject constructor(
                 titleTextSizeMultiplier = preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] ?: 1.0f,
                 imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM",
                 showGeneralStats = preferences[PreferencesKeys.SHOW_GENERAL_STATS] ?: true,
-                dashboardCardOrder = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow").split(",")
+                dashboardCardOrder = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow").split(","),
+                showHomeContinueWatching = preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] ?: true,
+                showHomeWatchlist = preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] ?: true,
+                showHomeBecauseYouWatched = preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] ?: true,
+                homeSectionOrder = preferences[PreferencesKeys.HOME_SECTION_ORDER]?.let { raw ->
+                    com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(raw.split(","))
+                } ?: com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER
             )
         }
 
@@ -248,6 +258,10 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_YOUR_FLOW] = prefs.showYourFlow
             preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] = prefs.titleTextSizeMultiplier
             preferences[PreferencesKeys.IMAGE_QUALITY] = prefs.imageQuality
+            preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] = prefs.showHomeContinueWatching
+            preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] = prefs.showHomeWatchlist
+            preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] = prefs.showHomeBecauseYouWatched
+            preferences[PreferencesKeys.HOME_SECTION_ORDER] = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(prefs.homeSectionOrder).joinToString(",")
         }
     }
 
@@ -272,6 +286,31 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateDashboardCardOrder(order: List<String>) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] = order.joinToString(",")
+        }
+    }
+
+    suspend fun updateShowHomeContinueWatching(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] = show
+        }
+    }
+
+    suspend fun updateShowHomeWatchlist(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] = show
+        }
+    }
+
+    suspend fun updateShowHomeBecauseYouWatched(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] = show
+        }
+    }
+
+    suspend fun updateHomeSectionOrder(order: List<String>) {
+        val sanitized = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(order)
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HOME_SECTION_ORDER] = sanitized.joinToString(",")
         }
     }
 

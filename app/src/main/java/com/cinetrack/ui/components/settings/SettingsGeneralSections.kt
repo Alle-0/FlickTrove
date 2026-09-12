@@ -99,7 +99,8 @@ fun SettingsUILayoutSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
-    onShowBadgesInfo: () -> Unit
+    onShowBadgesInfo: () -> Unit,
+    onShowHomeSectionsOrderDialog: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
@@ -114,6 +115,24 @@ fun SettingsUILayoutSection(
         title = stringResource(R.string.settings_ui_layout),
         icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
     ) {
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_home),
+            title = stringResource(R.string.settings_home_feed_sections),
+            description = stringResource(R.string.settings_home_feed_sections_desc),
+            trailing = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(16.dp)
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                onShowHomeSectionsOrderDialog()
+            }
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_eye_off),
             title = stringResource(R.string.settings_hide_saved),

@@ -764,6 +764,28 @@ fun SettingsDashboardSettingsDialog(
 }
 
 @Composable
+fun SettingsHomeSectionsOrderDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel,
+    onDismiss: () -> Unit
+) {
+    GlassmorphicModal(
+        visible = visible,
+        activeHazeState = activeHazeState,
+        onDismissRequest = onDismiss
+    ) {
+        HomeSectionsOrderDialog(
+            visible = visible,
+            activeHazeState = activeHazeState,
+            settingsViewModel = settingsViewModel,
+            onDismiss = onDismiss
+        )
+    }
+}
+
+
+@Composable
 fun SettingsLoadingOverlay(
     visible: Boolean,
     activeHazeState: HazeState

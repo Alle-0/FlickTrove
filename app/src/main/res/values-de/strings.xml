@@ -1197,4 +1197,12 @@
     <string name="lbl_episodes_remaining">noch %1$d</string>
     <string name="lbl_next_episode">Nächste: %1$s</string>
     <string name="cd_mark_episode_watched">Folge %1$s als gesehen markieren</string>
+    <string name="home_section_because_you_watched_generic">Weil du dir das angesehen hast...</string>
+    <string name="home_section_in_theaters_streaming">Im Kino &amp; Streaming</string>
+    <string name="settings_home_feed_sections">Startseiten-Bereiche</string>
+    <string name="settings_home_feed_sections_desc">Bereiche neu anordnen und Sichtbarkeit anpassen</string>
+    <string name="settings_section_always_on">Immer aktiv</string>
+    <string name="settings_home_feed_reset">Auf Standard zurücksetzen</string>
+    <string name="settings_msg_home_feed_reset">Startseiten-Layout auf Standard zurückgesetzt</string>
 </resources>
+

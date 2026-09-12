@@ -1193,5 +1193,13 @@
     <string name="lbl_episodes_remaining">%1$d शेष</string>
     <string name="lbl_next_episode">अगला: %1$s</string>
     <string name="cd_mark_episode_watched">एपिसोड %1$s को देखा गया चिह्नित करें</string>
+    <string name="home_section_because_you_watched_generic">क्योंकि आपने देखा...</string>
+    <string name="home_section_in_theaters_streaming">सिनेमाघरों और स्ट्रीमिंग में</string>
+    <string name="settings_home_feed_sections">होम फ़ीड अनुभाग</string>
+    <string name="settings_home_feed_sections_desc">अनुभागों को पुनर्व्यवस्थित करें और दृश्यता अनुकूलित करें</string>
+    <string name="settings_section_always_on">हमेशा चालू</string>
+    <string name="settings_home_feed_reset">डिफ़ॉल्ट पर रीसेट करें</string>
+    <string name="settings_msg_home_feed_reset">होम फ़ीड लेआउट डिफ़ॉल्ट पर रीसेट किया गया</string>
 </resources>
+
 

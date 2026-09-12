@@ -121,6 +121,41 @@ data class UserPreferences(
     val titleTextSizeMultiplier: Float = 1.0f,
     val imageQuality: String = "MEDIUM",
     val showGeneralStats: Boolean = true,
-    val dashboardCardOrder: List<String> = listOf("stats", "folders", "flow")
+    val dashboardCardOrder: List<String> = listOf("stats", "folders", "flow"),
+    val showHomeContinueWatching: Boolean = true,
+    val showHomeWatchlist: Boolean = true,
+    val showHomeBecauseYouWatched: Boolean = true,
+    val homeSectionOrder: List<String> = HomeFeedSectionConstants.DEFAULT_ORDER
 )
+
+object HomeFeedSectionConstants {
+    const val CONTINUE_WATCHING = "continue_watching"
+    const val WATCHLIST = "watchlist"
+    const val TROVE_PICK = "trove_pick"
+    const val BECAUSE_YOU_WATCHED = "because_you_watched"
+    const val TOP_10 = "top_10"
+    const val POPULAR = "popular"
+    const val NOW_PLAYING = "now_playing"
+    const val UPCOMING = "upcoming"
+    const val NEWS = "news"
+
+    val DEFAULT_ORDER = listOf(
+        CONTINUE_WATCHING,
+        WATCHLIST,
+        TROVE_PICK,
+        BECAUSE_YOU_WATCHED,
+        TOP_10,
+        POPULAR,
+        NOW_PLAYING,
+        UPCOMING,
+        NEWS
+    )
+
+    fun sanitizeOrder(savedOrder: List<String>): List<String> {
+        val validSaved = savedOrder.filter { it in DEFAULT_ORDER }.distinct()
+        val missing = DEFAULT_ORDER.filter { it !in validSaved }
+        return validSaved + missing
+    }
+}
+
 

@@ -1072,6 +1072,12 @@ class MovieRepository @Inject constructor(
                 vistiSort = parseSortConfig(remotePrefs["vistiSort"], currentPrefs.vistiSort),
                 foldersSort = parseSortConfig(remotePrefs["foldersSort"], currentPrefs.foldersSort),
                 discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
+                showHomeContinueWatching = remotePrefs["showHomeContinueWatching"] as? Boolean ?: currentPrefs.showHomeContinueWatching,
+                showHomeWatchlist = remotePrefs["showHomeWatchlist"] as? Boolean ?: currentPrefs.showHomeWatchlist,
+                showHomeBecauseYouWatched = remotePrefs["showHomeBecauseYouWatched"] as? Boolean ?: currentPrefs.showHomeBecauseYouWatched,
+                homeSectionOrder = (remotePrefs["homeSectionOrder"] as? List<*>)?.filterIsInstance<String>()?.let {
+                    com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(it)
+                } ?: currentPrefs.homeSectionOrder,
                 lastSyncTimestamp = System.currentTimeMillis()
             )
             
@@ -1136,7 +1142,11 @@ class MovieRepository @Inject constructor(
                         "selectedProviders" to prefs.discoveryFilters.selectedProviders,
                         "selectedDecades" to prefs.discoveryFilters.selectedDecades,
                         "sortBy" to prefs.discoveryFilters.sortBy
-                    )
+                    ),
+                    "showHomeContinueWatching" to prefs.showHomeContinueWatching,
+                    "showHomeWatchlist" to prefs.showHomeWatchlist,
+                    "showHomeBecauseYouWatched" to prefs.showHomeBecauseYouWatched,
+                    "homeSectionOrder" to prefs.homeSectionOrder
                 )
                 firebaseRemoteDataSource.setUserPreferences(prefsMap)
             } catch (e: Exception) {
