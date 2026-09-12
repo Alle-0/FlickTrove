@@ -262,6 +262,44 @@ fun formatReleaseDate(dateStr: String?): String {
     }
 }
 
+fun formatEpisodeAirDate(dateStr: String?, context: android.content.Context): Pair<String, Color>? {
+    if (dateStr.isNullOrEmpty() || dateStr.length < 10) return null
+    return try {
+        val target = java.time.LocalDate.parse(dateStr.take(10))
+        val today = java.time.LocalDate.now()
+        val days = java.time.temporal.ChronoUnit.DAYS.between(today, target)
+        if (days < 0L) return null
+
+        val locale = try {
+            context.resources.configuration.locales[0]
+        } catch (_: Exception) {
+            java.util.Locale.getDefault()
+        }
+
+        when (days) {
+            0L -> {
+                val todayText = context.getString(R.string.widget_date_today).uppercase()
+                todayText to Color(0xFFFF5252)
+            }
+            1L -> {
+                val tomorrowText = context.getString(R.string.widget_date_tomorrow).uppercase()
+                tomorrowText to Color(0xFFFF9800)
+            }
+            else -> {
+                val pattern = if (locale.language == "en") {
+                    if (target.year == today.year) "MMM d" else "MMM d, ''yy"
+                } else {
+                    if (target.year == today.year) "d MMM" else "d MMM ''yy"
+                }
+                val formatter = java.time.format.DateTimeFormatter.ofPattern(pattern, locale)
+                target.format(formatter).uppercase() to Color(0xFFF9A825)
+            }
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
+
 fun Movie.getEffectiveArrivalDate(today: String): String? {
     if (this.mediaType == "movie") {
         val rDate = this.releaseDate

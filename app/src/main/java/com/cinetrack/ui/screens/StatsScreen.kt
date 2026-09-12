@@ -497,6 +497,17 @@ fun StatsScreenContent(
 
                             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
 
+                                // ── Top Case di Produzione & Studi ──────────────────────
+                                if (stats.topStudios.isNotEmpty()) {
+                                    StatsSectionHeader(
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_cinema),
+                                        title = stringResource(R.string.stats_top_studios),
+                                        count = null
+                                    )
+                                    StudioDistributionSection(studios = stats.topStudios)
+                                    Spacer(Modifier.height(36.dp))
+                                }
+
                                 // ── Distribuzione Generi ──────────────────────────────────
                                 if (stats.genreCounts.isNotEmpty()) {
                                     var genreExpanded by rememberSaveable { mutableStateOf(false) }

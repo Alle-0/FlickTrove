@@ -47,7 +47,7 @@ import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
 @Composable
-fun PersonMorphingTopBar(
+fun SimpleMorphingTopBar(
     title: String,
     localHazeState: HazeState,
     symbioteProgress: Float,
@@ -98,8 +98,9 @@ fun PersonMorphingTopBar(
 
             if (progress <= 0.01f && pillHeight <= with(density) { 45.dp.toPx() }) return@GenericShape
 
-            val stretchWidth = circleSize + (pillWidth / 2f - circleSize) * progress
-            val p4 = progress * progress * progress * progress
+            val stretchProgress = (progress / 0.75f).coerceIn(0f, 1f)
+            val stretchWidth = circleSize + (pillWidth / 2f - circleSize) * stretchProgress
+            val p4 = stretchProgress * stretchProgress * stretchProgress * stretchProgress
             val innerRadius = radius * (1f - p4)
 
             val pathLeft = androidx.compose.ui.graphics.Path().apply {
@@ -272,7 +273,7 @@ fun PersonMorphingTopBar(
                     }
 
                     // Center Title
-                    val personTitleAlpha = ((currentEffectiveProgress - 0.85f) / 0.15f).coerceIn(0f, 1f)
+                    val personTitleAlpha = ((currentEffectiveProgress - 0.72f) / 0.28f).coerceIn(0f, 1f)
                     if (personTitleAlpha > 0.01f) {
                         Text(
                             text = title,
@@ -347,3 +348,41 @@ fun PersonMorphingTopBar(
         }
     }
 }
+
+@Composable
+fun PersonMorphingTopBar(
+    title: String,
+    localHazeState: HazeState,
+    symbioteProgress: Float,
+    detailStackDepth: Int,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onShareClick: () -> Unit
+) = SimpleMorphingTopBar(
+    title = title,
+    localHazeState = localHazeState,
+    symbioteProgress = symbioteProgress,
+    detailStackDepth = detailStackDepth,
+    onBackClick = onBackClick,
+    onHomeClick = onHomeClick,
+    onShareClick = onShareClick
+)
+
+@Composable
+fun CollectionMorphingTopBar(
+    title: String,
+    localHazeState: HazeState,
+    symbioteProgress: Float,
+    detailStackDepth: Int,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onShareClick: () -> Unit
+) = SimpleMorphingTopBar(
+    title = title,
+    localHazeState = localHazeState,
+    symbioteProgress = symbioteProgress,
+    detailStackDepth = detailStackDepth,
+    onBackClick = onBackClick,
+    onHomeClick = onHomeClick,
+    onShareClick = onShareClick
+)

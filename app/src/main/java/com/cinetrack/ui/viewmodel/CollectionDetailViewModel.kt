@@ -145,6 +145,15 @@ class CollectionDetailViewModel @Inject constructor(
             folder.itemIds.forEach { itemId ->
                 val list = folderColorsMap[itemId] ?: persistentListOf()
                 folderColorsMap[itemId] = (list + color).toImmutableList()
+
+                val rawId = itemId.substringAfter("_")
+                if (rawId != itemId) {
+                    val rawList = folderColorsMap[rawId] ?: persistentListOf()
+                    folderColorsMap[rawId] = (rawList + color).toImmutableList()
+                } else {
+                    val movieList = folderColorsMap["movie_$itemId"] ?: persistentListOf()
+                    folderColorsMap["movie_$itemId"] = (movieList + color).toImmutableList()
+                }
             }
         }
 
@@ -258,8 +267,10 @@ class CollectionDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val targetMediaType = movie.mediaType.ifBlank { "movie" }
             val compositeId = "${targetMediaType}_${movie.id}"
-            val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                folder.itemIds - compositeId
+            val rawId = movie.id.toString()
+            val isInFolder = folder.itemIds.contains(compositeId) || folder.itemIds.contains(rawId) || folder.itemIds.contains("movie_$rawId")
+            val newItemIds = if (isInFolder) {
+                folder.itemIds - compositeId - rawId - "movie_$rawId"
             } else {
                 folder.itemIds + compositeId
             }

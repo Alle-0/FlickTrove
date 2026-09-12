@@ -88,6 +88,10 @@
     <string name="stats_longest_tv">SERIE PIÙ LUNGA</string>
     <string name="stats_top_cast">I TUOI MITI (CAST)</string>
     <string name="stats_top_directors">TOP REGISTI</string>
+    <string name="stats_top_studios">TOP STUDI &amp; PRODUZIONI</string>
+    <string name="stats_studios_watched">%d visti</string>
+    <string name="stats_studios_more">MOSTRA ALTRI</string>
+    <string name="stats_studios_less">MOSTRA MENO</string>
     <string name="stats_genre_distribution">DISTRIBUZIONE GENERI</string>
     <string name="stats_top_decades">LE TUE DECADI D\'ORO</string>
     <string name="stats_countries">NAZIONI PIÙ VISTE</string>
@@ -577,6 +581,8 @@
     <string name="widget_next_episodes">PROSSIMI EPISODI</string>
     <string name="widget_no_episodes">Nessun episodio in arrivo!</string>
     <string name="widget_episode_on">Il: %1$s</string>
+    <string name="widget_date_today">Oggi</string>
+    <string name="widget_date_tomorrow">Domani</string>
     <string name="widget_mark_watched">Segna come visto</string>
     <string name="widget_now_watching_name">In visione</string>
     <string name="widget_now_watching_title">IN VISIONE</string>

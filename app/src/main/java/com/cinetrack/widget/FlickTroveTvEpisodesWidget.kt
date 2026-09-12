@@ -271,7 +271,7 @@ class FlickTroveTvEpisodesWidget : GlanceAppWidget() {
                                             maxLines = 1
                                         )
 
-                                        Spacer(modifier = GlanceModifier.height(4.dp))
+                                        Spacer(modifier = GlanceModifier.height(3.dp))
 
                                         // Episode badge (e.g. "S3 E5") — compact red label
                                         val episodeLabel = show.nextEpisodeString
@@ -288,24 +288,80 @@ class FlickTroveTvEpisodesWidget : GlanceAppWidget() {
                                                 ),
                                                 maxLines = 1
                                             )
-                                            Spacer(modifier = GlanceModifier.height(2.dp))
+                                            Spacer(modifier = GlanceModifier.height(4.dp))
                                         }
 
-                                        // Formatted air date
-                                        val formattedDate = formatDate(show.nextEpisodeAirDate, context)
-                                        if (formattedDate.isNotEmpty()) {
-                                            Text(
-                                                text = LocalContext.current.getString(R.string.widget_episode_on, formattedDate),
-                                                style = TextStyle(
-                                                    color = androidx.glance.color.ColorProvider(
-                                                        day = Color(0xFF666666),
-                                                        night = Color(0xFFAAAAAA)
-                                                    ),
-                                                    fontSize = 10.sp,
-                                                    fontWeight = FontWeight.Medium
-                                                ),
-                                                maxLines = 1
-                                            )
+                                        // Highlighted release date badge
+                                        val dateInfo = getEpisodeDateInfo(show.nextEpisodeAirDate, context)
+                                        if (dateInfo != null) {
+                                            Box(
+                                                modifier = GlanceModifier
+                                                    .background(
+                                                        when {
+                                                            dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFFFEBEE),
+                                                                night = Color(0x38E50914)
+                                                            )
+                                                            dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFFFF3E0),
+                                                                night = Color(0x33FF9800)
+                                                            )
+                                                            else -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFEEEEF2),
+                                                                night = Color(0xFF25252B)
+                                                            )
+                                                        }
+                                                    )
+                                                    .cornerRadius(5.dp)
+                                                    .padding(horizontal = 7.dp, vertical = 3.dp)
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Image(
+                                                        provider = ImageProvider(R.drawable.ic_calendario),
+                                                        contentDescription = null,
+                                                        modifier = GlanceModifier.size(10.dp),
+                                                        colorFilter = androidx.glance.ColorFilter.tint(
+                                                            when {
+                                                                dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFFE50914),
+                                                                    night = Color(0xFFFF4444)
+                                                                )
+                                                                dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFFEF6C00),
+                                                                    night = Color(0xFFFFB74D)
+                                                                )
+                                                                else -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFF666666),
+                                                                    night = Color(0xFFB8B8C0)
+                                                                )
+                                                            }
+                                                        )
+                                                    )
+                                                    Spacer(modifier = GlanceModifier.width(4.dp))
+                                                    Text(
+                                                        text = dateInfo.label,
+                                                        style = TextStyle(
+                                                            color = when {
+                                                                dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFFD32F2F),
+                                                                    night = Color(0xFFFF5252)
+                                                                )
+                                                                dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFFE65100),
+                                                                    night = Color(0xFFFFB74D)
+                                                                )
+                                                                else -> androidx.glance.color.ColorProvider(
+                                                                    day = Color(0xFF222222),
+                                                                    night = Color(0xFFEEEEEE)
+                                                                )
+                                                            },
+                                                            fontSize = 10.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        ),
+                                                        maxLines = 1
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -331,20 +387,58 @@ class FlickTroveTvEpisodesWidget : GlanceAppWidget() {
         }
     }
 
+    private data class EpisodeDateInfo(
+        val label: String,
+        val isToday: Boolean,
+        val isTomorrow: Boolean
+    )
+
     /** Returns true only if the ISO date string parses cleanly as a LocalDate. */
     private fun isValidDate(dateStr: String): Boolean = try {
         java.time.LocalDate.parse(dateStr.take(10))
         true
     } catch (e: java.time.format.DateTimeParseException) { false }
 
-    /** Formats an ISO "yyyy-MM-dd" string to "d MMM yyyy" in the app locale. Empty on failure. */
-    private fun formatDate(dateStr: String?, context: Context): String {
-        if (dateStr.isNullOrEmpty() || dateStr.length < 10) return ""
+    /** Formats an ISO "yyyy-MM-dd" string into a highlighted date badge info. Null on failure. */
+    private fun getEpisodeDateInfo(dateStr: String?, context: Context): EpisodeDateInfo? {
+        if (dateStr.isNullOrEmpty() || dateStr.length < 10) return null
         return try {
-            val date = java.time.LocalDate.parse(dateStr.take(10))
-            val locale = context.resources.configuration.locales[0]
-            val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
-            date.format(formatter)
-        } catch (e: Exception) { "" }
+            val targetDate = java.time.LocalDate.parse(dateStr.take(10))
+            val today = java.time.LocalDate.now()
+            val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(today, targetDate)
+            val locale = try {
+                context.resources.configuration.locales[0]
+            } catch (_: Exception) {
+                java.util.Locale.getDefault()
+            }
+
+            val isToday = daysBetween == 0L
+            val isTomorrow = daysBetween == 1L
+
+            val dayMonthPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM", locale)
+            val formattedDayMonth = targetDate.format(dayMonthPattern).uppercase()
+
+            val label = when {
+                isToday -> {
+                    val todayText = context.getString(R.string.widget_date_today).uppercase()
+                    "$todayText • $formattedDayMonth"
+                }
+                isTomorrow -> {
+                    val tomorrowText = context.getString(R.string.widget_date_tomorrow).uppercase()
+                    "$tomorrowText • $formattedDayMonth"
+                }
+                daysBetween in 2L..6L -> {
+                    val weekPattern = java.time.format.DateTimeFormatter.ofPattern("EEE • d MMM", locale)
+                    targetDate.format(weekPattern).uppercase()
+                }
+                else -> {
+                    val fullPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+                    targetDate.format(fullPattern).uppercase()
+                }
+            }
+            EpisodeDateInfo(label = label, isToday = isToday, isTomorrow = isTomorrow)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

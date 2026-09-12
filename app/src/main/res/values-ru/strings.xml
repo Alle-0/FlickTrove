@@ -91,6 +91,10 @@
     <string name="stats_longest_tv">САМЫЙ ДЛИННЫЙ СЕРИАЛ</string>
     <string name="stats_top_cast">ВАШИ КУМИРЫ (АКТЕРЫ)</string>
     <string name="stats_top_directors">ТОП РЕЖИССЕРОВ</string>
+    <string name="stats_top_studios">ТОП СТУДИЙ И ПРОИЗВОДСТВ</string>
+    <string name="stats_studios_watched">%d просмотрено</string>
+    <string name="stats_studios_more">ПОКАЗАТЬ ЕЩЕ</string>
+    <string name="stats_studios_less">СКРЫТЬ</string>
     <string name="stats_genre_distribution">РАСПРЕДЕЛЕНИЕ ПО ЖАНРАМ</string>
     <string name="stats_top_decades">ВАШИ ЗОЛОТЫЕ ДЕСЯТИЛЕТИЯ</string>
     <string name="stats_countries">ТОП СТРАН</string>
@@ -580,6 +584,8 @@
     <string name="widget_next_episodes">СЛЕДУЮЩИЕ ЭПИЗОДЫ</string>
     <string name="widget_no_episodes">Нет предстоящих эпизодов!</string>
     <string name="widget_episode_on">Дата: %1$s</string>
+    <string name="widget_date_today">Сегодня</string>
+    <string name="widget_date_tomorrow">Завтра</string>
     <string name="widget_mark_watched">Отметить как просмотренное</string>
     <string name="widget_now_watching_name">Смотрю сейчас</string>
     <string name="widget_now_watching_title">СМОТРЮ СЕЙЧАС</string>

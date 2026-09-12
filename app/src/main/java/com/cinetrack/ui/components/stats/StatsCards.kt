@@ -34,6 +34,17 @@ import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.ui.viewmodel.PersonStat
+import com.cinetrack.ui.viewmodel.StudioStat
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardDoubleArrowDown
+import androidx.compose.material.icons.rounded.KeyboardDoubleArrowUp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import coil.request.ImageRequest
+import com.cinetrack.util.WhiteLogoTransformation
+import kotlin.math.roundToInt
 
 // ════════════════════════════════════════════════════════════════════
 // Total Time Hero
@@ -609,5 +620,451 @@ fun PersonAvatar(
             overflow = TextOverflow.Ellipsis,
             lineHeight = 13.sp
         )
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Studio Podium Chart (Top 3 Studios on Pedestals)
+// ════════════════════════════════════════════════════════════════════
+
+private data class StudioPodiumItem(
+    val studio: StudioStat,
+    val rank: Int,
+    val pedestalHeight: androidx.compose.ui.unit.Dp,
+    val color: Color,
+    val glowColor: Color,
+    val percentageText: String
+)
+
+@Composable
+private fun StudioPodiumChart(
+    topStudios: List<StudioStat>,
+    totalCount: Float,
+    modifier: Modifier = Modifier,
+    accentColor: Color = MaterialTheme.colorScheme.primary
+) {
+    if (topStudios.isEmpty()) return
+
+    fun calcPct(count: Int): String {
+        val pct = ((count.toFloat() / totalCount) * 100).roundToInt()
+        return if (pct == 0 && count > 0) "<1%" else "$pct%"
+    }
+
+    val podiumItems = remember(topStudios, totalCount) {
+        when {
+            topStudios.size >= 3 -> listOf(
+                StudioPodiumItem(
+                    studio = topStudios[1],
+                    rank = 2,
+                    pedestalHeight = 84.dp,
+                    color = Color(0xFFCBD5E1),
+                    glowColor = Color(0xFF94A3B8),
+                    percentageText = calcPct(topStudios[1].count)
+                ),
+                StudioPodiumItem(
+                    studio = topStudios[0],
+                    rank = 1,
+                    pedestalHeight = 112.dp,
+                    color = Color(0xFFFFB800),
+                    glowColor = accentColor,
+                    percentageText = calcPct(topStudios[0].count)
+                ),
+                StudioPodiumItem(
+                    studio = topStudios[2],
+                    rank = 3,
+                    pedestalHeight = 64.dp,
+                    color = Color(0xFFCD7F32),
+                    glowColor = Color(0xFFEA580C),
+                    percentageText = calcPct(topStudios[2].count)
+                )
+            )
+            topStudios.size == 2 -> listOf(
+                StudioPodiumItem(
+                    studio = topStudios[1],
+                    rank = 2,
+                    pedestalHeight = 84.dp,
+                    color = Color(0xFFCBD5E1),
+                    glowColor = Color(0xFF94A3B8),
+                    percentageText = calcPct(topStudios[1].count)
+                ),
+                StudioPodiumItem(
+                    studio = topStudios[0],
+                    rank = 1,
+                    pedestalHeight = 112.dp,
+                    color = Color(0xFFFFB800),
+                    glowColor = accentColor,
+                    percentageText = calcPct(topStudios[0].count)
+                )
+            )
+            else -> listOf(
+                StudioPodiumItem(
+                    studio = topStudios[0],
+                    rank = 1,
+                    pedestalHeight = 112.dp,
+                    color = Color(0xFFFFB800),
+                    glowColor = accentColor,
+                    percentageText = calcPct(topStudios[0].count)
+                )
+            )
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(215.dp)
+            .background(Color.White.copy(alpha = 0.02f), RoundedCornerShape(20.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(20.dp))
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            podiumItems.forEachIndexed { idx, item ->
+                PodiumColumn(
+                    item = item,
+                    delay = idx * 100,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PodiumColumn(
+    item: StudioPodiumItem,
+    delay: Int,
+    modifier: Modifier = Modifier
+) {
+    val animHeight by animateDpAsState(
+        targetValue = item.pedestalHeight,
+        animationSpec = tween(900, delayMillis = delay, easing = FastOutSlowInEasing),
+        label = "podium_height_${item.rank}"
+    )
+
+    Column(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        // 1. Rank Badge & Trophy at the TOP (Prominent & Clear, elevated above logo)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(bottom = 10.dp)
+        ) {
+            if (item.rank == 1) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_trophy),
+                    contentDescription = null,
+                    tint = Color(0xFFFFB800),
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+            }
+            Box(
+                modifier = Modifier
+                    .size(22.dp)
+                    .background(item.color.copy(alpha = 0.22f), CircleShape)
+                    .border(1.5.dp, item.color, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = item.rank.toString(),
+                    color = item.color,
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+        }
+
+        // 2. Studio Logo / Name Box (Resting directly on top of the pedestal)
+        Box(
+            modifier = Modifier
+                .width(80.dp)
+                .height(34.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xFF161922))
+                .border(1.dp, item.color.copy(alpha = 0.40f), RoundedCornerShape(14.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!item.studio.logoPath.isNullOrBlank()) {
+                val context = LocalContext.current
+                val logoUrl = buildTmdbImageUrl(item.studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(logoUrl)
+                        .crossfade(true)
+                        .transformations(WhiteLogoTransformation())
+                        .build(),
+                    contentDescription = item.studio.name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text(
+                    text = item.studio.name,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        // 3. Pedestal Box with Top Rim Neon Accent, Vertical Gradient & Percentages
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .height(animHeight)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            item.color.copy(alpha = 0.28f),
+                            item.color.copy(alpha = 0.04f)
+                        )
+                    )
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        listOf(item.color.copy(alpha = 0.6f), Color.Transparent)
+                    ),
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                )
+                .padding(top = 6.dp),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = item.studio.count.toString(),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 15.sp
+                        )
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = item.percentageText,
+                        color = item.color,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.stats_watched).uppercase(),
+                    color = Color.White.copy(alpha = 0.35f),
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                )
+            }
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Studio & Production Distribution Section
+// ════════════════════════════════════════════════════════════════════
+
+@Composable
+fun StudioDistributionSection(
+    studios: List<StudioStat>,
+    modifier: Modifier = Modifier,
+    accentColor: Color = MaterialTheme.colorScheme.primary
+) {
+    if (studios.isEmpty()) return
+
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    val displayStudios = if (isExpanded) studios else studios.take(5)
+    val maxCount = studios.maxOfOrNull { it.count }?.toFloat() ?: 1f
+    val totalCount = remember(studios) { studios.sumOf { it.count }.toFloat().coerceAtLeast(1f) }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .statsCard(RoundedCornerShape(20.dp))
+            .padding(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Visual Studio Podium Chart at the top
+            StudioPodiumChart(
+                topStudios = studios.take(3),
+                totalCount = totalCount,
+                accentColor = accentColor
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            displayStudios.forEachIndexed { index, studio ->
+                val fraction = (studio.count.toFloat() / maxCount).coerceIn(0.04f, 1f)
+                val animFraction by animateFloatAsState(
+                    targetValue = fraction,
+                    animationSpec = tween(
+                        durationMillis = 900,
+                        delayMillis = (index * 80).coerceAtMost(400),
+                        easing = FastOutSlowInEasing
+                    ),
+                    label = "studio_bar_$index"
+                )
+
+                val pct = ((studio.count.toFloat() / totalCount) * 100).roundToInt()
+                val percentageText = if (pct == 0 && studio.count > 0) "<1%" else "$pct%"
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Studio Identifier: either the official TMDB logo in a sleek dark badge, or the studio name text
+                    Box(
+                        modifier = Modifier.width(96.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (!studio.logoPath.isNullOrBlank()) {
+                            val context = LocalContext.current
+                            val logoUrl = buildTmdbImageUrl(studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
+                            Box(
+                                modifier = Modifier
+                                    .width(90.dp)
+                                    .height(30.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color(0xFF161922))
+                                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(logoUrl)
+                                        .crossfade(true)
+                                        .transformations(WhiteLogoTransformation())
+                                        .build(),
+                                    contentDescription = studio.name,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = studio.name,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // Thick 12dp Capsule Progress Bar with horizontal gradient (identical to Top Countries)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(12.dp)
+                            .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(animFraction)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(accentColor.copy(alpha = 0.5f), accentColor)
+                                    ),
+                                    RoundedCornerShape(6.dp)
+                                )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // Clean Count + Percentage on the same line (identical to Genres/Countries)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.widthIn(min = 48.dp)
+                    ) {
+                        Text(
+                            text = studio.count.toString(),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 13.sp
+                            ),
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = percentageText,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 12.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.35f)
+                        )
+                    }
+                }
+            }
+
+            // Expand / Collapse Pill Button (identical to Genre & Country sections)
+            if (studios.size > 5) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .bounceClick(onClick = { isExpanded = !isExpanded })
+                            .clip(CircleShape)
+                            .background(accentColor.copy(alpha = 0.2f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isExpanded) stringResource(R.string.stats_see_less) else stringResource(R.string.stats_see_all),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = accentColor,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Rounded.KeyboardDoubleArrowUp else Icons.Rounded.KeyboardDoubleArrowDown,
+                                contentDescription = null,
+                                tint = accentColor,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .padding(start = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

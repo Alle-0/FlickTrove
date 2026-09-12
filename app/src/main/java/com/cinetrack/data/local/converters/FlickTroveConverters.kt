@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.cinetrack.data.model.Genre
 import com.cinetrack.data.model.PersonData
 import com.cinetrack.data.model.Season
+import com.cinetrack.data.model.StudioData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -54,4 +55,10 @@ class FlickTroveConverters {
 
     @TypeConverter
     fun toGenreList(value: String?): List<Genre>? = value?.let { json.decodeFromString(it) }
+
+    @TypeConverter
+    fun fromStudioDataList(value: List<StudioData>?): String? = value?.let { json.encodeToString(it) }
+
+    @TypeConverter
+    fun toStudioDataList(value: String?): List<StudioData>? = value?.let { json.decodeFromString(it) }
 }

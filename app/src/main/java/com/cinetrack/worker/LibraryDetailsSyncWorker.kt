@@ -41,7 +41,7 @@ class LibraryDetailsSyncWorker(
             val allMovies = favoriteDao.getAll()
             val missingDetailsMovies = allMovies.filter { movie ->
                 val eps = movie.watchedEpisodes
-                movie.originCountry.isNullOrEmpty() || movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty() || (movie.mediaType == "tv" && movie.watched && (eps.isNullOrEmpty() || eps.values.sumOf { s -> s.size } == 0))
+                movie.originCountry.isNullOrEmpty() || movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty() || movie.productionCompanies.isNullOrEmpty() || (movie.mediaType == "tv" && movie.watched && (eps.isNullOrEmpty() || eps.values.sumOf { s -> s.size } == 0))
             }
 
             if (missingDetailsMovies.isEmpty()) {
@@ -101,7 +101,8 @@ class LibraryDetailsSyncWorker(
                             status = freshMovie.status ?: currentLocal.status,
                             voteAverage = freshMovie.voteAverage ?: currentLocal.voteAverage,
                             voteCount = freshMovie.voteCount ?: currentLocal.voteCount,
-                            originCountry = freshMovie.originCountry ?: currentLocal.originCountry
+                            originCountry = freshMovie.originCountry ?: currentLocal.originCountry,
+                            productionCompanies = freshMovie.productionCompanies ?: currentLocal.productionCompanies
                         )
                         favoriteDao.insert(currentLocal)
                     }

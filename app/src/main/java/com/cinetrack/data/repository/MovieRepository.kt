@@ -367,7 +367,7 @@ class MovieRepository @Inject constructor(
     fun fetchMissingDetailsAsync(movie: Movie) {
         val key = "${movie.mediaType}_${movie.id}"
         val eps = movie.watchedEpisodes
-        val needsDetails = movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty()
+        val needsDetails = movie.runtime == null || movie.runtime == 0 || movie.topCastData.isNullOrEmpty() || movie.productionCompanies.isNullOrEmpty()
         val needsEpisodes = movie.mediaType == "tv" && movie.watched && (eps.isNullOrEmpty() || eps.values.sumOf { it.size } == 0)
         if ((needsDetails || needsEpisodes) && fetchingDetailsIds.add(key)) {
             val updateEpisodesUseCase = com.cinetrack.domain.UpdateEpisodesUseCase()
@@ -427,7 +427,8 @@ class MovieRepository @Inject constructor(
                                 budget = freshMovie.budget ?: currentLocal.budget,
                                 tagline = freshMovie.tagline ?: currentLocal.tagline,
                                 imdbId = freshMovie.imdbId ?: currentLocal.imdbId,
-                                streamingProviderIds = freshMovie.streamingProviderIds ?: currentLocal.streamingProviderIds
+                                streamingProviderIds = freshMovie.streamingProviderIds ?: currentLocal.streamingProviderIds,
+                                productionCompanies = freshMovie.productionCompanies ?: currentLocal.productionCompanies
                             )
                             favoriteDao.insert(currentLocal)
                         }
@@ -997,6 +998,7 @@ class MovieRepository @Inject constructor(
             // 4. Pull Preferences
             emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
             syncPreferencesWithFirebase()
+            preferenceRepository.updateLastSyncTimestamp(System.currentTimeMillis())
             
             emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
         } catch (e: Exception) {

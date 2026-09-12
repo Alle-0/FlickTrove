@@ -51,6 +51,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                 status = local.status ?: movie.status,
                 tagline = local.tagline ?: movie.tagline,
                 dropped = local.dropped,
+                productionCompanies = local.productionCompanies ?: movie.productionCompanies,
                 createdAt = local.createdAt ?: movie.createdAt,
                 updatedAt = local.updatedAt ?: movie.updatedAt,
                 lastSyncDate = local.lastSyncDate ?: movie.lastSyncDate,

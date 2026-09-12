@@ -294,6 +294,11 @@ data class Movie(
     @set:Exclude
     @ColumnInfo(name = "origin_country") var originCountry: List<String>? = null,
 
+    @SerialName("production_companies")
+    @get:Exclude
+    @set:Exclude
+    @ColumnInfo(name = "production_companies") var productionCompanies: List<StudioData>? = null,
+
     // System Fields
     @SerialName("last_sync_date")
     @get:Exclude
@@ -768,6 +773,14 @@ data class Movie(
             topCastData = value?.mapNotNull { parsePerson(it) }
         }
 
+    @get:PropertyName("production_companies")
+    @set:PropertyName("production_companies")
+    var productionCompaniesProxy: List<Any?>?
+        get() = productionCompanies
+        set(value) {
+            productionCompanies = value?.mapNotNull { parseStudio(it) }
+        }
+
     private fun parseDate(value: Any?): String? {
         return when (value) {
             is String -> value
@@ -811,6 +824,21 @@ data class Movie(
                 if (name.isNotEmpty()) PersonData(id, name, profilePath) else null
             }
             is PersonData -> item
+            else -> null
+        }
+    }
+
+    private fun parseStudio(item: Any?): StudioData? {
+        return when (item) {
+            is String -> StudioData(id = 0L, name = item)
+            is Map<*, *> -> {
+                val id = (item["id"] as? Number)?.toLong() ?: 0L
+                val name = item["name"] as? String ?: ""
+                val logoPath = item["logo_path"] as? String
+                val originCountry = item["origin_country"] as? String
+                if (name.isNotEmpty()) StudioData(id, name, logoPath, originCountry) else null
+            }
+            is StudioData -> item
             else -> null
         }
     }

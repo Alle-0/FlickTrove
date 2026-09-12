@@ -88,6 +88,10 @@
     <string name="stats_longest_tv">SÉRIE LA PLUS LONGUE</string>
     <string name="stats_top_cast">VOS IDOLES (CASTING)</string>
     <string name="stats_top_directors">MEILLEURS RÉALISATEURS</string>
+    <string name="stats_top_studios">MEILLEURS STUDIOS &amp; PRODUCTIONS</string>
+    <string name="stats_studios_watched">%d vus</string>
+    <string name="stats_studios_more">AFFICHER PLUS</string>
+    <string name="stats_studios_less">AFFICHER MOINS</string>
     <string name="stats_genre_distribution">RÉPARTITION PAR GENRE</string>
     <string name="stats_top_decades">VOS DÉCENNIES D\'OR</string>
     <string name="stats_countries">PAYS LES PLUS VUS</string>
@@ -575,6 +579,8 @@
     <string name="widget_next_episodes">ÉPISODES À VENIR</string>
     <string name="widget_no_episodes">Aucun épisode à venir !</string>
     <string name="widget_episode_on">Le : %1$s</string>
+    <string name="widget_date_today">Aujourd\'hui</string>
+    <string name="widget_date_tomorrow">Demain</string>
     <string name="widget_mark_watched">Marquer comme vu</string>
     <string name="widget_now_watching_name">En cours</string>
     <string name="widget_now_watching_title">EN COURS</string>

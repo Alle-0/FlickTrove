@@ -1,6 +1,7 @@
 package com.cinetrack.data.mapper
 
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.StudioData
 import com.cinetrack.data.api.ExternalIds
 import com.cinetrack.data.api.MovieDetailResponse
 
@@ -69,8 +70,14 @@ object MovieMapper {
             directorData = directors,
             directorId = mainDirector?.id,
             directorName = mainDirector?.name,
-            directorProfilePath = mainDirector?.profilePath,
-            originCountry = response.originCountry ?: response.productionCountries?.mapNotNull { it.iso31661 }
+            originCountry = response.originCountry ?: response.productionCountries?.mapNotNull { it.iso31661 },
+            productionCompanies = if (type == "tv") {
+                val networks = response.networks?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) } ?: emptyList()
+                val prodCompanies = response.productionCompanies?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) } ?: emptyList()
+                (networks + prodCompanies).distinctBy { it.name.trim().lowercase() }.ifEmpty { null }
+            } else {
+                response.productionCompanies?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) }?.distinctBy { it.name.trim().lowercase() }?.ifEmpty { null }
+            }
         )
     }
 
@@ -132,7 +139,15 @@ object MovieMapper {
             numberOfEpisodes = movie.numberOfEpisodes,
             seasons = movie.seasons,
             credits = creditsResponse,
-            externalIds = ExternalIds(imdbId = movie.imdbId)
+            externalIds = ExternalIds(imdbId = movie.imdbId),
+            productionCompanies = movie.productionCompanies?.map {
+                com.cinetrack.data.api.ProductionCompany(
+                    id = it.id,
+                    name = it.name,
+                    logoPath = it.logoPath,
+                    originCountry = it.originCountry
+                )
+            }
         )
     }
 

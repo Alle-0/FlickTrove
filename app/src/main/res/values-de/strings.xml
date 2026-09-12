@@ -88,6 +88,10 @@
     <string name="stats_longest_tv">LÄNGSTE SERIE</string>
     <string name="stats_top_cast">DEINE IDOLE (BESETZUNG)</string>
     <string name="stats_top_directors">TOP-REGISSEURE</string>
+    <string name="stats_top_studios">TOP-STUDIOS &amp; PRODUKTIONEN</string>
+    <string name="stats_studios_watched">%d gesehen</string>
+    <string name="stats_studios_more">MEHR ANZEIGEN</string>
+    <string name="stats_studios_less">WENIGER ANZEIGEN</string>
     <string name="stats_genre_distribution">GENRE-VERTEILUNG</string>
     <string name="stats_top_decades">DEINE GOLDENEN JAHRZEHNTE</string>
     <string name="stats_countries">TOP-LÄNDER</string>
@@ -575,6 +579,8 @@
     <string name="widget_next_episodes">NÄCHSTE EPISODEN</string>
     <string name="widget_no_episodes">Keine bevorstehenden Episoden!</string>
     <string name="widget_episode_on">Am: %1$s</string>
+    <string name="widget_date_today">Heute</string>
+    <string name="widget_date_tomorrow">Morgen</string>
     <string name="widget_mark_watched">Als gesehen markieren</string>
     <string name="widget_now_watching_name">Schaue gerade</string>
     <string name="widget_now_watching_title">SCHAUE GERADE</string>

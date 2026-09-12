@@ -90,6 +90,10 @@
     <string name="stats_longest_tv">सबसे लंबी सीरीज़</string>
     <string name="stats_top_cast">आपके आदर्श (कास्ट)</string>
     <string name="stats_top_directors">शीर्ष निर्देशक</string>
+    <string name="stats_top_studios">शीर्ष स्टूडियो और प्रोडक्शंस</string>
+    <string name="stats_studios_watched">%d देखे गए</string>
+    <string name="stats_studios_more">और देखें</string>
+    <string name="stats_studios_less">कम देखें</string>
     <string name="stats_genre_distribution">शैली वितरण</string>
     <string name="stats_top_decades">आपके सुनहरे दशक</string>
     <string name="stats_countries">शीर्ष देश</string>
@@ -578,6 +582,8 @@
     <string name="widget_next_episodes">आगामी एपिसोड</string>
     <string name="widget_no_episodes">कोई आगामी एपिसोड नहीं!</string>
     <string name="widget_episode_on">तारीख: %1$s</string>
+    <string name="widget_date_today">आज</string>
+    <string name="widget_date_tomorrow">कल</string>
     <string name="widget_mark_watched">देखा हुआ चिह्नित करें</string>
     <string name="widget_now_watching_name">अभी देख रहे हैं</string>
     <string name="widget_now_watching_title">अभी देख रहे हैं</string>

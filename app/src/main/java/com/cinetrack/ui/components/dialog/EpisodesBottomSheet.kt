@@ -403,7 +403,8 @@ fun EpisodesBottomSheet(
                                         }
                                         localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to currentWatched)
                                     },
-                                    onInfoClick = { selectedEpisodeForInfo = episode }
+                                    onInfoClick = { selectedEpisodeForInfo = episode },
+                                    fallbackBackdropPath = currentSeasonData?.posterPath ?: movie.backdropPath ?: movie.posterPath
                                 )
                             }
                         }
@@ -605,7 +606,13 @@ private fun BulkAction(
 }
 
 @Composable
-internal fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> Unit, onInfoClick: () -> Unit) {
+internal fun EpisodeCard(
+    episode: Episode,
+    isWatched: Boolean,
+    onToggle: () -> Unit,
+    onInfoClick: () -> Unit,
+    fallbackBackdropPath: String? = null
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -617,8 +624,14 @@ internal fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> U
         border = androidx.compose.foundation.BorderStroke(1.dp, if (isWatched) Color(0xFF00E676).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f))
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            val thumbModel = episode.stillPath?.let {
+                buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
+            } ?: fallbackBackdropPath?.let {
+                buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
+            }
+
             AsyncImage(
-                model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
+                model = thumbModel,
                 contentDescription = null,
                 modifier = Modifier
                     .size(width = 120.dp, height = 68.dp)
@@ -628,34 +641,45 @@ internal fun EpisodeCard(episode: Episode, isWatched: Boolean, onToggle: () -> U
                 alpha = if (isWatched) 0.6f else 1f
             )
             
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp)) {
-                val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
-                val isUnreleased = !episode.airDate.isNullOrBlank() && episode.airDate > todayIso
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp, end = 8.dp)
+            ) {
+                val context = LocalContext.current
+                val airDateInfo = remember(episode.airDate) {
+                    com.cinetrack.ui.components.updates.formatEpisodeAirDate(episode.airDate, context)
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
-                        stringResource(R.string.episodes_episode_n, episode.episodeNumber),
+                        text = stringResource(R.string.episodes_episode_n, episode.episodeNumber),
                         color = if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.4f),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp
+                        letterSpacing = 1.sp,
+                        maxLines = 1
                     )
-                    
-                    if (isUnreleased) {
+
+                    if (airDateInfo != null && !isWatched) {
                         Text(
-                            " • " + com.cinetrack.ui.components.updates.formatReleaseDate(episode.airDate),
-                            color = Color(0xFFF9A825), // A nice amber color
+                            text = " • " + airDateInfo.first,
+                            color = airDateInfo.second,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp
+                            letterSpacing = 0.5.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    episode.name,
+                    text = episode.name,
                     color = if (isWatched) Color.White.copy(alpha = 0.6f) else Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.ExtraBold,

@@ -55,6 +55,15 @@ data class PersonData(
 
 @Serializable
 @Stable
+data class StudioData(
+    val id: Long = 0L,
+    val name: String = "",
+    @SerialName("logo_path") val logoPath: String? = null,
+    @SerialName("origin_country") val originCountry: String? = null
+)
+
+@Serializable
+@Stable
 data class Folder(
     var id: String = "",
     var name: String = "",

@@ -172,6 +172,7 @@ data class MovieDetailResponse(
     val revenue: Long? = 0,
     @SerialName("original_language") val originalLanguage: String? = null,
     @SerialName("production_companies") val productionCompanies: List<ProductionCompany>? = null,
+    val networks: List<ProductionCompany>? = null,
     @SerialName("number_of_seasons") val numberOfSeasons: Int? = 0,
     @SerialName("number_of_episodes") val numberOfEpisodes: Int? = 0,
     val seasons: List<com.cinetrack.data.model.Season>? = null,

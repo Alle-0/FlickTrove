@@ -90,6 +90,10 @@
     <string name="stats_longest_tv">SÉRIE MAIS LONGA</string>
     <string name="stats_top_cast">SEUS ÍDOLOS (ELENCO)</string>
     <string name="stats_top_directors">PRINCIPAIS DIRETORES</string>
+    <string name="stats_top_studios">PRINCIPAIS ESTÚDIOS E PRODUÇÕES</string>
+    <string name="stats_studios_watched">%d assistidos</string>
+    <string name="stats_studios_more">MOSTRAR MAIS</string>
+    <string name="stats_studios_less">MOSTRAR MENOS</string>
     <string name="stats_genre_distribution">DISTRIBUIÇÃO DE GÊNEROS</string>
     <string name="stats_top_decades">SUAS DÉCADAS DE OURO</string>
     <string name="stats_countries">PRINCIPAIS PAÍSES</string>
@@ -580,6 +584,8 @@
     <string name="widget_next_episodes">PRÓXIMOS EPISÓDIOS</string>
     <string name="widget_no_episodes">Nenhum episódio a caminho!</string>
     <string name="widget_episode_on">Em: %1$s</string>
+    <string name="widget_date_today">Hoje</string>
+    <string name="widget_date_tomorrow">Amanhã</string>
     <string name="widget_mark_watched">Marcar como assistido</string>
     <string name="widget_now_watching_name">Assistindo agora</string>
     <string name="widget_now_watching_title">ASSISTINDO AGORA</string>

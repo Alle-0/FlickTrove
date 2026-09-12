@@ -41,6 +41,14 @@ data class PersonStat(
     val count: Int
 )
 
+// Production company / Studio / Network for studio stats chart
+data class StudioStat(
+    val id: Long,
+    val name: String,
+    val logoPath: String?,
+    val count: Int
+)
+
 data class CalculatedStats(
     val totalTimeFormatted: String,
     val isEstimate: Boolean,
@@ -66,7 +74,8 @@ data class CalculatedStats(
     val topCast: ImmutableList<PersonStat>,
     val topDirectors: ImmutableList<PersonStat>,
     val countryCounts: ImmutableList<Pair<String, Int>>,
-    val topGenre: String?
+    val topGenre: String?,
+    val topStudios: ImmutableList<StudioStat> = persistentListOf()
 )
 
 @HiltViewModel
@@ -423,6 +432,39 @@ class StatsViewModel @Inject constructor(
 
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
 
+        // Top Studios / Networks
+        data class StudioAccum(var id: Long, val name: String, var logoPath: String?, var count: Int)
+        val studioMap = mutableMapOf<String, StudioAccum>()
+        combinedWatched.forEach { m ->
+            m.productionCompanies
+                ?.filter { it.name.isNotBlank() }
+                ?.distinctBy { normalizeStudio(it.name).first }
+                ?.forEach { studio ->
+                    val (key, canonicalName) = normalizeStudio(studio.name)
+                    val existing = studioMap[key]
+                    if (existing == null) {
+                        studioMap[key] = StudioAccum(studio.id, canonicalName, studio.logoPath, 1)
+                    } else {
+                        existing.count++
+                        if (existing.logoPath.isNullOrBlank() && !studio.logoPath.isNullOrBlank()) {
+                            existing.logoPath = studio.logoPath
+                        }
+                    }
+                }
+        }
+        val topStudios = studioMap.values
+            .sortedByDescending { it.count }
+            .take(20)
+            .map { accum ->
+                StudioStat(
+                    id = accum.id,
+                    name = accum.name,
+                    logoPath = accum.logoPath,
+                    count = accum.count
+                )
+            }
+            .toImmutableList()
+
         return CalculatedStats(
             totalTimeFormatted = formatDuration(movieMin + tvMin, language),
             isEstimate = moviesEstimate || tvEstimate,
@@ -448,7 +490,64 @@ class StatsViewModel @Inject constructor(
             topCast = topCast,
             topDirectors = topDirectors,
             countryCounts = sortedCountryCounts,
-            topGenre = topGenre
+            topGenre = topGenre,
+            topStudios = topStudios
         )
+    }
+
+    private fun normalizeStudio(name: String): Pair<String, String> {
+        val trimmed = name.trim()
+        val lower = trimmed.lowercase()
+
+        return when {
+            lower == "hbo" || lower == "home box office" || lower == "home box office (hbo)" ||
+            lower.startsWith("hbo films") || lower.startsWith("hbo entertainment") || lower == "hbo max" ->
+                "hbo" to "HBO"
+
+            lower.startsWith("warner bros") || lower.startsWith("warner brothers") ->
+                "warner_bros" to "Warner Bros. Pictures"
+
+            lower.startsWith("walt disney") || lower == "disney" || lower == "disney+" || lower.startsWith("disney ") ->
+                "disney" to "Walt Disney Pictures"
+
+            lower.startsWith("20th century") || lower.startsWith("twentieth century") ->
+                "20th_century" to "20th Century Studios"
+
+            lower.startsWith("universal pictures") || lower == "universal" || lower.startsWith("universal city") ->
+                "universal" to "Universal Pictures"
+
+            lower.startsWith("paramount") ->
+                "paramount" to "Paramount Pictures"
+
+            lower.startsWith("columbia pictures") ->
+                "columbia" to "Columbia Pictures"
+
+            lower.startsWith("sony pictures") ->
+                "sony" to "Sony Pictures"
+
+            lower.startsWith("netflix") ->
+                "netflix" to "Netflix"
+
+            lower.startsWith("apple tv") || lower == "apple" || lower.startsWith("apple original") || lower.startsWith("apple studios") ->
+                "apple" to "Apple TV+"
+
+            lower.startsWith("amazon") || lower == "prime video" ->
+                "amazon" to "Amazon Studios"
+
+            lower.startsWith("marvel") ->
+                "marvel" to "Marvel Studios"
+
+            lower == "mgm" || lower.startsWith("metro-goldwyn-mayer") || lower.startsWith("metro goldwyn mayer") ->
+                "mgm" to "MGM"
+
+            lower.startsWith("lionsgate") || lower.startsWith("lions gate") ->
+                "lionsgate" to "Lionsgate"
+
+            lower.startsWith("bbc") ->
+                "bbc" to "BBC"
+
+            else ->
+                lower to trimmed
+        }
     }
 }
