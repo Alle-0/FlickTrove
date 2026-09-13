@@ -24,6 +24,12 @@ interface TraktService {
         @Header("trakt-api-version") apiVersion: String = "2"
     ): List<TraktComment>
 
+    @GET("movies/boxoffice")
+    suspend fun getWeekendBoxOffice(
+        @Header("trakt-api-key") apiKey: String,
+        @Header("trakt-api-version") apiVersion: String = "2"
+    ): List<TraktBoxOfficeItem>
+
     // OAuth
     @retrofit2.http.POST("oauth/token")
     suspend fun getAccessToken(
@@ -467,4 +473,10 @@ data class TraktWatchedEpisode(
     val number: Int = 0,
     val plays: Int = 0,
     val last_watched_at: String? = null
+)
+
+@Serializable
+data class TraktBoxOfficeItem(
+    val revenue: Long = 0L,
+    val movie: TraktMovieItem? = null
 )

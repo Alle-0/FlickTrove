@@ -44,17 +44,29 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun NewsArticleCard(article: NewsItem, context: Context) {
-    // Estrai la fonte dall'URL (es. "screenrant.com" -> "ScreenRant")
+    // Estrai la fonte dall'URL (es. "cinema.everyeye.it" -> "Everyeye")
     val source = remember(article.link) {
-        runCatching {
-            android.net.Uri.parse(article.link).host
-                ?.removePrefix("www.")
-                ?.split(".")
-                ?.firstOrNull()
-                ?.replaceFirstChar { it.uppercase() }
-                ?: ""
-        }.getOrDefault("")
+        when {
+            article.link.contains("everyeye.it", ignoreCase = true) -> "Everyeye"
+            article.link.contains("movieplayer.it", ignoreCase = true) -> "Movieplayer.it"
+            article.link.contains("screenrant.com", ignoreCase = true) -> "ScreenRant"
+            article.link.contains("collider.com", ignoreCase = true) -> "Collider"
+            else -> {
+                runCatching {
+                    val host = android.net.Uri.parse(article.link).host?.removePrefix("www.") ?: ""
+                    val parts = host.split(".")
+                    if (parts.size >= 3) {
+                        // Per domini come cinema.everyeye.it prendi "Everyeye" e non il sottodominio "cinema"
+                        parts[parts.size - 2].replaceFirstChar { it.uppercase() }
+                    } else {
+                        parts.firstOrNull()?.replaceFirstChar { it.uppercase() } ?: ""
+                    }
+                }.getOrDefault("")
+            }
+        }
     }
+
+    val cardShape = RoundedCornerShape(24.dp)
 
     Box(
         modifier = Modifier
@@ -64,8 +76,8 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
                 val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(article.link))
                 context.startActivity(intent)
             }
-            .clip(RoundedCornerShape(16.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+            .clip(cardShape)
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), cardShape)
     ) {
         // Immagine di sfondo
         if (article.imageUrl != null) {
@@ -75,7 +87,7 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(cardShape)
             )
         } else {
             Spacer(
@@ -91,7 +103,7 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
                 .fillMaxWidth()
                 .fillMaxHeight(0.65f)
                 .align(Alignment.BottomStart)
-                .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 .background(
                     androidx.compose.ui.graphics.Brush.verticalGradient(
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.92f))

@@ -658,6 +658,8 @@
     <string name="filter_genres">शैलियाँ</string>
     <string name="filter_platforms">प्लेटफ़ॉर्म</string>
     <string name="filter_period">अवधि</string>
+    <string name="filter_release_month">रिलीज़ का महीना</string>
+    <string name="filter_future_beyond">बाद में</string>
     <string name="filter_selected_subgenre">चयनित उप-शैली</string>
     <string name="card_quick_rate">त्वरित दर</string>
     <string name="card_quick_note">त्वरित नोट</string>
@@ -1206,6 +1208,19 @@
     <string name="settings_section_always_on">हमेशा चालू</string>
     <string name="settings_home_feed_reset">डिफ़ॉल्ट पर रीसेट करें</string>
     <string name="settings_msg_home_feed_reset">होम फ़ीड लेआउट डिफ़ॉल्ट पर रीसेट किया गया</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">बॉक्स ऑफिस</string>
+    <string name="box_office_weekend_tab">सप्ताहांत</string>
+    <string name="box_office_all_time_tab">सर्वकालिक</string>
+    <string name="box_office_weekend_badge">सप्ताहांत विजेता</string>
+    <string name="box_office_weekend_gross">सप्ताहांत कमाई</string>
+    <string name="box_office_all_time_title">दुनिया भर में सबसे अधिक कमाई वाली फ़िल्में</string>
+    <string name="box_office_view_all">पूरी रैंकिंग देखें</string>
+    <string name="box_office_empty">फिलहाल कोई बॉक्स ऑफिस डेटा उपलब्ध नहीं है।</string>
+    <string name="box_office_error">बॉक्स ऑफिस डेटा लोड करने में असमर्थ। पुनः प्रयास करने के लिए नीचे खींचें।</string>
+    <string name="box_office_filter_all_years">सभी वर्ष</string>
+    <string name="box_office_banner_subtitle">सप्ताहांत और सर्वकालिक रैंकिंग</string>
 </resources>
 
 

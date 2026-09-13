@@ -76,4 +76,9 @@ data class SearchRoute(
 object LogoAnimationRoute : FlickRoute
 
 @Serializable
+data class BoxOfficeRoute(
+    val initialTab: String = "weekend"
+) : FlickRoute
+
+@Serializable
 object EmptyRoute : FlickRoute

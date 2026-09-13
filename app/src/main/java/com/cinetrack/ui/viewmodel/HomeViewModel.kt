@@ -66,7 +66,8 @@ data class HomeUiState(
     val becauseYouWatchedMovie: Pair<Movie, ImmutableList<Movie>>? = null,
     val becauseYouWatchedTv: Pair<Movie, ImmutableList<Movie>>? = null,
     val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
-    val allLocalMovies: ImmutableList<Movie> = persistentListOf()
+    val allLocalMovies: ImmutableList<Movie> = persistentListOf(),
+    val boxOfficeWinner: com.cinetrack.data.model.BoxOfficeMovie? = null
 )
 
 @HiltViewModel
@@ -96,9 +97,22 @@ class HomeViewModel @Inject constructor(
     }
 
     private val _feedState = MutableStateFlow(FeedState())
+    private val _boxOfficeWinner = MutableStateFlow<com.cinetrack.data.model.BoxOfficeMovie?>(null)
 
     init {
         fetchFeed()
+        loadBoxOfficeWinner()
+    }
+
+    private fun loadBoxOfficeWinner() {
+        viewModelScope.launch {
+            try {
+                val winner = repository.getWeekendBoxOffice(forceRefresh = false).firstOrNull()
+                _boxOfficeWinner.value = winner
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
     }
 
     private fun fetchFeed() {
@@ -169,8 +183,9 @@ class HomeViewModel @Inject constructor(
             activeTabFlow = _activeTab
         ),
         _feedState,
-        settingsRepository.hideSavedFromDiscovery
-    ) { baseState, feedState, hideSaved ->
+        settingsRepository.hideSavedFromDiscovery,
+        _boxOfficeWinner
+    ) { baseState, feedState, hideSaved, boxOfficeWinner ->
         val localCompositeIds = if (hideSaved) {
             baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
         } else {
@@ -213,7 +228,8 @@ class HomeViewModel @Inject constructor(
             becauseYouWatchedTv = feedState.becauseYouWatchedTv,
             isLoading = baseState.isLoading,
             isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError),
-            hasFeedError = feedState.hasError
+            hasFeedError = feedState.hasError,
+            boxOfficeWinner = boxOfficeWinner
         )
     }.stateIn(
         scope = viewModelScope,

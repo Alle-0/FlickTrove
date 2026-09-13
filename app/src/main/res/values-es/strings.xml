@@ -655,6 +655,8 @@
     <string name="filter_genres">GÉNEROS</string>
     <string name="filter_platforms">PLATAFORMAS</string>
     <string name="filter_period">PERÍODO</string>
+    <string name="filter_release_month">MES DE ESTRENO</string>
+    <string name="filter_future_beyond">Más adelante</string>
     <string name="filter_selected_subgenre">SUBGÉNERO SELECCIONADO</string>
     <string name="card_quick_rate">Calificación rápida</string>
     <string name="card_quick_note">Nota rápida</string>
@@ -1212,5 +1214,18 @@
     <string name="settings_section_always_on">Siempre activa</string>
     <string name="settings_home_feed_reset">Restablecer valores predeterminados</string>
     <string name="settings_msg_home_feed_reset">Diseño del feed de inicio restablecido</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Taquilla</string>
+    <string name="box_office_weekend_tab">Fin de semana</string>
+    <string name="box_office_all_time_tab">Histórico</string>
+    <string name="box_office_weekend_badge">Líder del fin de semana</string>
+    <string name="box_office_weekend_gross">Recaudación del fin de semana</string>
+    <string name="box_office_all_time_title">Películas más taquilleras del mundo</string>
+    <string name="box_office_view_all">Ver clasificación completa</string>
+    <string name="box_office_empty">No hay datos de taquilla disponibles en este momento.</string>
+    <string name="box_office_error">No se pudieron cargar los datos de taquilla. Desliza hacia abajo para reintentar.</string>
+    <string name="box_office_filter_all_years">Todos los años</string>
+    <string name="box_office_banner_subtitle">Clasificaciones del fin de semana e históricas</string>
 </resources>
 

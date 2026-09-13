@@ -217,8 +217,8 @@ fun MainGlobalDialogs(
             onMovieClick = { movie ->
                 rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },
-            onSocialNotificationClick = { movie ->
-                rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType, openComments = true))
+            onSocialNotificationClick = { movie, commentId ->
+                rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType, openComments = true, targetCommentId = commentId))
             },
             modifier = Modifier.zIndex(80000f)
         )

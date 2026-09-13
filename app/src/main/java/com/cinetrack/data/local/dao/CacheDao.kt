@@ -40,5 +40,8 @@ interface CacheDao {
 
     @Query("SELECT data FROM home_feed_cache WHERE id = :id LIMIT 1")
     suspend fun getHomeFeed(id: String = "home_feed"): String?
+
+    @Query("SELECT * FROM home_feed_cache WHERE id = :id LIMIT 1")
+    suspend fun getHomeFeedEntity(id: String = "home_feed"): HomeFeedCacheEntity?
 }
 

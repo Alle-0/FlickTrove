@@ -655,6 +655,8 @@
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATEFORMES</string>
     <string name="filter_period">PÉRIODE</string>
+    <string name="filter_release_month">MOIS DE SORTIE</string>
+    <string name="filter_future_beyond">Plus tard</string>
     <string name="filter_selected_subgenre">SOUS-GENRE SÉLECTIONNÉ</string>
     <string name="card_quick_rate">Note rapide</string>
     <string name="card_quick_note">Note rapide</string>
@@ -1209,5 +1211,18 @@
     <string name="settings_section_always_on">Toujours active</string>
     <string name="settings_home_feed_reset">Rétablir par défaut</string>
     <string name="settings_msg_home_feed_reset">Mise en page de l\'accueil réinitialisée par défaut</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Box-Office</string>
+    <string name="box_office_weekend_tab">Week-end</string>
+    <string name="box_office_all_time_tab">De tous les temps</string>
+    <string name="box_office_weekend_badge">Numéro 1 du week-end</string>
+    <string name="box_office_weekend_gross">Recettes du week-end</string>
+    <string name="box_office_all_time_title">Plus grands succès mondiaux</string>
+    <string name="box_office_view_all">Voir le classement complet</string>
+    <string name="box_office_empty">Aucune donnée du box-office disponible pour le moment.</string>
+    <string name="box_office_error">Impossible de charger le box-office. Tirez vers le bas pour réessayer.</string>
+    <string name="box_office_filter_all_years">Toutes les années</string>
+    <string name="box_office_banner_subtitle">Classements du week-end et de tous les temps</string>
 </resources>
 

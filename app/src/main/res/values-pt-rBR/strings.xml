@@ -660,6 +660,8 @@
     <string name="filter_genres">GÊNEROS</string>
     <string name="filter_platforms">PLATAFORMAS</string>
     <string name="filter_period">PERÍODO</string>
+    <string name="filter_release_month">MÊS DE LANÇAMENTO</string>
+    <string name="filter_future_beyond">Mais tarde</string>
     <string name="filter_selected_subgenre">SUBGÊNERO SELECIONADO</string>
     <string name="card_quick_rate">Avaliação rápida</string>
     <string name="card_quick_note">Nota rápida</string>
@@ -1208,6 +1210,19 @@
     <string name="settings_section_always_on">Sempre ativo</string>
     <string name="settings_home_feed_reset">Restaurar padrão</string>
     <string name="settings_msg_home_feed_reset">Layout do feed inicial restaurado para o padrão</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Bilheteria</string>
+    <string name="box_office_weekend_tab">Fim de semana</string>
+    <string name="box_office_all_time_tab">De todos os tempos</string>
+    <string name="box_office_weekend_badge">Campeão do fim de semana</string>
+    <string name="box_office_weekend_gross">Arrecadação do fim de semana</string>
+    <string name="box_office_all_time_title">Maiores bilheterias mundiais</string>
+    <string name="box_office_view_all">Ver classificação completa</string>
+    <string name="box_office_empty">Nenhum dado de bilheteria disponível no momento.</string>
+    <string name="box_office_error">Não foi possível carregar os dados de bilheteria. Puxe para baixo para tentar novamente.</string>
+    <string name="box_office_filter_all_years">Todos os anos</string>
+    <string name="box_office_banner_subtitle">Classificações de fim de semana e históricas</string>
 </resources>
 
 

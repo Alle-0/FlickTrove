@@ -312,8 +312,8 @@ class FlickTroveTvEpisodesWidget : GlanceAppWidget() {
                                                             )
                                                         }
                                                     )
-                                                    .cornerRadius(5.dp)
-                                                    .padding(horizontal = 7.dp, vertical = 3.dp)
+                                                    .cornerRadius(16.dp)
+                                                    .padding(horizontal = 8.dp, vertical = 3.dp)
                                             ) {
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                     Image(

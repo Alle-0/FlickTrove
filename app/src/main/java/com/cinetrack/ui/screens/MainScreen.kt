@@ -77,6 +77,8 @@ import com.cinetrack.ui.screens.HomeTab
 import com.cinetrack.ui.screens.HomeFeedTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
+import com.cinetrack.ui.screens.BoxOfficeTab
+import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
@@ -183,7 +185,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     tabNavigator.current = FoldersTab
                 } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) {
                     tabNavigator.current = AccountTab
-                } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is SettingsTab) {
+                } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is SettingsTab || currentTab is BoxOfficeTab) {
                     tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab
                 } else {
                     showExitConfirmation = true
@@ -213,13 +215,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     targetState = currentTab,
                                 transitionSpec = {
                                     val targetDepth = when (targetState) {
-                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
                                         is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
                                     val initialDepth = when (initialState) {
-                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab -> 0
+                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
                                         is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
@@ -270,6 +272,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is StatsTab -> stringResource(R.string.bottom_bar_stats)
                                 is SettingsTab -> stringResource(R.string.main_tab_settings)
                                 is NewsTab -> stringResource(R.string.news_tab_title)
+                                is BoxOfficeTab -> stringResource(R.string.box_office_title)
                                 is FolderDetailTab -> currentTab.folderName
                                 is FlowTab -> "Flow"
                                 is FlowStatsTab -> "Flow stats"
@@ -277,6 +280,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             }
 
                             val recommendationsViewModel: RecommendationsViewModel? = if (currentTab is RecommendationsTab && activity != null) {
+                                hiltViewModel(activity)
+                            } else null
+
+                            val boxOfficeViewModel: BoxOfficeViewModel? = if (currentTab is BoxOfficeTab && activity != null) {
                                 hiltViewModel(activity)
                             } else null
 
@@ -320,10 +327,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     isDimmed = isSettingsDialogOpen,
                                     onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                     onMenuClick = null, // Menu rimosso
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
-                                    onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
+                                    onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else if (currentTab is FoldersTab) { { offset -> showFoldersSortMenu = true; foldersSortMenuOffset = offset } } else null,
                                     hasActiveFilters = discoverHasActiveFilters,

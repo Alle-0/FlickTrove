@@ -365,6 +365,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showHomeContinueWatching }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showHomeBoxOffice: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showHomeBoxOffice }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val showHomeWatchlist: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showHomeWatchlist }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -521,6 +525,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun toggleShowHomeBoxOffice(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowHomeBoxOffice(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
     fun toggleShowHomeWatchlist(enabled: Boolean) {
         viewModelScope.launch {
             preferenceRepository.updateShowHomeWatchlist(enabled)
@@ -539,6 +550,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.updateHomeSectionOrder(com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER)
             preferenceRepository.updateShowHomeContinueWatching(true)
+            preferenceRepository.updateShowHomeBoxOffice(true)
             preferenceRepository.updateShowHomeWatchlist(true)
             preferenceRepository.updateShowHomeBecauseYouWatched(true)
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_home_feed_reset))

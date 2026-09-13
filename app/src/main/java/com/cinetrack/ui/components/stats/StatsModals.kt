@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.theme.DarkSurface
@@ -280,6 +281,8 @@ fun YearSelectionModal(
     availableYears: List<Int>,
     hazeState: HazeState,
     triggerBounds: Rect? = null,
+    titleRes: Int = R.string.stats_period,
+    allTimeLabelRes: Int = R.string.stats_all_stats,
     onYearSelected: (Int) -> Unit,
     onAllTimeSelected: () -> Unit
 ) {
@@ -291,13 +294,13 @@ fun YearSelectionModal(
     val targetWidth = (screenWidth * 0.85f).coerceAtMost(with(density) { 320.dp.toPx() })
     
     var contentHeightPx by remember { mutableStateOf(0f) }
-    val topSafetyPx = with(density) { 96.dp.toPx() }
-    val bottomSafetyPx = with(density) { 56.dp.toPx() }
-    val maxAllowedHeight = screenHeight - topSafetyPx - bottomSafetyPx
+    val maxModalHeightPx = with(density) { 430.dp.toPx() }
+    val maxAllowedHeight = minOf(screenHeight * 0.58f, maxModalHeightPx)
+    val minAllowedHeight = with(density) { 260.dp.toPx() }
     
     val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(with(density) { 300.dp.toPx() }, maxAllowedHeight) 
-                      else screenHeight * 0.4f,
+        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeight, maxAllowedHeight) 
+                      else minAllowedHeight,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "dynamicHeight"
     )
@@ -410,7 +413,7 @@ fun YearSelectionModal(
 
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .zIndex(1f)
                             .graphicsLayer(
                                 alpha = contentAlpha,
@@ -426,7 +429,7 @@ fun YearSelectionModal(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = stringResource(R.string.stats_period),
+                                text = stringResource(titleRes),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 3.sp,
@@ -435,17 +438,23 @@ fun YearSelectionModal(
                         }
 
                         // Scrollable Content
+                        val scrollState = rememberScrollState()
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f, fill = false)
-                                .verticalScroll(rememberScrollState())
+                                .weight(1f)
+                                .verticalFadingEdges(
+                                    scrollState = scrollState,
+                                    topEdgeHeight = 16.dp,
+                                    bottomEdgeHeight = 16.dp
+                                )
+                                .verticalScroll(scrollState)
                                 .padding(horizontal = 24.dp)
                         ) {
                             val isAllTime = currentRange is TimeRange.AllTime
                             
                             ModalItem(
-                                label = stringResource(R.string.stats_all_stats),
+                                label = stringResource(allTimeLabelRes),
                                 isSelected = isAllTime,
                                 onClick = { 
                                     onAllTimeSelected()
@@ -472,14 +481,14 @@ fun YearSelectionModal(
                                 )
                             }
                             
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(8.dp))
                         }
 
                         // Close Button
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp)
+                                .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 20.dp)
                                 .height(48.dp)
                                 .bounceClick { onDismiss() }
                                 .clip(RoundedCornerShape(14.dp))

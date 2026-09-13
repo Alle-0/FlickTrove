@@ -657,6 +657,8 @@
     <string name="filter_genres">GENERI</string>
     <string name="filter_platforms">PIATTAFORME</string>
     <string name="filter_period">PERIODO</string>
+    <string name="filter_release_month">MESE DI USCITA</string>
+    <string name="filter_future_beyond">Più avanti</string>
     <string name="filter_selected_subgenre">SOTTOGENERE SELEZIONATO</string>
     <string name="card_quick_rate">Voto rapido</string>
     <string name="card_quick_note">Nota rapida</string>
@@ -1213,4 +1215,17 @@
     <string name="settings_section_always_on">Sempre attiva</string>
     <string name="settings_home_feed_reset">Ripristina predefiniti</string>
     <string name="settings_msg_home_feed_reset">Layout della home ripristinato ai valori predefiniti</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Box Office</string>
+    <string name="box_office_weekend_tab">Weekend</string>
+    <string name="box_office_all_time_tab">Di Sempre</string>
+    <string name="box_office_weekend_badge">Campione del Weekend</string>
+    <string name="box_office_weekend_gross">Incasso Weekend</string>
+    <string name="box_office_all_time_title">Maggiori Incassi Mondiali</string>
+    <string name="box_office_view_all">Classifica completa</string>
+    <string name="box_office_empty">Nessun dato sul Box Office al momento.</string>
+    <string name="box_office_error">Impossibile caricare i dati del Box Office. Trascina in basso per riprovare.</string>
+    <string name="box_office_filter_all_years">Tutti gli anni</string>
+    <string name="box_office_banner_subtitle">Classifiche Weekend &amp; Di Sempre</string>
 </resources>

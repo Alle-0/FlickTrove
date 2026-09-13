@@ -32,9 +32,9 @@ fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 165.
         modifier = Modifier
             .width(110.dp)
             .height(height)
+            .bounceClick { onClick() }
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .bounceClick { onClick() },
+            .background(Color.White.copy(alpha = 0.1f)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

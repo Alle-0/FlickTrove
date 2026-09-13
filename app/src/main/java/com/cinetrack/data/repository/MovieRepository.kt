@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -1075,6 +1077,7 @@ class MovieRepository @Inject constructor(
                 foldersSort = parseSortConfig(remotePrefs["foldersSort"], currentPrefs.foldersSort),
                 discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
                 showHomeContinueWatching = remotePrefs["showHomeContinueWatching"] as? Boolean ?: currentPrefs.showHomeContinueWatching,
+                showHomeBoxOffice = remotePrefs["showHomeBoxOffice"] as? Boolean ?: currentPrefs.showHomeBoxOffice,
                 showHomeWatchlist = remotePrefs["showHomeWatchlist"] as? Boolean ?: currentPrefs.showHomeWatchlist,
                 showHomeBecauseYouWatched = remotePrefs["showHomeBecauseYouWatched"] as? Boolean ?: currentPrefs.showHomeBecauseYouWatched,
                 homeSectionOrder = (remotePrefs["homeSectionOrder"] as? List<*>)?.filterIsInstance<String>()?.let {
@@ -1146,6 +1149,7 @@ class MovieRepository @Inject constructor(
                         "sortBy" to prefs.discoveryFilters.sortBy
                     ),
                     "showHomeContinueWatching" to prefs.showHomeContinueWatching,
+                    "showHomeBoxOffice" to prefs.showHomeBoxOffice,
                     "showHomeWatchlist" to prefs.showHomeWatchlist,
                     "showHomeBecauseYouWatched" to prefs.showHomeBecauseYouWatched,
                     "homeSectionOrder" to prefs.homeSectionOrder
@@ -1544,19 +1548,56 @@ class MovieRepository @Inject constructor(
     suspend fun getMovieRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getMovieRecommendations(id, page = page).results
     suspend fun getTVRecommendations(id: Long, page: Int = 1): List<Movie> = tmdbService.getTVRecommendations(id, page = page).results
 
-    private suspend fun getRegionFromPrefs(): String {
+    suspend fun getRegionFromPrefs(): String {
         val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-        val resolvedLanguage = if (rawLanguage == "system") {
-            java.util.Locale.getDefault().language
+        return if (rawLanguage == "system") {
+            val systemCountry = java.util.Locale.getDefault().country
+            if (systemCountry.isNotBlank() && systemCountry.length == 2) {
+                systemCountry.uppercase()
+            } else {
+                when (java.util.Locale.getDefault().language.lowercase()) {
+                    "it" -> "IT"
+                    "es" -> "ES"
+                    "fr" -> "FR"
+                    "de" -> "DE"
+                    "pt" -> "PT"
+                    "ru" -> "RU"
+                    "hi" -> "IN"
+                    else -> "US"
+                }
+            }
         } else {
-            rawLanguage
+            when (rawLanguage.lowercase().substringBefore("-")) {
+                "it" -> "IT"
+                "es" -> "ES"
+                "fr" -> "FR"
+                "de" -> "DE"
+                "pt" -> "PT"
+                "ru" -> "RU"
+                "hi" -> "IN"
+                else -> "US"
+            }
         }
-        return if (resolvedLanguage == "it") "IT" else "US"
     }
 
     suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = getRegionFromPrefs()).results
 
     suspend fun getUpcomingMovies(page: Int = 1): List<Movie> = tmdbService.getUpcomingMovies(page = page, region = getRegionFromPrefs()).results
+
+    suspend fun getRegionalUpcomingMoviesResponse(page: Int = 1): com.cinetrack.data.api.SearchResponse =
+        tmdbService.getUpcomingMovies(page = page, region = getRegionFromPrefs())
+
+    suspend fun getUpcomingMoviesResponse(page: Int = 1, region: String? = null): com.cinetrack.data.api.SearchResponse =
+        tmdbService.getUpcomingMovies(page = page, region = region)
+
+    suspend fun getGlobalUpcomingMoviesResponse(page: Int = 1): com.cinetrack.data.api.SearchResponse {
+        val today = java.time.LocalDate.now().toString()
+        val options = mapOf(
+            "primary_release_date.gte" to today,
+            "sort_by" to "popularity.desc"
+        )
+        return tmdbService.discoverMovies(page = page, options = options)
+    }
 
     suspend fun getPopularTV(page: Int = 1): List<Movie> = tmdbService.getPopularTV(page = page).results
     suspend fun getAiringTodayTV(page: Int = 1): List<Movie> = tmdbService.getAiringTodayTV(page = page).results
@@ -1619,14 +1660,15 @@ class MovieRepository @Inject constructor(
         } else {
             rawLanguage
         }
-        val region = if (resolvedLanguage == "it") "IT" else "US"
+        val region = getRegionFromPrefs()
 
         val finalOptions = options.toMutableMap()
         finalOptions.putIfAbsent("language", resolvedLanguage)
         finalOptions.putIfAbsent("region", region)
         finalOptions.putIfAbsent("watch_region", region)
 
-        return tmdbService.discoverMovies(page = page, options = finalOptions).results.map { it.copy(mediaType = "movie") }
+        val cleanedOptions = finalOptions.filterValues { it.isNotBlank() }
+        return tmdbService.discoverMovies(page = page, options = cleanedOptions).results.map { it.copy(mediaType = "movie") }
     }
 
     suspend fun discoverTVWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {
@@ -1636,13 +1678,14 @@ class MovieRepository @Inject constructor(
         } else {
             rawLanguage
         }
-        val region = if (resolvedLanguage == "it") "IT" else "US"
+        val region = getRegionFromPrefs()
 
         val finalOptions = options.toMutableMap()
         finalOptions.putIfAbsent("language", resolvedLanguage)
         finalOptions.putIfAbsent("watch_region", region)
 
-        return tmdbService.discoverTV(page = page, options = finalOptions).results.map { it.copy(mediaType = "tv") }
+        val cleanedOptions = finalOptions.filterValues { it.isNotBlank() }
+        return tmdbService.discoverTV(page = page, options = cleanedOptions).results.map { it.copy(mediaType = "tv") }
     }
 
 
@@ -1743,6 +1786,191 @@ class MovieRepository @Inject constructor(
     suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.insert(history)
     suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.update(history.copy(syncStatus = "pending"))
     suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.markDeleted(history.id)
+    // --- Box Office ---
+    suspend fun getWeekendBoxOffice(forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> = withContext(Dispatchers.IO) {
+        val cacheId = "box_office_weekend"
+        val ttl = 24 * 60 * 60 * 1000L // 24 hours TTL
+
+        if (!forceRefresh) {
+            try {
+                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
+                if (cachedEntity != null && (System.currentTimeMillis() - cachedEntity.updatedAt) < ttl) {
+                    val cachedList = json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
+                    if (cachedList.isNotEmpty()) {
+                        return@withContext cachedList
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore parse error, proceed to network
+            }
+        }
+
+        try {
+            val traktItems = traktService.getWeekendBoxOffice(apiKey = traktApiKey)
+            if (traktItems.isEmpty()) {
+                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
+                if (cachedEntity != null) {
+                    return@withContext json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
+                }
+                return@withContext emptyList()
+            }
+
+            val boxOfficeList = traktItems.mapIndexedNotNull { index, item ->
+                val tmdbId = item.movie?.ids?.tmdb ?: return@mapIndexedNotNull null
+                val rank = index + 1
+                val revenue = item.revenue
+                val formattedRev = com.cinetrack.data.model.BoxOfficeMovie.formatRevenue(revenue)
+
+                // Cache-First: check favoriteDao first
+                val localMovie = favoriteDao.getById(tmdbId, "movie")
+                val movie = if (localMovie != null && !localMovie.posterPath.isNullOrBlank()) {
+                    localMovie
+                } else {
+                    // Check cache or fetch details
+                    try {
+                        val detailsResponse = fetchMovieDetails(tmdbId, isTv = false)
+                        com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(detailsResponse, "movie")
+                    } catch (e: Exception) {
+                        com.cinetrack.data.model.Movie(
+                            id = tmdbId,
+                            title = item.movie.title ?: "",
+                            releaseDate = item.movie.year?.toString() ?: "",
+                            mediaType = "movie"
+                        )
+                    }
+                }
+
+                com.cinetrack.data.model.BoxOfficeMovie(
+                    movie = movie,
+                    rank = rank,
+                    revenue = revenue,
+                    formattedRevenue = formattedRev
+                )
+            }
+
+            if (boxOfficeList.isNotEmpty()) {
+                try {
+                    cacheDao.saveHomeFeed(
+                        com.cinetrack.data.local.entities.HomeFeedCacheEntity(
+                            id = cacheId,
+                            data = json.encodeToString(boxOfficeList),
+                            updatedAt = System.currentTimeMillis()
+                        )
+                    )
+                } catch (e: Exception) {
+                    // Ignore cache write error
+                }
+            }
+
+            boxOfficeList
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
+                if (cachedEntity != null) {
+                    json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
+                } else {
+                    emptyList()
+                }
+            } catch (ex: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun getAllTimeBoxOffice(year: Int? = null, page: Int = 1, forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> = withContext(Dispatchers.IO) {
+        val cacheId = "box_office_all_time_${year ?: "all"}_p$page"
+        val ttl = 24 * 60 * 60 * 1000L // 24 hours TTL
+
+        if (!forceRefresh) {
+            try {
+                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
+                if (cachedEntity != null && (System.currentTimeMillis() - cachedEntity.updatedAt) < ttl) {
+                    val cachedList = json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
+                    if (cachedList.isNotEmpty() && cachedList.any { it.formattedRevenue.isNotBlank() }) {
+                        return@withContext cachedList
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore parse error, proceed to network
+            }
+        }
+
+        try {
+            val options = mutableMapOf<String, String>()
+            options["sort_by"] = "revenue.desc"
+            options["region"] = ""
+            if (year != null) {
+                options["primary_release_year"] = year.toString()
+            }
+            val movies = discoverMoviesWithParams(page = page, options = options)
+            val baseRank = (page - 1) * 20
+
+            val boxOfficeList = coroutineScope {
+                movies.mapIndexed { index, movie ->
+                    async {
+                        val rank = baseRank + index + 1
+                        val localMovie = favoriteDao.getById(movie.id, "movie")
+                        val revenueFromLocal = localMovie?.revenue ?: 0L
+                        val (finalMovie, finalRevenue) = if (revenueFromLocal > 0L) {
+                            (localMovie ?: movie) to revenueFromLocal
+                        } else {
+                            try {
+                                var details = fetchMovieDetails(movie.id, isTv = false)
+                                if ((details.revenue ?: 0L) == 0L) {
+                                    details = fetchMovieDetails(movie.id, isTv = false, forceRefresh = true)
+                                }
+                                val rev = details.revenue ?: 0L
+                                val mapped = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "movie")
+                                mapped to rev
+                            } catch (e: Exception) {
+                                movie to (movie.revenue ?: 0L)
+                            }
+                        }
+                        val formattedRev = if (finalRevenue > 0L) {
+                            com.cinetrack.data.model.BoxOfficeMovie.formatRevenue(finalRevenue)
+                        } else {
+                            ""
+                        }
+                        com.cinetrack.data.model.BoxOfficeMovie(
+                            movie = finalMovie,
+                            rank = rank,
+                            revenue = finalRevenue,
+                            formattedRevenue = formattedRev
+                        )
+                    }
+                }.awaitAll()
+            }
+
+            if (boxOfficeList.isNotEmpty()) {
+                try {
+                    cacheDao.saveHomeFeed(
+                        com.cinetrack.data.local.entities.HomeFeedCacheEntity(
+                            id = cacheId,
+                            data = json.encodeToString(boxOfficeList),
+                            updatedAt = System.currentTimeMillis()
+                        )
+                    )
+                } catch (e: Exception) {
+                    // Ignore cache write error
+                }
+            }
+
+            boxOfficeList
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
+                if (cachedEntity != null) {
+                    json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
+                } else {
+                    emptyList()
+                }
+            } catch (ex: Exception) {
+                emptyList()
+            }
+        }
+    }
     suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryDao.deleteByMovieId(movieId)
 }
 

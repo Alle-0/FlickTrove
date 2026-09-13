@@ -98,7 +98,7 @@ fun UpdatesScreen(
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
-    onSocialNotificationClick: ((Movie) -> Unit)? = null
+    onSocialNotificationClick: ((Movie, String?) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -132,6 +132,7 @@ fun UpdatesScreen(
     var isCalendarView by rememberSaveable { mutableStateOf(false) }
     var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
     var showMonthPicker by remember { mutableStateOf(false) }
+    var lastSocialClickTime by remember { mutableLongStateOf(0L) }
 
     val socialListState = rememberLazyListState()
     val remindersListState = rememberLazyListState()
@@ -529,18 +530,22 @@ fun UpdatesScreen(
                                                 SocialNotificationCard(
                                                     notification = notif,
                                                     onClick = {
-                                                        viewModel.markSocialNotificationAsRead(notif.id)
-                                                        val movie = Movie(
-                                                            id = notif.mediaId.toLongOrNull() ?: 0L,
-                                                            mediaType = notif.mediaType,
-                                                            title = notif.mediaTitle,
-                                                            posterPath = null,
-                                                            backdropPath = null
-                                                        )
-                                                        if (onSocialNotificationClick != null) {
-                                                            onSocialNotificationClick(movie)
-                                                        } else {
-                                                            onMovieClick(movie)
+                                                        val currentTime = android.os.SystemClock.elapsedRealtime()
+                                                        if (currentTime - lastSocialClickTime > 500L) {
+                                                            lastSocialClickTime = currentTime
+                                                            viewModel.markSocialNotificationAsRead(notif.id)
+                                                            val movie = Movie(
+                                                                id = notif.mediaId.toLongOrNull() ?: 0L,
+                                                                mediaType = notif.mediaType,
+                                                                title = notif.mediaTitle,
+                                                                posterPath = null,
+                                                                backdropPath = null
+                                                            )
+                                                            if (onSocialNotificationClick != null) {
+                                                                onSocialNotificationClick(movie, notif.commentId.ifBlank { null })
+                                                            } else {
+                                                                onMovieClick(movie)
+                                                            }
                                                         }
                                                     },
                                                     onMarkRead = {
@@ -563,17 +568,21 @@ fun UpdatesScreen(
                                                 SocialNotificationCard(
                                                     notification = notif,
                                                     onClick = {
-                                                        val movie = Movie(
-                                                            id = notif.mediaId.toLongOrNull() ?: 0L,
-                                                            mediaType = notif.mediaType,
-                                                            title = notif.mediaTitle,
-                                                            posterPath = null,
-                                                            backdropPath = null
-                                                        )
-                                                        if (onSocialNotificationClick != null) {
-                                                            onSocialNotificationClick(movie)
-                                                        } else {
-                                                            onMovieClick(movie)
+                                                        val currentTime = android.os.SystemClock.elapsedRealtime()
+                                                        if (currentTime - lastSocialClickTime > 500L) {
+                                                            lastSocialClickTime = currentTime
+                                                            val movie = Movie(
+                                                                id = notif.mediaId.toLongOrNull() ?: 0L,
+                                                                mediaType = notif.mediaType,
+                                                                title = notif.mediaTitle,
+                                                                posterPath = null,
+                                                                backdropPath = null
+                                                            )
+                                                            if (onSocialNotificationClick != null) {
+                                                                onSocialNotificationClick(movie, notif.commentId.ifBlank { null })
+                                                            } else {
+                                                                onMovieClick(movie)
+                                                            }
                                                         }
                                                     },
                                                     onMarkRead = {} // Already read

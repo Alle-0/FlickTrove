@@ -155,9 +155,8 @@ interface TMDBService {
 
     @GET("movie/upcoming")
     suspend fun getUpcomingMovies(
-
         @Query("page") page: Int = 1,
-        @Query("region") region: String = "IT"
+        @Query("region") region: String? = null
     ): SearchResponse
 
     @GET("tv/popular")

@@ -655,6 +655,8 @@
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATTFORMEN</string>
     <string name="filter_period">ZEITRAUM</string>
+    <string name="filter_release_month">VERÖFFENTLICHUNGSMONAT</string>
+    <string name="filter_future_beyond">Später</string>
     <string name="filter_selected_subgenre">AUSGEWÄHLTES SUBGENRE</string>
     <string name="card_quick_rate">Schnell bewerten</string>
     <string name="card_quick_note">Schnelle Notiz</string>
@@ -1210,5 +1212,18 @@
     <string name="settings_section_always_on">Immer aktiv</string>
     <string name="settings_home_feed_reset">Auf Standard zurücksetzen</string>
     <string name="settings_msg_home_feed_reset">Startseiten-Layout auf Standard zurückgesetzt</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Box Office</string>
+    <string name="box_office_weekend_tab">Wochenende</string>
+    <string name="box_office_all_time_tab">Aller Zeiten</string>
+    <string name="box_office_weekend_badge">Wochenend-Gewinner</string>
+    <string name="box_office_weekend_gross">Wochenende-Einspielergebnis</string>
+    <string name="box_office_all_time_title">Weltweit erfolgreichste Filme</string>
+    <string name="box_office_view_all">Vollständige Rangliste</string>
+    <string name="box_office_empty">Zurzeit sind keine Box-Office-Daten verfügbar.</string>
+    <string name="box_office_error">Box-Office-Daten konnten nicht geladen werden. Zum Wiederholen nach unten ziehen.</string>
+    <string name="box_office_filter_all_years">Alle Jahre</string>
+    <string name="box_office_banner_subtitle">Wochenend- &amp; Allzeit-Ranglisten</string>
 </resources>
 

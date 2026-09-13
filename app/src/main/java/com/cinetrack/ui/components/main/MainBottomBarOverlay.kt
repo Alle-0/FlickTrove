@@ -13,6 +13,7 @@ import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.HomeTab
 import com.cinetrack.ui.screens.NewsTab
+import com.cinetrack.ui.screens.BoxOfficeTab
 import com.cinetrack.ui.screens.RecommendationsTab
 import com.cinetrack.ui.screens.SettingsTab
 import com.cinetrack.ui.screens.AccountTab
@@ -35,7 +36,8 @@ fun isPrimaryMainTab(currentTab: Tab): Boolean {
             currentTab is RecommendationsTab ||
             currentTab is FlowTab ||
             currentTab is FlowStatsTab ||
-            currentTab is NewsTab
+            currentTab is NewsTab ||
+            currentTab is BoxOfficeTab
 }
 
 @Composable

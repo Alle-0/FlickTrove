@@ -660,6 +660,8 @@
     <string name="filter_genres">ЖАНРЫ</string>
     <string name="filter_platforms">ПЛАТФОРМЫ</string>
     <string name="filter_period">ПЕРИОД</string>
+    <string name="filter_release_month">МЕСЯЦ ВЫХОДА</string>
+    <string name="filter_future_beyond">Позже</string>
     <string name="filter_selected_subgenre">ВЫБРАННЫЙ ПОДЖАНР</string>
     <string name="card_quick_rate">Быстрая оценка</string>
     <string name="card_quick_note">Быстрая заметка</string>
@@ -1209,5 +1211,18 @@
     <string name="settings_section_always_on">Всегда включено</string>
     <string name="settings_home_feed_reset">Сбросить по умолчанию</string>
     <string name="settings_msg_home_feed_reset">Макет главной ленты сброшен по умолчанию</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Кассовые сборы</string>
+    <string name="box_office_weekend_tab">Уик-энд</string>
+    <string name="box_office_all_time_tab">За всё время</string>
+    <string name="box_office_weekend_badge">Лидер уик-энда</string>
+    <string name="box_office_weekend_gross">Сборы за уик-энд</string>
+    <string name="box_office_all_time_title">Самые кассовые фильмы в мире</string>
+    <string name="box_office_view_all">Полный рейтинг</string>
+    <string name="box_office_empty">Данные о кассовых сборах в данный момент недоступны.</string>
+    <string name="box_office_error">Не удалось загрузить данные о сборах. Потяните вниз, чтобы обновить.</string>
+    <string name="box_office_filter_all_years">Все годы</string>
+    <string name="box_office_banner_subtitle">Рейтинги за уик-энд и за всё время</string>
 </resources>
 

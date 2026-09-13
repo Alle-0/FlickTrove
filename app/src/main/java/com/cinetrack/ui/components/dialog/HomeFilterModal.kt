@@ -595,33 +595,90 @@ fun HomeFilterModal(
                             }
                         }
 
-                        // --- DECADES SECTION ---
+                        // --- DECADES / RELEASE MONTHS SECTION ---
                         if (!isCommentsFilter) {
-                                ExpandableSection(
-                                title = stringResource(R.string.filter_period),
+                            val isUpcoming = category.contains("upcoming")
+                            val sectionTitle = if (isUpcoming) {
+                                stringResource(R.string.filter_release_month)
+                            } else {
+                                stringResource(R.string.filter_period)
+                            }
+                            ExpandableSection(
+                                title = sectionTitle,
                                 isExpanded = expandedSection == "period",
                                 badgeCount = localSortConfig.selectedDecades.size,
                                 onToggle = { expandedSection = if (expandedSection == "period") null else "period" }
                             ) {
-                                val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
-                                val currentDecade = (currentYear / 10) * 10
-                                val decades = (currentDecade downTo 1960 step 10).map { it.toString() }
-                                FlowRow(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    decades.forEach { decade ->
-                                        val isSelected = decade in localSortConfig.selectedDecades
+                                if (isUpcoming) {
+                                    val currentYearMonth = remember { java.time.YearMonth.now() }
+                                    val currentLocale = configuration.locales[0] ?: java.util.Locale.getDefault()
+                                    val months = remember(currentYearMonth, currentLocale) {
+                                        (0..11).map { offset ->
+                                            val ym = currentYearMonth.plusMonths(offset.toLong())
+                                            val key = String.format(java.util.Locale.US, "%04d-%02d", ym.year, ym.monthValue)
+                                            val rawName = ym.month.getDisplayName(java.time.format.TextStyle.FULL, currentLocale)
+                                            val capitalized = rawName.replaceFirstChar {
+                                                if (it.isLowerCase()) it.titlecase(currentLocale) else it.toString()
+                                            }
+                                            val label = if (ym.year == currentYearMonth.year) {
+                                                capitalized
+                                            } else {
+                                                "$capitalized '${ym.year % 100}"
+                                            }
+                                            key to label
+                                        }
+                                    }
+                                    val beyondLabel = stringResource(R.string.filter_future_beyond)
+
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        months.forEach { (key, label) ->
+                                            val isSelected = key in localSortConfig.selectedDecades
+                                            FilterChip(
+                                                label = label,
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    val newList = if (isSelected) localSortConfig.selectedDecades - key
+                                                    else localSortConfig.selectedDecades + key
+                                                    localSortConfig = localSortConfig.copy(selectedDecades = newList)
+                                                }
+                                            )
+                                        }
+                                        val isBeyondSelected = "future" in localSortConfig.selectedDecades
                                         FilterChip(
-                                            label = "${decade}s",
-                                            isSelected = isSelected,
+                                            label = beyondLabel,
+                                            isSelected = isBeyondSelected,
                                             onClick = {
-                                                val newList = if (isSelected) localSortConfig.selectedDecades - decade
-                                                           else localSortConfig.selectedDecades + decade
+                                                val newList = if (isBeyondSelected) localSortConfig.selectedDecades - "future"
+                                                else localSortConfig.selectedDecades + "future"
                                                 localSortConfig = localSortConfig.copy(selectedDecades = newList)
                                             }
                                         )
+                                    }
+                                } else {
+                                    val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+                                    val currentDecade = (currentYear / 10) * 10
+                                    val decades = (currentDecade downTo 1960 step 10).map { it.toString() }
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        decades.forEach { decade ->
+                                            val isSelected = decade in localSortConfig.selectedDecades
+                                            FilterChip(
+                                                label = "${decade}s",
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    val newList = if (isSelected) localSortConfig.selectedDecades - decade
+                                                    else localSortConfig.selectedDecades + decade
+                                                    localSortConfig = localSortConfig.copy(selectedDecades = newList)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }

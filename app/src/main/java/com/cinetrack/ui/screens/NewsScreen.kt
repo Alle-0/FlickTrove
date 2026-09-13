@@ -120,9 +120,9 @@ fun NewsScreenContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(240.dp)
-                                    .clip(RoundedCornerShape(24.dp))
+                                    .clip(RoundedCornerShape(28.dp))
                                     .shimmerEffect()
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(28.dp))
                             )
                         }
                     }
@@ -207,13 +207,14 @@ fun NewsScreenContent(
 
 @Composable
 fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
+    val cardShape = RoundedCornerShape(28.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
             .bounceClick { onClick() }
-            .clip(RoundedCornerShape(24.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+            .clip(cardShape)
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), cardShape)
     ) {
         item.imageUrl?.let { imgUrl ->
             AsyncImage(
@@ -222,7 +223,7 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(cardShape)
             )
         }
         
@@ -255,7 +256,7 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
                 .fillMaxWidth()
                 .fillMaxHeight(0.6f)
                 .align(Alignment.BottomStart)
-                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                 .background(
                     androidx.compose.ui.graphics.Brush.verticalGradient(
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))

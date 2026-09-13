@@ -709,6 +709,8 @@
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATFORMS</string>
     <string name="filter_period">PERIOD</string>
+    <string name="filter_release_month">RELEASE MONTH</string>
+    <string name="filter_future_beyond">Later</string>
     <string name="filter_selected_subgenre">SELECTED SUBGENRE</string>
     <string name="card_quick_rate">Quick rate</string>
     <string name="card_quick_note">Quick note</string>
@@ -1255,4 +1257,17 @@
     <string name="lbl_episodes_remaining">%1$d left</string>
     <string name="lbl_next_episode">Next: %1$s</string>
     <string name="cd_mark_episode_watched">Mark episode %1$s as watched</string>
+
+    <!-- Box Office -->
+    <string name="box_office_title">Box Office</string>
+    <string name="box_office_weekend_tab">Weekend</string>
+    <string name="box_office_all_time_tab">All-Time</string>
+    <string name="box_office_weekend_badge">Weekend Winner</string>
+    <string name="box_office_weekend_gross">Weekend Gross</string>
+    <string name="box_office_all_time_title">Highest-Grossing Worldwide</string>
+    <string name="box_office_view_all">View Full Ranking</string>
+    <string name="box_office_empty">No Box Office data available at the moment.</string>
+    <string name="box_office_error">Unable to load Box Office data. Pull down to retry.</string>
+    <string name="box_office_filter_all_years">All Years</string>
+    <string name="box_office_banner_subtitle">Weekend &amp; All-Time Rankings</string>
 </resources>

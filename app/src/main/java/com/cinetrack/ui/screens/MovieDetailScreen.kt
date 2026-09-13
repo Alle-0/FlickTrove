@@ -123,6 +123,7 @@ data class MovieDetailScreen(
     val preloadedAccentColor: String? = null
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
+    @Transient var hasHandledCommentsNavigation: Boolean = false
     @Composable
     override fun Content() {
         val viewModel = getViewModel<MovieDetailViewModel>()
@@ -193,7 +194,9 @@ data class MovieDetailScreen(
             },
             onHomeClick = {
                 navigator.popUntilRoot()
-            }
+            },
+            initialHasHandledComments = hasHandledCommentsNavigation,
+            onCommentsHandled = { hasHandledCommentsNavigation = true }
         )
     }
 }
@@ -222,7 +225,9 @@ fun MovieDetailScreenContent(
     onGenreClick: (Long, String?, Offset) -> Unit = { _, _, _ -> },
     onKeywordClick: (Long, String?, Offset) -> Unit = { _, _, _ -> },
     detailStackDepth: Int = 1,
-    onHomeClick: () -> Unit = {}
+    onHomeClick: () -> Unit = {},
+    initialHasHandledComments: Boolean = false,
+    onCommentsHandled: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
@@ -317,8 +322,14 @@ fun MovieDetailScreenContent(
     }
 
     // Handle openComments auto-navigation
+    var hasHandledOpenComments by androidx.compose.runtime.saveable.rememberSaveable {
+        mutableStateOf(initialHasHandledComments)
+    }
+
     LaunchedEffect(hasCompletedFirstEnter, uiState) {
-        if (openComments && hasCompletedFirstEnter && uiState is DetailUiState.Success) {
+        if (openComments && !hasHandledOpenComments && !initialHasHandledComments && hasCompletedFirstEnter && uiState is DetailUiState.Success) {
+            hasHandledOpenComments = true
+            onCommentsHandled()
             val state = uiState as DetailUiState.Success
             val mediaTitle = state.details.title ?: state.details.name ?: ""
             val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)

@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +50,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
@@ -95,6 +98,7 @@ object DiscoverTab : Tab {
         val hazeState = LocalHazeState.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
+        val tabNavigator = LocalTabNavigator.current
         var isFilterVisible by remember { mutableStateOf(false) }
         var isActionModalVisible by remember { mutableStateOf(false) }
         
@@ -342,3 +346,4 @@ fun DiscoverScreenContent(
         }
     }
 }
+

@@ -132,6 +132,7 @@ data class UserPreferences(
     val showGeneralStats: Boolean = true,
     val dashboardCardOrder: List<String> = listOf("stats", "folders", "flow"),
     val showHomeContinueWatching: Boolean = true,
+    val showHomeBoxOffice: Boolean = true,
     val showHomeWatchlist: Boolean = true,
     val showHomeBecauseYouWatched: Boolean = true,
     val homeSectionOrder: List<String> = HomeFeedSectionConstants.DEFAULT_ORDER
@@ -139,6 +140,7 @@ data class UserPreferences(
 
 object HomeFeedSectionConstants {
     const val CONTINUE_WATCHING = "continue_watching"
+    const val BOX_OFFICE = "box_office"
     const val WATCHLIST = "watchlist"
     const val TROVE_PICK = "trove_pick"
     const val BECAUSE_YOU_WATCHED = "because_you_watched"
@@ -157,11 +159,28 @@ object HomeFeedSectionConstants {
         POPULAR,
         NOW_PLAYING,
         UPCOMING,
+        NEWS,
+        BOX_OFFICE
+    )
+
+    private val OLD_DEFAULT_WITH_BOX_OFFICE_SECOND = listOf(
+        CONTINUE_WATCHING,
+        BOX_OFFICE,
+        WATCHLIST,
+        TROVE_PICK,
+        BECAUSE_YOU_WATCHED,
+        TOP_10,
+        POPULAR,
+        NOW_PLAYING,
+        UPCOMING,
         NEWS
     )
 
     fun sanitizeOrder(savedOrder: List<String>): List<String> {
         val validSaved = savedOrder.filter { it in DEFAULT_ORDER }.distinct()
+        if (validSaved == OLD_DEFAULT_WITH_BOX_OFFICE_SECOND) {
+            return DEFAULT_ORDER
+        }
         val missing = DEFAULT_ORDER.filter { it !in validSaved }
         return validSaved + missing
     }

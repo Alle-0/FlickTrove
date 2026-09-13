@@ -22,8 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Modifier
@@ -58,6 +64,8 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import coil.compose.AsyncImage
 import com.cinetrack.R
+import com.cinetrack.data.model.BoxOfficeMovie
+import com.cinetrack.ui.viewmodel.BoxOfficeCategory
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.NewsItem
 import com.cinetrack.ui.LocalAppPadding
@@ -124,6 +132,7 @@ object HomeFeedTab : Tab {
         val surpriseMeRequest = com.cinetrack.ui.LocalSurpriseMeRequest.current
         val filterRequest = LocalFilterRequest.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val tabNavigator = LocalTabNavigator.current
 
         HomeFeedScreenContent(
             viewModel = viewModel,
@@ -146,6 +155,10 @@ object HomeFeedTab : Tab {
                         preloadedAccentColor = movie.accentColor
                     )
                 )
+            },
+            onBoxOfficeClick = {
+                BoxOfficeTab.requestedCategory = BoxOfficeCategory.WEEKEND
+                tabNavigator.current = BoxOfficeTab
             }
         )
     }
@@ -159,7 +172,8 @@ fun HomeFeedScreenContent(
     hazeState: HazeState? = null,
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, Rect?) -> Unit = { _, _ -> },
-    onMovieClick: (Movie) -> Unit = {}
+    onMovieClick: (Movie) -> Unit = {},
+    onBoxOfficeClick: () -> Unit = {}
 ) {
     val tabNavigator = LocalTabNavigator.current    
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -440,6 +454,27 @@ fun HomeFeedScreenContent(
                 // DYNAMICALLY REORDERABLE & CUSTOMIZABLE HOME SECTIONS
                 uiState.preferences.homeSectionOrder.forEach { sectionKey ->
                     when (sectionKey) {
+                        com.cinetrack.data.model.HomeFeedSectionConstants.BOX_OFFICE -> {
+                            // BOX OFFICE WEEKEND WINNER (Movies only)
+                            if (uiState.preferences.showHomeBoxOffice && !isTv && uiState.boxOfficeWinner != null) {
+                                val winner = uiState.boxOfficeWinner!!
+                                item(key = "section_box_office_winner") {
+                                    AnimatedHomeSection {
+                                        Column {
+                                            HomeSectionTitle(
+                                                title = stringResource(R.string.box_office_weekend_badge),
+                                                onClick = onBoxOfficeClick
+                                            )
+                                            HomeBoxOfficeWinnerCard(
+                                                item = winner,
+                                                onMovieClick = { onMovieClick(winner.movie) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         com.cinetrack.data.model.HomeFeedSectionConstants.CONTINUE_WATCHING -> {
                             // CONTINUA A GUARDARE (TV)
                             if (uiState.preferences.showHomeContinueWatching && isTv && uiState.continueWatchingTv.isNotEmpty()) {
@@ -978,5 +1013,170 @@ private fun AnimatedHomeSection(
         content()
     }
 }
+
+@Composable
+private fun HomeBoxOfficeWinnerCard(
+    item: BoxOfficeMovie,
+    onMovieClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val movie = item.movie
+    val imageQuality = LocalImageQuality.current
+
+    val backdropUrl = remember(movie.backdropPath, movie.posterPath, imageQuality) {
+        val path = movie.backdropPath ?: movie.posterPath
+        if (path != null) buildTmdbImageUrl(path, ImageType.BACKDROP, imageQuality) else null
+    }
+
+    val cardShape = RoundedCornerShape(26.dp)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(200.dp)
+            .bounceClick(scaleDown = 0.96f) {
+                onMovieClick()
+            }
+            .clip(cardShape)
+            .border(1.dp, Color.White.copy(alpha = 0.08f), cardShape)
+    ) {
+        // Backdrop
+        if (backdropUrl != null) {
+            AsyncImage(
+                model = backdropUrl,
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF1B1B26))
+            )
+        }
+
+        // Dark Gradient Scrim
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.2f),
+                            Color.Black.copy(alpha = 0.45f),
+                            Color.Black.copy(alpha = 0.92f)
+                        )
+                    )
+                )
+        )
+
+        // Top Badge: #1 Box Office Pill
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(12.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f))
+                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ic_crown),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = "#1 BOX OFFICE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                letterSpacing = 0.5.sp
+            )
+        }
+
+        // Top Right Badge: Revenue Pill
+        if (item.formattedRevenue.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .border(1.dp, Color(0xFF10B981).copy(alpha = 0.5f), CircleShape)
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = item.formattedRevenue,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF34D399)
+                )
+            }
+        }
+
+        // Bottom Content
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(14.dp)
+        ) {
+            Text(
+                text = movie.title ?: "",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.White
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val year = movie.releaseDate?.take(4) ?: ""
+                if (year.isNotBlank()) {
+                    Text(
+                        text = year,
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                val rating = movie.voteAverage ?: 0.0
+                if (rating > 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_star_piena),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = String.format(java.util.Locale.US, "%.1f", rating),
+                            fontSize = 12.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 

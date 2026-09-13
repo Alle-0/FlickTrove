@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.scrollBy
+import kotlinx.coroutines.isActive
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,6 +45,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -1240,6 +1243,7 @@ fun HomeSectionsOrderDialog(
     if (!visible) return
 
     val showHomeContinueWatching by settingsViewModel.showHomeContinueWatching.collectAsStateWithLifecycle()
+    val showHomeBoxOffice by settingsViewModel.showHomeBoxOffice.collectAsStateWithLifecycle()
     val showHomeWatchlist by settingsViewModel.showHomeWatchlist.collectAsStateWithLifecycle()
     val showHomeBecauseYouWatched by settingsViewModel.showHomeBecauseYouWatched.collectAsStateWithLifecycle()
     val homeSectionOrder by settingsViewModel.homeSectionOrder.collectAsStateWithLifecycle()
@@ -1248,19 +1252,42 @@ fun HomeSectionsOrderDialog(
 
     var localOrder by remember(homeSectionOrder) { mutableStateOf(homeSectionOrder) }
     var draggedItemKey by remember { mutableStateOf<String?>(null) }
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     var dropTrigger by remember { mutableIntStateOf(0) }
-    var itemHeightPx by remember { mutableStateOf(0f) }
+    var itemHeightPx by remember { mutableFloatStateOf(0f) }
+    var autoScrollSpeed by remember { mutableFloatStateOf(0f) }
+    var pointerWindowY by remember { mutableFloatStateOf(0f) }
+    var containerTopInWindow by remember { mutableFloatStateOf(0f) }
+    var containerBottomInWindow by remember { mutableFloatStateOf(0f) }
+
+    val configuration = LocalConfiguration.current
+    val maxDialogHeight = (configuration.screenHeightDp.dp * 0.74f).coerceIn(460.dp, 580.dp)
+    val listScrollState = rememberScrollState()
+
+    // Auto-scroll while dragging near top or bottom edge of the dialog
+    LaunchedEffect(draggedItemKey, autoScrollSpeed) {
+        if (draggedItemKey != null && autoScrollSpeed != 0f) {
+            while (isActive && draggedItemKey != null && autoScrollSpeed != 0f) {
+                val consumed = listScrollState.scrollBy(autoScrollSpeed)
+                if (consumed != 0f) {
+                    dragOffset += consumed
+                }
+                kotlinx.coroutines.delay(16)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
-            .padding(24.dp)
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .heightIn(max = maxDialogHeight)
+            .padding(top = 22.dp, bottom = 18.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1270,6 +1297,7 @@ fun HomeSectionsOrderDialog(
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     stringResource(R.string.settings_home_feed_sections_desc),
                     style = MaterialTheme.typography.bodySmall,
@@ -1282,7 +1310,7 @@ fun HomeSectionsOrderDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(34.dp)
                         .bounceClick {
                             if (vibrationEnabled) {
                                 VibrationHelper.vibrateClick(context)
@@ -1302,7 +1330,7 @@ fun HomeSectionsOrderDialog(
                 }
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(34.dp)
                         .bounceClick { onDismiss() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -1325,13 +1353,41 @@ fun HomeSectionsOrderDialog(
             }
         }
 
+        var lastHapticIndex by remember { mutableIntStateOf(-1) }
+        LaunchedEffect(visualTargetIndex, draggedItemKey) {
+            if (draggedItemKey != null && visualTargetIndex != -1) {
+                if (lastHapticIndex != -1 && lastHapticIndex != visualTargetIndex && vibrationEnabled) {
+                    VibrationHelper.vibrateTick(context)
+                }
+                lastHapticIndex = visualTargetIndex
+            } else {
+                lastHapticIndex = -1
+            }
+        }
+
         val currentDraggedIndex by rememberUpdatedState(draggedIndex)
         val currentVisualTargetIndex by rememberUpdatedState(visualTargetIndex)
         val currentLocalOrder by rememberUpdatedState(localOrder)
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .onGloballyPositioned { coordinates ->
+                    val pos = coordinates.positionInWindow()
+                    containerTopInWindow = pos.y
+                    containerBottomInWindow = pos.y + coordinates.size.height.toFloat()
+                }
+                .verticalFadingEdges(
+                    scrollState = listScrollState,
+                    topEdgeHeight = 28.dp,
+                    bottomEdgeHeight = 28.dp
+                )
+                .premiumScrollbar(listScrollState, width = 3f, paddingEnd = 6f)
+                .verticalScroll(listScrollState)
+                .padding(horizontal = 24.dp)
+                .padding(top = 4.dp, bottom = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             localOrder.forEachIndexed { index, itemKey ->
                 androidx.compose.runtime.key(itemKey) {
@@ -1372,6 +1428,14 @@ fun HomeSectionsOrderDialog(
                             canToggle = true,
                             checked = showHomeContinueWatching,
                             onCheckedChange = { settingsViewModel.toggleShowHomeContinueWatching(it) }
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.BOX_OFFICE -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_crown,
+                            titleRes = R.string.box_office_title,
+                            canToggle = true,
+                            checked = showHomeBoxOffice,
+                            onCheckedChange = { settingsViewModel.toggleShowHomeBoxOffice(it) }
                         )
                         com.cinetrack.data.model.HomeFeedSectionConstants.WATCHLIST -> HomeSectionSettingRow(
                             key = itemKey,
@@ -1433,6 +1497,8 @@ fun HomeSectionsOrderDialog(
                         )
                     }
 
+                    var handleCoords by remember { mutableStateOf<androidx.compose.ui.layout.LayoutCoordinates?>(null) }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -1455,20 +1521,22 @@ fun HomeSectionsOrderDialog(
                             )
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DragHandle,
-                            contentDescription = "Drag to reorder",
-                            tint = if (isDragging) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                        Box(
                             modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(24.dp)
+                                .padding(end = 6.dp)
+                                .size(width = 34.dp, height = 44.dp)
+                                .onGloballyPositioned { handleCoords = it }
                                 .pointerInput(itemKey) {
                                     detectDragGestures(
-                                        onDragStart = { 
+                                        onDragStart = { offset ->
                                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                            draggedItemKey = itemKey 
+                                            draggedItemKey = itemKey
+                                            val startY = (handleCoords?.positionInWindow()?.y ?: 0f) + offset.y
+                                            pointerWindowY = startY
+                                            autoScrollSpeed = 0f
                                         },
-                                        onDragEnd = { 
+                                        onDragEnd = {
+                                            autoScrollSpeed = 0f
                                             if (currentDraggedIndex != -1 && currentVisualTargetIndex != -1 && currentDraggedIndex != currentVisualTargetIndex) {
                                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                                 val newList = currentLocalOrder.toMutableList()
@@ -1481,17 +1549,40 @@ fun HomeSectionsOrderDialog(
                                             dragOffset = 0f
                                             dropTrigger++
                                         },
-                                        onDragCancel = { 
+                                        onDragCancel = {
+                                            autoScrollSpeed = 0f
                                             draggedItemKey = null
-                                            dragOffset = 0f 
+                                            dragOffset = 0f
                                         },
                                         onDrag = { change, dragAmount ->
                                             change.consume()
                                             dragOffset += dragAmount.y
+                                            pointerWindowY += dragAmount.y
+
+                                            val thresholdPx = with(density) { 64.dp.toPx() }
+                                            if (containerBottomInWindow > 0f && pointerWindowY > containerBottomInWindow - thresholdPx) {
+                                                val overflow = (pointerWindowY - (containerBottomInWindow - thresholdPx)).coerceAtLeast(0f)
+                                                val ratio = (overflow / thresholdPx).coerceIn(0.25f, 2.5f)
+                                                autoScrollSpeed = with(density) { 12.dp.toPx() } * ratio
+                                            } else if (containerTopInWindow > 0f && pointerWindowY < containerTopInWindow + thresholdPx) {
+                                                val overflow = ((containerTopInWindow + thresholdPx) - pointerWindowY).coerceAtLeast(0f)
+                                                val ratio = (overflow / thresholdPx).coerceIn(0.25f, 2.5f)
+                                                autoScrollSpeed = -with(density) { 12.dp.toPx() } * ratio
+                                            } else {
+                                                autoScrollSpeed = 0f
+                                            }
                                         }
                                     )
-                                }
-                        )
+                                },
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.DragHandle,
+                                contentDescription = "Drag to reorder",
+                                tint = if (isDragging) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
 
                         Box(
                             modifier = Modifier
