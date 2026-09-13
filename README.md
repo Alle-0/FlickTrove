@@ -87,7 +87,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
 - 📅 **Magazine & News Feed**: A dedicated editorial news section with curated articles from top film publications.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
-- 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Cloudflare R2.
+- 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Storage.
 - 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove community.
 - 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
 - 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
