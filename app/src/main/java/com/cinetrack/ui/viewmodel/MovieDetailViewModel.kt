@@ -328,6 +328,11 @@ class MovieDetailViewModel @Inject constructor(
                             "pt", "pt_br", "pt-br" -> "BR"
                             "ru" -> "RU"
                             "hi" -> "IN"
+                            "ja" -> "JP"
+                            "ko" -> "KR"
+                            "zh", "zh_cn", "zh-cn" -> "CN"
+                            "id", "in" -> "ID"
+                            "tr" -> "TR"
                             else -> java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
                         }
                     }

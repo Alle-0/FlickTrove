@@ -1563,6 +1563,11 @@ class MovieRepository @Inject constructor(
                     "pt" -> "PT"
                     "ru" -> "RU"
                     "hi" -> "IN"
+                    "ja" -> "JP"
+                    "ko" -> "KR"
+                    "zh" -> "CN"
+                    "id", "in" -> "ID"
+                    "tr" -> "TR"
                     else -> "US"
                 }
             }
@@ -1575,6 +1580,11 @@ class MovieRepository @Inject constructor(
                 "pt" -> "PT"
                 "ru" -> "RU"
                 "hi" -> "IN"
+                "ja" -> "JP"
+                "ko" -> "KR"
+                "zh" -> "CN"
+                "id", "in" -> "ID"
+                "tr" -> "TR"
                 else -> "US"
             }
         }

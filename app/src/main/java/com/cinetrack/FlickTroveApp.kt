@@ -62,7 +62,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         val locale = if (contentLanguage == "system") {
             initialSystemLocale
         } else {
-            java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
+            val tag = when (contentLanguage) {
+                "pt" -> "pt-BR"
+                "zh" -> "zh-CN"
+                "in" -> "id"
+                else -> contentLanguage
+            }
+            java.util.Locale.forLanguageTag(tag.replace("_", "-"))
         }
         java.util.Locale.setDefault(locale)
         var currentContext = baseContext
@@ -84,7 +90,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         val locale = if (contentLanguage == "system") {
             initialSystemLocale
         } else {
-            java.util.Locale.forLanguageTag(contentLanguage.replace("_", "-"))
+            val tag = when (contentLanguage) {
+                "pt" -> "pt-BR"
+                "zh" -> "zh-CN"
+                "in" -> "id"
+                else -> contentLanguage
+            }
+            java.util.Locale.forLanguageTag(tag.replace("_", "-"))
         }
         val config = android.content.res.Configuration(baseContext.resources.configuration)
         config.setLocale(locale)

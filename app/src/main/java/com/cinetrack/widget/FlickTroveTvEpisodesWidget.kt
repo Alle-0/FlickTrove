@@ -61,7 +61,13 @@ class FlickTroveTvEpisodesWidget : GlanceAppWidget() {
         val language = prefRepo.userPreferencesFlow.first().contentLanguage
 
         val localizedContext = if (language != "system") {
-            val locale = java.util.Locale.forLanguageTag(language.replace("_", "-"))
+            val tag = when (language) {
+                "pt" -> "pt-BR"
+                "zh" -> "zh-CN"
+                "in" -> "id"
+                else -> language
+            }
+            val locale = java.util.Locale.forLanguageTag(tag.replace("_", "-"))
             val config = android.content.res.Configuration(context.resources.configuration)
             config.setLocale(locale)
             context.createConfigurationContext(config)

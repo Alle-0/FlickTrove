@@ -83,7 +83,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
 - ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
-- 🌍 **Localization**: Native multi-language architecture supporting 8 languages: 🇮🇹 🇬🇧 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳.
+- 🌍 **Localization**: Native multi-language architecture supporting 13 languages (🇮🇹 🇬🇧 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
 - 📅 **Magazine & News Feed**: A dedicated editorial news section with curated articles from top film publications.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.

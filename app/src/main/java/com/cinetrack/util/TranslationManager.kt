@@ -204,6 +204,8 @@ class TranslationManager @Inject constructor() {
             "ru" -> TranslateLanguage.RUSSIAN
             "ar" -> TranslateLanguage.ARABIC
             "hi" -> TranslateLanguage.HINDI
+            "tr" -> TranslateLanguage.TURKISH
+            "id", "in" -> TranslateLanguage.INDONESIAN
             else -> TranslateLanguage.ENGLISH
         }
     }
@@ -222,6 +224,8 @@ class TranslationManager @Inject constructor() {
             TranslateLanguage.RUSSIAN -> "ru"
             TranslateLanguage.ARABIC -> "ar"
             TranslateLanguage.HINDI -> "hi"
+            TranslateLanguage.TURKISH -> "tr"
+            TranslateLanguage.INDONESIAN -> "id"
             else -> "en"
         }
     }

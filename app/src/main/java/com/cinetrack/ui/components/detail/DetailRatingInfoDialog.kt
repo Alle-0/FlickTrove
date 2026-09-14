@@ -225,6 +225,64 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_gb_18))
                                 }
                             }
+                            "JP" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_jp),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_jp_g))
+                                    RatingLegendItem("PG12", Color(0xFFFF9800), stringResource(R.string.detail_rating_jp_pg12))
+                                    RatingLegendItem("R15+", Color(0xFFFF5722), stringResource(R.string.detail_rating_jp_r15))
+                                    RatingLegendItem("R18+", Color(0xFFF44336), stringResource(R.string.detail_rating_jp_r18))
+                                }
+                            }
+                            "KR" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_kr),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("ALL", Color(0xFF4CAF50), stringResource(R.string.detail_rating_kr_all))
+                                    RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_kr_12))
+                                    RatingLegendItem("15", Color(0xFFFF5722), stringResource(R.string.detail_rating_kr_15))
+                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_kr_18))
+                                    RatingLegendItem("Restricted", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_kr_restricted))
+                                }
+                            }
+                            "ID" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_id),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("SU", Color(0xFF4CAF50), stringResource(R.string.detail_rating_id_su))
+                                    RatingLegendItem("13+", Color(0xFFFF9800), stringResource(R.string.detail_rating_id_13))
+                                    RatingLegendItem("17+", Color(0xFFFF5722), stringResource(R.string.detail_rating_id_17))
+                                    RatingLegendItem("21+", Color(0xFFF44336), stringResource(R.string.detail_rating_id_21))
+                                }
+                            }
+                            "TR" -> {
+                                Text(
+                                    stringResource(R.string.detail_rating_country_tr),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("Genel", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tr_genel))
+                                    RatingLegendItem("7+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tr_7))
+                                    RatingLegendItem("13+", Color(0xFFFF9800), stringResource(R.string.detail_rating_tr_13))
+                                    RatingLegendItem("16+", Color(0xFFFF5722), stringResource(R.string.detail_rating_tr_16))
+                                    RatingLegendItem("18+", Color(0xFFF44336), stringResource(R.string.detail_rating_tr_18))
+                                }
+                            }
                             else -> {
                                 // Default / US Fallback
                                 if (isTv) {
@@ -356,7 +414,7 @@ private fun RatingLegendItem(cert: String, color: Color, desc: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
-                .width(55.dp)
+                .widthIn(min = 55.dp)
                 .background(color.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                 .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                 .padding(horizontal = 6.dp, vertical = 4.dp),

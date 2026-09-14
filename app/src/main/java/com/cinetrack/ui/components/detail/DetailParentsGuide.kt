@@ -68,7 +68,7 @@ object ParentsGuideResolver {
         val country = countryCode?.uppercase() ?: "US"
 
         val (age, certColor, sex, violence, profanity, drugs, frightening) = when {
-            cleanCert in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+") -> {
+            cleanCert in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> {
                 Tuple7(
                     "0+",
                     Color(0xFF4CAF50),
@@ -79,7 +79,7 @@ object ParentsGuideResolver {
                     SeverityLevel.NONE
                 )
             }
-            cleanCert in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "10") -> {
+            cleanCert in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10") -> {
                 Tuple7(
                     if (cleanCert == "PG") "8+" else "6+",
                     Color(0xFF8BC34A),
@@ -90,9 +90,9 @@ object ParentsGuideResolver {
                     SeverityLevel.MILD
                 )
             }
-            cleanCert in listOf("PG-13", "TV-14", "12", "12+", "12A", "FSK 12", "14", "14+", "VM14", "15", "UA") -> {
+            cleanCert in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM14", "15", "UA") -> {
                 Tuple7(
-                    if (cleanCert.contains("14") || cleanCert == "VM14") "14+" else "12+",
+                    if (cleanCert.contains("14") || cleanCert == "VM14") "14+" else if (cleanCert.contains("15")) "15+" else "12+",
                     Color(0xFFFF9800),
                     SeverityLevel.MILD,
                     SeverityLevel.MODERATE,
@@ -101,9 +101,9 @@ object ParentsGuideResolver {
                     SeverityLevel.MODERATE
                 )
             }
-            cleanCert in listOf("R", "TV-MA", "16", "16+", "FSK 16", "18", "18+", "VM18", "FSK 18", "NC-17", "A") -> {
+            cleanCert in listOf("R", "TV-MA", "16", "16+", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> {
                 Tuple7(
-                    if (cleanCert.contains("16")) "16+" else "18+",
+                    if (cleanCert.contains("16")) "16+" else if (cleanCert.contains("17")) "17+" else if (cleanCert.contains("15")) "15+" else "18+",
                     Color(0xFFEF5350),
                     SeverityLevel.MODERATE,
                     SeverityLevel.SEVERE,

@@ -915,33 +915,47 @@ fun LanguageSelectionDialog(
                         "de" to stringResource(R.string.settings_language_de),
                         "pt" to stringResource(R.string.settings_language_pt),
                         "ru" to stringResource(R.string.settings_language_ru),
-                        "hi" to stringResource(R.string.settings_language_hi)
+                        "hi" to stringResource(R.string.settings_language_hi),
+                        "ja" to stringResource(R.string.settings_language_ja),
+                        "ko" to stringResource(R.string.settings_language_ko),
+                        "zh" to stringResource(R.string.settings_language_zh),
+                        "id" to stringResource(R.string.settings_language_id),
+                        "tr" to stringResource(R.string.settings_language_tr)
                     )
                     
-                    options.forEach { (value, label) ->
-                        val isSelected = current == value
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .bounceClick {
-                                    if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
-                                    onSelect(value)
-                                }
-                                .background(
-                                    color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
-                                    shape = RoundedCornerShape(16.dp)
+                    val scrollState = rememberScrollState()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 420.dp)
+                            .verticalFadingEdges(scrollState, topEdgeHeight = 24.dp, bottomEdgeHeight = 28.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        options.forEach { (value, label) ->
+                            val isSelected = current == value
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .bounceClick {
+                                        if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                                        onSelect(value)
+                                    }
+                                    .background(
+                                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
+                                    modifier = Modifier.weight(1f)
                                 )
-                                .clip(RoundedCornerShape(16.dp))
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
-                                modifier = Modifier.weight(1f)
-                            )
+                            }
                         }
                     }
                     

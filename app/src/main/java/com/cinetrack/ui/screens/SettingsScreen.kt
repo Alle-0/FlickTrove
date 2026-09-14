@@ -529,7 +529,7 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || isBackupLoading ||
-                           showDeepSyncConfirm || showUnmatchedItemsModal || showDashboardSettings
+                           showDeepSyncConfirm || showUnmatchedItemsModal || showDashboardSettings || showHomeSectionsDialog
 
     BackHandler(enabled = anyDialogVisible) {
         focusManager.clearFocus()
@@ -550,6 +550,7 @@ fun SettingsScreenContent(
         showWipeTotalDataConfirm = false
         showUnmatchedItemsModal = false
         showDashboardSettings = false
+        showHomeSectionsDialog = false
     }
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
@@ -597,6 +598,7 @@ fun SettingsScreenContent(
             showWipeTotalDataConfirm = false
             showUnmatchedItemsModal = false
             showDashboardSettings = false
+            showHomeSectionsDialog = false
         }
     }
 
@@ -851,6 +853,7 @@ fun SettingsScreenContent(
                                 showExternalMigrationDialog = false
                                 showUnmatchedItemsModal = false
                                 showDashboardSettings = false
+                                showHomeSectionsDialog = false
                             }
                         )
                 )

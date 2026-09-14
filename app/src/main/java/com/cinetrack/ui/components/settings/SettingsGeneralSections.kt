@@ -61,6 +61,11 @@ fun SettingsGeneralPreferencesSection(
                     "pt" -> stringResource(R.string.settings_language_pt)
                     "ru" -> stringResource(R.string.settings_language_ru)
                     "hi" -> stringResource(R.string.settings_language_hi)
+                    "ja" -> stringResource(R.string.settings_language_ja)
+                    "ko" -> stringResource(R.string.settings_language_ko)
+                    "zh" -> stringResource(R.string.settings_language_zh)
+                    "id", "in" -> stringResource(R.string.settings_language_id)
+                    "tr" -> stringResource(R.string.settings_language_tr)
                     else -> contentLanguage
                 }
                 Text(

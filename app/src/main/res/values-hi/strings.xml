@@ -196,6 +196,11 @@
     <string name="settings_language_pt">Português</string>
     <string name="settings_language_ru">Русский</string>
     <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_id">Bahasa Indonesia</string>
+    <string name="settings_language_tr">Türkçe</string>
     <string name="settings_default_start_tab">प्रारंभ स्क्रीन</string>
     <string name="settings_default_start_tab_desc">ऐप लॉन्च होने पर डिफ़ॉल्ट स्क्रीन चुनें</string>
     <string name="settings_default_start_home">देखनी हैं</string>

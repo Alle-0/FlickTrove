@@ -190,8 +190,13 @@
     <string name="settings_language_fr">Français</string>
     <string name="settings_language_de">Deutsch</string>
     <string name="settings_language_pt">Português</string>
-    <string name="settings_language_ru">Ð ÑƒÑ�Ñ�ÐºÐ¸Ð¹</string>
-    <string name="settings_language_hi">à¤¹à¤¿à¤¨à¥�à¤¦à¥€</string>
+    <string name="settings_language_ru">Русский</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_ko">한국어</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_id">Bahasa Indonesia</string>
+    <string name="settings_language_tr">Türkçe</string>
     <string name="settings_default_start_tab">Écran de démarrage</string>
     <string name="settings_default_start_tab_desc">Choisissez l\'écran par défaut au lancement de l\'application</string>
     <string name="settings_default_start_home">À VOIR</string>
