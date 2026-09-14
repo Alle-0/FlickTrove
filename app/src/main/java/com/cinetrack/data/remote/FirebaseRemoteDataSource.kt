@@ -414,18 +414,11 @@ class FirebaseRemoteDataSource @Inject constructor(
                     val calendar = java.util.Calendar.getInstance()
                     val year = calendar.get(java.util.Calendar.YEAR)
                     val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
-                    val month = calendar.get(java.util.Calendar.MONTH) + 1
                     
                     val weekId = "${year}_W$week"
-                    val monthId = "${year}_M${String.format("%02d", month)}"
                     
                     val weeklyRef = firestore.collection("trending_stats_weekly")
                         .document(weekId)
-                        .collection("movies")
-                        .document(compositeId)
-                        
-                    val monthlyRef = firestore.collection("trending_stats_monthly")
-                        .document(monthId)
                         .collection("movies")
                         .document(compositeId)
                         
@@ -442,7 +435,6 @@ class FirebaseRemoteDataSource @Inject constructor(
                     
                     if (trendingUpdates.isNotEmpty()) {
                         transaction.set(weeklyRef, trendingUpdates, SetOptions.merge())
-                        transaction.set(monthlyRef, trendingUpdates, SetOptions.merge())
                     }
                 }
 
@@ -476,10 +468,8 @@ class FirebaseRemoteDataSource @Inject constructor(
         val calendar = java.util.Calendar.getInstance()
         val year = calendar.get(java.util.Calendar.YEAR)
         val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
-        val month = calendar.get(java.util.Calendar.MONTH) + 1
         
         val weekId = "${year}_W$week"
-        val monthId = "${year}_M${String.format("%02d", month)}"
 
         // Pre-aggregate locally by compositeId to avoid duplicate operations in batch
         val aggregated = mutableMapOf<String, TrendingStatUpdate>()
@@ -500,8 +490,8 @@ class FirebaseRemoteDataSource @Inject constructor(
         val operations = aggregated.values.toList()
         
         // Firestore limits batches to 500 operations. 
-        // We write to 2 documents (weekly and monthly) per update, so max 250 updates per batch.
-        val batchSize = 250
+        // We write to 1 document (weekly) per update, so max 450 updates per batch.
+        val batchSize = 450
         for (i in operations.indices step batchSize) {
             val chunk = operations.subList(i, kotlin.math.min(i + batchSize, operations.size))
             val batch = firestore.batch()
@@ -509,11 +499,6 @@ class FirebaseRemoteDataSource @Inject constructor(
             for (update in chunk) {
                 val weeklyRef = firestore.collection("trending_stats_weekly")
                     .document(weekId)
-                    .collection("movies")
-                    .document(update.compositeId)
-                    
-                val monthlyRef = firestore.collection("trending_stats_monthly")
-                    .document(monthId)
                     .collection("movies")
                     .document(update.compositeId)
                     
@@ -530,7 +515,6 @@ class FirebaseRemoteDataSource @Inject constructor(
                 
                 if (trendingUpdates.isNotEmpty()) {
                     batch.set(weeklyRef, trendingUpdates, SetOptions.merge())
-                    batch.set(monthlyRef, trendingUpdates, SetOptions.merge())
                 }
             }
             
