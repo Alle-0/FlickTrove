@@ -55,9 +55,11 @@ object ColorUtils {
         }
 
         val palette = builder.generate()
-        val colorInt = palette.dominantSwatch?.rgb
+        val colorInt = palette.vibrantSwatch?.rgb
+            ?: palette.darkVibrantSwatch?.rgb
+            ?: palette.lightVibrantSwatch?.rgb
+            ?: palette.dominantSwatch?.rgb
             ?: palette.mutedSwatch?.rgb
-            ?: palette.vibrantSwatch?.rgb
             ?: return@withContext fallback
 
         val raw = Color(colorInt)
@@ -76,9 +78,11 @@ object ColorUtils {
     suspend fun extractAverageColor(bitmap: Bitmap, defaultFallback: Color = Color.Unspecified): Color = withContext(Dispatchers.Default) {
         if (bitmap.width <= 0 || bitmap.height <= 0) return@withContext defaultFallback
         val palette = androidx.palette.graphics.Palette.Builder(bitmap).generate()
-        val colorInt = palette.dominantSwatch?.rgb
+        val colorInt = palette.vibrantSwatch?.rgb
+            ?: palette.darkVibrantSwatch?.rgb
+            ?: palette.lightVibrantSwatch?.rgb
+            ?: palette.dominantSwatch?.rgb
             ?: palette.mutedSwatch?.rgb
-            ?: palette.vibrantSwatch?.rgb
         if (colorInt != null) Color(colorInt) else defaultFallback
     }
 

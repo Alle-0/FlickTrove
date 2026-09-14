@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -88,13 +89,13 @@ fun DetailComments(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
                     ),
-                    color = Color.White.copy(alpha = 0.5f)
+                    color = Color.White.copy(alpha = 0.65f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.5f),
+                    tint = Color.White.copy(alpha = 0.65f),
                     modifier = Modifier.size(12.dp)
                 )
             }
@@ -105,7 +106,7 @@ fun DetailComments(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = accentColor,
+                color = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier
                     .bounceClick { onOpenThread(true) }
                     .clip(RoundedCornerShape(12.dp))
@@ -157,12 +158,12 @@ fun DetailComments(
                     modifier = Modifier
                         .height(140.dp)
                         .padding(start = 8.dp)
-                        .clickable { onOpenThread(false) },
+                        .bounceClick { onOpenThread(false) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.comment_view_full_thread),
-                        color = accentColor,
+                        color = ColorUtils.lightenForText(accentColor, 1.35f),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
@@ -303,7 +304,7 @@ private fun CommentCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val username = comment.userDisplayName.takeIf { it.isNotBlank() } ?: "Utente Anonimo"
+                val username = comment.userDisplayName.takeIf { it.isNotBlank() } ?: stringResource(R.string.comment_anonymous_user)
                 Text(
                     text = username,
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -436,7 +437,7 @@ private fun CommentCard(
                                     lineHeight = 18.sp,
                                     fontSize = 13.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = Color.White.copy(alpha = 0.88f),
                                 maxLines = if (isExpanded) Int.MAX_VALUE else 4,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.then(
@@ -446,23 +447,11 @@ private fun CommentCard(
                         }
 
                         if (mediaUrls.isNotEmpty()) {
-                            val imageLoader = remember {
-                                coil.ImageLoader.Builder(context)
-                                    .components {
-                                        if (android.os.Build.VERSION.SDK_INT >= 28) {
-                                            add(coil.decode.ImageDecoderDecoder.Factory())
-                                        } else {
-                                            add(coil.decode.GifDecoder.Factory())
-                                        }
-                                    }
-                                    .build()
-                            }
                             mediaUrls.forEach { mediaUrl ->
                                 coil.compose.AsyncImage(
                                     model = coil.request.ImageRequest.Builder(context)
                                         .data(mediaUrl)
                                         .build(),
-                                    imageLoader = imageLoader,
                                     contentDescription = "Attachment",
                                     modifier = Modifier
                                         .padding(top = 8.dp)

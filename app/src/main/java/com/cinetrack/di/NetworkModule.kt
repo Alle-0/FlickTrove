@@ -13,17 +13,20 @@ import com.cinetrack.data.api.TvdbAuthenticator
 import com.cinetrack.data.api.SimklAuthInterceptor
 import com.cinetrack.data.api.SimklService
 import com.cinetrack.util.Keys
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
-import kotlinx.coroutines.flow.first
+import okhttp3.Cache
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.io.File
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -42,7 +45,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(preferenceRepository: com.cinetrack.data.repository.PreferenceRepository): OkHttpClient {
+    fun provideOkHttpClient(
+        @ApplicationContext context: Context,
+        preferenceRepository: com.cinetrack.data.repository.PreferenceRepository
+    ): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = if (com.cinetrack.BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BASIC
@@ -53,9 +59,7 @@ object NetworkModule {
         val tmdbAuthInterceptor = okhttp3.Interceptor { chain ->
             val original = chain.request()
             if (original.url.host.contains("themoviedb.org")) {
-                val rawLanguage = kotlinx.coroutines.runBlocking { 
-                    preferenceRepository.userPreferencesFlow.first().contentLanguage 
-                }
+                val rawLanguage = preferenceRepository.getContentLanguage()
                 val resolvedLanguage = if (rawLanguage == "system") {
                     java.util.Locale.getDefault().language
                 } else {
@@ -77,7 +81,12 @@ object NetworkModule {
                 chain.proceed(original)
             }
         }
+        val httpCache = Cache(
+            directory = File(context.cacheDir, "http_cache"),
+            maxSize = 50L * 1024 * 1024 // 50 MB
+        )
         return OkHttpClient.Builder()
+            .cache(httpCache)
             .addInterceptor(logging)
             .addInterceptor(tmdbAuthInterceptor)
             .build()

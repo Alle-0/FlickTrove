@@ -93,8 +93,10 @@ fun DetailMetaRows(
                     )
                 }
                 
+                val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
                 keywords.forEachIndexed { index, keyword ->
                     val reverseIndex = keywords.size - 1 - index
+                    val localizedKeyword = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keyword.id, currentLanguage) ?: keyword.name
                     AnimatedVisibility(
                         visible = showKeywords,
                         enter = scaleIn(
@@ -111,9 +113,9 @@ fun DetailMetaRows(
                         )
                     ) {
                         KeywordPill(
-                            keyword = keyword.name, 
+                            keyword = localizedKeyword, 
                             accentColor = accentColor,
-                            onKeywordClick = { offset -> onKeywordClick(keyword.id, keyword.name, offset) }
+                            onKeywordClick = { offset -> onKeywordClick(keyword.id, localizedKeyword, offset) }
                         )
                     }
                 }
@@ -150,7 +152,7 @@ fun DetailMetaRows(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp
                 ),
-                color = Color.White.copy(alpha = 0.5f),
+                color = Color.White.copy(alpha = 0.65f),
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -163,7 +165,7 @@ fun DetailMetaRows(
                             fontWeight = FontWeight.Black,
                             letterSpacing = 1.5.sp
                         ),
-                        color = Color.White.copy(alpha = 0.25f),
+                        color = Color.White.copy(alpha = 0.65f),
                         modifier = Modifier.padding(bottom = 5.dp)
                     )
                     
@@ -172,7 +174,7 @@ fun DetailMetaRows(
                             .size(32.dp)
                             .border(
                                 width = 0.5.dp,
-                                color = accentColor.copy(alpha = 0.3f),
+                                color = ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.5f),
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .padding(1.5.dp)
@@ -183,7 +185,7 @@ fun DetailMetaRows(
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_cinema),
                             contentDescription = stringResource(R.string.in_theaters),
-                            tint = accentColor,
+                            tint = ColorUtils.lightenForText(accentColor, 1.35f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -267,7 +269,7 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.5.sp
             ),
-            color = Color.White.copy(alpha = 0.25f),
+            color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 5.dp)
         )
 

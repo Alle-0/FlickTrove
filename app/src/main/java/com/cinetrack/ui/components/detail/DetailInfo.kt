@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 
 /**
@@ -46,7 +47,7 @@ fun DetailInfo(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp
             ),
-            color = Color.White.copy(alpha = 0.5f),
+            color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -75,7 +76,7 @@ fun DetailInfo(
                         letterSpacing = 0.2.sp,
                         fontSize = 15.sp
                     ),
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Color.White.copy(alpha = 0.88f),
                     maxLines = if (targetExpanded) Int.MAX_VALUE else 4,
                     overflow = TextOverflow.Ellipsis,
                     onTextLayout = { result ->
@@ -88,11 +89,11 @@ fun DetailInfo(
 
             if (hasOverflow || isExpanded) {
                 Text(
-                    text = if (isExpanded) "Leggi meno" else "Leggi tutto",
+                    text = if (isExpanded) stringResource(R.string.detail_read_less) else stringResource(R.string.detail_read_more),
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = Color.White,
+                    color = ColorUtils.lightenForText(accentColor, 1.35f),
                     modifier = Modifier.padding(top = 12.dp)
                 )
             }

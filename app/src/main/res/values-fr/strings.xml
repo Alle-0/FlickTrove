@@ -1229,5 +1229,8 @@
     <string name="box_office_error">Impossible de charger le box-office. Tirez vers le bas pour réessayer.</string>
     <string name="box_office_filter_all_years">Toutes les années</string>
     <string name="box_office_banner_subtitle">Classements du week-end et de tous les temps</string>
+    <string name="detail_read_more">Lire plus</string>
+    <string name="detail_read_less">Lire moins</string>
+    <string name="comment_anonymous_user">Utilisateur anonyme</string>
 </resources>
 

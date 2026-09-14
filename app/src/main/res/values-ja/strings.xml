@@ -1298,4 +1298,7 @@
     <string name="box_office_error">興行収入データを取得できませんでした。下に引いて再試行してください。</string>
     <string name="box_office_filter_all_years">すべての年</string>
     <string name="box_office_banner_subtitle">週末＆歴代興行収入ランキング</string>
+    <string name="detail_read_more">続きを読む</string>
+    <string name="detail_read_less">折りたたむ</string>
+    <string name="comment_anonymous_user">匿名ユーザー</string>
 </resources>

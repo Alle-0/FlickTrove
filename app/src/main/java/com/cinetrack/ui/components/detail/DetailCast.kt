@@ -108,7 +108,7 @@ fun DetailCast(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
                     ),
-                    color = Color.White.copy(alpha = 0.5f)
+                    color = Color.White.copy(alpha = 0.65f)
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -117,13 +117,13 @@ fun DetailCast(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         ),
-                        color = Color.White.copy(alpha = 0.5f)
+                        color = Color.White.copy(alpha = 0.65f)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(
                         painter = painterResource(id = R.drawable.ic_right),
                         contentDescription = "See All",
-                        tint = Color.White.copy(alpha = 0.5f),
+                        tint = Color.White.copy(alpha = 0.65f),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -173,13 +173,13 @@ fun DetailCast(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
                     ),
-                    color = Color.White.copy(alpha = 0.5f)
+                    color = Color.White.copy(alpha = 0.65f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = "See All",
-                    tint = Color.White.copy(alpha = 0.5f),
+                    tint = Color.White.copy(alpha = 0.65f),
                     modifier = Modifier.size(16.dp)
                 )
             }

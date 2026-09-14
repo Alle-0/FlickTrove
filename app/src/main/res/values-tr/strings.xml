@@ -1298,4 +1298,7 @@
     <string name="box_office_error">Gişe verileri yüklenemedi. Yeniden denemek için aşağı çekin.</string>
     <string name="box_office_filter_all_years">Tüm Yıllar</string>
     <string name="box_office_banner_subtitle">Hafta Sonu &amp; Tüm Zamanlar Sıralaması</string>
+    <string name="detail_read_more">Daha fazla oku</string>
+    <string name="detail_read_less">Daha az oku</string>
+    <string name="comment_anonymous_user">Anonim Kullanıcı</string>
 </resources>

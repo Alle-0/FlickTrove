@@ -261,6 +261,12 @@ fun HomeScreenContent(
 
                 val unreleasedTitle = stringResource(id = R.string.home_unreleased)
                 val droppedTitle = stringResource(id = R.string.home_dropped)
+                val precomputedFolderColors = remember(uiState.movieFolderColors) {
+                    uiState.movieFolderColors.mapValues { entry ->
+                        entry.value.map { it.toComposeColor() }
+                    }
+                }
+
                 LazyVerticalGrid(
                     state = currentGridState,
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
@@ -301,7 +307,10 @@ fun HomeScreenContent(
 
                     sections.forEachIndexed { sectionIndex, (title, items) ->
                         if (title.isNotEmpty()) {
-                            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            item(
+                                key = "section_header_${title}_$sectionIndex",
+                                span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }
+                            ) {
                                 Text(
                                     text = title.uppercase(),
                                     style = MaterialTheme.typography.labelLarge,
@@ -321,11 +330,7 @@ fun HomeScreenContent(
                             contentType = { _, _ -> "movie_card" }
                         ) { index, movie ->
                             val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
-                            val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                                uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                    it.toComposeColor()
-                                } ?: emptyList()
-                            }
+                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
 
                             val isTvTab = uiState.activeTab == "tv"
                             val nextEpisode = if (isTvTab) movie.calculateNextEpisode() else null
@@ -346,7 +351,8 @@ fun HomeScreenContent(
                                     onAction = stableOnAction,
                                     onLongPress = stableOnLongPress,
                                     onMessage = stableOnMessage,
-                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) { { m -> viewModel.markNextEpisodeWatched(m) } } else null
+                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) { { m -> viewModel.markNextEpisodeWatched(m) } } else null,
+                                    precalculatedNextInfo = nextEpisode
                                 )
                             } else if (isTvTab && nextEpisode != null) {
                                 val isUpdating = viewModel.updatingShowIds[movie.id] == true
@@ -369,7 +375,8 @@ fun HomeScreenContent(
                                     onLongPress = stableOnLongPress,
                                     onAction = stableOnAction,
                                     onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
-                                    onMessage = stableOnMessage
+                                    onMessage = stableOnMessage,
+                                    precalculatedNextInfo = nextEpisode
                                 )
                             } else {
                                 MovieCard(

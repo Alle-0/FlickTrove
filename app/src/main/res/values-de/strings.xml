@@ -1230,5 +1230,8 @@
     <string name="box_office_error">Box-Office-Daten konnten nicht geladen werden. Zum Wiederholen nach unten ziehen.</string>
     <string name="box_office_filter_all_years">Alle Jahre</string>
     <string name="box_office_banner_subtitle">Wochenend- &amp; Allzeit-Ranglisten</string>
+    <string name="detail_read_more">Mehr lesen</string>
+    <string name="detail_read_less">Weniger lesen</string>
+    <string name="comment_anonymous_user">Anonymer Benutzer</string>
 </resources>
 

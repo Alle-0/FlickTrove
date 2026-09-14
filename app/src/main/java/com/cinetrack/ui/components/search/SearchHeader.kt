@@ -379,7 +379,8 @@ fun SearchHeader(
 
             SearchCategorySelector(
                 category = category,
-                onCategoryChanged = { onCategoryChanged(it) }
+                onCategoryChanged = { onCategoryChanged(it) },
+                hazeState = hazeState
             )
         }
     }

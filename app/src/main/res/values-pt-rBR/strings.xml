@@ -1228,6 +1228,9 @@
     <string name="box_office_error">Não foi possível carregar os dados de bilheteria. Puxe para baixo para tentar novamente.</string>
     <string name="box_office_filter_all_years">Todos os anos</string>
     <string name="box_office_banner_subtitle">Classificações de fim de semana e históricas</string>
+    <string name="detail_read_more">Ler mais</string>
+    <string name="detail_read_less">Ler menos</string>
+    <string name="comment_anonymous_user">Usuário Anônimo</string>
 </resources>
 
 

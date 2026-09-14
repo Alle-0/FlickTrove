@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.utils.ColorUtils
 import java.util.Locale
 
 
@@ -177,7 +178,7 @@ fun DetailParentsGuide(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp
             ),
-            color = Color.White.copy(alpha = 0.5f),
+            color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
@@ -200,11 +201,11 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Category Icon (poster accent color when active, soft grey when none)
+        // Category Icon (lightened poster accent color when active, soft clear white when none)
         Icon(
             imageVector = ImageVector.vectorResource(id = category.iconRes),
             contentDescription = null,
-            tint = if (isNone) Color.White.copy(alpha = 0.35f) else accentColor.copy(alpha = 0.75f),
+            tint = if (isNone) Color.White.copy(alpha = 0.60f) else ColorUtils.lightenForText(accentColor, 1.35f),
             modifier = Modifier.size(18.dp)
         )
 
@@ -217,7 +218,7 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
                 fontWeight = FontWeight.Medium,
                 fontSize = 13.sp
             ),
-            color = if (isNone) Color.White.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.9f),
+            color = if (isNone) Color.White.copy(alpha = 0.70f) else Color.White,
             modifier = Modifier.weight(1f)
         )
 
@@ -229,14 +230,14 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
             for (i in 1..3) {
                 val isFilled = i <= category.level.filledBars
                 val segmentColor = if (isFilled) {
-                    accentColor
+                    ColorUtils.lightenForText(accentColor, 1.4f)
                 } else {
-                    Color.White.copy(alpha = 0.08f)
+                    Color.White.copy(alpha = 0.22f)
                 }
                 Box(
                     modifier = Modifier
                         .width(20.dp)
-                        .height(4.5.dp)
+                        .height(5.dp)
                         .clip(RoundedCornerShape(percent = 50))
                         .background(segmentColor)
                 )
@@ -245,14 +246,14 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // Severity Label (Bold & accentColor when active, subdued grey when None)
+        // Severity Label (Bold & bright accent when active, legible grey when None)
         Text(
             text = stringResource(category.level.labelRes),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontSize = 11.5.sp,
                 fontWeight = if (isNone) FontWeight.Normal else FontWeight.Bold
             ),
-            color = if (isNone) Color.White.copy(alpha = 0.35f) else accentColor,
+            color = if (isNone) Color.White.copy(alpha = 0.65f) else ColorUtils.lightenForText(accentColor, 1.4f),
             textAlign = TextAlign.End,
             modifier = Modifier.widthIn(min = 60.dp)
         )

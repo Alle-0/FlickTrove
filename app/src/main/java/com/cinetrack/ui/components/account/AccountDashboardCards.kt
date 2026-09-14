@@ -160,7 +160,7 @@ private fun StatItem(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White.copy(alpha = 0.6f)
+            color = Color.White.copy(alpha = 0.72f)
         )
         Text(
             text = value,
@@ -303,8 +303,8 @@ fun MyFoldersCard(
                 }
             } else if (folders.isEmpty()) {
                 Text(
-                    "You haven't created any folders yet.",
-                    color = Color.White.copy(alpha = 0.5f),
+                    text = stringResource(R.string.dashboard_no_folders_yet),
+                    color = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             } else {
@@ -445,7 +445,7 @@ fun FolderPreviewItem(
         Text(
             text = "(${folder.itemIds.size})",
             style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.6f)
+            color = Color.White.copy(alpha = 0.70f)
         )
     }
 }
@@ -521,7 +521,7 @@ fun YourFlowCard(
                 Text(
                     text = stringResource(R.string.dashboard_your_flow_desc),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Color.White.copy(alpha = 0.75f),
                     modifier = Modifier.weight(1f)
                 )
                 

@@ -1229,5 +1229,8 @@
     <string name="box_office_error">Не удалось загрузить данные о сборах. Потяните вниз, чтобы обновить.</string>
     <string name="box_office_filter_all_years">Все годы</string>
     <string name="box_office_banner_subtitle">Рейтинги за уик-энд и за всё время</string>
+    <string name="detail_read_more">Читать далее</string>
+    <string name="detail_read_less">Скрыть</string>
+    <string name="comment_anonymous_user">Анонимный пользователь</string>
 </resources>
 

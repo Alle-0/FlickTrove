@@ -34,7 +34,7 @@ class GetHomeFeedUseCase @Inject constructor(
                 val first = recs.first()
                 try {
                     val detail = repository.getMovieDetail(first.id, false)
-                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                    val rawLanguage = preferenceRepository.getContentLanguage()
                     val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
                     val logos = detail.images?.logos
                     val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
@@ -54,7 +54,7 @@ class GetHomeFeedUseCase @Inject constructor(
                 val first = recs.first()
                 try {
                     val detail = repository.getMovieDetail(first.id, true)
-                    val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+                    val rawLanguage = preferenceRepository.getContentLanguage()
                     val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
                     val logos = detail.images?.logos
                     val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
@@ -212,6 +212,7 @@ class GetHomeFeedUseCase @Inject constructor(
             }.awaitAll().flatten()
         }
 
+        val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
         var results = rawData
             .distinctBy { it.id }
             .filter { movie ->
@@ -220,7 +221,7 @@ class GetHomeFeedUseCase @Inject constructor(
             }
             .map { it.copy(mediaType = type) }
             .mapNotNull { movie ->
-                val score = calculateMatchScoreUseCase(movie, matching)
+                val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                 if (score == null || score >= 65) {
                     movie.apply { matchScore = score }
                 } else null
@@ -232,7 +233,7 @@ class GetHomeFeedUseCase @Inject constructor(
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
                 .map { movie -> 
-                    val score = calculateMatchScoreUseCase(movie, matching)
+                    val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                     movie.apply { matchScore = score }
                 }
                 .sortedByDescending { it.matchScore ?: 0 }
@@ -275,6 +276,7 @@ class GetHomeFeedUseCase @Inject constructor(
         }
 
         val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
         
         var results = rawData
             .distinctBy { it.id }
@@ -284,7 +286,7 @@ class GetHomeFeedUseCase @Inject constructor(
             }
             .map { it.copy(mediaType = type) }
             .mapNotNull { movie ->
-                val score = calculateMatchScoreUseCase(movie, matching)
+                val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                 if (score == null || score >= 65) {
                     movie.apply { matchScore = score }
                 } else null
@@ -296,7 +298,7 @@ class GetHomeFeedUseCase @Inject constructor(
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
                 .map { movie -> 
-                    val score = calculateMatchScoreUseCase(movie, matching)
+                    val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                     movie.apply { matchScore = score }
                 }
                 .sortedByDescending { it.matchScore ?: 0 }

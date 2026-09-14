@@ -308,12 +308,17 @@ fun LazyGridScope.searchTrendingMoviesSection(
     cardWidth: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     keyboardController: SoftwareKeyboardController?,
+    favoritesMap: Map<String, Movie>? = null,
+    precomputedFolderColors: Map<String, List<Color>>? = null,
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
 ) {
+    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
+    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
+
     if (trendingMovies.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
@@ -344,11 +349,9 @@ fun LazyGridScope.searchTrendingMoviesSection(
                         overview = item.overview,
                         genreIds = item.genreIds
                     )
-                    val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
+                    val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
                     val movie = movieStatus ?: baseMovie
-                    val folderColors = remember(movie.id, movieFolderColors) {
-                        movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
-                    }
+                    val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                     SearchGridMovieItem(
                         movie = movie,
                         movieStatus = movieStatus,
@@ -397,12 +400,17 @@ fun LazyGridScope.searchTrendingTvSection(
     cardWidth: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     keyboardController: SoftwareKeyboardController?,
+    favoritesMap: Map<String, Movie>? = null,
+    precomputedFolderColors: Map<String, List<Color>>? = null,
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
 ) {
+    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
+    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
+
     if (trendingTv.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
             Column {
@@ -433,11 +441,9 @@ fun LazyGridScope.searchTrendingTvSection(
                         overview = item.overview,
                         genreIds = item.genreIds
                     )
-                    val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
+                    val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
                     val movie = movieStatus ?: baseMovie
-                    val folderColors = remember(movie.id, movieFolderColors) {
-                        movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
-                    }
+                    val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                     SearchGridMovieItem(
                         movie = movie,
                         movieStatus = movieStatus,
@@ -662,7 +668,8 @@ fun CollectionCollageCard(
             val totalCount = collection.partsCount
             val watchedCount = remember(collection.partsIds, favorites) {
                 if (collection.partsIds.isNotEmpty()) {
-                    collection.partsIds.count { partId -> favorites.find { it.id == partId }?.watched == true }
+                    val watchedIds = favorites.filter { it.watched }.map { it.id }.toSet()
+                    collection.partsIds.count { it in watchedIds }
                 } else 0
             }
             val progress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
@@ -723,6 +730,8 @@ fun LazyGridScope.searchResultsGridSection(
     personCardWidth: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     keyboardController: SoftwareKeyboardController?,
+    favoritesMap: Map<String, Movie>? = null,
+    precomputedFolderColors: Map<String, List<Color>>? = null,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit,
     onCollectionClick: (Long, String?) -> Unit,
@@ -730,6 +739,9 @@ fun LazyGridScope.searchResultsGridSection(
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit
 ) {
+    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
+    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
+
     itemsIndexed(
         items = results,
         key = { _, item -> when (item) {
@@ -760,11 +772,9 @@ fun LazyGridScope.searchResultsGridSection(
                     overview = item.overview,
                     genreIds = item.genreIds
                 )
-                val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "movie" }
+                val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
                 val movie = movieStatus ?: baseMovie
-                val folderColors = remember(movie.id, movieFolderColors) {
-                    movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
-                }
+                val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                 SearchGridMovieItem(
                     movie = movie,
                     movieStatus = movieStatus,
@@ -794,11 +804,9 @@ fun LazyGridScope.searchResultsGridSection(
                     overview = item.overview,
                     genreIds = item.genreIds
                 )
-                val movieStatus = favorites.find { it.id == baseMovie.id && it.mediaType == "tv" }
+                val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
                 val movie = movieStatus ?: baseMovie
-                val folderColors = remember(movie.id, movieFolderColors) {
-                    movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { it.toComposeColor() } ?: emptyList()
-                }
+                val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                 SearchGridMovieItem(
                     movie = movie,
                     movieStatus = movieStatus,

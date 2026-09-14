@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -82,7 +83,7 @@ fun DetailPersonalZone(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp
             ),
-            color = Color.White.copy(alpha = 0.5f),
+            color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
@@ -324,7 +325,7 @@ private fun PersonalAction(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = if (hasValue || isActive) accentColor else Color.White.copy(alpha = 0.4f),
+                        tint = if (hasValue || isActive) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White.copy(alpha = 0.60f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -334,7 +335,7 @@ private fun PersonalAction(
                         text = label,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White.copy(alpha = 0.4f),
+                        color = Color.White.copy(alpha = 0.65f),
                         lineHeight = 10.sp
                     )
                     Text(
@@ -345,7 +346,7 @@ private fun PersonalAction(
                             else -> 14.sp
                         },
                         fontWeight = FontWeight.Black,
-                        color = if (hasValue) accentColor else Color.White.copy(alpha = 0.6f),
+                        color = if (hasValue) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White.copy(alpha = 0.85f),
                         lineHeight = when {
                             hasValue && isRateAction -> 34.sp
                             hasValue -> 18.sp

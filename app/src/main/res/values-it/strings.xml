@@ -700,6 +700,8 @@
     <string name="detail_cast">CAST</string>
     <string name="detail_top_comments">COMMENTI MIGLIORI</string>
     <string name="detail_plot">TRAMA</string>
+    <string name="detail_read_more">Leggi tutto</string>
+    <string name="detail_read_less">Leggi meno</string>
     <string name="detail_where_to_watch">DOVE GUARDARE</string>
     <string name="detail_collection">COLLEZIONE</string>
     <string name="detail_recommendations">CONSIGLIATI</string>
@@ -1255,4 +1257,5 @@
     <string name="box_office_error">Impossibile caricare i dati del Box Office. Trascina in basso per riprovare.</string>
     <string name="box_office_filter_all_years">Tutti gli anni</string>
     <string name="box_office_banner_subtitle">Classifiche Weekend &amp; Di Sempre</string>
+    <string name="comment_anonymous_user">Utente Anonimo</string>
 </resources>

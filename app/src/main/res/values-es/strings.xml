@@ -1232,5 +1232,8 @@
     <string name="box_office_error">No se pudieron cargar los datos de taquilla. Desliza hacia abajo para reintentar.</string>
     <string name="box_office_filter_all_years">Todos los años</string>
     <string name="box_office_banner_subtitle">Clasificaciones del fin de semana e históricas</string>
+    <string name="detail_read_more">Leer más</string>
+    <string name="detail_read_less">Leer menos</string>
+    <string name="comment_anonymous_user">Usuario anónimo</string>
 </resources>
 

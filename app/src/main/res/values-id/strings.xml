@@ -1297,4 +1297,7 @@
     <string name="box_office_error">Tidak dapat memuat data Box Office. Tarik ke bawah untuk mencoba lagi.</string>
     <string name="box_office_filter_all_years">Semua Tahun</string>
     <string name="box_office_banner_subtitle">Peringkat Akhir Pekan &amp; Sepanjang Masa</string>
+    <string name="detail_read_more">Baca selengkapnya</string>
+    <string name="detail_read_less">Baca lebih sedikit</string>
+    <string name="comment_anonymous_user">Pengguna Anonim</string>
 </resources>

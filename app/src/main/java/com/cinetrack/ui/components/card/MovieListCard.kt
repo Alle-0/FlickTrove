@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.NextEpisodeInfo
 import com.cinetrack.ui.model.getLocalizedText
 import com.cinetrack.ui.utils.bounceClickWithOffset
 import com.cinetrack.ui.utils.bounceClick
@@ -72,10 +73,11 @@ fun MovieListCard(
     onLongPress: (Movie, Offset, Offset) -> Unit = { _, _, _ -> },
     onAction: (Movie) -> Unit = {},
     onMessage: (String) -> Unit = {},
-    onQuickMarkWatched: ((Movie) -> Unit)? = null
+    onQuickMarkWatched: ((Movie) -> Unit)? = null,
+    precalculatedNextInfo: NextEpisodeInfo? = null
 ) {
     val isTv = movie.mediaType == "tv"
-    val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
+    val nextInfo = precalculatedNextInfo ?: remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
         if (isTv) movie.calculateNextEpisode() else null
     }
     val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)

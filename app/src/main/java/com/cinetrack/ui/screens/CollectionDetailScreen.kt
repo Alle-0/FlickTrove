@@ -182,8 +182,8 @@ fun CollectionDetailScreenContent(
     val rawAccentColor = extractedColor ?: fallbackAccentColor
     val globalAccentColor = remember(rawAccentColor) { ColorUtils.ensureVividAccent(rawAccentColor) }
 
-    val baseDarkColor = remember { Color(0xFF161620) }
-    val targetBackgroundColor = if (uiState.collection != null) lerp(globalAccentColor, baseDarkColor, 0.68f) else baseDarkColor
+    val baseDarkColor = remember { Color(0xFF0F0F16) }
+    val targetBackgroundColor = if (uiState.collection != null) lerp(globalAccentColor, baseDarkColor, 0.85f) else baseDarkColor
     val animatedBgColor by animateColorAsState(
         targetValue = targetBackgroundColor,
         animationSpec = tween(durationMillis = 800),

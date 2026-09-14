@@ -197,6 +197,15 @@ fun DiscoverScreenContent(
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
+                val favoritesMap = remember(uiState.favorites) {
+                    uiState.favorites.associateBy { "${it.mediaType}_${it.id}" }
+                }
+                val precomputedFolderColors = remember(uiState.movieFolderColors) {
+                    uiState.movieFolderColors.mapValues { entry ->
+                        entry.value.map { it.toComposeColor() }
+                    }
+                }
+
                 LazyVerticalGrid(
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
@@ -276,12 +285,11 @@ fun DiscoverScreenContent(
                     } else {
                         itemsIndexed(
                             items = uiState.movies,
-                            key = { index, movie -> movie.id.toString() + movie.mediaType }
+                            key = { _, movie -> movie.compositeId },
+                            contentType = { _, _ -> "movie_card" }
                         ) { index, movie ->
-                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
-                            val folderColors = uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                it.toComposeColor()
-                            } ?: emptyList()
+                            val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
+                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
                             
                             if (columns == 1) {
                                 com.cinetrack.ui.components.card.MovieListCard(

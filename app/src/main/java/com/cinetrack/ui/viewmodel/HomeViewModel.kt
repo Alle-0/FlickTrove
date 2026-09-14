@@ -196,21 +196,19 @@ class HomeViewModel @Inject constructor(
         settingsRepository.hideSavedFromDiscovery,
         _boxOfficeWinner
     ) { baseState, feedState, hideSaved, boxOfficeWinner ->
-        val localCompositeIds = if (hideSaved) {
-            baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
-        } else {
-            emptySet()
-        }
+        val allLocalCompositeIds = baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        val localCompositeIds = if (hideSaved) allLocalCompositeIds else emptySet()
 
         fun filterList(list: ImmutableList<Movie>): ImmutableList<Movie> {
             if (!hideSaved) return list
             return list.filter { !localCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
         }
 
-        val allLocalCompositeIds = baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
         fun forceFilterRecommendations(list: ImmutableList<Movie>): ImmutableList<Movie> {
             return list.filter { !allLocalCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
         }
+
+        val localTvMap = baseState.allLocalMovies.filter { it.mediaType == "tv" }.associateBy { it.id }
 
         baseState.copy(
             recommendedMovies = forceFilterRecommendations(feedState.recommendedMovies),
@@ -227,7 +225,7 @@ class HomeViewModel @Inject constructor(
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
             continueWatchingTv = feedState.continueWatchingTv.mapNotNull { tv ->
-                val localTv = baseState.allLocalMovies.find { it.id == tv.id && it.mediaType == "tv" }
+                val localTv = localTvMap[tv.id]
                 val effectiveTv = localTv ?: tv
                 if (!effectiveTv.watched && !effectiveTv.dropped) {
                     val next = effectiveTv.calculateNextEpisode()

@@ -75,7 +75,8 @@ fun CategoryTabSelector(
     selectedIndex: Int,
     onOptionClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    tabWidth: androidx.compose.ui.unit.Dp = 116.dp
+    tabWidth: androidx.compose.ui.unit.Dp = 116.dp,
+    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp
 ) {
     val tabHeight = 34.dp
     val haptic = LocalHapticFeedback.current
@@ -110,7 +111,7 @@ fun CategoryTabSelector(
         var flightStartCenter by remember { mutableStateOf(0f) }
         var flightTargetCenter by remember { mutableStateOf(0f) }
         var isFlightActive by remember { mutableStateOf(false) }
-        var peakFlightBoost by remember { mutableStateOf(0.18f) }
+        var peakFlightBoost by remember { mutableStateOf(0.30f) }
 
         // Apple-style Leading & Trailing edge spring physics
         val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
@@ -132,7 +133,7 @@ fun CategoryTabSelector(
             if (isTabChangedByClick) {
                 flightStartCenter = (animLeft.value + animRight.value) / 2f
                 flightTargetCenter = (targetLeft + targetRight) / 2f
-                peakFlightBoost = (0.16f + (indexDistance - 1) * 0.03f).coerceAtMost(0.22f)
+                peakFlightBoost = (0.30f + (indexDistance - 1) * 0.04f).coerceAtMost(0.40f)
                 isFlightActive = true
             }
 
@@ -295,7 +296,8 @@ fun CategoryTabSelector(
                 selectedIndex = selectedIndex,
                 isInteractive = true,
                 onOptionClick = onOptionClick,
-                onTabPressedChange = { isSelectedTabPressed = it }
+                onTabPressedChange = { isSelectedTabPressed = it },
+                fontSize = fontSize
             )
 
             // 2. Sliding Highlighter + 3. Active Masked Layer (Only what is under the selector gets colored!)
@@ -325,7 +327,7 @@ fun CategoryTabSelector(
                         val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val maxPillHeight = size.height * 1.35f
+                        val maxPillHeight = size.height * 1.45f
                         val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
                         val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
 
@@ -362,7 +364,7 @@ fun CategoryTabSelector(
                         val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val maxPillHeight = size.height * 1.35f
+                        val maxPillHeight = size.height * 1.45f
                         val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
                         val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
 
@@ -396,7 +398,8 @@ fun CategoryTabSelector(
                     realTabWidth = realTabWidth,
                     selectedIndex = selectedIndex,
                     isInteractive = false,
-                    onOptionClick = {}
+                    onOptionClick = {},
+                    fontSize = fontSize
                 )
             }
         }
@@ -413,7 +416,8 @@ private fun CategoryTabItems(
     selectedIndex: Int,
     isInteractive: Boolean,
     onOptionClick: (Int) -> Unit,
-    onTabPressedChange: ((Boolean) -> Unit)? = null
+    onTabPressedChange: ((Boolean) -> Unit)? = null,
+    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp
 ) {
     Row(
         modifier = Modifier
@@ -452,7 +456,7 @@ private fun CategoryTabItems(
                     Text(
                         text = title.uppercase(),
                         style = MaterialTheme.typography.labelSmall,
-                        fontSize = 12.sp,
+                        fontSize = fontSize,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.sp,
                         color = textColor,

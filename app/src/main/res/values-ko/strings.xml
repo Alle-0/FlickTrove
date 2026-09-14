@@ -1298,4 +1298,7 @@
     <string name="box_office_error">박스오피스 데이터를 불러오지 못했습니다. 아래로 당겨 다시 시도하세요.</string>
     <string name="box_office_filter_all_years">전체 연도</string>
     <string name="box_office_banner_subtitle">주말 및 역대 박스오피스 순위</string>
+    <string name="detail_read_more">더보기</string>
+    <string name="detail_read_less">접기</string>
+    <string name="comment_anonymous_user">익명 사용자</string>
 </resources>

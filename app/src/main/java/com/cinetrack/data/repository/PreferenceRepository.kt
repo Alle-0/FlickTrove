@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,6 +23,7 @@ class PreferenceRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
     private val json = Json { ignoreUnknownKeys = true }
+    private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private object PreferencesKeys {
         val HOME_SORT = stringPreferencesKey("home_sort")
@@ -114,6 +119,20 @@ class PreferenceRepository @Inject constructor(
                 } ?: com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER
             )
         }
+
+    @Volatile
+    private var cachedPreferences: UserPreferences = UserPreferences()
+
+    init {
+        repoScope.launch {
+            userPreferencesFlow.collect { prefs ->
+                cachedPreferences = prefs
+            }
+        }
+    }
+
+    fun getContentLanguage(): String = cachedPreferences.contentLanguage
+    fun getCachedPreferences(): UserPreferences = cachedPreferences
 
     suspend fun updateHomeSort(config: SortConfig) {
         dataStore.edit { preferences ->

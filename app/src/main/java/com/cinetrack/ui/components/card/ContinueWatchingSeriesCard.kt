@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.NextEpisodeInfo
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
@@ -178,10 +179,11 @@ fun ContinueWatchingSeriesCard(
     onQuickMarkWatched: (Movie) -> Unit,
     onAction: (Movie) -> Unit = {},
     onMessage: (String) -> Unit = {},
+    precalculatedNextInfo: NextEpisodeInfo? = null,
     modifier: Modifier = Modifier
 ) {
     val effectiveWidth = cardWidth ?: 110.dp
-    val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
+    val nextInfo = precalculatedNextInfo ?: remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
         movie.calculateNextEpisode()
     }
 

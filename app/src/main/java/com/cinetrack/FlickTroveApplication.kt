@@ -21,9 +21,26 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
 
     override fun newImageLoader(): coil.ImageLoader {
         return coil.ImageLoader.Builder(this)
+            .memoryCache {
+                coil.memory.MemoryCache.Builder(this)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                coil.disk.DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(150L * 1024 * 1024)
+                    .build()
+            }
             .components {
                 add(coil.decode.SvgDecoder.Factory())
+                if (android.os.Build.VERSION.SDK_INT >= 28) {
+                    add(coil.decode.ImageDecoderDecoder.Factory())
+                } else {
+                    add(coil.decode.GifDecoder.Factory())
+                }
             }
+            .respectCacheHeaders(false)
             .build()
     }
 

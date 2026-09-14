@@ -28,6 +28,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
@@ -50,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toBitmap
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.toHexString
 import com.cinetrack.util.toComposeColor
 
 @Composable
@@ -142,6 +144,9 @@ fun HeroSpotlightCarousel(
                 1f
             }
 
+            var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
+            val coroutineScope = rememberCoroutineScope()
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -150,12 +155,16 @@ fun HeroSpotlightCarousel(
                         scaleY = scale
                         translationX = if (advancedEffectsEnabled) rawPageOffset * 28.dp.toPx() else 0f
                     }
-                    .bounceClick { onMovieClick(movie) }
+                    .bounceClick {
+                        val movieWithColor = if (dominantColor != null) {
+                            movie.copy(accentColor = dominantColor?.toHexString())
+                        } else {
+                            movie
+                        }
+                        onMovieClick(movieWithColor)
+                    }
                     .clip(RoundedCornerShape(36.dp))
             ) {
-
-                var dominantColor by remember { mutableStateOf<Color?>(null) }
-                val coroutineScope = rememberCoroutineScope()
 
                 // Backdrop Image
                 AsyncImage(
@@ -178,23 +187,33 @@ fun HeroSpotlightCarousel(
                     }
                 )
 
-                val bgColor = MaterialTheme.colorScheme.background
-                val targetColor = movie.accentColor?.toComposeColor() ?: dominantColor ?: bgColor
-                val animatedColor by animateColorAsState(targetValue = targetColor, label = "backdropColor")
+                val fallbackColor = MaterialTheme.colorScheme.primary
+                val rawTargetColor = movie.accentColor?.toComposeColor() ?: dominantColor ?: fallbackColor
+                val vividAccent = remember(rawTargetColor) {
+                    ColorUtils.ensureVividAccent(rawTargetColor)
+                }
+                val animatedColor by animateColorAsState(
+                    targetValue = vividAccent,
+                    animationSpec = tween(600),
+                    label = "backdropColor"
+                )
+                val baseDarkColor = remember { Color(0xFF0F0F16) }
+                val cardBottomColor = remember(animatedColor) {
+                    lerp(animatedColor, baseDarkColor, 0.72f)
+                }
                 
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.Transparent,
-                                        animatedColor.copy(alpha = 0.3f),
-                                        animatedColor.copy(alpha = 0.85f),
-                                        animatedColor
-                                    )
-                                )
+                                0.0f to Color.Transparent,
+                                0.3f to Color.Transparent,
+                                0.5f to cardBottomColor.copy(alpha = 0.35f),
+                                0.7f to cardBottomColor.copy(alpha = 0.75f),
+                                0.85f to cardBottomColor.copy(alpha = 0.92f),
+                                1.0f to cardBottomColor
+                            )
                         )
                 )
 
@@ -244,10 +263,12 @@ fun HeroSpotlightCarousel(
                         }
 
                         // Anno e generi
+                        val currentLanguage = LocalContext.current.resources.configuration.locales[0].language
                         val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
                         val genres = movie.genreIds?.mapNotNull { id ->
                             val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
-                            list.find { it.id == id }?.name
+                            val defaultName = list.find { it.id == id }?.name ?: ""
+                            com.cinetrack.data.model.GenreConstants.getLocalizedName(id, currentLanguage, defaultName).takeIf { it.isNotBlank() }
                         }?.take(3) ?: emptyList()
                         
                         if (year.isNotEmpty() || genres.isNotEmpty()) {

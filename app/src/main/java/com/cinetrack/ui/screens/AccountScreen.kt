@@ -148,13 +148,14 @@ object AccountTab : Tab {
         val avatarSelection = com.cinetrack.ui.components.account.LocalAvatarSelection.current
         val prefs = remember { context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE) }
         
-        var currentDisplayName by remember(currentUser) {
+        val guestLabel = stringResource(R.string.settings_guest)
+        var currentDisplayName by remember(currentUser, guestLabel) {
             mutableStateOf(
                 when {
-                    currentUser == null || currentUser.isAnonymous -> "Guest"
+                    currentUser == null || currentUser.isAnonymous -> guestLabel
                     else -> currentUser.displayName.takeIf { !it.isNullOrBlank() }
                         ?: currentUser.email?.substringBefore("@")
-                        ?: "User"
+                        ?: guestLabel
                 }
             )
         }
@@ -215,10 +216,10 @@ object AccountTab : Tab {
         var extractedColor by remember { mutableStateOf<Color?>(null) }
         var rawExtractedColor by remember { mutableStateOf<Color?>(null) }
         
-        val baseDarkColor = remember { Color(0xFF161620) }
+        val baseDarkColor = remember { Color(0xFF0F0F16) }
         val targetBackgroundColor = if (extractedColor != null) {
             val vividAccent = com.cinetrack.ui.utils.ColorUtils.ensureVividAccent(extractedColor!!)
-            androidx.compose.ui.graphics.lerp(vividAccent, baseDarkColor, 0.68f)
+            androidx.compose.ui.graphics.lerp(vividAccent, baseDarkColor, 0.85f)
         } else {
             baseDarkColor
         }
@@ -289,10 +290,10 @@ object AccountTab : Tab {
                             .background(
                                 Brush.verticalGradient(
                                     0.0f to Color.Transparent,
-                                    0.3f to Color.Transparent,
-                                    0.5f to animatedBgColor.copy(alpha = 0.3f),
-                                    0.7f to animatedBgColor.copy(alpha = 0.7f),
-                                    0.85f to animatedBgColor.copy(alpha = 0.9f),
+                                    0.30f to Color.Transparent,
+                                    0.55f to animatedBgColor.copy(alpha = 0.40f),
+                                    0.75f to animatedBgColor.copy(alpha = 0.85f),
+                                    0.92f to animatedBgColor.copy(alpha = 0.98f),
                                     1.0f to animatedBgColor
                                 )
                             )

@@ -752,6 +752,8 @@
     <string name="detail_cast">CAST</string>
     <string name="detail_top_comments">TOP COMMENTS</string>
     <string name="detail_plot">PLOT</string>
+    <string name="detail_read_more">Read more</string>
+    <string name="detail_read_less">Read less</string>
     <string name="detail_where_to_watch">WHERE TO WATCH</string>
     <string name="detail_collection">COLLECTION</string>
     <string name="detail_recommendations">RECOMMENDED</string>
@@ -1151,6 +1153,7 @@
     <string name="search_local_only">Showing results from your library</string>
     <string name="comment_write_btn">Write</string>
     <string name="comment_view_full_thread">View full thread -&gt;</string>
+    <string name="comment_anonymous_user">Anonymous User</string>
     <string name="comment_filters_title">FILTERS</string>
     <string name="comment_sort_by">SORT BY</string>
     <string name="comment_sort_date">Date</string>

@@ -224,16 +224,26 @@ fun HomeFeedScreenContent(
         { msg -> viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) }
     }
 
-    val getMovieFolderColors = remember(uiState.movieFolderColors) {
-        { movie: Movie ->
-            val compositeId = "${if(movie.mediaType.isNotEmpty()) movie.mediaType else uiState.activeTab}_${movie.id}"
-            uiState.movieFolderColors[compositeId]?.map { it.toComposeColor() } ?: emptyList()
+    val localMoviesMap = remember(uiState.allLocalMovies) {
+        uiState.allLocalMovies.associateBy { "${it.mediaType}_${it.id}" }
+    }
+
+    val precomputedFolderColors = remember(uiState.movieFolderColors) {
+        uiState.movieFolderColors.mapValues { entry ->
+            entry.value.map { it.toComposeColor() }
         }
     }
 
-    val resolveLocalMovie = remember(uiState.allLocalMovies) {
+    val getMovieFolderColors = remember(precomputedFolderColors, uiState.activeTab) {
+        { movie: Movie ->
+            val compositeId = "${if (movie.mediaType.isNotEmpty()) movie.mediaType else uiState.activeTab}_${movie.id}"
+            precomputedFolderColors[compositeId] ?: emptyList()
+        }
+    }
+
+    val resolveLocalMovie = remember(localMoviesMap) {
         { remoteMovie: Movie ->
-            val local = uiState.allLocalMovies.find { it.id == remoteMovie.id && it.mediaType == remoteMovie.mediaType }
+            val local = localMoviesMap["${remoteMovie.mediaType}_${remoteMovie.id}"]
             if (local != null) {
                 local.copy(
                     genreIds = if (!remoteMovie.genreIds.isNullOrEmpty()) remoteMovie.genreIds else local.genreIds
@@ -247,9 +257,9 @@ fun HomeFeedScreenContent(
         }
     }
 
-    val getMovieProgress = remember(uiState.allLocalMovies) {
+    val getMovieProgress = remember(localMoviesMap) {
         { movie: Movie ->
-            val local = uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }
+            val local = localMoviesMap["${movie.mediaType}_${movie.id}"]
             val effective = local ?: movie
             (effective.progress ?: 0.0).toFloat().let { p ->
                 if (p > 0f) p
@@ -261,21 +271,21 @@ fun HomeFeedScreenContent(
         }
     }
 
-    val isMovieFavorite = remember(uiState.allLocalMovies) {
+    val isMovieFavorite = remember(localMoviesMap) {
         { movie: Movie ->
-            movie.favorite || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.favorite == true
+            movie.favorite || localMoviesMap["${movie.mediaType}_${movie.id}"]?.favorite == true
         }
     }
 
-    val isMovieWatched = remember(uiState.allLocalMovies) {
+    val isMovieWatched = remember(localMoviesMap) {
         { movie: Movie ->
-            movie.watched || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.watched == true
+            movie.watched || localMoviesMap["${movie.mediaType}_${movie.id}"]?.watched == true
         }
     }
 
-    val isMovieReminder = remember(uiState.allLocalMovies) {
+    val isMovieReminder = remember(localMoviesMap) {
         { movie: Movie ->
-            movie.reminder || uiState.allLocalMovies.find { it.id == movie.id && it.mediaType == movie.mediaType }?.reminder == true
+            movie.reminder || localMoviesMap["${movie.mediaType}_${movie.id}"]?.reminder == true
         }
     }
 
@@ -535,9 +545,12 @@ fun HomeFeedScreenContent(
                                             LazyRow(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                items(watchlistList.take(10).size) { index ->
-                                                    val movie = watchlistList[index]
+                                             ) {
+                                                 items(
+                                                     count = watchlistList.take(10).size,
+                                                     key = { index -> "wl_${watchlistList[index].mediaType}_${watchlistList[index].id}" }
+                                                 ) { index ->
+                                                     val movie = watchlistList[index]
                                                     Box(modifier = Modifier.width(110.dp)) {
                                                         MovieCard(
                                                             movie = movie,
@@ -593,12 +606,16 @@ fun HomeFeedScreenContent(
                                                     onClick = { tabNavigator.current = RecommendationsTab }
                                                 )
                                                 
+                                                val restRecommended = remember(recommendedList) { recommendedList.drop(1) }
                                                 LazyRow(
                                                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                                 ) {
-                                                    items(recommendedList.drop(1).size) { index ->
-                                                        val rawMovie = recommendedList.drop(1)[index]
+                                                    items(
+                                                        count = restRecommended.size,
+                                                        key = { index -> "rec_${restRecommended[index].mediaType}_${restRecommended[index].id}" }
+                                                    ) { index ->
+                                                        val rawMovie = restRecommended[index]
                                                         val movie = resolveLocalMovie(rawMovie)
                                                         Box(modifier = Modifier.width(110.dp)) {
                                                             MovieCard(
@@ -645,7 +662,10 @@ fun HomeFeedScreenContent(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
-                                                items(recs.size) { index ->
+                                                items(
+                                                    count = recs.size,
+                                                    key = { index -> "byw_${recs[index].mediaType}_${recs[index].id}" }
+                                                ) { index ->
                                                     val rawMovie = recs[index]
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     Box(modifier = Modifier.width(110.dp)) {
@@ -682,12 +702,16 @@ fun HomeFeedScreenContent(
                                         Column {
                                             HomeSectionTitle(stringResource(R.string.home_section_top_10))
                                             
+                                            val top10Limited = remember(top10List) { top10List.take(10) }
                                             LazyRow(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
-                                                items(top10List.take(10).size) { index ->
-                                                    val rawMovie = top10List[index]
+                                                items(
+                                                    count = top10Limited.size,
+                                                    key = { index -> "top_${top10Limited[index].mediaType}_${top10Limited[index].id}" }
+                                                ) { index ->
+                                                    val rawMovie = top10Limited[index]
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     Top10MovieCard(
                                                         movie = movie,
@@ -728,7 +752,10 @@ fun HomeFeedScreenContent(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
-                                                items(popularList.size) { index ->
+                                                items(
+                                                    count = popularList.size,
+                                                    key = { index -> "pop_${popularList[index].mediaType}_${popularList[index].id}" }
+                                                ) { index ->
                                                     val rawMovie = popularList[index]
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     Box(modifier = Modifier.width(110.dp)) {
@@ -778,7 +805,10 @@ fun HomeFeedScreenContent(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
-                                                items(nowPlayingList.size) { index ->
+                                                items(
+                                                    count = nowPlayingList.size,
+                                                    key = { index -> "now_${nowPlayingList[index].mediaType}_${nowPlayingList[index].id}" }
+                                                ) { index ->
                                                     val rawMovie = nowPlayingList[index]
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     Box(modifier = Modifier.width(110.dp)) {
@@ -828,7 +858,10 @@ fun HomeFeedScreenContent(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
-                                                items(upcomingList.size) { index ->
+                                                items(
+                                                    count = upcomingList.size,
+                                                    key = { index -> "upc_${upcomingList[index].mediaType}_${upcomingList[index].id}" }
+                                                ) { index ->
                                                     val rawMovie = upcomingList[index]
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     Box(modifier = Modifier.width(110.dp)) {
@@ -875,7 +908,10 @@ fun HomeFeedScreenContent(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                                             ) {
-                                                items(uiState.magazineNews.size) { index ->
+                                                items(
+                                                    count = uiState.magazineNews.size,
+                                                    key = { index -> "news_${uiState.magazineNews[index].link.hashCode()}" }
+                                                ) { index ->
                                                     val article = uiState.magazineNews[index]
                                                     NewsArticleCard(article = article, context = context)
                                                 }

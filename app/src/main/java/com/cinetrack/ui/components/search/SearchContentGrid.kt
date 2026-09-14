@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.components.shared.MovieActionsState
 import com.cinetrack.ui.components.shared.CollectionCardSkeleton
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
@@ -132,6 +133,15 @@ fun SearchContentGrid(
             }
         }
     } else {
+        val favoritesMap = remember(uiState.favorites) {
+            uiState.favorites.associateBy { "${it.mediaType}_${it.id}" }
+        }
+        val precomputedFolderColors = remember(uiState.movieFolderColors) {
+            uiState.movieFolderColors.mapValues { entry ->
+                entry.value.map { it.toComposeColor() }
+            }
+        }
+
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Fixed(12),
@@ -161,6 +171,8 @@ fun SearchContentGrid(
                         isLoading = uiState.isLoading,
                         favorites = uiState.favorites,
                         movieFolderColors = uiState.movieFolderColors,
+                        favoritesMap = favoritesMap,
+                        precomputedFolderColors = precomputedFolderColors,
                         preferences = uiState.preferences,
                         animatedMovieIds = animatedMovieIds,
                         columns = columns,
@@ -182,6 +194,8 @@ fun SearchContentGrid(
                         isLoading = uiState.isLoading,
                         favorites = uiState.favorites,
                         movieFolderColors = uiState.movieFolderColors,
+                        favoritesMap = favoritesMap,
+                        precomputedFolderColors = precomputedFolderColors,
                         preferences = uiState.preferences,
                         animatedMovieIds = animatedMovieIds,
                         columns = columns,
@@ -250,6 +264,8 @@ fun SearchContentGrid(
                     category = uiState.category,
                     favorites = uiState.favorites,
                     movieFolderColors = uiState.movieFolderColors,
+                    favoritesMap = favoritesMap,
+                    precomputedFolderColors = precomputedFolderColors,
                     preferences = uiState.preferences,
                     animatedMovieIds = animatedMovieIds,
                     columns = columns,

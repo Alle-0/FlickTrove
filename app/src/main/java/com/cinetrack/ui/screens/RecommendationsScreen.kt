@@ -63,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
+import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -401,6 +402,15 @@ fun RecommendationsScreenContent(
                     }
                 }
             } else {
+                val favoritesMap = remember(uiState.favorites) {
+                    uiState.favorites.associateBy { "${it.mediaType}_${it.id}" }
+                }
+                val precomputedFolderColors = remember(uiState.movieFolderColors) {
+                    uiState.movieFolderColors.mapValues { entry ->
+                        entry.value.map { it.toComposeColor() }
+                    }
+                }
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
                     contentPadding = PaddingValues(
@@ -452,9 +462,11 @@ fun RecommendationsScreenContent(
                     } else {
                         itemsIndexed(
                             items = uiState.recommendedMovies,
-                            key = { _, movie -> movie.id.toString() + movie.mediaType }
+                            key = { _, movie -> movie.compositeId },
+                            contentType = { _, _ -> "movie_card" }
                         ) { index, movie ->
-                            val movieStatus = uiState.favorites.find { it.id == movie.id && it.mediaType == movie.mediaType }
+                            val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
+                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
                             if (columns == 1) {
                                 com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie.copy(personalRating = movieStatus?.personalRating),
@@ -463,7 +475,7 @@ fun RecommendationsScreenContent(
                                     isWatched = movieStatus?.watched ?: false,
                                     isReminder = movieStatus?.reminder ?: false,
                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                    folderColors = viewModel.getMovieFolderColors(movie),
+                                    folderColors = folderColors,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                     hasAnimatedSet = viewModel.animatedMovieIds,
                                     staggerIndex = index,
@@ -481,7 +493,7 @@ fun RecommendationsScreenContent(
                                     isReminder = movieStatus?.reminder ?: false,
                                     progress = movieStatus?.progress?.toFloat() ?: 0f,
                                     personalRating = movieStatus?.personalRating,
-                                    folderColors = viewModel.getMovieFolderColors(movie),
+                                    folderColors = folderColors,
                                     showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                     hasAnimatedSet = viewModel.animatedMovieIds,
                                     staggerIndex = index,

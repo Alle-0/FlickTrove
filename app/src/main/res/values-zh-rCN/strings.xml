@@ -1298,4 +1298,7 @@
     <string name="box_office_error">无法加载票房数据。下拉以重试。</string>
     <string name="box_office_filter_all_years">全部年份</string>
     <string name="box_office_banner_subtitle">周末与影史票房排行榜</string>
+    <string name="detail_read_more">展开更多</string>
+    <string name="detail_read_less">收起</string>
+    <string name="comment_anonymous_user">匿名用户</string>
 </resources>

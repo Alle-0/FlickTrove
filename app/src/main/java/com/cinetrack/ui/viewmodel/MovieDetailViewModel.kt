@@ -992,7 +992,7 @@ class MovieDetailViewModel @Inject constructor(
                     .allowHardware(false)
                     .build()
                 val result = loader.execute(request)
-                if (_extractedColor.value == null && result is SuccessResult) {
+                if (result is SuccessResult) {
                     val bitmap = result.drawable.toBitmap()
                     val finalColor = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
                     if (finalColor != Color.Unspecified) {
@@ -1010,32 +1010,30 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun fetchAccentColor(imageUrl: String, movie: Movie, forceReload: Boolean = false, targetAspectRatio: Float? = null) {
-        if (forceReload || movie.accentColor == null || _extractedColor.value == null) {
-            viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
-                try {
-                    val loader = Coil.imageLoader(context)
-                    val request = ImageRequest.Builder(context)
-                        .data(imageUrl)
-                        .allowHardware(false)
-                        .build()
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+            try {
+                val loader = Coil.imageLoader(context)
+                val request = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .allowHardware(false)
+                    .build()
 
-                    val result = loader.execute(request)
-                    if (result is SuccessResult) {
-                        val bitmap = result.drawable.toBitmap()
-                        val finalColor = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
-                        if (finalColor != Color.Unspecified) {
-                            _extractedColor.value = finalColor
-                            val hexString = finalColor.toHexString()
-                            repository.saveCachedColor("${movie.mediaType}:${movie.id}", hexString)
-                            val local = repository.getMovie(movie.id, movie.mediaType)
-                            if (local != null && (forceReload || local.accentColor == null || local.accentColor != hexString)) {
-                                repository.saveMovie(local.copy(accentColor = hexString))
-                            }
+                val result = loader.execute(request)
+                if (result is SuccessResult) {
+                    val bitmap = result.drawable.toBitmap()
+                    val finalColor = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
+                    if (finalColor != Color.Unspecified) {
+                        _extractedColor.value = finalColor
+                        val hexString = finalColor.toHexString()
+                        repository.saveCachedColor("${movie.mediaType}:${movie.id}", hexString)
+                        val local = repository.getMovie(movie.id, movie.mediaType)
+                        if (local != null && local.accentColor != hexString) {
+                            repository.saveMovie(local.copy(accentColor = hexString))
                         }
                     }
-                } catch (e: Exception) {
-                    // Ignore extraction errors and fallback to default
                 }
+            } catch (e: Exception) {
+                // Ignore extraction errors and fallback to default
             }
         }
     }

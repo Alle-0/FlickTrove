@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -369,28 +370,28 @@ fun DetailRatingInfoDialog(
                                         onDismiss()
                                         onViewGuideClick()
                                     })
-                                    .background(accent.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-                                    .border(0.5.dp, accent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                    .background(accent.copy(alpha = 0.12f), CircleShape)
+                                    .border(0.5.dp, accent.copy(alpha = 0.3f), CircleShape)
+                                    .padding(horizontal = 10.dp, vertical = 3.5.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 Text(
                                     text = stringResource(R.string.detail_rating_view_guide),
                                     color = accent,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.Medium
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                                     contentDescription = null,
                                     tint = accent,
-                                    modifier = Modifier.size(13.dp)
+                                    modifier = Modifier.size(10.dp)
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
 
                     Box(

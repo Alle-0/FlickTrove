@@ -139,7 +139,7 @@ fun DetailRecommendations(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 3.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.5f),
+                                color = Color.White.copy(alpha = 0.65f),
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -216,7 +216,7 @@ fun DetailRecommendations(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
                     ),
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = Color.White.copy(alpha = 0.65f),
                     modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
                 )
 

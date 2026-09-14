@@ -788,10 +788,15 @@ fun MetaBadge(
     Row(
         modifier = Modifier
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-            .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.06f), CircleShape)
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
             .let { if (onClick != null) it.bounceClick(scaleDown = 0.95f) { onClick() } else it }
-            .padding(horizontal = 10.dp, vertical = 3.dp),
+            .padding(
+                start = 10.dp,
+                end = if (showValueBox) 3.dp else 10.dp,
+                top = 3.dp,
+                bottom = 3.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -799,14 +804,15 @@ fun MetaBadge(
             fontSize = 9.sp,
             fontWeight = FontWeight.Black,
             color = Color.White.copy(alpha = 0.4f),
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 6.dp)
         )
         if (showValueBox) {
             Box(
                 modifier = Modifier
-                    .background(valueColor.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
-                    .border(0.5.dp, valueColor.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 10.dp, vertical = 0.dp)
+                    .background(valueColor.copy(alpha = 0.12f), CircleShape)
+                    .border(0.5.dp, valueColor.copy(alpha = 0.25f), CircleShape)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = value,
@@ -825,3 +831,4 @@ fun MetaBadge(
         }
     }
 }
+

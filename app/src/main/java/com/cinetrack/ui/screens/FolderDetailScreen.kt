@@ -252,6 +252,11 @@ fun FolderDetailScreenContent(
                             val handlePress: (Movie) -> Unit = remember { { m -> currentOnMovieClick(m) } }
                             val handleLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember { { m, p, c -> currentOnLongPress(m, p, c) } }
                             val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) } }
+                            val precomputedFolderColors = remember(folderColors) {
+                                folderColors.mapValues { entry ->
+                                    entry.value.map { it.toComposeColor() }
+                                }
+                            }
 
                             LazyVerticalGrid(
                                 state = lazyGridState,
@@ -291,12 +296,12 @@ fun FolderDetailScreenContent(
                                         }
                                     }
                                 } else {
-                                    itemsIndexed(state.movies, key = { index, movie -> movie.id }) { index, movie ->
-                                        val currentFolderColors = remember(folderColors[movie.compositeId]) {
-                                            folderColors[movie.compositeId]?.map { 
-                                                it.toComposeColor()
-                                            } ?: emptyList()
-                                        }
+                                    itemsIndexed(
+                                        items = state.movies,
+                                        key = { _, movie -> movie.compositeId },
+                                        contentType = { _, _ -> "movie_card" }
+                                    ) { index, movie ->
+                                        val currentFolderColors = precomputedFolderColors[movie.compositeId] ?: emptyList()
                                         
                                         if (columns == 1) {
                                             com.cinetrack.ui.components.card.MovieListCard(

@@ -554,7 +554,8 @@ data class Movie(
         season: Season,
         todayIso: String,
         nextEpSeason: Int? = null,
-        nextEpNum: Int? = null
+        nextEpNum: Int? = null,
+        maxDatedSeason: Int = 0
     ): Int {
         val sNum = season.seasonNumber ?: 0
         if (sNum <= 0) return 0
@@ -587,7 +588,6 @@ data class Movie(
             return 0
         }
 
-        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
         if (maxDatedSeason > 0 && sNum > maxDatedSeason) {
             return 0
         }
@@ -602,7 +602,7 @@ data class Movie(
         if (validSeasons.isNullOrEmpty()) return null
 
         val todayIso = try {
-            java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+            LocalDate.now().toString()
         } catch (e: Exception) {
             "2026-01-01"
         }
@@ -611,7 +611,7 @@ data class Movie(
         var nextAiringEpNum: Int? = null
         if (!nextEpisodeString.isNullOrBlank() && (nextEpisodeAirDate.isNullOrBlank() || nextEpisodeAirDate!! > todayIso)) {
             try {
-                val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(nextEpisodeString!!)
+                val match = EPISODE_REGEX.find(nextEpisodeString!!)
                 if (match != null) {
                     nextAiringSeason = match.groupValues[1].toIntOrNull()
                     nextAiringEpNum = match.groupValues[2].toIntOrNull()
@@ -619,12 +619,16 @@ data class Movie(
             } catch (_: Exception) {}
         }
 
-        val totalAiredEpisodes = validSeasons.sumOf { getReleasedEpisodeCountForSeason(it, todayIso, nextAiringSeason, nextAiringEpNum) }
+        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+
+        val seasonAiredCounts = validSeasons.map { season ->
+            season to getReleasedEpisodeCountForSeason(season, todayIso, nextAiringSeason, nextAiringEpNum, maxDatedSeason)
+        }
+        val totalAiredEpisodes = seasonAiredCounts.sumOf { it.second }
         val totalWatchedEpisodes = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
         val overallProgress = if (totalAiredEpisodes > 0) (totalWatchedEpisodes.toFloat() / totalAiredEpisodes).coerceIn(0f, 1f) else 0f
 
-        for (season in validSeasons) {
-            val airedCount = getReleasedEpisodeCountForSeason(season, todayIso, nextAiringSeason, nextAiringEpNum)
+        for ((season, airedCount) in seasonAiredCounts) {
             if (airedCount <= 0) continue
 
             val watchedInSeason = watchedEpisodes?.get(season.seasonNumber.toString()) ?: emptyList()
@@ -844,6 +848,7 @@ data class Movie(
     }
 
     companion object {
+        private val EPISODE_REGEX = Regex("""[Ss](\d+)[Ee](\d+)""")
         private val utcFormatter = object : ThreadLocal<SimpleDateFormat>() {
             override fun initialValue(): SimpleDateFormat {
                 return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {

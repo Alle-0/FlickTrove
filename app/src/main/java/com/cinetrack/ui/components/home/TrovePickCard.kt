@@ -291,9 +291,11 @@ fun TrovePickCard(
 
                     // Anno e Generi
                     val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
+                    val currentLanguage = context.resources.configuration.locales[0].language
                     val genres = movie.genreIds?.mapNotNull { id ->
                         val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
-                        list.find { it.id == id }?.name
+                        val defaultName = list.find { it.id == id }?.name ?: ""
+                        com.cinetrack.data.model.GenreConstants.getLocalizedName(id, currentLanguage, defaultName).takeIf { it.isNotBlank() }
                     }?.take(2) ?: emptyList()
                     
                     if (year.isNotEmpty() || genres.isNotEmpty()) {

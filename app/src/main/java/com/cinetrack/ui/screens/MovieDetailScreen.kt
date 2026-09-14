@@ -388,17 +388,17 @@ fun MovieDetailScreenContent(
         themePrimaryColor
     }
 
-    val rawAccentColor = when (val state = uiState) {
-        is DetailUiState.Success -> state.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
-        else -> extractedColor ?: fallbackAccentColor
-    }
+    val rawAccentColor = extractedColor
+        ?: preloadedAccentColor?.toComposeColor()
+        ?: (uiState as? DetailUiState.Success)?.movieEntry?.accentColor?.toComposeColor()
+        ?: fallbackAccentColor
     val globalAccentColor = remember(rawAccentColor) {
         ColorUtils.ensureVividAccent(rawAccentColor)
     }
 
-    val baseDarkColor = remember { Color(0xFF161620) } // Balanced sleek dark slate
+    val baseDarkColor = remember { Color(0xFF0F0F16) } // Balanced sleek deep dark slate
     val targetBackgroundColor = when (uiState) {
-        is DetailUiState.Success -> lerp(globalAccentColor, baseDarkColor, 0.68f)
+        is DetailUiState.Success -> lerp(globalAccentColor, baseDarkColor, 0.85f)
         else -> baseDarkColor
     }
     val animatedBgColor by animateColorAsState(
@@ -460,10 +460,11 @@ fun MovieDetailScreenContent(
                     if (state != null) {
                         val activeMovie = state.movieEntry
                         
-                        // Use preloadedAccentColor as fallback if extractedColor is not yet available
-                        // This prevents the screen from reverting to the default color before the new extraction finishes.
-                        val fallbackColor = extractedColor ?: preloadedAccentColor?.toComposeColor(fallbackAccentColor) ?: fallbackAccentColor
-                        val rawTargetAccentColor = activeMovie.accentColor.toComposeColor(fallbackColor)
+                        // Use extractedColor or preloadedAccentColor before stale DB accentColor
+                        val rawTargetAccentColor = extractedColor
+                            ?: preloadedAccentColor?.toComposeColor()
+                            ?: activeMovie.accentColor?.toComposeColor()
+                            ?: fallbackAccentColor
                         
                         val targetAccentColor = remember(rawTargetAccentColor) {
                             ColorUtils.ensureVividAccent(rawTargetAccentColor)

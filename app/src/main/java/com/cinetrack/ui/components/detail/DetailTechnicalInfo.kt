@@ -6,7 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.res.stringResource
 
 import com.cinetrack.R
-
+import com.cinetrack.ui.utils.ColorUtils
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +46,7 @@ fun DetailTechnicalInfo(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 3.sp
             ),
-            color = Color.White.copy(alpha = 0.5f),
+            color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
@@ -165,13 +165,13 @@ private fun TechnicalItem(
             modifier = Modifier
                 .size(36.dp)
                 .background(accentColor.copy(alpha = 0.18f), iconShape)
-                .border(1.dp, accentColor.copy(alpha = 0.45f), iconShape),
+                .border(1.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.6f), iconShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = accentColor,
+                tint = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -186,7 +186,7 @@ private fun TechnicalItem(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp
                 ),
-                color = Color.White.copy(alpha = 0.3f),
+                color = Color.White.copy(alpha = 0.65f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

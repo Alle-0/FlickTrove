@@ -5,6 +5,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import coil.imageLoader
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -144,17 +145,7 @@ class CommentsScreen(
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
         var attachedMedia by remember { mutableStateOf(emptyList<String>()) }
-        val imageLoader = remember {
-            coil.ImageLoader.Builder(context)
-                .components {
-                    if (android.os.Build.VERSION.SDK_INT >= 28) {
-                        add(coil.decode.ImageDecoderDecoder.Factory())
-                    } else {
-                        add(coil.decode.GifDecoder.Factory())
-                    }
-                }
-                .build()
-        }
+        val imageLoader = context.imageLoader
         
         val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
             contract = androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia(),
@@ -415,7 +406,7 @@ class CommentsScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { "Anonimo" },
+                                        text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { stringResource(R.string.comment_anonymous_user) },
                                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = Color.White
                                     )
