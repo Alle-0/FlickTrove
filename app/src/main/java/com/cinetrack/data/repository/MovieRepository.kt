@@ -1270,6 +1270,14 @@ class MovieRepository @Inject constructor(
         }
     }
 
+    suspend fun getCachedHomeFeedEntity(): HomeFeedCacheEntity? {
+        return try {
+            cacheDao.getHomeFeedEntity("home_feed")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun saveCachedHomeFeed(feed: CachedFeedData) {
         try {
             val jsonStr = json.encodeToString(feed)
@@ -1632,35 +1640,64 @@ class MovieRepository @Inject constructor(
     suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(page = page).results
     suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
 
-    suspend fun getTop10FlickTrove(isTv: Boolean): List<Movie> {
-        val compositeIds = firebaseRemoteDataSource.fetchTop10Monthly(isTv)
-        val mediaType = if (isTv) "tv" else "movie"
+    suspend fun getTop10FlickTroveBoth(): Pair<List<Movie>, List<Movie>> {
+        val (movieIds, tvIds) = firebaseRemoteDataSource.fetchTop10MonthlyBoth()
         return kotlinx.coroutines.coroutineScope {
-            compositeIds.mapNotNull { compositeId ->
-                val idStr = compositeId.removePrefix("tv_").removePrefix("movie_")
-                val id = idStr.toLongOrNull() ?: return@mapNotNull null
-                async {
+            val moviesDeferred = async {
+                movieIds.mapNotNull { compositeId ->
+                    val idStr = compositeId.removePrefix("movie_")
+                    val id = idStr.toLongOrNull() ?: return@mapNotNull null
                     try {
-                        val detail = getMovieDetail(id, isTv)
+                        val detail = getMovieDetail(id, isTv = false)
                         Movie(
                             id = detail.id.toLong(),
-                            title = detail.title ?: detail.name ?: "",
+                            title = detail.title ?: "",
                             posterPath = detail.posterPath,
                             backdropPath = detail.backdropPath,
-                            releaseDate = detail.releaseDate ?: detail.firstAirDate ?: "",
+                            releaseDate = detail.releaseDate ?: "",
                             overview = detail.overview ?: "",
                             voteAverage = detail.voteAverage ?: 0.0,
                             voteCount = detail.voteCount ?: 0,
                             genreIds = detail.genres?.map { it.id } ?: emptyList(),
-                            mediaType = mediaType,
+                            mediaType = "movie",
                             runtime = detail.runtime
                         )
                     } catch (e: Exception) {
                         null
                     }
                 }
-            }.mapNotNull { it.await() }
+            }
+            val tvDeferred = async {
+                tvIds.mapNotNull { compositeId ->
+                    val idStr = compositeId.removePrefix("tv_")
+                    val id = idStr.toLongOrNull() ?: return@mapNotNull null
+                    try {
+                        val detail = getMovieDetail(id, isTv = true)
+                        Movie(
+                            id = detail.id.toLong(),
+                            title = detail.name ?: detail.title ?: "",
+                            posterPath = detail.posterPath,
+                            backdropPath = detail.backdropPath,
+                            releaseDate = detail.firstAirDate ?: detail.releaseDate ?: "",
+                            overview = detail.overview ?: "",
+                            voteAverage = detail.voteAverage ?: 0.0,
+                            voteCount = detail.voteCount ?: 0,
+                            genreIds = detail.genres?.map { it.id } ?: emptyList(),
+                            mediaType = "tv",
+                            runtime = detail.runtime
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }
+            Pair(moviesDeferred.await(), tvDeferred.await())
         }
+    }
+
+    suspend fun getTop10FlickTrove(isTv: Boolean): List<Movie> {
+        val (movies, tv) = getTop10FlickTroveBoth()
+        return if (isTv) tv else movies
     }
 
     suspend fun discoverMoviesWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {

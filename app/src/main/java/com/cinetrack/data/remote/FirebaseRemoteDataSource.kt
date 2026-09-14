@@ -542,10 +542,28 @@ class FirebaseRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun fetchTop10Monthly(isTv: Boolean): List<String> {
+    suspend fun fetchTop10MonthlyBoth(): Pair<List<String>, List<String>> {
+        val top10DocRef = firestore.collection("global_movie_stats").document("top10")
+
+        // 1. Prova prima a leggere il documento pre-aggregato globale (1 SOLA LETTURA FIRESTORE!)
+        try {
+            val globalDoc = top10DocRef.get().await()
+            if (globalDoc.exists()) {
+                val updatedAt = globalDoc.getTimestamp("updatedAt")?.toDate()?.time ?: 0L
+                val isRecent = (System.currentTimeMillis() - updatedAt) < (24 * 60 * 60 * 1000L) // 24 ore
+                val movies = (globalDoc.get("top10_movies") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                val tv = (globalDoc.get("top10_tv") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+
+                if (isRecent && (movies.isNotEmpty() || tv.isNotEmpty())) {
+                    return Pair(movies, tv)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("FirebaseRemoteDataSource", "Could not fetch pre-aggregated top10, falling back to calculation", e)
+        }
+
+        // 2. Se il documento non esiste o è scaduto da oltre 24 ore, esegue il calcolo rolling 4 settimane
         val now = java.util.Calendar.getInstance()
-        
-        // Rolling 4 settimane (28 giorni ~ ultimi 30 gg mobili reali)
         val weekIds = (0 until 4).map { i ->
             val cal = java.util.Calendar.getInstance().apply {
                 timeInMillis = now.timeInMillis
@@ -555,7 +573,7 @@ class FirebaseRemoteDataSource @Inject constructor(
             val week = cal.get(java.util.Calendar.WEEK_OF_YEAR)
             "${year}_W$week"
         }
-        
+
         return try {
             val snaps = coroutineScope {
                 weekIds.map { weekId ->
@@ -572,33 +590,61 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                 }.awaitAll().filterNotNull()
             }
-            
-            val prefix = if (isTv) "tv_" else "movie_"
-            
+
             data class ScoredItem(val compositeId: String, val score: Long)
-            val mergedItems = mutableMapOf<String, Long>()
-            
+            val mergedMovieItems = mutableMapOf<String, Long>()
+            val mergedTvItems = mutableMapOf<String, Long>()
+
             for (snap in snaps) {
                 for (doc in snap.documents) {
-                    if (doc.id.startsWith(prefix)) {
-                        val views = doc.getLong("view_count") ?: 0L
-                        val ratings = doc.getLong("rating_count") ?: 0L
-                        val score = views + (ratings * 2)
-                        if (score > 0) {
-                            mergedItems[doc.id] = (mergedItems[doc.id] ?: 0L) + score
+                    val views = doc.getLong("view_count") ?: 0L
+                    val ratings = doc.getLong("rating_count") ?: 0L
+                    val score = views + (ratings * 2)
+                    if (score > 0) {
+                        if (doc.id.startsWith("movie_")) {
+                            mergedMovieItems[doc.id] = (mergedMovieItems[doc.id] ?: 0L) + score
+                        } else if (doc.id.startsWith("tv_")) {
+                            mergedTvItems[doc.id] = (mergedTvItems[doc.id] ?: 0L) + score
                         }
                     }
                 }
             }
-            
-            mergedItems.entries
+
+            val topMovies = mergedMovieItems.entries
                  .map { ScoredItem(it.key, it.value) }
                  .sortedByDescending { it.score }
                  .take(10)
                  .map { it.compositeId }
+
+            val topTv = mergedTvItems.entries
+                 .map { ScoredItem(it.key, it.value) }
+                 .sortedByDescending { it.score }
+                 .take(10)
+                 .map { it.compositeId }
+
+            // 3. Salva il nuovo calcolo nel documento globale per tutti gli altri utenti
+            try {
+                top10DocRef.set(
+                    mapOf(
+                        "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                        "top10_movies" to topMovies,
+                        "top10_tv" to topTv
+                    ),
+                    com.google.firebase.firestore.SetOptions.merge()
+                )
+            } catch (e: Exception) {
+                android.util.Log.w("FirebaseRemoteDataSource", "Failed to cache global top10 document", e)
+            }
+
+            Pair(topMovies, topTv)
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRemoteDataSource", "Error fetching Top 10 Rolling 30 Days", e)
-            emptyList()
+            Pair(emptyList(), emptyList())
         }
+    }
+
+    suspend fun fetchTop10Monthly(isTv: Boolean): List<String> {
+        val (movies, tv) = fetchTop10MonthlyBoth()
+        return if (isTv) tv else movies
     }
 }

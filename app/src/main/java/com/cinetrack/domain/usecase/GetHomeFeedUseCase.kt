@@ -70,9 +70,10 @@ class GetHomeFeedUseCase @Inject constructor(
 
         val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
         val nowMoviesDeferred = async { repository.getNowPlayingMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
+        val topBothDeferred = async { repository.getTop10FlickTroveBoth() }
         val topMoviesDeferred = async { 
-            val rawTop = repository.getTop10FlickTrove(isTv = false)
-            val result = rawTop.toMutableList()
+            val (rawTopMovies, _) = topBothDeferred.await()
+            val result = rawTopMovies.toMutableList()
             if (result.size < 10) {
                 try {
                     val trendingFallback = repository.getTrendingMovies()
@@ -92,8 +93,8 @@ class GetHomeFeedUseCase @Inject constructor(
         val popTvDeferred = async { repository.getPopularTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
         val nowTvDeferred = async { repository.getOnTheAirTV().take(10).map { it.copy(mediaType = "tv") }.toImmutableList() }
         val topTvDeferred = async { 
-            val rawTop = repository.getTop10FlickTrove(isTv = true)
-            val result = rawTop.toMutableList()
+            val (_, rawTopTv) = topBothDeferred.await()
+            val result = rawTopTv.toMutableList()
             if (result.size < 10) {
                 try {
                     val trendingFallback = repository.getTrendingTV()

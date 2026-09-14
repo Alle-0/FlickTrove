@@ -115,9 +115,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun fetchFeed() {
+    private fun fetchFeed(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             // 1. Legge prima la cache Room per un rendering istantaneo (T=0ms)
+            val cachedEntity = repository.getCachedHomeFeedEntity()
             val cachedData = repository.getCachedHomeFeed()
             if (cachedData != null) {
                 _feedState.value = cachedData.toFeedState()
@@ -125,7 +126,16 @@ class HomeViewModel @Inject constructor(
                 _feedState.value = FeedState(isLoaded = false, hasError = false)
             }
 
-            // 2. Esegue il refresh di rete in background
+            // 2. Controllo validità cache (6 ORE: 6 * 60 * 60 * 1000L)
+            val cacheAgeMs = cachedEntity?.updatedAt?.let { System.currentTimeMillis() - it } ?: Long.MAX_VALUE
+            val isCacheValid = !forceRefresh && cachedData != null && (cacheAgeMs < 6 * 60 * 60 * 1000L)
+
+            if (isCacheValid) {
+                // Cache valida per 6 ore: non rieseguire la rete per proteggere le quote Firestore/TMDB
+                return@launch
+            }
+
+            // 3. Esegue il refresh di rete in background se la cache è scaduta (> 6 ore) o forzata
             try {
                 val freshFeed = getHomeFeedUseCase()
                 _feedState.value = freshFeed
@@ -168,7 +178,7 @@ class HomeViewModel @Inject constructor(
 
 
     fun retryFeed() {
-        fetchFeed()
+        fetchFeed(forceRefresh = true)
     }
 
 
