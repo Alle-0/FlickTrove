@@ -194,9 +194,10 @@ fun MarkdownNotesViewer(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(max = 240.dp)
-            .verticalScroll(scrollState)
-            .verticalFadingEdges(scrollState, 16.dp, 16.dp)
             .premiumScrollbar(scrollState)
+            .padding(end = 8.dp)
+            .verticalFadingEdges(scrollState, topEdgeHeight = 24.dp, bottomEdgeHeight = 28.dp)
+            .verticalScroll(scrollState)
     ) {
         val lines = rawNotes.lines()
         for (line in lines) {
