@@ -262,7 +262,14 @@ fun SettingsUILayoutSection(
             icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
             title = stringResource(R.string.account_personalize_dashboard),
             description = stringResource(R.string.settings_personalize_dashboard_desc),
-            trailing = { },
+            trailing = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(16.dp)
+                )
+            },
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.triggerDashboardSettingsMenu()
