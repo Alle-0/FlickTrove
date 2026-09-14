@@ -185,7 +185,6 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Public Folders:** Make any folder public and shareable via link — let anyone browse your curated collection.
 - [ ] **Badges & Achievements:** Unlock special badges based on your watch history, streaks, genres explored, and community contributions.
 - [ ] **Follow Actors & Directors:** Get notified the moment a followed person announces or releases a new project.
-- [ ] **Production Company Pages:** Dedicated stats and screens for major studios (Paramount, 20th Century, A24, Warner Bros, etc.) — browse their full catalog and see community ratings at a glance.
 - [ ] **Official Website:** A public-facing companion website to showcase your profile, public folders, and stats.
 - [ ] **AI:** ?
 
