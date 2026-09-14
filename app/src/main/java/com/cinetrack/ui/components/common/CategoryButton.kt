@@ -19,7 +19,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,6 +37,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.core.Animatable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.DisposableEffect
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -87,134 +98,350 @@ fun CategoryTabSelector(
         val realTabWidth = with(LocalDensity.current) { realTabWidthPx.toDp() }
 
         val coroutineScope = rememberCoroutineScope()
-        val offsetAnimatable = remember { Animatable(selectedIndex * realTabWidthPx) }
+        val paddingPx = with(LocalDensity.current) { 3.dp.toPx() }
+        val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        LaunchedEffect(selectedIndex, realTabWidthPx) {
-            offsetAnimatable.animateTo(
-                targetValue = selectedIndex * realTabWidthPx,
-                animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
-            )
+        val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
+        val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
+
+        var isSelectedTabPressed by remember { mutableStateOf(false) }
+        var isDragging by remember { mutableStateOf(false) }
+
+        // Apple-style Leading & Trailing edge spring physics
+        val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
+
+        LaunchedEffect(selectedIndex, realTabWidthPx, options.size, advancedEffectsEnabled) {
+            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+
+            if (!advancedEffectsEnabled) {
+                launch { animLeft.snapTo(targetLeft) }
+                launch { animRight.snapTo(targetRight) }
+                return@LaunchedEffect
+            }
+
+            if (targetLeft > animLeft.value) {
+                // Moving right: Right edge leads (fast spring), Left edge trails (softer spring) -> stretches horizontally
+                launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
+                    )
+                }
+                launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
+                    )
+                }
+            } else {
+                // Moving left: Left edge leads (fast spring), Right edge trails (softer spring) -> stretches horizontally
+                launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
+                    )
+                }
+                launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
+                    )
+                }
+            }
         }
 
-        val maxOffset = realTabWidthPx * (options.size - 1)
-        val currentIndicatorOffset = offsetAnimatable.value.coerceIn(0f, maxOffset)
-
-        // Stretch deformation based on velocity
-        val velocity = offsetAnimatable.velocity
-        // The faster it moves, the more it stretches horizontally
-        val stretchFactor = 1f + (kotlin.math.abs(velocity) / realTabWidthPx) * 0.05f
-        // Snap to exactly 1f when velocity is near zero to prevent RenderNode float artifacts (1px horizontal line glitch)
-        val currentScaleX = if (kotlin.math.abs(velocity) < 10f) 1f else stretchFactor.coerceIn(1f, 1.35f)
-
-        // Sliding Highlighter
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(currentIndicatorOffset.roundToInt(), 0) }
-                .graphicsLayer { scaleX = currentScaleX }
-                .padding(3.dp)
-                .width(realTabWidth - 6.dp)
-                .height(tabHeight - 6.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                    shape = CircleShape
-                )
+        // Spring animation for scaling up the indicator when held/pressed or dragged
+        val dragScaleY by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.30f
+                else if (isSelectedTabPressed) 1.10f
+                else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "dragScaleY"
+        )
+        val dragScaleX by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.06f
+                else if (isSelectedTabPressed) 1.04f
+                else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "dragScaleX"
         )
 
-        // Content
-        Row(
+        val primaryColor = MaterialTheme.colorScheme.primary
+        val pillPath = remember { Path() }
+
+        Box(
             modifier = Modifier
                 .width(realTabWidth * options.size)
                 .fillMaxHeight()
                 .pointerInput(selectedIndex, realTabWidthPx) {
+                    var isDragActiveOnPill = false
+                    val touchMargin = 8.dp.toPx()
                     detectHorizontalDragGestures(
+                        onDragStart = { startOffset ->
+                            val currentLeft = animLeft.value
+                            val currentRight = animRight.value
+                            if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
+                                isDragActiveOnPill = true
+                                isDragging = true
+                                coroutineScope.launch {
+                                    launch { animLeft.stop() }
+                                    launch { animRight.stop() }
+                                }
+                            } else {
+                                isDragActiveOnPill = false
+                            }
+                        },
                         onDragEnd = {
-                            val targetIndex = (offsetAnimatable.value / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                            if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val currentLeft = animLeft.value - paddingPx
+                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
                             if (targetIndex != selectedIndex) {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onOptionClick(targetIndex)
                             } else {
+                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
                                 coroutineScope.launch {
-                                    offsetAnimatable.animateTo(
-                                        targetValue = selectedIndex * realTabWidthPx,
-                                        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
-                                    )
+                                    launch {
+                                        animLeft.animateTo(
+                                            targetLeft,
+                                            spring(stiffness = 500f, dampingRatio = 0.75f)
+                                        )
+                                    }
+                                    launch {
+                                        animRight.animateTo(
+                                            targetRight,
+                                            spring(stiffness = 500f, dampingRatio = 0.75f)
+                                        )
+                                    }
                                 }
                             }
                         },
                         onDragCancel = {
+                            if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
                             coroutineScope.launch {
-                                offsetAnimatable.animateTo(
-                                    targetValue = selectedIndex * realTabWidthPx,
-                                    animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioNoBouncy)
-                                )
+                                launch {
+                                    animLeft.animateTo(
+                                        targetLeft,
+                                        spring(stiffness = 500f, dampingRatio = 0.75f)
+                                    )
+                                }
+                                launch {
+                                    animRight.animateTo(
+                                        targetRight,
+                                        spring(stiffness = 500f, dampingRatio = 0.75f)
+                                    )
+                                }
                             }
                         }
                     ) { change, dragAmount ->
+                        if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                        isDragging = true
                         change.consume()
                         coroutineScope.launch {
-                            offsetAnimatable.snapTo(
-                                (offsetAnimatable.value + dragAmount).coerceIn(0f, maxOffset)
-                            )
+                            val maxRight = options.size * realTabWidthPx - paddingPx
+                            val newLeft = (animLeft.value + dragAmount).coerceIn(paddingPx, maxRight - normalWidthPx)
+                            val newRight = newLeft + normalWidthPx
+                            launch { animLeft.snapTo(newLeft) }
+                            launch { animRight.snapTo(newRight) }
                         }
                     }
                 }
         ) {
-            options.forEachIndexed { index, title ->
-                val isSelected = index == selectedIndex
-                val textColor by animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
-                    label = "textColor"
-                )
+            // 1. Base Layer: Inactive muted grey labels
+            CategoryTabItems(
+                options = options,
+                counts = counts,
+                textColor = Color.White.copy(alpha = 0.5f),
+                badgeBgColor = Color.White.copy(alpha = 0.1f),
+                realTabWidth = realTabWidth,
+                selectedIndex = selectedIndex,
+                isInteractive = true,
+                onOptionClick = onOptionClick,
+                onTabPressedChange = { isSelectedTabPressed = it }
+            )
 
-                val interactionSource = remember { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-                val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "tabScale")
+            // 2. Sliding Highlighter + 3. Active Masked Layer (Only what is under the selector gets colored!)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        val currentLeft = animLeft.value
+                        val currentRight = animRight.value
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .graphicsLayer { scaleX = scale; scaleY = scale }
-                        .clickable(interactionSource = interactionSource, indication = null) { onOptionClick(index) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    ) {
-                        Text(
-                            text = title.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.sp,
-                            color = textColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
+                        val stretch = if (advancedEffectsEnabled && normalWidthPx > 0f) {
+                            ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
+                        } else 0f
+                        val flightEnlargeX = stretch * 0.35f
+                        val flightEnlargeY = stretch * 0.20f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightEnlargeY) else 1f
+
+                        val baseHeight = size.height - (paddingPx * 2f)
+                        val maxPillHeight = size.height * 1.35f
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
+                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+
+                        val pillTop = (size.height - pillHeight) / 2f
+                        val pillLeft = centerXPx - (pillWidth / 2f)
+
+                        drawRoundRect(
+                            color = primaryColor.copy(alpha = 0.25f),
+                            topLeft = Offset(pillLeft, pillTop),
+                            size = Size(pillWidth, pillHeight),
+                            cornerRadius = CornerRadius(pillHeight / 2f, pillHeight / 2f)
+                        )
+                    }
+                    .drawWithContent {
+                        val currentLeft = animLeft.value
+                        val currentRight = animRight.value
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
+
+                        val stretch = if (advancedEffectsEnabled && normalWidthPx > 0f) {
+                            ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
+                        } else 0f
+                        val flightEnlargeX = stretch * 0.35f
+                        val flightEnlargeY = stretch * 0.20f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightEnlargeY) else 1f
+
+                        val baseHeight = size.height - (paddingPx * 2f)
+                        val maxPillHeight = size.height * 1.35f
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
+                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+
+                        val pillTop = (size.height - pillHeight) / 2f
+                        val pillLeft = centerXPx - (pillWidth / 2f)
+
+                        pillPath.reset()
+                        pillPath.addRoundRect(
+                            RoundRect(
+                                left = pillLeft,
+                                top = pillTop,
+                                right = pillLeft + pillWidth,
+                                bottom = pillTop + pillHeight,
+                                radiusX = pillHeight / 2f,
+                                radiusY = pillHeight / 2f
+                            )
                         )
 
-                        if (counts != null && counts.size > index) {
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(17.dp)
-                                    .background(
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.1f),
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = counts[index].toString(),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 8.sp,
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = textColor
-                                )
+                        // Clip the active pink layer strictly to what is under the selector
+                        clipPath(pillPath) {
+                            this@drawWithContent.drawContent()
+                        }
+                    }
+            ) {
+                // Active Layer: Rendered only within the pill capsule bounds
+                CategoryTabItems(
+                    options = options,
+                    counts = counts,
+                    textColor = primaryColor,
+                    badgeBgColor = primaryColor.copy(alpha = 0.15f),
+                    realTabWidth = realTabWidth,
+                    selectedIndex = selectedIndex,
+                    isInteractive = false,
+                    onOptionClick = {}
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryTabItems(
+    options: List<String>,
+    counts: List<Int>?,
+    textColor: Color,
+    badgeBgColor: Color,
+    realTabWidth: androidx.compose.ui.unit.Dp,
+    selectedIndex: Int,
+    isInteractive: Boolean,
+    onOptionClick: (Int) -> Unit,
+    onTabPressedChange: ((Boolean) -> Unit)? = null
+) {
+    Row(
+        modifier = Modifier
+            .width(realTabWidth * options.size)
+            .fillMaxHeight()
+    ) {
+        options.forEachIndexed { index, title ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+
+            if (isInteractive && index == selectedIndex && onTabPressedChange != null) {
+                DisposableEffect(isPressed) {
+                    onTabPressedChange(isPressed)
+                    onDispose { onTabPressedChange(false) }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .then(
+                        if (isInteractive) {
+                            Modifier.clickable(interactionSource = interactionSource, indication = null) {
+                                onOptionClick(index)
                             }
+                        } else Modifier
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    Text(
+                        text = title.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.sp,
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+
+                    if (counts != null && counts.size > index) {
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(17.dp)
+                                .background(
+                                    color = badgeBgColor,
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = counts[index].toString(),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = textColor
+                            )
                         }
                     }
                 }

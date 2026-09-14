@@ -74,10 +74,10 @@ fun Modifier.bounceClickWithOffset(
     val currentOnLongClick by rememberUpdatedState(onLongClick)
     val currentOnPress by rememberUpdatedState(onPress)
 
-    LaunchedEffect(interactionSource, enabled, animateOnPress) {
-        if (!enabled || !animateOnPress) {
+    val shouldAnimate = animateOnPress
+    LaunchedEffect(interactionSource, enabled, shouldAnimate) {
+        if (!enabled || !shouldAnimate) {
             scale.snapTo(1f)
-            if (!animateOnPress) return@LaunchedEffect // solo click, nessuna animazione
             return@LaunchedEffect
         }
         var pressJob: kotlinx.coroutines.Job? = null

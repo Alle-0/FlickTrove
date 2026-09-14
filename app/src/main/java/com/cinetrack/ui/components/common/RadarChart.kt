@@ -32,16 +32,22 @@ fun RadarChart(
     val numAxes = data.size
     
     // Animation for expansion
-    val infiniteTransition = rememberInfiniteTransition(label = "RadarPulse")
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "Pulse"
-    )
+    val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
+    val pulseScale = if (advancedEffectsEnabled) {
+        val infiniteTransition = rememberInfiniteTransition(label = "RadarPulse")
+        val scale by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.05f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "Pulse"
+        )
+        scale
+    } else {
+        1f
+    }
 
     val animatedProgress = remember { Animatable(0f) }
     LaunchedEffect(data) {

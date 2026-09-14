@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,10 +18,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -28,9 +33,22 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.ui.utils.UiText
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface UpdatesToastEntryPoint {
+    fun actionFeedbackManager(): ActionFeedbackManager
+}
 
 @Composable
 fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
@@ -160,19 +178,77 @@ fun SectionHeader(text: String, action: (@Composable () -> Unit)? = null) {
     }
 }
 
+fun formatEpisodeBadge(raw: String?): String? {
+    if (raw.isNullOrBlank()) return null
+    val cleaned = raw.trim().removePrefix("•").removePrefix("·").trim()
+    if (cleaned.isBlank()) return null
+    val regex = Regex("(?i)s(\\d+)e(\\d+)")
+    val match = regex.find(cleaned)
+    return if (match != null) {
+        val s = match.groupValues[1].toIntOrNull() ?: match.groupValues[1]
+        val e = match.groupValues[2].toIntOrNull() ?: match.groupValues[2]
+        "S$s · E$e"
+    } else {
+        cleaned
+    }
+}
+
+@Composable
+fun PillBadge(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.14f))
+            .border(1.dp, color.copy(alpha = 0.35f), RoundedCornerShape(50))
+            .padding(horizontal = 9.dp, vertical = 3.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.3.sp,
+            maxLines = 1
+        )
+    }
+}
+
 @Composable
 fun UpdateCard(
-    movie: Movie, 
-    label: String, 
-    iconRes: Int, 
-    color: Color, 
-    onAction: () -> Unit, 
-    onPress: () -> Unit
+    movie: Movie,
+    label: String,
+    iconRes: Int,
+    color: Color,
+    onAction: () -> Unit,
+    onPress: () -> Unit,
+    modifier: Modifier = Modifier,
+    episodeBadge: String? = null,
+    rawDate: String? = null,
+    isReminder: Boolean = false
 ) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    val actionFeedbackManager = remember(context) {
+        runCatching {
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                UpdatesToastEntryPoint::class.java
+            ).actionFeedbackManager()
+        }.getOrNull()
+    }
+
+    val actualIsReminder = isReminder || iconRes == R.drawable.ic_bell_piena
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
+        targetValue = if (isPressed) 0.94f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = if (isPressed) Spring.StiffnessHigh else Spring.StiffnessLow
@@ -180,72 +256,204 @@ fun UpdateCard(
         label = "cardScale"
     )
 
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    // Episode badge parsing (from parameter or fallback from label)
+    val parsedEpisode = remember(episodeBadge, label) {
+        if (!episodeBadge.isNullOrBlank()) {
+            formatEpisodeBadge(episodeBadge)
+        } else {
+            val match = Regex("(?i)•\\s*(s\\d+e\\d+)").find(label)
+            match?.let { formatEpisodeBadge(it.groupValues[1]) }
+        }
+    }
+
+    // Clean label without embedded episode info
+    val cleanLabel = remember(label, episodeBadge) {
+        if (episodeBadge != null) {
+            label.trim()
+        } else {
+            label.replace(Regex("(?i)\\s*•\\s*s\\d+e\\d+.*"), "").trim()
+        }
+    }
+
+    val airDateInfo = remember(rawDate) {
+        if (!rawDate.isNullOrEmpty()) formatEpisodeAirDate(rawDate, context) else null
+    }
+
+    val timingPillText = remember(rawDate, airDateInfo, parsedEpisode) {
+        if (airDateInfo != null) {
+            if (parsedEpisode == null && !rawDate.isNullOrEmpty()) {
+                val dateStr = formatReleaseDate(rawDate)
+                if (airDateInfo.first == "OGGI" || airDateInfo.first == "DOMANI" || airDateInfo.first == "TODAY" || airDateInfo.first == "TOMORROW") {
+                    "${airDateInfo.first} · $dateStr"
+                } else {
+                    airDateInfo.first
+                }
+            } else {
+                airDateInfo.first
+            }
+        } else null
+    }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(82.dp)
+            .height(90.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(26.dp))
+            .clip(RoundedCornerShape(22.dp))
             .background(Color(0xFF1C1C1E))
-            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(26.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(22.dp))
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
             ) {
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onPress()
             }
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Poster
             AsyncImage(
                 model = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current),
                 contentDescription = null,
-                modifier = Modifier.width(44.dp).height(58.dp).clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop
             )
-            
-            Column(modifier = Modifier.weight(1f).padding(horizontal = 14.dp)) {
+
+            // Info Column
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = movie.title ?: movie.name ?: "", 
-                    color = Color.White, 
-                    fontSize = 15.sp, 
-                    fontWeight = FontWeight.Bold, 
-                    maxLines = 1
+                    text = movie.title ?: movie.name ?: "",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Text(text = label, color = color, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                if (actualIsReminder) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        if (parsedEpisode != null) {
+                            PillBadge(
+                                text = parsedEpisode,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        if (timingPillText != null && airDateInfo != null) {
+                            PillBadge(
+                                text = timingPillText,
+                                color = airDateInfo.second
+                            )
+                        } else if (cleanLabel.isNotEmpty()) {
+                            PillBadge(
+                                text = cleanLabel,
+                                color = color
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PillBadge(
+                            text = label,
+                            color = color
+                        )
+                    }
+                }
             }
 
-            val actionInteractionSource = remember { MutableInteractionSource() }
-            val isActionPressed by actionInteractionSource.collectIsPressedAsState()
-            val actionScale by animateFloatAsState(
-                targetValue = if (isActionPressed) 0.8f else 1f,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = if (isActionPressed) Spring.StiffnessHigh else Spring.StiffnessLow
-                ),
-                label = "actionScale"
-            )
+            // Action / Status Section
+            if (actualIsReminder) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 4.dp)
+                ) {
+                    val hintReminder = stringResource(R.string.card_hint_manage_reminder)
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f), CircleShape)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (actionFeedbackManager != null) {
+                                    actionFeedbackManager.emit(
+                                        UiText.StringResource(R.string.card_hint_manage_reminder)
+                                    )
+                                } else {
+                                    android.widget.Toast.makeText(context, hintReminder, android.widget.Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
+                            contentDescription = hintReminder,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
 
-            IconButton(
-                onClick = {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                    onAction()
-                },
-                interactionSource = actionInteractionSource,
-                modifier = Modifier.graphicsLayer {
-                    scaleX = actionScale
-                    scaleY = actionScale
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.25f),
+                        modifier = Modifier.size(14.dp)
+                    )
                 }
-            ) {
-                Icon(imageVector = ImageVector.vectorResource(id = iconRes), contentDescription = null, tint = color.copy(alpha = 0.8f), modifier = Modifier.size(18.dp))
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .bounceClick(
+                            scaleDown = 0.82f,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onAction()
+                            }
+                        )
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.14f))
+                        .border(1.dp, color.copy(alpha = 0.28f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = iconRes),
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
             }
         }
     }

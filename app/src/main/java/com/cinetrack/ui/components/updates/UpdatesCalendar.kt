@@ -35,6 +35,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.ColorUtils
 import dev.chrisbanes.haze.HazeState
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -112,10 +113,13 @@ fun UpdatesCalendarView(
                     androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                         UpdateCard(
                             movie = item.movie,
-                            label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)) + item.episodeInfo,
+                            label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
+                            episodeBadge = item.episodeInfo,
+                            rawDate = item.arrivalDate,
                             iconRes = R.drawable.ic_bell_piena,
                             color = MaterialTheme.colorScheme.primary,
-                            onAction = { /* Optional: toggle reminder */ },
+                            isReminder = true,
+                            onAction = {},
                             onPress = { onMovieClick(item.movie) }
                         )
                     }
@@ -413,13 +417,18 @@ fun MonthYearPickerDialog(
                                 val isSelected = initialMonth.year == selectedYear && initialMonth.monthValue == month
                                 val monthName = java.time.Month.of(month).getDisplayName(TextStyle.SHORT, Locale.getDefault()).replaceFirstChar { it.uppercase() }
                                 
+                                val selectedBgColor = if (accentColor != Color.Unspecified) accentColor else MaterialTheme.colorScheme.primary
+                                val selectedContentColor = if (accentColor != Color.Unspecified) {
+                                    ColorUtils.contentColorForAccent(accentColor)
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimary
+                                }
+
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(if (isSelected) {
-                                            if (accentColor != Color.Unspecified) accentColor else MaterialTheme.colorScheme.primary
-                                        } else Color.White.copy(alpha = 0.05f))
+                                        .background(if (isSelected) selectedBgColor else Color.White.copy(alpha = 0.05f))
                                         .bounceClick(scaleDown = 0.95f) {
                                             onMonthSelected(YearMonth.of(selectedYear, month))
                                             onDismiss()
@@ -429,7 +438,7 @@ fun MonthYearPickerDialog(
                                 ) {
                                     Text(
                                         text = monthName,
-                                        color = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f),
+                                        color = if (isSelected) selectedContentColor else Color.White.copy(alpha = 0.8f),
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         fontSize = 14.sp
                                     )

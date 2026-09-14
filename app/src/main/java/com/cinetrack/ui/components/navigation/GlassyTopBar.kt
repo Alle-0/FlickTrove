@@ -93,17 +93,6 @@ fun GlassyTopBar(
         label = "TopBarDimAlpha"
     )
 
-    val infiniteTransition = rememberInfiniteTransition(label = "SyncPulse")
-    val syncAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "SyncAlpha"
-    )
-
     // Shared enter/exit specs for all top bar icons.
     // expandFrom = Alignment.End keeps the RIGHT edge of each icon fixed,
     // so the bell never moves when icons appear/disappear to its left.
@@ -312,13 +301,23 @@ fun GlassyTopBar(
                     enter = iconEnter,
                     exit = iconExit
                 ) {
+                    val infiniteTransition = rememberInfiniteTransition(label = "SyncPulse")
+                    val syncAlpha by infiniteTransition.animateFloat(
+                        initialValue = 0.4f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "SyncAlpha"
+                    )
                     Icon(
                         imageVector = Icons.Rounded.Sync,
                         contentDescription = "Syncing",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(24.dp)
-                            .alpha(syncAlpha)
+                            .graphicsLayer { alpha = syncAlpha }
                             .padding(end = 8.dp)
                     )
                 }

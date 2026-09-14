@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.components.updates.MonthYearPickerDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -204,7 +205,7 @@ fun FlickTroveDatePickerModal(
                             ) {
                                 Text(
                                     text = currentDay.toString(),
-                                    color = if (isSelected) Color.White else if (isFuture) Color.White.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.8f),
+                                    color = if (isSelected) ColorUtils.contentColorForAccent(accentColor) else if (isFuture) Color.White.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.8f),
                                     fontSize = 15.sp,
                                     fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
                                 )

@@ -579,7 +579,10 @@ fun DonationBanner(
                         tint = Color.White,
                         modifier = Modifier
                             .size(26.dp)
-                            .scale(scale) // Apply pulse animation
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
                     )
                 }
                 

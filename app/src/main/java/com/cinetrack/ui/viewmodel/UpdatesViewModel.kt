@@ -20,6 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 import com.cinetrack.ui.components.updates.generateReminderItems
+import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.ui.utils.UiText
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
@@ -34,8 +36,13 @@ data class UpdatesUiState(
 class UpdatesViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
+
+    fun emitMessage(message: UiText) {
+        actionFeedbackManager.emit(message)
+    }
 
     private val _socialNotifications = MutableStateFlow<ImmutableList<SocialNotification>>(persistentListOf())
     private val _socialUnreadCount = MutableStateFlow(0)

@@ -300,10 +300,13 @@ fun UpdatesScreen(
                                                         androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
                                                             UpdateCard(
                                                                 movie = item.movie,
-                                                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)) + item.episodeInfo,
+                                                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
+                                                                episodeBadge = item.episodeInfo,
+                                                                rawDate = item.arrivalDate,
                                                                 iconRes = R.drawable.ic_bell_piena,
                                                                 color = MaterialTheme.colorScheme.primary,
-                                                                onAction = { /* Optional: toggle reminder */ },
+                                                                isReminder = true,
+                                                                onAction = {},
                                                                 onPress = { onMovieClick(item.movie) }
                                                             )
                                                         }
@@ -366,8 +369,9 @@ fun UpdatesScreen(
                                                     Box(
                                                         modifier = Modifier
                                                             .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .clip(RoundedCornerShape(50))
                                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
                                                             .clickable(
                                                                 interactionSource = markInteractionSource,
                                                                 indication = null
@@ -375,7 +379,7 @@ fun UpdatesScreen(
                                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                                 viewModel.clearAllNewEpisodes() 
                                                             }
-                                                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
                                                     ) {
                                                         Text(
                                                             stringResource(R.string.updates_mark_all), 
@@ -414,8 +418,9 @@ fun UpdatesScreen(
                                                     Box(
                                                         modifier = Modifier
                                                             .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .clip(RoundedCornerShape(50))
                                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
                                                             .clickable(
                                                                 interactionSource = markInteractionSource,
                                                                 indication = null
@@ -423,7 +428,7 @@ fun UpdatesScreen(
                                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                                 viewModel.clearAllMigrated() 
                                                             }
-                                                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
                                                     ) {
                                                         Text(
                                                             stringResource(R.string.updates_mark_all), 
@@ -502,8 +507,9 @@ fun UpdatesScreen(
                                                     Box(
                                                         modifier = Modifier
                                                             .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .clip(RoundedCornerShape(50))
                                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
                                                             .clickable(
                                                                 interactionSource = markInteractionSource,
                                                                 indication = null
@@ -511,7 +517,7 @@ fun UpdatesScreen(
                                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                                 viewModel.markAllSocialNotificationsAsRead()
                                                             }
-                                                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
                                                     ) {
                                                         Text(
                                                             stringResource(R.string.updates_mark_all), 

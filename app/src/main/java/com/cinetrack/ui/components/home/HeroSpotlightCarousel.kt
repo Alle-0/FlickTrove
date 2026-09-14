@@ -63,12 +63,14 @@ fun HeroSpotlightCarousel(
     if (movies.isEmpty()) return
 
     val primaryColor = MaterialTheme.colorScheme.primary
+    val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
 
-    // Auto-scroll ogni 4 secondi
-    LaunchedEffect(pagerState) {
+    // Auto-scroll ogni 4 secondi (disattivato se gli effetti avanzati sono disabilitati)
+    LaunchedEffect(pagerState, advancedEffectsEnabled) {
+        if (!advancedEffectsEnabled) return@LaunchedEffect
         while (true) {
             delay(4000)
-            if (pagerState.pageCount > 0) {
+            if (pagerState.pageCount > 0 && !pagerState.isScrollInProgress) {
                 val next = pagerState.currentPage + 1
                 pagerState.animateScrollToPage(next, animationSpec = tween(600))
             }
@@ -134,7 +136,11 @@ fun HeroSpotlightCarousel(
             )
             val pageOffset = rawPageOffset.absoluteValue
             
-            val scale = 1f - (pageOffset * 0.15f).coerceIn(0f, 0.15f)
+            val scale = if (advancedEffectsEnabled) {
+                1f - (pageOffset * 0.15f).coerceIn(0f, 0.15f)
+            } else {
+                1f
+            }
 
             Box(
                 modifier = Modifier
@@ -142,7 +148,7 @@ fun HeroSpotlightCarousel(
                     .graphicsLayer {
                         scaleX = scale
                         scaleY = scale
-                        translationX = rawPageOffset * 28.dp.toPx()
+                        translationX = if (advancedEffectsEnabled) rawPageOffset * 28.dp.toPx() else 0f
                     }
                     .bounceClick { onMovieClick(movie) }
                     .clip(RoundedCornerShape(36.dp))

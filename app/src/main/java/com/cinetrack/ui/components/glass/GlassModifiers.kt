@@ -88,9 +88,21 @@ fun Modifier.hazeGlass(
                     }
                 }
             } else {
-                val fallbackColor = containerColor ?: HazeStyles.GlassColor
-                val fallbackAlpha = if (advancedEffectsEnabled) HazeStyles.GlassAlphaFallback * alpha else 0.95f * alpha
-                Modifier.background(fallbackColor.copy(alpha = fallbackAlpha), shape)
+                // When blur/effects are disabled, fallback to a solid/semi-translucent dark glass surface.
+                // If containerColor was a light highlight tint (e.g. Color.White with low alpha), we MUST NOT
+                // turn the whole card into 95% solid white. Instead, use HazeStyles.GlassColor as the base.
+                val fallbackBaseColor = if (containerColor != null && containerColor.luminance() > 0.4f) {
+                    HazeStyles.GlassColor
+                } else {
+                    containerColor ?: HazeStyles.GlassColor
+                }
+                val fallbackAlpha = if (advancedEffectsEnabled) HazeStyles.GlassAlphaFallback * alpha else 0.88f * alpha
+                val baseMod = Modifier.background(fallbackBaseColor.copy(alpha = fallbackAlpha), shape)
+                if (containerColor != null && containerColor.luminance() > 0.4f) {
+                    baseMod.background(containerColor, shape)
+                } else {
+                    baseMod
+                }
             }
         )
         .glassOverlay(shape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))

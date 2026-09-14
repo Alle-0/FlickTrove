@@ -190,26 +190,6 @@ fun GenreDistributionSection(
         label = "initialAnim"
     )
     
-    val infiniteTransition = rememberInfiniteTransition(label = "breathing")
-    val breathingScale by infiniteTransition.animateFloat(
-        initialValue = 0.96f,
-        targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
-    val breathingAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.15f,
-        targetValue = 0.35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
-    
     val animatedHaloColor by animateColorAsState(
         targetValue = if (selectedGenreName != null && chartSelectedIndex != -1) {
             genreColors[chartSelectedIndex % genreColors.size]
@@ -393,17 +373,44 @@ fun GenreDistributionSection(
                 }
                 
                 // 1. Organic Breathing Inner Neon Halo
+                val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
+                val (haloScale, haloAlpha) = if (advancedEffectsEnabled) {
+                    val infiniteTransition = rememberInfiniteTransition(label = "breathing")
+                    val breathingScale by infiniteTransition.animateFloat(
+                        initialValue = 0.96f,
+                        targetValue = 1.04f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "scale"
+                    )
+                    val breathingAlpha by infiniteTransition.animateFloat(
+                        initialValue = 0.15f,
+                        targetValue = 0.35f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "alpha"
+                    )
+                    breathingScale to breathingAlpha
+                } else {
+                    1f to 0.25f
+                }
+
                 Box(
                     modifier = Modifier
                         .size(165.dp)
                         .graphicsLayer {
-                            scaleX = breathingScale
-                            scaleY = breathingScale
+                            scaleX = haloScale
+                            scaleY = haloScale
+                            alpha = haloAlpha
                         }
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    animatedHaloColor.copy(alpha = breathingAlpha),
+                                    animatedHaloColor,
                                     animatedHaloColor.copy(alpha = 0f)
                                 )
                             ),

@@ -202,6 +202,14 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                         transition = {
                                             val isPop = navigator.lastEvent == cafe.adriel.voyager.core.stack.StackEvent.Pop
                                             val isReplace = navigator.lastEvent == cafe.adriel.voyager.core.stack.StackEvent.Replace
+
+                                            if (!advancedVisualEffectsEnabled) {
+                                                val enter = androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(150))
+                                                val exit = androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(150))
+                                                return@ScreenTransition (enter togetherWith exit).apply {
+                                                    targetContentZIndex = if (isPop) -1f else 1f
+                                                }
+                                            }
                                             
                                             val isTargetSearch = targetState is com.cinetrack.ui.screens.SearchScreen
                                             val isInitialSearch = initialState is com.cinetrack.ui.screens.SearchScreen
