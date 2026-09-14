@@ -416,9 +416,9 @@ private fun RatingLegendItem(cert: String, color: Color, desc: String) {
         Box(
             modifier = Modifier
                 .widthIn(min = 55.dp)
-                .background(color.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-                .padding(horizontal = 6.dp, vertical = 4.dp),
+                .background(color.copy(alpha = 0.15f), CircleShape)
+                .border(1.dp, color.copy(alpha = 0.4f), CircleShape)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
