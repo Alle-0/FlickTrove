@@ -156,8 +156,22 @@ class TraktSyncWorker @AssistedInject constructor(
 
                 val localMovie = movieRepository.getMovie(tmdbId, mediaType)                
                 if (localMovie != null) {
-                    if (!localMovie.watched) {
-                        val updated = localMovie.copy(watched = true, watchedAt = item.watched_at)
+                    var currentMovie = localMovie
+                    if (currentMovie.posterPath.isNullOrEmpty()) {
+                        try {
+                            val tmdbResponse = tmdbService.getMovieBasicDetails(tmdbId)
+                            val fresh = MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
+                            currentMovie = currentMovie.copy(
+                                posterPath = fresh.posterPath ?: currentMovie.posterPath,
+                                backdropPath = fresh.backdropPath ?: currentMovie.backdropPath
+                            )
+                            delay(50)
+                        } catch (e: Exception) {
+                            // Non-fatal
+                        }
+                    }
+                    if (!currentMovie.watched || currentMovie != localMovie) {
+                        val updated = currentMovie.copy(watched = true, watchedAt = item.watched_at)
                         moviesToUpdate.add(updated)
                         if (isRecent(item.watched_at)) {
                             bulkStatsUpdates.add(
@@ -345,12 +359,16 @@ class TraktSyncWorker @AssistedInject constructor(
                     } else {
                         var totalEps = local.effectiveTotalEpisodes
                         var updatedNumberOfEpisodes = local.numberOfEpisodes
-                        if (totalEps == 0) {
+                        var updatedPosterPath = local.posterPath
+                        var updatedBackdropPath = local.backdropPath
+                        if (totalEps == 0 || local.posterPath.isNullOrEmpty()) {
                             try {
                                 val tmdbResponse = tmdbService.getTVBasicDetails(showTmdbId)
                                 val mapped = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, "tv")
                                 totalEps = mapped.effectiveTotalEpisodes
                                 updatedNumberOfEpisodes = if ((mapped.numberOfEpisodes ?: 0) > 0) mapped.numberOfEpisodes else local.numberOfEpisodes
+                                updatedPosterPath = mapped.posterPath ?: local.posterPath
+                                updatedBackdropPath = mapped.backdropPath ?: local.backdropPath
                             } catch (e: Exception) {
                                 android.util.Log.w("TraktSyncWorker", "Impossibile aggiornare totalEps per $showTitle", e)
                             }
@@ -360,7 +378,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         val shouldBeFavorite = if (!isCompleted && totalWatched > 0) true else if (isCompleted) false else local.favorite
                         val progressVal = if (totalEps > 0) (totalWatched.toDouble() / totalEps.toDouble()).coerceIn(0.0, 1.0) else 0.0
 
-                        if (seasonsMap != local.watchedEpisodes || local.watched != isCompleted || local.favorite != shouldBeFavorite || updatedNumberOfEpisodes != local.numberOfEpisodes || local.progress != progressVal) {
+                        if (seasonsMap != local.watchedEpisodes || local.watched != isCompleted || local.favorite != shouldBeFavorite || updatedNumberOfEpisodes != local.numberOfEpisodes || local.progress != progressVal || updatedPosterPath != local.posterPath) {
                             android.util.Log.e("TRAKT_DEBUG", "SYNC: Aggiorno stato per '$showTitle' (Visti: $totalWatched/$totalEps, favorite: $shouldBeFavorite, watched: $isCompleted, progress: $progressVal)")
                             episodeUpdates.add(
                                 local.copy(
@@ -369,6 +387,8 @@ class TraktSyncWorker @AssistedInject constructor(
                                     numberOfEpisodes = updatedNumberOfEpisodes,
                                     watchedEpisodes = seasonsMap,
                                     progress = progressVal,
+                                    posterPath = updatedPosterPath,
+                                    backdropPath = updatedBackdropPath,
                                     syncStatus = "synced",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )

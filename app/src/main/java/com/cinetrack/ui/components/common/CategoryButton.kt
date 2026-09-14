@@ -106,6 +106,11 @@ fun CategoryTabSelector(
 
         var isSelectedTabPressed by remember { mutableStateOf(false) }
         var isDragging by remember { mutableStateOf(false) }
+        var previousIndex by remember { mutableStateOf(selectedIndex) }
+        var flightStartCenter by remember { mutableStateOf(0f) }
+        var flightTargetCenter by remember { mutableStateOf(0f) }
+        var isFlightActive by remember { mutableStateOf(false) }
+        var peakFlightBoost by remember { mutableStateOf(0.18f) }
 
         // Apple-style Leading & Trailing edge spring physics
         val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
@@ -114,40 +119,57 @@ fun CategoryTabSelector(
             val targetLeft = selectedIndex * realTabWidthPx + paddingPx
             val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
 
+            val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
+            val indexDistance = kotlin.math.abs(selectedIndex - previousIndex).coerceAtLeast(1)
+            previousIndex = selectedIndex
+
             if (!advancedEffectsEnabled) {
                 launch { animLeft.snapTo(targetLeft) }
                 launch { animRight.snapTo(targetRight) }
                 return@LaunchedEffect
             }
 
+            if (isTabChangedByClick) {
+                flightStartCenter = (animLeft.value + animRight.value) / 2f
+                flightTargetCenter = (targetLeft + targetRight) / 2f
+                peakFlightBoost = (0.16f + (indexDistance - 1) * 0.03f).coerceAtMost(0.22f)
+                isFlightActive = true
+            }
+
             if (targetLeft > animLeft.value) {
                 // Moving right: Right edge leads (fast spring), Left edge trails (softer spring) -> stretches horizontally
-                launch {
+                val jobRight = launch {
                     animRight.animateTo(
                         targetValue = targetRight,
                         animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
                     )
                 }
-                launch {
+                val jobLeft = launch {
                     animLeft.animateTo(
                         targetValue = targetLeft,
                         animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
                     )
                 }
+                jobRight.join()
+                jobLeft.join()
+                isFlightActive = false
             } else {
                 // Moving left: Left edge leads (fast spring), Right edge trails (softer spring) -> stretches horizontally
-                launch {
+                val jobLeft = launch {
                     animLeft.animateTo(
                         targetValue = targetLeft,
                         animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
                     )
                 }
-                launch {
+                val jobRight = launch {
                     animRight.animateTo(
                         targetValue = targetRight,
                         animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
                     )
                 }
+                jobLeft.join()
+                jobRight.join()
+                isFlightActive = false
             }
         }
 
@@ -290,9 +312,17 @@ fun CategoryTabSelector(
                             ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
                         } else 0f
                         val flightEnlargeX = stretch * 0.35f
-                        val flightEnlargeY = stretch * 0.20f
+
+                        val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
+                            val totalDist = flightTargetCenter - flightStartCenter
+                            if (kotlin.math.abs(totalDist) > 1f) {
+                                val fraction = ((centerXPx - flightStartCenter) / totalDist).coerceIn(0f, 1f)
+                                kotlin.math.sin(fraction * Math.PI.toFloat()) * peakFlightBoost
+                            } else 0f
+                        } else 0f
+
                         val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightEnlargeY) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
                         val maxPillHeight = size.height * 1.35f
@@ -319,9 +349,17 @@ fun CategoryTabSelector(
                             ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
                         } else 0f
                         val flightEnlargeX = stretch * 0.35f
-                        val flightEnlargeY = stretch * 0.20f
+
+                        val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
+                            val totalDist = flightTargetCenter - flightStartCenter
+                            if (kotlin.math.abs(totalDist) > 1f) {
+                                val fraction = ((centerXPx - flightStartCenter) / totalDist).coerceIn(0f, 1f)
+                                kotlin.math.sin(fraction * Math.PI.toFloat()) * peakFlightBoost
+                            } else 0f
+                        } else 0f
+
                         val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightEnlargeY) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
                         val maxPillHeight = size.height * 1.35f
