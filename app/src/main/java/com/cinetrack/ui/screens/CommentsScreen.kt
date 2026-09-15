@@ -209,7 +209,11 @@ class CommentsScreen(
                     ),
                     actions = {
                         Box {
-                            IconButton(onClick = { showSortMenu = true }) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .bounceClick { showSortMenu = true }
+                            ) {
                                 Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
                             }
                         }

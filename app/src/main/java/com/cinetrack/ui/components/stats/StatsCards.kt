@@ -76,7 +76,7 @@ fun TotalTimeHeroCard(totalMinutes: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(24.dp))
+            .statsCard(RoundedCornerShape(32.dp))
     ) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 22.dp),
@@ -224,7 +224,7 @@ fun MiniStatCard(
 ) {
     Box(
         modifier = modifier
-            .statsCard(RoundedCornerShape(16.dp))
+            .statsCard(RoundedCornerShape(24.dp))
     ) {
         Row(
             Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
@@ -327,7 +327,7 @@ fun DualStatPill(
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
-            .statsCard(RoundedCornerShape(20.dp))
+            .statsCard(RoundedCornerShape(24.dp))
     ) {
         Row(
             Modifier
@@ -430,7 +430,7 @@ fun MediaTimeCard(
 
     Box(
         modifier = Modifier.fillMaxWidth()
-            .statsCard(RoundedCornerShape(28.dp))
+            .statsCard(RoundedCornerShape(32.dp))
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
 
@@ -787,9 +787,9 @@ private fun PodiumColumn(
             modifier = Modifier
                 .width(80.dp)
                 .height(34.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF161922))
+                .background(Color(0xFF161922), RoundedCornerShape(14.dp))
                 .border(1.dp, item.color.copy(alpha = 0.40f), RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -821,26 +821,28 @@ private fun PodiumColumn(
         Spacer(Modifier.height(6.dp))
 
         // 3. Pedestal Box with Top Rim Neon Accent, Vertical Gradient & Percentages
+        val pedestalShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .height(animHeight)
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 .background(
-                    Brush.verticalGradient(
+                    brush = Brush.verticalGradient(
                         listOf(
                             item.color.copy(alpha = 0.28f),
                             item.color.copy(alpha = 0.04f)
                         )
-                    )
+                    ),
+                    shape = pedestalShape
                 )
                 .border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         listOf(item.color.copy(alpha = 0.6f), Color.Transparent)
                     ),
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    shape = pedestalShape
                 )
+                .clip(pedestalShape)
                 .padding(top = 6.dp),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -899,7 +901,7 @@ fun StudioDistributionSection(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(20.dp))
+            .statsCard(RoundedCornerShape(32.dp))
             .padding(20.dp)
     ) {
         Column(
@@ -948,9 +950,9 @@ fun StudioDistributionSection(
                                 modifier = Modifier
                                     .width(90.dp)
                                     .height(30.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF161922))
-                                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                                    .background(Color(0xFF161922), RoundedCornerShape(50))
+                                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
+                                    .clip(RoundedCornerShape(50))
                                     .padding(horizontal = 8.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {

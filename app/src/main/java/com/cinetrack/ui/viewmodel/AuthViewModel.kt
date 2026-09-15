@@ -519,33 +519,34 @@ class AuthViewModel @Inject constructor(
         val uid = user.uid
         val displayName = user.displayName
         
-        user.delete()
-            .addOnSuccessListener {
-                viewModelScope.launch {
-                    try {
-                        val batch = Firebase.firestore.batch()
-                        batch.delete(Firebase.firestore.collection("users").document(uid))
-                        if (!displayName.isNullOrBlank()) {
-                            batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
-                        }
-                        batch.commit().await()
-                    } catch (e: Exception) {
-                        // ignore
+        viewModelScope.launch {
+            try {
+                // Delete Firestore data first while user is still authenticated
+                try {
+                    val batch = Firebase.firestore.batch()
+                    batch.delete(Firebase.firestore.collection("users").document(uid))
+                    if (!displayName.isNullOrBlank()) {
+                        batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
                     }
+                    batch.commit().await()
+                } catch (e: Exception) {
+                    // ignore
+                }
+                
+                // Delete Auth user
+                user.delete().await()
+                
+                // Clear local data and complete
+                movieRepository.clearAllData()
+                auth.signOut()
+                _processState.update { AuthState.Unauthenticated }
+                onComplete(true)
+            } catch (exception: Exception) {
+                if (user.isAnonymous) {
                     movieRepository.clearAllData()
                     auth.signOut()
                     _processState.update { AuthState.Unauthenticated }
                     onComplete(true)
-                }
-            }
-            .addOnFailureListener { exception ->
-                if (user.isAnonymous) {
-                    viewModelScope.launch {
-                        movieRepository.clearAllData()
-                        auth.signOut()
-                        _processState.update { AuthState.Unauthenticated }
-                        onComplete(true)
-                    }
                 } else if (exception is FirebaseAuthRecentLoginRequiredException) {
                     // Firebase requires fresh credentials: show reauth dialog
                     _processState.update { AuthState.NeedsReauth }
@@ -555,6 +556,7 @@ class AuthViewModel @Inject constructor(
                     onComplete(false)
                 }
             }
+        }
     }
 
     fun deleteAccountWithReauth(password: String, onComplete: (Boolean) -> Unit) {
@@ -567,7 +569,8 @@ class AuthViewModel @Inject constructor(
             try {
                 val credential = EmailAuthProvider.getCredential(email, password)
                 user.reauthenticate(credential).await()
-                user.delete().await()
+                
+                // Delete Firestore data first while user is still authenticated
                 try {
                     val batch = Firebase.firestore.batch()
                     batch.delete(Firebase.firestore.collection("users").document(uid))
@@ -578,6 +581,10 @@ class AuthViewModel @Inject constructor(
                 } catch (e: Exception) {
                     // ignore
                 }
+                
+                // Delete Auth user
+                user.delete().await()
+                
                 movieRepository.clearAllData()
                 auth.signOut()
                 _processState.update { AuthState.Unauthenticated }

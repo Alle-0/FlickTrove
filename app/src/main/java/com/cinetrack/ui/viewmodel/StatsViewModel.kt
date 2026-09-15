@@ -433,7 +433,7 @@ class StatsViewModel @Inject constructor(
         val topGenre = genreCounts.entries.sortedByDescending { it.value }.firstOrNull()?.key
 
         // Top Studios / Networks
-        data class StudioAccum(var id: Long, val name: String, var logoPath: String?, var count: Int)
+        data class StudioAccum(var id: Long, val key: String, val name: String, var logoPath: String?, var count: Int)
         val studioMap = mutableMapOf<String, StudioAccum>()
         combinedWatched.forEach { m ->
             m.productionCompanies
@@ -443,7 +443,7 @@ class StatsViewModel @Inject constructor(
                     val (key, canonicalName) = normalizeStudio(studio.name)
                     val existing = studioMap[key]
                     if (existing == null) {
-                        studioMap[key] = StudioAccum(studio.id, canonicalName, studio.logoPath, 1)
+                        studioMap[key] = StudioAccum(studio.id, key, canonicalName, studio.logoPath, 1)
                     } else {
                         existing.count++
                         if (existing.logoPath.isNullOrBlank() && !studio.logoPath.isNullOrBlank()) {
@@ -456,10 +456,11 @@ class StatsViewModel @Inject constructor(
             .sortedByDescending { it.count }
             .take(20)
             .map { accum ->
+                val resolvedLogo = accum.logoPath?.takeIf { it.isNotBlank() } ?: getStudioFallbackLogo(accum.key)
                 StudioStat(
                     id = accum.id,
                     name = accum.name,
-                    logoPath = accum.logoPath,
+                    logoPath = resolvedLogo,
                     count = accum.count
                 )
             }
@@ -546,8 +547,41 @@ class StatsViewModel @Inject constructor(
             lower.startsWith("bbc") ->
                 "bbc" to "BBC"
 
+            lower == "a24" || lower.startsWith("a24 ") ->
+                "a24" to "A24"
+
+            lower.startsWith("dreamworks") ->
+                "dreamworks" to "DreamWorks"
+
+            lower.startsWith("lucasfilm") ->
+                "lucasfilm" to "Lucasfilm"
+
             else ->
                 lower to trimmed
+        }
+    }
+
+    private fun getStudioFallbackLogo(key: String): String? {
+        return when (key) {
+            "netflix" -> "/tyHnxjQJLH6h4iDQKhN5iqebWmX.png"
+            "marvel" -> "/hUzeosd33nzE5MCNsZxCGEKTXaQ.png"
+            "warner_bros" -> "/zhD3hhtKB5qyv7ZeL4uLpNxgMVU.png"
+            "disney" -> "/wdrCwmRnLFJhEoH8GSfymY85KHT.png"
+            "universal" -> "/8lvHyhjr8oUKOOy2dKXoALWKdp0.png"
+            "paramount" -> "/jay6WcMgagAklUt7i9Euwj1pzTF.png"
+            "hbo" -> "/tuomPhY2UtuPTqqFnKMVHvSb724.png"
+            "columbia" -> "/71BqEFAF4V3qjjMPCpLuyJFB9A.png"
+            "sony" -> "/xAb1o9HrSvKBo9mnXC8fJKDNu00.png"
+            "amazon" -> "/oRR9EXVoKP9szDkVKlze5HVJS7g.png"
+            "20th_century" -> "/h0rjX5vjW5r8yEnUBStFarjcLT4.png"
+            "lionsgate" -> "/cisLn1YAUuptXVBa0xjq7ST9cH0.png"
+            "a24" -> "/1ZXsGaFPgrgS6ZZGS37AqD5uU12.png"
+            "dreamworks" -> "/zcKhWbxFJ4CohZ9dLBMxmOArTVn.png"
+            "lucasfilm" -> "/tlVSws0RvvtPBwViUyOFAO0vcQS.png"
+            "mgm" -> "/usUnaYV6hQnlVAXP6r4HwrlLFPG.png"
+            "bbc" -> "/dqT3yOTlfJRmtvk52Ccd1O6dZ0A.png"
+            "apple" -> "/bnlD5KJ5oSzBYbEpDkwi6w8SoBO.png"
+            else -> null
         }
     }
 }

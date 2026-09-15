@@ -247,17 +247,19 @@ fun WrappedBannerPill(
                     // Highlight Box - Top Actor
                     val topActor = stats.topCast.firstOrNull()
                     if (topActor != null) {
+                        val highlightShape = TicketShape(cutoutRadius = 8.dp, cornerRadius = 24.dp)
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(TicketShape(cutoutRadius = 8.dp, cornerRadius = 24.dp))
                                 .background(
-                                    Brush.verticalGradient(
+                                    brush = Brush.verticalGradient(
                                         0f to primary.copy(alpha = 0.3f),
                                         1f to secondary.copy(alpha = 0.1f)
-                                    )
+                                    ),
+                                    shape = highlightShape
                                 )
-                                .border(1.2.dp, Color.White.copy(alpha = 0.15f), TicketShape(cutoutRadius = 8.dp, cornerRadius = 24.dp))
+                                .border(1.2.dp, Color.White.copy(alpha = 0.15f), highlightShape)
+                                .clip(highlightShape)
                                 .padding(horizontal = 20.dp, vertical = 16.dp)
                         ) {
                             Row(
@@ -269,9 +271,9 @@ fun WrappedBannerPill(
                                 Box(
                                     modifier = Modifier
                                         .size(64.dp)
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Color.White.copy(alpha = 0.12f))
-                                        .border(2.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
+                                        .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(50))
+                                        .border(2.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(50))
+                                        .clip(RoundedCornerShape(50)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -476,9 +478,9 @@ fun shareBitmap(context: android.content.Context, bitmap: android.graphics.Bitma
 private fun WrappedMainStat(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color.White.copy(alpha = 0.12f))
-            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(18.dp))
+            .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(28.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(28.dp))
             .padding(horizontal = 12.dp, vertical = 14.dp)
     ) {
         Column(
@@ -527,9 +529,9 @@ private fun WrappedMainStat(label: String, value: String, icon: ImageVector, mod
 private fun WrappedSmallStat(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.08f))
-            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(24.dp))
             .padding(horizontal = 10.dp, vertical = 12.dp)
     ) {
         Column {
@@ -579,9 +581,9 @@ private fun WrappedSmallStat(label: String, value: String, icon: ImageVector, mo
 private fun WrappedMiniStat(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.18f))
-            .border(1.2.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
+            .background(Color.White.copy(alpha = 0.18f), RoundedCornerShape(32.dp))
+            .border(1.2.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(32.dp))
+            .clip(RoundedCornerShape(32.dp))
             .drawBehind {
                 // Glass shine effect
                 drawRect(

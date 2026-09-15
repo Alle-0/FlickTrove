@@ -92,7 +92,8 @@ Depth is created through **Glassmorphism (Haze)** and fine borders rather than t
 The shape language is "Rounded" to soften the aggressive neon-on-black color scheme, making the interface feel premium and approachable.
 
 - **Posters & Media:** `rounded-DEFAULT` (12dp) or `rounded-md` (14dp).
-- **Cards & Stats:** `rounded-lg` (16dp) or `rounded-xl` (20dp).
+- **Cards & Stats:** `rounded-2xl` (24dp), `rounded-3xl` (28dp), or fully custom extra-large radii (e.g., `32dp`) to provide a soft, "squircle" premium feel.
+- **Badges & Tags:** Fully pill-shaped (`50` or `CircleShape`) or `rounded-2xl` (24dp) to integrate seamlessly with thicker progress bars.
 - **Custom Shapes:** Occasional use of `TicketShape` with semi-circular cutouts to emulate a physical movie ticket for special components.
 
 ## Components

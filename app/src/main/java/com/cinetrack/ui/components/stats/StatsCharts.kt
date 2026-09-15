@@ -74,9 +74,9 @@ private fun LegendItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .bounceClick(onClick = onClick)
+            .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = bgAlpha))
-            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -203,7 +203,7 @@ fun GenreDistributionSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(24.dp))
+            .statsCard(RoundedCornerShape(32.dp))
             .animateContentSize()
     ) {
         Column(
@@ -422,8 +422,7 @@ fun GenreDistributionSection(
                 Box(
                     modifier = Modifier
                         .size(158.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF0F0F1A).copy(alpha = 0.75f))
+                        .background(Color(0xFF0F0F1A).copy(alpha = 0.75f), CircleShape)
                         .border(
                             width = 1.5.dp,
                             brush = Brush.verticalGradient(
@@ -433,7 +432,8 @@ fun GenreDistributionSection(
                                 )
                             ),
                             shape = CircleShape
-                        ),
+                        )
+                        .clip(CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -691,7 +691,7 @@ fun DecadesSection(decadeCounts: List<Pair<String, Int>>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(20.dp))
+            .statsCard(RoundedCornerShape(32.dp))
     ) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
@@ -879,7 +879,7 @@ fun RatingHistogram(distribution: ImmutableList<Int>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(24.dp))
+            .statsCard(RoundedCornerShape(32.dp))
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 22.dp)
@@ -953,20 +953,21 @@ fun RatingHistogram(distribution: ImmutableList<Int>) {
                                     Modifier
                                         .fillMaxWidth()
                                         .fillMaxHeight(animFrac.coerceAtLeast(minHeight))
-                                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                         .background(
-                                            Brush.verticalGradient(
+                                            brush = Brush.verticalGradient(
                                                 listOf(
                                                     if (isSelected) glowColor else if (isMax) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                                                     if (isSelected) glowColor.copy(0.3f) else if (isMax) MaterialTheme.colorScheme.primary.copy(0.3f) else MaterialTheme.colorScheme.primary.copy(0.1f)
                                                 )
-                                            )
+                                            ),
+                                            shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
                                         )
                                         .border(
                                             width = if (isSelected) 1.dp else 0.dp,
                                             color = if (isSelected) glowColor else Color.Transparent,
                                             shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
                                         )
+                                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                 )
                             }
 
@@ -1078,7 +1079,7 @@ fun CountryDistributionSection(countryCounts: List<Pair<String, Int>>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .statsCard(RoundedCornerShape(20.dp))
+            .statsCard(RoundedCornerShape(32.dp))
             .padding(20.dp)
     ) {
         Column(
@@ -1095,8 +1096,8 @@ fun CountryDistributionSection(countryCounts: List<Pair<String, Int>>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
-                    .background(Color.White.copy(alpha = 0.02f), RoundedCornerShape(12.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.02f), RoundedCornerShape(20.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
             )
 
             Spacer(modifier = Modifier.height(4.dp))

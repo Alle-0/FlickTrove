@@ -1,6 +1,7 @@
 package com.cinetrack.data.model
 
 import androidx.compose.runtime.Stable
+import com.google.firebase.firestore.PropertyName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
@@ -48,18 +49,18 @@ data class NextEpisodeInfo(
 @Serializable
 @Stable
 data class PersonData(
-    val id: Long = 0L,
-    val name: String = "",
-    @SerialName("profile_path") val profilePath: String? = null
+    @get:PropertyName("id") @set:PropertyName("id") var id: Long = 0L,
+    @get:PropertyName("name") @set:PropertyName("name") var name: String = "",
+    @get:PropertyName("profile_path") @set:PropertyName("profile_path") @SerialName("profile_path") var profilePath: String? = null
 )
 
 @Serializable
 @Stable
 data class StudioData(
-    val id: Long = 0L,
-    val name: String = "",
-    @SerialName("logo_path") val logoPath: String? = null,
-    @SerialName("origin_country") val originCountry: String? = null
+    @get:PropertyName("id") @set:PropertyName("id") var id: Long = 0L,
+    @get:PropertyName("name") @set:PropertyName("name") var name: String = "",
+    @get:PropertyName("logo_path") @set:PropertyName("logo_path") @SerialName("logo_path") var logoPath: String? = null,
+    @get:PropertyName("origin_country") @set:PropertyName("origin_country") @SerialName("origin_country") var originCountry: String? = null
 )
 
 @Serializable

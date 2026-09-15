@@ -824,7 +824,7 @@ data class Movie(
             is Map<*, *> -> {
                 val id = (item["id"] as? Number)?.toLong() ?: 0L
                 val name = item["name"] as? String ?: ""
-                val profilePath = item["profile_path"] as? String
+                val profilePath = (item["profile_path"] ?: item["profilePath"]) as? String
                 if (name.isNotEmpty()) PersonData(id, name, profilePath) else null
             }
             is PersonData -> item
@@ -838,8 +838,8 @@ data class Movie(
             is Map<*, *> -> {
                 val id = (item["id"] as? Number)?.toLong() ?: 0L
                 val name = item["name"] as? String ?: ""
-                val logoPath = item["logo_path"] as? String
-                val originCountry = item["origin_country"] as? String
+                val logoPath = (item["logo_path"] ?: item["logoPath"]) as? String
+                val originCountry = (item["origin_country"] ?: item["originCountry"]) as? String
                 if (name.isNotEmpty()) StudioData(id, name, logoPath, originCountry) else null
             }
             is StudioData -> item

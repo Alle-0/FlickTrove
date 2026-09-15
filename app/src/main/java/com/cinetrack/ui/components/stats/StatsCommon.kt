@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 // Custom Stats Card Modifier (No Blur)
 // ──────────────────────────────────────────────────────────────────────
 fun Modifier.statsCard(
-    shape: Shape = RoundedCornerShape(20.dp)
+    shape: Shape = RoundedCornerShape(28.dp)
 ): Modifier = this.then(
     Modifier
         .background(Color.White.copy(alpha = 0.06f), shape)
