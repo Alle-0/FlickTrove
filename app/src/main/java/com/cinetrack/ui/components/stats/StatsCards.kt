@@ -42,7 +42,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowUp
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import coil.request.ImageRequest
 import com.cinetrack.util.WhiteLogoTransformation
@@ -896,7 +904,8 @@ fun StudioDistributionSection(
     if (studios.isEmpty()) return
 
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    val displayStudios = if (isExpanded) studios else studios.take(5)
+    val remainingStudios = remember(studios) { studios.drop(3) }
+    val displayStudios = if (isExpanded) remainingStudios else remainingStudios.take(5)
     val maxCount = studios.maxOfOrNull { it.count }?.toFloat() ?: 1f
     val totalCount = remember(studios) { studios.sumOf { it.count }.toFloat().coerceAtLeast(1f) }
 
@@ -919,134 +928,180 @@ fun StudioDistributionSection(
                 accentColor = accentColor
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            if (remainingStudios.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
 
-            val scrollState = rememberScrollState()
-            val listModifier = if (isExpanded) {
-                Modifier.fillMaxWidth().heightIn(max = 350.dp).verticalScroll(scrollState)
-            } else {
-                Modifier.fillMaxWidth()
-            }
+                val scrollState = rememberScrollState()
+                val nestedScrollConnection = remember {
+                    object : NestedScrollConnection {
+                        override fun onPostScroll(
+                            consumed: Offset,
+                            available: Offset,
+                            source: NestedScrollSource
+                        ): Offset {
+                            return available
+                        }
+                    }
+                }
 
-            Column(
-                modifier = listModifier,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                displayStudios.forEachIndexed { index, studio ->
-                    val fraction = (studio.count.toFloat() / maxCount).coerceIn(0.04f, 1f)
-                    val animFraction by animateFloatAsState(
-                        targetValue = fraction,
-                        animationSpec = tween(
-                            durationMillis = 900,
-                            delayMillis = (index * 80).coerceAtMost(400),
-                            easing = FastOutSlowInEasing
-                        ),
-                        label = "studio_bar_$index"
-                    )
-
-                    val pct = ((studio.count.toFloat() / totalCount) * 100).roundToInt()
-                    val percentageText = if (pct == 0 && studio.count > 0) "<1%" else "$pct%"
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Studio Identifier: either the official TMDB logo in a sleek dark badge, or the studio name text
-                        Box(
-                            modifier = Modifier.width(96.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (!studio.logoPath.isNullOrBlank()) {
-                                val context = LocalContext.current
-                                val logoUrl = buildTmdbImageUrl(studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
-                                Box(
-                                    modifier = Modifier
-                                        .width(90.dp)
-                                        .height(30.dp)
-                                        .background(Color(0xFF161922), RoundedCornerShape(50))
-                                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
-                                        .clip(RoundedCornerShape(50))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(logoUrl)
-                                            .crossfade(true)
-                                            .transformations(WhiteLogoTransformation())
-                                            .build(),
-                                        contentDescription = studio.name,
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier.fillMaxSize()
+                Box(
+                    modifier = if (isExpanded) {
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 350.dp)
+                            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                            .drawWithContent {
+                                drawContent()
+                                if (scrollState.value > 0) {
+                                    drawRect(
+                                        brush = Brush.verticalGradient(
+                                            0f to Color.Transparent,
+                                            1f to Color.Black,
+                                            startY = 0f,
+                                            endY = 28.dp.toPx()
+                                        ),
+                                        blendMode = BlendMode.DstIn
                                     )
                                 }
-                            } else {
-                                Text(
-                                    text = studio.name,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = Color.White,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        // Thick 12dp Capsule Progress Bar with horizontal gradient (identical to Top Countries)
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(12.dp)
-                                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(animFraction)
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(accentColor.copy(alpha = 0.5f), accentColor)
+                                if (scrollState.value < scrollState.maxValue) {
+                                    drawRect(
+                                        brush = Brush.verticalGradient(
+                                            0f to Color.Black,
+                                            1f to Color.Transparent,
+                                            startY = size.height - 28.dp.toPx(),
+                                            endY = size.height
                                         ),
-                                        RoundedCornerShape(6.dp)
+                                        blendMode = BlendMode.DstIn
                                     )
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        // Clean Count + Percentage on the same line (identical to Genres/Countries)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.widthIn(min = 48.dp)
-                        ) {
-                            Text(
-                                text = studio.count.toString(),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 13.sp
+                                }
+                            }
+                            .nestedScroll(nestedScrollConnection)
+                            .verticalScroll(scrollState)
+                    } else {
+                        Modifier.fillMaxWidth()
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        displayStudios.forEachIndexed { index, studio ->
+                            val fraction = (studio.count.toFloat() / maxCount).coerceIn(0.04f, 1f)
+                            val animFraction by animateFloatAsState(
+                                targetValue = fraction,
+                                animationSpec = tween(
+                                    durationMillis = 900,
+                                    delayMillis = (index * 80).coerceAtMost(400),
+                                    easing = FastOutSlowInEasing
                                 ),
-                                color = Color.White
+                                label = "studio_bar_$index"
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = percentageText,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 12.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.35f)
-                            )
+
+                            val pct = ((studio.count.toFloat() / totalCount) * 100).roundToInt()
+                            val percentageText = if (pct == 0 && studio.count > 0) "<1%" else "$pct%"
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Studio Identifier: either the official TMDB logo in a sleek dark badge, or the studio name text
+                                Box(
+                                    modifier = Modifier.width(96.dp),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    if (!studio.logoPath.isNullOrBlank()) {
+                                        val context = LocalContext.current
+                                        val logoUrl = buildTmdbImageUrl(studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
+                                        Box(
+                                            modifier = Modifier
+                                                .width(90.dp)
+                                                .height(30.dp)
+                                                .background(Color(0xFF161922), RoundedCornerShape(50))
+                                                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
+                                                .clip(RoundedCornerShape(50))
+                                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(context)
+                                                    .data(logoUrl)
+                                                    .crossfade(true)
+                                                    .transformations(WhiteLogoTransformation())
+                                                    .build(),
+                                                contentDescription = studio.name,
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
+                                    } else {
+                                        Text(
+                                            text = studio.name,
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                // Thick 12dp Capsule Progress Bar with horizontal gradient (identical to Top Countries)
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(12.dp)
+                                        .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .fillMaxWidth(animFraction)
+                                            .background(
+                                                Brush.horizontalGradient(
+                                                    listOf(accentColor.copy(alpha = 0.5f), accentColor)
+                                                ),
+                                                RoundedCornerShape(6.dp)
+                                            )
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                // Clean Count + Percentage on the same line (identical to Genres/Countries)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.End,
+                                    modifier = Modifier.widthIn(min = 48.dp)
+                                ) {
+                                    Text(
+                                        text = studio.count.toString(),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 13.sp
+                                        ),
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = percentageText,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = 12.sp
+                                        ),
+                                        color = Color.White.copy(alpha = 0.35f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
             // Expand / Collapse Pill Button (identical to Genre & Country sections)
-            if (studios.size > 5) {
+            if (remainingStudios.size > 5) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

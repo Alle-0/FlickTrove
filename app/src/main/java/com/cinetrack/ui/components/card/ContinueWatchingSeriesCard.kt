@@ -65,6 +65,11 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.NextEpisodeInfo
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.bounceClickWithOffset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import com.cinetrack.ui.components.shared.LocalMovieActions
 import dev.chrisbanes.haze.HazeState
 
 private val UpToDateGreen = Color(0xFF10B981)
@@ -323,6 +328,9 @@ fun ContinueWatchingSeriesCard(
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val pressScale = remember { Animatable(1f) }
+    val movieActions = LocalMovieActions.current
+    val fullCardPosition = remember { arrayOf(Offset.Zero) }
+    val fullCardSize = remember { arrayOf(Size.Zero) }
 
     // Premium Staggered Entrance Animation States (applies to the entire series card: poster + protrusion)
     val compositeId = "${movie.id}_${movie.mediaType}"
@@ -338,9 +346,10 @@ fun ContinueWatchingSeriesCard(
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
     val isVisible = hasAnimated.value || isScrollItem
 
+    val isExploding = movieActions.explodingMovie?.id == movie.id
     val cardAlpha by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
+        targetValue = if (isExploding) 0f else (if (isVisible) 1f else 0f),
+        animationSpec = if (isExploding) snap() else tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
         label = "seriesCardAlpha"
     )
 
@@ -365,6 +374,10 @@ fun ContinueWatchingSeriesCard(
                 scaleY = cardScale * pressScale.value
                 translationY = cardTranslateY * density.density
                 clip = false
+            }
+            .onGloballyPositioned { coordinates ->
+                fullCardPosition[0] = coordinates.positionInWindow()
+                fullCardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
             .pointerInput(Unit) {
                 // requireUnconsumed = false: cattura il press anche se figli lo consumano
@@ -416,7 +429,11 @@ fun ContinueWatchingSeriesCard(
             hasAnimatedSet = null,
             animatedVisibilityScope = animatedVisibilityScope,
             onPress = onPress,
-            onLongPress = onLongPress ?: { _, _, _ -> },
+            onLongPress = { m, offset, pos ->
+                movieActions.updatePopupCardSize(fullCardSize[0])
+                val effectivePos = if (fullCardPosition[0] != Offset.Zero) fullCardPosition[0] else pos
+                onLongPress?.invoke(m, offset, effectivePos)
+            },
             onAction = onAction,
             onMessage = onMessage
         )
@@ -434,9 +451,22 @@ fun ContinueWatchingSeriesCard(
                     )
                 )
                 .background(Color(0xFF1E1E22))
-                // animateOnPress=false: il click e l'haptic funzionano,
-                // ma la scala visiva è delegata all'outer Column (pressScale)
-                .bounceClick(scaleDown = 0.92f, animateOnPress = false) { onPress(movie) }
+                .bounceClickWithOffset(
+                    scaleDown = 0.92f,
+                    animateOnPress = false,
+                    requireUnconsumed = false,
+                    onLongClick = { offset ->
+                        movieActions.updatePopupCardSize(fullCardSize[0])
+                        val posterHeightPx = with(density) { (effectiveWidth * 1.5f).toPx() }
+                        val fullCardOffset = Offset(offset.x, posterHeightPx + offset.y)
+                        onLongPress?.invoke(movie.apply {
+                            this.favorite = isFavorite
+                            this.watched = isWatched
+                            this.reminder = isReminder
+                            if (personalRating != null) this.personalRating = personalRating
+                        }, fullCardOffset, fullCardPosition[0])
+                    }
+                ) { onPress(movie) }
         ) {
             // Pill progress bar tra le due sezioni per l'intera larghezza
             if (isReleased) {
