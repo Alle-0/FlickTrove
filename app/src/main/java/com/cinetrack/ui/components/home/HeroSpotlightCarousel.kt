@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
@@ -164,6 +165,11 @@ fun HeroSpotlightCarousel(
                         onMovieClick(movieWithColor)
                     }
                     .clip(RoundedCornerShape(36.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(36.dp)
+                    )
             ) {
 
                 // Backdrop Image
