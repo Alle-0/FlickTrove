@@ -518,7 +518,7 @@ fun DetailHeader(
                                 val cleanCert = cert.trim().uppercase(java.util.Locale.ROOT)
                                 val certColor = when (cleanCert) {
                                     in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> Color(0xFF4CAF50)
-                                    in listOf("PG", "TV-PG", "TV-Y7", "6", "6+", "7", "7+", "7A", "10", "UA") -> Color(0xFF8BC34A)
+                                    in listOf("PG", "TV-PG", "TV-Y7", "6", "6+", "7", "7+", "7A", "10", "10+", "UA") -> Color(0xFF8BC34A)
                                     in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "13+", "13A", "14", "14+", "VM14", "15") -> Color(0xFFFF9800)
                                     in listOf("R", "TV-MA", "16", "16+", "17+", "18", "18+", "19", "21+", "VM18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> Color(0xFFF44336)
                                     else -> Color.White

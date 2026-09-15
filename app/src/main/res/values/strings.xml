@@ -428,6 +428,7 @@
     <string name="detail_rating_country_it">Movies &amp; TV (Italy)</string>
     <string name="detail_rating_it_t">General audiences (All ages admitted).</string>
     <string name="detail_rating_it_6">Not suitable for children under 6 years.</string>
+    <string name="detail_rating_it_10">Not suitable for children under 10.</string>
     <string name="detail_rating_it_14">Restricted to persons aged 14 and over.</string>
     <string name="detail_rating_it_18">Restricted to adults aged 18 and over.</string>
     <string name="detail_rating_country_de">Freiwillige Selbstkontrolle (Germany / FSK)</string>

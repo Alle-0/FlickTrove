@@ -225,11 +225,13 @@ class HomeViewModel @Inject constructor(
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
             continueWatchingTv = feedState.continueWatchingTv.mapNotNull { tv ->
-                val localTv = localTvMap[tv.id]
-                val effectiveTv = localTv ?: tv
-                if (!effectiveTv.watched && !effectiveTv.dropped) {
-                    val next = effectiveTv.calculateNextEpisode()
-                    if (next != null && !next.isUpToDateWithAirDate) effectiveTv else null
+                // FIX: se la serie è stata eliminata (pending_delete), getAllFlow() la filtra e
+                // localTvMap non la conterrà più. In questo caso saltiamo la card anziché
+                // usare il vecchio valore dalla cache del feed, che la farebbe rimanere visibile.
+                val localTv = localTvMap[tv.id] ?: return@mapNotNull null
+                if (!localTv.watched && !localTv.dropped) {
+                    val next = localTv.calculateNextEpisode()
+                    if (next != null && !next.isUpToDateWithAirDate) localTv else null
                 } else null
             }.toImmutableList(),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,

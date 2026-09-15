@@ -141,9 +141,10 @@ class GetHomeFeedUseCase @Inject constructor(
         
         val continueWatchingTvDeferred = async {
             localMovies.filter { movie ->
-                movie.mediaType == "tv" && 
-                !movie.watched && 
-                !movie.dropped && 
+                movie.mediaType == "tv" &&
+                movie.syncStatus != "pending_delete" &&
+                !movie.watched &&
+                !movie.dropped &&
                 (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0 &&
                 run {
                     val next = movie.calculateNextEpisode()

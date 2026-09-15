@@ -55,10 +55,6 @@ data class ParentsGuideCategory(
 
 
 data class ParentsGuideData(
-    val certification: String,
-    val countryCode: String,
-    val ageLabel: String,
-    val certColor: Color,
     val categories: List<ParentsGuideCategory>
 )
 
@@ -66,24 +62,16 @@ object ParentsGuideResolver {
     fun resolve(certification: String?, countryCode: String?): ParentsGuideData? {
         if (certification.isNullOrBlank()) return null
         val cleanCert = certification.trim().uppercase(Locale.ROOT)
-        val country = countryCode?.uppercase() ?: "US"
+        
+        // Se il rating è per tutti (G, T, 0+, ecc.), tutte le categorie sarebbero "Nessuno".
+        // In questo caso preferiamo nascondere completamente la Guida Genitori.
+        if (cleanCert in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ")) {
+            return null
+        }
 
-        val (age, certColor, sex, violence, profanity, drugs, frightening) = when {
-            cleanCert in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> {
-                Tuple7(
-                    "0+",
-                    Color(0xFF4CAF50),
-                    SeverityLevel.NONE,
-                    SeverityLevel.NONE,
-                    SeverityLevel.NONE,
-                    SeverityLevel.NONE,
-                    SeverityLevel.NONE
-                )
-            }
-            cleanCert in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10") -> {
-                Tuple7(
-                    if (cleanCert == "PG") "8+" else "6+",
-                    Color(0xFF8BC34A),
+        val (sex, violence, profanity, drugs, frightening) = when {
+            cleanCert in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+") -> {
+                Tuple5(
                     SeverityLevel.NONE,
                     SeverityLevel.MODERATE,
                     SeverityLevel.MILD,
@@ -92,9 +80,7 @@ object ParentsGuideResolver {
                 )
             }
             cleanCert in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM14", "15", "UA") -> {
-                Tuple7(
-                    if (cleanCert.contains("14") || cleanCert == "VM14") "14+" else if (cleanCert.contains("15")) "15+" else "12+",
-                    Color(0xFFFF9800),
+                Tuple5(
                     SeverityLevel.MILD,
                     SeverityLevel.MODERATE,
                     SeverityLevel.MODERATE,
@@ -103,9 +89,7 @@ object ParentsGuideResolver {
                 )
             }
             cleanCert in listOf("R", "TV-MA", "16", "16+", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> {
-                Tuple7(
-                    if (cleanCert.contains("16")) "16+" else if (cleanCert.contains("17")) "17+" else if (cleanCert.contains("15")) "15+" else "18+",
-                    Color(0xFFEF5350),
+                Tuple5(
                     SeverityLevel.MODERATE,
                     SeverityLevel.SEVERE,
                     SeverityLevel.SEVERE,
@@ -114,9 +98,7 @@ object ParentsGuideResolver {
                 )
             }
             else -> {
-                Tuple7(
-                    "12+",
-                    Color(0xFFFF9800),
+                Tuple5(
                     SeverityLevel.MILD,
                     SeverityLevel.MILD,
                     SeverityLevel.MILD,
@@ -135,17 +117,11 @@ object ParentsGuideResolver {
         )
 
         return ParentsGuideData(
-            certification = cleanCert,
-            countryCode = country,
-            ageLabel = age,
-            certColor = certColor,
             categories = categories
         )
     }
 
-    private data class Tuple7(
-        val age: String,
-        val certColor: Color,
+    private data class Tuple5(
         val sex: SeverityLevel,
         val violence: SeverityLevel,
         val profanity: SeverityLevel,

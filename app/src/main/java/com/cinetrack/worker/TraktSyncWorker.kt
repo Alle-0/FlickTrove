@@ -415,15 +415,26 @@ class TraktSyncWorker @AssistedInject constructor(
                     val imdbId = remoteShow.show?.ids?.imdb
                     val showTitle = remoteShow.show?.title ?: "Unknown"
 
+                    // FIX: Se ids.tmdb è null, proviamo la risoluzione via IMDB.
+                    // Verifichiamo che l'ID restituito sia plausibile (> 100) per non
+                    // confonderlo con un ids.trakt piccolo (1, 2, 3...) che TMDB potrebbe
+                    // associare alle primissime serie registrate nel suo database.
                     if (showTmdbId == null && !imdbId.isNullOrBlank()) {
                         try {
                             val found = tmdbService.findByExternalId(imdbId, "imdb_id")
-                            showTmdbId = found.tvResults?.firstOrNull()?.id
+                            val resolved = found.tvResults?.firstOrNull()?.id
+                            if (resolved != null && resolved > 100L) {
+                                showTmdbId = resolved
+                            } else if (resolved != null) {
+                                android.util.Log.w("TraktSyncWorker", "SYNC: ID TMDB sospetto ($resolved) per '$showTitle' via IMDB $imdbId — skip")
+                            }
                         } catch (e: Exception) {
                             android.util.Log.e("TRAKT_DEBUG", "Errore lookup TMDB per IMDB ID $imdbId", e)
                         }
                     }
-                    if (showTmdbId == null) continue
+                    // Anche il TMDB ID diretto può essere sospettosamente piccolo se Trakt
+                    // ha serializzato ids.trakt al posto di ids.tmdb.
+                    if (showTmdbId == null || showTmdbId <= 0L) continue
 
                     processedShowTmdbIds.add(showTmdbId)
 
@@ -500,6 +511,10 @@ class TraktSyncWorker @AssistedInject constructor(
                         }
                     } else {
                         for (local in localTvShows) {
+                            // FIX CASCADE: Non resettare le serie già marcate pending_delete —
+                            // verranno rimosse fisicamente dal TraktInstantWriteWorker dopo il
+                            // push a Trakt. Resettarle qui le farebbe riapparire in continueWatching.
+                            if (local.syncStatus == "pending_delete") continue
                             if ((!local.watchedEpisodes.isNullOrEmpty() || local.watched) && !processedShowTmdbIds.contains(local.id)) {
                                 episodeUpdates.add(
                                     local.copy(

@@ -148,6 +148,22 @@ fun HeroSpotlightCarousel(
             var dominantColor by remember(movie.id) { mutableStateOf<Color?>(null) }
             val coroutineScope = rememberCoroutineScope()
 
+            val fallbackColor = MaterialTheme.colorScheme.primary
+            val rawTargetColor = movie.accentColor?.toComposeColor() ?: dominantColor ?: fallbackColor
+            val vividAccent = remember(rawTargetColor) {
+                ColorUtils.ensureVividAccent(rawTargetColor)
+            }
+            val animatedColor by animateColorAsState(
+                targetValue = vividAccent,
+                animationSpec = tween(600),
+                label = "backdropColor"
+            )
+
+            val baseDarkColor = remember { Color(0xFF0F0F16) }
+            val cardBottomColor = remember(animatedColor) {
+                lerp(animatedColor, baseDarkColor, 0.72f)
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -167,7 +183,7 @@ fun HeroSpotlightCarousel(
                     .clip(RoundedCornerShape(36.dp))
                     .border(
                         width = 1.dp,
-                        color = Color.White.copy(alpha = 0.15f),
+                        color = cardBottomColor,
                         shape = RoundedCornerShape(36.dp)
                     )
             ) {
@@ -193,20 +209,6 @@ fun HeroSpotlightCarousel(
                     }
                 )
 
-                val fallbackColor = MaterialTheme.colorScheme.primary
-                val rawTargetColor = movie.accentColor?.toComposeColor() ?: dominantColor ?: fallbackColor
-                val vividAccent = remember(rawTargetColor) {
-                    ColorUtils.ensureVividAccent(rawTargetColor)
-                }
-                val animatedColor by animateColorAsState(
-                    targetValue = vividAccent,
-                    animationSpec = tween(600),
-                    label = "backdropColor"
-                )
-                val baseDarkColor = remember { Color(0xFF0F0F16) }
-                val cardBottomColor = remember(animatedColor) {
-                    lerp(animatedColor, baseDarkColor, 0.72f)
-                }
                 
                 Box(
                     modifier = Modifier

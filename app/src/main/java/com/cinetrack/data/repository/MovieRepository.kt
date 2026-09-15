@@ -486,9 +486,16 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun deleteMovie(movie: Movie) {
-        val updatedMovie = movie.copy(watchedEpisodes = emptyMap())
+        // FIX: unico insert atomico con syncStatus già = "pending_delete".
+        // Se facessimo insert() + markDeleted() in due step, Room emetterebbe il Flow
+        // due volte: la prima con la serie ancora visibile, la seconda senza.
+        // Ciò causava la card a rimanere visibile per qualche frame dopo "Eliminar".
+        val updatedMovie = movie.copy(
+            watchedEpisodes = emptyMap(),
+            syncStatus = "pending_delete",
+            clientUpdatedAt = System.currentTimeMillis()
+        )
         favoriteDao.insert(updatedMovie)
-        favoriteDao.markDeleted(movie.id, movie.mediaType)
         watchHistoryDao.deleteByMovieId(movie.id)
         watchHistoryDao.purgeHistoryForMovie(movie.id)
         widgetNotifier.notifyWidgetUpdated()
@@ -551,9 +558,12 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun markAsDeleted(movie: Movie) {
-        val updatedMovie = movie.copy(watchedEpisodes = emptyMap())
+        val updatedMovie = movie.copy(
+            watchedEpisodes = emptyMap(),
+            syncStatus = "pending_delete",
+            clientUpdatedAt = System.currentTimeMillis()
+        )
         favoriteDao.insert(updatedMovie)
-        favoriteDao.markDeleted(movie.id, movie.mediaType)
         watchHistoryDao.deleteByMovieId(movie.id)
         watchHistoryDao.purgeHistoryForMovie(movie.id)
 

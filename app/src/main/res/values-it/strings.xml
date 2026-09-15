@@ -408,6 +408,7 @@
     <string name="detail_rating_country_it">Film e Serie TV (Italia)</string>
     <string name="detail_rating_it_t">Per tutti (Nessuna limitazione d\'età).</string>
     <string name="detail_rating_it_6">Non adatto ai minori di 6 anni.</string>
+    <string name="detail_rating_it_10">Non adatto ai minori di 10 anni.</string>
     <string name="detail_rating_it_14">Vietato ai minori di 14 anni.</string>
     <string name="detail_rating_it_18">Vietato ai minori di 18 anni.</string>
     <string name="detail_rating_country_jp">Classificazione Film Eirin (Giappone)</string>

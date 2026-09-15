@@ -7,6 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -919,114 +921,126 @@ fun StudioDistributionSection(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            displayStudios.forEachIndexed { index, studio ->
-                val fraction = (studio.count.toFloat() / maxCount).coerceIn(0.04f, 1f)
-                val animFraction by animateFloatAsState(
-                    targetValue = fraction,
-                    animationSpec = tween(
-                        durationMillis = 900,
-                        delayMillis = (index * 80).coerceAtMost(400),
-                        easing = FastOutSlowInEasing
-                    ),
-                    label = "studio_bar_$index"
-                )
+            val scrollState = rememberScrollState()
+            val listModifier = if (isExpanded) {
+                Modifier.fillMaxWidth().heightIn(max = 350.dp).verticalScroll(scrollState)
+            } else {
+                Modifier.fillMaxWidth()
+            }
 
-                val pct = ((studio.count.toFloat() / totalCount) * 100).roundToInt()
-                val percentageText = if (pct == 0 && studio.count > 0) "<1%" else "$pct%"
+            Column(
+                modifier = listModifier,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                displayStudios.forEachIndexed { index, studio ->
+                    val fraction = (studio.count.toFloat() / maxCount).coerceIn(0.04f, 1f)
+                    val animFraction by animateFloatAsState(
+                        targetValue = fraction,
+                        animationSpec = tween(
+                            durationMillis = 900,
+                            delayMillis = (index * 80).coerceAtMost(400),
+                            easing = FastOutSlowInEasing
+                        ),
+                        label = "studio_bar_$index"
+                    )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Studio Identifier: either the official TMDB logo in a sleek dark badge, or the studio name text
-                    Box(
-                        modifier = Modifier.width(96.dp),
-                        contentAlignment = Alignment.CenterStart
+                    val pct = ((studio.count.toFloat() / totalCount) * 100).roundToInt()
+                    val percentageText = if (pct == 0 && studio.count > 0) "<1%" else "$pct%"
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (!studio.logoPath.isNullOrBlank()) {
-                            val context = LocalContext.current
-                            val logoUrl = buildTmdbImageUrl(studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
-                            Box(
-                                modifier = Modifier
-                                    .width(90.dp)
-                                    .height(30.dp)
-                                    .background(Color(0xFF161922), RoundedCornerShape(50))
-                                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
-                                    .clip(RoundedCornerShape(50))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(logoUrl)
-                                        .crossfade(true)
-                                        .transformations(WhiteLogoTransformation())
-                                        .build(),
-                                    contentDescription = studio.name,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
+                        // Studio Identifier: either the official TMDB logo in a sleek dark badge, or the studio name text
+                        Box(
+                            modifier = Modifier.width(96.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (!studio.logoPath.isNullOrBlank()) {
+                                val context = LocalContext.current
+                                val logoUrl = buildTmdbImageUrl(studio.logoPath, ImageType.LOGO, LocalImageQuality.current)
+                                Box(
+                                    modifier = Modifier
+                                        .width(90.dp)
+                                        .height(30.dp)
+                                        .background(Color(0xFF161922), RoundedCornerShape(50))
+                                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
+                                        .clip(RoundedCornerShape(50))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(logoUrl)
+                                            .crossfade(true)
+                                            .transformations(WhiteLogoTransformation())
+                                            .build(),
+                                        contentDescription = studio.name,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = studio.name,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                        } else {
-                            Text(
-                                text = studio.name,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                    // Thick 12dp Capsule Progress Bar with horizontal gradient (identical to Top Countries)
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(12.dp)
-                            .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
+                        // Thick 12dp Capsule Progress Bar with horizontal gradient (identical to Top Countries)
                         Box(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .fillMaxWidth(animFraction)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(accentColor.copy(alpha = 0.5f), accentColor)
-                                    ),
-                                    RoundedCornerShape(6.dp)
-                                )
-                        )
-                    }
+                                .weight(1f)
+                                .height(12.dp)
+                                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(animFraction)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(accentColor.copy(alpha = 0.5f), accentColor)
+                                        ),
+                                        RoundedCornerShape(6.dp)
+                                    )
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                    // Clean Count + Percentage on the same line (identical to Genres/Countries)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.widthIn(min = 48.dp)
-                    ) {
-                        Text(
-                            text = studio.count.toString(),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Black,
-                                fontSize = 13.sp
-                            ),
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = percentageText,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 12.sp
-                            ),
-                            color = Color.White.copy(alpha = 0.35f)
-                        )
+                        // Clean Count + Percentage on the same line (identical to Genres/Countries)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.widthIn(min = 48.dp)
+                        ) {
+                            Text(
+                                text = studio.count.toString(),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 13.sp
+                                ),
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = percentageText,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 12.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.35f)
+                            )
+                        }
                     }
                 }
             }

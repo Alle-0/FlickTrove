@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
@@ -498,13 +499,19 @@ fun HomeFeedScreenContent(
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
                                                 items(
-                                                    count = uiState.continueWatchingTv.size,
-                                                    key = { index -> uiState.continueWatchingTv[index].id }
-                                                ) { index ->
-                                                    val rawMovie = uiState.continueWatchingTv[index]
+                                                    items = uiState.continueWatchingTv,
+                                                    key = { movie -> movie.id }
+                                                ) { rawMovie ->
                                                     val movie = resolveLocalMovie(rawMovie)
                                                     val isUpdating = viewModel.updatingShowIds[movie.id] == true
-                                                    Box(modifier = Modifier.width(110.dp)) {
+                                                    Box(modifier = Modifier
+                                                        .width(110.dp)
+                                                        .animateItem(
+                                                            fadeInSpec = tween(220),
+                                                            fadeOutSpec = tween(280),
+                                                            placementSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy)
+                                                        )
+                                                    ) {
                                                         com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
                                                             movie = movie,
                                                             cardWidth = 110.dp,
@@ -516,7 +523,7 @@ fun HomeFeedScreenContent(
                                                             personalRating = movie.personalRating,
                                                             folderColors = getMovieFolderColors(movie),
                                                             hazeState = activeHazeState,
-                                                            staggerIndex = index,
+                                                            staggerIndex = -1,
                                                             onPress = onMovieClick,
                                                             onLongPress = stableOnLongPress,
                                                             onAction = stableOnAction,
