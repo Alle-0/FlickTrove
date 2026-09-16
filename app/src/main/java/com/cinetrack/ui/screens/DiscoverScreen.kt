@@ -166,7 +166,7 @@ fun DiscoverScreenContent(
         when (uiState.type) {
             "popular_movies" -> stringResource(R.string.discover_title_popular_movies)
             "now_playing_movies" -> stringResource(R.string.discover_title_now_playing_movies)
-            "upcoming_movies" -> stringResource(R.string.discover_title_upcoming_movies)
+            "upcoming_movies", "upcoming", "upcoming_tv" -> stringResource(R.string.discover_title_upcoming_movies)
             "popular_tv" -> stringResource(R.string.discover_title_popular_tv)
             "airing_today_tv" -> stringResource(R.string.discover_title_airing_today_tv)
             "on_the_air_tv" -> stringResource(R.string.discover_title_on_the_air_tv)

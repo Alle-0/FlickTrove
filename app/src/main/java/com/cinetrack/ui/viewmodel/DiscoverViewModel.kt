@@ -262,6 +262,7 @@ class DiscoverViewModel @Inject constructor(
                         "popular_tv" -> repository.getPopularTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         "airing_today_tv" -> repository.getAiringTodayTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         "on_the_air_tv", "streaming_tv" -> repository.getOnTheAirTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
+                        "upcoming_tv" -> repository.getUpcomingTV(page = pageToFetch).map { it.copy(mediaType = "tv") }
                         "trending_all" -> repository.getTrendingAll(page = pageToFetch) 
                         "trending_movies", "trending" -> repository.getTrendingMovies(page = pageToFetch).map { it.copy(mediaType = "movie") }
                         "trending_tv" -> repository.getTrendingTV(page = pageToFetch).map { it.copy(mediaType = "tv") }

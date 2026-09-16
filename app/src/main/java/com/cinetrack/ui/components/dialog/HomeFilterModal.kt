@@ -469,7 +469,7 @@ fun HomeFilterModal(
                             }
 
                             // --- STATUS SECTION (Only for TV) ---
-                            if (!isCommentsFilter && category == "tv") {
+                            if (!isCommentsFilter && category.contains("tv")) {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_status),
                                     isExpanded = expandedSection == "status",
@@ -555,7 +555,7 @@ fun HomeFilterModal(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    val relevantGenres = if (category == "tv") GenreConstants.TV_GENRES else GenreConstants.MOVIE_GENRES
+                                    val relevantGenres = if (category.contains("tv")) GenreConstants.TV_GENRES else GenreConstants.MOVIE_GENRES
                                     val displayedGenres = if (showAllGenres) {
                                         relevantGenres
                                     } else {

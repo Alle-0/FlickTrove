@@ -1646,7 +1646,7 @@ class MovieRepository @Inject constructor(
                 "watch_region" to getRegionFromPrefs(),
                 "sort_by" to "popularity.desc"
             )
-        ).results
+        ).results.map { it.copy(mediaType = "tv") }
     }
 
     suspend fun getTrendingAll(page: Int = 1): List<Movie> = tmdbService.getTrendingAll(page = page).results
