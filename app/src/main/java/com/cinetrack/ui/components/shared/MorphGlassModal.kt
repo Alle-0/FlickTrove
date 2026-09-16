@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
+import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
@@ -52,6 +54,9 @@ import kotlin.math.roundToInt
  * The modal animates directly from the trigger button bounds (or center if null)
  * with bouncy spring physics into the centered glass modal, morphing the corner radius
  * and fading in content once expanded. On dismiss, it smoothly shrinks back into the trigger button.
+ *
+ * When [LocalAdvancedVisualEffects] is disabled, it switches to an ultra-lightweight centered
+ * fade & scale transition, completely bypassing frame-by-frame geometry and blur recalculations.
  */
 @Composable
 fun MorphGlassModal(
@@ -69,6 +74,7 @@ fun MorphGlassModal(
     zIndex: Float = 100f,
     content: @Composable BoxScope.(contentAlpha: Float) -> Unit
 ) {
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
     val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -83,7 +89,8 @@ fun MorphGlassModal(
     val targetHeightPx by animateFloatAsState(
         targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeightPx, maxAllowedHeight) 
                       else with(density) { 340.dp.toPx() },
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        animationSpec = if (advancedEffectsEnabled) spring(stiffness = Spring.StiffnessLow) 
+                        else spring(stiffness = Spring.StiffnessMedium),
         label = "dynamicHeight"
     )
 
@@ -102,7 +109,9 @@ fun MorphGlassModal(
 
     val progress by transition.animateFloat(
         transitionSpec = {
-            if (initialState == false && targetState == true) {
+            if (!advancedEffectsEnabled) {
+                tween(durationMillis = 150, easing = FastOutSlowInEasing)
+            } else if (initialState == false && targetState == true) {
                 spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
             } else {
                 spring(stiffness = Spring.StiffnessMedium)
@@ -111,14 +120,14 @@ fun MorphGlassModal(
         label = "expansionProgress"
     ) { state -> if (state) 1f else 0f }
 
-    val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
-
     if (transition.currentState || transition.targetState) {
-        val effectiveScrimAlpha = if (triggerBounds != null) {
+        val effectiveScrimAlpha = if (!advancedEffectsEnabled) {
+            scrimAlpha * progress
+        } else if (triggerBounds != null) {
             val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
             scrimAlpha * FastOutSlowInEasing.transform(scrimProgress)
         } else {
-            scrimAlpha * alpha
+            scrimAlpha * progress
         }
 
         Box(
@@ -145,116 +154,160 @@ fun MorphGlassModal(
                 content(0f)
             }
 
-            val startRect = triggerBounds ?: targetRect.copy(
-                left = targetRect.center.x - 20f,
-                top = targetRect.center.y - 20f,
-                right = targetRect.center.x + 20f,
-                bottom = targetRect.center.y + 20f
-            )
+            if (!advancedEffectsEnabled) {
+                // Static, ultra-lightweight dialog layout: fade + subtle scale, no frame-by-frame shape or layout recalculation
+                val shape = remember(targetCornerRadius) { RoundedCornerShape(targetCornerRadius) }
 
-            // Center moves smoothly towards screen center
-            val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
-            val currentCenterY = lerp(startRect.center.y, targetRect.center.y, progress)
-
-            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
-            val sizeProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) {
-                    (progress / delay) * 0.05f
-                } else {
-                    val raw = (progress - delay) / (1f - delay)
-                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
-                }
-            } else {
-                progress
-            }
-
-            // Corner radius stays circular during liftoff, then morphs into target rounded corners
-            val cornerRadiusProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) 0f
-                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
-            } else {
-                progress
-            }
-
-            val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
-            val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
-
-            val currentRect = Rect(
-                left = currentCenterX - currentWidth / 2f,
-                top = currentCenterY - currentHeight / 2f,
-                right = currentCenterX + currentWidth / 2f,
-                bottom = currentCenterY + currentHeight / 2f
-            )
-
-            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { targetCornerRadius.toPx() }
-            val endRadius = with(density) { targetCornerRadius.toPx() }
-            val currentCornerRadius = lerp(startRadius, endRadius, cornerRadiusProgress)
-            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
-
-            val currentTintAlpha = if (triggerBounds != null) {
-                lerp(0.48f, style.tint.alpha, sizeProgress)
-            } else {
-                style.tint.alpha
-            }
-            val currentBlur = if (triggerBounds != null) {
-                androidx.compose.ui.unit.lerp(16.dp, style.blurRadius, sizeProgress)
-            } else {
-                style.blurRadius
-            }
-            val animatedStyle = remember(style, currentTintAlpha, currentBlur) {
-                style.copy(
-                    tint = style.tint.copy(alpha = currentTintAlpha),
-                    blurRadius = currentBlur
-                )
-            }
-            val borderAlpha = if (triggerBounds != null) {
-                lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
-            } else {
-                HazeStyles.ModalBorderAlpha
-            }
-
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
-                    .size(
-                        width = with(density) { currentRect.width.toDp() },
-                        height = with(density) { currentRect.height.toDp() }
-                    )
-                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
-            ) {
-                // Background Layer (Blurred glass)
-                Spacer(
+                Box(
                     modifier = Modifier
-                        .matchParentSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = currentShape,
-                            style = animatedStyle,
-                            useOffscreenStrategy = false
+                        .offset { IntOffset(targetRect.left.roundToInt(), targetRect.top.roundToInt()) }
+                        .size(
+                            width = with(density) { targetRect.width.toDp() },
+                            height = with(density) { targetRect.height.toDp() }
                         )
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = borderAlpha),
-                            shape = currentShape
-                        )
-                )
+                        .graphicsLayer {
+                            alpha = progress
+                            val scale = lerp(0.95f, 1f, progress)
+                            scaleX = scale
+                            scaleY = scale
+                        }
+                        .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
+                ) {
+                    // Background Layer (Glass / Surface)
+                    Spacer(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = shape,
+                                style = style,
+                                useOffscreenStrategy = false
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
+                                shape = shape
+                            )
+                    )
 
-                // Foreground Content
-                if (progress > 0.38f) {
-                    val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
-
+                    // Content
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .zIndex(1f)
-                            .graphicsLayer(
-                                alpha = contentAlpha,
-                                compositingStrategy = CompositingStrategy.Offscreen
-                            )
                     ) {
-                        content(contentAlpha)
+                        content(progress)
+                    }
+                }
+            } else {
+                // Expanding morph from trigger button bounds (or center)
+                val startRect = triggerBounds ?: targetRect.copy(
+                    left = targetRect.center.x - 20f,
+                    top = targetRect.center.y - 20f,
+                    right = targetRect.center.x + 20f,
+                    bottom = targetRect.center.y + 20f
+                )
+
+                // Center moves smoothly towards screen center
+                val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
+                val currentCenterY = lerp(startRect.center.y, targetRect.center.y, progress)
+
+                // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
+                val sizeProgress = if (triggerBounds != null) {
+                    val delay = 0.18f
+                    if (progress <= delay) {
+                        (progress / delay) * 0.05f
+                    } else {
+                        val raw = (progress - delay) / (1f - delay)
+                        0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
+                    }
+                } else {
+                    progress
+                }
+
+                // Corner radius stays circular during liftoff, then morphs into target rounded corners
+                val cornerRadiusProgress = if (triggerBounds != null) {
+                    val delay = 0.18f
+                    if (progress <= delay) 0f
+                    else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
+                } else {
+                    progress
+                }
+
+                val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
+                val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
+
+                val currentRect = Rect(
+                    left = currentCenterX - currentWidth / 2f,
+                    top = currentCenterY - currentHeight / 2f,
+                    right = currentCenterX + currentWidth / 2f,
+                    bottom = currentCenterY + currentHeight / 2f
+                )
+
+                val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { targetCornerRadius.toPx() }
+                val endRadius = with(density) { targetCornerRadius.toPx() }
+                val currentCornerRadius = lerp(startRadius, endRadius, cornerRadiusProgress)
+                val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
+
+                val currentTintAlpha = if (triggerBounds != null) {
+                    lerp(0.48f, style.tint.alpha, sizeProgress)
+                } else {
+                    style.tint.alpha
+                }
+                // Keep blurRadius constant at style.blurRadius to avoid GPU shader re-allocations during animation
+                val animatedStyle = remember(style, currentTintAlpha) {
+                    style.copy(
+                        tint = style.tint.copy(alpha = currentTintAlpha),
+                        blurRadius = style.blurRadius
+                    )
+                }
+                val borderAlpha = if (triggerBounds != null) {
+                    lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
+                } else {
+                    HazeStyles.ModalBorderAlpha
+                }
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
+                        .size(
+                            width = with(density) { currentRect.width.toDp() },
+                            height = with(density) { currentRect.height.toDp() }
+                        )
+                        .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
+                ) {
+                    // Background Layer (Blurred glass)
+                    Spacer(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = currentShape,
+                                style = animatedStyle,
+                                useOffscreenStrategy = false
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = borderAlpha),
+                                shape = currentShape
+                            )
+                    )
+
+                    // Foreground Content
+                    if (progress > 0.38f) {
+                        val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(1f)
+                                .graphicsLayer(
+                                    alpha = contentAlpha,
+                                    compositingStrategy = CompositingStrategy.Offscreen
+                                )
+                        ) {
+                            content(contentAlpha)
+                        }
                     }
                 }
             }

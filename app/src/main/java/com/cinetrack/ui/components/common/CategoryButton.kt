@@ -112,6 +112,7 @@ fun CategoryTabSelector(
         var flightTargetCenter by remember { mutableStateOf(0f) }
         var isFlightActive by remember { mutableStateOf(false) }
         var peakFlightBoost by remember { mutableStateOf(0.30f) }
+        var pressedTabIndex by remember { mutableStateOf(-1) }
 
         // Apple-style Leading & Trailing edge spring physics
         val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
@@ -295,8 +296,14 @@ fun CategoryTabSelector(
                 realTabWidth = realTabWidth,
                 selectedIndex = selectedIndex,
                 isInteractive = true,
+                pressedTabIndex = pressedTabIndex,
                 onOptionClick = onOptionClick,
-                onTabPressedChange = { isSelectedTabPressed = it },
+                onTabPressed = { index, pressed ->
+                    pressedTabIndex = if (pressed) index else -1
+                    if (index == selectedIndex) {
+                        isSelectedTabPressed = pressed
+                    }
+                },
                 fontSize = fontSize
             )
 
@@ -398,7 +405,9 @@ fun CategoryTabSelector(
                     realTabWidth = realTabWidth,
                     selectedIndex = selectedIndex,
                     isInteractive = false,
+                    pressedTabIndex = pressedTabIndex,
                     onOptionClick = {},
+                    onTabPressed = null,
                     fontSize = fontSize
                 )
             }
@@ -415,10 +424,14 @@ private fun CategoryTabItems(
     realTabWidth: androidx.compose.ui.unit.Dp,
     selectedIndex: Int,
     isInteractive: Boolean,
+    pressedTabIndex: Int,
     onOptionClick: (Int) -> Unit,
-    onTabPressedChange: ((Boolean) -> Unit)? = null,
+    onTabPressed: ((Int, Boolean) -> Unit)? = null,
     fontSize: androidx.compose.ui.unit.TextUnit = 12.sp
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val vibrationEnabled = com.cinetrack.ui.utils.LocalVibrationEnabled.current
+
     Row(
         modifier = Modifier
             .width(realTabWidth * options.size)
@@ -428,12 +441,22 @@ private fun CategoryTabItems(
             val interactionSource = remember { MutableInteractionSource() }
             val isPressed by interactionSource.collectIsPressedAsState()
 
-            if (isInteractive && index == selectedIndex && onTabPressedChange != null) {
+            if (isInteractive && onTabPressed != null) {
                 DisposableEffect(isPressed) {
-                    onTabPressedChange(isPressed)
-                    onDispose { onTabPressedChange(false) }
+                    onTabPressed(index, isPressed)
+                    onDispose { onTabPressed(index, false) }
                 }
             }
+
+            val isCurrentPressed = (isInteractive && isPressed) || (pressedTabIndex == index)
+            val tabBounceScale by animateFloatAsState(
+                targetValue = if (isCurrentPressed) 0.92f else 1f,
+                animationSpec = spring(
+                    stiffness = if (isCurrentPressed) 10000f else Spring.StiffnessMediumLow,
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ),
+                label = "tabBounceScale_$index"
+            )
 
             Box(
                 modifier = Modifier
@@ -441,7 +464,13 @@ private fun CategoryTabItems(
                     .fillMaxHeight()
                     .then(
                         if (isInteractive) {
-                            Modifier.clickable(interactionSource = interactionSource, indication = null) {
+                            Modifier.clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                if (vibrationEnabled) {
+                                    com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                                }
                                 onOptionClick(index)
                             }
                         } else Modifier
@@ -451,7 +480,12 @@ private fun CategoryTabItems(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .graphicsLayer {
+                            scaleX = tabBounceScale
+                            scaleY = tabBounceScale
+                        }
                 ) {
                     Text(
                         text = title.uppercase(),

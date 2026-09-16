@@ -324,11 +324,13 @@ fun MovieActionsPopup(
                             movie.watched
                         }
                         
+                        val accentColor = MaterialTheme.colorScheme.primary
+
                         if (canRate) {
                             MovieMenuItem(
                                 text = stringResource(R.string.card_quick_rate),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_star),
-                                iconColor = HazeStyles.AccentYellow,
+                                iconColor = accentColor,
                                 modifier = Modifier.animateEnterExit(
                                     enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
                                 ),
@@ -338,7 +340,7 @@ fun MovieActionsPopup(
                         MovieMenuItem(
                             text = stringResource(R.string.card_quick_note),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
-                            iconColor = Color(0xFF60A5FA),
+                            iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 80)) { it / 2 } + fadeIn(tween(300, delayMillis = 80))
                             ),
@@ -347,7 +349,7 @@ fun MovieActionsPopup(
                         MovieMenuItem(
                             text = stringResource(R.string.card_folders),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
-                            iconColor = Color(0xFF34D399),
+                            iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 120)) { it / 2 } + fadeIn(tween(300, delayMillis = 120))
                             ),
@@ -357,7 +359,7 @@ fun MovieActionsPopup(
                             text = stringResource(R.string.card_share),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             iconModifier = Modifier.offset(x = (-1).dp),
-                            iconColor = Color(0xFF818CF8),
+                            iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
                                 enter = slideInVertically(tween(300, delayMillis = 160)) { it / 2 } + fadeIn(tween(300, delayMillis = 160))
                             ),
