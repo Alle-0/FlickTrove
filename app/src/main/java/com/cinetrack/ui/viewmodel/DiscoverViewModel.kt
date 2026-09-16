@@ -289,7 +289,10 @@ class DiscoverViewModel @Inject constructor(
                         val relDate = movie.releaseDate ?: movie.firstAirDate
                         val isNotReleased = !movie.isReleased && (relDate == null || relDate >= today)
                         if (!isNotReleased) return@filter false
-                        if (type.contains("upcoming") && movie.posterPath == null) return@filter false
+                        if (type.contains("upcoming")) {
+                            if (movie.posterPath.isNullOrBlank()) return@filter false
+                            if ((movie.popularity ?: 0.0) < 1.5) return@filter false
+                        }
 
                         if (config.selectedDecades.isEmpty()) {
                             true
@@ -368,7 +371,9 @@ class DiscoverViewModel @Inject constructor(
                 .map { it.copy(mediaType = "movie") }
                 .filter { movie ->
                     val date = movie.releaseDate
-                    !movie.isReleased && (date == null || date >= today)
+                    !movie.isReleased && (date == null || date >= today) &&
+                    !movie.posterPath.isNullOrBlank() &&
+                    (movie.popularity ?: 0.0) >= 1.0
                 }
                 .sortedBy { it.releaseDate ?: "9999" }
             val totalPages = response.totalPages ?: 1
@@ -408,7 +413,8 @@ class DiscoverViewModel @Inject constructor(
                     movie.id !in existingIds && 
                     !movie.isReleased && 
                     (date == null || date >= today) &&
-                    movie.posterPath != null
+                    !movie.posterPath.isNullOrBlank() &&
+                    (movie.popularity ?: 0.0) >= 1.5
                 }
 
             if (uniqueGlobal.isNotEmpty()) {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -603,23 +604,26 @@ fun HomeFilterModal(
                                         Box(
                                             modifier = Modifier
                                                 .bounceClick { showAllGenres = true }
-                                                .clip(RoundedCornerShape(12.dp))
-                                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                                .clip(CircleShape)
+                                                .background(Color.Black.copy(alpha = 0.45f))
+                                                .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
                                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                                         ) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
                                                 Icon(
                                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                                                     contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                                    modifier = Modifier.size(14.dp)
+                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.size(12.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = stringResource(R.string.filter_show_all),
+                                                    text = stringResource(R.string.filter_show_all).uppercase(),
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                                 )
                                             }
                                         }

@@ -78,6 +78,11 @@ data class Movie(
     @set:PropertyName("vote_count")
     @ColumnInfo(name = "vote_count") var voteCount: Int? = 0,
     
+    @SerialName("popularity")
+    @get:PropertyName("popularity")
+    @set:PropertyName("popularity")
+    @ColumnInfo(name = "popularity") var popularity: Double? = null,
+    
     @get:PropertyName("overview")
     @set:PropertyName("overview")
     var overview: String? = null,
