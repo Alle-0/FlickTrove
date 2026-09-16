@@ -431,9 +431,9 @@ fun HomeFilterModal(
                                                 } else {
                                                     add(FilterOption("created_at", stringResource(R.string.person_popularity).lowercase().replaceFirstChar { it.uppercase() }))
                                                     add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                                    add(FilterOption("personal_rating", stringResource(R.string.detail_rating)))
+                                                    add(FilterOption("title", stringResource(R.string.filter_sort_title)))
                                                 }
-                                                add(FilterOption("personal_rating", stringResource(R.string.detail_rating)))
-                                                add(FilterOption("title", stringResource(R.string.filter_sort_title)))
                                             } else {
                                                 if (isVisti) {
                                                     add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
@@ -487,8 +487,8 @@ fun HomeFilterModal(
                                 }
                             }
 
-                            // --- STATUS SECTION (Only for TV) ---
-                            if (!isCommentsFilter && category.contains("tv")) {
+                            // --- STATUS SECTION (Only for TV, not for upcoming) ---
+                            if (!isCommentsFilter && category.contains("tv") && !category.contains("upcoming")) {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_status),
                                     isExpanded = expandedSection == "status",
