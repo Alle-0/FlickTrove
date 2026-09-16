@@ -130,7 +130,10 @@ class DiscoverViewModel @Inject constructor(
         this.type = newType
         this.genreId = newGenreId
         this.genreName = newGenreName
+        val isUpcoming = newType.contains("upcoming")
         _sortConfig.value = _sortConfig.value.copy(
+            sortType = if (isUpcoming) "release_date" else "created_at",
+            sortDirection = if (isUpcoming) "asc" else "desc",
             selectedGenres = if (newGenreId != null) listOf(newGenreId) else emptyList(),
             selectedDecades = emptyList()
         )
@@ -157,7 +160,13 @@ class DiscoverViewModel @Inject constructor(
             try {
                 val pageToFetch = if (isNextPage) _currentPage.value + 1 else 1
                 val config = _sortConfig.value
-                val hasCustomFilters = config.selectedGenres.isNotEmpty() || config.selectedProviders.isNotEmpty() || config.selectedDecades.isNotEmpty() || config.sortType != "created_at"
+                val isUpcoming = type.contains("upcoming")
+                val isDefaultSort = if (isUpcoming) {
+                    config.sortType == "release_date" && config.sortDirection == "asc"
+                } else {
+                    config.sortType == "created_at" && config.sortDirection == "desc"
+                }
+                val hasCustomFilters = config.selectedGenres.isNotEmpty() || config.selectedProviders.isNotEmpty() || config.selectedDecades.isNotEmpty() || !isDefaultSort
 
                 val fetchedResults = if (hasCustomFilters || genreId != null) {
                     val options = mutableMapOf<String, String>()
@@ -280,6 +289,7 @@ class DiscoverViewModel @Inject constructor(
                         val relDate = movie.releaseDate ?: movie.firstAirDate
                         val isNotReleased = !movie.isReleased && (relDate == null || relDate >= today)
                         if (!isNotReleased) return@filter false
+                        if (type.contains("upcoming") && movie.posterPath == null) return@filter false
 
                         if (config.selectedDecades.isEmpty()) {
                             true
@@ -360,6 +370,7 @@ class DiscoverViewModel @Inject constructor(
                     val date = movie.releaseDate
                     !movie.isReleased && (date == null || date >= today)
                 }
+                .sortedBy { it.releaseDate ?: "9999" }
             val totalPages = response.totalPages ?: 1
             regionalUpcomingMaxPages = totalPages
 
@@ -383,7 +394,10 @@ class DiscoverViewModel @Inject constructor(
         var attempts = 0
         while (results.isEmpty() && attempts < 5) {
             attempts++
-            val globalResponse = repository.getGlobalUpcomingMoviesResponse(page = globalUpcomingPage)
+            val globalResponse = repository.getGlobalUpcomingMoviesResponse(
+                page = globalUpcomingPage,
+                sortBy = "primary_release_date.asc"
+            )
             val globalTotalPages = globalResponse.totalPages ?: 1
             globalUpcomingPage++
 
@@ -391,7 +405,10 @@ class DiscoverViewModel @Inject constructor(
                 .map { it.copy(mediaType = "movie") }
                 .filter { movie ->
                     val date = movie.releaseDate
-                    movie.id !in existingIds && !movie.isReleased && (date == null || date >= today)
+                    movie.id !in existingIds && 
+                    !movie.isReleased && 
+                    (date == null || date >= today) &&
+                    movie.posterPath != null
                 }
 
             if (uniqueGlobal.isNotEmpty()) {

@@ -95,7 +95,7 @@ fun MainModalsContainer(
                     sortConfig = discoverUiState.sortConfig,
                     hazeState = globalHazeState,
                     triggerBounds = filterButtonBounds,
-                    showSortBy = false,
+                    showSortBy = true,
                     category = discoverUiState.type,
                     onSortConfigChanged = { newConfig -> discoverViewModel.updateSortConfig(newConfig); onFilterModalDismiss() },
                     onDismissRequest = onFilterModalDismiss

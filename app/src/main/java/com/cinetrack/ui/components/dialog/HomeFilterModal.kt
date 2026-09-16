@@ -411,10 +411,29 @@ fun HomeFilterModal(
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val isDiscoverCategory = category.contains("popular") ||
+                                            category.contains("upcoming") ||
+                                            category.contains("now_playing") ||
+                                            category.contains("airing") ||
+                                            category.contains("trending") ||
+                                            category.contains("streaming") ||
+                                            category.contains("on_the_air") ||
+                                            category == "genre"
+
                                         val sortOptions = buildList {
                                             if (isCommentsFilter) {
                                                 add(FilterOption("date", stringResource(R.string.comment_sort_date)))
                                                 add(FilterOption("likes", stringResource(R.string.comment_sort_likes)))
+                                            } else if (isDiscoverCategory) {
+                                                if (category.contains("upcoming")) {
+                                                    add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                                    add(FilterOption("created_at", stringResource(R.string.person_popularity).lowercase().replaceFirstChar { it.uppercase() }))
+                                                } else {
+                                                    add(FilterOption("created_at", stringResource(R.string.person_popularity).lowercase().replaceFirstChar { it.uppercase() }))
+                                                    add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                                }
+                                                add(FilterOption("personal_rating", stringResource(R.string.detail_rating)))
+                                                add(FilterOption("title", stringResource(R.string.filter_sort_title)))
                                             } else {
                                                 if (isVisti) {
                                                     add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))

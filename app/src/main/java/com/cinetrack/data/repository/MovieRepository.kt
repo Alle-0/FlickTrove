@@ -1623,11 +1623,11 @@ class MovieRepository @Inject constructor(
     suspend fun getUpcomingMoviesResponse(page: Int = 1, region: String? = null): com.cinetrack.data.api.SearchResponse =
         tmdbService.getUpcomingMovies(page = page, region = region)
 
-    suspend fun getGlobalUpcomingMoviesResponse(page: Int = 1): com.cinetrack.data.api.SearchResponse {
+    suspend fun getGlobalUpcomingMoviesResponse(page: Int = 1, sortBy: String = "primary_release_date.asc"): com.cinetrack.data.api.SearchResponse {
         val today = java.time.LocalDate.now().toString()
         val options = mapOf(
             "primary_release_date.gte" to today,
-            "sort_by" to "popularity.desc"
+            "sort_by" to sortBy
         )
         return tmdbService.discoverMovies(page = page, options = options)
     }
@@ -1637,14 +1637,14 @@ class MovieRepository @Inject constructor(
 
     suspend fun getOnTheAirTV(page: Int = 1): List<Movie> = tmdbService.getOnTheAirTV(page = page).results
 
-    suspend fun getUpcomingTV(page: Int = 1): List<Movie> {
+    suspend fun getUpcomingTV(page: Int = 1, sortBy: String = "first_air_date.asc"): List<Movie> {
         val today = java.time.LocalDate.now()
         return tmdbService.discoverTV(
             page = page,
             options = mapOf(
                 "first_air_date.gte" to today.toString(),
                 "watch_region" to getRegionFromPrefs(),
-                "sort_by" to "popularity.desc"
+                "sort_by" to sortBy
             )
         ).results.map { it.copy(mediaType = "tv") }
     }
