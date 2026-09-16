@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import com.cinetrack.ui.components.shared.MorphGlassModal
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,6 +85,7 @@ fun AccountModals(
     }
     
     var showProfileMenu by remember { mutableStateOf(false) }
+    var editProfileTriggerBounds by remember { mutableStateOf<Rect?>(null) }
     var showDashboardSettings by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
     
@@ -108,8 +111,9 @@ fun AccountModals(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        settingsViewModel.showEditProfileMenu.collect {
+        settingsViewModel.showEditProfileMenu.collect { bounds ->
             if (currentUser != null && !currentUser.isAnonymous) {
+                editProfileTriggerBounds = bounds
                 showProfileMenu = true
             } else {
                 settingsViewModel.triggerGuestAuthDialog()
@@ -186,7 +190,146 @@ fun AccountModals(
     
     val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
 
-    if (showProfileMenu || showNameDialog) {
+    // Profile Menu Modal
+    MorphGlassModal(
+        isVisible = showProfileMenu,
+        onDismissRequest = { showProfileMenu = false },
+        triggerBounds = editProfileTriggerBounds,
+        hazeState = globalHazeState,
+        targetMaxWidth = 320.dp,
+        targetWidthFraction = 0.85f,
+        zIndex = 80000f
+    ) { contentAlpha ->
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.account_edit_profile),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .bounceClick { showProfileMenu = false },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .bounceClick {
+                        showProfileMenu = false
+                        nameInput = currentDisplayName
+                        showNameDialog = true
+                    }
+                    .padding(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_pencil),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(stringResource(R.string.account_change_name_menu), color = MaterialTheme.colorScheme.onSurface)
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .bounceClick {
+                        showProfileMenu = false
+                        if (avatarBanned) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.avatar_banned_message))
+                            }
+                        } else {
+                            avatarSelection.show(
+                                mode = com.cinetrack.ui.components.account.AvatarSelectionMode.AVATAR,
+                                onDismissed = { showProfileMenu = true }
+                            ) { newUrl, _ ->
+                                val oldUrl = currentPhotoUrl
+                                currentPhotoUrl = newUrl?.let { Uri.parse(it) }
+                                currentUser?.updateProfile(userProfileChangeRequest { 
+                                    photoUri = newUrl?.let { Uri.parse(it) } 
+                                })?.addOnSuccessListener {
+                                    val updates = mutableMapOf<String, Any?>("photoUrl" to newUrl)
+                                    Firebase.firestore.collection("users").document(currentUser!!.uid)
+                                        .set(updates, SetOptions.merge())
+                                }?.addOnFailureListener {
+                                    currentPhotoUrl = oldUrl
+                                    scope.launch { snackbarHostState.showSnackbar("Failed to update avatar. Please try again.") }
+                                }
+                            }
+                        }
+                    }
+                    .padding(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_persona),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(stringResource(R.string.account_change_avatar_menu), color = MaterialTheme.colorScheme.onSurface)
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .bounceClick {
+                        showProfileMenu = false
+                        avatarSelection.show(
+                            mode = com.cinetrack.ui.components.account.AvatarSelectionMode.BACKDROP,
+                            onDismissed = { showProfileMenu = true }
+                        ) { _, backdropUrl ->
+                            if (backdropUrl != null) {
+                                prefs.edit().putString("avatar_backdrop_${currentUser!!.uid}", backdropUrl).apply()
+                            } else {
+                                prefs.edit().remove("avatar_backdrop_${currentUser!!.uid}").apply()
+                            }
+                            Firebase.firestore.collection("users").document(currentUser!!.uid)
+                                .set(mapOf("avatarBackdrop" to backdropUrl), SetOptions.merge())
+                        }
+                    }
+                    .padding(12.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_image),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(stringResource(R.string.account_change_cover_menu), color = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
+
+    // Name Dialog
+    if (showNameDialog) {
         Box(
             modifier = Modifier
                 .zIndex(80000f)
@@ -194,165 +337,6 @@ fun AccountModals(
                     detectDragGestures { _, _ -> }
                 }
         ) {
-            // Profile Menu Modal
-            if (showProfileMenu) {
-                BackHandler(enabled = showProfileMenu) {
-                    showProfileMenu = false
-                }
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { showProfileMenu = false },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = 300.dp)
-                            .fillMaxWidth(0.85f)
-                            .hazeGlass(state = globalHazeState, alpha = 1f, shape = RoundedCornerShape(32.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { focusManager.clearFocus() }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    stringResource(R.string.account_edit_profile),
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .bounceClick { showProfileMenu = false },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                        contentDescription = "Close",
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            }
-                            
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .bounceClick {
-                                        showProfileMenu = false
-                                        nameInput = currentDisplayName
-                                        showNameDialog = true
-                                    }
-                                    .padding(12.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_pencil),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(stringResource(R.string.account_change_name_menu), color = MaterialTheme.colorScheme.onSurface)
-                            }
-                            
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .bounceClick {
-                                        showProfileMenu = false
-                                        if (avatarBanned) {
-                                            scope.launch {
-                                                snackbarHostState.showSnackbar(context.getString(R.string.avatar_banned_message))
-                                            }
-                                        } else {
-                                            avatarSelection.show(
-                                                mode = com.cinetrack.ui.components.account.AvatarSelectionMode.AVATAR,
-                                                onDismissed = { showProfileMenu = true }
-                                            ) { newUrl, _ ->
-                                                val oldUrl = currentPhotoUrl
-                                                currentPhotoUrl = newUrl?.let { Uri.parse(it) }
-                                                currentUser?.updateProfile(userProfileChangeRequest { 
-                                                    photoUri = newUrl?.let { Uri.parse(it) } 
-                                                })?.addOnSuccessListener {
-                                                    val updates = mutableMapOf<String, Any?>("photoUrl" to newUrl)
-                                                    Firebase.firestore.collection("users").document(currentUser!!.uid)
-                                                        .set(updates, SetOptions.merge())
-                                                }?.addOnFailureListener {
-                                                    currentPhotoUrl = oldUrl
-                                                    scope.launch { snackbarHostState.showSnackbar("Failed to update avatar. Please try again.") }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(12.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_persona),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(stringResource(R.string.account_change_avatar_menu), color = MaterialTheme.colorScheme.onSurface)
-                            }
-                            
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .bounceClick {
-                                        showProfileMenu = false
-                                        avatarSelection.show(
-                                            mode = com.cinetrack.ui.components.account.AvatarSelectionMode.BACKDROP,
-                                            onDismissed = { showProfileMenu = true }
-                                        ) { _, backdropUrl ->
-                                            if (backdropUrl != null) {
-                                                prefs.edit().putString("avatar_backdrop_${currentUser!!.uid}", backdropUrl).apply()
-                                            } else {
-                                                prefs.edit().remove("avatar_backdrop_${currentUser!!.uid}").apply()
-                                            }
-                                            Firebase.firestore.collection("users").document(currentUser!!.uid)
-                                                .set(mapOf("avatarBackdrop" to backdropUrl), SetOptions.merge())
-                                        }
-                                    }
-                                    .padding(12.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_image),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(stringResource(R.string.account_change_cover_menu), color = MaterialTheme.colorScheme.onSurface)
-                            }
-                        }
-                    }
-                }
-            }
-            
-
-            // Name Dialog
-            if (showNameDialog) {
                 var isCheckingName by remember { mutableStateOf(false) }
                 BackHandler(enabled = showNameDialog) {
                     showNameDialog = false
@@ -550,11 +534,12 @@ fun AccountModals(
                     }
                 }
             }
+        }
 
+        Box(modifier = Modifier.fillMaxSize().zIndex(90000f)) {
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)
             )
         }
     }
-}

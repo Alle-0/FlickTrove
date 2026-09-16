@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">Akordeon (TV Time)</string>
     <string name="episodes_up_next">BERIKUTNYA</string>
     <string name="episodes_all_caught_up">Anda sudah menonton semuanya!</string>
+    <string name="episodes_season_upcoming">Musim %1$d segera hadir</string>
+    <string name="episodes_season_upcoming_date">Musim %1$d segera hadir • %2$s</string>
     <string name="episodes_all_episodes">SEMUA MUSIM</string>
     <string name="episodes_layout_toggle">Alihkan Tata Letak</string>
     <string name="settings_split_home">Pisahkan Rilisan di Beranda</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">BERANDA</string>
     <string name="settings_default_start_home">INGIN DITONTON</string>
     <string name="settings_default_start_visti">SUDAH DITONTON</string>
+    <string name="settings_default_start_media">Tampilan Media Default</string>
+    <string name="settings_default_start_media_desc">Pilih untuk membuka Film atau Serial TV secara default</string>
+    <string name="settings_default_start_media_movie">Film</string>
+    <string name="settings_default_start_media_tv">Serial TV</string>
     <string name="settings_aesthetics">Estetika</string>
     <string name="settings_accent_color">Warna Aksen</string>
     <string name="settings_accent_color_desc">Sesuaikan tampilan aplikasi</string>

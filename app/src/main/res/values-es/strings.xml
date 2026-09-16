@@ -169,6 +169,8 @@
     <string name="settings_episodes_layout_accordion">Acordeón (TV Time)</string>
     <string name="episodes_up_next">A CONTINUACIÓN</string>
     <string name="episodes_all_caught_up">¡Estás al día con la serie!</string>
+    <string name="episodes_season_upcoming">Temporada %1$d próximamente</string>
+    <string name="episodes_season_upcoming_date">Temporada %1$d próximamente • %2$s</string>
     <string name="episodes_all_episodes">TODAS LAS TEMPORADAS</string>
     <string name="episodes_layout_toggle">Cambiar diseño</string>
     <string name="settings_split_home">Dividir estrenos en Inicio</string>
@@ -201,6 +203,10 @@
     <string name="settings_default_start_tab_desc">Elige la pantalla predeterminada al abrir la app</string>
     <string name="settings_default_start_home">POR VER</string>
     <string name="settings_default_start_visti">VISTO</string>
+    <string name="settings_default_start_media">Vista multimedia predeterminada</string>
+    <string name="settings_default_start_media_desc">Elige si abrir Películas o Series de TV por defecto</string>
+    <string name="settings_default_start_media_movie">Películas</string>
+    <string name="settings_default_start_media_tv">Series de TV</string>
     <string name="settings_aesthetics">Estética</string>
     <string name="settings_accent_color">Color de acento</string>
     <string name="settings_accent_color_desc">Personaliza la apariencia de la aplicación</string>

@@ -1,8 +1,5 @@
 package com.cinetrack.ui.screens
 
-import androidx.compose.ui.res.stringResource
-import com.cinetrack.R
-
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -11,25 +8,39 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
+import androidx.compose.ui.zIndex
+import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.DarkSurface
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.SurpriseCompany
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
@@ -38,10 +49,13 @@ import com.cinetrack.ui.viewmodel.SurpriseTime
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SurpriseMeOverlay(
+    isVisible: Boolean,
+    triggerBounds: Rect? = null,
     viewModel: SurpriseMeViewModel,
     globalHazeState: HazeState,
     onMovieFound: (Movie?) -> Unit,
@@ -56,7 +70,35 @@ fun SurpriseMeOverlay(
 
     val scope = rememberCoroutineScope()
 
-    BackHandler {
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
+
+    val targetWidth = (screenWidth * 0.90f).coerceAtMost(with(density) { 380.dp.toPx() })
+    
+    var contentHeightPx by remember { mutableStateOf(0f) }
+    val maxModalHeightPx = with(density) { 520.dp.toPx() }
+    val maxAllowedHeight = minOf(screenHeight * 0.78f, maxModalHeightPx)
+    val minAllowedHeight = with(density) { 260.dp.toPx() }
+    
+    val targetHeightPx by animateFloatAsState(
+        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeight, maxAllowedHeight) 
+                      else with(density) { 300.dp.toPx() },
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "dynamicHeight"
+    )
+
+    val targetRect = Rect(
+        left = (screenWidth - targetWidth) / 2f,
+        top = (screenHeight - targetHeightPx) / 2f,
+        right = (screenWidth + targetWidth) / 2f,
+        bottom = (screenHeight + targetHeightPx) / 2f
+    )
+
+    val transition = updateTransition(targetState = isVisible, label = "SurpriseMeTransition")
+
+    BackHandler(enabled = isVisible) {
         if (step in 1..3) {
             step--
         } else {
@@ -64,86 +106,318 @@ fun SurpriseMeOverlay(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.6f)) // Scrim
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClose
-            )
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
+    LaunchedEffect(transition.currentState, isVisible) {
+        if (!isVisible && !transition.currentState) {
+            step = 0
+            selectedTime = null
+            selectedMood = null
+            selectedCompany = null
+        }
+    }
+
+    val progress by transition.animateFloat(
+        transitionSpec = {
+            if (initialState == false && targetState == true) {
+                spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
+            } else {
+                spring(stiffness = Spring.StiffnessMedium)
+            }
+        },
+        label = "expansionProgress"
+    ) { state -> if (state) 1f else 0f }
+
+    val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
+
+    if (transition.currentState || transition.targetState) {
+        val effectiveScrimAlpha = if (triggerBounds != null) {
+            val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
+            0.6f * FastOutSlowInEasing.transform(scrimProgress)
+        } else {
+            0.6f * alpha
+        }
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
+                .fillMaxSize()
+                .zIndex(90000f)
+                .background(Color.Black.copy(alpha = effectiveScrimAlpha))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = {} // Consume clicks inside modal
+                    onClick = onClose
                 )
-                .hazeGlass(state = globalHazeState, shape = RoundedCornerShape(32.dp))
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (step in 1..3) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f))
-                            .bounceClick { step-- },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(ImageVector.vectorResource(R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = Color.White, modifier = Modifier.size(18.dp))
+            // --- GHOST MEASUREMENT LAYER ---
+            Box(
+                modifier = Modifier
+                    .width(with(density) { targetWidth.toDp() })
+                    .alpha(0f)
+                    .onSizeChanged { size ->
+                        if (size.height > 0) contentHeightPx = size.height.toFloat()
                     }
-                } else {
-                    Spacer(modifier = Modifier.size(36.dp))
-                }
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.surprise_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        ),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = stringResource(R.string.surprise_subtitle),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.White.copy(alpha = 0.7f)
-                        ),
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .bounceClick { onClose() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(ImageVector.vectorResource(R.drawable.ic_x), contentDescription = stringResource(R.string.surprise_close), tint = Color.White, modifier = Modifier.size(18.dp))
-                }
+                    .align(Alignment.Center)
+            ) {
+                SurpriseMeContent(
+                    step = step,
+                    selectedTime = selectedTime,
+                    selectedMood = selectedMood,
+                    selectedCompany = selectedCompany,
+                    isGhost = true,
+                    onBack = {},
+                    onClose = {},
+                    onRandomClick = {},
+                    onEmotionalClick = {},
+                    onTimeSelect = {},
+                    onMoodSelect = {},
+                    onCompanySelect = {}
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            val startRect = triggerBounds ?: targetRect.copy(
+                left = targetRect.center.x - 20f,
+                top = targetRect.center.y - 20f,
+                right = targetRect.center.x + 20f,
+                bottom = targetRect.center.y + 20f
+            )
 
+            // Center moves smoothly towards screen center
+            val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
+            val currentCenterY = lerp(startRect.center.y, targetRect.center.y, progress)
+
+            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
+            val sizeProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) {
+                    (progress / delay) * 0.05f
+                } else {
+                    val raw = (progress - delay) / (1f - delay)
+                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
+                }
+            } else {
+                progress
+            }
+
+            // Corner radius stays circular during liftoff, then morphs into target rounded corners
+            val cornerRadiusProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) 0f
+                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
+            } else {
+                progress
+            }
+
+            val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
+            val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
+
+            val currentRect = Rect(
+                left = currentCenterX - currentWidth / 2f,
+                top = currentCenterY - currentHeight / 2f,
+                right = currentCenterX + currentWidth / 2f,
+                bottom = currentCenterY + currentHeight / 2f
+            )
+
+            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() }
+            val endRadius = with(density) { 32.dp.toPx() }
+            val currentCornerRadius = lerp(startRadius, endRadius, cornerRadiusProgress)
+            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
+
+            val currentTintAlpha = if (triggerBounds != null) {
+                lerp(0.48f, HazeStyles.glassmorphicDialog.tint.alpha, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.tint.alpha
+            }
+            val currentBlur = if (triggerBounds != null) {
+                androidx.compose.ui.unit.lerp(16.dp, HazeStyles.glassmorphicDialog.blurRadius, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.blurRadius
+            }
+            val animatedStyle = remember(currentTintAlpha, currentBlur) {
+                HazeStyles.glassmorphicDialog.copy(
+                    tint = HazeStyles.glassmorphicDialog.tint.copy(alpha = currentTintAlpha),
+                    blurRadius = currentBlur
+                )
+            }
+            val borderAlpha = if (triggerBounds != null) {
+                lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
+            } else {
+                HazeStyles.ModalBorderAlpha
+            }
+
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
+                    .size(
+                        width = with(density) { currentRect.width.toDp() },
+                        height = with(density) { currentRect.height.toDp() }
+                    )
+                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
+            ) {
+                // Background Layer (Blurred glass)
+                Spacer(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .hazeGlass(
+                            state = globalHazeState,
+                            shape = currentShape,
+                            style = animatedStyle,
+                            useOffscreenStrategy = false
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = borderAlpha),
+                            shape = currentShape
+                        )
+                )
+
+                // Foreground Content
+                if (progress > 0.38f) {
+                    val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zIndex(1f)
+                            .graphicsLayer(
+                                alpha = contentAlpha,
+                                compositingStrategy = CompositingStrategy.Offscreen
+                            )
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        SurpriseMeContent(
+                            step = step,
+                            selectedTime = selectedTime,
+                            selectedMood = selectedMood,
+                            selectedCompany = selectedCompany,
+                            isGhost = false,
+                            onBack = { if (step in 1..3) step-- else onClose() },
+                            onClose = onClose,
+                            onRandomClick = {
+                                onMovieFound(viewModel.getRandomMovie())
+                            },
+                            onEmotionalClick = { step = 1 },
+                            onTimeSelect = {
+                                selectedTime = it
+                                step = 2
+                            },
+                            onMoodSelect = {
+                                selectedMood = it
+                                step = 3
+                            },
+                            onCompanySelect = {
+                                selectedCompany = it
+                                scope.launch {
+                                    step = 4
+                                    delay(800)
+                                    val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
+                                    onMovieFound(movie)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun SurpriseMeContent(
+    step: Int,
+    selectedTime: SurpriseTime?,
+    selectedMood: SurpriseMood?,
+    selectedCompany: SurpriseCompany?,
+    isGhost: Boolean,
+    onBack: () -> Unit,
+    onClose: () -> Unit,
+    onRandomClick: () -> Unit,
+    onEmotionalClick: () -> Unit,
+    onTimeSelect: (SurpriseTime) -> Unit,
+    onMoodSelect: (SurpriseMood) -> Unit,
+    onCompanySelect: (SurpriseCompany) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (step in 1..3) {
+                Box(
+                    modifier = Modifier
+                        .then(if (!isGhost) Modifier.bounceClick { onBack() } else Modifier)
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.ic_left),
+                        contentDescription = stringResource(R.string.detail_content_desc_back),
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(36.dp))
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.surprise_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    ),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.surprise_subtitle),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color.White.copy(alpha = 0.7f)
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .then(if (!isGhost) Modifier.bounceClick { onClose() } else Modifier)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    ImageVector.vectorResource(R.drawable.ic_x),
+                    contentDescription = stringResource(R.string.surprise_close),
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (isGhost) {
+            when (step) {
+                0 -> ChoiceStep(onRandomClick = {}, onEmotionalClick = {})
+                1 -> TimeStep(onSelect = {})
+                2 -> MoodStep(onSelect = {})
+                3 -> CompanyStep(onSelect = {})
+                4 -> LoadingStep(isGhost = true)
+            }
+        } else {
             AnimatedContent(
                 targetState = step,
                 transitionSpec = {
@@ -168,72 +442,59 @@ fun SurpriseMeOverlay(
             ) { currentStep ->
                 when (currentStep) {
                     0 -> ChoiceStep(
-                        onRandomClick = { 
-                            onMovieFound(viewModel.getRandomMovie()) 
-                        },
-                        onEmotionalClick = { step = 1 }
+                        onRandomClick = onRandomClick,
+                        onEmotionalClick = onEmotionalClick
                     )
-                    1 -> TimeStep(
-                        onSelect = { 
-                            selectedTime = it
-                            step = 2
-                        }
-                    )
-                    2 -> MoodStep(
-                        onSelect = {
-                            selectedMood = it
-                            step = 3
-                        }
-                    )
-                    3 -> CompanyStep(
-                        onSelect = {
-                            selectedCompany = it
-                            // Calcola
-                            scope.launch {
-                                step = 4 // Loading
-                                delay(800) // Fake loading per creare hype
-                                val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
-                                onMovieFound(movie)
-                            }
-                        }
-                    )
-                    4 -> LoadingStep()
+                    1 -> TimeStep(onSelect = onTimeSelect)
+                    2 -> MoodStep(onSelect = onMoodSelect)
+                    3 -> CompanyStep(onSelect = onCompanySelect)
+                    4 -> LoadingStep(isGhost = false)
                 }
             }
+        }
 
-            // Progress bar
-            if (step in 1..3) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    for (i in 1..3) {
-                        val isCurrent = step == i
-                        val isPast = step > i
-                        
-                        val width by animateDpAsState(
+        // Progress bar
+        if (step in 1..3) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                for (i in 1..3) {
+                    val isCurrent = step == i
+                    val isPast = step > i
+                    
+                    val width = if (isGhost) {
+                        if (isCurrent) 24.dp else 8.dp
+                    } else {
+                        val animatedWidth by animateDpAsState(
                             targetValue = if (isCurrent) 24.dp else 8.dp,
                             animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
                             label = "dotWidth"
                         )
-                        
-                        val color by animateColorAsState(
+                        animatedWidth
+                    }
+                    
+                    val color = if (isGhost) {
+                        if (isCurrent || isPast) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.2f)
+                    } else {
+                        val animatedColor by animateColorAsState(
                             targetValue = if (isCurrent || isPast) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.2f),
                             animationSpec = tween(300),
                             label = "dotColor"
                         )
-                        
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .height(4.dp)
-                                .width(width)
-                                .clip(CircleShape)
-                                .background(color)
-                        )
+                        animatedColor
                     }
+                    
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .height(4.dp)
+                            .width(width)
+                            .clip(CircleShape)
+                            .background(color)
+                    )
                 }
             }
         }
@@ -304,7 +565,28 @@ private fun CompanyStep(onSelect: (SurpriseCompany) -> Unit) {
 }
 
 @Composable
-private fun LoadingStep() {
+private fun LoadingStep(isGhost: Boolean = false) {
+    if (isGhost) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                stringResource(R.string.surprise_loading_1), 
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        return
+    }
+
     val infiniteTransition = rememberInfiniteTransition(label = "loading_infinite")
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.85f,
@@ -416,10 +698,10 @@ private fun OptionGridCard(
                     Modifier.aspectRatio(if (description != null) 0.9f else 1.35f)
                 }
             )
+            .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White.copy(alpha = 0.04f))
-            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
-            .bounceClick(scaleDown = 0.92f, onClick = onClick)
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

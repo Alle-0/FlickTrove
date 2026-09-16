@@ -483,9 +483,9 @@ fun SettingsActionButton(
 ) {
     Row(
         modifier = Modifier
+            .bounceClick(enabled = enabled) { onClick() }
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White.copy(alpha = if (enabled) 0.1f else 0.05f))
-            .bounceClick(enabled = enabled) { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .alpha(if (enabled) 1f else 0.5f),
         horizontalArrangement = Arrangement.Center,
@@ -618,6 +618,10 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .bounceClick {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://ko-fi.com/alle0")
+                        }
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
@@ -627,10 +631,6 @@ fun DonationBanner(
                                 )
                             )
                         )
-                        .bounceClick {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            uriHandler.openUri("https://ko-fi.com/alle0")
-                        }
                         .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -654,6 +654,10 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .bounceClick {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://paypal.me/AlessandroBasile0")
+                        }
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
@@ -663,10 +667,6 @@ fun DonationBanner(
                                 )
                             )
                         )
-                        .bounceClick {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            uriHandler.openUri("https://paypal.me/AlessandroBasile0")
-                        }
                         .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -703,12 +703,12 @@ fun SettingsDialogConfirmButton(
     Box(
         modifier = modifier
             .height(50.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f))
             .bounceClick(enabled = enabled) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
-            },
+            }
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f)),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -731,11 +731,11 @@ fun SettingsDialogCancelButton(
     Box(
         modifier = modifier
             .height(50.dp)
-            .clip(RoundedCornerShape(16.dp))
             .bounceClick(enabled = enabled) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
-            },
+            }
+            .clip(RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(

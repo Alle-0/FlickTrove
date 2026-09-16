@@ -81,6 +81,10 @@ fun FolderColorPicker(
                 Box(
                     modifier = Modifier
                         .size(36.dp)
+                        .bounceClick { 
+                            isCustomMode = false
+                            onColorSelected(colorHex)
+                        }
                         .clip(CircleShape)
                         .background(color)
                         .border(
@@ -88,10 +92,6 @@ fun FolderColorPicker(
                             color = if (isSelected) Color.White else color.copy(alpha = 0.2f),
                             shape = CircleShape
                         )
-                        .bounceClick { 
-                            isCustomMode = false
-                            onColorSelected(colorHex)
-                        }
                 )
             }
             
@@ -99,6 +99,7 @@ fun FolderColorPicker(
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .bounceClick { isCustomMode = true }
                     .clip(CircleShape)
                     .background(
                         if (isCustomMode) selectedColor.toComposeColor()
@@ -108,8 +109,7 @@ fun FolderColorPicker(
                         width = if (isCustomMode) 4.dp else 1.dp,
                         color = if (isCustomMode) Color.White else Color.White.copy(alpha = 0.1f),
                         shape = CircleShape
-                    )
-                    .bounceClick { isCustomMode = true },
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (!isCustomMode) {

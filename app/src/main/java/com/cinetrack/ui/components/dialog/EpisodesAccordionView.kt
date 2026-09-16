@@ -77,9 +77,18 @@ fun EpisodesAccordionView(
             .sortedBy { it.seasonNumber }
     }
 
-    // Identify "Up Next" episode across regular seasons
-    val upNextInfo = remember(canonicalSeasons, localWatchedEpisodes, seasonDetails) {
-        findUpNextEpisode(canonicalSeasons, localWatchedEpisodes, seasonDetails)
+    val todayIso = remember {
+        try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
+    }
+
+    // Identify "Up Next" episode across regular seasons (excluding future unreleased episodes)
+    val upNextInfo = remember(canonicalSeasons, localWatchedEpisodes, seasonDetails, todayIso) {
+        findUpNextEpisode(canonicalSeasons, localWatchedEpisodes, seasonDetails, todayIso)
+    }
+
+    // Identify upcoming unreleased season/episode if all released episodes are watched
+    val upcomingAiringInfo = remember(canonicalSeasons, seasonDetails, todayIso) {
+        findUpcomingAiring(canonicalSeasons, seasonDetails, todayIso)
     }
 
     // Preload season details for Up Next if not already present
@@ -158,6 +167,7 @@ fun EpisodesAccordionView(
             UpNextHeroCard(
                 movie = movie,
                 upNext = upNextInfo,
+                upcomingAiring = upcomingAiringInfo,
                 isDropped = isDropped,
                 onToggle = { sNum, epNum ->
                     if (isDropped) return@UpNextHeroCard
@@ -315,33 +325,95 @@ data class UpNextEpisodeData(
 )
 
 /**
- * Calculates the next episode to watch strictly excluding Specials (Season 0).
+ * Information about a future upcoming season/episode that hasn't aired yet.
+ */
+data class UpcomingAiringInfo(
+    val seasonNumber: Int,
+    val episodeNumber: Int?,
+    val airDate: String?
+)
+
+/**
+ * Identifies the next upcoming unreleased season or episode if available.
+ */
+private fun findUpcomingAiring(
+    seasons: List<Season>,
+    seasonDetails: Map<Int, Season>,
+    todayIso: String
+): UpcomingAiringInfo? {
+    for (season in seasons) {
+        val sNum = season.seasonNumber ?: continue
+        if (sNum <= 0) continue
+
+        val detailedSeason = seasonDetails[sNum]
+        if (detailedSeason?.episodes != null) {
+            val upcomingEp = detailedSeason.episodes.firstOrNull { ep ->
+                val epDate = ep.airDate
+                if (!epDate.isNullOrBlank()) epDate.take(10) > todayIso
+                else {
+                    val sDate = detailedSeason.airDate ?: season.airDate
+                    !sDate.isNullOrBlank() && sDate.take(10) > todayIso
+                }
+            }
+            if (upcomingEp != null) {
+                return UpcomingAiringInfo(
+                    seasonNumber = sNum,
+                    episodeNumber = upcomingEp.episodeNumber,
+                    airDate = upcomingEp.airDate ?: detailedSeason.airDate ?: season.airDate
+                )
+            }
+        } else {
+            val sDate = season.airDate
+            if (!sDate.isNullOrBlank() && sDate.take(10) > todayIso) {
+                return UpcomingAiringInfo(
+                    seasonNumber = sNum,
+                    episodeNumber = 1,
+                    airDate = sDate
+                )
+            }
+        }
+    }
+    return null
+}
+
+/**
+ * Calculates the next episode to watch strictly excluding Specials (Season 0)
+ * and unreleased future episodes/seasons.
  */
 private fun findUpNextEpisode(
     seasons: List<Season>,
     localWatchedEpisodes: Map<String, List<Int>>,
-    seasonDetails: Map<Int, Season>
+    seasonDetails: Map<Int, Season>,
+    todayIso: String
 ): UpNextEpisodeData? {
-    val todayIso = try { java.time.LocalDate.now().toString() } catch (e: Exception) { "2026-01-01" }
-
     for (season in seasons) {
         val sNum = season.seasonNumber ?: continue
         if (sNum <= 0) continue // Exclude specials (Pro-Tip #1)
+
+        // If the entire season air date is known and in the future, skip it
+        val seasonAirDate = season.airDate
+        if (!seasonAirDate.isNullOrBlank() && seasonAirDate.take(10) > todayIso) {
+            continue
+        }
 
         val watched = (localWatchedEpisodes[sNum.toString()] ?: emptyList()).toSet()
         val detailedSeason = seasonDetails[sNum]
 
         if (detailedSeason?.episodes != null) {
+            val detailedSeasonAirDate = detailedSeason.airDate
+            if (!detailedSeasonAirDate.isNullOrBlank() && detailedSeasonAirDate.take(10) > todayIso) {
+                continue
+            }
+
             val releasedEpisodes = detailedSeason.episodes.filter { ep ->
                 val epDate = ep.airDate
                 if (!epDate.isNullOrBlank()) epDate.take(10) <= todayIso
-                else if (!detailedSeason.airDate.isNullOrBlank()) detailedSeason.airDate.take(10) <= todayIso
+                else if (!detailedSeasonAirDate.isNullOrBlank()) detailedSeasonAirDate.take(10) <= todayIso
                 else true
             }
 
+            // Strictly pick from released episodes: do not fallback to unreleased episodes
             val nextEp = releasedEpisodes.firstOrNull { it.episodeNumber !in watched }
-                ?: detailedSeason.episodes.firstOrNull { it.episodeNumber !in watched }
-
             if (nextEp != null) {
                 return UpNextEpisodeData(sNum, nextEp.episodeNumber, nextEp)
             }
@@ -358,11 +430,14 @@ private fun findUpNextEpisode(
 
 /**
  * Up Next Hero Card styled with FlickTrove's dark glassmorphism system.
+ * Streamlined to focus directly on the episode (thumbnail, title, Sxx•Exx pill, date, and checkmark)
+ * without distracting header badges.
  */
 @Composable
 private fun UpNextHeroCard(
     movie: Movie,
     upNext: UpNextEpisodeData?,
+    upcomingAiring: UpcomingAiringInfo? = null,
     isDropped: Boolean,
     onToggle: (Int, Int) -> Unit,
     onInfoClick: (Episode) -> Unit
@@ -391,205 +466,143 @@ private fun UpNextHeroCard(
         )
     ) {
         if (upNext != null) {
-            Column(
+            // Clean, streamlined horizontal hero card
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(14.dp)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Header row: [ 🟢 UP NEXT ] pill on left + Season label pill on right
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color(0xFF00E676).copy(alpha = 0.12f),
-                                CircleShape
-                            )
-                            .border(
-                                1.dp,
-                                Color(0xFF00E676).copy(alpha = 0.28f),
-                                CircleShape
-                            )
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF00E676))
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.episodes_up_next),
-                                color = Color(0xFF00E676),
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.2.sp
-                            )
-                        }
-                    }
+                val thumbModel = upNext.episode?.stillPath?.let {
+                    buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
+                } ?: movie.backdropPath?.let {
+                    buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
+                } ?: buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
 
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color.White.copy(alpha = 0.06f),
-                                CircleShape
-                            )
-                            .padding(horizontal = 9.dp, vertical = 3.5.dp)
-                    ) {
-                        Text(
-                            text = "SEASON ${upNext.seasonNumber}",
-                            color = Color.White.copy(alpha = 0.50f),
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp
-                        )
-                    }
+                // Clean Thumbnail without play button
+                Box(
+                    modifier = Modifier
+                        .size(width = 118.dp, height = 72.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = thumbModel,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Content Row: Clean Thumbnail, Title & Meta Pills, Action Checkmark
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                // Metadata Column
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp)
                 ) {
-                    val thumbModel = upNext.episode?.stillPath?.let {
-                        buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
-                    } ?: movie.backdropPath?.let {
-                        buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
-                    } ?: buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
+                    val epTitle = upNext.episode?.name?.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.episodes_episode_n, upNext.episodeNumber)
 
-                    // Clean Thumbnail without play button
-                    Box(
-                        modifier = Modifier
-                            .size(width = 120.dp, height = 70.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AsyncImage(
-                            model = thumbModel,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
+                    Text(
+                        text = epTitle,
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    val seasonLabel = "S%02d • E%02d".format(upNext.seasonNumber, upNext.episodeNumber)
+                    val airDate = upNext.episode?.airDate
+                    val context = LocalContext.current
+                    val airDateInfo = remember(airDate) {
+                        com.cinetrack.ui.components.updates.formatEpisodeAirDate(airDate, context)
                     }
 
-                    // Metadata Column
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 12.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        val epTitle = upNext.episode?.name?.takeIf { it.isNotBlank() }
-                            ?: stringResource(R.string.episodes_episode_n, upNext.episodeNumber)
-
-                        Text(
-                            text = epTitle,
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        val seasonLabel = "S%02d • E%02d".format(upNext.seasonNumber, upNext.episodeNumber)
-                        val airDate = upNext.episode?.airDate
-                        val context = LocalContext.current
-                        val airDateInfo = remember(airDate) {
-                            com.cinetrack.ui.components.updates.formatEpisodeAirDate(airDate, context)
+                        // Season/Episode pill
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Color.White.copy(alpha = 0.08f),
+                                    CircleShape
+                                )
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = seasonLabel,
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp,
+                                maxLines = 1
+                            )
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            // Season/Episode pill
+                        if (airDateInfo != null) {
+                            Spacer(modifier = Modifier.width(6.dp))
                             Box(
                                 modifier = Modifier
                                     .background(
-                                        Color.White.copy(alpha = 0.08f),
+                                        airDateInfo.second.copy(alpha = 0.15f),
+                                        CircleShape
+                                    )
+                                    .border(
+                                        1.dp,
+                                        airDateInfo.second.copy(alpha = 0.30f),
                                         CircleShape
                                     )
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
-                                    text = seasonLabel,
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    text = airDateInfo.first,
+                                    color = airDateInfo.second,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
                                     letterSpacing = 0.5.sp,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    softWrap = false
                                 )
-                            }
-
-                            if (airDateInfo != null) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            airDateInfo.second.copy(alpha = 0.15f),
-                                            CircleShape
-                                        )
-                                        .border(
-                                            1.dp,
-                                            airDateInfo.second.copy(alpha = 0.30f),
-                                            CircleShape
-                                        )
-                                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                                ) {
-                                    Text(
-                                        text = airDateInfo.first,
-                                        color = airDateInfo.second,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = 0.5.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        softWrap = false
-                                    )
-                                }
                             }
                         }
                     }
+                }
 
-                    // Checkmark Action Button
-                    Surface(
-                        modifier = Modifier.size(32.dp),
-                        color = Color.White.copy(alpha = 0.06f),
-                        shape = CircleShape,
-                        border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.22f))
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                                contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.25f),
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
+                // Checkmark Action Button
+                Surface(
+                    modifier = Modifier.size(34.dp),
+                    color = Color.White.copy(alpha = 0.06f),
+                    shape = CircleShape,
+                    border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.22f))
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.25f),
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
             }
         } else {
-            // All Caught Up Celebration State
+            // All Caught Up Celebration State with upcoming season info if available
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(32.dp),
                     color = Color(0xFF00E676),
                     shape = CircleShape
                 ) {
@@ -598,19 +611,40 @@ private fun UpNextHeroCard(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
                             contentDescription = null,
                             tint = Color.Black,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
-                Text(
-                    text = stringResource(R.string.episodes_all_caught_up),
-                    color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.episodes_all_caught_up),
+                        color = Color.White,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    if (upcomingAiring != null) {
+                        val context = LocalContext.current
+                        val airDateInfo = remember(upcomingAiring.airDate) {
+                            com.cinetrack.ui.components.updates.formatEpisodeAirDate(upcomingAiring.airDate, context)
+                        }
+                        val subtitle = if (airDateInfo != null) {
+                            stringResource(R.string.episodes_season_upcoming_date, upcomingAiring.seasonNumber, airDateInfo.first)
+                        } else {
+                            stringResource(R.string.episodes_season_upcoming, upcomingAiring.seasonNumber)
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = subtitle,
+                            color = Color.White.copy(alpha = 0.55f),
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
     }

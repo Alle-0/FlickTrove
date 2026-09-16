@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -63,7 +64,7 @@ fun GlassyTopBar(
     title: String,
     onMenuClick: (() -> Unit)? = null,
     onBackPress: (() -> Unit)? = null,
-    onFilterClick: ((Offset) -> Unit)? = null,
+    onFilterClick: ((Rect) -> Unit)? = null,
     onUpdatesClick: ((Offset) -> Unit)? = null,
     onRefreshClick: (() -> Unit)? = null,
     hasActiveFilters: Boolean = false,
@@ -77,7 +78,7 @@ fun GlassyTopBar(
     onLayoutToggleClick: (() -> Unit)? = null,
     layoutColumns: Int? = null,
     hasAppUpdateBadge: Boolean = false,
-    onEditBackdropClick: (() -> Unit)? = null,
+    onEditBackdropClick: ((Rect) -> Unit)? = null,
     onSettingsClick: ((Offset) -> Unit)? = null,
     isStatsRewatchesEnabled: Boolean? = null,
     onStatsRewatchToggle: ((Boolean) -> Unit)? = null
@@ -345,7 +346,7 @@ fun GlassyTopBar(
                     }
                 }
 
-                val filterButtonCenter = remember { arrayOf(Offset.Zero) }
+                val filterButtonBounds = remember { arrayOf<Rect?>(null) }
                 AnimatedVisibility(
                     visible = onFilterClick != null,
                     enter = iconEnter,
@@ -360,14 +361,16 @@ fun GlassyTopBar(
                             )
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInWindow()
-                                filterButtonCenter[0] = Offset(
-                                    x = position.x + coords.size.width / 2f,
-                                    y = position.y + coords.size.height / 2f
+                                filterButtonBounds[0] = Rect(
+                                    position.x,
+                                    position.y,
+                                    position.x + coords.size.width,
+                                    position.y + coords.size.height
                                 )
                             }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = { onFilterClick?.invoke(filterButtonCenter[0]) }
+                                onClick = { filterButtonBounds[0]?.let { onFilterClick?.invoke(it) } }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -474,6 +477,7 @@ fun GlassyTopBar(
                     }
                 }
 
+                val editButtonBounds = remember { arrayOf<Rect?>(null) }
                 AnimatedVisibility(
                     visible = onEditBackdropClick != null,
                     enter = iconEnter,
@@ -482,15 +486,24 @@ fun GlassyTopBar(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .onGloballyPositioned { coords ->
+                                val position = coords.positionInWindow()
+                                editButtonBounds[0] = Rect(
+                                    position.x,
+                                    position.y,
+                                    position.x + coords.size.width,
+                                    position.y + coords.size.height
+                                )
+                            }
                             .bounceClick(
                                 enabled = !isDimmed,
-                                onClick = { onEditBackdropClick?.invoke() }
+                                onClick = { editButtonBounds[0]?.let { onEditBackdropClick?.invoke(it) } }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_pencil),
-                            contentDescription = "Modifica Sfondo",
+                            contentDescription = "Modifica Profilo",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )

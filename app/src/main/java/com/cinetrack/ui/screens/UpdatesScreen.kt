@@ -636,32 +636,23 @@ fun UpdatesScreen(
                             .align(Alignment.CenterStart)
                             .padding(start = 16.dp)
                             .size(44.dp)
+                            .bounceClick { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (pagerState.currentPage > 0) {
+                                    scope.launch { pagerState.animateScrollToPage(0) }
+                                } else {
+                                    triggerExit() 
+                                }
+                            }
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                            contentDescription = stringResource(R.string.detail_content_desc_back),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(20.dp)
                         )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick { 
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (pagerState.currentPage > 0) {
-                                        scope.launch { pagerState.animateScrollToPage(0) }
-                                    } else {
-                                        triggerExit() 
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                                contentDescription = stringResource(R.string.detail_content_desc_back),
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
                     }
 
                     // Title with Animation
@@ -693,11 +684,11 @@ fun UpdatesScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
                                 .bounceClick { 
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isCalendarView = !isCalendarView 
-                                },
+                                }
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

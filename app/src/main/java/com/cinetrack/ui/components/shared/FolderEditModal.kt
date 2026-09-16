@@ -125,9 +125,9 @@ fun FolderEditDialog(
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
+                                .bounceClick { isDismissing = true }
                                 .clip(androidx.compose.foundation.shape.CircleShape)
-                                .background(Color.White.copy(alpha = 0.1f))
-                                .bounceClick { isDismissing = true },
+                                .background(Color.White.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
@@ -175,14 +175,14 @@ fun FolderEditDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSaveEnabled) Color.White else Color.White.copy(alpha = 0.2f)
-                            )
                             .bounceClick(enabled = isSaveEnabled) {
                                 pendingSave = Pair(name, selectedColor)
                                 isDismissing = true
-                            },
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (isSaveEnabled) Color.White else Color.White.copy(alpha = 0.2f)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(

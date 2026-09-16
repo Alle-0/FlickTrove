@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.shape.CircleShape
@@ -471,7 +473,8 @@ fun FolderDetailScreenContent(
                                         modifier = Modifier
                                             .size(36.dp)
                                             .onGloballyPositioned { coords: LayoutCoordinates ->
-                                                filterButtonBounds.rect = coords.boundsInRoot()
+                                                val pos = coords.positionInWindow()
+                                                filterButtonBounds.rect = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                                             }                              ) {
                                     // Background Layer
                                     Box(

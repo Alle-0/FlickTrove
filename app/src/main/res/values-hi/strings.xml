@@ -171,6 +171,8 @@
     <string name="settings_episodes_layout_accordion">अकॉर्डियन (TV Time)</string>
     <string name="episodes_up_next">आगे देखें</string>
     <string name="episodes_all_caught_up">आप पूरी तरह अपडेट हैं!</string>
+    <string name="episodes_season_upcoming">सीज़न %1$d जल्द आ रहा है</string>
+    <string name="episodes_season_upcoming_date">सीज़न %1$d जल्द आ रहा है • %2$s</string>
     <string name="episodes_all_episodes">सभी सीज़न</string>
     <string name="episodes_layout_toggle">लेआउट बदलें</string>
     <string name="settings_split_home">होम रिलीज़ को विभाजित करें</string>
@@ -205,6 +207,10 @@
     <string name="settings_default_start_tab_desc">ऐप लॉन्च होने पर डिफ़ॉल्ट स्क्रीन चुनें</string>
     <string name="settings_default_start_home">देखनी हैं</string>
     <string name="settings_default_start_visti">देख लीं</string>
+    <string name="settings_default_start_media">डिफ़ॉल्ट मीडिया दृश्य</string>
+    <string name="settings_default_start_media_desc">चुनें कि डिफ़ॉल्ट रूप से फ़िल्में या टीवी सीरीज़ खोलनी हैं</string>
+    <string name="settings_default_start_media_movie">फ़िल्में</string>
+    <string name="settings_default_start_media_tv">टीवी सीरीज़</string>
     <string name="settings_aesthetics">सौंदर्यशास्त्र</string>
     <string name="settings_accent_color">एक्सेंट रंग</string>
     <string name="settings_accent_color_desc">ऐप के स्वरूप को कस्टमाइज़ करें</string>

@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">아코디언 (TV Time 스타일)</string>
     <string name="episodes_up_next">다음 에피소드</string>
     <string name="episodes_all_caught_up">모두 시청하셨습니다!</string>
+    <string name="episodes_season_upcoming">시즌 %1$d 공개 예정</string>
+    <string name="episodes_season_upcoming_date">시즌 %1$d 공개 예정 • %2$s</string>
     <string name="episodes_all_episodes">전체 시즌</string>
     <string name="episodes_layout_toggle">레이아웃 전환</string>
     <string name="settings_split_home">홈 화면 출시작 구분</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">홈</string>
     <string name="settings_default_start_home">볼 작품</string>
     <string name="settings_default_start_visti">시청 완료</string>
+    <string name="settings_default_start_media">기본 미디어 화면</string>
+    <string name="settings_default_start_media_desc">시작 시 영화와 TV 시리즈 중 기본으로 열 항목 선택</string>
+    <string name="settings_default_start_media_movie">영화</string>
+    <string name="settings_default_start_media_tv">TV 시리즈</string>
     <string name="settings_aesthetics">디자인 테마</string>
     <string name="settings_accent_color">강조 색상</string>
     <string name="settings_accent_color_desc">앱의 전반적인 테마 컬러를 변경합니다</string>

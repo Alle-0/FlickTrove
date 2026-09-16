@@ -354,6 +354,30 @@ class MovieDetailViewModel @Inject constructor(
                                 updatedProgress = 1.0
                             }
                         }
+                        var mergedSeasons = freshMovie.seasons?.map { freshSeason ->
+                            val existing = localMovie.seasons?.firstOrNull { it.seasonNumber == freshSeason.seasonNumber && !it.episodes.isNullOrEmpty() }
+                            existing ?: freshSeason
+                        } ?: localMovie.seasons
+
+                        if (isTv) {
+                            val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                            val targetSeasonNum = response.nextEpisodeToAir?.seasonNumber
+                                ?: response.seasons?.firstOrNull { !it.airDate.isNullOrBlank() && it.airDate >= today }?.seasonNumber
+
+                            if (targetSeasonNum != null && targetSeasonNum > 0) {
+                                val alreadyHasEpisodes = mergedSeasons?.any { it.seasonNumber == targetSeasonNum && !it.episodes.isNullOrEmpty() } == true
+                                if (!alreadyHasEpisodes) {
+                                    try {
+                                        val detailedSeason = repository.fetchSeasonDetails(id, targetSeasonNum)
+                                        mergedSeasons = mergedSeasons?.map { if (it.seasonNumber == targetSeasonNum) detailedSeason else it }
+                                        _seasonDetails.update { it + (targetSeasonNum to detailedSeason) }
+                                    } catch (e: Exception) {
+                                        if (e is kotlinx.coroutines.CancellationException) throw e
+                                    }
+                                }
+                            }
+                        }
+
                         val updatedMovie = localMovie.copy(
                             genres = freshMovie.genres ?: localMovie.genres,
                             runtime = freshMovie.runtime ?: localMovie.runtime,
@@ -370,7 +394,7 @@ class MovieDetailViewModel @Inject constructor(
                             numberOfEpisodes = freshMovie.numberOfEpisodes ?: localMovie.numberOfEpisodes,
                             revenue = freshMovie.revenue ?: localMovie.revenue,
                             budget = freshMovie.budget ?: localMovie.budget,
-                            seasons = freshMovie.seasons ?: localMovie.seasons,
+                            seasons = mergedSeasons,
                             releaseDate = freshMovie.releaseDate ?: localMovie.releaseDate,
                             firstAirDate = freshMovie.firstAirDate ?: localMovie.firstAirDate,
                             lastAirDate = freshMovie.lastAirDate ?: localMovie.lastAirDate,
@@ -891,6 +915,16 @@ class MovieDetailViewModel @Inject constructor(
                 val season = repository.fetchSeasonDetails(id, seasonNumber)
                 _seasonDetails.update { it + (seasonNumber to season) }
                 _loadingSeason.value = false
+
+                movieUpdateMutex.withLock {
+                    val currentMovie = repository.getMovie(id, mediaType)
+                    if (currentMovie != null) {
+                        val updatedSeasons = currentMovie.seasons?.map {
+                            if (it.seasonNumber == seasonNumber) season else it
+                        } ?: listOf(season)
+                        repository.saveMovie(currentMovie.copy(seasons = updatedSeasons))
+                    }
+                }
             } catch (e: Exception) {
                 _loadingSeason.value = false
             }

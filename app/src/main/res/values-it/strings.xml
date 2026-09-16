@@ -164,6 +164,8 @@
     <string name="settings_episodes_layout_accordion">Fisarmonica (TV Time)</string>
     <string name="episodes_up_next">PROSSIMO DA VEDERE</string>
     <string name="episodes_all_caught_up">Sei in pari con la serie!</string>
+    <string name="episodes_season_upcoming">Stagione %1$d in arrivo</string>
+    <string name="episodes_season_upcoming_date">Stagione %1$d in arrivo • %2$s</string>
     <string name="episodes_all_episodes">TUTTE LE STAGIONI</string>
     <string name="episodes_layout_toggle">Cambia Layout</string>
     <string name="settings_split_home">Divisione uscite Home</string>
@@ -186,10 +188,15 @@
     <string name="settings_language_zh">简体中文</string>
     <string name="settings_language_id">Bahasa Indonesia</string>
     <string name="settings_language_tr">Türkçe</string>
+    <string name="settings_default_start_feed">HOME</string>
     <string name="settings_default_start_tab">Schermata Iniziale</string>
     <string name="settings_default_start_tab_desc">Scegli quale schermata vedere all\'avvio</string>
     <string name="settings_default_start_home">DA VEDERE</string>
     <string name="settings_default_start_visti">VISTI</string>
+    <string name="settings_default_start_media">Sezione Multimediale Iniziale</string>
+    <string name="settings_default_start_media_desc">Scegli se aprire su Film o Serie TV all\'avvio</string>
+    <string name="settings_default_start_media_movie">Film</string>
+    <string name="settings_default_start_media_tv">Serie TV</string>
     <string name="settings_aesthetics">Estetica</string>
     <string name="settings_accent_color">Colore accento</string>
     <string name="settings_accent_color_desc">Personalizza l\'aspetto dell\'app</string>
@@ -1200,7 +1207,6 @@
     <string name="home_section_trove_pick">La Selezione di Trove</string>
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
     <string name="surprise_subtitle">Dalla tua watchlist</string>
-    <string name="settings_default_start_feed">HOME</string>
     <string name="error_feed_title">Oops! Impossibile caricare il feed.</string>
     <string name="error_feed_subtitle">Controlla la connessione e riprova.</string>
     <string name="content_description_error">Errore</string>

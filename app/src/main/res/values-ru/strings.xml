@@ -172,6 +172,8 @@
     <string name="settings_episodes_layout_accordion">Аккордеон (TV Time)</string>
     <string name="episodes_up_next">ДАЛЕЕ К ПРОСМОТРУ</string>
     <string name="episodes_all_caught_up">Вы посмотрели все серии!</string>
+    <string name="episodes_season_upcoming">Сезон %1$d скоро</string>
+    <string name="episodes_season_upcoming_date">Сезон %1$d скоро • %2$s</string>
     <string name="episodes_all_episodes">ВСЕ СЕЗОНЫ</string>
     <string name="episodes_layout_toggle">Изменить вид</string>
     <string name="settings_split_home">Разделение релизов на Главной</string>
@@ -206,6 +208,10 @@
     <string name="settings_default_start_tab_desc">Выберите экран по умолчанию при запуске приложения</string>
     <string name="settings_default_start_home">БУДУ СМОТРЕТЬ</string>
     <string name="settings_default_start_visti">ПРОСМОТРЕНО</string>
+    <string name="settings_default_start_media">Раздел медиа по умолчанию</string>
+    <string name="settings_default_start_media_desc">Выберите, открывать ли по умолчанию Фильмы или Сериалы</string>
+    <string name="settings_default_start_media_movie">Фильмы</string>
+    <string name="settings_default_start_media_tv">Сериалы</string>
     <string name="settings_aesthetics">Эстетика</string>
     <string name="settings_accent_color">Цвет акцента</string>
     <string name="settings_accent_color_desc">Настройте внешний вид приложения</string>

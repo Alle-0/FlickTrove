@@ -169,6 +169,8 @@
     <string name="settings_episodes_layout_accordion">Accordéon (TV Time)</string>
     <string name="episodes_up_next">À SUIVRE</string>
     <string name="episodes_all_caught_up">Vous êtes à jour dans la série !</string>
+    <string name="episodes_season_upcoming">Saison %1$d à venir</string>
+    <string name="episodes_season_upcoming_date">Saison %1$d à venir • %2$s</string>
     <string name="episodes_all_episodes">TOUTES LES SAISONS</string>
     <string name="episodes_layout_toggle">Changer de disposition</string>
     <string name="settings_split_home">Séparer les sorties sur l\'accueil</string>
@@ -201,6 +203,10 @@
     <string name="settings_default_start_tab_desc">Choisissez l\'écran par défaut au lancement de l\'application</string>
     <string name="settings_default_start_home">À VOIR</string>
     <string name="settings_default_start_visti">VUS</string>
+    <string name="settings_default_start_media">Vue multimédia par défaut</string>
+    <string name="settings_default_start_media_desc">Choisissez d\'ouvrir par défaut les Films ou les Séries TV</string>
+    <string name="settings_default_start_media_movie">Films</string>
+    <string name="settings_default_start_media_tv">Séries TV</string>
     <string name="settings_aesthetics">Esthétique</string>
     <string name="settings_accent_color">Couleur d\'accentuation</string>
     <string name="settings_accent_color_desc">Personnalisez l\'apparence de l\'application</string>

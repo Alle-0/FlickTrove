@@ -86,7 +86,7 @@ fun GlassmorphicModal(
                         shape = RoundedCornerShape(32.dp),
                         style = HazeStyles.glassmorphicDialog
                     )
-                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                    .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
                     .pointerInput(Unit) { 
                         detectTapGestures {
                             focusManager.clearFocus()

@@ -132,25 +132,19 @@ fun SearchHeader(
                     .padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(44.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .bounceClick { onBackClick() }
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                        contentDescription = stringResource(R.string.detail_content_desc_back),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick { onBackClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                            contentDescription = stringResource(R.string.detail_content_desc_back),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Box(
@@ -277,28 +271,22 @@ fun SearchHeader(
                                 sortConfig.sortType != "popularity"
 
                         if (preferences.showLayoutToggle) {
-                            Box(modifier = Modifier.size(44.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .bounceClick(scaleDown = 0.92f) {
+                                        val nextColumns = nextGridColumns(preferences.gridColumns)
+                                        onLayoutToggleClick(nextColumns)
+                                    }
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = layoutToggleIcon(preferences.gridColumns),
+                                    contentDescription = stringResource(R.string.search_content_desc_layout),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .bounceClick(scaleDown = 0.92f) {
-                                            val nextColumns = nextGridColumns(preferences.gridColumns)
-                                            onLayoutToggleClick(nextColumns)
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = layoutToggleIcon(preferences.gridColumns),
-                                        contentDescription = stringResource(R.string.search_content_desc_layout),
-                                        tint = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                         }
@@ -317,32 +305,23 @@ fun SearchHeader(
                                         )
                                     )
                                 }
+                                .bounceClick {
+                                    keyboardController?.hide()
+                                    onFilterClick()
+                                }
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
+                                .then(
+                                    if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape)
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
-                                    .then(
-                                        if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape)
-                                        else Modifier
-                                    )
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                                contentDescription = stringResource(R.string.folder_detail_filters),
+                                tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .bounceClick {
-                                        keyboardController?.hide()
-                                        onFilterClick()
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                    contentDescription = stringResource(R.string.folder_detail_filters),
-                                    tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
                         }
                     }
                 }

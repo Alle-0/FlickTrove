@@ -72,6 +72,7 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val getHomeFeedUseCase: GetHomeFeedUseCase,
     private val getHomeUiStateUseCase: com.cinetrack.domain.GetHomeUiStateUseCase,
@@ -79,11 +80,14 @@ class HomeViewModel @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
-    private val updateEpisodesUseCase: UpdateEpisodesUseCase
+    private val updateEpisodesUseCase: UpdateEpisodesUseCase,
+    private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
+    private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository
 ) : ViewModel() {
 
+    private val initialMedia = preferenceRepository.initialDefaultMedia
     private val _searchQuery = MutableStateFlow("")
-    private val _activeTab = MutableStateFlow("movie")
+    private val _activeTab = MutableStateFlow(initialMedia)
     
     val movieGridState = LazyGridState()
     val tvGridState = LazyGridState()
@@ -91,6 +95,81 @@ class HomeViewModel @Inject constructor(
     var feedPagerIndex: Int? = null
     val animatedMovieIds = mutableSetOf<String>()
     val updatingShowIds = mutableStateMapOf<Long, Boolean>()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private var lastRefreshTimestamp: Long = 0L
+
+    fun pullToRefresh() {
+        val now = System.currentTimeMillis()
+        if (now - lastRefreshTimestamp < 15_000L) {
+            // Cooldown anti-spam (15s): evita di bombardare le API esterne
+            _isRefreshing.value = true
+            viewModelScope.launch {
+                kotlinx.coroutines.delay(600)
+                _isRefreshing.value = false
+            }
+            return
+        }
+        lastRefreshTimestamp = now
+        _isRefreshing.value = true
+
+        viewModelScope.launch {
+            try {
+                kotlinx.coroutines.withTimeoutOrNull(3000L) {
+                    var anySyncTriggered = false
+
+                    // 1. Sincronizzazione Trakt se collegato
+                    if (traktAuthRepository.isLoggedIn.value) {
+                        val inputData = androidx.work.workDataOf("force" to true)
+                        val traktRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
+                            .setInputData(inputData)
+                            .build()
+                        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                            "TraktManualSync",
+                            androidx.work.ExistingWorkPolicy.REPLACE,
+                            traktRequest
+                        )
+                        anySyncTriggered = true
+                    }
+
+                    // 2. Sincronizzazione SIMKL se collegato
+                    if (simklAuthRepository.getAccessToken() != null) {
+                        val inputData = androidx.work.workDataOf("force" to true)
+                        val simklRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
+                            .setInputData(inputData)
+                            .build()
+                        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                            "SimklManualSync",
+                            androidx.work.ExistingWorkPolicy.REPLACE,
+                            simklRequest
+                        )
+                        anySyncTriggered = true
+                    }
+
+                    // 3. Refresh Home Feed (TMDb)
+                    fetchFeed(forceRefresh = true)
+
+                    // 4. Sincronizzazione Firebase cloud se loggato
+                    try {
+                        repository.syncWithFirebase(force = false)
+                    } catch (e: Exception) {
+                        // Ignore silent sync failure
+                    }
+
+                    if (anySyncTriggered) {
+                        actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_manual_sync_started))
+                    }
+
+                    // Mantieni attiva l'animazione per 1.2s per dare fluidità visiva
+                    kotlinx.coroutines.delay(1200)
+                }
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
     
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
@@ -100,6 +179,15 @@ class HomeViewModel @Inject constructor(
     private val _boxOfficeWinner = MutableStateFlow<com.cinetrack.data.model.BoxOfficeMovie?>(null)
 
     init {
+        viewModelScope.launch {
+            preferenceRepository.userPreferencesFlow
+                .map { it.defaultStartMedia }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { newDefault ->
+                    _activeTab.value = newDefault
+                }
+        }
         fetchFeed()
         loadBoxOfficeWinner()
     }
@@ -244,7 +332,7 @@ class HomeViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = HomeUiState()
+        initialValue = HomeUiState(activeTab = initialMedia)
     )
 
     fun onSearchQueryChanged(query: String) {

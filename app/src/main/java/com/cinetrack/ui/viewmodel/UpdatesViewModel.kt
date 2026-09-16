@@ -49,6 +49,64 @@ class UpdatesViewModel @Inject constructor(
 
     init {
         observeSocialNotifications()
+        syncUpcomingSeasonsForReminders()
+    }
+
+    private fun syncUpcomingSeasonsForReminders() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Wait for initial screen setup and animations to settle
+                kotlinx.coroutines.delay(4000)
+                val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                val movies = repository.getLocalMoviesFlow().first()
+                val tvShows = movies.filter {
+                    it.mediaType == "tv" && !it.dropped && (it.reminder || it.favorite) &&
+                    it.status != "Ended" && it.status != "Canceled"
+                }
+
+                for (show in tvShows) {
+                    val nextAirDate = show.nextEpisodeAirDate
+                    val seasons = show.seasons ?: continue
+
+                    val targetSeasons = seasons.filter { s ->
+                        s.seasonNumber > 0 && s.episodes.isNullOrEmpty() && (
+                            (!s.airDate.isNullOrBlank() && s.airDate >= today) ||
+                            (!nextAirDate.isNullOrBlank() && nextAirDate >= today)
+                        )
+                    }
+
+                    if (targetSeasons.isEmpty()) continue
+
+                    var current = repository.getMovie(show.id, "tv") ?: show
+                    var hasUpdates = false
+
+                    for (targetSeason in targetSeasons) {
+                        try {
+                            val detailedSeason = repository.fetchSeasonDetails(show.id, targetSeason.seasonNumber)
+                            val sanitizedSeason = detailedSeason.copy(
+                                overview = null,
+                                episodes = detailedSeason.episodes?.map { ep -> ep.copy(overview = null) }
+                            )
+                            val updatedSeasons = current.seasons?.map {
+                                if (it.seasonNumber == targetSeason.seasonNumber) sanitizedSeason else it
+                            } ?: current.seasons
+                            current = current.copy(seasons = updatedSeasons)
+                            hasUpdates = true
+                        } catch (e: Exception) {
+                            if (e is kotlinx.coroutines.CancellationException) throw e
+                        }
+                    }
+
+                    if (hasUpdates) {
+                        repository.saveMovie(current, syncToTrakt = false)
+                        // Polite delay between shows to allow GC and avoid Room invalidation storms
+                        kotlinx.coroutines.delay(600)
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore background prefetch errors
+            }
+        }
     }
 
     private fun observeSocialNotifications() {

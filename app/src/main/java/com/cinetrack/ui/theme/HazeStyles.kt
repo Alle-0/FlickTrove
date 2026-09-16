@@ -19,6 +19,8 @@ object HazeStyles {
     
     // Overlay Constants
     const val ModalScrimAlpha = 0.35f
+    const val ModalBorderAlpha = 0.04f
+    const val ModalBorderAlphaStart = 0.08f
     const val GlassBorderAlphaTop = 0.30f
     const val GlassBorderAlphaActive = 0.50f
     val GlassBorderColor = Color(0xFF666666)

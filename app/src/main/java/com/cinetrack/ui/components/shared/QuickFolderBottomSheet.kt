@@ -198,13 +198,13 @@ fun QuickFolderModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .bounceClick(scaleDown = 0.92f, onClick = onClose)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(accentColor)
-                    .bounceClick(scaleDown = 0.92f, onClick = onClose),
+                    .background(accentColor),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "FATTO",
+                    text = stringResource(R.string.action_done).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
@@ -227,6 +227,7 @@ private fun QuickFolderItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(58.dp)
+            .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .clip(RoundedCornerShape(16.dp))
             .background(
                 if (isSelected) Color.White.copy(alpha = 0.08f)
@@ -237,7 +238,6 @@ private fun QuickFolderItem(
                 if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
                 RoundedCornerShape(16.dp)
             )
-            .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

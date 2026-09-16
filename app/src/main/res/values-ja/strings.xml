@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">アコーディオン（TV Time風）</string>
     <string name="episodes_up_next">次のエピソード</string>
     <string name="episodes_all_caught_up">最新話まで視聴済みです！</string>
+    <string name="episodes_season_upcoming">シーズン%1$d 近日公開</string>
+    <string name="episodes_season_upcoming_date">シーズン%1$d 近日公開 • %2$s</string>
     <string name="episodes_all_episodes">全シーズン</string>
     <string name="episodes_layout_toggle">レイアウト切り替え</string>
     <string name="settings_split_home">ホームで公開済み/未公開を分割</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">ホーム</string>
     <string name="settings_default_start_home">見たい</string>
     <string name="settings_default_start_visti">視聴済み</string>
+    <string name="settings_default_start_media">デフォルトメディア表示</string>
+    <string name="settings_default_start_media_desc">起動時に映画とTVシリーズのどちらをデフォルトで開くか選択</string>
+    <string name="settings_default_start_media_movie">映画</string>
+    <string name="settings_default_start_media_tv">TVシリーズ</string>
     <string name="settings_aesthetics">デザイン・外観</string>
     <string name="settings_accent_color">アクセントカラー</string>
     <string name="settings_accent_color_desc">アプリのテーマカラーをカスタマイズ</string>

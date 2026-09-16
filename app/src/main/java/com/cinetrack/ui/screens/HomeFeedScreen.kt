@@ -21,6 +21,11 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.cinetrack.ui.components.common.LocalSymbiontPullState
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -178,6 +183,8 @@ fun HomeFeedScreenContent(
 ) {
     val tabNavigator = LocalTabNavigator.current    
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val pullToRefreshState = rememberPullToRefreshState()
     val configuration = LocalConfiguration.current
     
     var filterButtonBounds = remember { arrayOf<Rect?>(null) }
@@ -315,12 +322,32 @@ fun HomeFeedScreenContent(
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
+        val symbiontPullState = LocalSymbiontPullState.current
+        val currentPullFraction = pullToRefreshState.distanceFraction
+        SideEffect {
+            symbiontPullState.progress = currentPullFraction
+            symbiontPullState.isRefreshing = isRefreshing
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                symbiontPullState.progress = 0f
+                symbiontPullState.isRefreshing = false
+            }
+        }
+
         Box(
             modifier = Modifier            
-    .fillMaxSize()
+                .fillMaxSize()
                 .haze(activeHazeState, style = HazeStyles.PremiumDark)
         ) {
-            LazyColumn(
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { viewModel.pullToRefresh() },
+                state = pullToRefreshState,
+                modifier = Modifier.fillMaxSize(),
+                indicator = {}
+            ) {
+                LazyColumn(
                 state = viewModel.feedListState,
                 contentPadding = PaddingValues(
                     bottom = paddingValues.calculateBottomPadding() + 80.dp, // Spazio extra richiesto
@@ -936,6 +963,7 @@ fun HomeFeedScreenContent(
 
             }
         }
+    }
 
         // Perfectly Centered Floating Sticky Header
         Box(
@@ -985,8 +1013,11 @@ fun HomeFeedScreenContent(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val wandCoords = remember { arrayOf<LayoutCoordinates?>(null) }
                     Box(
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier
+                            .size(36.dp)
+                            .onGloballyPositioned { wandCoords[0] = it }
                     ) {
                         Box(
                             modifier = Modifier
@@ -1005,7 +1036,16 @@ fun HomeFeedScreenContent(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .bounceClick(scaleDown = 0.92f) { 
-                                    surpriseMeRequest?.invoke()
+                                    val rect = wandCoords[0]?.let {
+                                        val pos = it.positionInWindow()
+                                        Rect(
+                                            pos.x,
+                                            pos.y,
+                                            pos.x + it.size.width,
+                                            pos.y + it.size.height
+                                        )
+                                    }
+                                    surpriseMeRequest?.invoke(rect)
                                 },
                             contentAlignment = Alignment.Center
                         ) {

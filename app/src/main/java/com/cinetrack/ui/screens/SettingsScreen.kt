@@ -452,6 +452,7 @@ fun SettingsScreenContent(
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
+    val defaultStartMedia by settingsViewModel.defaultStartMedia.collectAsStateWithLifecycle()
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
     val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
@@ -462,6 +463,7 @@ fun SettingsScreenContent(
     var showColorDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showStartScreenDialog by remember { mutableStateOf(false) }
+    var showStartMediaDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
@@ -725,7 +727,8 @@ fun SettingsScreenContent(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             onShowLanguageDialog = { showLanguageDialog = true },
-                            onShowStartScreenDialog = { showStartScreenDialog = true }
+                            onShowStartScreenDialog = { showStartScreenDialog = true },
+                            onShowStartMediaDialog = { showStartMediaDialog = true }
                         )
                     }
 
@@ -1029,6 +1032,21 @@ fun SettingsScreenContent(
                     settingsViewModel.setDefaultStartTab(value)
                 }
                 showStartScreenDialog = false
+            }
+        )
+
+        SettingsStartMediaSelectionDialog(
+            visible = showStartMediaDialog,
+            activeHazeState = activeHazeState,
+            current = defaultStartMedia,
+            accentColor = currentAccentColor,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = { showStartMediaDialog = false },
+            onSelect = { value ->
+                if (defaultStartMedia != value) {
+                    settingsViewModel.setDefaultStartMedia(value)
+                }
+                showStartMediaDialog = false
             }
         )
 

@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">Accordion (TV Time)</string>
     <string name="episodes_up_next">UP NEXT</string>
     <string name="episodes_all_caught_up">You\'re all caught up!</string>
+    <string name="episodes_season_upcoming">Season %1$d upcoming</string>
+    <string name="episodes_season_upcoming_date">Season %1$d upcoming • %2$s</string>
     <string name="episodes_all_episodes">ALL SEASONS</string>
     <string name="episodes_layout_toggle">Toggle Layout</string>
     <string name="settings_split_home">Split Home Releases</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">HOME</string>
     <string name="settings_default_start_home">TO WATCH</string>
     <string name="settings_default_start_visti">WATCHED</string>
+    <string name="settings_default_start_media">Default Media View</string>
+    <string name="settings_default_start_media_desc">Choose whether to open Movies or TV Series by default</string>
+    <string name="settings_default_start_media_movie">Movies</string>
+    <string name="settings_default_start_media_tv">TV Series</string>
     <string name="settings_aesthetics">Aesthetics</string>
     <string name="settings_accent_color">Accent Color</string>
     <string name="settings_accent_color_desc">Customize the look of the app</string>

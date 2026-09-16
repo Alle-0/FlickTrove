@@ -58,6 +58,9 @@ import com.cinetrack.ui.components.main.MainBottomBarOverlay
 import com.cinetrack.ui.components.main.MainDeepLinkHandler
 import com.cinetrack.ui.components.main.MainFolderOptionsMenu
 import com.cinetrack.ui.components.main.MainGlobalDialogs
+import com.cinetrack.ui.components.common.LocalSymbiontPullState
+import com.cinetrack.ui.components.common.SymbiontGlobalIndicator
+import com.cinetrack.ui.components.common.SymbiontPullState
 import com.cinetrack.ui.components.main.MainModalsContainer
 import com.cinetrack.ui.components.main.MainSearchFab
 import com.cinetrack.ui.components.navigation.GlassyTopBar
@@ -123,6 +126,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var isYearPickerVisible by remember { mutableStateOf(false) }
         var yearPickerButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var surpriseMeButtonBounds by remember { mutableStateOf<Rect?>(null) }
         
         var showFolderOptions by remember { mutableStateOf(false) }
         var folderOptionsOffset by remember { mutableStateOf(Offset.Zero) }
@@ -131,6 +135,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         var showFolderDeleteConfirm by remember { mutableStateOf(false) }
         
         var showFoldersSortMenu by remember { mutableStateOf(false) }
+        var foldersFilterButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var foldersSortMenuOffset by remember { mutableStateOf<Offset?>(null) }
         
         var showExitConfirmation by remember { mutableStateOf(false) }
@@ -196,20 +201,23 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 showExitConfirmation = true
             }
 
+            val symbiontPullState = remember { SymbiontPullState() }
             Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
                 val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
-                        LocalActiveFilterConfig provides activeFilterConfig,
-                        LocalFilterRequest provides { bounds ->
-                            filterButtonBounds = bounds
-                            isFilterModalVisible = true
-                        },
-                        com.cinetrack.ui.LocalSurpriseMeRequest provides {
-                            showSurpriseMeOverlay = true
-                        }
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
+                    LocalActiveFilterConfig provides activeFilterConfig,
+                    LocalFilterRequest provides { bounds ->
+                        filterButtonBounds = bounds
+                        isFilterModalVisible = true
+                    },
+                    com.cinetrack.ui.LocalSurpriseMeRequest provides { bounds ->
+                        surpriseMeButtonBounds = bounds
+                        showSurpriseMeOverlay = true
+                    },
+                    LocalSymbiontPullState provides symbiontPullState
+                ) {
+                    Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
                             Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
                                 AnimatedContent(
                                     targetState = currentTab,
@@ -332,15 +340,15 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                    onFilterClick = if (currentTab is DiscoverTab) { { offset -> isFilterModalVisible = true; filterButtonBounds = Rect(offset, Size.Zero) } } else if (currentTab is FoldersTab) { { offset -> showFoldersSortMenu = true; foldersSortMenuOffset = offset } } else null,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else null,
                                     hasActiveFilters = discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.totalUnreadCount,
                                     hasAppUpdateBadge = hasAppUpdateBadge,
                                     onEditBackdropClick = if (currentTab is AccountTab) { 
-                                        {
-                                            settingsViewModel.triggerEditProfileMenu()
+                                        { bounds ->
+                                            settingsViewModel.triggerEditProfileMenu(bounds)
                                         } 
                                     } else null,
                                     onSettingsClick = if (currentTab is AccountTab) {
@@ -376,6 +384,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 onSearchClick = { offset ->
                                     searchOverlay?.invoke(offset, null, null, null, null)
                                 }
+                            )
+
+                            // Overlay Globale Simbionte (Renderizzato sopra top bar, filtri e categorie)
+                            SymbiontGlobalIndicator(
+                                state = symbiontPullState,
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .zIndex(200f)
                             )
                         }
 
@@ -421,12 +437,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             hiltViewModel(activity)
                         } else null
 
-                        if (showFoldersSortMenu && foldersViewModelForSort != null && foldersSortMenuOffset != null) {
+                        if (foldersViewModelForSort != null) {
                             val currentSortOption by foldersViewModelForSort.sortOption.collectAsStateWithLifecycle()
                             val currentSortOrder by foldersViewModelForSort.sortOrder.collectAsStateWithLifecycle()
 
                             com.cinetrack.ui.components.dialog.FoldersFilterModal(
                                 isVisible = showFoldersSortMenu,
+                                triggerBounds = foldersFilterButtonBounds,
                                 hazeState = contentHazeState,
                                 currentSortOption = currentSortOption,
                                 currentSortOrder = currentSortOrder,
@@ -475,6 +492,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             onSettingsOverlayClose = { settingsOverlayOffsetX = null; settingsOverlayOffsetY = null },
                             onOverlayClosing = { isOverlayClosing = true },
                             showSurpriseMeOverlay = showSurpriseMeOverlay,
+                            surpriseMeButtonBounds = surpriseMeButtonBounds,
                             onSurpriseMeClose = { showSurpriseMeOverlay = false },
                             updateInfo = updateInfo,
                             dismissedUpdateVersion = dismissedUpdateVersion,

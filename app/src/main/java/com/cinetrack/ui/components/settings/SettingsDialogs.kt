@@ -129,14 +129,14 @@ fun BackupDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
+                        .bounceClick(enabled = isExportEnabled) {
+                            onExport()
+                        }
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             if (isExportEnabled) MaterialTheme.colorScheme.primary 
                             else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        )
-                        .bounceClick(enabled = isExportEnabled) {
-                            onExport()
-                        },
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -152,11 +152,11 @@ fun BackupDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
                         .bounceClick {
                             onImport()
-                        },
+                        }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.05f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -211,9 +211,9 @@ fun ExternalMigrationDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
+                        .bounceClick { onImport() }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                        .bounceClick { onImport() },
+                        .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -273,12 +273,12 @@ fun YamtrackDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
+                        .bounceClick(enabled = !isLoading) { onImport() }
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             if (!isLoading) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        )
-                        .bounceClick(enabled = !isLoading) { onImport() },
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -530,16 +530,16 @@ fun FeedbackDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
+                        .bounceClick(enabled = isEnabled) {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onSubmit(title, description.text, rating, email)
+                        }
                         .clip(RoundedCornerShape(18.dp))
                         .background(
                             if (isEnabled) MaterialTheme.colorScheme.primary 
                             else if (isLoading) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                             else Color.White.copy(alpha = 0.05f)
-                        )
-                        .bounceClick(enabled = isEnabled) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSubmit(title, description.text, rating, email)
-                        },
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isLoading) {
@@ -676,12 +676,12 @@ fun ColorSelectionDialog(
                                 Box(
                                     modifier = Modifier
                                         .size(42.dp)
-                                        .clip(CircleShape)
-                                        .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent)
                                         .bounceClick { 
                                             isCustomMode = false
                                             tempSelectedColor = name
-                                        },
+                                        }
+                                        .clip(CircleShape)
+                                        .background(if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
@@ -715,14 +715,14 @@ fun ColorSelectionDialog(
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
+                                    .bounceClick { isCustomMode = true }
                                     .clip(CircleShape)
                                     .background(if (customSelected) Color.White.copy(alpha = 0.2f) else Color.Transparent)
                                     .border(
                                         width = if (customSelected) 2.dp else 0.dp,
                                         color = if (customSelected) Color.White else Color.Transparent,
                                         shape = CircleShape
-                                    )
-                                    .bounceClick { isCustomMode = true },
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -859,12 +859,12 @@ fun ColorSelectionDialog(
                                     y = pos.y + coords.size.height / 2f
                                 )
                             }
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(previewAccentColor)
                             .bounceClick {
                                 onSelect(tempSelectedColor, confirmButtonCenter[0])
                                 onDismiss()
-                            },
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(previewAccentColor),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -1040,6 +1040,73 @@ fun StartScreenSelectionDialog(
                         )
                     }
                 }
+}
+
+@Composable
+fun StartMediaSelectionDialog(
+    current: String,
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit,
+    accentColor: Color,
+    vibrationEnabled: Boolean
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    Column(
+        modifier = Modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.settings_default_start_media),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val options = listOf(
+            "movie" to stringResource(R.string.settings_default_start_media_movie),
+            "tv" to stringResource(R.string.settings_default_start_media_tv)
+        )
+        
+        options.forEach { (value, label) ->
+            val isSelected = current == value
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .bounceClick {
+                        if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                        onSelect(value)
+                    }
+                    .background(
+                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            SettingsDialogCancelButton(
+                text = stringResource(R.string.settings_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+        }
+    }
 }
 
 private data class DashboardSettingItem(

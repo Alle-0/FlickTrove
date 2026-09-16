@@ -569,8 +569,12 @@ fun Movie.generateReminderItems(today: String): List<ReminderItem> {
     } else {
         // TV Series
         val isPremiered = !this.firstAirDate.isNullOrBlank() && this.firstAirDate!! <= today
-        if (!isPremiered) {
-            // Not yet released or brand new series
+        val hasDetailedEpisodes = this.seasons?.any { season ->
+            season.episodes?.any { !it.airDate.isNullOrBlank() && it.airDate > today } == true
+        } == true
+
+        if (!isPremiered && !hasDetailedEpisodes) {
+            // Not yet released or brand new series with no detailed episodes loaded yet
             val arrivalDate = this.firstAirDate ?: this.nextEpisodeAirDate
             return if (!arrivalDate.isNullOrBlank() && arrivalDate > today) {
                 val epInfo = if (!this.nextEpisodeString.isNullOrBlank()) " • ${this.nextEpisodeString}" else " • S01E01"
@@ -587,7 +591,7 @@ fun Movie.generateReminderItems(today: String): List<ReminderItem> {
                 emptyList()
             }
         } else {
-            // Already premiered: ongoing series -> return all future episodes!
+            // Ongoing series or series with detailed upcoming episodes: return all future episodes!
             val items = mutableListOf<ReminderItem>()
             val seenDatesAndEps = mutableSetOf<String>()
 
@@ -606,7 +610,7 @@ fun Movie.generateReminderItems(today: String): List<ReminderItem> {
                                     movie = this,
                                     arrivalDate = epDate,
                                     episodeInfo = " • $epString",
-                                    isOngoingSeriesEpisode = true
+                                    isOngoingSeriesEpisode = isPremiered
                                 )
                             )
                         }

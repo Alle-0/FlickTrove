@@ -43,6 +43,7 @@ import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.theme.DarkSurface
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.roundToInt
@@ -332,11 +333,18 @@ fun YearSelectionModal(
     val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
 
     if (transition.currentState || transition.targetState) {
+        val effectiveScrimAlpha = if (triggerBounds != null) {
+            val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
+            0.6f * FastOutSlowInEasing.transform(scrimProgress)
+        } else {
+            0.6f * alpha
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(200f)
-                .graphicsLayer(alpha = alpha)
+                .background(Color.Black.copy(alpha = effectiveScrimAlpha))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -379,12 +387,68 @@ fun YearSelectionModal(
                 bottom = targetRect.center.y + 20f
             )
 
-            val currentRect = lerp(startRect, targetRect, progress)
-            val currentCornerRadius = androidx.compose.ui.util.lerp(
-                if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() },
-                with(density) { 32.dp.toPx() },
+            // Center moves smoothly towards screen center
+            val currentCenterX = androidx.compose.ui.util.lerp(startRect.center.x, targetRect.center.x, progress)
+            val currentCenterY = androidx.compose.ui.util.lerp(startRect.center.y, targetRect.center.y, progress)
+
+            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
+            val sizeProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) {
+                    (progress / delay) * 0.05f
+                } else {
+                    val raw = (progress - delay) / (1f - delay)
+                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
+                }
+            } else {
                 progress
+            }
+
+            // Corner radius stays circular during liftoff, then morphs into target rounded corners
+            val cornerRadiusProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) 0f
+                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
+            } else {
+                progress
+            }
+
+            val currentWidth = androidx.compose.ui.util.lerp(startRect.width, targetRect.width, sizeProgress)
+            val currentHeight = androidx.compose.ui.util.lerp(startRect.height, targetRect.height, sizeProgress)
+
+            val currentRect = Rect(
+                left = currentCenterX - currentWidth / 2f,
+                top = currentCenterY - currentHeight / 2f,
+                right = currentCenterX + currentWidth / 2f,
+                bottom = currentCenterY + currentHeight / 2f
             )
+
+            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() }
+            val endRadius = with(density) { 32.dp.toPx() }
+            val currentCornerRadius = androidx.compose.ui.util.lerp(startRadius, endRadius, cornerRadiusProgress)
+            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
+
+            val currentTintAlpha = if (triggerBounds != null) {
+                androidx.compose.ui.util.lerp(0.48f, HazeStyles.glassmorphicDialog.tint.alpha, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.tint.alpha
+            }
+            val currentBlur = if (triggerBounds != null) {
+                androidx.compose.ui.unit.lerp(16.dp, HazeStyles.glassmorphicDialog.blurRadius, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.blurRadius
+            }
+            val animatedStyle = remember(currentTintAlpha, currentBlur) {
+                HazeStyles.glassmorphicDialog.copy(
+                    tint = HazeStyles.glassmorphicDialog.tint.copy(alpha = currentTintAlpha),
+                    blurRadius = currentBlur
+                )
+            }
+            val borderAlpha = if (triggerBounds != null) {
+                androidx.compose.ui.util.lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
+            } else {
+                HazeStyles.ModalBorderAlpha
+            }
 
             Box(
                 modifier = Modifier
@@ -401,9 +465,14 @@ fun YearSelectionModal(
                         .matchParentSize()
                         .hazeGlass(
                             state = hazeState,
-                            shape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() }),
-                            containerColor = DarkSurface.copy(alpha = 0.45f),
+                            shape = currentShape,
+                            style = animatedStyle,
                             useOffscreenStrategy = false
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = borderAlpha),
+                            shape = currentShape
                         )
                 )
 

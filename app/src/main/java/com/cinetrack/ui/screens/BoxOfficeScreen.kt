@@ -322,7 +322,8 @@ fun BoxOfficeScreenContent(
                         .align(Alignment.CenterEnd)
                         .size(36.dp)
                         .onGloballyPositioned { coords ->
-                            filterButtonBounds = coords.boundsInRoot()
+                            val pos = coords.positionInWindow()
+                            filterButtonBounds = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                         }
                 ) {
                     // Glass Background

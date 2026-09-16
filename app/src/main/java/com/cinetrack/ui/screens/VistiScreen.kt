@@ -33,6 +33,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.foundation.clickable
@@ -390,7 +391,8 @@ fun VistiScreenContent(
                     modifier = Modifier
                         .size(36.dp)
                         .onGloballyPositioned { coords: LayoutCoordinates ->
-                            filterButtonBounds[0] = coords.boundsInRoot()
+                            val pos = coords.positionInWindow()
+                            filterButtonBounds[0] = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                         }
                 ) {
                 // Background Layer

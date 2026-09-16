@@ -57,6 +57,7 @@ import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.utils.ProviderConstants
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
@@ -140,10 +141,18 @@ fun HomeFilterModal(
     }
 
     if (transition.currentState || transition.targetState) {
+        val effectiveScrimAlpha = if (triggerBounds != null) {
+            val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
+            0.6f * FastOutSlowInEasing.transform(scrimProgress)
+        } else {
+            0.6f * alpha
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(100f)
+                .background(Color.Black.copy(alpha = effectiveScrimAlpha))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -200,66 +209,107 @@ fun HomeFilterModal(
                 bottom = targetRect.center.y + 20f
             )
 
-            val currentRect = geometryLerp(startRect, targetRect, progress)
-            val currentCornerRadius = lerp(
-                if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() },
-                with(density) { 32.dp.toPx() },
+            // Center moves smoothly towards screen center
+            val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
+            val currentCenterY = lerp(startRect.center.y, targetRect.center.y, progress)
+
+            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
+            val sizeProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) {
+                    (progress / delay) * 0.05f
+                } else {
+                    val raw = (progress - delay) / (1f - delay)
+                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
+                }
+            } else {
                 progress
+            }
+
+            // Corner radius stays circular during liftoff, then morphs into target rounded corners
+            val cornerRadiusProgress = if (triggerBounds != null) {
+                val delay = 0.18f
+                if (progress <= delay) 0f
+                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
+            } else {
+                progress
+            }
+
+            val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
+            val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
+
+            val currentRect = Rect(
+                left = currentCenterX - currentWidth / 2f,
+                top = currentCenterY - currentHeight / 2f,
+                right = currentCenterX + currentWidth / 2f,
+                bottom = currentCenterY + currentHeight / 2f
             )
 
-            // Background blur layer (always in composition to avoid HazeState leaks!)
-            // We set its size to 0x0 when progress == 0f so it clears the ghost blur area.
-            Spacer(
+            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() }
+            val endRadius = with(density) { 32.dp.toPx() }
+            val currentCornerRadius = lerp(startRadius, endRadius, cornerRadiusProgress)
+            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
+
+            val currentTintAlpha = if (triggerBounds != null) {
+                lerp(0.48f, HazeStyles.glassmorphicDialog.tint.alpha, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.tint.alpha
+            }
+            val currentBlur = if (triggerBounds != null) {
+                androidx.compose.ui.unit.lerp(16.dp, HazeStyles.glassmorphicDialog.blurRadius, sizeProgress)
+            } else {
+                HazeStyles.glassmorphicDialog.blurRadius
+            }
+            val animatedStyle = remember(currentTintAlpha, currentBlur) {
+                HazeStyles.glassmorphicDialog.copy(
+                    tint = HazeStyles.glassmorphicDialog.tint.copy(alpha = currentTintAlpha),
+                    blurRadius = currentBlur
+                )
+            }
+            val borderAlpha = if (triggerBounds != null) {
+                lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
+            } else {
+                HazeStyles.ModalBorderAlpha
+            }
+
+            Box(
                 modifier = Modifier
                     .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
                     .size(
-                        width = if (progress == 0f) 0.dp else with(density) { currentRect.width.toDp() },
-                        height = if (progress == 0f) 0.dp else with(density) { currentRect.height.toDp() }
+                        width = with(density) { currentRect.width.toDp() },
+                        height = with(density) { currentRect.height.toDp() }
                     )
-                    .hazeGlass(
-                        state = hazeState,
-                        shape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() }),
-                        alpha = alpha
-                    )
-            )
-
-            if (progress > 0f) {
-                Box(
+                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
+            ) {
+                // Background Layer (Blurred glass)
+                Spacer(
                     modifier = Modifier
-                        .offset { IntOffset(targetRect.left.roundToInt(), targetRect.top.roundToInt()) }
-                        .size(
-                            width = with(density) { targetRect.width.toDp() },
-                            height = with(density) { targetRect.height.toDp() }
+                        .matchParentSize()
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = currentShape,
+                            style = animatedStyle,
+                            useOffscreenStrategy = false
                         )
-                        .graphicsLayer {
-                            val scaleX = currentRect.width / targetRect.width
-                            val scaleY = currentRect.height / targetRect.height
-                            this.scaleX = scaleX
-                            this.scaleY = scaleY
-                            
-                            val targetCenterX = targetRect.left + targetRect.width / 2f
-                            val targetCenterY = targetRect.top + targetRect.height / 2f
-                            val currentCenterX = currentRect.left + currentRect.width / 2f
-                            val currentCenterY = currentRect.top + currentRect.height / 2f
-                            
-                            this.translationX = currentCenterX - targetCenterX
-                            this.translationY = currentCenterY - targetCenterY
-                        }
-                        .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
-                ) {
-                    // No background here, handled by the independent Spacer above!
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = borderAlpha),
+                            shape = currentShape
+                        )
+                )
 
                 // Foreground Content
-                if (progress > 0.4f) {
-                    val contentAlpha = ((progress - 0.4f) / 0.6f).coerceIn(0f, 1f)
+                if (progress > 0.38f) {
+                    val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
 
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .animateContentSize()
                             .zIndex(1f)
                             .graphicsLayer(
-                                alpha = contentAlpha
+                                alpha = contentAlpha,
+                                compositingStrategy = CompositingStrategy.Offscreen
                             )
                     ) {
                         // --- HEADER BAR ---
@@ -710,7 +760,6 @@ fun HomeFilterModal(
                     }
                 }
             }
-            } // <-- Closes if (progress > 0f)
         }
     }
 }

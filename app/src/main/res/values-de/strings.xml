@@ -169,6 +169,8 @@
     <string name="settings_episodes_layout_accordion">Akkordeon (TV Time)</string>
     <string name="episodes_up_next">ALS NÄCHSTES</string>
     <string name="episodes_all_caught_up">Du bist auf dem neuesten Stand!</string>
+    <string name="episodes_season_upcoming">Staffel %1$d demnächst</string>
+    <string name="episodes_season_upcoming_date">Staffel %1$d demnächst • %2$s</string>
     <string name="episodes_all_episodes">ALLE STAFFELN</string>
     <string name="episodes_layout_toggle">Layout umschalten</string>
     <string name="settings_split_home">Neuerscheinungen trennen</string>
@@ -201,6 +203,10 @@
     <string name="settings_default_start_tab_desc">Wähle den Standardbildschirm beim Start der App</string>
     <string name="settings_default_start_home">MÖCHTE ICH SEHEN</string>
     <string name="settings_default_start_visti">GESEHEN</string>
+    <string name="settings_default_start_media">Standard-Medienansicht</string>
+    <string name="settings_default_start_media_desc">Wähle, ob standardmäßig Filme oder Serien geöffnet werden</string>
+    <string name="settings_default_start_media_movie">Filme</string>
+    <string name="settings_default_start_media_tv">Serien</string>
     <string name="settings_aesthetics">Erscheinungsbild</string>
     <string name="settings_accent_color">Akzentfarbe</string>
     <string name="settings_accent_color_desc">Passe das Aussehen der App an</string>

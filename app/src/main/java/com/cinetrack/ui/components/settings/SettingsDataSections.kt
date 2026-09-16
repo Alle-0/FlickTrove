@@ -77,12 +77,12 @@ fun SettingsImagesStorageSection(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
                                 .bounceClick { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.updateImageQuality(value) 
                                 }
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
                                 .padding(vertical = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {

@@ -20,10 +20,15 @@ import javax.inject.Singleton
 
 @Singleton
 class PreferenceRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context? = null
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val startupPrefs = context?.getSharedPreferences("flicktrove_startup_prefs", android.content.Context.MODE_PRIVATE)
+
+    val initialDefaultMedia: String
+        get() = startupPrefs?.getString("default_start_media", "movie") ?: "movie"
 
     private object PreferencesKeys {
         val HOME_SORT = stringPreferencesKey("home_sort")
@@ -50,6 +55,7 @@ class PreferenceRepository @Inject constructor(
         val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         val DEFAULT_START_TAB = stringPreferencesKey("default_start_tab")
+        val DEFAULT_START_MEDIA = stringPreferencesKey("default_start_media")
         val TVDB_JWT_TOKEN = stringPreferencesKey("tvdb_jwt_token")
         val SHOW_MY_FOLDERS = booleanPreferencesKey("show_my_folders")
         val SHOW_YOUR_FLOW = booleanPreferencesKey("show_your_flow")
@@ -93,7 +99,7 @@ class PreferenceRepository @Inject constructor(
                 disabledBadges = preferences[PreferencesKeys.DISABLED_BADGES] ?: emptySet(),
                 vibrationEnabled = preferences[PreferencesKeys.VIBRATION_ENABLED] ?: true,
                 accentColor = preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal",
-                appTheme = preferences[PreferencesKeys.APP_THEME] ?: "System",
+                appTheme = preferences[PreferencesKeys.APP_THEME] ?: "AMOLED",
                 contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "system",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
@@ -103,6 +109,7 @@ class PreferenceRepository @Inject constructor(
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
                 defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "feed",
+                defaultStartMedia = preferences[PreferencesKeys.DEFAULT_START_MEDIA] ?: startupPrefs?.getString("default_start_media", "movie") ?: "movie",
                 tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: "",
                 showMyFolders = preferences[PreferencesKeys.SHOW_MY_FOLDERS] ?: true,
                 showYourFlow = preferences[PreferencesKeys.SHOW_YOUR_FLOW] ?: true,
@@ -121,12 +128,18 @@ class PreferenceRepository @Inject constructor(
         }
 
     @Volatile
-    private var cachedPreferences: UserPreferences = UserPreferences()
+    private var cachedPreferences: UserPreferences = UserPreferences(
+        defaultStartMedia = startupPrefs?.getString("default_start_media", "movie") ?: "movie"
+    )
 
     init {
         repoScope.launch {
             userPreferencesFlow.collect { prefs ->
                 cachedPreferences = prefs
+                val saved = startupPrefs?.getString("default_start_media", null)
+                if (saved != prefs.defaultStartMedia) {
+                    startupPrefs?.edit()?.putString("default_start_media", prefs.defaultStartMedia)?.apply()
+                }
             }
         }
     }
@@ -248,7 +261,17 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateDefaultStartMedia(media: String) {
+        startupPrefs?.edit()?.putString("default_start_media", media)?.apply()
+        cachedPreferences = cachedPreferences.copy(defaultStartMedia = media)
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DEFAULT_START_MEDIA] = media
+        }
+    }
+
     suspend fun updateAll(prefs: UserPreferences) {
+        startupPrefs?.edit()?.putString("default_start_media", prefs.defaultStartMedia)?.apply()
+        cachedPreferences = prefs
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_SORT] = json.encodeToString(prefs.homeSort)
             preferences[PreferencesKeys.VISTI_SORT] = json.encodeToString(prefs.vistiSort)
@@ -274,6 +297,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
             preferences[PreferencesKeys.DEFAULT_START_TAB] = prefs.defaultStartTab
+            preferences[PreferencesKeys.DEFAULT_START_MEDIA] = prefs.defaultStartMedia
             preferences[PreferencesKeys.TVDB_JWT_TOKEN] = prefs.tvdbJwtToken
             preferences[PreferencesKeys.SHOW_MY_FOLDERS] = prefs.showMyFolders
             preferences[PreferencesKeys.SHOW_YOUR_FLOW] = prefs.showYourFlow

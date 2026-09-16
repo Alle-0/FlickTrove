@@ -5,6 +5,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
 import android.content.Context
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
@@ -55,7 +56,7 @@ class SettingsViewModel @Inject constructor(
 
     val updateInfo = appUpdateManager.updateInfo
 
-    private val _showEditProfileMenu = MutableSharedFlow<Unit>()
+    private val _showEditProfileMenu = MutableSharedFlow<Rect?>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
     
     private val _showGuestAuthDialog = MutableSharedFlow<Unit>()
@@ -64,9 +65,9 @@ class SettingsViewModel @Inject constructor(
     private val _showDashboardSettingsMenu = MutableSharedFlow<Unit>()
     val showDashboardSettingsMenu = _showDashboardSettingsMenu.asSharedFlow()
 
-    fun triggerEditProfileMenu() {
+    fun triggerEditProfileMenu(triggerBounds: Rect? = null) {
         viewModelScope.launch {
-            _showEditProfileMenu.emit(Unit)
+            _showEditProfileMenu.emit(triggerBounds)
         }
     }
     
@@ -328,11 +329,15 @@ class SettingsViewModel @Inject constructor(
 
     val appTheme: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.appTheme }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "AMOLED")
 
     val defaultStartTab: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.defaultStartTab }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "feed")
+
+    val defaultStartMedia: StateFlow<String> = preferenceRepository.userPreferencesFlow
+        .map { it.defaultStartMedia }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "movie")
 
     val contentLanguage: StateFlow<String> = preferenceRepository.userPreferencesFlow
         .map { it.contentLanguage }
@@ -760,6 +765,13 @@ class SettingsViewModel @Inject constructor(
     fun setDefaultStartTab(tab: String) {
         viewModelScope.launch {
             preferenceRepository.updateDefaultStartTab(tab)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
+    fun setDefaultStartMedia(media: String) {
+        viewModelScope.launch {
+            preferenceRepository.updateDefaultStartMedia(media)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }
     }

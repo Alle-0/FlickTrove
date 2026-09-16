@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -81,6 +82,7 @@ fun MainGlobalDialogs(
     onSettingsOverlayClose: () -> Unit,
     onOverlayClosing: () -> Unit,
     showSurpriseMeOverlay: Boolean,
+    surpriseMeButtonBounds: Rect? = null,
     onSurpriseMeClose: () -> Unit,
     updateInfo: AppUpdateInfo?,
     dismissedUpdateVersion: String?,
@@ -245,23 +247,23 @@ fun MainGlobalDialogs(
     }
 
 
-    if (showSurpriseMeOverlay) {
-        val surpriseMeViewModel: SurpriseMeViewModel = with(screen) { getViewModel<SurpriseMeViewModel>() }
-        Box(modifier = Modifier.zIndex(90000f)) {
-            SurpriseMeOverlay(
-                viewModel = surpriseMeViewModel,
-                globalHazeState = globalHazeState,
-                onMovieFound = { movie ->
-                    onSurpriseMeClose()
-                    if (movie != null) {
-                        rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.main_surprise_me_not_found), Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onClose = onSurpriseMeClose
-            )
-        }
+    val surpriseMeViewModel: SurpriseMeViewModel = with(screen) { getViewModel<SurpriseMeViewModel>() }
+    Box(modifier = Modifier.zIndex(90000f)) {
+        SurpriseMeOverlay(
+            isVisible = showSurpriseMeOverlay,
+            triggerBounds = surpriseMeButtonBounds,
+            viewModel = surpriseMeViewModel,
+            globalHazeState = globalHazeState,
+            onMovieFound = { movie ->
+                onSurpriseMeClose()
+                if (movie != null) {
+                    rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+                } else {
+                    Toast.makeText(context, context.getString(R.string.main_surprise_me_not_found), Toast.LENGTH_SHORT).show()
+                }
+            },
+            onClose = onSurpriseMeClose
+        )
     }
 
     if (updateInfo != null && updateInfo.isUpdateAvailable && dismissedUpdateVersion != updateInfo.latestVersion && ignoredUpdateVersion != updateInfo.latestVersion) {

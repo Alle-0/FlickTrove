@@ -171,6 +171,8 @@
     <string name="settings_episodes_layout_accordion">Sanfona (TV Time)</string>
     <string name="episodes_up_next">A SEGUIR</string>
     <string name="episodes_all_caught_up">Você está em dia com a série!</string>
+    <string name="episodes_season_upcoming">Temporada %1$d em breve</string>
+    <string name="episodes_season_upcoming_date">Temporada %1$d em breve • %2$s</string>
     <string name="episodes_all_episodes">TODAS AS TEMPORADAS</string>
     <string name="episodes_layout_toggle">Alternar Layout</string>
     <string name="settings_split_home">Dividir Lançamentos no Início</string>
@@ -205,6 +207,10 @@
     <string name="settings_default_start_tab_desc">Escolha a tela padrão ao abrir o aplicativo</string>
     <string name="settings_default_start_home">PARA ASSISTIR</string>
     <string name="settings_default_start_visti">ASSISTIDOS</string>
+    <string name="settings_default_start_media">Visualização padrão de mídia</string>
+    <string name="settings_default_start_media_desc">Escolha se deseja abrir Filmes ou Séries por padrão</string>
+    <string name="settings_default_start_media_movie">Filmes</string>
+    <string name="settings_default_start_media_tv">Séries</string>
     <string name="settings_aesthetics">Estética</string>
     <string name="settings_accent_color">Cor de Destaque</string>
     <string name="settings_accent_color_desc">Personalize a aparência do aplicativo</string>

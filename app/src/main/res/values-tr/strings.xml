@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">Akordeon (TV Time)</string>
     <string name="episodes_up_next">SIRADAKİ</string>
     <string name="episodes_all_caught_up">Hepsini izlediniz!</string>
+    <string name="episodes_season_upcoming">Sezon %1$d yakında</string>
+    <string name="episodes_season_upcoming_date">Sezon %1$d yakında • %2$s</string>
     <string name="episodes_all_episodes">TÜM SEZONLAR</string>
     <string name="episodes_layout_toggle">Düzeni Değiştir</string>
     <string name="settings_split_home">Ana Sayfada Vizyondakileri Ayır</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">ANA SAYFA</string>
     <string name="settings_default_start_home">İZLENECEKLER</string>
     <string name="settings_default_start_visti">İZLENDİ</string>
+    <string name="settings_default_start_media">Varsayılan Medya Görünümü</string>
+    <string name="settings_default_start_media_desc">Varsayılan olarak Filmlerin mi yoksa Dizilerin mi açılacağını seçin</string>
+    <string name="settings_default_start_media_movie">Filmler</string>
+    <string name="settings_default_start_media_tv">Diziler</string>
     <string name="settings_aesthetics">Görünüm ve Tema</string>
     <string name="settings_accent_color">Vurgu Rengi</string>
     <string name="settings_accent_color_desc">Uygulamanın görünümünü özelleştirin</string>

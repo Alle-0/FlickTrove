@@ -543,7 +543,7 @@ fun WipeDataSelectionDialog(
             Icon(
                 ImageVector.vectorResource(id = R.drawable.ic_trash),
                 null,
-                tint = Color(0xFFFF9800),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -568,31 +568,50 @@ fun WipeDataSelectionDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
                         .bounceClick { onSelectLocal() }
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .padding(vertical = 14.dp, horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(id = R.string.settings_wipe_local_data_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Text(stringResource(id = R.string.settings_wipe_local_data_desc), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), textAlign = TextAlign.Center)
+                        Text(
+                            stringResource(id = R.string.settings_wipe_local_data_title),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            stringResource(id = R.string.settings_wipe_local_data_desc),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
                 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFFF9800).copy(alpha = 0.2f))
-                        .border(1.dp, Color(0xFFFF9800).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                         .bounceClick { onSelectTotal() }
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFFF5252).copy(alpha = 0.15f))
+                        .border(1.dp, Color(0xFFFF5252).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .padding(vertical = 14.dp, horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(id = R.string.settings_wipe_total_data_title), fontWeight = FontWeight.Bold, color = Color(0xFFFF9800))
-                        Text(stringResource(id = R.string.settings_wipe_total_data_desc), style = MaterialTheme.typography.labelSmall, color = Color(0xFFFF9800).copy(alpha = 0.8f), textAlign = TextAlign.Center)
+                        Text(
+                            stringResource(id = R.string.settings_wipe_total_data_title),
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF5252)
+                        )
+                        Text(
+                            stringResource(id = R.string.settings_wipe_total_data_desc),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFFF5252).copy(alpha = 0.8f),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
                 
@@ -733,6 +752,31 @@ fun SettingsStartScreenSelectionDialog(
         onDismissRequest = onDismiss
     ) {
         StartScreenSelectionDialog(
+            current = current,
+            accentColor = accentColor,
+            vibrationEnabled = vibrationEnabled,
+            onDismiss = onDismiss,
+            onSelect = onSelect
+        )
+    }
+}
+
+@Composable
+fun SettingsStartMediaSelectionDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    current: String,
+    accentColor: Color,
+    vibrationEnabled: Boolean,
+    onDismiss: () -> Unit,
+    onSelect: (String) -> Unit
+) {
+    GlassmorphicModal(
+        visible = visible,
+        activeHazeState = activeHazeState,
+        onDismissRequest = onDismiss
+    ) {
+        StartMediaSelectionDialog(
             current = current,
             accentColor = accentColor,
             vibrationEnabled = vibrationEnabled,

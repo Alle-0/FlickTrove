@@ -36,10 +36,12 @@ fun SettingsGeneralPreferencesSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     onShowLanguageDialog: () -> Unit,
-    onShowStartScreenDialog: () -> Unit
+    onShowStartScreenDialog: () -> Unit,
+    onShowStartMediaDialog: () -> Unit = {}
 ) {
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
+    val defaultStartMedia by settingsViewModel.defaultStartMedia.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_general),
@@ -95,6 +97,25 @@ fun SettingsGeneralPreferencesSection(
                 )
             },
             onClick = { onShowStartScreenDialog() }
+        )
+        // Default Media Section (Movies vs TV Series)
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+            title = stringResource(R.string.settings_default_start_media),
+            description = stringResource(R.string.settings_default_start_media_desc),
+            trailing = {
+                val label = if (defaultStartMedia == "tv") {
+                    stringResource(R.string.settings_default_start_media_tv)
+                } else {
+                    stringResource(R.string.settings_default_start_media_movie)
+                }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = currentAccentColor
+                )
+            },
+            onClick = { onShowStartMediaDialog() }
         )
     }
 }
@@ -484,12 +505,12 @@ fun SettingsAccessibilitySection(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
                                 .bounceClick { 
                                     if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                     settingsViewModel.updateTitleTextSizeMultiplier(value) 
                                 }
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
                                 .padding(vertical = 10.dp),
                             contentAlignment = Alignment.Center
                         ) {

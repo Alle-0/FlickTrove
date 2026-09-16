@@ -45,13 +45,26 @@ class VistiViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
+    private val initialMedia = preferenceRepository.initialDefaultMedia
     private val _searchQuery = MutableStateFlow("")
-    private val _activeTab = MutableStateFlow("movie")
+    private val _activeTab = MutableStateFlow(initialMedia)
     
     val movieGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
     val tvGridState = androidx.compose.foundation.lazy.grid.LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
     
+    init {
+        viewModelScope.launch {
+            preferenceRepository.userPreferencesFlow
+                .map { it.defaultStartMedia }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { newDefault ->
+                    _activeTab.value = newDefault
+                }
+        }
+    }
+
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
@@ -67,7 +80,7 @@ class VistiViewModel @Inject constructor(
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
-        initialValue = VistiUiState()
+        initialValue = VistiUiState(activeTab = initialMedia)
     )
 
     fun onSearchQueryChanged(query: String) {

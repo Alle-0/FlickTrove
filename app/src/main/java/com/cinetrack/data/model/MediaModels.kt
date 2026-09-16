@@ -115,7 +115,7 @@ data class UserPreferences(
     val disabledBadges: Set<String> = emptySet(),
     val vibrationEnabled: Boolean = true,
     val accentColor: String = "Teal",
-    val appTheme: String = "System", // System, Light, Dark, Amoled
+    val appTheme: String = "AMOLED", // System, Amoled
     val contentLanguage: String = "system",
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
@@ -125,6 +125,7 @@ data class UserPreferences(
     val useMovieLogo: Boolean = true,
     val lastSyncTimestamp: Long = 0L,
     val defaultStartTab: String = "feed",
+    val defaultStartMedia: String = "movie",
     val tvdbJwtToken: String = "",
     val showMyFolders: Boolean = true,
     val showYourFlow: Boolean = true,

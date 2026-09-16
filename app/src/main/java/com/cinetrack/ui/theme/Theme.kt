@@ -58,7 +58,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun FlickTroveTheme(
-    themeSetting: String = "System",
+    themeSetting: String = "AMOLED",
     accentColor: Color = NeonTeal,
     content: @Composable () -> Unit
 ) {

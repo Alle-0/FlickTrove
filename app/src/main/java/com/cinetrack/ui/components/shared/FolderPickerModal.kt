@@ -176,9 +176,9 @@ private fun FolderListContent(
             Box(
                 modifier = Modifier
                     .size(36.dp)
+                    .bounceClick { onClose() }
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .bounceClick { onClose() },
+                    .background(Color.White.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -318,10 +318,10 @@ private fun FolderItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .bounceClick { onClick() }
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .bounceClick { onClick() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -413,9 +413,9 @@ private fun FolderCreateForm(
                 Box(
                     modifier = Modifier
                         .size(36.dp)
+                        .bounceClick { onCancel() }
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .bounceClick { onCancel() },
+                        .background(Color.White.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

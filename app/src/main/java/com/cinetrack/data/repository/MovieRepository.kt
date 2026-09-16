@@ -158,7 +158,10 @@ class MovieRepository @Inject constructor(
         val oldMovie = favoriteDao.getById(movie.id, movie.mediaType)
 
         // 1. Update Room immediately
-        val updatedMovie = movie.copy(syncStatus = "synced", clientUpdatedAt = System.currentTimeMillis())
+        val updatedMovie = movie.copy(
+            syncStatus = "synced",
+            clientUpdatedAt = if (syncToTrakt) System.currentTimeMillis() else (movie.clientUpdatedAt.takeIf { it > 0 } ?: oldMovie?.clientUpdatedAt ?: System.currentTimeMillis())
+        )
         updatedMovie.emotionalVibes = movie.emotionalVibes
         updatedMovie.favoriteActorId = movie.favoriteActorId
         updatedMovie.favoriteActorName = movie.favoriteActorName
@@ -1078,6 +1081,7 @@ class MovieRepository @Inject constructor(
                 showAppEntryAnimation = remotePrefs["showAppEntryAnimation"] as? Boolean ?: currentPrefs.showAppEntryAnimation,
                 useMovieLogo = remotePrefs["useMovieLogo"] as? Boolean ?: currentPrefs.useMovieLogo,
                 defaultStartTab = remotePrefs["defaultStartTab"] as? String ?: currentPrefs.defaultStartTab,
+                defaultStartMedia = remotePrefs["defaultStartMedia"] as? String ?: currentPrefs.defaultStartMedia,
                 showMyFolders = remotePrefs["showMyFolders"] as? Boolean ?: currentPrefs.showMyFolders,
                 showYourFlow = remotePrefs["showYourFlow"] as? Boolean ?: currentPrefs.showYourFlow,
                 titleTextSizeMultiplier = (remotePrefs["titleTextSizeMultiplier"] as? Number)?.toFloat() ?: currentPrefs.titleTextSizeMultiplier,
@@ -1127,6 +1131,7 @@ class MovieRepository @Inject constructor(
                     "showAppEntryAnimation" to prefs.showAppEntryAnimation,
                     "useMovieLogo" to prefs.useMovieLogo,
                     "defaultStartTab" to prefs.defaultStartTab,
+                    "defaultStartMedia" to prefs.defaultStartMedia,
                     "showMyFolders" to prefs.showMyFolders,
                     "showYourFlow" to prefs.showYourFlow,
                     "titleTextSizeMultiplier" to prefs.titleTextSizeMultiplier.toDouble(),

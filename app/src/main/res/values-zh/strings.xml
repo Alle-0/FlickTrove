@@ -175,6 +175,8 @@
     <string name="settings_episodes_layout_accordion">手风琴样式（TV Time 风格）</string>
     <string name="episodes_up_next">接下来看</string>
     <string name="episodes_all_caught_up">已全部追平！</string>
+    <string name="episodes_season_upcoming">第 %1$d 季即将推出</string>
+    <string name="episodes_season_upcoming_date">第 %1$d 季即将推出 • %2$s</string>
     <string name="episodes_all_episodes">全部季数</string>
     <string name="episodes_layout_toggle">切换布局</string>
     <string name="settings_split_home">首页区分上映状态</string>
@@ -210,6 +212,10 @@
     <string name="settings_default_start_feed">首页</string>
     <string name="settings_default_start_home">想看</string>
     <string name="settings_default_start_visti">看过</string>
+    <string name="settings_default_start_media">默认媒体视图</string>
+    <string name="settings_default_start_media_desc">选择启动时默认打开电影还是电视剧</string>
+    <string name="settings_default_start_media_movie">电影</string>
+    <string name="settings_default_start_media_tv">电视剧</string>
     <string name="settings_aesthetics">外观与视觉</string>
     <string name="settings_accent_color">主题重点色</string>
     <string name="settings_accent_color_desc">自定义应用外观</string>

@@ -155,13 +155,13 @@ fun DeleteFolderDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(ErrorRed)
                                 .bounceClick {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     pendingConfirm = true
                                     isDismissing = true
-                                },
+                                }
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(ErrorRed),
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -176,8 +176,8 @@ fun DeleteFolderDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .bounceClick { isDismissing = true },
+                                .bounceClick { isDismissing = true }
+                                .clip(RoundedCornerShape(16.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(

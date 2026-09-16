@@ -20,15 +20,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.cinetrack.ui.components.common.SymbiontPullToRefreshIndicator
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -37,6 +35,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -147,6 +146,8 @@ fun HomeScreenContent(
     onMovieClick: (Movie) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val pullToRefreshState = rememberPullToRefreshState()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
@@ -211,45 +212,67 @@ fun HomeScreenContent(
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
             CinematicBackground(modifier = Modifier.fillMaxSize())
+            val symbiontPullState = LocalSymbiontPullState.current
+            val currentPullFraction = pullToRefreshState.distanceFraction
+            SideEffect {
+                symbiontPullState.progress = currentPullFraction
+                symbiontPullState.isRefreshing = isRefreshing
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    symbiontPullState.progress = 0f
+                    symbiontPullState.isRefreshing = false
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
-            if (showSkeleton) {
-                LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
-                    contentPadding = PaddingValues(
-                        start = 16.dp, 
-                        end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
-                        top = topPadding + stickyHeaderHeight + 12.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { viewModel.pullToRefresh() },
+                    state = pullToRefreshState,
                     modifier = Modifier.fillMaxSize(),
-                    userScrollEnabled = false
+                    indicator = {}
                 ) {
-                    items(count = 15, contentType = { "skeleton" }) {
-                        if (columns == 1) {
-                            com.cinetrack.ui.components.shared.MovieListCardSkeleton()
-                        } else {
-                            com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                    if (showSkeleton) {
+                        LazyVerticalGrid(
+                            columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
+                            contentPadding = PaddingValues(
+                                start = 16.dp, 
+                                end = 16.dp, 
+                                bottom = paddingValues.calculateBottomPadding() + 96.dp, 
+                                top = topPadding + stickyHeaderHeight + 12.dp
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled = false
+                        ) {
+                            items(count = 15, contentType = { "skeleton" }) {
+                                if (columns == 1) {
+                                    com.cinetrack.ui.components.shared.MovieListCardSkeleton()
+                                } else {
+                                    com.cinetrack.ui.components.shared.MovieCardSkeleton(width = cardWidth)
+                                }
+                            }
                         }
-                    }
-                }
-            } else if (uiState.movies.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Text(
-                        text = if (uiState.searchQuery.isEmpty()) stringResource(id = R.string.home_empty_list) else stringResource(id = R.string.home_no_results),
-                        color = Color.White.copy(alpha = 0.5f),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            } else {
+                    } else if (uiState.movies.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            contentAlignment = androidx.compose.ui.Alignment.Center
+                        ) {
+                            Text(
+                                text = if (uiState.searchQuery.isEmpty()) stringResource(id = R.string.home_empty_list) else stringResource(id = R.string.home_no_results),
+                                color = Color.White.copy(alpha = 0.5f),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    } else {
                 val stableOnPress: (Movie) -> Unit = remember(onMovieClick) { { m -> onMovieClick(m) } }
                 val stableOnAction: (Movie) -> Unit = remember(viewModel) { { m -> viewModel.toggleWatched(m) } }
                 val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(actionsState) {
@@ -403,6 +426,7 @@ fun HomeScreenContent(
                 }
             }
         }
+    }
 
         // Perfectly Centered Floating Sticky Header
         Box(
@@ -500,7 +524,8 @@ fun HomeScreenContent(
                         modifier = Modifier
                             .size(36.dp)
                             .onGloballyPositioned { coords: androidx.compose.ui.layout.LayoutCoordinates ->
-                                filterButtonBounds[0] = coords.boundsInRoot()
+                                val pos = coords.positionInWindow()
+                                filterButtonBounds[0] = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                             }
                     ) {
                         // Background Layer

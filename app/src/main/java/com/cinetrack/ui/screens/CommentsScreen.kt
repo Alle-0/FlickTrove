@@ -24,6 +24,10 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
@@ -134,6 +138,7 @@ class CommentsScreen(
         var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
         var showSortMenu by remember { mutableStateOf(false) }
+        var sortButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
         LaunchedEffect(sortOption, sortOrder) {
             viewModel.setSort(sortOption, sortOrder)
@@ -208,11 +213,19 @@ class CommentsScreen(
                         scrolledContainerColor = Color.Transparent
                     ),
                     actions = {
+                        val sortCoords = remember { arrayOf<LayoutCoordinates?>(null) }
                         Box {
                             Box(
                                 modifier = Modifier
                                     .padding(12.dp)
-                                    .bounceClick { showSortMenu = true }
+                                    .onGloballyPositioned { sortCoords[0] = it }
+                                    .bounceClick { 
+                                        sortButtonBounds = sortCoords[0]?.let {
+                                            val pos = it.positionInWindow()
+                                            Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                        }
+                                        showSortMenu = true 
+                                    }
                             ) {
                                 Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
                             }
@@ -1127,6 +1140,7 @@ class CommentsScreen(
             com.cinetrack.ui.components.dialog.HomeFilterModal(
                 isVisible = showSortMenu,
                 isCommentsFilter = true,
+                triggerBounds = sortButtonBounds,
                 sortConfig = com.cinetrack.data.model.SortConfig(
                     sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",
                     sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc"

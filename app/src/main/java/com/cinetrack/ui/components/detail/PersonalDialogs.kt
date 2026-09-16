@@ -355,14 +355,14 @@ fun NoteEditorBox(
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.1f))
                         .bounceClick {
                             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                             }
                             speechLauncher.launch(intent)
-                        },
+                        }
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -382,9 +382,6 @@ fun NoteEditorBox(
                         Box(
                             modifier = Modifier
                                 .height(36.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(accentColor.copy(alpha = 0.2f))
-                                .border(1.dp, accentColor, RoundedCornerShape(50))
                                 .bounceClick {
                                     if (isPlaying) {
                                         audioHelper.stopPlaying()
@@ -392,6 +389,9 @@ fun NoteEditorBox(
                                         audioHelper.startPlaying(movieId, mediaType)
                                     }
                                 }
+                                .clip(RoundedCornerShape(50))
+                                .background(accentColor.copy(alpha = 0.2f))
+                                .border(1.dp, accentColor, RoundedCornerShape(50))
                                 .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -430,7 +430,6 @@ fun NoteEditorBox(
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .clip(RoundedCornerShape(50))
                                 .bounceClick {
                                     hapticAudioTrash.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     scopeAudioTrash.launch {
@@ -446,7 +445,8 @@ fun NoteEditorBox(
                                         audioHelper.deleteAudioNote(movieId, mediaType)
                                         hasAudio = false
                                     }
-                                },
+                                }
+                                .clip(RoundedCornerShape(50)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -468,9 +468,6 @@ fun NoteEditorBox(
                     Box(
                         modifier = Modifier
                             .height(36.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(if (isRecording) Color(0xFFFF3B30).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f))
-                            .border(1.dp, if (isRecording) Color(0xFFFF3B30) else Color.Transparent, RoundedCornerShape(50))
                             .bounceClick {
                                 if (isRecording) {
                                     audioHelper.stopRecording()
@@ -479,6 +476,9 @@ fun NoteEditorBox(
                                     permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                                 }
                             }
+                            .clip(RoundedCornerShape(50))
+                            .background(if (isRecording) Color(0xFFFF3B30).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f))
+                            .border(1.dp, if (isRecording) Color(0xFFFF3B30) else Color.Transparent, RoundedCornerShape(50))
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
