@@ -69,10 +69,10 @@ fun SearchRecentSearchesRow(
                 Box(
                     modifier = Modifier
                         .height(32.dp)
+                        .bounceClick { onSearchClick(search) }
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
-                        .bounceClick { onSearchClick(search) },
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
@@ -145,10 +145,10 @@ fun SearchSuggestedFiltersRow(
                     Box(
                         modifier = Modifier
                             .height(32.dp)
+                            .bounceClick { onFilterClick(filter) }
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
-                            .bounceClick { onFilterClick(filter) },
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
