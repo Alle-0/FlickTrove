@@ -40,6 +40,13 @@
     <string name="main_folder_rename">Ganti Nama Folder</string>
     <string name="main_folder_change_color">Ubah Warna</string>
     <string name="main_folder_delete">Hapus Folder</string>
+    <string name="main_folder_reorder">Atur Ulang Item</string>
+    <string name="folder_reorder_title">Atur Ulang Folder</string>
+    <string name="folder_reorder_subtitle">Tarik item untuk menentukan urutan maraton Anda</string>
+    <string name="folder_reorder_save">Selesai</string>
+    <string name="filter_sort_manual">Urutan Kustom</string>
+    <string name="msg_folder_reordered">Urutan folder diperbarui</string>
+    <string name="msg_folder_reorder_min_items">Tambahkan setidaknya dua judul untuk mengatur ulang</string>
     <string name="main_exit_title">Keluar dari FlickTrove?</string>
     <string name="main_exit_body">Apakah Anda yakin ingin keluar dari aplikasi?</string>
     <string name="main_exit_cancel">Batal</string>

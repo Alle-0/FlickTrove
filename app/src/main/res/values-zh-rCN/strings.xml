@@ -40,6 +40,13 @@
     <string name="main_folder_rename">重命名文件夹</string>
     <string name="main_folder_change_color">更改颜色</string>
     <string name="main_folder_delete">删除文件夹</string>
+    <string name="main_folder_reorder">重新排序项目</string>
+    <string name="folder_reorder_title">重新排列文件夹</string>
+    <string name="folder_reorder_subtitle">拖动项目以设置连看马拉松顺序</string>
+    <string name="folder_reorder_save">完成</string>
+    <string name="filter_sort_manual">自定义顺序</string>
+    <string name="msg_folder_reordered">文件夹顺序已更新</string>
+    <string name="msg_folder_reorder_min_items">请至少添加两个作品以进行排序</string>
     <string name="main_exit_title">退出 FlickTrove？</string>
     <string name="main_exit_body">确定要退出应用程序吗？</string>
     <string name="main_exit_cancel">取消</string>

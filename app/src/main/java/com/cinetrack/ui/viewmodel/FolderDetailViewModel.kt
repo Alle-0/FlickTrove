@@ -34,7 +34,10 @@ sealed interface FolderDetailUiState {
         val activeTab: String = "all",
         val movieCount: Int = 0,
         val tvCount: Int = 0,
-        val sortConfig: com.cinetrack.data.model.SortConfig = com.cinetrack.data.model.SortConfig()
+        val sortConfig: com.cinetrack.data.model.SortConfig = com.cinetrack.data.model.SortConfig(sortType = "manual", sortDirection = "asc"),
+        val allMoviesRaw: ImmutableList<Movie> = persistentListOf(),
+        val isReordering: Boolean = false,
+        val reorderedMovies: ImmutableList<Movie> = persistentListOf()
     ) : FolderDetailUiState
     data class Error(val message: String) : FolderDetailUiState
 }
@@ -46,7 +49,7 @@ class FolderDetailViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val preferenceRepository: PreferenceRepository,
     private val globalErrorHandler: GlobalErrorHandler,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
@@ -87,10 +90,13 @@ class FolderDetailViewModel @Inject constructor(
         }
     }
 
-    private val _sortConfig = MutableStateFlow(com.cinetrack.data.model.SortConfig())
+    private val _sortConfig = MutableStateFlow(com.cinetrack.data.model.SortConfig(sortType = "manual", sortDirection = "asc"))
     fun updateSortConfig(config: com.cinetrack.data.model.SortConfig) {
         _sortConfig.value = config
     }
+
+    private val isReorderingFlow = savedStateHandle.getStateFlow("is_reordering", false)
+    private val tempReorderedIdsFlow = savedStateHandle.getStateFlow<List<String>?>("temp_reordered_ids", null)
 
     private val _activeTab = MutableStateFlow("all")
     fun onTabChanged(tab: String) { _activeTab.value = tab }
@@ -105,7 +111,7 @@ class FolderDetailViewModel @Inject constructor(
                     combine(
                         repository.getMoviesByCompositeIds(folder.itemIds).onEach { movies ->
                             val missingIds = folder.itemIds.filter { id -> 
-                                !movies.any { m -> "${m.mediaType}_${m.id}" == id } 
+                                !movies.any { m -> m.compositeId == id } 
                             }
                             if (missingIds.isNotEmpty()) {
                                 viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
@@ -130,29 +136,44 @@ class FolderDetailViewModel @Inject constructor(
                         },
                         allFoldersFlow
                     ) { movies, allFolders ->
-                        FolderDetailUiState.Success(folder, movies.toImmutableList(), allFolders.toImmutableList()) as FolderDetailUiState
+                        FolderDetailUiState.Success(
+                            folder = folder,
+                            movies = movies.toImmutableList(),
+                            allFolders = allFolders.toImmutableList(),
+                            allMoviesRaw = movies.toImmutableList()
+                        ) as FolderDetailUiState
                     }
                 }
             }
         },
         _activeTab,
-        _sortConfig
-    ) { baseState, activeTab, sortConfig ->
+        _sortConfig,
+        isReorderingFlow,
+        tempReorderedIdsFlow
+    ) { baseState, activeTab, sortConfig, isReordering, tempReorderedIds ->
         if (baseState is FolderDetailUiState.Success) {
-            val movieCount = baseState.movies.count { it.mediaType == "movie" }
-            val tvCount = baseState.movies.count { it.mediaType == "tv" }
+            val rawMovies = baseState.allMoviesRaw
+            val rawMoviesMap = rawMovies.associateBy { it.compositeId }
+            
+            val reorderIds = tempReorderedIds ?: baseState.folder.itemIds
+            val reorderedList = reorderIds.mapNotNull { rawMoviesMap[it] } + rawMovies.filter { it.compositeId !in reorderIds }
+
+            val movieCount = rawMovies.count { it.mediaType == "movie" }
+            val tvCount = rawMovies.count { it.mediaType == "tv" }
             var filtered = when (activeTab) {
-                "movie" -> baseState.movies.filter { it.mediaType == "movie" }
-                "tv" -> baseState.movies.filter { it.mediaType == "tv" }
-                else -> baseState.movies
+                "movie" -> rawMovies.filter { it.mediaType == "movie" }
+                "tv" -> rawMovies.filter { it.mediaType == "tv" }
+                else -> rawMovies
             }
-            filtered = applySortConfig(filtered, sortConfig)
+            filtered = applySortConfig(filtered, sortConfig, baseState.folder)
             baseState.copy(
                 movies = filtered.toImmutableList(),
                 activeTab = activeTab,
                 movieCount = movieCount,
                 tvCount = tvCount,
-                sortConfig = sortConfig
+                sortConfig = sortConfig,
+                isReordering = isReordering,
+                reorderedMovies = reorderedList.toImmutableList()
             )
         } else {
             baseState
@@ -163,7 +184,56 @@ class FolderDetailViewModel @Inject constructor(
         initialValue = FolderDetailUiState.Loading
     )
 
-    private fun applySortConfig(movies: List<Movie>, sort: com.cinetrack.data.model.SortConfig): List<Movie> {
+    fun openReorderModal() {
+        val currentState = uiState.value as? FolderDetailUiState.Success ?: return
+        if (currentState.allMoviesRaw.size < 2) {
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_reorder_min_items))
+            return
+        }
+        if (savedStateHandle.get<List<String>>("temp_reordered_ids") == null) {
+            val initialIds = if (currentState.folder.itemIds.isNotEmpty()) {
+                currentState.folder.itemIds
+            } else {
+                currentState.allMoviesRaw.map { it.compositeId }
+            }
+            savedStateHandle["temp_reordered_ids"] = ArrayList(initialIds)
+        }
+        savedStateHandle["is_reordering"] = true
+    }
+
+    fun dismissReorderModal() {
+        savedStateHandle["temp_reordered_ids"] = null
+        savedStateHandle["is_reordering"] = false
+    }
+
+    fun moveReorderItem(fromIndex: Int, toIndex: Int) {
+        val current = savedStateHandle.get<List<String>>("temp_reordered_ids")?.toMutableList()
+            ?: (uiState.value as? FolderDetailUiState.Success)?.folder?.itemIds?.toMutableList()
+            ?: return
+        if (fromIndex in current.indices && toIndex in current.indices && fromIndex != toIndex) {
+            val item = current.removeAt(fromIndex)
+            current.add(toIndex, item)
+            savedStateHandle["temp_reordered_ids"] = ArrayList(current)
+        }
+    }
+
+    fun saveReorderedItems() {
+        val currentState = uiState.value as? FolderDetailUiState.Success ?: return
+        val newIds = savedStateHandle.get<List<String>>("temp_reordered_ids") ?: currentState.reorderedMovies.map { it.compositeId }
+        viewModelScope.launch {
+            repository.saveFolder(
+                currentState.folder.copy(
+                    itemIds = newIds,
+                    updatedAt = Instant.now().toString()
+                )
+            )
+            _sortConfig.value = _sortConfig.value.copy(sortType = "manual", sortDirection = "asc")
+            dismissReorderModal()
+            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_reordered))
+        }
+    }
+
+    private fun applySortConfig(movies: List<Movie>, sort: com.cinetrack.data.model.SortConfig, folder: FolderEntity): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         var filtered = movies
         
@@ -187,6 +257,14 @@ class FolderDetailViewModel @Inject constructor(
         }
 
         return when (sort.sortType) {
+            "manual" -> {
+                val orderMap = folder.itemIds.withIndex().associate { it.value to it.index }
+                if (isDesc) {
+                    filtered.sortedWith(compareByDescending<Movie> { orderMap[it.compositeId] ?: Int.MAX_VALUE }.thenBy { it.compositeId })
+                } else {
+                    filtered.sortedWith(compareBy<Movie> { orderMap[it.compositeId] ?: Int.MAX_VALUE }.thenBy { it.compositeId })
+                }
+            }
             "watched_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "release_date" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "title" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id })
@@ -233,7 +311,7 @@ class FolderDetailViewModel @Inject constructor(
             val currentState = uiState.value
             if (currentState is FolderDetailUiState.Success) {
                 val folder = currentState.folder
-                val itemId = "${movie.mediaType}_${movie.id}"
+                val itemId = movie.compositeId
                 val updatedIds = folder.itemIds.filter { it != itemId }
                 
                 repository.saveFolder(folder.copy(
@@ -267,7 +345,7 @@ class FolderDetailViewModel @Inject constructor(
 
     fun toggleItemInFolder(targetFolder: FolderEntity, movie: Movie) {
         viewModelScope.launch {
-            val itemId = "${movie.mediaType}_${movie.id}"
+            val itemId = movie.compositeId
             val isPresent = targetFolder.itemIds.contains(itemId)
             val updatedIds = if (isPresent) {
                 targetFolder.itemIds.filter { it != itemId }

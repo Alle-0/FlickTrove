@@ -37,6 +37,13 @@
     <string name="main_folder_rename">फ़ोल्डर का नाम बदलें</string>
     <string name="main_folder_change_color">रंग बदलें</string>
     <string name="main_folder_delete">फ़ोल्डर हटाएँ</string>
+    <string name="main_folder_reorder">आइटम पुनर्व्यवस्थित करें</string>
+    <string name="folder_reorder_title">फ़ोल्डर पुनर्व्यवस्थित करें</string>
+    <string name="folder_reorder_subtitle">अपना मैराथन क्रम सेट करने के लिए खींचें</string>
+    <string name="folder_reorder_save">पूर्ण</string>
+    <string name="filter_sort_manual">कस्टम क्रम</string>
+    <string name="msg_folder_reordered">फ़ोल्डर क्रम अपडेट किया गया</string>
+    <string name="msg_folder_reorder_min_items">पुनर्व्यवस्थित करने के लिए कम से कम दो शीर्षक जोड़ें</string>
     <string name="main_exit_title">FlickTrove से बाहर निकलें?</string>
     <string name="main_exit_body">क्या आप वाकई ऐप से बाहर निकलना चाहते हैं?</string>
     <string name="main_exit_cancel">रद्द करें</string>

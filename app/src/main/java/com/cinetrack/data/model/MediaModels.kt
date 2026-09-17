@@ -80,7 +80,7 @@ data class Folder(
 @Serializable
 @Stable
 data class SortConfig(
-    val sortType: String = "created_at", // 'created_at', 'vote_average', 'release_date', 'title', 'personal_rating'
+    val sortType: String = "created_at", // 'created_at', 'vote_average', 'release_date', 'title', 'personal_rating', 'manual'
     val sortDirection: String = "desc", // 'asc', 'desc'
     val selectedGenres: List<Long> = emptyList(),
     val selectedProviders: List<Long> = emptyList(),

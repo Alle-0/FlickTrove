@@ -37,6 +37,13 @@
     <string name="main_folder_rename">Renomear Pasta</string>
     <string name="main_folder_change_color">Alterar Cor</string>
     <string name="main_folder_delete">Excluir Pasta</string>
+    <string name="main_folder_reorder">Reordenar Itens</string>
+    <string name="folder_reorder_title">Reordenar Pasta</string>
+    <string name="folder_reorder_subtitle">Arraste os itens para definir sua sequência de maratona</string>
+    <string name="folder_reorder_save">Concluído</string>
+    <string name="filter_sort_manual">Ordem Personalizada</string>
+    <string name="msg_folder_reordered">Ordem da pasta atualizada</string>
+    <string name="msg_folder_reorder_min_items">Adicione pelo menos dois títulos para reordenar</string>
     <string name="main_exit_title">Sair do FlickTrove?</string>
     <string name="main_exit_body">Tem certeza de que deseja sair do aplicativo?</string>
     <string name="main_exit_cancel">Cancelar</string>

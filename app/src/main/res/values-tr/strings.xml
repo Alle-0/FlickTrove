@@ -40,6 +40,13 @@
     <string name="main_folder_rename">Klasörü Yeniden Adlandır</string>
     <string name="main_folder_change_color">Rengi Değiştir</string>
     <string name="main_folder_delete">Klasörü Sil</string>
+    <string name="main_folder_reorder">Öğeleri Yeniden Sırala</string>
+    <string name="folder_reorder_title">Klasörü Yeniden Sırala</string>
+    <string name="folder_reorder_subtitle">Maraton sıranızı belirlemek için öğeleri sürükleyin</string>
+    <string name="folder_reorder_save">Bitti</string>
+    <string name="filter_sort_manual">Özel Sıralama</string>
+    <string name="msg_folder_reordered">Klasör sırası güncellendi</string>
+    <string name="msg_folder_reorder_min_items">Yeniden sıralamak için en az iki başlık ekleyin</string>
     <string name="main_exit_title">FlickTrove\'dan çıkılsın mı?</string>
     <string name="main_exit_body">Uygulamadan çıkmak istediğinizden emin misiniz?</string>
     <string name="main_exit_cancel">İptal</string>

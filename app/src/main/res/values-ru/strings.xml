@@ -37,6 +37,13 @@
     <string name="main_folder_rename">Переименовать папку</string>
     <string name="main_folder_change_color">Изменить цвет</string>
     <string name="main_folder_delete">Удалить папку</string>
+    <string name="main_folder_reorder">Изменить порядок</string>
+    <string name="folder_reorder_title">Порядок в папке</string>
+    <string name="folder_reorder_subtitle">Перетащите элементы, чтобы задать порядок марафона</string>
+    <string name="folder_reorder_save">Готово</string>
+    <string name="filter_sort_manual">Пользовательский порядок</string>
+    <string name="msg_folder_reordered">Порядок папки обновлен</string>
+    <string name="msg_folder_reorder_min_items">Добавьте хотя бы два названия для изменения порядка</string>
     <string name="main_exit_title">Выйти из FlickTrove?</string>
     <string name="main_exit_body">Вы уверены, что хотите выйти из приложения?</string>
     <string name="main_exit_cancel">Отмена</string>

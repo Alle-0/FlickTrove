@@ -128,6 +128,7 @@ fun MainModalsContainer(
                     HomeFilterModal(
                         isVisible = isFilterModalVisible,
                         isVisti = filterConfig.isVisti,
+                        isFolder = filterConfig.isFolder,
                         sortConfig = filterConfig.sortConfig,
                         hazeState = globalHazeState,
                         triggerBounds = filterButtonBounds,
@@ -137,6 +138,22 @@ fun MainModalsContainer(
                             onFilterModalDismiss()
                         },
                         onDismissRequest = onFilterModalDismiss
+                    )
+                }
+            }
+
+            val reorderConfig = com.cinetrack.ui.LocalFolderReorderConfig.current.value
+            if (reorderConfig != null && reorderConfig.visible) {
+                Box(modifier = Modifier.zIndex(75000f)) {
+                    com.cinetrack.ui.components.dialog.FolderReorderModal(
+                        visible = reorderConfig.visible,
+                        movies = reorderConfig.movies,
+                        folderName = reorderConfig.folderName,
+                        folderColor = reorderConfig.folderColor,
+                        hazeState = globalHazeState,
+                        onMove = reorderConfig.onMove,
+                        onSave = reorderConfig.onSave,
+                        onDismiss = reorderConfig.onDismiss
                     )
                 }
             }

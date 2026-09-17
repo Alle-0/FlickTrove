@@ -73,6 +73,7 @@ import kotlin.math.roundToInt
 fun HomeFilterModal(
     isVisible: Boolean,
     isVisti: Boolean = false,
+    isFolder: Boolean = false,
     sortConfig: SortConfig,
     hazeState: HazeState?,
     triggerBounds: Rect? = null,
@@ -440,6 +441,9 @@ fun HomeFilterModal(
                                                     add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
                                                     add(FilterOption("first_watched_at", stringResource(R.string.filter_sort_first_watched_at)))
                                                     add(FilterOption("rewatch_count", stringResource(R.string.filter_sort_rewatch_count)))
+                                                }
+                                                if (isFolder) {
+                                                    add(FilterOption("manual", stringResource(R.string.filter_sort_manual)))
                                                 }
                                                 add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
                                                 add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))

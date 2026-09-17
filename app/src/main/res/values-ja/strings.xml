@@ -40,6 +40,13 @@
     <string name="main_folder_rename">フォルダ名を変更</string>
     <string name="main_folder_change_color">カラーを変更</string>
     <string name="main_folder_delete">フォルダを削除</string>
+    <string name="main_folder_reorder">アイテムを並べ替え</string>
+    <string name="folder_reorder_title">フォルダを並べ替え</string>
+    <string name="folder_reorder_subtitle">ドラッグしてマラソンの視聴順を設定します</string>
+    <string name="folder_reorder_save">完了</string>
+    <string name="filter_sort_manual">カスタム順</string>
+    <string name="msg_folder_reordered">フォルダの順序を更新しました</string>
+    <string name="msg_folder_reorder_min_items">並べ替えるには2つ以上のタイトルを追加してください</string>
     <string name="main_exit_title">FlickTroveを終了しますか？</string>
     <string name="main_exit_body">アプリを終了してもよろしいですか？</string>
     <string name="main_exit_cancel">キャンセル</string>

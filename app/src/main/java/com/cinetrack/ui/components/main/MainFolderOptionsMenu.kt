@@ -54,6 +54,7 @@ fun MainFolderOptionsMenu(
     onDismiss: () -> Unit,
     onRename: () -> Unit,
     onChangeColor: () -> Unit,
+    onReorder: () -> Unit,
     onDelete: () -> Unit
 ) {
     Box(
@@ -127,6 +128,30 @@ fun MainFolderOptionsMenu(
                     Spacer(Modifier.width(12.dp))
                     Text(
                         stringResource(R.string.main_folder_change_color),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .bounceClick {
+                            onDismiss()
+                            onReorder()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_lista),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        stringResource(R.string.main_folder_reorder),
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )

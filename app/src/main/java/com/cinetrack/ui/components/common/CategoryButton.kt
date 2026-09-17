@@ -180,8 +180,8 @@ fun CategoryTabSelector(
         // Spring animation for scaling up the indicator when held/pressed or dragged
         val dragScaleY by animateFloatAsState(
             targetValue = if (!advancedEffectsEnabled) 1f
-                else if (isDragging) 1.20f
-                else if (isSelectedTabPressed) 1.08f
+                else if (isDragging) 1.12f
+                else if (isSelectedTabPressed) 1.05f
                 else 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -377,11 +377,6 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val volumeConservationY = if (advancedEffectsEnabled && normalWidthPx > 0f) {
-                            val ratio = (normalWidthPx / currentWidth).coerceIn(0.8f, 1.25f)
-                            1f + (ratio - 1f) * 0.6f
-                        } else 1f
-
                         val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
                             val totalDist = flightTargetCenter - flightStartCenter
                             if (kotlin.math.abs(totalDist) > 1f) {
@@ -391,59 +386,23 @@ fun CategoryTabSelector(
                         } else 0f
 
                         val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY * volumeConservationY, 1f + flightEnlargeY) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val idealHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
-                        
-                        val rawDragY = animDragY.value
-                        val maxVisualDrag = baseHeight * 1.5f
-                        val dragYOffset = if (rawDragY > 0) {
-                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 200f))
-                        } else if (rawDragY < 0) {
-                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 200f))
-                        } else 0f
-                        
-                        val idealCenterY = (size.height / 2f) + dragYOffset
-                        val idealTop = idealCenterY - (idealHeight / 2f)
-                        val idealBottom = idealCenterY + (idealHeight / 2f)
-                        
-                        val physicalTopBoundary = paddingPx
-                        val physicalBottomBoundary = size.height - paddingPx
-                        
-                        val extraHeight = (idealHeight - baseHeight).coerceAtLeast(0f)
-                        val adjustedTopBoundary = physicalTopBoundary - (extraHeight / 2f)
-                        val adjustedBottomBoundary = physicalBottomBoundary + (extraHeight / 2f)
-                        
-                        var actualTop = idealTop
-                        var actualBottom = idealBottom
-                        var pillHeight = idealHeight
-                        
-                        val topOvershoot = (adjustedTopBoundary - idealTop).coerceAtLeast(0f)
-                        val bottomOvershoot = (idealBottom - adjustedBottomBoundary).coerceAtLeast(0f)
-                        
-                        if (bottomOvershoot > 0f) {
-                            val maxPenetration = paddingPx * 1.5f
-                            val penetration = maxPenetration * (1f - kotlin.math.exp(-bottomOvershoot / 40f))
-                            actualBottom = adjustedBottomBoundary + penetration
-                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - bottomOvershoot * 0.1f)
-                            actualTop = actualBottom - pillHeight
-                        } else if (topOvershoot > 0f) {
-                            val maxPenetration = paddingPx * 1.5f
-                            val penetration = maxPenetration * (1f - kotlin.math.exp(-topOvershoot / 40f))
-                            actualTop = adjustedTopBoundary - penetration
-                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - topOvershoot * 0.1f)
-                            actualBottom = actualTop + pillHeight
-                        }
-                        
-                        val verticalCompression = (pillHeight / idealHeight).coerceIn(0.1f, 1f)
-                        val cornerRadius = (pillHeight / 2f) * verticalCompression
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val cornerRadius = pillHeight / 2f
 
-                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
-                        val horizontalSquishCompensation = 1f + ((1f / verticalCompression) - 1f) * 0.4f
-                        val finalPillWidth = pillWidth * horizontalSquishCompensation
-                        
-                        val pillTop = actualTop
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = paddingPx * 0.75f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                        } else 0f
+
+                        val pillCenterY = (size.height / 2f) + dragYOffset
+                        val pillTop = pillCenterY - (pillHeight / 2f)
                         val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         drawRoundRect(
@@ -459,11 +418,6 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val volumeConservationY = if (advancedEffectsEnabled && normalWidthPx > 0f) {
-                            val ratio = (normalWidthPx / currentWidth).coerceIn(0.8f, 1.25f)
-                            1f + (ratio - 1f) * 0.6f
-                        } else 1f
-
                         val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
                             val totalDist = flightTargetCenter - flightStartCenter
                             if (kotlin.math.abs(totalDist) > 1f) {
@@ -473,59 +427,23 @@ fun CategoryTabSelector(
                         } else 0f
 
                         val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY * volumeConservationY, 1f + flightEnlargeY) else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val idealHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
-                        
-                        val rawDragY = animDragY.value
-                        val maxVisualDrag = baseHeight * 1.5f
-                        val dragYOffset = if (rawDragY > 0) {
-                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 200f))
-                        } else if (rawDragY < 0) {
-                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 200f))
-                        } else 0f
-                        
-                        val idealCenterY = (size.height / 2f) + dragYOffset
-                        val idealTop = idealCenterY - (idealHeight / 2f)
-                        val idealBottom = idealCenterY + (idealHeight / 2f)
-                        
-                        val physicalTopBoundary = paddingPx
-                        val physicalBottomBoundary = size.height - paddingPx
-                        
-                        val extraHeight = (idealHeight - baseHeight).coerceAtLeast(0f)
-                        val adjustedTopBoundary = physicalTopBoundary - (extraHeight / 2f)
-                        val adjustedBottomBoundary = physicalBottomBoundary + (extraHeight / 2f)
-                        
-                        var actualTop = idealTop
-                        var actualBottom = idealBottom
-                        var pillHeight = idealHeight
-                        
-                        val topOvershoot = (adjustedTopBoundary - idealTop).coerceAtLeast(0f)
-                        val bottomOvershoot = (idealBottom - adjustedBottomBoundary).coerceAtLeast(0f)
-                        
-                        if (bottomOvershoot > 0f) {
-                            val maxPenetration = paddingPx * 1.5f
-                            val penetration = maxPenetration * (1f - kotlin.math.exp(-bottomOvershoot / 40f))
-                            actualBottom = adjustedBottomBoundary + penetration
-                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - bottomOvershoot * 0.1f)
-                            actualTop = actualBottom - pillHeight
-                        } else if (topOvershoot > 0f) {
-                            val maxPenetration = paddingPx * 1.5f
-                            val penetration = maxPenetration * (1f - kotlin.math.exp(-topOvershoot / 40f))
-                            actualTop = adjustedTopBoundary - penetration
-                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - topOvershoot * 0.1f)
-                            actualBottom = actualTop + pillHeight
-                        }
-                        
-                        val verticalCompression = (pillHeight / idealHeight).coerceIn(0.1f, 1f)
-                        val cornerRadius = (pillHeight / 2f) * verticalCompression
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val cornerRadius = pillHeight / 2f
 
-                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
-                        val horizontalSquishCompensation = 1f + ((1f / verticalCompression) - 1f) * 0.4f
-                        val finalPillWidth = pillWidth * horizontalSquishCompensation
-                        
-                        val pillTop = actualTop
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = paddingPx * 0.75f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                        } else 0f
+
+                        val pillCenterY = (size.height / 2f) + dragYOffset
+                        val pillTop = pillCenterY - (pillHeight / 2f)
                         val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         pillPath.reset()

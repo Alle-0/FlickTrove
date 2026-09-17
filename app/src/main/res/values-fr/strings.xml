@@ -35,6 +35,13 @@
     <string name="main_folder_rename">Renommer le dossier</string>
     <string name="main_folder_change_color">Changer la couleur</string>
     <string name="main_folder_delete">Supprimer le dossier</string>
+    <string name="main_folder_reorder">Réorganiser les éléments</string>
+    <string name="folder_reorder_title">Réorganiser le dossier</string>
+    <string name="folder_reorder_subtitle">Faites glisser les éléments pour définir l\'ordre de votre marathon</string>
+    <string name="folder_reorder_save">Terminé</string>
+    <string name="filter_sort_manual">Ordre personnalisé</string>
+    <string name="msg_folder_reordered">Ordre du dossier mis à jour</string>
+    <string name="msg_folder_reorder_min_items">Ajoutez au moins deux titres pour réorganiser</string>
     <string name="main_exit_title">Quitter FlickTrove ?</string>
     <string name="main_exit_body">Voulez-vous vraiment quitter l\'application ?</string>
     <string name="main_exit_cancel">Annuler</string>

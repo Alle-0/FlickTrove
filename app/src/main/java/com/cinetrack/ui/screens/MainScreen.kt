@@ -204,9 +204,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             val symbiontPullState = remember { SymbiontPullState() }
             Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
                 val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
+                val folderReorderRequest = remember { mutableStateOf<(() -> Unit)?>(null) }
+                val folderReorderConfig = remember { mutableStateOf<com.cinetrack.ui.FolderReorderModalConfig?>(null) }
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
                     LocalActiveFilterConfig provides activeFilterConfig,
+                    com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
+                    com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
                     LocalFilterRequest provides { bounds ->
                         filterButtonBounds = bounds
                         isFilterModalVisible = true
@@ -425,6 +429,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     showFolderOptions = false
                                     folderEditMode = FolderEditMode.COLOR
                                     showFolderEditDialog = true
+                                },
+                                onReorder = {
+                                    showFolderOptions = false
+                                    folderReorderRequest.value?.invoke()
                                 },
                                 onDelete = {
                                     showFolderOptions = false

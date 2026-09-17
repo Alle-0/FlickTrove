@@ -35,6 +35,13 @@
     <string name="main_folder_rename">Renombrar carpeta</string>
     <string name="main_folder_change_color">Cambiar color</string>
     <string name="main_folder_delete">Eliminar carpeta</string>
+    <string name="main_folder_reorder">Reordenar elementos</string>
+    <string name="folder_reorder_title">Reordenar carpeta</string>
+    <string name="folder_reorder_subtitle">Arrastra los elementos para definir tu secuencia de maratón</string>
+    <string name="folder_reorder_save">Listo</string>
+    <string name="filter_sort_manual">Orden personalizado</string>
+    <string name="msg_folder_reordered">Orden de carpeta actualizado</string>
+    <string name="msg_folder_reorder_min_items">Añade al menos dos títulos para reordenar</string>
     <string name="main_exit_title">¿Salir de FlickTrove?</string>
     <string name="main_exit_body">¿Estás seguro de que quieres salir de la aplicación?</string>
     <string name="main_exit_cancel">Cancelar</string>

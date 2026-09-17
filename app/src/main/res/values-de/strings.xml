@@ -35,6 +35,13 @@
     <string name="main_folder_rename">Ordner umbenennen</string>
     <string name="main_folder_change_color">Farbe ändern</string>
     <string name="main_folder_delete">Ordner löschen</string>
+    <string name="main_folder_reorder">Elemente neu anordnen</string>
+    <string name="folder_reorder_title">Ordner neu anordnen</string>
+    <string name="folder_reorder_subtitle">Ziehe Elemente, um deine Marathon-Reihenfolge festzulegen</string>
+    <string name="folder_reorder_save">Fertig</string>
+    <string name="filter_sort_manual">Benutzerdefinierte Reihenfolge</string>
+    <string name="msg_folder_reordered">Ordnerreihenfolge aktualisiert</string>
+    <string name="msg_folder_reorder_min_items">Füge mindestens zwei Titel hinzu, um neu anzuordnen</string>
     <string name="main_exit_title">FlickTrove beenden?</string>
     <string name="main_exit_body">Möchtest du die App wirklich beenden?</string>
     <string name="main_exit_cancel">Abbrechen</string>

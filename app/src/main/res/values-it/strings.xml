@@ -35,6 +35,13 @@
     <string name="main_folder_rename">Rinomina Cartella</string>
     <string name="main_folder_change_color">Cambia Colore</string>
     <string name="main_folder_delete">Elimina Cartella</string>
+    <string name="main_folder_reorder">Riordina Elementi</string>
+    <string name="folder_reorder_title">Riordina Cartella</string>
+    <string name="folder_reorder_subtitle">Trascina gli elementi per definire la sequenza</string>
+    <string name="folder_reorder_save">Fine</string>
+    <string name="filter_sort_manual">Ordine Personalizzato</string>
+    <string name="msg_folder_reordered">Ordine cartella aggiornato</string>
+    <string name="msg_folder_reorder_min_items">Aggiungi almeno due titoli per riordinare</string>
     <string name="main_exit_title">Esci da FlickTrove?</string>
     <string name="main_exit_body">Sei sicuro di voler uscire dall\'applicazione?</string>
     <string name="main_exit_cancel">Annulla</string>

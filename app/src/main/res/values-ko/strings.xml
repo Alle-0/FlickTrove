@@ -40,6 +40,13 @@
     <string name="main_folder_rename">폴더 이름 변경</string>
     <string name="main_folder_change_color">색상 변경</string>
     <string name="main_folder_delete">폴더 삭제</string>
+    <string name="main_folder_reorder">항목 순서 변경</string>
+    <string name="folder_reorder_title">폴더 순서 변경</string>
+    <string name="folder_reorder_subtitle">드래그하여 마라톤 시청 순서를 설정하세요</string>
+    <string name="folder_reorder_save">완료</string>
+    <string name="filter_sort_manual">사용자 지정 순서</string>
+    <string name="msg_folder_reordered">폴더 순서가 업데이트되었습니다</string>
+    <string name="msg_folder_reorder_min_items">순서를 변경하려면 2개 이상의 타이틀을 추가하세요</string>
     <string name="main_exit_title">FlickTrove를 종료하시겠습니까?</string>
     <string name="main_exit_body">앱을 종료하시겠습니까?</string>
     <string name="main_exit_cancel">취소</string>

@@ -136,6 +136,13 @@ fun FolderDetailScreenContent(
     val lazyGridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
 
+    val folderReorderRequest = com.cinetrack.ui.LocalFolderReorderRequest.current
+    
+    DisposableEffect(viewModel) {
+        folderReorderRequest.value = { viewModel.openReorderModal() }
+        onDispose { folderReorderRequest.value = null }
+    }
+
     val successStateForScroll = uiState as? FolderDetailUiState.Success
     val currentActiveTab = successStateForScroll?.activeTab ?: "all"
     val currentSortConfig = successStateForScroll?.sortConfig ?: com.cinetrack.data.model.SortConfig()
@@ -145,6 +152,7 @@ fun FolderDetailScreenContent(
             activeFilterConfig.value = com.cinetrack.ui.FilterModalConfig(
                 triggerBounds = null,
                 isVisti = false,
+                isFolder = true,
                 category = currentActiveTab,
                 sortConfig = currentSortConfig,
                 onSortConfigChanged = { viewModel.updateSortConfig(it) }
@@ -156,6 +164,27 @@ fun FolderDetailScreenContent(
 
     DisposableEffect(Unit) {
         onDispose { activeFilterConfig.value = null }
+    }
+
+    val folderReorderConfig = com.cinetrack.ui.LocalFolderReorderConfig.current
+    LaunchedEffect(successStateForScroll?.isReordering, successStateForScroll?.reorderedMovies, successStateForScroll?.folder) {
+        if (successStateForScroll != null && successStateForScroll.isReordering) {
+            folderReorderConfig.value = com.cinetrack.ui.FolderReorderModalConfig(
+                visible = true,
+                movies = successStateForScroll.reorderedMovies,
+                folderName = successStateForScroll.folder.name,
+                folderColor = successStateForScroll.folder.color,
+                onMove = { fromIndex, toIndex -> viewModel.moveReorderItem(fromIndex, toIndex) },
+                onSave = { viewModel.saveReorderedItems() },
+                onDismiss = { viewModel.dismissReorderModal() }
+            )
+        } else {
+            folderReorderConfig.value = null
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { folderReorderConfig.value = null }
     }
 
     LaunchedEffect(successStateForScroll?.sortConfig, successStateForScroll?.activeTab) {
@@ -379,6 +408,7 @@ fun FolderDetailScreenContent(
                                     hazeState = externalHazeState
                                 )
                             }
+
                         }
                     }
 
