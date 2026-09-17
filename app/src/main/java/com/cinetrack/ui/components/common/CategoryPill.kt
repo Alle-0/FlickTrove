@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
 
+import com.cinetrack.ui.utils.bounceClick
+
 @Composable
 fun CategoryPill(
     text: String, 
@@ -34,7 +36,7 @@ fun CategoryPill(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .clickable { 
+            .bounceClick { 
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick() 
             }

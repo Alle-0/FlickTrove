@@ -29,7 +29,7 @@ class GetHomeFeedUseCase @Inject constructor(
 
         // Lancia tutte le sezioni in parallelo all'unisono
         val recMoviesDeferred = async { 
-            val recs = buildRecommendations(type = "movie", localMovies = localMovies)
+            val (recs, seedIds) = buildRecommendations(type = "movie", localMovies = localMovies)
             if (recs.isNotEmpty()) {
                 val first = recs.first()
                 try {
@@ -43,13 +43,13 @@ class GetHomeFeedUseCase @Inject constructor(
                         this.logoPath = bestLogo?.filePath 
                         this.matchScore = first.matchScore
                     }
-                    newList.toImmutableList()
-                } catch (e: Exception) { recs }
-            } else recs
+                    Pair(newList.toImmutableList(), seedIds)
+                } catch (e: Exception) { Pair(recs, seedIds) }
+            } else Pair(recs, seedIds)
         }
 
         val recTvDeferred = async { 
-            val recs = buildRecommendations(type = "tv", localMovies = localMovies)
+            val (recs, seedIds) = buildRecommendations(type = "tv", localMovies = localMovies)
             if (recs.isNotEmpty()) {
                 val first = recs.first()
                 try {
@@ -63,9 +63,9 @@ class GetHomeFeedUseCase @Inject constructor(
                         this.logoPath = bestLogo?.filePath 
                         this.matchScore = first.matchScore
                     }
-                    newList.toImmutableList()
-                } catch (e: Exception) { recs }
-            } else recs
+                    Pair(newList.toImmutableList(), seedIds)
+                } catch (e: Exception) { Pair(recs, seedIds) }
+            } else Pair(recs, seedIds)
         }
 
         val popMoviesDeferred = async { repository.getPopularMovies().take(10).map { it.copy(mediaType = "movie") }.toImmutableList() }
@@ -153,18 +153,22 @@ class GetHomeFeedUseCase @Inject constructor(
             }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
         }
         
-        val becauseYouWatchedMovieDeferred = async { buildBecauseYouWatched("movie", localMovies) }
-        val becauseYouWatchedTvDeferred = async { buildBecauseYouWatched("tv", localMovies) }
+        // Collect seed IDs used by the main recommendation blocks to prevent
+        // the same film from appearing in both "Consigliati" and "Perché hai visto"
+        val usedMovieSeedIds = recMoviesDeferred.await().second
+        val usedTvSeedIds = recTvDeferred.await().second
+        val becauseYouWatchedMovieDeferred = async { buildBecauseYouWatched("movie", localMovies, usedMovieSeedIds) }
+        val becauseYouWatchedTvDeferred = async { buildBecauseYouWatched("tv", localMovies, usedTvSeedIds) }
 
         FeedState(
             isLoaded = true,
             hasError = false,
-            recommendedMovies = recMoviesDeferred.await(),
+            recommendedMovies = recMoviesDeferred.await().first,
             popularMovies = popMoviesDeferred.await(),
             nowPlayingMovies = nowMoviesDeferred.await(),
             top10Movies = topMoviesDeferred.await(),
             upcomingMovies = upcMoviesDeferred.await(),
-            recommendedTv = recTvDeferred.await(),
+            recommendedTv = recTvDeferred.await().first,
             popularTv = popTvDeferred.await(),
             nowStreamingTv = nowTvDeferred.await(),
             top10Tv = topTvDeferred.await(),
@@ -178,30 +182,44 @@ class GetHomeFeedUseCase @Inject constructor(
         )
     }
 
-    private suspend fun buildRecommendations(type: String, localMovies: List<Movie>): ImmutableList<Movie> {
+    // Returns (recommendations, usedSeedIds) so that buildBecauseYouWatched can avoid the same seeds
+    private suspend fun buildRecommendations(type: String, localMovies: List<Movie>): Pair<ImmutableList<Movie>, Set<Long>> {
         val matching = if (type == "movie") {
             localMovies.filter { it.mediaType != "tv" }
         } else {
             localMovies.filter { it.mediaType == "tv" }
         }
-        if (matching.isEmpty()) return persistentListOf()
+        if (matching.isEmpty()) return Pair(persistentListOf(), emptySet())
 
         val goodCandidates = matching.filter { movie ->
             (movie.personalRating ?: 0.0) >= 7.0 ||
             (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
         }
         val pool = if (goodCandidates.size >= 3) goodCandidates else matching
-        val seeds = pool
+        val topPool = pool
             .sortedWith(
                 compareByDescending<Movie> { it.personalRating ?: 0.0 }
                     .thenByDescending { it.watchedAt ?: "" }
                     .thenByDescending { it.voteAverage ?: 0.0 }
             )
             .take(20)
-            .shuffled()
-            .take(3)
 
-        val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        // Anchor-based genre diversification:
+        // 1. Best-rated film is the anchor seed
+        // 2. Pick a second seed with minimal genre overlap with the anchor
+        // 3. Third seed is random from the remainder
+        val anchor = topPool.firstOrNull()
+        val second = if (anchor != null) {
+            topPool.drop(1).minByOrNull { candidate ->
+                (candidate.genreIds ?: emptyList()).intersect((anchor.genreIds ?: emptyList()).toSet()).size
+            }
+        } else null
+        val usedTwo = setOfNotNull(anchor?.id, second?.id)
+        val third = topPool.filter { it.id !in usedTwo }.randomOrNull()
+        val seeds = listOfNotNull(anchor, second, third)
+        val usedSeedIds = seeds.map { it.id }.toSet()
+
+        val localCompositeIds = localMovies.map { it.compositeId }.toSet()
         val rawData = coroutineScope {
             seeds.map { seed ->
                 async {
@@ -213,27 +231,46 @@ class GetHomeFeedUseCase @Inject constructor(
             }.awaitAll().flatten()
         }
 
+        // Quality gate: filter out low-quality or posterless results
+        val qualityData = rawData.filter { movie ->
+            (movie.voteCount ?: 0) >= 50 &&
+            (movie.voteAverage ?: 0.0) >= 5.5 &&
+            movie.posterPath != null
+        }
+
         val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
-        var results = rawData
+        var results = qualityData
             .distinctBy { it.id }
-            .filter { movie ->
-                val compositeId = "${type}_${movie.id}"
-                !localCompositeIds.contains(compositeId)
-            }
+            .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
             .map { it.copy(mediaType = type) }
             .mapNotNull { movie ->
                 val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
-                if (score == null || score >= 65) {
+                if (score == null || score >= 70) {
                     movie.apply { matchScore = score }
                 } else null
             }
-            
-        if (results.isEmpty() && rawData.isNotEmpty()) {
-            results = rawData
+
+        if (results.isEmpty() && qualityData.isNotEmpty()) {
+            // Graceful degradation: try 55% threshold before full fallback
+            results = qualityData
                 .distinctBy { it.id }
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
-                .map { movie -> 
+                .map { movie ->
+                    val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
+                    movie.apply { matchScore = score }
+                }
+                .filter { it.matchScore == null || (it.matchScore ?: 0) >= 55 }
+                .sortedByDescending { it.matchScore ?: 0 }
+                .take(10)
+        }
+
+        if (results.isEmpty() && qualityData.isNotEmpty()) {
+            results = qualityData
+                .distinctBy { it.id }
+                .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
+                .map { it.copy(mediaType = type) }
+                .map { movie ->
                     val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                     movie.apply { matchScore = score }
                 }
@@ -242,11 +279,11 @@ class GetHomeFeedUseCase @Inject constructor(
         } else {
             results = results.sortedByDescending { it.matchScore ?: 0 }
         }
-        
-        return results.take(15).toImmutableList()
+
+        return Pair(results.take(15).toImmutableList(), usedSeedIds)
     }
 
-    private suspend fun buildBecauseYouWatched(type: String, localMovies: List<Movie>): Pair<Movie, ImmutableList<Movie>>? {
+    private suspend fun buildBecauseYouWatched(type: String, localMovies: List<Movie>, excludeIds: Set<Long> = emptySet()): Pair<Movie, ImmutableList<Movie>>? {
         val matching = if (type == "movie") {
             localMovies.filter { it.mediaType != "tv" }
         } else {
@@ -258,8 +295,12 @@ class GetHomeFeedUseCase @Inject constructor(
             (movie.personalRating ?: 0.0) >= 7.0 ||
             (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
         }
-        
-        val pool = if (goodCandidates.isNotEmpty()) goodCandidates else matching
+
+        // Exclude seeds already used by buildRecommendations to avoid cross-section duplicates
+        val pool = (if (goodCandidates.isNotEmpty()) goodCandidates else matching)
+            .filter { it.id !in excludeIds }
+            .ifEmpty { (if (goodCandidates.isNotEmpty()) goodCandidates else matching) } // fallback if all excluded
+
         val seed = pool
             .sortedWith(
                 compareByDescending<Movie> { it.personalRating ?: 0.0 }
@@ -276,15 +317,19 @@ class GetHomeFeedUseCase @Inject constructor(
             }.getOrDefault(emptyList())
         }
 
-        val localCompositeIds = localMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        // Quality gate: filter out low-quality or posterless results
+        val qualityData = rawData.filter { movie ->
+            (movie.voteCount ?: 0) >= 50 &&
+            (movie.voteAverage ?: 0.0) >= 5.5 &&
+            movie.posterPath != null
+        }
+
+        val localCompositeIds = localMovies.map { it.compositeId }.toSet()
         val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
-        
-        var results = rawData
+
+        var results = qualityData
             .distinctBy { it.id }
-            .filter { movie ->
-                val compositeId = "${type}_${movie.id}"
-                !localCompositeIds.contains(compositeId)
-            }
+            .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
             .map { it.copy(mediaType = type) }
             .mapNotNull { movie ->
                 val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
@@ -292,13 +337,28 @@ class GetHomeFeedUseCase @Inject constructor(
                     movie.apply { matchScore = score }
                 } else null
             }
-            
-        if (results.isEmpty() && rawData.isNotEmpty()) {
-            results = rawData
+
+        if (results.isEmpty() && qualityData.isNotEmpty()) {
+            // Graceful degradation: 50% threshold before full fallback
+            results = qualityData
                 .distinctBy { it.id }
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
-                .map { movie -> 
+                .map { movie ->
+                    val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
+                    movie.apply { matchScore = score }
+                }
+                .filter { it.matchScore == null || (it.matchScore ?: 0) >= 50 }
+                .sortedByDescending { it.matchScore ?: 0 }
+                .take(10)
+        }
+
+        if (results.isEmpty() && qualityData.isNotEmpty()) {
+            results = qualityData
+                .distinctBy { it.id }
+                .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
+                .map { it.copy(mediaType = type) }
+                .map { movie ->
                     val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                     movie.apply { matchScore = score }
                 }
@@ -307,7 +367,7 @@ class GetHomeFeedUseCase @Inject constructor(
         } else {
             results = results.sortedByDescending { it.matchScore ?: 0 }
         }
-        
+
         val finalList = results.take(15).toImmutableList()
         if (finalList.isEmpty()) return null
         return Pair(seed, finalList)

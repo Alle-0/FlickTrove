@@ -231,7 +231,14 @@ fun PersonBioAndInfoSection(
             color = Color.White.copy(alpha = 0.7f)
         )
 
-        val ageString = getAgeString(person.birthday, person.deathday)
+        val age = calculateAge(person.birthday, person.deathday)
+        val ageString = age?.let {
+            if (!person.deathday.isNullOrBlank()) {
+                stringResource(R.string.person_deceased, it)
+            } else {
+                it.toString()
+            }
+        }
         val aliases = if (person.alsoKnownAs.isNotEmpty()) {
             person.alsoKnownAs.take(2).joinToString(", ")
         } else null
@@ -281,8 +288,7 @@ fun PersonBioAndInfoSection(
     }
 }
 
-@Composable
-fun getAgeString(birthday: String?, deathday: String?): String? {
+fun calculateAge(birthday: String?, deathday: String?): Int? {
     if (birthday.isNullOrBlank()) return null
     return try {
         val birthDate = java.time.LocalDate.parse(birthday)
@@ -291,12 +297,7 @@ fun getAgeString(birthday: String?, deathday: String?): String? {
         } else {
             java.time.LocalDate.now()
         }
-        val age = java.time.Period.between(birthDate, endDate).years
-        if (!deathday.isNullOrBlank()) {
-            stringResource(R.string.person_deceased, age)
-        } else {
-            "$age"
-        }
+        java.time.Period.between(birthDate, endDate).years
     } catch (e: Exception) {
         null
     }

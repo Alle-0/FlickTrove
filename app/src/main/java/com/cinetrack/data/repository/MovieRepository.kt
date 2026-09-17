@@ -1615,18 +1615,40 @@ class MovieRepository @Inject constructor(
 
     suspend fun getNowPlayingMovies(page: Int = 1): List<Movie> = tmdbService.getNowPlayingMovies(page = page, region = getRegionFromPrefs()).results
 
-    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> = tmdbService.getUpcomingMovies(page = page, region = getRegionFromPrefs()).results
+    suspend fun getUpcomingMovies(page: Int = 1): List<Movie> = getRegionalUpcomingMoviesResponse(page).results
 
-    suspend fun getRegionalUpcomingMoviesResponse(page: Int = 1): com.cinetrack.data.api.SearchResponse =
-        tmdbService.getUpcomingMovies(page = page, region = getRegionFromPrefs())
-
-    suspend fun getUpcomingMoviesResponse(page: Int = 1, region: String? = null): com.cinetrack.data.api.SearchResponse =
-        tmdbService.getUpcomingMovies(page = page, region = region)
-
-    suspend fun getGlobalUpcomingMoviesResponse(page: Int = 1, sortBy: String = "primary_release_date.asc"): com.cinetrack.data.api.SearchResponse {
-        val today = java.time.LocalDate.now().toString()
+    suspend fun getRegionalUpcomingMoviesResponse(page: Int = 1): com.cinetrack.data.api.SearchResponse {
+        val today = java.time.LocalDate.now()
+        val nextMonth = today.plusWeeks(6)
         val options = mapOf(
-            "primary_release_date.gte" to today,
+            "primary_release_date.gte" to today.toString(),
+            "primary_release_date.lte" to nextMonth.toString(),
+            "region" to getRegionFromPrefs(),
+            "with_release_type" to "2|3",
+            "sort_by" to "popularity.desc"
+        )
+        return tmdbService.discoverMovies(page = page, options = options)
+    }
+
+    suspend fun getUpcomingMoviesResponse(page: Int = 1, region: String? = null): com.cinetrack.data.api.SearchResponse {
+        val today = java.time.LocalDate.now()
+        val nextMonth = today.plusWeeks(6)
+        val options = mutableMapOf(
+            "primary_release_date.gte" to today.toString(),
+            "primary_release_date.lte" to nextMonth.toString(),
+            "with_release_type" to "2|3",
+            "sort_by" to "popularity.desc"
+        )
+        region?.let { options["region"] = it }
+        return tmdbService.discoverMovies(page = page, options = options)
+    }
+
+    suspend fun getGlobalUpcomingMoviesResponse(page: Int = 1, sortBy: String = "popularity.desc"): com.cinetrack.data.api.SearchResponse {
+        val today = java.time.LocalDate.now()
+        val nextMonth = today.plusWeeks(6)
+        val options = mapOf(
+            "primary_release_date.gte" to today.toString(),
+            "primary_release_date.lte" to nextMonth.toString(),
             "sort_by" to sortBy
         )
         return tmdbService.discoverMovies(page = page, options = options)
@@ -1637,12 +1659,14 @@ class MovieRepository @Inject constructor(
 
     suspend fun getOnTheAirTV(page: Int = 1): List<Movie> = tmdbService.getOnTheAirTV(page = page).results
 
-    suspend fun getUpcomingTV(page: Int = 1, sortBy: String = "first_air_date.asc"): List<Movie> {
+    suspend fun getUpcomingTV(page: Int = 1, sortBy: String = "popularity.desc"): List<Movie> {
         val today = java.time.LocalDate.now()
+        val nextMonth = today.plusWeeks(6)
         return tmdbService.discoverTV(
             page = page,
             options = mapOf(
                 "first_air_date.gte" to today.toString(),
+                "first_air_date.lte" to nextMonth.toString(),
                 "watch_region" to getRegionFromPrefs(),
                 "sort_by" to sortBy
             )

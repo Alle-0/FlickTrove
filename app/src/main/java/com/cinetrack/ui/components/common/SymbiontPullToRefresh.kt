@@ -204,12 +204,15 @@ private fun SymbiontFluidCanvas(
         if (!isDetached || isRetracting) {
             val pull = springPull
             val stretch = pull.coerceIn(0f, 1.15f)
+            val t = stretch.coerceIn(0f, 1f)
 
-            val rBottom = if (isRetracting) {
+            val rBottomRaw = if (isRetracting) {
                 with(density) { (22.dp * pull).toPx() }
             } else {
                 with(density) { (2.dp + 20.dp * stretch.coerceIn(0f, 1f)).toPx() }
             }
+            val rBottom = rBottomRaw.coerceAtLeast(0.1f)
+            
             val rTop = with(density) { (1.8.dp + 2.dp * (1f - stretch * 0.50f)).toPx() }
             val dropY = if (isRetracting) {
                 floatingRestYPx * pull
@@ -217,22 +220,20 @@ private fun SymbiontFluidCanvas(
                 with(density) { (105.dp * stretch).toPx() }
             }
 
-            val t = stretch.coerceIn(0f, 1f)
-
             val alphaTop = (70f - 40f * t) * (Math.PI.toFloat() / 180f)
             val xTop = rTop * kotlin.math.sin(alphaTop)
             val yTop = rTop * kotlin.math.cos(alphaTop)
 
-            val alphaBottom = (65f - 30f * t) * (Math.PI.toFloat() / 180f)
-            val xBottom = rBottom * kotlin.math.sin(alphaBottom)
-            val yBottom = dropY - rBottom * kotlin.math.cos(alphaBottom)
-
-            val waistHalfWidth = (xTop.coerceAtMost(xBottom) * (1f - t * 0.72f))
+            val waistHalfWidth = (xTop.coerceAtMost(rBottom) * (1f - t * 0.72f))
                 .coerceAtLeast(with(density) { 1.2.dp.toPx() })
 
-            val distY = (yBottom - yTop).coerceAtLeast(1f)
-            val vx = (xBottom - waistHalfWidth) * 0.65f
-            val vy = distY * 0.30f
+            val distY = (dropY - yTop).coerceAtLeast(1f)
+            val c1Y = yTop + distY * 0.35f
+            
+            // Pointedness shapes the teardrop: round at t=0, sharp cone at t=1
+            val pointedness = 0.3f + 0.9f * t
+            val c2Y = (dropY - rBottom * pointedness).coerceAtLeast(c1Y + distY * 0.1f)
+            val c1X = centerX + waistHalfWidth * 1.15f
 
             val symbiotePath = Path().apply {
                 // 1. Calotta morbida a soffitto (Y = 0)
@@ -243,62 +244,31 @@ private fun SymbiontFluidCanvas(
                     x3 = centerX + xTop, y3 = yTop
                 )
 
-                // 2. Ponte liquido destro verso la spalla inferiore
+                // 2. Ponte liquido destro (collegamento tangenziale all'equatore della goccia)
                 cubicTo(
-                    x1 = centerX + (xTop * 0.35f + waistHalfWidth * 0.65f),
-                    y1 = yTop + distY * 0.30f,
-                    x2 = (centerX + xBottom) - vx,
-                    y2 = yBottom - vy,
-                    x3 = centerX + xBottom,
-                    y3 = yBottom
+                    x1 = c1X, y1 = c1Y,
+                    x2 = centerX + rBottom, y2 = c2Y,
+                    x3 = centerX + rBottom, y3 = dropY
                 )
 
-                // 3. Raccordo tangenziale collineare alla spalla destra (angolo 0° continuo)
-                cubicTo(
-                    x1 = (centerX + xBottom) + vx * 0.5f,
-                    y1 = yBottom + vy * 0.5f,
-                    x2 = centerX + rBottom,
-                    y2 = dropY - (dropY - yBottom) * 0.35f,
-                    x3 = centerX + rBottom,
-                    y3 = dropY
+                // 3. Fondo arrotondato della sfera (arco perfetto di 180 gradi)
+                arcTo(
+                    rect = Rect(
+                        left = centerX - rBottom,
+                        top = dropY - rBottom,
+                        right = centerX + rBottom,
+                        bottom = dropY + rBottom
+                    ),
+                    startAngleDegrees = 0f,
+                    sweepAngleDegrees = 180f,
+                    forceMoveTo = false
                 )
 
-                // 4. Fondo arrotondato della sfera
+                // 4. Ritorno ponte liquido sinistro verso il soffitto
                 cubicTo(
-                    x1 = centerX + rBottom,
-                    y1 = dropY + rBottom * 0.552f,
-                    x2 = centerX + rBottom * 0.552f,
-                    y2 = dropY + rBottom,
-                    x3 = centerX,
-                    y3 = dropY + rBottom
-                )
-                cubicTo(
-                    x1 = centerX - rBottom * 0.552f,
-                    y1 = dropY + rBottom,
-                    x2 = centerX - rBottom,
-                    y2 = dropY + rBottom * 0.552f,
-                    x3 = centerX - rBottom,
-                    y3 = dropY
-                )
-
-                // 5. Raccordo tangenziale collineare alla spalla sinistra (angolo 0° continuo)
-                cubicTo(
-                    x1 = centerX - rBottom,
-                    y1 = dropY - (dropY - yBottom) * 0.35f,
-                    x2 = (centerX - xBottom) - vx * 0.5f,
-                    y2 = yBottom + vy * 0.5f,
-                    x3 = centerX - xBottom,
-                    y3 = yBottom
-                )
-
-                // 6. Ritorno ponte liquido sinistro verso il soffitto
-                cubicTo(
-                    x1 = (centerX - xBottom) + vx,
-                    y1 = yBottom - vy,
-                    x2 = centerX - (xTop * 0.35f + waistHalfWidth * 0.65f),
-                    y2 = yTop + distY * 0.30f,
-                    x3 = centerX - xTop,
-                    y3 = yTop
+                    x1 = centerX - rBottom, y1 = c2Y,
+                    x2 = centerX - (c1X - centerX), y2 = c1Y,
+                    x3 = centerX - xTop, y3 = yTop
                 )
                 close()
             }

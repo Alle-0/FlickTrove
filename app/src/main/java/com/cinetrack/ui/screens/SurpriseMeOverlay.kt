@@ -293,7 +293,12 @@ fun SurpriseMeOverlay(
                             onBack = { if (step in 1..3) step-- else onClose() },
                             onClose = onClose,
                             onRandomClick = {
-                                onMovieFound(viewModel.getRandomMovie())
+                                scope.launch {
+                                    step = 4
+                                    delay(800)
+                                    val movie = viewModel.getRandomMovie()
+                                    onMovieFound(movie)
+                                }
                             },
                             onEmotionalClick = { step = 1 },
                             onTimeSelect = {
@@ -378,13 +383,6 @@ private fun SurpriseMeContent(
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
-                    ),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = stringResource(R.string.surprise_subtitle),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = Color.White.copy(alpha = 0.7f)
                     ),
                     textAlign = TextAlign.Center
                 )

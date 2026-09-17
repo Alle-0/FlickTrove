@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -35,7 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -104,6 +105,7 @@ fun CategoryTabSelector(
 
         val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
         val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
+        val animDragY = remember { Animatable(0f) }
 
         var isSelectedTabPressed by remember { mutableStateOf(false) }
         var isDragging by remember { mutableStateOf(false) }
@@ -178,8 +180,8 @@ fun CategoryTabSelector(
         // Spring animation for scaling up the indicator when held/pressed or dragged
         val dragScaleY by animateFloatAsState(
             targetValue = if (!advancedEffectsEnabled) 1f
-                else if (isDragging) 1.30f
-                else if (isSelectedTabPressed) 1.10f
+                else if (isDragging) 1.20f
+                else if (isSelectedTabPressed) 1.08f
                 else 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -189,8 +191,8 @@ fun CategoryTabSelector(
         )
         val dragScaleX by animateFloatAsState(
             targetValue = if (!advancedEffectsEnabled) 1f
-                else if (isDragging) 1.06f
-                else if (isSelectedTabPressed) 1.04f
+                else if (isDragging) 1.05f
+                else if (isSelectedTabPressed) 1.02f
                 else 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -209,27 +211,41 @@ fun CategoryTabSelector(
                 .pointerInput(selectedIndex, realTabWidthPx) {
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
-                    detectHorizontalDragGestures(
+                    var dragTargetLeft = 0f
+                    var dragTargetRight = 0f
+                    
+                    var dragTargetY = 0f
+                    
+                    detectDragGestures(
                         onDragStart = { startOffset ->
                             val currentLeft = animLeft.value
                             val currentRight = animRight.value
                             if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
                                 isDragActiveOnPill = true
                                 isDragging = true
+                                dragTargetLeft = currentLeft
+                                dragTargetRight = currentRight
+                                dragTargetY = 0f
                                 coroutineScope.launch {
                                     launch { animLeft.stop() }
                                     launch { animRight.stop() }
+                                    launch { animDragY.stop() }
                                 }
                             } else {
                                 isDragActiveOnPill = false
                             }
                         },
                         onDragEnd = {
-                            if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                            if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
                             val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                            
+                            coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                            }
+                            
                             if (targetIndex != selectedIndex) {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onOptionClick(targetIndex)
@@ -240,49 +256,93 @@ fun CategoryTabSelector(
                                     launch {
                                         animLeft.animateTo(
                                             targetLeft,
-                                            spring(stiffness = 500f, dampingRatio = 0.75f)
+                                            spring(stiffness = 500f, dampingRatio = 0.70f)
                                         )
                                     }
                                     launch {
                                         animRight.animateTo(
                                             targetRight,
-                                            spring(stiffness = 500f, dampingRatio = 0.75f)
+                                            spring(stiffness = 500f, dampingRatio = 0.70f)
                                         )
                                     }
                                 }
                             }
                         },
                         onDragCancel = {
-                            if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                            if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
                             val targetLeft = selectedIndex * realTabWidthPx + paddingPx
                             val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
                             coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
                                 launch {
                                     animLeft.animateTo(
                                         targetLeft,
-                                        spring(stiffness = 500f, dampingRatio = 0.75f)
+                                        spring(stiffness = 500f, dampingRatio = 0.70f)
                                     )
                                 }
                                 launch {
                                     animRight.animateTo(
                                         targetRight,
-                                        spring(stiffness = 500f, dampingRatio = 0.75f)
+                                        spring(stiffness = 500f, dampingRatio = 0.70f)
                                     )
                                 }
                             }
                         }
                     ) { change, dragAmount ->
-                        if (!isDragActiveOnPill) return@detectHorizontalDragGestures
+                        if (!isDragActiveOnPill) return@detectDragGestures
                         isDragging = true
                         change.consume()
+                        
+                        val dragX = dragAmount.x
+                        val dragYDelta = dragAmount.y
+                        
+                        dragTargetLeft += dragX
+                        dragTargetRight += dragX
+                        dragTargetY += dragYDelta
+                        
                         coroutineScope.launch {
                             val maxRight = options.size * realTabWidthPx - paddingPx
-                            val newLeft = (animLeft.value + dragAmount).coerceIn(paddingPx, maxRight - normalWidthPx)
-                            val newRight = newLeft + normalWidthPx
-                            launch { animLeft.snapTo(newLeft) }
-                            launch { animRight.snapTo(newRight) }
+                            val maxLeft = maxRight - normalWidthPx
+                            
+                            var targetLeft = dragTargetLeft
+                            var targetRight = dragTargetRight
+                            
+                            // Effetto squish (schiacciamento) controllato contro i bordi in X
+                            val maxOverscroll = normalWidthPx * 0.8f 
+                            if (dragTargetLeft < paddingPx) {
+                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetLeft = paddingPx - penetration
+                                targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f 
+                            } else if (dragTargetRight > maxRight) {
+                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetRight = maxRight + penetration
+                                targetLeft = maxLeft + overscroll * 0.15f
+                            }
+
+                            // Effetto Jelly + Inerzia
+                            val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
+                            val rightStiffness = if (dragX > 0) 800f else if (dragX < 0) 250f else 600f
+
+                            launch { animDragY.animateTo(dragTargetY, spring(stiffness = 1000f, dampingRatio = 0.7f)) }
+                            
+                            launch { 
+                                animLeft.animateTo(
+                                    targetLeft, 
+                                    spring(stiffness = leftStiffness, dampingRatio = 0.65f)
+                                ) 
+                            }
+                            launch { 
+                                animRight.animateTo(
+                                    targetRight, 
+                                    spring(stiffness = rightStiffness, dampingRatio = 0.65f)
+                                ) 
+                            }
                         }
                     }
                 }
@@ -317,10 +377,10 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val stretch = if (advancedEffectsEnabled && normalWidthPx > 0f) {
-                            ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
-                        } else 0f
-                        val flightEnlargeX = stretch * 0.35f
+                        val volumeConservationY = if (advancedEffectsEnabled && normalWidthPx > 0f) {
+                            val ratio = (normalWidthPx / currentWidth).coerceIn(0.8f, 1.25f)
+                            1f + (ratio - 1f) * 0.6f
+                        } else 1f
 
                         val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
                             val totalDist = flightTargetCenter - flightStartCenter
@@ -330,22 +390,67 @@ fun CategoryTabSelector(
                             } else 0f
                         } else 0f
 
-                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY * volumeConservationY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val maxPillHeight = size.height * 1.45f
-                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
-                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val idealHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = baseHeight * 1.5f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 200f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 200f))
+                        } else 0f
+                        
+                        val idealCenterY = (size.height / 2f) + dragYOffset
+                        val idealTop = idealCenterY - (idealHeight / 2f)
+                        val idealBottom = idealCenterY + (idealHeight / 2f)
+                        
+                        val physicalTopBoundary = paddingPx
+                        val physicalBottomBoundary = size.height - paddingPx
+                        
+                        val extraHeight = (idealHeight - baseHeight).coerceAtLeast(0f)
+                        val adjustedTopBoundary = physicalTopBoundary - (extraHeight / 2f)
+                        val adjustedBottomBoundary = physicalBottomBoundary + (extraHeight / 2f)
+                        
+                        var actualTop = idealTop
+                        var actualBottom = idealBottom
+                        var pillHeight = idealHeight
+                        
+                        val topOvershoot = (adjustedTopBoundary - idealTop).coerceAtLeast(0f)
+                        val bottomOvershoot = (idealBottom - adjustedBottomBoundary).coerceAtLeast(0f)
+                        
+                        if (bottomOvershoot > 0f) {
+                            val maxPenetration = paddingPx * 1.5f
+                            val penetration = maxPenetration * (1f - kotlin.math.exp(-bottomOvershoot / 40f))
+                            actualBottom = adjustedBottomBoundary + penetration
+                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - bottomOvershoot * 0.1f)
+                            actualTop = actualBottom - pillHeight
+                        } else if (topOvershoot > 0f) {
+                            val maxPenetration = paddingPx * 1.5f
+                            val penetration = maxPenetration * (1f - kotlin.math.exp(-topOvershoot / 40f))
+                            actualTop = adjustedTopBoundary - penetration
+                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - topOvershoot * 0.1f)
+                            actualBottom = actualTop + pillHeight
+                        }
+                        
+                        val verticalCompression = (pillHeight / idealHeight).coerceIn(0.1f, 1f)
+                        val cornerRadius = (pillHeight / 2f) * verticalCompression
 
-                        val pillTop = (size.height - pillHeight) / 2f
-                        val pillLeft = centerXPx - (pillWidth / 2f)
+                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val horizontalSquishCompensation = 1f + ((1f / verticalCompression) - 1f) * 0.4f
+                        val finalPillWidth = pillWidth * horizontalSquishCompensation
+                        
+                        val pillTop = actualTop
+                        val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         drawRoundRect(
                             color = primaryColor.copy(alpha = 0.25f),
                             topLeft = Offset(pillLeft, pillTop),
-                            size = Size(pillWidth, pillHeight),
-                            cornerRadius = CornerRadius(pillHeight / 2f, pillHeight / 2f)
+                            size = Size(finalPillWidth, pillHeight),
+                            cornerRadius = CornerRadius(cornerRadius, cornerRadius)
                         )
                     }
                     .drawWithContent {
@@ -354,10 +459,10 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val stretch = if (advancedEffectsEnabled && normalWidthPx > 0f) {
-                            ((currentWidth / normalWidthPx) - 1f).coerceAtLeast(0f)
-                        } else 0f
-                        val flightEnlargeX = stretch * 0.35f
+                        val volumeConservationY = if (advancedEffectsEnabled && normalWidthPx > 0f) {
+                            val ratio = (normalWidthPx / currentWidth).coerceIn(0.8f, 1.25f)
+                            1f + (ratio - 1f) * 0.6f
+                        } else 1f
 
                         val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
                             val totalDist = flightTargetCenter - flightStartCenter
@@ -367,26 +472,71 @@ fun CategoryTabSelector(
                             } else 0f
                         } else 0f
 
-                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + flightEnlargeX) else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
+                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY * volumeConservationY, 1f + flightEnlargeY) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
-                        val maxPillHeight = size.height * 1.45f
-                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f).coerceAtMost(maxPillHeight)
-                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val idealHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = baseHeight * 1.5f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 200f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 200f))
+                        } else 0f
+                        
+                        val idealCenterY = (size.height / 2f) + dragYOffset
+                        val idealTop = idealCenterY - (idealHeight / 2f)
+                        val idealBottom = idealCenterY + (idealHeight / 2f)
+                        
+                        val physicalTopBoundary = paddingPx
+                        val physicalBottomBoundary = size.height - paddingPx
+                        
+                        val extraHeight = (idealHeight - baseHeight).coerceAtLeast(0f)
+                        val adjustedTopBoundary = physicalTopBoundary - (extraHeight / 2f)
+                        val adjustedBottomBoundary = physicalBottomBoundary + (extraHeight / 2f)
+                        
+                        var actualTop = idealTop
+                        var actualBottom = idealBottom
+                        var pillHeight = idealHeight
+                        
+                        val topOvershoot = (adjustedTopBoundary - idealTop).coerceAtLeast(0f)
+                        val bottomOvershoot = (idealBottom - adjustedBottomBoundary).coerceAtLeast(0f)
+                        
+                        if (bottomOvershoot > 0f) {
+                            val maxPenetration = paddingPx * 1.5f
+                            val penetration = maxPenetration * (1f - kotlin.math.exp(-bottomOvershoot / 40f))
+                            actualBottom = adjustedBottomBoundary + penetration
+                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - bottomOvershoot * 0.1f)
+                            actualTop = actualBottom - pillHeight
+                        } else if (topOvershoot > 0f) {
+                            val maxPenetration = paddingPx * 1.5f
+                            val penetration = maxPenetration * (1f - kotlin.math.exp(-topOvershoot / 40f))
+                            actualTop = adjustedTopBoundary - penetration
+                            pillHeight = maxOf(idealHeight * 0.95f, idealHeight - topOvershoot * 0.1f)
+                            actualBottom = actualTop + pillHeight
+                        }
+                        
+                        val verticalCompression = (pillHeight / idealHeight).coerceIn(0.1f, 1f)
+                        val cornerRadius = (pillHeight / 2f) * verticalCompression
 
-                        val pillTop = (size.height - pillHeight) / 2f
-                        val pillLeft = centerXPx - (pillWidth / 2f)
+                        val pillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val horizontalSquishCompensation = 1f + ((1f / verticalCompression) - 1f) * 0.4f
+                        val finalPillWidth = pillWidth * horizontalSquishCompensation
+                        
+                        val pillTop = actualTop
+                        val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         pillPath.reset()
                         pillPath.addRoundRect(
                             RoundRect(
                                 left = pillLeft,
                                 top = pillTop,
-                                right = pillLeft + pillWidth,
+                                right = pillLeft + finalPillWidth,
                                 bottom = pillTop + pillHeight,
-                                radiusX = pillHeight / 2f,
-                                radiusY = pillHeight / 2f
+                                radiusX = cornerRadius,
+                                radiusY = cornerRadius
                             )
                         )
 
@@ -397,11 +547,12 @@ fun CategoryTabSelector(
                     }
             ) {
                 // Active Layer: Rendered only within the pill capsule bounds
+                val activeTextColor = lerp(Color.White, primaryColor, 0.30f)
                 CategoryTabItems(
                     options = options,
                     counts = counts,
-                    textColor = primaryColor,
-                    badgeBgColor = primaryColor.copy(alpha = 0.15f),
+                    textColor = activeTextColor,
+                    badgeBgColor = primaryColor.copy(alpha = 0.5f),
                     realTabWidth = realTabWidth,
                     selectedIndex = selectedIndex,
                     isInteractive = false,

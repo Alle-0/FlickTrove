@@ -100,15 +100,11 @@ class RecommendationsViewModel @Inject constructor(
 
         val watchedCompositeIds = favorites
             .filter { it.watched || !it.watchedEpisodes.isNullOrEmpty() || it.watchedAt != null }
-            .flatMap { movie ->
-                val normType = if (movie.mediaType == "tv") "tv" else "movie"
-                listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
-            }
+            .map { it.compositeId }
             .toSet()
 
         val displayRecommendations = recommended.filter { rec ->
-            val compId = "${mediaType}_${rec.id}"
-            !watchedCompositeIds.contains(compId)
+            !watchedCompositeIds.contains("${mediaType}_${rec.id}")
         }
 
         RecommendationsUiState(
@@ -299,8 +295,19 @@ class RecommendationsViewModel @Inject constructor(
                         .thenByDescending { it.voteAverage ?: 0.0 }
                 ).take(20)
 
-                // Scegliamo 3 seed casuali rigorosamente dai top 20 (evita film scarsi!)
-                val topItems = topPool.shuffled().take(3)
+                // Anchor-based genre diversification:
+                // 1. Best-rated film is the anchor
+                // 2. Pick a second seed with minimal genre overlap with the anchor
+                // 3. Third seed is random from the remainder
+                val anchor = topPool.firstOrNull()
+                val second = if (anchor != null) {
+                    topPool.drop(1).minByOrNull { candidate ->
+                        (candidate.genreIds ?: emptyList()).intersect((anchor.genreIds ?: emptyList()).toSet()).size
+                    }
+                } else null
+                val usedTwo = setOfNotNull(anchor?.id, second?.id)
+                val third = topPool.filter { it.id !in usedTwo }.randomOrNull()
+                val topItems = listOfNotNull(anchor, second, third)
                 currentTopSourceIds = topItems.map { it.id }
             }
 
@@ -314,17 +321,11 @@ class RecommendationsViewModel @Inject constructor(
             // Use compositeId (mediaType_id) to avoid false matches between movies and TV shows with same TMDB numeric id
             val watchedCompositeIds = favorites
                 .filter { it.watched || !it.watchedEpisodes.isNullOrEmpty() || it.watchedAt != null }
-                .flatMap { movie ->
-                    val normType = if (movie.mediaType == "tv") "tv" else "movie"
-                    listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
-                }
+                .map { it.compositeId }
                 .toSet()
 
             val localCompositeIds = favorites
-                .flatMap { movie ->
-                    val normType = if (movie.mediaType == "tv") "tv" else "movie"
-                    listOf("${normType}_${movie.id}", "${movie.mediaType}_${movie.id}")
-                }
+                .map { it.compositeId }
                 .toSet()
 
             val existingIds = _recommendedMovies.value.map { it.id }.toSet()
@@ -339,11 +340,18 @@ class RecommendationsViewModel @Inject constructor(
                             repository.getTVRecommendations(sourceId, page = page)
                         }
                     }
-                }.awaitAll().flatten() // Aspettiamo che finiscano tutte assieme e appiattiamo le liste
+                }.awaitAll().flatten()
+            }
+
+            // Quality gate: filter out low-quality or posterless results
+            val qualityData = rawData.filter { movie ->
+                (movie.voteCount ?: 0) >= 50 &&
+                (movie.voteAverage ?: 0.0) >= 5.5 &&
+                movie.posterPath != null
             }
 
             results.addAll(
-                rawData.filter { movie ->
+                qualityData.filter { movie ->
                     val compositeId = "${type}_${movie.id}"
                     val isWatched = watchedCompositeIds.contains(compositeId)
                     val isHidden = isWatched || (hideSaved && localCompositeIds.contains(compositeId))
@@ -355,24 +363,34 @@ class RecommendationsViewModel @Inject constructor(
                 if (page > 1) _isEndReached.value = true
                 else _recommendedMovies.value = emptyList()
             } else {
-                // 1. Applichiamo il nostro scudo al 65%
+                // 1. Primary filter: 70% match score threshold
                 var newMovies = results.distinctBy { it.id }
                     .filter { movie ->
                         val score = calculateMatchScoreUseCase(movie, favorites)
-                        score == null || score >= 65 
+                        score == null || score >= 70
                     }
-                
-                // 2. IL SALVAVITA: Se il filtro ha ucciso TUTTI i film, mostriamo comunque 
-                // i migliori 10 di questa infornata invece di dare schermo bianco!
+
+                // 2. Graceful degradation: 55% threshold before full fallback
+                if (newMovies.isEmpty() && results.isNotEmpty()) {
+                    newMovies = results.distinctBy { it.id }
+                        .filter { movie ->
+                            val score = calculateMatchScoreUseCase(movie, favorites)
+                            score == null || score >= 55
+                        }
+                        .sortedByDescending { calculateMatchScoreUseCase(it, favorites) ?: 0 }
+                        .take(10)
+                }
+
+                // 3. Full fallback: show best available if all filters too strict
                 if (newMovies.isEmpty() && results.isNotEmpty()) {
                     newMovies = results.distinctBy { it.id }
                         .sortedByDescending { calculateMatchScoreUseCase(it, favorites) ?: 0 }
                         .take(10)
                 }
 
-                // 3. Mescoliamo i sopravvissuti
+                // 4. Shuffle survivors for freshness
                 newMovies = newMovies.shuffled()
-                
+
                 if (isAppend) {
                     _recommendedMovies.value = (_recommendedMovies.value + newMovies).distinctBy { it.id }
                 } else {

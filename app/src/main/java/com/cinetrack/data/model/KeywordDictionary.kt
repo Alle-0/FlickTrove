@@ -151,7 +151,14 @@ object KeywordDictionary {
         "tratto da un film" to 165317L, "fuori dagli schemi" to 315905L, "veicolo spaziale" to 1612L,
         "malinconia" to 4232L, "umorismo per adulti" to 11192L, "futuro remoto" to 11239L,
         "satira sociale" to 11514L, "scomparsa" to 10941L, "figlia scomparsa" to 197430L,
-        "centralinista" to 311029L
+        "centralinista" to 311029L,
+        "corsa contro il tempo" to 4776L, "distorsione temporale" to 1521L, "spedizione" to 1963L,
+        "wormhole" to 3417L, "volo" to 334L, "vichinghi" to 5895L, "battaglia" to 14643L,
+        "guerriero" to 192913L, "remake live action" to 245230L, "nostalgico" to 315310L,
+        "relazione coniugale" to 1157L, "bomba atomica" to 1815L, "patriottismo" to 1627L,
+        "nuovo messico" to 1508L, "test bomba atomica" to 4593L, "universo alternativo" to 245157L,
+        "paraplegico" to 856L, "legame con la natura" to 1534L, "scontro culturale" to 1463L,
+        "indigeni" to 1551L, "colonia spaziale" to 3388L, "tribù" to 10148L, "marine" to 11399L
     )
 
     val englishToTmdbKeywordIds = mapOf(
@@ -302,15 +309,32 @@ object KeywordDictionary {
         "based on movie" to 165317L, "offbeat" to 315905L, "spacecraft" to 1612L,
         "melancholy" to 4232L, "adult humor" to 11192L, "distant future" to 11239L,
         "social satire" to 11514L, "disappearance" to 10941L, "missing daughter" to 197430L,
-        "dispatcher" to 311029L
+        "dispatcher" to 311029L,
+        "race against time" to 4776L, "time warp" to 1521L, "expedition" to 1963L,
+        "wormhole" to 3417L, "flying" to 334L, "vikings (norsemen)" to 5895L, "battle" to 14643L,
+        "warrior" to 192913L, "live action remake" to 245230L, "reminiscent" to 315310L,
+        "husband wife relationship" to 1157L, "atomic bomb" to 1815L, "patriotism" to 1627L,
+        "new mexico" to 1508L, "atomic bomb test" to 4593L, "alternate universe" to 245157L,
+        "paraplegic" to 856L, "attachment to nature" to 1534L, "culture clash" to 1463L,
+        "indigenous" to 1551L, "space colony" to 3388L, "tribe" to 10148L, "marine" to 11399L
     )
 
     fun getDictionaryForLanguage(language: String): Map<String, Long> {
         return if (language.startsWith("it")) italianToTmdbKeywordIds else englishToTmdbKeywordIds
     }
 
-    fun getLocalizedKeywordName(keywordId: Long, language: String): String? {
+    fun getLocalizedKeywordName(keywordId: Long, language: String, fallbackName: String? = null): String? {
         val dict = getDictionaryForLanguage(language)
-        return dict.entries.firstOrNull { it.value == keywordId }?.key
+        val fromId = dict.entries.firstOrNull { it.value == keywordId }?.key
+        if (fromId != null) return fromId
+        if (language.startsWith("it") && fallbackName != null) {
+            val normalized = fallbackName.lowercase().trim()
+            val engId = englishToTmdbKeywordIds[normalized]
+            if (engId != null) {
+                val itName = italianToTmdbKeywordIds.entries.firstOrNull { it.value == engId }?.key
+                if (itName != null) return itName
+            }
+        }
+        return null
     }
 }

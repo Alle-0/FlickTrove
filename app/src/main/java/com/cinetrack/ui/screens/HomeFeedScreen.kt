@@ -996,7 +996,10 @@ fun HomeFeedScreenContent(
                             .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
                     )
                     
-                    val options = listOf("Movies", "TV Series")
+                    val options = listOf(
+                        stringResource(com.cinetrack.R.string.home_tab_movies), 
+                        stringResource(com.cinetrack.R.string.home_tab_tv_series)
+                    )
                     val selectedIndex = if (uiState.activeTab == "movie") 0 else 1
                     
                     CategoryTabSelector(

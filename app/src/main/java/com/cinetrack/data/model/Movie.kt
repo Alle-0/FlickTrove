@@ -394,7 +394,7 @@ data class Movie(
 
     @get:Exclude
     val compositeId: String
-        get() = "${mediaType}_$id"
+        get() = "${if (mediaType.isEmpty()) "movie" else mediaType}_$id"
 
     @get:Exclude
     val displayName: String

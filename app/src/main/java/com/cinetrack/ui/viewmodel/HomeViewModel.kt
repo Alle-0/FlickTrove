@@ -284,16 +284,16 @@ class HomeViewModel @Inject constructor(
         settingsRepository.hideSavedFromDiscovery,
         _boxOfficeWinner
     ) { baseState, feedState, hideSaved, boxOfficeWinner ->
-        val allLocalCompositeIds = baseState.allLocalMovies.map { "${it.mediaType}_${it.id}" }.toSet()
+        val allLocalCompositeIds = baseState.allLocalMovies.map { it.compositeId }.toSet()
         val localCompositeIds = if (hideSaved) allLocalCompositeIds else emptySet()
 
         fun filterList(list: ImmutableList<Movie>): ImmutableList<Movie> {
             if (!hideSaved) return list
-            return list.filter { !localCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
+            return list.filter { !localCompositeIds.contains(it.compositeId) }.toImmutableList()
         }
 
         fun forceFilterRecommendations(list: ImmutableList<Movie>): ImmutableList<Movie> {
-            return list.filter { !allLocalCompositeIds.contains("${it.mediaType}_${it.id}") }.toImmutableList()
+            return list.filter { !allLocalCompositeIds.contains(it.compositeId) }.toImmutableList()
         }
 
         val localTvMap = baseState.allLocalMovies.filter { it.mediaType == "tv" }.associateBy { it.id }
@@ -498,7 +498,7 @@ class HomeViewModel @Inject constructor(
     fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
         viewModelScope.launch {
             try {
-                val compositeId = "${movie.mediaType}_${movie.id}"
+                val compositeId = movie.compositeId
                 val newItemIds = if (folder.itemIds.contains(compositeId)) {
                     folder.itemIds - compositeId
                 } else {

@@ -96,7 +96,7 @@ fun DetailMetaRows(
                 val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
                 keywords.forEachIndexed { index, keyword ->
                     val reverseIndex = keywords.size - 1 - index
-                    val localizedKeyword = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keyword.id, currentLanguage) ?: keyword.name
+                    val localizedKeyword = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keyword.id, currentLanguage, keyword.name) ?: keyword.name
                     AnimatedVisibility(
                         visible = showKeywords,
                         enter = scaleIn(

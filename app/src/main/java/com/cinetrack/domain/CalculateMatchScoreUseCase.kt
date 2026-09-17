@@ -12,7 +12,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
     fun buildUserProfile(localMovies: List<Movie>): UserGenreProfile? {
         val watchedMovies = localMovies.filter { it.watched || it.favorite }
-        if (watchedMovies.size < 5) return null
+        if (watchedMovies.size < 3) return null
 
         val genreScores = mutableMapOf<Long, Float>()
         val genreCounts = mutableMapOf<Long, Int>()
@@ -45,28 +45,43 @@ class CalculateMatchScoreUseCase @Inject constructor() {
     }
 
     fun calculateScore(currentMovie: Movie, profile: UserGenreProfile?): Int? {
+        // 1. Bypass Voto Personale: se l'utente ha già votato il film, la sua valutazione è la verità assoluta
+        val personalRating = currentMovie.personalRating
+        if (personalRating != null && personalRating > 0) {
+            val personalScore = (personalRating * 10f).toInt()
+            return personalScore.coerceIn(10, 99)
+        }
+
         if (profile == null) return null
 
+        // 2. Anti-Diluizione: Max Affinity invece della media aritmetica sui generi
         var matchBonus = 0f
         val currentMovieGenreIds = currentMovie.genres?.map { it.id.toLong() }
             ?: currentMovie.genreIds?.map { it.toLong() }
             ?: emptyList()
 
         if (currentMovieGenreIds.isNotEmpty()) {
-            val avgAffinity = currentMovieGenreIds.sumOf { id ->
-                (profile.genreAffinities[id] ?: 0f).toDouble()
-            } / currentMovieGenreIds.size
+            val maxGenreAffinity = currentMovieGenreIds.maxOfOrNull { id ->
+                profile.genreAffinities[id] ?: 0f
+            } ?: 0f
 
-            matchBonus = ((avgAffinity / profile.maxAffinity) * 40f).toFloat()
+            if (maxGenreAffinity > 0f) {
+                matchBonus = ((maxGenreAffinity / profile.maxAffinity) * 50f).coerceIn(0f, 50f)
+            }
         }
 
+        // 3. Bilanciamento 50/50: 50 punti da TMDB (normalizzato su 8.5 max) + 50 punti dall'affinità personale
         val tmdbRating = currentMovie.voteAverage ?: 0.0
-        val baseScore = 40f + (tmdbRating / 10f) * 20f
+        val baseScore = ((tmdbRating / 8.5f) * 50f).toFloat().coerceAtMost(50f)
         val finalScore = (baseScore + matchBonus).toInt()
         return finalScore.coerceIn(10, 99)
     }
 
     operator fun invoke(currentMovie: Movie, localMovies: List<Movie>): Int? {
+        val personalRating = currentMovie.personalRating
+        if (personalRating != null && personalRating > 0) {
+            return (personalRating * 10f).toInt().coerceIn(10, 99)
+        }
         val profile = buildUserProfile(localMovies) ?: return null
         return calculateScore(currentMovie, profile)
     }
