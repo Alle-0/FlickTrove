@@ -509,6 +509,9 @@
     <string name="person_read_more">展开更多</string>
     <string name="person_no_bio">暂无生平信息。</string>
     <string name="person_birthday">生日</string>
+    <string name="person_age">年龄</string>
+    <string name="person_deceased">%d (已故)</string>
+    <string name="person_alias">别名</string>
     <string name="person_birth_place">出生地</string>
     <string name="person_known_for">代表领域</string>
     <string name="person_popularity">热度</string>

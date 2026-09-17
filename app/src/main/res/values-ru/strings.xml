@@ -438,6 +438,9 @@
     <string name="person_read_more">ЧИТАТЬ ДАЛЕЕ</string>
     <string name="person_no_bio">Биография отсутствует.</string>
     <string name="person_birthday">ДАТА РОЖДЕНИЯ</string>
+    <string name="person_age">ВОЗРАСТ</string>
+    <string name="person_deceased">%d (Умер)</string>
+    <string name="person_alias">ПСЕВДОНИМ</string>
     <string name="person_birth_place">МЕСТО РОЖДЕНИЯ</string>
     <string name="person_known_for">ИЗВЕСТЕН(НА) ПО</string>
     <string name="person_popularity">ПОПУЛЯРНОСТЬ</string>

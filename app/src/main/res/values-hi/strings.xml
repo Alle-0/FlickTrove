@@ -436,6 +436,9 @@
     <string name="person_read_more">और पढ़ें</string>
     <string name="person_no_bio">कोई जीवनी उपलब्ध नहीं है।</string>
     <string name="person_birthday">जन्मदिन</string>
+    <string name="person_age">आयु</string>
+    <string name="person_deceased">%d (मृत)</string>
+    <string name="person_alias">उपनाम</string>
     <string name="person_birth_place">जन्म स्थान</string>
     <string name="person_known_for">इसके लिए प्रसिद्ध</string>
     <string name="person_popularity">लोकप्रियता</string>

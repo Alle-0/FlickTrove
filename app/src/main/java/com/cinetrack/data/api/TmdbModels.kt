@@ -111,6 +111,8 @@ data class Person(
     @SerialName("known_for_department") val knownForDepartment: String? = null,
     val biography: String? = null,
     val birthday: String? = null,
+    val deathday: String? = null,
+    @SerialName("also_known_as") val alsoKnownAs: List<String> = emptyList(),
     @SerialName("place_of_birth") val placeOfBirth: String? = null,
     val popularity: Double? = null,
     @SerialName("accent_color") val accentColor: String? = null,

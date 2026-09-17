@@ -509,6 +509,9 @@
     <string name="person_read_more">BACA SELENGKAPNYA</string>
     <string name="person_no_bio">Biografi tidak tersedia.</string>
     <string name="person_birthday">TANGGAL LAHIR</string>
+    <string name="person_age">UMUR</string>
+    <string name="person_deceased">%d (Meninggal)</string>
+    <string name="person_alias">ALIAS</string>
     <string name="person_birth_place">TEMPAT LAHIR</string>
     <string name="person_known_for">DIKENAL KARENA</string>
     <string name="person_popularity">POPULARITAS</string>

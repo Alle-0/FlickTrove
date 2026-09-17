@@ -433,6 +433,9 @@
     <string name="person_read_more">MEHR LESEN</string>
     <string name="person_no_bio">Keine Biografie verfügbar.</string>
     <string name="person_birthday">GEBURTSTAG</string>
+    <string name="person_age">ALTER</string>
+    <string name="person_deceased">%d (Verstorben)</string>
+    <string name="person_alias">ALIAS</string>
     <string name="person_birth_place">GEBURTSORT</string>
     <string name="person_known_for">BEKANNT FÜR</string>
     <string name="person_popularity">BELIEBTHEIT</string>

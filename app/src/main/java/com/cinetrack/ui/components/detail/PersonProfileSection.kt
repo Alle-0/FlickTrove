@@ -231,15 +231,27 @@ fun PersonBioAndInfoSection(
             color = Color.White.copy(alpha = 0.7f)
         )
 
+        val ageString = getAgeString(person.birthday, person.deathday)
+        val aliases = if (person.alsoKnownAs.isNotEmpty()) {
+            person.alsoKnownAs.take(2).joinToString(", ")
+        } else null
+
         Spacer(modifier = Modifier.height(30.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.weight(1f)) {
                 PersonInfoItem(
-                    ImageVector.vectorResource(id = R.drawable.ic_star),
+                    ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     stringResource(R.string.person_birthday),
                     person.birthday ?: stringResource(R.string.person_nd)
                 )
+                if (ageString != null) {
+                    PersonInfoItem(
+                        ImageVector.vectorResource(id = R.drawable.ic_clock),
+                        stringResource(R.string.person_age),
+                        ageString
+                    )
+                }
                 PersonInfoItem(
                     ImageVector.vectorResource(id = R.drawable.ic_partenone),
                     stringResource(R.string.person_birth_place),
@@ -257,8 +269,36 @@ fun PersonBioAndInfoSection(
                     stringResource(R.string.person_popularity),
                     person.popularity?.let { "%.1f".format(it) } ?: stringResource(R.string.person_nd)
                 )
+                if (aliases != null) {
+                    PersonInfoItem(
+                        ImageVector.vectorResource(id = R.drawable.ic_persona),
+                        stringResource(R.string.person_alias),
+                        aliases
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun getAgeString(birthday: String?, deathday: String?): String? {
+    if (birthday.isNullOrBlank()) return null
+    return try {
+        val birthDate = java.time.LocalDate.parse(birthday)
+        val endDate = if (!deathday.isNullOrBlank()) {
+            java.time.LocalDate.parse(deathday)
+        } else {
+            java.time.LocalDate.now()
+        }
+        val age = java.time.Period.between(birthDate, endDate).years
+        if (!deathday.isNullOrBlank()) {
+            stringResource(R.string.person_deceased, age)
+        } else {
+            "$age"
+        }
+    } catch (e: Exception) {
+        null
     }
 }
 

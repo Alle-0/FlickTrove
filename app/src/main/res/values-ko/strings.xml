@@ -509,6 +509,9 @@
     <string name="person_read_more">더보기</string>
     <string name="person_no_bio">등록된 바이오그래피가 없습니다.</string>
     <string name="person_birthday">출생일</string>
+    <string name="person_age">나이</string>
+    <string name="person_deceased">%d (고인)</string>
+    <string name="person_alias">별칭</string>
     <string name="person_birth_place">출생지</string>
     <string name="person_known_for">대표 분야</string>
     <string name="person_popularity">인기도</string>

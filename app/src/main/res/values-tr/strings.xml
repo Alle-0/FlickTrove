@@ -509,6 +509,9 @@
     <string name="person_read_more">DAHA FAZLA OKU</string>
     <string name="person_no_bio">Biyografi bulunmuyor.</string>
     <string name="person_birthday">DOĞUM TARİHİ</string>
+    <string name="person_age">YAŞ</string>
+    <string name="person_deceased">%d (Vefat Etti)</string>
+    <string name="person_alias">ALIAS</string>
     <string name="person_birth_place">DOĞUM YERİ</string>
     <string name="person_known_for">BİLİNEN ALANI</string>
     <string name="person_popularity">POPÜLERLİK</string>

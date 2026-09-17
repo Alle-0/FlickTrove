@@ -48,6 +48,7 @@ fun PersonHighlightsRow(
     modifier: Modifier = Modifier
 ) {
     if (knownFor.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = stringResource(R.string.person_highlights),
             color = Color.White,

@@ -510,6 +510,9 @@
     <string name="person_read_more">READ MORE</string>
     <string name="person_no_bio">No biography available.</string>
     <string name="person_birthday">BIRTHDAY</string>
+    <string name="person_age">AGE</string>
+    <string name="person_deceased">%d (Deceased)</string>
+    <string name="person_alias">ALIAS</string>
     <string name="person_birth_place">PLACE OF BIRTH</string>
     <string name="person_known_for">KNOWN FOR</string>
     <string name="person_popularity">POPULARITY</string>
