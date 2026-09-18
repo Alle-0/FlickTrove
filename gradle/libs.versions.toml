@@ -39,6 +39,7 @@ googleid = "1.1.1"
 profileinstaller = "1.4.1"
 
 [libraries]
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 liquid = { group = "io.github.fletchmckee.liquid", name = "liquid", version.ref = "liquid" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haZe" }

@@ -7,6 +7,10 @@ import com.cinetrack.data.local.dao.WatchHistoryDao
 import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.data.model.BackupData
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.repository.importers.BingersImporter
+import com.cinetrack.data.repository.importers.MovieParadiseImporter
+import com.cinetrack.data.repository.importers.RefractImporter
+import com.cinetrack.data.repository.importers.SofaImporter
 import com.cinetrack.data.repository.importers.TraktJsonImporter
 import com.cinetrack.data.repository.importers.TraktZipImporter
 import com.cinetrack.data.repository.importers.TvTimeGdprImporter
@@ -35,6 +39,10 @@ class BackupRepository @Inject constructor(
     private val traktZipImporter: TraktZipImporter,
     private val universalCsvImporter: UniversalCsvImporter,
     private val tvTimeGdprImporter: TvTimeGdprImporter,
+    private val movieParadiseImporter: MovieParadiseImporter,
+    private val bingersImporter: BingersImporter,
+    private val sofaImporter: SofaImporter,
+    private val refractImporter: RefractImporter,
     private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -139,12 +147,32 @@ class BackupRepository @Inject constructor(
         inputStream: InputStream,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> },
         fileName: String? = null
-    ): Int = traktJsonImporter.migrateTraktStream(
-        inputStream = inputStream,
-        onProgress = onProgress,
-        fileName = fileName
-    ) { items, cb ->
-        processAndSaveImportedItems(items, cb)
+    ): Int {
+        val bytes = inputStream.readBytes()
+        val text = bytes.decodeToString()
+        if (movieParadiseImporter.isMovieParadiseJson(text)) {
+            return movieParadiseImporter.migrateJsonStream(
+                inputStream = java.io.ByteArrayInputStream(bytes),
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+        if (refractImporter.isRefractJson(text)) {
+            return refractImporter.migrateRefractJson(
+                inputStream = java.io.ByteArrayInputStream(bytes),
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+        return traktJsonImporter.migrateTraktStream(
+            inputStream = java.io.ByteArrayInputStream(bytes),
+            onProgress = onProgress,
+            fileName = fileName
+        ) { items, cb ->
+            processAndSaveImportedItems(items, cb)
+        }
     }
 
     private suspend fun migrateTvTimeGdprZip(
@@ -197,6 +225,46 @@ class BackupRepository @Inject constructor(
         if (traktZipImporter.isTraktExport(zipEntries.keys)) {
             return@withContext traktZipImporter.import(zipEntries) { items ->
                 processAndSaveImportedItems(items, onProgress)
+            }
+        }
+
+        // Dedicated Movie Paradise export handler: processes JSON tree with TMDB IDs and custom lists
+        if (movieParadiseImporter.isMovieParadiseZip(zipEntries)) {
+            return@withContext movieParadiseImporter.migrateMovieParadiseZip(
+                zipEntries = zipEntries,
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+
+        // Dedicated Bingers export handler: processes library, watches, ratings, lists CSVs
+        if (bingersImporter.isBingersZip(zipEntries)) {
+            return@withContext bingersImporter.migrateBingersZip(
+                zipEntries = zipEntries,
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+
+        // Dedicated Sofa / Sofa Time export handler: processes items.csv with api_source == tmdb
+        if (sofaImporter.isSofaZip(zipEntries)) {
+            return@withContext sofaImporter.migrateSofaZip(
+                zipEntries = zipEntries,
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+
+        // Dedicated Refract export handler: processes series.csv, episodes.csv, movies.csv
+        if (refractImporter.isRefractZip(zipEntries)) {
+            return@withContext refractImporter.migrateRefractZip(
+                zipEntries = zipEntries,
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
             }
         }
 

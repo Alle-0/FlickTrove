@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.channels.awaitClose
 import com.cinetrack.worker.TraktInstantWriteWorker
 import com.cinetrack.worker.SimklInstantWriteWorker
+import com.cinetrack.data.repository.importers.MovieLookupService
 
 @Singleton
 class MovieRepository @Inject constructor(
@@ -71,7 +72,7 @@ class MovieRepository @Inject constructor(
     @Named("trakt_api_key") private val traktApiKey: String,
     private val widgetNotifier: com.cinetrack.domain.WidgetNotifier,
     @ApplicationContext private val context: Context
-) {
+) : MovieLookupService {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -1355,7 +1356,7 @@ class MovieRepository @Inject constructor(
         return results.firstOrNull()
     }
     
-    suspend fun searchMediaWithYear(query: String, year: String?, isTv: Boolean = false): Movie? {
+    override suspend fun searchMediaWithYear(query: String, year: String?, isTv: Boolean): Movie? {
         val cleanQuery = query.trim()
         val cleanYear = year?.trim()?.takeIf { it.isNotBlank() }
         if (isTv) {
@@ -1406,7 +1407,7 @@ class MovieRepository @Inject constructor(
         }
     }
     
-    suspend fun findByImdbId(imdbId: String): Movie? {
+    override suspend fun findByImdbId(imdbId: String): Movie? {
         val response = tmdbService.findByExternalId(imdbId, "imdb_id")
         val movieRes = response.movieResults?.firstOrNull()
         if (movieRes != null) {
@@ -1439,7 +1440,7 @@ class MovieRepository @Inject constructor(
         return null
     }
 
-    suspend fun findByTvdbId(tvdbId: String): Movie? {
+    override suspend fun findByTvdbId(tvdbId: String): Movie? {
         val response = tmdbService.findByExternalId(tvdbId, "tvdb_id")
         val tvRes = response.tvResults?.firstOrNull()
         if (tvRes != null) {

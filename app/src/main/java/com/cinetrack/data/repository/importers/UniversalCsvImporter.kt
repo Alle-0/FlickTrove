@@ -11,9 +11,10 @@ import kotlinx.coroutines.withContext
 import java.io.InputStream
 import javax.inject.Inject
 
-class UniversalCsvImporter @Inject constructor(
-    private val movieRepository: MovieRepository
+class UniversalCsvImporter(
+    private val movieLookup: MovieLookupService
 ) {
+    @Inject constructor(movieRepository: MovieRepository) : this(movieRepository as MovieLookupService)
     suspend fun migrateCsvStream(
         inputStream: InputStream,
         onProgress: suspend (Int, Int) -> Unit = { _, _ -> },
@@ -29,7 +30,7 @@ class UniversalCsvImporter @Inject constructor(
             val lowerHeaders = headers.map { it.trim().lowercase() }
 
             // Common Headers
-            val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst") }
+            val imdbIdx = lowerHeaders.indexOfFirst { it in listOf("const", "imdb id", "imdb_id", "imdbid", "imdb", "id", "title_id", "imdb_uri", "tconst", "series_imdb_id") }
             val titleIdx = lowerHeaders.indexOfFirst { it in listOf("title", "name", "movie title", "show name", "film", "series", "show_name", "movie_name", "item_name", "movie", "show", "original title", "show title", "episode title", "original_title", "show_title", "tv_show_name", "series_name") }
             val letterboxdUriIdx = lowerHeaders.indexOfFirst { it == "letterboxd uri" }
             val yearIdx = lowerHeaders.indexOfFirst { it in listOf("year", "release year", "release_year", "date_released", "date released", "release date") }
@@ -47,17 +48,22 @@ class UniversalCsvImporter @Inject constructor(
             val favIdx = lowerHeaders.indexOfFirst { it in listOf("favorite", "is_favorite", "fav", "starred", "liked") }
             val seasonIdx = lowerHeaders.indexOfFirst { it in listOf("season", "season number", "season_number", "s", "season_num") }
             val episodeIdx = lowerHeaders.indexOfFirst { it in listOf("episode", "episode number", "episode_number", "e", "episode_num", "ep") }
-            val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection", "list_type", "custom_list") }
+            val folderIdx = lowerHeaders.indexOfFirst { it in listOf("folder", "list", "list name", "list_name", "tag", "playlist", "collection", "list_type", "custom_list", "list_title", "list title", "section") }
             val mvpIdx = lowerHeaders.indexOfFirst { it in listOf("mvp", "best character", "best_character", "favorite character", "favorite_character", "fav_character", "fav character", "favorite actor", "favorite_actor", "fav actor", "fav_actor") }
             val vibesIdx = lowerHeaders.indexOfFirst { it in listOf("vibes", "emotional_vibes", "emotional vibes", "tags", "mood") }
+            val categoryIdx = lowerHeaders.indexOfFirst { it in listOf("category", "category_name") }
             
-            // Yamtrack-specific Headers
+            // Yamtrack & Sofa API Source Headers
             val yamtrackMediaIdIdx = lowerHeaders.indexOfFirst { it == "media_id" }
-            val yamtrackSourceIdx  = lowerHeaders.indexOfFirst { it == "source" }
+            val apiSourceIdx = lowerHeaders.indexOfFirst { it in listOf("api_source", "api source", "source") }
+            val apiIdIdx = lowerHeaders.indexOfFirst { it in listOf("api_id", "api id") }
 
-            // Universal TMDB ID - prioritize Yamtrack's `media_id` if present
-            val tmdbIdx = if (yamtrackMediaIdIdx != -1) yamtrackMediaIdIdx 
-                          else lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid", "tv_show_id", "s_id", "id_show") }
+            // Universal TMDB ID - prioritize Yamtrack's `media_id` or Sofa's `api_id` (if source == tmdb)
+            val tmdbIdx = when {
+                yamtrackMediaIdIdx != -1 -> yamtrackMediaIdIdx
+                apiIdIdx != -1 -> apiIdIdx
+                else -> lowerHeaders.indexOfFirst { it in listOf("tmdb id", "tmdb_id", "tmdbid", "tmdb", "movie_id", "show_id", "id_movie", "movieid", "tv_show_id", "s_id", "id_show") }
+            }
             
             val isYamtrack = yamtrackMediaIdIdx != -1
             
@@ -73,9 +79,16 @@ class UniversalCsvImporter @Inject constructor(
                     val columns = parseCsvLine(line)
                     if (columns.isEmpty()) return@mapNotNull null
                     
-                    if (isYamtrack) {
-                        val source = if (yamtrackSourceIdx != -1 && columns.size > yamtrackSourceIdx) columns[yamtrackSourceIdx].trim().lowercase() else ""
-                        if (source.isNotBlank() && source != "tmdb") return@mapNotNull null
+                    if (apiSourceIdx != -1 && columns.size > apiSourceIdx) {
+                        val src = columns[apiSourceIdx].trim().lowercase()
+                        if (src.isNotBlank() && src != "tmdb") return@mapNotNull null
+                    }
+                    
+                    if (categoryIdx != -1 && columns.size > categoryIdx) {
+                        val cat = columns[categoryIdx].trim().lowercase()
+                        val isMovie = cat.contains("movie") || cat.contains("film")
+                        val isTv = cat.contains("tv") || cat.contains("show") || cat.contains("series")
+                        if (!isMovie && !isTv && cat.isNotBlank()) return@mapNotNull null
                     }
                     
                     val imdbVal = if (imdbIdx != -1 && columns.size > imdbIdx) columns[imdbIdx] 
@@ -148,7 +161,7 @@ class UniversalCsvImporter @Inject constructor(
                     async {
                         try {
                             if (!imdbVal.isNullOrBlank() && imdbVal.trim().startsWith("tt")) {
-                                val tmdbMovie = movieRepository.findByImdbId(imdbVal.trim())
+                                val tmdbMovie = movieLookup.findByImdbId(imdbVal.trim())
                                 tmdbMovie?.let {
                                     val mediaType = if (epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || it.mediaType == "tv") "tv" else "movie"
                                     val m = Movie(
@@ -196,7 +209,7 @@ class UniversalCsvImporter @Inject constructor(
                                 Pair(m, folderVal)
                             } else if (!titleVal.isNullOrBlank()) {
                                 val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true) || lowerHeaders.any { it == "tv_show_name" || it == "series_name" || it == "tv_show_id" || it == "s_id" || it == "id_show" }
-                                val tmdbMovie = movieRepository.searchMediaWithYear(titleVal.trim(), yearVal?.trim(), isTv = isTvMedia)
+                                val tmdbMovie = movieLookup.searchMediaWithYear(titleVal.trim(), yearVal?.trim(), isTv = isTvMedia)
                                 tmdbMovie?.let {
                                     val mediaType = if (epsMap != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")
                                     val m = Movie(
