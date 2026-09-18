@@ -74,7 +74,8 @@ fun DeleteAccountDialog(
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
@@ -167,7 +168,8 @@ fun ReauthDeleteAccountDialog(
             Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
@@ -228,7 +230,8 @@ fun ClearCacheConfirmDialog(
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
@@ -288,7 +291,8 @@ fun DeepSyncConfirmDialog(
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
@@ -443,7 +447,8 @@ fun WipeDataConfirmDialog(
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
@@ -502,7 +507,8 @@ fun LogoutConfirmDialog(
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),

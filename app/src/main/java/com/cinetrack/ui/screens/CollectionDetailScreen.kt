@@ -228,6 +228,7 @@ fun CollectionDetailScreenContent(
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     DetailBackdrop(
+                        scrollState = scrollState,
                         backdropPath = collection?.backdropPath ?: collection?.posterPath,
                         posterPath = collection?.posterPath,
                         accentColor = globalAccentColor,

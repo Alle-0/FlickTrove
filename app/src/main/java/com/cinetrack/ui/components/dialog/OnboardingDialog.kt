@@ -113,7 +113,7 @@ fun OnboardingDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(28.dp))
+                .clip(RoundedCornerShape(32.dp))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -121,7 +121,7 @@ fun OnboardingDialog(
                 )
                 .hazeGlass(
                     state = hazeState,
-                    shape = RoundedCornerShape(28.dp)
+                    shape = RoundedCornerShape(32.dp)
                 )
                 .border(
                     1.dp,
@@ -131,7 +131,7 @@ fun OnboardingDialog(
                             Color.White.copy(alpha = 0.05f)
                         )
                     ),
-                    RoundedCornerShape(28.dp)
+                    RoundedCornerShape(32.dp)
                 )
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -147,14 +147,14 @@ fun OnboardingDialog(
                             Box(
                                 modifier = Modifier
                                     .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                                     .bounceClick {
                                         coroutineScope.launch {
                                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                         }
-                                    },
+                                    }
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -176,8 +176,8 @@ fun OnboardingDialog(
                                 color = Color.White.copy(alpha = 0.6f)
                             ),
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
                                 .bounceClick { onDismiss() }
+                                .clip(CircleShape)
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -284,16 +284,23 @@ fun OnboardingDialog(
                             )
                             Box(
                                 modifier = Modifier
-                                    .height(8.dp)
-                                    .width(animatedWidth)
-                                    .clip(CircleShape)
-                                    .background(animatedColor)
-                                    .clickable {
+                                    .height(20.dp)
+                                    .width(animatedWidth + 10.dp)
+                                    .bounceClick {
                                         coroutineScope.launch {
                                             pagerState.animateScrollToPage(index)
                                         }
-                                    }
-                            )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(8.dp)
+                                        .width(animatedWidth)
+                                        .clip(CircleShape)
+                                        .background(animatedColor)
+                                )
+                            }
                         }
                     }
 
@@ -305,8 +312,6 @@ fun OnboardingDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(accentColor)
                             .bounceClick {
                                 if (isLastPage) {
                                     onDismiss()
@@ -315,7 +320,9 @@ fun OnboardingDialog(
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                     }
                                 }
-                            },
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(accentColor),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(

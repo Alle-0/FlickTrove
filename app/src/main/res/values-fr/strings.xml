@@ -296,7 +296,7 @@
     <string name="avatar_selection_tv_show">Série TV</string>
     <string name="settings_export_backup">Exporter la sauvegarde</string>
     <string name="settings_restore_backup">Restaurer la sauvegarde</string>
-    <string name="settings_select_file">Sélectionner un fichier (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">Sélectionner un fichier</string>
     <string name="settings_send_message">Envoyer le message</string>
     <string name="settings_interface_color">Couleur de l\'interface</string>
     <string name="settings_custom">Personnalisé</string>
@@ -484,6 +484,10 @@
     <string name="search_fallback_keyword">Sélectionné</string>
     <string name="search_active_keyword_format">Thème : %1$s</string>
     <string name="search_placeholder">Rechercher des films, séries, personnes...</string>
+    <string name="search_placeholder_movie">Rechercher des films...</string>
+    <string name="search_placeholder_tv">Rechercher des séries...</string>
+    <string name="search_placeholder_person">Rechercher des personnes...</string>
+    <string name="search_placeholder_collection">Rechercher des collections...</string>
     <string name="search_content_desc_clear">Effacer</string>
     <string name="search_content_desc_layout">Changer de disposition</string>
     <string name="search_keyword_filter_warning">Remarque : le filtre par mot-clé est ignoré dans la recherche textuelle.</string>
@@ -1248,5 +1252,17 @@
     <string name="detail_read_more">Lire plus</string>
     <string name="detail_read_less">Lire moins</string>
     <string name="comment_anonymous_user">Utilisateur anonyme</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">Ajout récent</string>
+    <string name="flow_filter_sort_watch_date">Date de visionnage</string>
+    <string name="flow_filter_sort_rating">Note personnelle</string>
+    <string name="flow_filter_section_vibe">VIBE ÉMOTIONNEL</string>
+    <string name="flow_filter_all_vibes">Tous les Vibes</string>
+    <string name="flow_filter_section_media">TYPE DE CONTENU</string>
+    <string name="flow_filter_media_all">Tous</string>
+    <string name="flow_filter_media_movies">Films</string>
+    <string name="flow_filter_media_tv">Séries TV</string>
+    <string name="flow_filter_reset">Réinitialiser</string>
 </resources>
 

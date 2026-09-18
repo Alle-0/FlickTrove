@@ -3,6 +3,7 @@ package com.cinetrack.ui.screens
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,16 +14,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
@@ -95,24 +99,42 @@ object FlowTab : Tab {
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 80.dp)) {
                                     Icon(
-                                        painter = androidx.compose.ui.res.painterResource(id = com.cinetrack.R.drawable.ic_sparkle),
+                                        painter = androidx.compose.ui.res.painterResource(id = if (flowUiState.filterConfig.hasActiveFilters) com.cinetrack.R.drawable.ic_filtri else com.cinetrack.R.drawable.ic_sparkle),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.5f),
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = stringResource(R.string.flow_empty_title),
+                                        text = if (flowUiState.filterConfig.hasActiveFilters) stringResource(R.string.search_no_results) else stringResource(R.string.flow_empty_title),
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                         color = Color.White
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = stringResource(R.string.flow_empty_desc),
+                                        text = if (flowUiState.filterConfig.hasActiveFilters) stringResource(R.string.search_no_results_simplify) else stringResource(R.string.flow_empty_desc),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.White.copy(alpha = 0.6f),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                     )
+                                    if (flowUiState.filterConfig.hasActiveFilters) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .bounceClick { viewModel?.resetFilters() }
+                                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                                .border(1.dp, MaterialTheme.colorScheme.primary, androidx.compose.foundation.shape.CircleShape)
+                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.flow_filter_reset),
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         } else {

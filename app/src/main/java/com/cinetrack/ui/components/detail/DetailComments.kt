@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
@@ -109,9 +110,9 @@ fun DetailComments(
                 color = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier
                     .bounceClick { onOpenThread(true) }
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(CircleShape)
                     .background(accentColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
             )
         }
 

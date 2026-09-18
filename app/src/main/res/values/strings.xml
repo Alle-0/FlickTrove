@@ -309,7 +309,7 @@
     <string name="avatar_selection_tv_show">TV Show</string>
     <string name="settings_export_backup">Export Backup</string>
     <string name="settings_restore_backup">Restore Backup</string>
-    <string name="settings_select_file">Select file (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">Select File</string>
     <string name="settings_send_message">Send Message</string>
     <string name="settings_interface_color">Interface Color</string>
     <string name="settings_custom">Custom</string>
@@ -561,6 +561,10 @@
     <string name="search_fallback_keyword">Selected</string>
     <string name="search_active_keyword_format">Theme: %1$s</string>
     <string name="search_placeholder">Search movies, TV shows, people...</string>
+    <string name="search_placeholder_movie">Search movies...</string>
+    <string name="search_placeholder_tv">Search TV shows...</string>
+    <string name="search_placeholder_person">Search people...</string>
+    <string name="search_placeholder_collection">Search collections...</string>
     <string name="search_content_desc_clear">Clear</string>
     <string name="search_content_desc_layout">Change Layout</string>
     <string name="search_keyword_filter_warning">Note: the keyword filter is ignored in text search.</string>
@@ -1317,4 +1321,16 @@
     <string name="box_office_error">Unable to load Box Office data. Pull down to retry.</string>
     <string name="box_office_filter_all_years">All Years</string>
     <string name="box_office_banner_subtitle">Weekend &amp; All-Time Rankings</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">Recent Check-in</string>
+    <string name="flow_filter_sort_watch_date">Watch Date</string>
+    <string name="flow_filter_sort_rating">Personal Rating</string>
+    <string name="flow_filter_section_vibe">EMOTIONAL VIBE</string>
+    <string name="flow_filter_all_vibes">All Vibes</string>
+    <string name="flow_filter_section_media">MEDIA TYPE</string>
+    <string name="flow_filter_media_all">All</string>
+    <string name="flow_filter_media_movies">Movies</string>
+    <string name="flow_filter_media_tv">TV Shows</string>
+    <string name="flow_filter_reset">Reset</string>
 </resources>

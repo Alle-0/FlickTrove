@@ -191,7 +191,6 @@ fun SearchHeader(
                                 decorationBox = { innerTextField ->
                                     Box(contentAlignment = Alignment.CenterStart) {
                                         if (query.isEmpty()) {
-                                            val hasLayoutButton = preferences.showLayoutToggle && category != "person" && category != "collection"
                                             val placeholderText = when {
                                                 sortConfig.selectedGenres.isNotEmpty() -> {
                                                     val gid = sortConfig.selectedGenres.first()
@@ -210,13 +209,18 @@ fun SearchHeader(
                                                         ?: stringResource(R.string.search_fallback_keyword)
                                                     stringResource(R.string.search_active_keyword_format, name)
                                                 }
-                                                else -> stringResource(R.string.search_placeholder)
+                                                else -> when (category) {
+                                                    "tv" -> stringResource(R.string.search_placeholder_tv)
+                                                    "person" -> stringResource(R.string.search_placeholder_person)
+                                                    "collection" -> stringResource(R.string.search_placeholder_collection)
+                                                    else -> stringResource(R.string.search_placeholder_movie)
+                                                }
                                             }
                                             val hasActiveFilter = sortConfig.selectedGenres.isNotEmpty() || sortConfig.selectedKeywords.isNotEmpty()
                                             Text(
                                                 text = placeholderText,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f),
-                                                fontSize = if (hasLayoutButton) 12.sp else 14.sp,
+                                                fontSize = 14.sp,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )

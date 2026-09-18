@@ -250,9 +250,9 @@ class GetHomeFeedUseCase @Inject constructor(
                 } else null
             }
 
-        if (results.isEmpty() && qualityData.isNotEmpty()) {
+        val sortedResults = if (results.isEmpty() && qualityData.isNotEmpty()) {
             // Graceful degradation: try 55% threshold before full fallback
-            results = qualityData
+            val degraded = qualityData
                 .distinctBy { it.id }
                 .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
                 .map { it.copy(mediaType = type) }
@@ -263,24 +263,39 @@ class GetHomeFeedUseCase @Inject constructor(
                 .filter { it.matchScore == null || (it.matchScore ?: 0) >= 55 }
                 .sortedByDescending { it.matchScore ?: 0 }
                 .take(10)
-        }
 
-        if (results.isEmpty() && qualityData.isNotEmpty()) {
-            results = qualityData
-                .distinctBy { it.id }
-                .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
-                .map { it.copy(mediaType = type) }
-                .map { movie ->
-                    val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
-                    movie.apply { matchScore = score }
-                }
-                .sortedByDescending { it.matchScore ?: 0 }
-                .take(10)
+            if (degraded.isEmpty()) {
+                qualityData
+                    .distinctBy { it.id }
+                    .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
+                    .map { it.copy(mediaType = type) }
+                    .map { movie ->
+                        val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
+                        movie.apply { matchScore = score }
+                    }
+                    .sortedByDescending { it.matchScore ?: 0 }
+                    .take(10)
+            } else {
+                degraded
+            }
         } else {
-            results = results.sortedByDescending { it.matchScore ?: 0 }
+            results.sortedByDescending { it.matchScore ?: 0 }
         }
 
-        return Pair(results.take(15).toImmutableList(), usedSeedIds)
+        val finalOrdered = if (sortedResults.isNotEmpty()) {
+            val maxScore = sortedResults.first().matchScore ?: 0
+            // Candidati per il Trove's Pick: titoli eccellenti (entro 6 punti dal miglior match, o i primi 4)
+            val topCandidates = sortedResults
+                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(70) }
+                .take(4)
+            val pick = if (topCandidates.size > 1) topCandidates.random() else sortedResults.first()
+            // Posiziona il pick al primo posto per The Trove's Pick, lasciando il resto ordinato per punteggio
+            listOf(pick) + sortedResults.filter { it.id != pick.id }
+        } else {
+            sortedResults
+        }
+
+        return Pair(finalOrdered.take(15).toImmutableList(), usedSeedIds)
     }
 
     private suspend fun buildBecauseYouWatched(type: String, localMovies: List<Movie>, excludeIds: Set<Long> = emptySet()): Pair<Movie, ImmutableList<Movie>>? {

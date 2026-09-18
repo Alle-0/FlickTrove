@@ -80,6 +80,7 @@ import com.cinetrack.ui.screens.HomeTab
 import com.cinetrack.ui.screens.HomeFeedTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
+import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.screens.BoxOfficeTab
 import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
 import dev.chrisbanes.haze.HazeState
@@ -333,6 +334,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     statsOnRewatchToggle = { statsVm.toggleIncludeRewatches(it) }
                                 }
 
+                                var flowHasActiveFilters = false
+                                if (currentTab is FlowTab && activity != null) {
+                                    val flowVm = hiltViewModel<FlowViewModel>(activity)
+                                    val flowUiState by flowVm.uiState.collectAsStateWithLifecycle()
+                                    flowHasActiveFilters = flowUiState.filterConfig.hasActiveFilters
+                                }
+
                                 GlassyTopBar(
                                     title = title,
                                     hazeState = contentHazeState,
@@ -344,8 +352,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else null,
-                                    hasActiveFilters = discoverHasActiveFilters,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
+                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.totalUnreadCount,

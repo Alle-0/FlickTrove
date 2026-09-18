@@ -65,7 +65,8 @@ class SearchViewModel @Inject constructor(
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val tmdbService: TMDBService,
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -251,7 +252,9 @@ class SearchViewModel @Inject constructor(
         rawResults = emptyList()
         applyStateFilters()
 
-        if (query.length <= 2) {
+        val isIdQuery = searchByIdUseCase.isIdQuery(query)
+
+        if (!isIdQuery && query.length <= 2) {
             _uiState.update { it.copy(isLoading = false) }
             _uiState.update { it.copy(isEndReached = false) }
             currentPage = 1
@@ -263,6 +266,22 @@ class SearchViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
+                // Delegated ID Search (IMDb tt... or TMDB #/id:/tmdb:)
+                if (isIdQuery) {
+                    val idResults = searchByIdUseCase(
+                        query = query,
+                        category = category,
+                        isOnline = connectionState == com.cinetrack.util.ConnectionState.ONLINE,
+                        localMovies = localMovies
+                    )
+                    if (idResults != null) {
+                        rawResults = idResults
+                        applyStateFilters()
+                        _uiState.update { it.copy(isEndReached = true, isLocalOnly = false, isLoading = false) }
+                        return@launch
+                    }
+                }
+
                 val useLocalFirst = connectionState != com.cinetrack.util.ConnectionState.ONLINE
                 if (useLocalFirst) {
                     rawResults = performLocalSearch(query, category)
@@ -334,11 +353,45 @@ class SearchViewModel @Inject constructor(
                 
                 _uiState.update { it.copy(isEndReached = reachedEnd) }
 
-                if (accumulatedResults.isEmpty() && query.length >= 3) {
-                    // FALLBACK: If no results found, try a fuzzy match by using a prefix of the longest word
+                // 1. Numeric ID fallback: if text search returned empty and query is digits (e.g. "3465")
+                val numericId = query.trim().toLongOrNull()
+                if (accumulatedResults.isEmpty() && numericId != null) {
+                    val idResults = searchByIdUseCase.resolveByTmdbId(
+                        tmdbId = numericId,
+                        category = category,
+                        isOnline = connectionState == com.cinetrack.util.ConnectionState.ONLINE,
+                        localMovies = localMovies
+                    )
+                    if (idResults.isNotEmpty()) {
+                        rawResults = idResults
+                        applyStateFilters()
+                        _uiState.update { it.copy(isEndReached = true) }
+                        return@launch
+                    }
+                }
+
+                // 2. Check local library with 2-level fuzzy search
+                val localFuzzyMatches = if (query.length >= 3) {
+                    localMovies.filter { movie ->
+                        val matchesCategory = when (category) {
+                            "movie" -> movie.mediaType != "tv"
+                            "tv" -> movie.mediaType == "tv"
+                            "all" -> true
+                            else -> false
+                        }
+                        matchesCategory &&
+                        (com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.title) ||
+                         com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.name))
+                    }.map { if (it.mediaType == "tv") it.toTvResultInternal() else it.toMovieResultInternal() }
+                } else emptyList()
+
+                // 3. Fallback TMDB search when results are empty or few (<= 3) and query >= 4
+                // (Compensates for TMDB's strict spelling, finding e.g. "Interstellar" when user types "interstelar")
+                if (accumulatedResults.size <= 3 && query.length >= 4) {
                     val fallbackQuery = com.cinetrack.ui.utils.FuzzySearch.buildFallbackQuery(query)
                     if (fallbackQuery != null && fallbackQuery != query) {
                         var fallbackPage = 1
+                        val collectedFallback = mutableListOf<TMDBSearchResult>()
                         while (fallbackPage <= 2) {
                             val fallbackBatch: List<TMDBSearchResult> = when (category) {
                                 "movie" -> tmdbService.searchMovie(fallbackQuery, page = fallbackPage).results.map { it.toMovieResultInternal() }
@@ -350,22 +403,38 @@ class SearchViewModel @Inject constructor(
                             
                             if (fallbackBatch.isEmpty()) break
                             
-                            // Score and filter fallback results
-                            val scoredFallback = fallbackBatch.filter { res ->
-                                com.cinetrack.ui.utils.FuzzySearch.score(query, res.displayTitle) > 0.45
-                            }.sortedByDescending { res ->
-                                com.cinetrack.ui.utils.FuzzySearch.score(query, res.displayTitle)
+                            val scored = fallbackBatch.filter { res ->
+                                com.cinetrack.ui.utils.FuzzySearch.score(query, res.displayTitle) >= 0.70
                             }
-                            
-                            if (scoredFallback.isNotEmpty()) {
-                                rawResults = accumulatedResults
-                                applyStateFilters()
-                                break // Found something fuzzy
-                            }
+                            collectedFallback.addAll(scored)
+                            if (collectedFallback.size >= 10) break
                             fallbackPage++
+                        }
+                        
+                        if (collectedFallback.isNotEmpty()) {
+                            accumulatedResults = (accumulatedResults + collectedFallback)
+                                .distinctBy { "${it.id}_${it.mediaType}" }
+                                .sortedByDescending { res: TMDBSearchResult ->
+                                    val sim = com.cinetrack.ui.utils.FuzzySearch.score(query, res.displayTitle)
+                                    val voteAvg = when (res) {
+                                        is TMDBSearchResult.MovieResult -> res.voteAverage ?: 0.0
+                                        is TMDBSearchResult.TvResult -> res.voteAverage ?: 0.0
+                                        else -> 0.0
+                                    }
+                                    sim * 100.0 + voteAvg
+                                }
                         }
                     }
                 }
+
+                // Merge local fuzzy matches if any
+                if (localFuzzyMatches.isNotEmpty()) {
+                    accumulatedResults = (localFuzzyMatches + accumulatedResults)
+                        .distinctBy { "${it.id}_${it.mediaType}" }
+                }
+
+                rawResults = accumulatedResults
+                applyStateFilters()
 
                 if (accumulatedResults.isNotEmpty() && query.length >= 3) {
                     repository.saveSearchQuery(query)
@@ -389,8 +458,18 @@ class SearchViewModel @Inject constructor(
     private suspend fun performLocalSearch(query: String, category: String): List<TMDBSearchResult> {
         if (query.isBlank()) return emptyList()
         val mediaType = if (category == "person" || category == "collection") "" else category
-        val results = repository.searchLocalMovies(query, mediaType)
-        return results.map { localMovie ->
+        val exactResults = repository.searchLocalMovies(query, mediaType)
+        val finalMovies = if (exactResults.isNotEmpty() || query.length < 4) {
+            exactResults
+        } else {
+            // Level 2: Fuzzy fallback with Levenshtein distance for typos on local library
+            localMovies.filter { movie ->
+                (mediaType.isEmpty() || movie.mediaType == mediaType) &&
+                (com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.title) ||
+                 com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.name))
+            }
+        }
+        return finalMovies.map { localMovie ->
             when (localMovie.mediaType) {
                 "tv" -> localMovie.toTvResultInternal()
                 else -> localMovie.toMovieResultInternal()

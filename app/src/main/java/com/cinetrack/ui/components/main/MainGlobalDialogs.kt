@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -113,23 +115,45 @@ fun MainGlobalDialogs(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
-                    modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .bounceClick { onExitConfirmationChange(false) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .bounceClick { onExitConfirmationChange(false) }
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.main_exit_cancel), color = Color.White)
+                    Text(
+                        text = stringResource(R.string.main_exit_cancel),
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    )
                 }
                 Box(
-                    modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                        .bounceClick { onExitConfirmationChange(false); activity?.finish() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .bounceClick { onExitConfirmationChange(false); activity?.finish() }
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.main_exit_confirm), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(R.string.main_exit_confirm),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
                 }
             }
         }
@@ -181,27 +205,49 @@ fun MainGlobalDialogs(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
-                        modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
-                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(24.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .bounceClick { onFolderDeleteConfirmChange(false) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .bounceClick { onFolderDeleteConfirmChange(false) }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(stringResource(R.string.folder_delete_cancel), color = Color.White)
+                        Text(
+                            text = stringResource(R.string.folder_delete_cancel),
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp
+                        )
                     }
                     Box(
-                        modifier = Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(24.dp))
-                            .background(Color(0xFFFF3B30))
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
                             .bounceClick { 
                                 onFolderDeleteConfirmChange(false)
                                 foldersViewModel.deleteFolder(folderId)
                                 tabNavigator.current = FoldersTab
-                            },
+                            }
+                            .clip(CircleShape)
+                            .background(Color(0xFFFF3B30)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(stringResource(R.string.folder_delete_short), color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = stringResource(R.string.folder_delete_short),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
                     }
                 }
             }

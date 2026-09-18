@@ -260,7 +260,6 @@ fun MovieDetailScreenContent(
     LaunchedEffect(Unit) {
         hasCompletedFirstEnter = true
     }
-    val effectiveSharedTransitionScope = if (hasCompletedFirstEnter) null else sharedTransitionScope
 
     androidx.activity.compose.BackHandler(enabled = true) {
         if (movieActions.isAnyModalOpen) {
@@ -484,7 +483,7 @@ fun MovieDetailScreenContent(
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     DetailBackdrop(
-                                        sharedElementKey = "movie_backdrop_${activeMovie.id}",
+                                        scrollState = scrollState,
                                         backdropPath = activeMovie.customBackdropPath ?: activeMovie.backdropPath,
                                         posterPath = activeMovie.posterPath,
                                         accentColor = accentColor,
@@ -518,10 +517,9 @@ fun MovieDetailScreenContent(
                                             val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
                                                 ?: logos?.firstOrNull { it.iso6391 == "en" } 
                                                 ?: logos?.firstOrNull()
-                                            bestLogo?.filePath
+                                            bestLogo?.filePath ?: preloadedLogoPath
                                         } else null,
                                         hazeState = backdropHazeState,
-                                        sharedTransitionScope = effectiveSharedTransitionScope,
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
                                         onCoverSelectClick = { showCoverSelectionSheet = true },
@@ -638,7 +636,7 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         globalStats = globalStats,
                                         hazeState = localHazeState,
-                                        sharedTransitionScope = effectiveSharedTransitionScope,
+                                        sharedTransitionScope = sharedTransitionScope,
                                         animatedVisibilityScope = animatedVisibilityScope,
                                         onPersonClick = onPersonClick,
                                         onSheetStateChange = { isDetailCastSheetOpen = it }

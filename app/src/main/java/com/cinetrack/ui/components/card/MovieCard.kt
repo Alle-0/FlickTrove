@@ -319,7 +319,7 @@ fun MovieActionsPopup(
                         
                         Spacer(modifier = Modifier.height(4.dp))
                         val canRate = if (movie.mediaType == "tv") {
-                            movie.favorite || movie.watched
+                            movie.watched || (movie.watchedEpisodes?.values?.any { it.isNotEmpty() } == true)
                         } else {
                             movie.watched
                         }

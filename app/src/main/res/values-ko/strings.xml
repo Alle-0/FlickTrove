@@ -309,7 +309,7 @@
     <string name="avatar_selection_tv_show">TV 시리즈</string>
     <string name="settings_export_backup">백업 내보내기</string>
     <string name="settings_restore_backup">백업 복원</string>
-    <string name="settings_select_file">파일 선택 (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">파일 선택</string>
     <string name="settings_send_message">메시지 보내기</string>
     <string name="settings_interface_color">인터페이스 색상</string>
     <string name="settings_custom">사용자 정의</string>
@@ -560,6 +560,10 @@
     <string name="search_fallback_keyword">선택됨</string>
     <string name="search_active_keyword_format">테마: %1$s</string>
     <string name="search_placeholder">영화, TV 시리즈, 인물 검색...</string>
+    <string name="search_placeholder_movie">영화 검색...</string>
+    <string name="search_placeholder_tv">TV 시리즈 검색...</string>
+    <string name="search_placeholder_person">인물 검색...</string>
+    <string name="search_placeholder_collection">시리즈 컬렉션 검색...</string>
     <string name="search_content_desc_clear">지우기</string>
     <string name="search_content_desc_layout">레이아웃 변경</string>
     <string name="search_keyword_filter_warning">참고: 텍스트 검색 시 키워드 필터는 무시됩니다.</string>
@@ -1317,4 +1321,16 @@
     <string name="detail_read_more">더보기</string>
     <string name="detail_read_less">접기</string>
     <string name="comment_anonymous_user">익명 사용자</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">최근 체크인</string>
+    <string name="flow_filter_sort_watch_date">시청 날짜</string>
+    <string name="flow_filter_sort_rating">내 평점</string>
+    <string name="flow_filter_section_vibe">감정 바이브</string>
+    <string name="flow_filter_all_vibes">모든 바이브</string>
+    <string name="flow_filter_section_media">미디어 유형</string>
+    <string name="flow_filter_media_all">전체</string>
+    <string name="flow_filter_media_movies">영화</string>
+    <string name="flow_filter_media_tv">시리즈</string>
+    <string name="flow_filter_reset">초기화</string>
 </resources>

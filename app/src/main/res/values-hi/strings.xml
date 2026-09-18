@@ -300,7 +300,7 @@
     <string name="avatar_selection_tv_show">टीवी शो</string>
     <string name="settings_export_backup">बैकअप एक्सपोर्ट करें</string>
     <string name="settings_restore_backup">बैकअप रिस्टोर करें</string>
-    <string name="settings_select_file">फ़ाइल चुनें (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">फ़ाइल चुनें</string>
     <string name="settings_send_message">संदेश भेजें</string>
     <string name="settings_interface_color">इंटरफ़ेस का रंग</string>
     <string name="settings_custom">कस्टम</string>
@@ -487,6 +487,10 @@
     <string name="search_fallback_keyword">चयनित</string>
     <string name="search_active_keyword_format">थीम: %1$s</string>
     <string name="search_placeholder">फ़िल्में, टीवी शो, लोग खोजें...</string>
+    <string name="search_placeholder_movie">फ़िल्में खोजें...</string>
+    <string name="search_placeholder_tv">टीवी शो खोजें...</string>
+    <string name="search_placeholder_person">लोग खोजें...</string>
+    <string name="search_placeholder_collection">संग्रह खोजें...</string>
     <string name="search_content_desc_clear">साफ़ करें</string>
     <string name="search_content_desc_layout">लेआउट बदलें</string>
     <string name="search_keyword_filter_warning">ध्यान दें: टेक्स्ट खोज में कीवर्ड फ़िल्टर को अनदेखा किया जाता है।</string>
@@ -1245,6 +1249,18 @@
     <string name="detail_read_more">और पढ़ें</string>
     <string name="detail_read_less">कम पढ़ें</string>
     <string name="comment_anonymous_user">अनाम उपयोगकर्ता</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">हाल ही में जोड़ा गया</string>
+    <string name="flow_filter_sort_watch_date">देखने की तिथि</string>
+    <string name="flow_filter_sort_rating">व्यक्तिगत रेटिंग</string>
+    <string name="flow_filter_section_vibe">भावनात्मक वाइब</string>
+    <string name="flow_filter_all_vibes">सभी वाइब्स</string>
+    <string name="flow_filter_section_media">मीडिया का प्रकार</string>
+    <string name="flow_filter_media_all">सभी</string>
+    <string name="flow_filter_media_movies">फ़िल्में</string>
+    <string name="flow_filter_media_tv">टीवी शो</string>
+    <string name="flow_filter_reset">रीसेट</string>
 </resources>
 
 

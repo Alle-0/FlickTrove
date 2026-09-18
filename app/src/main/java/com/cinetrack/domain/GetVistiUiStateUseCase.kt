@@ -45,11 +45,28 @@ class GetVistiUiStateUseCase @Inject constructor() {
             val movieCount = watchedMovies.count { it.mediaType != "tv" }
             val tvCount = watchedMovies.count { it.mediaType == "tv" }
             
-            val filtered = watchedMovies.filter { movie ->
-                val matchesTab = if (tab == "movie") movie.mediaType != "tv" else movie.mediaType == "tv"
-                val matchesSearch = query.isEmpty() || 
+            val tabFiltered = watchedMovies.filter { movie ->
+                if (tab == "movie") movie.mediaType != "tv" else movie.mediaType == "tv"
+            }
+
+            val searchFiltered = if (query.isEmpty()) {
+                tabFiltered
+            } else {
+                val exact = tabFiltered.filter { movie ->
                     (movie.title?.contains(query, ignoreCase = true) ?: false) ||
                     (movie.name?.contains(query, ignoreCase = true) ?: false)
+                }
+                if (exact.isNotEmpty() || query.length < 4) {
+                    exact
+                } else {
+                    tabFiltered.filter { movie ->
+                        com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.title) ||
+                        com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, movie.name)
+                    }
+                }
+            }
+
+            val filtered = searchFiltered.filter { movie ->
                 
                 val matchesGenre = prefs.vistiSort.selectedGenres.isEmpty() || 
                     (movie.genreIds?.any { it in prefs.vistiSort.selectedGenres } ?: false)
@@ -76,7 +93,7 @@ class GetVistiUiStateUseCase @Inject constructor() {
                         }
                     }
 
-                matchesTab && matchesSearch && matchesGenre && matchesDecade && matchesProvider && matchesStatus
+                matchesGenre && matchesDecade && matchesProvider && matchesStatus
             }
 
             val sorted: List<Movie> = sortMovies(filtered, prefs.vistiSort, historyMap)

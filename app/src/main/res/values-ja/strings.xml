@@ -309,7 +309,7 @@
     <string name="avatar_selection_tv_show">TVシリーズ</string>
     <string name="settings_export_backup">バックアップをエクスポート</string>
     <string name="settings_restore_backup">バックアップから復元</string>
-    <string name="settings_select_file">ファイルを選択 (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">ファイルを選択</string>
     <string name="settings_send_message">メッセージを送信</string>
     <string name="settings_interface_color">インターフェースカラー</string>
     <string name="settings_custom">カスタム</string>
@@ -560,6 +560,10 @@
     <string name="search_fallback_keyword">選択中</string>
     <string name="search_active_keyword_format">テーマ: %1$s</string>
     <string name="search_placeholder">映画、TVシリーズ、人物を検索...</string>
+    <string name="search_placeholder_movie">映画を検索...</string>
+    <string name="search_placeholder_tv">TVシリーズを検索...</string>
+    <string name="search_placeholder_person">人物を検索...</string>
+    <string name="search_placeholder_collection">コレクションを検索...</string>
     <string name="search_content_desc_clear">クリア</string>
     <string name="search_content_desc_layout">レイアウト変更</string>
     <string name="search_keyword_filter_warning">注意: テキスト検索中はキーワードフィルターは無視されます。</string>
@@ -1317,4 +1321,16 @@
     <string name="detail_read_more">続きを読む</string>
     <string name="detail_read_less">折りたたむ</string>
     <string name="comment_anonymous_user">匿名ユーザー</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">最近のチェックイン</string>
+    <string name="flow_filter_sort_watch_date">視聴日</string>
+    <string name="flow_filter_sort_rating">個人評価</string>
+    <string name="flow_filter_section_vibe">感情バイブ</string>
+    <string name="flow_filter_all_vibes">すべてのバイブ</string>
+    <string name="flow_filter_section_media">メディア種別</string>
+    <string name="flow_filter_media_all">すべて</string>
+    <string name="flow_filter_media_movies">映画</string>
+    <string name="flow_filter_media_tv">ドラマ・アニメ</string>
+    <string name="flow_filter_reset">リセット</string>
 </resources>

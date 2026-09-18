@@ -35,13 +35,9 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.components.common.UndoToast
 import com.cinetrack.ui.components.common.GlobalErrorToast
-import androidx.compose.animation.SharedTransitionLayout
-import com.cinetrack.ui.navigation.LocalSharedTransitionScope
-import com.cinetrack.ui.navigation.LocalAnimatedVisibilityScope
 
 private val initialSystemLocale = java.util.Locale.getDefault()
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: SettingsViewModel) {
     val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
@@ -180,10 +176,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    SharedTransitionLayout {
-                        val sharedTransitionScope = this
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Navigator(SplashScreen()) { navigator ->
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Navigator(SplashScreen()) { navigator ->
                             CompositionLocalProvider(
                                 com.cinetrack.ui.LocalSearchOverlay provides { offset, genreId, genreName, keywordId, keywordName ->
                                     searchOverlayTriggerX = offset?.x ?: -1f
@@ -255,7 +249,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                 if (isInitialSearch) {
                                                     androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                                                 } else {
-                                                    androidx.compose.animation.ExitTransition.KeepUntilTransitionsFinished
+                                                    androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                                                 }
                                             }
                                             
@@ -264,13 +258,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     ) { screen ->
-                                        val animatedVisibilityScope = this
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionScope provides sharedTransitionScope,
-                                            LocalAnimatedVisibilityScope provides animatedVisibilityScope
-                                        ) {
-                                            Box(modifier = Modifier.fillMaxSize()) {
-                                                screen.Content()
+                                        Box(modifier = Modifier.fillMaxSize()) {
+                                            screen.Content()
                                                 
                                                 if (isSearchOverlayOpen && screen.key == searchOverlaySourceScreenKey) {
                                                     Box(modifier = Modifier.fillMaxSize().zIndex(100000f)) {
@@ -329,7 +318,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             }
                                         }
                                     }
-                                    }
                                     } // end haze Box
                                     
                                     com.cinetrack.ui.components.dialog.GuestAuthDialog(
@@ -341,7 +329,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                 }
                             }
                         }
-                    }
                     }
 
                     

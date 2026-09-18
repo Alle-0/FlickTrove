@@ -309,7 +309,7 @@
     <string name="avatar_selection_tv_show">剧集</string>
     <string name="settings_export_backup">导出备份</string>
     <string name="settings_restore_backup">恢复备份</string>
-    <string name="settings_select_file">选择文件 (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">選擇文件</string>
     <string name="settings_send_message">发送消息</string>
     <string name="settings_interface_color">界面颜色</string>
     <string name="settings_custom">自定义</string>
@@ -560,6 +560,10 @@
     <string name="search_fallback_keyword">已选</string>
     <string name="search_active_keyword_format">主题：%1$s</string>
     <string name="search_placeholder">搜索电影、剧集、演职员...</string>
+    <string name="search_placeholder_movie">搜索电影...</string>
+    <string name="search_placeholder_tv">搜索剧集...</string>
+    <string name="search_placeholder_person">搜索演职员...</string>
+    <string name="search_placeholder_collection">搜索影视合集...</string>
     <string name="search_content_desc_clear">清除</string>
     <string name="search_content_desc_layout">更改布局</string>
     <string name="search_keyword_filter_warning">注意：文字搜索时将忽略关键字过滤器。</string>
@@ -1317,4 +1321,16 @@
     <string name="detail_read_more">展开更多</string>
     <string name="detail_read_less">收起</string>
     <string name="comment_anonymous_user">匿名用户</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">最近记录</string>
+    <string name="flow_filter_sort_watch_date">观看日期</string>
+    <string name="flow_filter_sort_rating">个人评分</string>
+    <string name="flow_filter_section_vibe">情感氛围</string>
+    <string name="flow_filter_all_vibes">所有氛围</string>
+    <string name="flow_filter_section_media">内容类型</string>
+    <string name="flow_filter_media_all">全部</string>
+    <string name="flow_filter_media_movies">电影</string>
+    <string name="flow_filter_media_tv">剧集</string>
+    <string name="flow_filter_reset">重置</string>
 </resources>

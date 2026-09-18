@@ -118,4 +118,93 @@ object FuzzySearch {
         val pivot = words.maxByOrNull { it.length } ?: return null
         return pivot.take(5)
     }
+
+    /**
+     * Highly optimized Levenshtein distance calculation with threshold early-exit.
+     * Space complexity: O(min(m, n)) using two integer arrays.
+     */
+    fun levenshteinDistance(s1: CharSequence, s2: CharSequence, maxThreshold: Int = Int.MAX_VALUE): Int {
+        if (s1 == s2) return 0
+        val len1 = s1.length
+        val len2 = s2.length
+        if (len1 == 0) return len2
+        if (len2 == 0) return len1
+        if (kotlin.math.abs(len1 - len2) > maxThreshold) return maxThreshold + 1
+
+        val (shorter, longer) = if (len1 < len2) s1 to s2 else s2 to s1
+        val n = shorter.length
+        val m = longer.length
+
+        var prev = IntArray(n + 1) { it }
+        var curr = IntArray(n + 1)
+
+        for (i in 1..m) {
+            curr[0] = i
+            var minInRow = curr[0]
+            val cLonger = longer[i - 1]
+            for (j in 1..n) {
+                val cost = if (cLonger == shorter[j - 1]) 0 else 1
+                curr[j] = minOf(
+                    prev[j] + 1,       // deletion
+                    curr[j - 1] + 1,   // insertion
+                    prev[j - 1] + cost // substitution
+                )
+                if (curr[j] < minInRow) minInRow = curr[j]
+            }
+            if (minInRow > maxThreshold) return maxThreshold + 1
+            val temp = prev
+            prev = curr
+            curr = temp
+        }
+        return prev[n]
+    }
+
+    /**
+     * 2-Level Fuzzy Match for local database search:
+     * - Only active for queries of length >= 4
+     * - Distance threshold = 1 for words 4..6 chars (e.g. "porato" -> "pirati")
+     * - Distance threshold = 2 for words >= 7 chars (e.g. "interstelar" -> "interstellar")
+     */
+    fun matchesFuzzy(query: String, target: String?): Boolean {
+        if (target.isNullOrBlank() || query.length < 4) return false
+
+        val normQuery = normalize(query)
+        val normTarget = normalize(target)
+
+        // Exact substring match
+        if (normTarget.contains(normQuery)) return true
+
+        val queryWords = normQuery.split("\\s+".toRegex()).filter { it.isNotBlank() }
+        val targetWords = normTarget.split("\\s+".toRegex()).filter { it.isNotBlank() }
+
+        if (queryWords.isEmpty() || targetWords.isEmpty()) return false
+
+        // For single-word query: check if any target word is within allowed Levenshtein distance
+        if (queryWords.size == 1) {
+            val qWord = queryWords[0]
+            if (qWord.length < 4) return false
+            val maxDist = if (qWord.length in 4..6) 1 else 2
+
+            return targetWords.any { tWord ->
+                if (kotlin.math.abs(tWord.length - qWord.length) <= maxDist) {
+                    levenshteinDistance(qWord, tWord, maxDist) <= maxDist
+                } else false
+            }
+        }
+
+        // For multi-word query: each significant query word must match at least one target word
+        return queryWords.all { qWord ->
+            if (qWord.length < 4) {
+                targetWords.any { it.contains(qWord) }
+            } else {
+                val maxDist = if (qWord.length in 4..6) 1 else 2
+                targetWords.any { tWord ->
+                    if (tWord.contains(qWord)) true
+                    else if (kotlin.math.abs(tWord.length - qWord.length) <= maxDist) {
+                        levenshteinDistance(qWord, tWord, maxDist) <= maxDist
+                    } else false
+                }
+            }
+        }
+    }
 }

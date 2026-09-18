@@ -25,15 +25,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.R
-import com.cinetrack.ui.navigation.sharedElementIfAvailable
+
+import androidx.compose.foundation.ScrollState
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * DetailBackdrop
- * High-fidelity backdrop with multi-step vertical gradient and atmospheric offline fallback.
+ * High-fidelity backdrop with multi-step vertical gradient, atmospheric offline fallback,
+ * and zero-cost 120 FPS hardware-accelerated parallax.
  */
 @Composable
 fun DetailBackdrop(
-    sharedElementKey: String? = null,
+    scrollState: ScrollState? = null,
     backdropPath: String?,
     posterPath: String?,
     accentColor: Color,
@@ -47,38 +51,57 @@ fun DetailBackdrop(
         modifier = modifier
             .fillMaxWidth()
             .height(480.dp)
+            .clipToBounds()
             .background(backgroundColor)
     ) {
-        // 1. ATMOSPHERIC PREMIUM FALLBACK (Visibile durante il caricamento, offline o se l'immagine è assente)
-        AtmosphericBackdropFallback(
-            accentColor = accentColor,
-            backgroundColor = backgroundColor,
-            showCiack = (path == null)
-        )
-
-        // 2. BACKDROP IMAGE (Crossfade sopra il fallback quando connesso)
-        if (path != null) {
-            val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
-            val context = LocalContext.current
-            val request = remember(imageUrl, isOffline) {
-                ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .crossfade(true)
-                    .crossfade(700)
-                    .build()
-            }
-            AsyncImage(
-                model = request,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().let { m ->
-                    if (sharedElementKey != null) {
-                        m.sharedElementIfAvailable(sharedElementKey)
+        // Piano di profondità con Parallax GPU (Fallback + Immagine)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .let { m ->
+                    if (scrollState != null) {
+                        m.graphicsLayer {
+                            val scroll = scrollState.value
+                            if (scroll > 0) {
+                                // L'immagine sale a metà velocità (0.5f) rispetto allo scroll del contenuto
+                                translationY = scroll * 0.5f
+                            } else if (scroll < 0) {
+                                // Stretch elastico gommoso in overscroll pull-down
+                                val stretch = 1f + (-scroll * 0.001f).coerceIn(0f, 0.25f)
+                                scaleX = stretch
+                                scaleY = stretch
+                            }
+                        }
                     } else {
                         m
                     }
                 }
+        ) {
+            // 1. ATMOSPHERIC PREMIUM FALLBACK (Visibile durante il caricamento, offline o se l'immagine è assente)
+            AtmosphericBackdropFallback(
+                accentColor = accentColor,
+                backgroundColor = backgroundColor,
+                showCiack = (path == null)
             )
+
+            // 2. BACKDROP IMAGE (Crossfade sopra il fallback quando connesso)
+            if (path != null) {
+                val imageUrl = buildTmdbImageUrl(path, ImageType.BACKDROP, LocalImageQuality.current)
+                val context = LocalContext.current
+                val request = remember(imageUrl, isOffline) {
+                    ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .crossfade(700)
+                        .build()
+                }
+                AsyncImage(
+                    model = request,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
 
         // 3. GRADIENTE PURO E NATIVO: Multi-step gradient for premium blending

@@ -23,6 +23,8 @@ import com.cinetrack.ui.components.glass.hazeGlass
 
 import com.cinetrack.ui.utils.bounceClick
 
+import androidx.compose.foundation.shape.CircleShape
+
 @Composable
 fun CategoryPill(
     text: String, 
@@ -35,21 +37,15 @@ fun CategoryPill(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
             .bounceClick { 
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick() 
             }
-            .then(
-                if (isSelected) {
-                    Modifier.background(accentColor)
-                } else {
-                    Modifier.background(Color.White.copy(alpha = 0.08f))
-                }
-            )
+            .clip(CircleShape)
+            .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.08f))
             .border(
                 BorderStroke(1.dp, if (isSelected) accentColor else Color.White.copy(alpha = 0.12f)),
-                RoundedCornerShape(50)
+                CircleShape
             )
             .padding(horizontal = 20.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center

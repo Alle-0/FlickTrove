@@ -21,6 +21,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -286,7 +287,7 @@ fun SettingsItem(
                 
                 if (trailing != null) {
                     trailing()
-                } else if (customContent == null) {
+                } else if (isClickable) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = if (isExternal) R.drawable.ic_external_link else R.drawable.ic_right),
                         contentDescription = null,
@@ -697,52 +698,64 @@ fun SettingsDialogConfirmButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primary,
-    contentColor: Color = Color.Black
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
     Box(
         modifier = modifier
-            .height(50.dp)
+            .height(48.dp)
             .bounceClick(enabled = enabled) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .clip(RoundedCornerShape(16.dp))
+            .clip(shape)
             .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
             color = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
     }
 }
 
 @Composable
 fun SettingsDialogCancelButton(
-    text: String,
+    text: String = stringResource(R.string.settings_cancel),
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
     Box(
         modifier = modifier
-            .height(50.dp)
+            .height(48.dp)
             .bounceClick(enabled = enabled) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(1.dp, Color.White.copy(alpha = 0.15f), shape),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
     }
 }

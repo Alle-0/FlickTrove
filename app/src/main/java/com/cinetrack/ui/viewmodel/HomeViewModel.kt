@@ -103,9 +103,10 @@ class HomeViewModel @Inject constructor(
 
     fun pullToRefresh() {
         val now = System.currentTimeMillis()
-        if (now - lastRefreshTimestamp < 15_000L) {
-            // Cooldown anti-spam (15s): evita di bombardare le API esterne
+        if (now - lastRefreshTimestamp < 5_000L) {
+            // Cooldown anti-spam (5s): evita di bombardare le API esterne ma ruota comunque il pick
             _isRefreshing.value = true
+            rotateTrovePickInMemory()
             viewModelScope.launch {
                 kotlinx.coroutines.delay(600)
                 _isRefreshing.value = false
@@ -115,12 +116,15 @@ class HomeViewModel @Inject constructor(
         lastRefreshTimestamp = now
         _isRefreshing.value = true
 
+        // 1. Ruota istantaneamente il pick in memoria per dare feedback visivo immediato
+        rotateTrovePickInMemory()
+
         viewModelScope.launch {
             try {
-                kotlinx.coroutines.withTimeoutOrNull(3000L) {
+                kotlinx.coroutines.withTimeoutOrNull(2500L) {
                     var anySyncTriggered = false
 
-                    // 1. Sincronizzazione Trakt se collegato
+                    // 2. Sincronizzazione Trakt se collegato
                     if (traktAuthRepository.isLoggedIn.value) {
                         val inputData = androidx.work.workDataOf("force" to true)
                         val traktRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
@@ -134,7 +138,7 @@ class HomeViewModel @Inject constructor(
                         anySyncTriggered = true
                     }
 
-                    // 2. Sincronizzazione SIMKL se collegato
+                    // 3. Sincronizzazione SIMKL se collegato
                     if (simklAuthRepository.getAccessToken() != null) {
                         val inputData = androidx.work.workDataOf("force" to true)
                         val simklRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
@@ -148,25 +152,53 @@ class HomeViewModel @Inject constructor(
                         anySyncTriggered = true
                     }
 
-                    // 3. Refresh Home Feed (TMDb)
+                    // 4. Refresh Home Feed (TMDb) in background (non blocca la chiusura dello spinner)
                     fetchFeed(forceRefresh = true)
 
-                    // 4. Sincronizzazione Firebase cloud se loggato
-                    try {
-                        repository.syncWithFirebase(force = false)
-                    } catch (e: Exception) {
-                        // Ignore silent sync failure
+                    // 5. Sincronizzazione Firebase cloud in background IO
+                    launch(Dispatchers.IO) {
+                        try {
+                            repository.syncWithFirebase(force = false)
+                        } catch (e: Exception) {
+                            // Ignore silent sync failure
+                        }
                     }
 
                     if (anySyncTriggered) {
                         actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_manual_sync_started))
                     }
 
-                    // Mantieni attiva l'animazione per 1.2s per dare fluidità visiva
-                    kotlinx.coroutines.delay(1200)
+                    // Mantieni attiva l'animazione per 1 secondo per fluidità visiva
+                    kotlinx.coroutines.delay(1000)
                 }
             } finally {
                 _isRefreshing.value = false
+            }
+        }
+    }
+
+    private fun rotateTrovePickInMemory() {
+        val current = _feedState.value
+        val isTv = _activeTab.value == "tv"
+        val list = if (isTv) current.recommendedTv else current.recommendedMovies
+        if (list.size > 1) {
+            val maxScore = list.maxOfOrNull { it.matchScore ?: 0 } ?: 0
+            val topCandidates = list
+                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(70) }
+                .take(4)
+            if (topCandidates.size > 1) {
+                val currentPickId = list.first().id
+                val otherCandidates = topCandidates.filter { it.id != currentPickId }
+                val nextPick = if (otherCandidates.isNotEmpty()) otherCandidates.random() else topCandidates.random()
+                val reordered = (listOf(nextPick) + list.filter { it.id != nextPick.id }).toImmutableList()
+                _feedState.value = if (isTv) {
+                    current.copy(recommendedTv = reordered)
+                } else {
+                    current.copy(recommendedMovies = reordered)
+                }
+                viewModelScope.launch {
+                    resolveMovieLogo(nextPick)
+                }
             }
         }
     }
@@ -203,39 +235,43 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private suspend fun executeFetchFeed(forceRefresh: Boolean = false) {
+        // 1. Legge prima la cache Room per un rendering istantaneo (T=0ms)
+        val cachedEntity = repository.getCachedHomeFeedEntity()
+        val cachedData = repository.getCachedHomeFeed()
+        if (cachedData != null) {
+            _feedState.value = cachedData.toFeedState()
+        } else if (!_feedState.value.isLoaded) {
+            _feedState.value = FeedState(isLoaded = false, hasError = false)
+        }
+
+        // 2. Controllo validità cache (6 ORE: 6 * 60 * 60 * 1000L)
+        val cacheAgeMs = cachedEntity?.updatedAt?.let { System.currentTimeMillis() - it } ?: Long.MAX_VALUE
+        val isCacheValid = !forceRefresh && cachedData != null && (cacheAgeMs < 6 * 60 * 60 * 1000L)
+
+        if (isCacheValid) {
+            // Cache valida per 6 ore: non rieseguire la rete per proteggere le quote Firestore/TMDB
+            return
+        }
+
+        // 3. Esegue il refresh di rete in background se la cache è scaduta (> 6 ore) o forzata
+        try {
+            val freshFeed = getHomeFeedUseCase()
+            _feedState.value = freshFeed
+            // Salva nella cache Room per i successivi accessi
+            repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed))
+        } catch (e: Exception) {
+            // Se non c'è cache pregressa, mostra lo stato di errore
+            if (!_feedState.value.isLoaded) {
+                _feedState.value = FeedState(hasError = true)
+                actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
+            }
+        }
+    }
+
     private fun fetchFeed(forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            // 1. Legge prima la cache Room per un rendering istantaneo (T=0ms)
-            val cachedEntity = repository.getCachedHomeFeedEntity()
-            val cachedData = repository.getCachedHomeFeed()
-            if (cachedData != null) {
-                _feedState.value = cachedData.toFeedState()
-            } else if (!_feedState.value.isLoaded) {
-                _feedState.value = FeedState(isLoaded = false, hasError = false)
-            }
-
-            // 2. Controllo validità cache (6 ORE: 6 * 60 * 60 * 1000L)
-            val cacheAgeMs = cachedEntity?.updatedAt?.let { System.currentTimeMillis() - it } ?: Long.MAX_VALUE
-            val isCacheValid = !forceRefresh && cachedData != null && (cacheAgeMs < 6 * 60 * 60 * 1000L)
-
-            if (isCacheValid) {
-                // Cache valida per 6 ore: non rieseguire la rete per proteggere le quote Firestore/TMDB
-                return@launch
-            }
-
-            // 3. Esegue il refresh di rete in background se la cache è scaduta (> 6 ore) o forzata
-            try {
-                val freshFeed = getHomeFeedUseCase()
-                _feedState.value = freshFeed
-                // Salva nella cache Room per i successivi accessi
-                repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed))
-            } catch (e: Exception) {
-                // Se non c'è cache pregressa, mostra lo stato di errore
-                if (!_feedState.value.isLoaded) {
-                    _feedState.value = FeedState(hasError = true)
-                    actionFeedbackManager.emit(UiText.DynamicString("Network error: Could not load feed"))
-                }
-            }
+            executeFetchFeed(forceRefresh)
         }
     }
 
@@ -253,9 +289,17 @@ class HomeViewModel @Inject constructor(
                 val updatedTv = currentFeed.trendingTv.map {
                     if (it.id == movie.id) it.apply { this.logoPath = logo } else it
                 }.toImmutableList()
+                val updatedRecMovies = currentFeed.recommendedMovies.map {
+                    if (it.id == movie.id) it.apply { this.logoPath = logo } else it
+                }.toImmutableList()
+                val updatedRecTv = currentFeed.recommendedTv.map {
+                    if (it.id == movie.id) it.apply { this.logoPath = logo } else it
+                }.toImmutableList()
                 _feedState.value = currentFeed.copy(
                     trendingMovies = updatedMovies,
-                    trendingTv = updatedTv
+                    trendingTv = updatedTv,
+                    recommendedMovies = updatedRecMovies,
+                    recommendedTv = updatedRecTv
                 )
             }
             logo

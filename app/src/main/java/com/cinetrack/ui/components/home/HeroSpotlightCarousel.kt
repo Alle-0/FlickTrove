@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import kotlin.math.absoluteValue
@@ -43,7 +44,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
-import com.cinetrack.ui.navigation.sharedElementIfAvailable
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
@@ -173,17 +173,24 @@ fun HeroSpotlightCarousel(
                         translationX = if (advancedEffectsEnabled) rawPageOffset * 28.dp.toPx() else 0f
                     }
                     .bounceClick {
-                        val movieWithColor = if (dominantColor != null) {
-                            movie.copy(accentColor = dominantColor?.toHexString())
-                        } else {
-                            movie
+                        val movieWithColor = movie.copy(
+                            accentColor = dominantColor?.toHexString() ?: movie.accentColor
+                        ).apply {
+                            this.logoPath = localLogoPath ?: movie.logoPath
                         }
                         onMovieClick(movieWithColor)
                     }
                     .clip(RoundedCornerShape(36.dp))
+                    .drawWithContent {
+                        drawContent()
+                        val dimAlpha = (pageOffset * 0.58f).coerceIn(0f, 0.65f)
+                        if (dimAlpha > 0.005f) {
+                            drawRect(Color.Black.copy(alpha = dimAlpha))
+                        }
+                    }
                     .border(
                         width = 1.dp,
-                        color = cardBottomColor,
+                        color = cardBottomColor.copy(alpha = (1f - pageOffset * 0.5f).coerceIn(0.35f, 1f)),
                         shape = RoundedCornerShape(36.dp)
                     )
             ) {
@@ -197,7 +204,7 @@ fun HeroSpotlightCarousel(
                         .build(),
                     contentDescription = movie.title ?: movie.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().sharedElementIfAvailable("movie_backdrop_${movie.id}"),
+                    modifier = Modifier.fillMaxSize(),
                     onSuccess = { result ->
                         val bitmap = result.result.drawable.toBitmap()
                         coroutineScope.launch {
@@ -248,7 +255,6 @@ fun HeroSpotlightCarousel(
                                 modifier = Modifier
                                     .heightIn(max = 100.dp)
                                     .fillMaxWidth(0.8f)
-                                    .sharedElementIfAvailable("movie_logo_${movie.id}")
                             )
                         } else {
                             Text(

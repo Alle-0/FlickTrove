@@ -29,6 +29,9 @@ import com.cinetrack.ui.viewmodel.TimeRange
 import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.ui.components.account.AccountModals
+import com.cinetrack.ui.components.dialog.FlowFilterModal
+import com.cinetrack.ui.screens.FlowTab
+import com.cinetrack.ui.viewmodel.FlowViewModel
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -156,6 +159,28 @@ fun MainModalsContainer(
                         onDismiss = reorderConfig.onDismiss
                     )
                 }
+            }
+        } else if (currentTab is FlowTab) {
+            val flowViewModel = if (activity != null) {
+                hiltViewModel<FlowViewModel>(activity)
+            } else {
+                with(screen) { getViewModel<FlowViewModel>() }
+            }
+            val flowUiState by flowViewModel.uiState.collectAsStateWithLifecycle()
+            Box(modifier = Modifier.zIndex(70000f)) {
+                FlowFilterModal(
+                    isVisible = isFilterModalVisible,
+                    config = flowUiState.filterConfig,
+                    availableVibes = flowUiState.topVibes,
+                    totalCount = flowUiState.totalUnfilteredCount,
+                    hazeState = globalHazeState,
+                    triggerBounds = filterButtonBounds,
+                    onApply = { newConfig ->
+                        flowViewModel.updateFilterConfig(newConfig)
+                        onFilterModalDismiss()
+                    },
+                    onDismissRequest = onFilterModalDismiss
+                )
             }
         }
     }

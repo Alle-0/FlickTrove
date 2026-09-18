@@ -67,7 +67,11 @@ class FoldersViewModel @Inject constructor(
     }
 
     val folders: StateFlow<ImmutableList<FolderEntity>?> = kotlinx.coroutines.flow.combine(repository.getFoldersFlow(), _sortOption, _sortOrder, _searchQuery) { list, option, order, query ->
-        val filteredList = if (query.isBlank()) list else list.filter { it.name.contains(query, ignoreCase = true) }
+        val filteredList = if (query.isBlank()) list else {
+            val exact = list.filter { it.name.contains(query, ignoreCase = true) }
+            if (exact.isNotEmpty() || query.length < 4) exact
+            else list.filter { com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, it.name) }
+        }
         val sorted = when (option) {
             com.cinetrack.ui.screens.FolderSortOption.DATE -> filteredList.sortedBy { parseDateString(it.createdAt) }
             com.cinetrack.ui.screens.FolderSortOption.NAME -> filteredList.sortedBy { it.name.lowercase() }

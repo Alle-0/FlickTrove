@@ -309,7 +309,7 @@
     <string name="avatar_selection_tv_show">Serial TV</string>
     <string name="settings_export_backup">Ekspor Cadangan</string>
     <string name="settings_restore_backup">Pulihkan Cadangan</string>
-    <string name="settings_select_file">Pilih file (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">Pilih file</string>
     <string name="settings_send_message">Kirim Pesan</string>
     <string name="settings_interface_color">Warna Antarmuka</string>
     <string name="settings_custom">Kustom</string>
@@ -560,6 +560,10 @@
     <string name="search_fallback_keyword">Dipilih</string>
     <string name="search_active_keyword_format">Tema: %1$s</string>
     <string name="search_placeholder">Cari film, serial TV, pemeran...</string>
+    <string name="search_placeholder_movie">Cari film...</string>
+    <string name="search_placeholder_tv">Cari serial TV...</string>
+    <string name="search_placeholder_person">Cari pemeran...</string>
+    <string name="search_placeholder_collection">Cari koleksi...</string>
     <string name="search_content_desc_clear">Hapus</string>
     <string name="search_content_desc_layout">Ubah Tata Letak</string>
     <string name="search_keyword_filter_warning">Catatan: filter kata kunci diabaikan dalam pencarian teks.</string>
@@ -1316,4 +1320,16 @@
     <string name="detail_read_more">Baca selengkapnya</string>
     <string name="detail_read_less">Baca lebih sedikit</string>
     <string name="comment_anonymous_user">Pengguna Anonim</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">Check-in Terbaru</string>
+    <string name="flow_filter_sort_watch_date">Tanggal Tonton</string>
+    <string name="flow_filter_sort_rating">Rating Pribadi</string>
+    <string name="flow_filter_section_vibe">VIBE EMOSIONAL</string>
+    <string name="flow_filter_all_vibes">Semua Vibe</string>
+    <string name="flow_filter_section_media">TIPE MEDIA</string>
+    <string name="flow_filter_media_all">Semua</string>
+    <string name="flow_filter_media_movies">Film</string>
+    <string name="flow_filter_media_tv">Serial TV</string>
+    <string name="flow_filter_reset">Atur Ulang</string>
 </resources>

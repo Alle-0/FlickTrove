@@ -87,7 +87,7 @@ fun DetailPersonalZone(
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        val canInteract = movie.watched || (movie.mediaType == "tv" && movie.isReleased)
+        val canInteract = movie.watched || (movie.mediaType == "tv" && movie.watchedEpisodes?.values?.any { it.isNotEmpty() } == true)
         
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),

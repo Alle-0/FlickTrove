@@ -55,7 +55,6 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.LocalAdvancedVisualEffects
-import com.cinetrack.ui.navigation.sharedElementIfAvailable
 
 /**
  * DetailHeader
@@ -166,8 +165,7 @@ fun DetailHeader(
                     modifier = Modifier
                         .fillMaxWidth(0.6f) // Takes up to 60% of width
                         .heightIn(max = 100.dp) // Max height to avoid huge logos
-                        .padding(bottom = 8.dp)
-                        .sharedElementIfAvailable("movie_logo_${movie.id}"),
+                        .padding(bottom = 8.dp),
                     alignment = Alignment.CenterStart
                 ) {
                     val state = painter.state

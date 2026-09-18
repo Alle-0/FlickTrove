@@ -42,9 +42,27 @@ class GetHomeUiStateUseCase @Inject constructor() {
             val movieCount = toWatchMovies.count { it.mediaType != "tv" }
             val tvCount = toWatchMovies.count { it.mediaType == "tv" && !it.dropped }
 
-            val filtered = toWatchMovies.asSequence()
+            val baseSequence = toWatchMovies.asSequence()
                 .filter { if (tab == "movie") it.mediaType != "tv" else it.mediaType == "tv" }
-                .filter { query.isEmpty() || it.title?.contains(query, ignoreCase = true) == true || it.name?.contains(query, ignoreCase = true) == true }
+
+            val searchFiltered = if (query.isEmpty()) {
+                baseSequence
+            } else {
+                val exact = baseSequence.filter {
+                    it.title?.contains(query, ignoreCase = true) == true ||
+                    it.name?.contains(query, ignoreCase = true) == true
+                }.toList()
+                if (exact.isNotEmpty() || query.length < 4) {
+                    exact.asSequence()
+                } else {
+                    baseSequence.filter {
+                        com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, it.title) ||
+                        com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, it.name)
+                    }
+                }
+            }
+
+            val filtered = searchFiltered
                 .filter { prefs.homeSort.selectedGenres.isEmpty() || it.genreIds?.any { g -> g in prefs.homeSort.selectedGenres } == true }
                 .filter { movie ->
                     prefs.homeSort.selectedDecades.isEmpty() || 

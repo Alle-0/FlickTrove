@@ -75,105 +75,157 @@ fun BackupDialog(
     onImport: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(24.dp)
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-                Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_cloud),
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.settings_backup_restore_title),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    stringResource(R.string.settings_backup_restore_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                // Tip: sync missing details after import
-                Row(
+        Icon(
+            ImageVector.vectorResource(id = R.drawable.ic_cloud),
+            null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            stringResource(R.string.settings_backup_restore_title),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.settings_backup_restore_desc),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Tip: sync missing details after import
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.settings_import_tip_sync),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        val isExportEnabled = !isBackupLoading
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Option 1: Export Backup
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bounceClick(enabled = isExportEnabled) { onExport() }
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (isExportEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                    )
+                    .border(
+                        1.dp,
+                        if (isExportEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        else Color.White.copy(alpha = 0.1f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
-                        contentDescription = null,
+                        ImageVector.vectorResource(id = R.drawable.ic_caricare),
+                        null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        stringResource(R.string.settings_import_tip_sync),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                val isExportEnabled = !isBackupLoading
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .bounceClick(enabled = isExportEnabled) {
-                            onExport()
-                        }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (isExportEnabled) MaterialTheme.colorScheme.primary 
-                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_caricare), null, tint = Color.Black)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_export_backup), fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .bounceClick {
-                            onImport()
-                        }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.05f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_restore_backup), fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
+                Spacer(modifier = Modifier.width(14.dp))
+                Text(
+                    stringResource(R.string.settings_export_backup),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_right),
+                    null,
+                    tint = Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.size(16.dp)
                 )
             }
+
+            // Option 2: Restore Backup
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bounceClick { onImport() }
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.06f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.ic_scaricare),
+                        null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Text(
+                    stringResource(R.string.settings_restore_backup),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_right),
+                    null,
+                    tint = Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        SettingsDialogCancelButton(
+            text = stringResource(R.string.settings_cancel),
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -182,60 +234,48 @@ fun ExternalMigrationDialog(
     onImport: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(24.dp)
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-                Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_documento),
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.settings_external_migration_dialog_title),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    stringResource(R.string.settings_external_migration_dialog_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(32.dp))
+        Icon(
+            ImageVector.vectorResource(id = R.drawable.ic_documento),
+            null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            stringResource(R.string.settings_external_migration_dialog_title),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.settings_external_migration_dialog_desc),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(28.dp))
 
-                // Primary Action Button (Select File)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .bounceClick { onImport() }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = MaterialTheme.colorScheme.onPrimary)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_select_file), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsDialogCancelButton(
+                text = stringResource(R.string.settings_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+            SettingsDialogConfirmButton(
+                text = stringResource(R.string.settings_select_file),
+                onClick = onImport,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
 }
-
 
 @Composable
 fun YamtrackDialog(
@@ -244,58 +284,48 @@ fun YamtrackDialog(
     onImport: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(24.dp)
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-                Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    "Yamtrack",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    "Import your Yamtrack library into FlickTrove.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(32.dp))
+        Icon(
+            ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+            null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "Yamtrack",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            "Import your Yamtrack library into FlickTrove.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(28.dp))
 
-                // Import button (primary)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .bounceClick(enabled = !isLoading) { onImport() }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (!isLoading) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_scaricare), null, tint = Color.Black)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Import from Yamtrack", fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsDialogCancelButton(
+                text = stringResource(R.string.settings_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            )
+            SettingsDialogConfirmButton(
+                text = stringResource(R.string.settings_yamtrack_import),
+                onClick = onImport,
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
 }
 
 @Composable
@@ -523,50 +553,54 @@ fun FeedbackDialog(
                 }
 
                 // Footer (Fixed)
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 val isEnabled = title.isNotBlank() && description.text.isNotBlank() && !isLoading
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .bounceClick(enabled = isEnabled) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSubmit(title, description.text, rating, email)
-                        }
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(
-                            if (isEnabled) MaterialTheme.colorScheme.primary 
-                            else if (isLoading) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            else Color.White.copy(alpha = 0.05f)
-                        ),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.Black,
-                            strokeWidth = 3.dp
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.settings_send_message),
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = if (isEnabled) Color.Black else Color.White.copy(alpha = 0.2f)
+                    SettingsDialogCancelButton(
+                        text = stringResource(R.string.settings_cancel),
+                        onClick = onDismiss,
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .bounceClick(enabled = isEnabled) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onSubmit(title, description.text, rating, email)
+                            }
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (isEnabled) MaterialTheme.colorScheme.primary 
+                                else if (isLoading) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                else Color.White.copy(alpha = 0.05f)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.Black,
+                                strokeWidth = 2.5.dp
                             )
-                        )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.settings_send_message),
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = if (isEnabled) Color.Black else Color.White.copy(alpha = 0.2f)
+                                )
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 }
 
@@ -843,44 +877,48 @@ fun ColorSelectionDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                     
                     // Track the screen-space centre of the Conferma button
                     val confirmButtonCenter = remember { arrayOf(Offset.Zero) }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .onGloballyPositioned { coords ->
-                                val pos = coords.positionInWindow()
-                                confirmButtonCenter[0] = Offset(
-                                    x = pos.x + coords.size.width / 2f,
-                                    y = pos.y + coords.size.height / 2f
-                                )
-                            }
-                            .bounceClick {
-                                onSelect(tempSelectedColor, confirmButtonCenter[0])
-                                onDismiss()
-                            }
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(previewAccentColor),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(R.string.settings_confirm),
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                        SettingsDialogCancelButton(
+                            text = stringResource(R.string.settings_cancel),
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
                         )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                                .onGloballyPositioned { coords ->
+                                    val pos = coords.positionInWindow()
+                                    confirmButtonCenter[0] = Offset(
+                                        x = pos.x + coords.size.width / 2f,
+                                        y = pos.y + coords.size.height / 2f
+                                    )
+                                }
+                                .bounceClick {
+                                    onSelect(tempSelectedColor, confirmButtonCenter[0])
+                                    onDismiss()
+                                }
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(previewAccentColor),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.settings_confirm),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                color = Color.Black
+                            )
+                        }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    SettingsDialogCancelButton(
-                        text = stringResource(R.string.settings_cancel),
-                        onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
 }
 
@@ -896,81 +934,76 @@ fun LanguageSelectionDialog(
     val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.settings_language),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val options = listOf(
+            "system" to stringResource(R.string.settings_language_system),
+            "en" to stringResource(R.string.settings_language_en),
+            "it" to stringResource(R.string.settings_language_it),
+            "es" to stringResource(R.string.settings_language_es),
+            "fr" to stringResource(R.string.settings_language_fr),
+            "de" to stringResource(R.string.settings_language_de),
+            "pt" to stringResource(R.string.settings_language_pt),
+            "ru" to stringResource(R.string.settings_language_ru),
+            "hi" to stringResource(R.string.settings_language_hi),
+            "ja" to stringResource(R.string.settings_language_ja),
+            "ko" to stringResource(R.string.settings_language_ko),
+            "zh" to stringResource(R.string.settings_language_zh),
+            "id" to stringResource(R.string.settings_language_id),
+            "tr" to stringResource(R.string.settings_language_tr)
+        )
+        
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 420.dp)
+                .verticalFadingEdges(scrollState, topEdgeHeight = 24.dp, bottomEdgeHeight = 28.dp)
+                .verticalScroll(scrollState)
+        ) {
+            options.forEach { (value, label) ->
+                val isSelected = current == value
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .bounceClick {
+                            if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                            onSelect(value)
+                        }
+                        .background(
+                            color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.settings_language),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
-                        color = Color.White
+                        text = label,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                        color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
+                        modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val options = listOf(
-                        "system" to stringResource(R.string.settings_language_system),
-                        "en" to stringResource(R.string.settings_language_en),
-                        "it" to stringResource(R.string.settings_language_it),
-                        "es" to stringResource(R.string.settings_language_es),
-                        "fr" to stringResource(R.string.settings_language_fr),
-                        "de" to stringResource(R.string.settings_language_de),
-                        "pt" to stringResource(R.string.settings_language_pt),
-                        "ru" to stringResource(R.string.settings_language_ru),
-                        "hi" to stringResource(R.string.settings_language_hi),
-                        "ja" to stringResource(R.string.settings_language_ja),
-                        "ko" to stringResource(R.string.settings_language_ko),
-                        "zh" to stringResource(R.string.settings_language_zh),
-                        "id" to stringResource(R.string.settings_language_id),
-                        "tr" to stringResource(R.string.settings_language_tr)
-                    )
-                    
-                    val scrollState = rememberScrollState()
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 420.dp)
-                            .verticalFadingEdges(scrollState, topEdgeHeight = 24.dp, bottomEdgeHeight = 28.dp)
-                            .verticalScroll(scrollState)
-                    ) {
-                        options.forEach { (value, label) ->
-                            val isSelected = current == value
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .bounceClick {
-                                        if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
-                                        onSelect(value)
-                                    }
-                                    .background(
-                                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
-                                        shape = RoundedCornerShape(16.dp)
-                                    )
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
-                                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        SettingsDialogCancelButton(
-                            text = stringResource(R.string.settings_cancel),
-                            onClick = onDismiss,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                    }
                 }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        SettingsDialogCancelButton(
+            text = stringResource(R.string.settings_cancel),
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -985,61 +1018,56 @@ fun StartScreenSelectionDialog(
     val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.settings_default_start_tab),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val options = listOf(
-                        "feed" to stringResource(R.string.settings_default_start_feed),
-                        "home" to stringResource(R.string.settings_default_start_home),
-                        "visti" to stringResource(R.string.settings_default_start_visti)
-                    )
-                    
-                    options.forEach { (value, label) ->
-                        val isSelected = current == value
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .bounceClick {
-                                    if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
-                                    onSelect(value)
-                                }
-                                .background(
-                                    color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                                .clip(RoundedCornerShape(16.dp))
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.settings_default_start_tab),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val options = listOf(
+            "feed" to stringResource(R.string.settings_default_start_feed),
+            "home" to stringResource(R.string.settings_default_start_home),
+            "visti" to stringResource(R.string.settings_default_start_visti)
+        )
+        
+        options.forEach { (value, label) ->
+            val isSelected = current == value
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .bounceClick {
+                        if (vibrationEnabled) com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                        onSelect(value)
                     }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        SettingsDialogCancelButton(
-                            text = stringResource(R.string.settings_cancel),
-                            onClick = onDismiss,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                    }
-                }
+                    .background(
+                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.05f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                    color = if (isSelected) Color(0xFF1E1E1E) else Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        SettingsDialogCancelButton(
+            text = stringResource(R.string.settings_cancel),
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -1053,7 +1081,7 @@ fun StartMediaSelectionDialog(
     val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
-        modifier = Modifier.padding(24.dp),
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -1095,17 +1123,12 @@ fun StartMediaSelectionDialog(
             }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            SettingsDialogCancelButton(
-                text = stringResource(R.string.settings_cancel),
-                onClick = onDismiss,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-        }
+        Spacer(modifier = Modifier.height(20.dp))
+        SettingsDialogCancelButton(
+            text = stringResource(R.string.settings_cancel),
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

@@ -301,7 +301,7 @@
     <string name="avatar_selection_tv_show">Сериал</string>
     <string name="settings_export_backup">Экспорт резервной копии</string>
     <string name="settings_restore_backup">Восстановление резервной копии</string>
-    <string name="settings_select_file">Выберите файл (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">Выбрать файл</string>
     <string name="settings_send_message">Отправить сообщение</string>
     <string name="settings_interface_color">Цвет интерфейса</string>
     <string name="settings_custom">Пользовательский</string>
@@ -489,6 +489,10 @@
     <string name="search_fallback_keyword">Выбрано</string>
     <string name="search_active_keyword_format">Тема: %1$s</string>
     <string name="search_placeholder">Поиск фильмов, сериалов, людей...</string>
+    <string name="search_placeholder_movie">Поиск фильмов...</string>
+    <string name="search_placeholder_tv">Поиск сериалов...</string>
+    <string name="search_placeholder_person">Поиск людей...</string>
+    <string name="search_placeholder_collection">Поиск коллекций...</string>
     <string name="search_content_desc_clear">Очистить</string>
     <string name="search_content_desc_layout">Изменить вид</string>
     <string name="search_keyword_filter_warning">Примечание: фильтр по ключевым словам игнорируется при текстовом поиске.</string>
@@ -1248,5 +1252,17 @@
     <string name="detail_read_more">Читать далее</string>
     <string name="detail_read_less">Скрыть</string>
     <string name="comment_anonymous_user">Анонимный пользователь</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">Недавно добавленные</string>
+    <string name="flow_filter_sort_watch_date">Дата просмотра</string>
+    <string name="flow_filter_sort_rating">Личная оценка</string>
+    <string name="flow_filter_section_vibe">ЭМОЦИОНАЛЬНЫЙ ВАЙБ</string>
+    <string name="flow_filter_all_vibes">Все вайбы</string>
+    <string name="flow_filter_section_media">ТИП КОНТЕНТА</string>
+    <string name="flow_filter_media_all">Все</string>
+    <string name="flow_filter_media_movies">Фильмы</string>
+    <string name="flow_filter_media_tv">Сериалы</string>
+    <string name="flow_filter_reset">Сбросить</string>
 </resources>
 

@@ -80,8 +80,8 @@ fun FlickTroveModal(
             ) {
                 Card(
                     modifier = Modifier
-                        .widthIn(max = 450.dp)
-                        .fillMaxWidth(0.94f)
+                        .widthIn(max = 420.dp)
+                        .fillMaxWidth(0.90f)
                         .padding(horizontal = 16.dp)
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { /* Consume clicks */ },
                     shape = cardShape,
@@ -103,7 +103,7 @@ fun FlickTroveModal(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 24.dp),
+                                .padding(horizontal = 22.dp, vertical = 24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             content()

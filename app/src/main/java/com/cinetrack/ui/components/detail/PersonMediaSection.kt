@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import com.cinetrack.ui.utils.horizontalFadingEdges
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
@@ -144,7 +143,6 @@ fun PersonFilmographyTabs(
     Row(
         modifier = modifier
             .padding(vertical = 16.dp)
-            .horizontalFadingEdges(scrollState, leftEdgeWidth = 16.dp, rightEdgeWidth = 16.dp)
             .horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

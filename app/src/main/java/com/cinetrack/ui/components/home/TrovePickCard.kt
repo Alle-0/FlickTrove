@@ -30,7 +30,6 @@ import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
-import com.cinetrack.ui.navigation.sharedElementIfAvailable
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.util.ImageQuality
@@ -171,7 +170,7 @@ fun TrovePickCard(
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().sharedElementIfAvailable("movie_backdrop_${movie.id}"),
+                modifier = Modifier.fillMaxSize(),
                 onSuccess = { result ->
                     coroutineScope.launch {
                         val bitmap = result.result.drawable.toBitmap()
@@ -266,8 +265,7 @@ fun TrovePickCard(
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .heightIn(max = 60.dp) // Leggermente più piccolo del carosello hero
-                                .fillMaxWidth(0.9f)
-                                .sharedElementIfAvailable("movie_logo_${movie.id}"),
+                                .fillMaxWidth(0.9f),
                             alignment = Alignment.CenterStart
                         )
                     } else {

@@ -300,7 +300,7 @@
     <string name="avatar_selection_tv_show">Série</string>
     <string name="settings_export_backup">Exportar Backup</string>
     <string name="settings_restore_backup">Restaurar Backup</string>
-    <string name="settings_select_file">Selecionar arquivo (JSON/CSV/ZIP)</string>
+    <string name="settings_select_file">Selecionar arquivo</string>
     <string name="settings_send_message">Enviar Mensagem</string>
     <string name="settings_interface_color">Cor da Interface</string>
     <string name="settings_custom">Personalizado</string>
@@ -489,6 +489,10 @@
     <string name="search_fallback_keyword">Selecionado</string>
     <string name="search_active_keyword_format">Tema: %1$s</string>
     <string name="search_placeholder">Busque filmes, séries, pessoas...</string>
+    <string name="search_placeholder_movie">Busque filmes...</string>
+    <string name="search_placeholder_tv">Busque séries...</string>
+    <string name="search_placeholder_person">Busque pessoas...</string>
+    <string name="search_placeholder_collection">Busque coleções...</string>
     <string name="search_content_desc_clear">Limpar</string>
     <string name="search_content_desc_layout">Alterar Layout</string>
     <string name="search_keyword_filter_warning">Aviso: o filtro de palavras-chave é ignorado na busca de texto.</string>
@@ -1247,6 +1251,18 @@
     <string name="detail_read_more">Ler mais</string>
     <string name="detail_read_less">Ler menos</string>
     <string name="comment_anonymous_user">Usuário Anônimo</string>
+    
+    <!-- Flow Filter Strings -->
+    <string name="flow_filter_sort_recent">Adicionado recentemente</string>
+    <string name="flow_filter_sort_watch_date">Data assistida</string>
+    <string name="flow_filter_sort_rating">Avaliação pessoal</string>
+    <string name="flow_filter_section_vibe">VIBE EMOCIONAL</string>
+    <string name="flow_filter_all_vibes">Todas as Vibes</string>
+    <string name="flow_filter_section_media">TIPO DE CONTEÚDO</string>
+    <string name="flow_filter_media_all">Todos</string>
+    <string name="flow_filter_media_movies">Filmes</string>
+    <string name="flow_filter_media_tv">Séries de TV</string>
+    <string name="flow_filter_reset">Redefinir</string>
 </resources>
 
 

@@ -5,8 +5,11 @@ import javax.inject.Inject
 
 data class UserGenreProfile(
     val genreAffinities: Map<Long, Float>,
-    val maxAffinity: Float
-)
+    val maxAffinity: Float,
+    val genreCounts: Map<Long, Int> = emptyMap()
+) {
+    fun getGenreCount(genreId: Long): Int = genreCounts[genreId] ?: 0
+}
 
 class CalculateMatchScoreUseCase @Inject constructor() {
 
@@ -35,17 +38,22 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
         if (genreScores.isEmpty()) return null
 
-        // 2. Calcoliamo l'AFFINITÀ MEDIA per genere
+        // 2. Calcoliamo l'AFFINITÀ MEDIA per genere con fattore di confidenza / shrinkage
+        // (Un genere con 1 solo film visto subisce una penalità di incertezza rispetto a generi consolidati con molti titoli)
         val genreAffinities = genreScores.mapValues { (id, totalScore) ->
-            totalScore / (genreCounts[id] ?: 1)
+            val count = genreCounts[id] ?: 1
+            val rawAvg = totalScore / count
+            // Curva di saturazione: count / (count + 3f) -> 1 film = 25% confidenza, 3 film = 50%, 10 film = 77%
+            val confidence = count.toFloat() / (count + 3f)
+            rawAvg * confidence
         }
 
         val maxAffinity = genreAffinities.values.maxOrNull()?.coerceAtLeast(0.1f) ?: 1f
-        return UserGenreProfile(genreAffinities, maxAffinity)
+        return UserGenreProfile(genreAffinities, maxAffinity, genreCounts)
     }
 
     fun calculateScore(currentMovie: Movie, profile: UserGenreProfile?): Int? {
-        // 1. Bypass Voto Personale: se l'utente ha già votato il film, la sua valutazione è la verità assoluta
+        // 1. Bypass Voto Personale: se l'utente ha già votato il film, la sua valutazione è la verità assoluta (fino a 99%)
         val personalRating = currentMovie.personalRating
         if (personalRating != null && personalRating > 0) {
             val personalScore = (personalRating * 10f).toInt()
@@ -70,11 +78,26 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
         }
 
-        // 3. Bilanciamento 50/50: 50 punti da TMDB (normalizzato su 8.5 max) + 50 punti dall'affinità personale
-        val tmdbRating = currentMovie.voteAverage ?: 0.0
-        val baseScore = ((tmdbRating / 8.5f) * 50f).toFloat().coerceAtMost(50f)
+        // 3. Bilanciamento 50/50 con Smorzamento Bayesiano sul voto TMDB
+        // (Protegge da titoli con 2-3 voti spinti artificialmente a 9.7 o 10.0)
+        val rawTmdbRating = currentMovie.voteAverage ?: 0.0
+        val voteCount = currentMovie.voteCount ?: 0
+
+        val effectiveRating = if (voteCount > 0 && rawTmdbRating > 0.0) {
+            val priorVotes = 50.0 // Soglia di confidenza minima
+            val priorMean = 6.5   // Media globale TMDB neutra
+            ((voteCount * rawTmdbRating) + (priorVotes * priorMean)) / (voteCount + priorVotes)
+        } else if (rawTmdbRating > 0.0) {
+            (rawTmdbRating + (6.5 * 3.0)) / 4.0
+        } else {
+            0.0
+        }
+
+        val baseScore = ((effectiveRating / 8.5) * 50.0).toFloat().coerceIn(0f, 50f)
         val finalScore = (baseScore + matchBonus).toInt()
-        return finalScore.coerceIn(10, 99)
+
+        // 4. Cap Predittivo al 95%: le predizioni non votate non superano il 95% (96%-99% riservati a voti personali 10/10)
+        return finalScore.coerceIn(10, 95)
     }
 
     operator fun invoke(currentMovie: Movie, localMovies: List<Movie>): Int? {

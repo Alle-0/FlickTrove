@@ -202,7 +202,7 @@ fun PeekABooCheckInDrawer(
                 modifier = Modifier
                     .width(340.dp)
                     .wrapContentHeight()
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(32.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -215,7 +215,7 @@ fun PeekABooCheckInDrawer(
                         .matchParentSize()
                         .hazeGlass(
                             state = hazeState,
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(32.dp),
                             containerColor = Color(0xFF080B14),
                             useOffscreenStrategy = true,
                             borderColor = accentColor.copy(alpha = 0.5f)
@@ -257,12 +257,9 @@ fun PeekABooCheckInDrawer(
                             Box(
                                 modifier = Modifier
                                     .size(28.dp)
+                                    .bounceClick(scaleDown = 0.85f) { dismissAll() }
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.1f))
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) { dismissAll() },
+                                    .background(Color.White.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -328,11 +325,6 @@ fun PeekABooCheckInDrawer(
                                         ) {
                                             rowVibes.forEach { vibe ->
                                                 val isSelected = selectedVibes.contains(vibe)
-                                                val scale by animateFloatAsState(
-                                                    targetValue = if (isSelected) 1.08f else 1.0f,
-                                                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                                                    label = "vibeScale"
-                                                )
                                                 val isDisabled = !isSelected && selectedVibes.size >= 3
                                                 val originalVibes = remember(movie?.emotionalVibes) {
                                                     movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
@@ -367,7 +359,6 @@ fun PeekABooCheckInDrawer(
                                                     vibe = vibe.copy(percentage = realPercentage),
                                                     isSelected = isSelected,
                                                     isDisabled = isDisabled,
-                                                    scale = scale,
                                                     accentColor = accentColor,
                                                     onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -481,18 +472,22 @@ fun PeekABooCheckInDrawer(
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .height(6.dp)
-                                        .width(width)
-                                        .clip(CircleShape)
-                                        .background(color)
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null
-                                        ) {
+                                        .height(14.dp)
+                                        .width(width + 8.dp)
+                                        .bounceClick(scaleDown = 0.85f) {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             currentPage = index
-                                        }
-                                )
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(6.dp)
+                                            .width(width)
+                                            .clip(CircleShape)
+                                            .background(color)
+                                    )
+                                }
                             }
                         }
 
@@ -509,14 +504,13 @@ fun PeekABooCheckInDrawer(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .height(40.dp)
-                                        .width(40.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.White.copy(alpha = 0.1f))
-                                        .bounceClick(scaleDown = 0.95f) {
+                                        .size(40.dp)
+                                        .bounceClick(scaleDown = 0.90f) {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             currentPage -= 1
-                                        },
+                                        }
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(Color.White.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -533,13 +527,7 @@ fun PeekABooCheckInDrawer(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(40.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
-                                        )
-                                    )
-                                    .bounceClick(scaleDown = 0.95f) {
+                                    .bounceClick(scaleDown = 0.96f) {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         if (currentPage < 2) {
                                             currentPage += 1
@@ -553,7 +541,13 @@ fun PeekABooCheckInDrawer(
                                             onSave(finalRating, selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
                                             dismissAll()
                                         }
-                                    },
+                                    }
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
+                                        )
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -589,10 +583,7 @@ fun PeekABooCheckInDrawer(
                 modifier = Modifier
                     .width(36.dp)
                     .height(96.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
+                    .bounceClick(scaleDown = 0.94f) {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         isExpanded = true
                     },
@@ -644,15 +635,16 @@ private fun VibeChip(
     vibe: EmotionalVibe,
     isSelected: Boolean,
     isDisabled: Boolean = false,
-    scale: Float,
     accentColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
-            .scale(scale)
             .alpha(if (isDisabled) 0.3f else 1f)
+            .bounceClick(scaleDown = if (isDisabled) 1f else 0.90f) {
+                if (!isDisabled) onClick()
+            }
             .clip(RoundedCornerShape(24.dp))
             .background(
                 if (isSelected) accentColor.copy(alpha = 0.18f)
@@ -662,11 +654,6 @@ private fun VibeChip(
                 width = if (isSelected) 1.5.dp else 0.dp,
                 color = if (isSelected) accentColor else Color.Transparent,
                 shape = RoundedCornerShape(24.dp)
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
             )
             .padding(horizontal = 8.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
@@ -716,23 +703,13 @@ private fun CastMvpChip(
     mvpPercentage: Int? = null,
     onClick: () -> Unit
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isMvp) 1.06f else 1.0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "mvpScale"
-    )
     val mvpGold = Color(0xFFFFC800)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(64.dp)
-            .scale(scale)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            )
+            .bounceClick(scaleDown = 0.92f) { onClick() }
     ) {
         Box {
         Box(
