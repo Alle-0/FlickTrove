@@ -1144,6 +1144,12 @@
     <string name="updates_social_on">पर</string>
     <string name="updates_social_recent">हालिया</string>
     <string name="updates_social_read">पढ़ें</string>
+    <string name="updates_social_and_others">और %1$d अन्य</string>
+    <string name="updates_social_and_other">और 1 अन्य</string>
+    <string name="updates_social_liked_multiple">आपकी %1$d टिप्पणियों को पसंद किया</string>
+    <string name="updates_social_replied_multiple">%1$d बार उत्तर दिया</string>
+    <string name="updates_social_liked_plural">आपकी टिप्पणियों को पसंद किया</string>
+    <string name="updates_social_replied_plural">आपकी टिप्पणियों का उत्तर दिया</string>
     <string name="comment_banned_permanent">आप टिप्पणी नहीं कर सकते। आपको स्थायी रूप से निलंबित कर दिया गया है।</string>
     <string name="comment_banned_temporary">आप टिप्पणी नहीं कर सकते। आपको %1$s तक निलंबित कर दिया गया है।</string>
     <string name="comment_cooldown_wait">फिर से टिप्पणी करने से पहले %1$d सेकंड प्रतीक्षा करें।</string>

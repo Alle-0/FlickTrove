@@ -1225,6 +1225,12 @@
     <string name="updates_social_on">作品:</string>
     <string name="updates_social_recent">最近</string>
     <string name="updates_social_read">既読</string>
+    <string name="updates_social_and_others">他%1$d人</string>
+    <string name="updates_social_and_other">他1人</string>
+    <string name="updates_social_liked_multiple">あなたのコメント%1$d件をいいねしました</string>
+    <string name="updates_social_replied_multiple">%1$d回返信しました</string>
+    <string name="updates_social_liked_plural">あなたのコメントをいいねしました</string>
+    <string name="updates_social_replied_plural">あなたのコメントに返信しました</string>
     <string name="comment_banned_permanent">コメントできません。アカウントが無期限停止されています。</string>
     <string name="comment_banned_temporary">コメントできません。アカウントは %1$s まで利用停止されています。</string>
     <string name="comment_cooldown_wait">次のコメントを投稿するまで %1$d 秒お待ちください。</string>

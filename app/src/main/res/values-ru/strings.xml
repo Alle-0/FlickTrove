@@ -1149,6 +1149,12 @@
     <string name="updates_social_on">в</string>
     <string name="updates_social_recent">Недавние</string>
     <string name="updates_social_read">Прочитано</string>
+    <string name="updates_social_and_others">и еще %1$d чел.</string>
+    <string name="updates_social_and_other">и еще 1 человек</string>
+    <string name="updates_social_liked_multiple">оценил(а) %1$d ваших комментариев</string>
+    <string name="updates_social_replied_multiple">ответил(а) %1$d раз</string>
+    <string name="updates_social_liked_plural">оценили ваши комментарии</string>
+    <string name="updates_social_replied_plural">ответили на ваши комментарии</string>
     <string name="comment_banned_permanent">Вы не можете комментировать. Вы были навсегда заблокированы.</string>
     <string name="comment_banned_temporary">Вы не можете комментировать. Вы заблокированы до %1$s.</string>
     <string name="comment_cooldown_wait">Подождите %1$d секунд перед отправкой нового комментария.</string>

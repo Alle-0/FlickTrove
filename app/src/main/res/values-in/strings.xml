@@ -1225,6 +1225,12 @@
     <string name="updates_social_on">pada</string>
     <string name="updates_social_recent">Terbaru</string>
     <string name="updates_social_read">Dibaca</string>
+    <string name="updates_social_and_others">dan %1$d lainnya</string>
+    <string name="updates_social_and_other">dan 1 lainnya</string>
+    <string name="updates_social_liked_multiple">menyukai %1$d komentar Anda</string>
+    <string name="updates_social_replied_multiple">membalas %1$d kali</string>
+    <string name="updates_social_liked_plural">menyukai komentar Anda</string>
+    <string name="updates_social_replied_plural">membalas komentar Anda</string>
     <string name="comment_banned_permanent">Anda tidak dapat berkomentar. Akun Anda telah ditangguhkan secara permanen.</string>
     <string name="comment_banned_temporary">Anda tidak dapat berkomentar. Akun Anda telah ditangguhkan hingga %1$s.</string>
     <string name="comment_cooldown_wait">Tunggu %1$d detik sebelum berkomentar lagi.</string>

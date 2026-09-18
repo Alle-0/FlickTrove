@@ -467,6 +467,13 @@ fun UpdatesScreen(
                 } // end HorizontalPager lambda
             } else { // closes if (mainTab == 0)
                         // SOCIAL TAB
+                        val unreadSocialNotifs = remember(uiState.socialNotifications) {
+                            uiState.socialNotifications.filter { !it.isRead }.sortedByDescending { it.latestTimestamp?.seconds ?: 0L }
+                        }
+                        val readSocialNotifs = remember(uiState.socialNotifications) {
+                            uiState.socialNotifications.filter { it.isRead }.sortedByDescending { it.latestTimestamp?.seconds ?: 0L }
+                        }
+
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -492,9 +499,6 @@ fun UpdatesScreen(
                                         }
                                     }
                                 } else {
-                                    val unreadSocialNotifs = uiState.socialNotifications.filter { !it.isRead }.sortedByDescending { it.createdAt }
-                                    val readSocialNotifs = uiState.socialNotifications.filter { it.isRead }.sortedByDescending { it.createdAt }
-
                                     if (unreadSocialNotifs.isNotEmpty()) {
                                         item {
                                             SectionHeader(
@@ -539,7 +543,7 @@ fun UpdatesScreen(
                                                         val currentTime = android.os.SystemClock.elapsedRealtime()
                                                         if (currentTime - lastSocialClickTime > 500L) {
                                                             lastSocialClickTime = currentTime
-                                                            viewModel.markSocialNotificationAsRead(notif.id)
+                                                            viewModel.markSocialNotificationAsRead(notif)
                                                             val movie = Movie(
                                                                 id = notif.mediaId.toLongOrNull() ?: 0L,
                                                                 mediaType = notif.mediaType,
@@ -555,7 +559,7 @@ fun UpdatesScreen(
                                                         }
                                                     },
                                                     onMarkRead = {
-                                                        viewModel.markSocialNotificationAsRead(notif.id)
+                                                        viewModel.markSocialNotificationAsRead(notif)
                                                     }
                                                 )
                                             }
@@ -608,26 +612,26 @@ fun UpdatesScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .offset(y = (-10).dp)
                         .hazeGlass(
                             state = internalHazeState,
                             shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
                             borderWidth = 0.dp
                         )
-                        .padding(top = 10.dp)
                         .zIndex(10f),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .displayCutoutPadding()
+                            .padding(top = 8.dp, bottom = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .statusBarsPadding()
-                                .displayCutoutPadding()
-                                .height(64.dp),
+                                .height(44.dp),
                             contentAlignment = Alignment.Center
                         ) {
                     // Back Button

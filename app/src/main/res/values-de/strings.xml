@@ -1144,6 +1144,12 @@
     <string name="updates_social_on">zu</string>
     <string name="updates_social_recent">Zuletzt</string>
     <string name="updates_social_read">Gelesen</string>
+    <string name="updates_social_and_others">und %1$d weitere</string>
+    <string name="updates_social_and_other">und 1 weitere Person</string>
+    <string name="updates_social_liked_multiple">hat %1$d deiner Kommentare geliked</string>
+    <string name="updates_social_replied_multiple">hat %1$d Mal geantwortet</string>
+    <string name="updates_social_liked_plural">haben deine Kommentare geliked</string>
+    <string name="updates_social_replied_plural">haben auf deine Kommentare geantwortet</string>
     <string name="comment_banned_permanent">Sie können nicht kommentieren. Sie wurden dauerhaft gesperrt.</string>
     <string name="comment_banned_temporary">Sie können nicht kommentieren. Sie wurden bis zum %1$s gesperrt.</string>
     <string name="comment_cooldown_wait">Warte %1$d Sekunden, bevor du erneut kommentierst.</string>

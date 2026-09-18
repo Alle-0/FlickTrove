@@ -511,6 +511,7 @@ class MovieDetailViewModel @Inject constructor(
         // Ottimistico
         val currentComments = _appComments.value.toMutableList()
         val index = currentComments.indexOfFirst { it.id == commentId }
+        val commentSnippet = if (index != -1) currentComments[index].text else null
         if (index != -1) {
             val comment = currentComments[index]
             val isLiked = comment.likedBy.contains(uId)
@@ -526,7 +527,14 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
             val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
-            val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
+            val success = commentRepository.toggleLike(
+                movieId.toString(),
+                commentId,
+                mediaType,
+                mediaTitle,
+                mediaImage,
+                commentSnippet = commentSnippet
+            )
             if (!success) {
                 _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
             }

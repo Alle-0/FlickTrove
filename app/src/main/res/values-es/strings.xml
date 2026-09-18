@@ -1147,6 +1147,12 @@
     <string name="updates_social_on">en</string>
     <string name="updates_social_recent">Recientes</string>
     <string name="updates_social_read">Leídos</string>
+    <string name="updates_social_and_others">y otras %1$d personas</string>
+    <string name="updates_social_and_other">y otra persona</string>
+    <string name="updates_social_liked_multiple">le ha dado me gusta a %1$d de tus comentarios</string>
+    <string name="updates_social_replied_multiple">ha respondido %1$d veces</string>
+    <string name="updates_social_liked_plural">les han dado me gusta a tus comentarios</string>
+    <string name="updates_social_replied_plural">han respondido a tus comentarios</string>
     <string name="comment_banned_permanent">No puedes comentar. Has sido suspendido permanentemente.</string>
     <string name="comment_banned_temporary">No puedes comentar. Has sido suspendido hasta el %1$s.</string>
     <string name="comment_cooldown_wait">Espera %1$d segundos antes de comentar de nuevo.</string>

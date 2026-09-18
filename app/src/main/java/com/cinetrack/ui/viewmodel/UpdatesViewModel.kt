@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import com.cinetrack.data.model.SocialNotification
+import com.cinetrack.data.model.GroupedSocialNotification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -26,7 +27,7 @@ import com.cinetrack.ui.utils.UiText
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
     val notificationCount: Int = 0,
-    val socialNotifications: ImmutableList<SocialNotification> = persistentListOf(),
+    val socialNotifications: ImmutableList<GroupedSocialNotification> = persistentListOf(),
     val socialUnreadCount: Int = 0,
     val totalUnreadCount: Int = 0,
     val isLoading: Boolean = true
@@ -44,7 +45,7 @@ class UpdatesViewModel @Inject constructor(
         actionFeedbackManager.emit(message)
     }
 
-    private val _socialNotifications = MutableStateFlow<ImmutableList<SocialNotification>>(persistentListOf())
+    private val _socialNotifications = MutableStateFlow<ImmutableList<GroupedSocialNotification>>(persistentListOf())
     private val _socialUnreadCount = MutableStateFlow(0)
 
     init {
@@ -109,13 +110,49 @@ class UpdatesViewModel @Inject constructor(
         }
     }
 
+    private fun groupSocialNotifications(rawNotifs: List<SocialNotification>): ImmutableList<GroupedSocialNotification> {
+        if (rawNotifs.isEmpty()) return persistentListOf()
+
+        val grouped = rawNotifs.groupBy { "${it.type}_${it.mediaId}_${it.isRead}" }
+
+        val result = grouped.map { (_, groupItems) ->
+            val sortedItems = groupItems.sortedByDescending { it.createdAt?.seconds ?: 0L }
+            val latest = sortedItems.first()
+
+            val senders = sortedItems.map { it.senderName.ifBlank { "Qualcuno" } }.distinct()
+            val snippet = sortedItems.firstOrNull { !it.snippet.isNullOrBlank() }?.snippet
+
+            GroupedSocialNotification(
+                id = latest.id,
+                type = latest.type,
+                mediaId = latest.mediaId,
+                mediaType = latest.mediaType,
+                mediaTitle = latest.mediaTitle,
+                mediaImage = latest.mediaImage,
+                commentId = latest.commentId,
+                senders = senders,
+                count = sortedItems.size,
+                latestTimestamp = latest.createdAt,
+                snippet = snippet,
+                isRead = latest.isRead,
+                originalNotificationIds = sortedItems.map { it.id }
+            )
+        }.sortedByDescending { it.latestTimestamp?.seconds ?: 0L }
+
+        return result.toImmutableList()
+    }
+
+    private var socialListenerRegistration: com.google.firebase.firestore.ListenerRegistration? = null
+    private var hasPerformedRetentionCleanup = false
+
     private fun observeSocialNotifications() {
         val userId = auth.currentUser?.uid ?: return
         
-        firestore.collection("user_social_notifications").document(userId)
+        socialListenerRegistration?.remove()
+        socialListenerRegistration = firestore.collection("user_social_notifications").document(userId)
             .collection("items")
             .orderBy("createdAt", Query.Direction.DESCENDING)
-            .limit(50)
+            .limit(35)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     error.printStackTrace()
@@ -123,11 +160,42 @@ class UpdatesViewModel @Inject constructor(
                 }
                 
                 if (snapshot != null) {
-                    val notifs = snapshot.documents.mapNotNull { it.toObject(SocialNotification::class.java) }
-                    _socialNotifications.value = notifs.toImmutableList()
-                    _socialUnreadCount.value = notifs.count { !it.isRead }
+                    val rawNotifs = snapshot.documents.mapNotNull { it.toObject(SocialNotification::class.java) }
+                    val grouped = groupSocialNotifications(rawNotifs)
+                    _socialNotifications.value = grouped
+                    _socialUnreadCount.value = grouped.count { !it.isRead }
+
+                    if (!hasPerformedRetentionCleanup) {
+                        hasPerformedRetentionCleanup = true
+                        cleanupStaleReadNotifications(userId, rawNotifs)
+                    }
                 }
             }
+    }
+
+    private fun cleanupStaleReadNotifications(userId: String, notifs: List<SocialNotification>) {
+        val thirtyDaysAgo = java.util.Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000)
+        val staleIds = notifs.filter { 
+            it.isRead && it.createdAt != null && it.createdAt.toDate().before(thirtyDaysAgo) 
+        }.map { it.id }
+
+        if (staleIds.isNotEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    staleIds.chunked(500).forEach { chunk ->
+                        val batch = firestore.batch()
+                        for (id in chunk) {
+                            val ref = firestore.collection("user_social_notifications").document(userId)
+                                .collection("items").document(id)
+                            batch.delete(ref)
+                        }
+                        batch.commit().await()
+                    }
+                } catch (e: Exception) {
+                    // Ignore background cleanup failures
+                }
+            }
+        }
     }
 
     val uiState: StateFlow<UpdatesUiState> = combine(
@@ -202,31 +270,43 @@ class UpdatesViewModel @Inject constructor(
         }
     }
 
-    fun markSocialNotificationAsRead(id: String) {
-        val userId = auth.currentUser?.uid ?: return
-        firestore.collection("user_social_notifications").document(userId)
-            .collection("items").document(id)
-            .update("isRead", true)
+    fun markSocialNotificationAsRead(notification: GroupedSocialNotification) {
+        markSocialNotificationsAsRead(notification.originalNotificationIds)
     }
 
-    fun markAllSocialNotificationsAsRead() {
+    fun markSocialNotificationAsRead(id: String) {
+        markSocialNotificationsAsRead(listOf(id))
+    }
+
+    fun markSocialNotificationsAsRead(ids: List<String>) {
         val userId = auth.currentUser?.uid ?: return
+        if (ids.isEmpty()) return
         viewModelScope.launch {
             try {
-                val unreadDocs = firestore.collection("user_social_notifications").document(userId)
-                    .collection("items").whereEqualTo("isRead", false).get().await()
-                
-                if (unreadDocs.isEmpty) return@launch
-                
-                val batch = firestore.batch()
-                for (doc in unreadDocs.documents) {
-                    batch.update(doc.reference, "isRead", true)
+                ids.chunked(500).forEach { chunk ->
+                    val batch = firestore.batch()
+                    for (id in chunk) {
+                        val ref = firestore.collection("user_social_notifications").document(userId)
+                            .collection("items").document(id)
+                        batch.update(ref, "isRead", true)
+                    }
+                    batch.commit().await()
                 }
-                batch.commit().await()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun markAllSocialNotificationsAsRead() {
+        // Zero-read optimization: use unread IDs already cached in StateFlow rather than executing a new Firestore query
+        val unreadIds = _socialNotifications.value
+            .filter { !it.isRead }
+            .flatMap { it.originalNotificationIds }
+            .distinct()
+
+        if (unreadIds.isEmpty()) return
+        markSocialNotificationsAsRead(unreadIds)
     }
 
     fun deleteSocialNotification(id: String) {
@@ -234,5 +314,11 @@ class UpdatesViewModel @Inject constructor(
         firestore.collection("user_social_notifications").document(userId)
             .collection("items").document(id)
             .delete()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        socialListenerRegistration?.remove()
+        socialListenerRegistration = null
     }
 }

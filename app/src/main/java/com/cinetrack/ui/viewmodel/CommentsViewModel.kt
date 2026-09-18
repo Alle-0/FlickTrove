@@ -326,6 +326,7 @@ class CommentsViewModel @Inject constructor(
         // Aggiornamento ottimistico della UI
         val currentComments = _comments.value.toMutableList()
         val index = currentComments.indexOfFirst { it.id == commentId }
+        val commentSnippet = if (index != -1) currentComments[index].text else null
         if (index != -1) {
             val comment = currentComments[index]
             val isLiked = comment.likedBy.contains(uId)
@@ -339,7 +340,14 @@ class CommentsViewModel @Inject constructor(
 
         // Chiamata di rete in background
         viewModelScope.launch {
-            val success = commentRepository.toggleLike(currentMediaId, commentId, currentMediaType, mediaTitle, mediaImage)
+            val success = commentRepository.toggleLike(
+                currentMediaId,
+                commentId,
+                currentMediaType,
+                mediaTitle,
+                mediaImage,
+                commentSnippet = commentSnippet
+            )
             if (!success) {
                 // In caso di fallimento, ripristina lo stato reale dal server (aggiornando solo il commento specifico o rifacendo la query)
                 refreshComments()

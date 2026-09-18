@@ -601,6 +601,12 @@
     <string name="updates_social_on">su</string>
     <string name="updates_social_recent">Recenti</string>
     <string name="updates_social_read">Letti</string>
+    <string name="updates_social_and_others">e altre %1$d persone</string>
+    <string name="updates_social_and_other">e un\'altra persona</string>
+    <string name="updates_social_liked_multiple">ha messo mi piace a %1$d tuoi commenti</string>
+    <string name="updates_social_replied_multiple">ha risposto %1$d volte</string>
+    <string name="updates_social_liked_plural">hanno messo mi piace ai tuoi commenti</string>
+    <string name="updates_social_replied_plural">hanno risposto ai tuoi commenti</string>
     <string name="updates_your_reminders">I tuoi Promemoria</string>
     <string name="updates_waiting_count">%1$d in attesa</string>
     <string name="updates_no_notifications">Nessuna notifica recente.</string>

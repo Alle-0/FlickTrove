@@ -185,6 +185,7 @@ class CommentRepository @Inject constructor(
                     "commentId" to generatedCommentId,
                     "senderName" to (user.displayName ?: "Qualcuno"),
                     "senderUserId" to user.uid,
+                    "snippet" to text.take(80),
                     "createdAt" to Timestamp.now(),
                     "isRead" to false
                 )
@@ -194,24 +195,19 @@ class CommentRepository @Inject constructor(
                     e.printStackTrace()
                 }
 
+                // Push notification: send directly without redundant Firestore reads
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     try {
-                        val prefsDoc = firestore.collection("users").document(resolvedParentUserId)
-                            .collection("settings").document("preferences").get().await()
-                        val notificationsSocial = prefsDoc.getBoolean("notificationsSocial") ?: true
-
-                        if (notificationsSocial) {
-                            com.cinetrack.util.SupabaseNotificationService.notifyUser(
-                                targetUserId = resolvedParentUserId,
-                                titleLocKey = "notification_reply_title",
-                                bodyLocKey = "notification_reply_body",
-                                bodyLocArgs = listOf(user.displayName ?: "Qualcuno"),
-                                mediaId = mediaId.toLongOrNull() ?: 0L,
-                                mediaType = mediaType,
-                                mediaImage = mediaImage,
-                                commentId = generatedCommentId
-                            )
-                        }
+                        com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                            targetUserId = resolvedParentUserId,
+                            titleLocKey = "notification_reply_title",
+                            bodyLocKey = "notification_reply_body",
+                            bodyLocArgs = listOf(user.displayName ?: "Qualcuno"),
+                            mediaId = mediaId.toLongOrNull() ?: 0L,
+                            mediaType = mediaType,
+                            mediaImage = mediaImage,
+                            commentId = generatedCommentId
+                        )
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -230,7 +226,8 @@ class CommentRepository @Inject constructor(
         commentId: String,
         mediaType: String,
         mediaTitle: String,
-        mediaImage: String? = null
+        mediaImage: String? = null,
+        commentSnippet: String? = null
     ): Boolean {
         val userId = auth.currentUser?.uid ?: return false
         val docRef = getMediaCommentsCollection(mediaId).document(commentId)
@@ -238,6 +235,7 @@ class CommentRepository @Inject constructor(
         var targetOwnerId: String? = null
         var isNewLike = false
         var isUnlike = false
+        var resolvedCommentContent: String? = null
 
         return try {
             firestore.runTransaction { transaction ->
@@ -264,6 +262,7 @@ class CommentRepository @Inject constructor(
                     if (commentOwnerId != null && commentOwnerId != userId) {
                         targetOwnerId = commentOwnerId
                         isNewLike = true
+                        resolvedCommentContent = commentSnippet ?: snapshot.getString("text")
                     }
                 }
             }.await()
@@ -287,27 +286,23 @@ class CommentRepository @Inject constructor(
                                 "commentId" to commentId,
                                 "senderName" to (auth.currentUser?.displayName ?: "Qualcuno"),
                                 "senderUserId" to userId,
+                                "snippet" to (commentSnippet ?: resolvedCommentContent)?.take(80),
                                 "createdAt" to Timestamp.now(),
                                 "isRead" to false
                             )
-                            notifRef.set(notif).await()
+                            notifRef.set(notif, com.google.firebase.firestore.SetOptions.merge()).await()
 
-                            val prefsDoc = firestore.collection("users").document(commentOwnerId)
-                                .collection("settings").document("preferences").get().await()
-                            val notificationsSocial = prefsDoc.getBoolean("notificationsSocial") ?: true
-
-                            if (notificationsSocial) {
-                                com.cinetrack.util.SupabaseNotificationService.notifyUser(
-                                    targetUserId = commentOwnerId,
-                                    titleLocKey = "notification_like_title",
-                                    bodyLocKey = "notification_like_body",
-                                    bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
-                                    mediaId = mediaId.toLongOrNull() ?: 0L,
-                                    mediaType = mediaType,
-                                    mediaImage = mediaImage,
-                                    commentId = commentId
-                                )
-                            }
+                            // Push notification: send directly without redundant Firestore reads
+                            com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                                targetUserId = commentOwnerId,
+                                titleLocKey = "notification_like_title",
+                                bodyLocKey = "notification_like_body",
+                                bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
+                                mediaId = mediaId.toLongOrNull() ?: 0L,
+                                mediaType = mediaType,
+                                mediaImage = mediaImage,
+                                commentId = commentId
+                            )
                         } else if (isUnlike) {
                             notifRef.delete().await()
                         }

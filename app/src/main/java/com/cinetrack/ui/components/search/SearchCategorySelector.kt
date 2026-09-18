@@ -40,7 +40,7 @@ fun SearchCategorySelector(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .padding(bottom = 8.dp),
+            .padding(bottom = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(

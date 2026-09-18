@@ -1225,6 +1225,12 @@
     <string name="updates_social_on">작품:</string>
     <string name="updates_social_recent">최근</string>
     <string name="updates_social_read">읽음</string>
+    <string name="updates_social_and_others">외 %1$d명</string>
+    <string name="updates_social_and_other">외 1명</string>
+    <string name="updates_social_liked_multiple">회원님의 댓글 %1$d개를 좋아합니다</string>
+    <string name="updates_social_replied_multiple">%1$d번 답글을 남겼습니다</string>
+    <string name="updates_social_liked_plural">회원님의 댓글을 좋아합니다</string>
+    <string name="updates_social_replied_plural">회원님의 댓글에 답글을 남겼습니다</string>
     <string name="comment_banned_permanent">댓글 작성이 제한되었습니다. 영구 정지 상태입니다.</string>
     <string name="comment_banned_temporary">댓글을 작성할 수 없습니다. 이용 정지 기간: %1$s까지.</string>
     <string name="comment_cooldown_wait">다시 댓글을 작성하려면 %1$d초 동안 기다려 주세요.</string>

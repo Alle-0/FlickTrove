@@ -3,6 +3,8 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.*
@@ -106,14 +108,11 @@ fun CategoryTabSelector(
         val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
         val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
         val animDragY = remember { Animatable(0f) }
+        val flightDynamics = remember { Animatable(0f) }
 
         var isSelectedTabPressed by remember { mutableStateOf(false) }
         var isDragging by remember { mutableStateOf(false) }
         var previousIndex by remember { mutableStateOf(selectedIndex) }
-        var flightStartCenter by remember { mutableStateOf(0f) }
-        var flightTargetCenter by remember { mutableStateOf(0f) }
-        var isFlightActive by remember { mutableStateOf(false) }
-        var peakFlightBoost by remember { mutableStateOf(0.30f) }
         var pressedTabIndex by remember { mutableStateOf(-1) }
 
         // Apple-style Leading & Trailing edge spring physics
@@ -133,11 +132,22 @@ fun CategoryTabSelector(
                 return@LaunchedEffect
             }
 
+            // Oscillatore inerziale unificato: sale in volo (ingrandito), scende a destinazione e per pura inerzia fisica
+            // oltrepassa lo zero comprimendosi (rimpicciolimento), per poi stabilizzarsi a 1.
             if (isTabChangedByClick) {
-                flightStartCenter = (animLeft.value + animRight.value) / 2f
-                flightTargetCenter = (targetLeft + targetRight) / 2f
-                peakFlightBoost = (0.30f + (indexDistance - 1) * 0.04f).coerceAtMost(0.40f)
-                isFlightActive = true
+                val riseDuration = if (indexDistance > 1) 110 else 85
+                val peakBoost = (0.24f + (indexDistance - 1) * 0.05f).coerceAtMost(0.34f)
+                launch {
+                    flightDynamics.snapTo(0f)
+                    flightDynamics.animateTo(peakBoost, tween(riseDuration, easing = FastOutSlowInEasing))
+                    flightDynamics.animateTo(
+                        0f,
+                        spring(
+                            dampingRatio = 0.50f,
+                            stiffness = 300f
+                        )
+                    )
+                }
             }
 
             if (targetLeft > animLeft.value) {
@@ -145,43 +155,57 @@ fun CategoryTabSelector(
                 val jobRight = launch {
                     animRight.animateTo(
                         targetValue = targetRight,
-                        animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
+                        animationSpec = spring(
+                            stiffness = 650f,
+                            dampingRatio = 0.64f,
+                            visibilityThreshold = 0.5f
+                        )
                     )
                 }
                 val jobLeft = launch {
                     animLeft.animateTo(
                         targetValue = targetLeft,
-                        animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
+                        animationSpec = spring(
+                            stiffness = 480f,
+                            dampingRatio = 0.68f,
+                            visibilityThreshold = 0.5f
+                        )
                     )
                 }
                 jobRight.join()
                 jobLeft.join()
-                isFlightActive = false
-            } else {
+            } else if (targetLeft < animLeft.value) {
                 // Moving left: Left edge leads (fast spring), Right edge trails (softer spring) -> stretches horizontally
                 val jobLeft = launch {
                     animLeft.animateTo(
                         targetValue = targetLeft,
-                        animationSpec = spring(stiffness = 700f, dampingRatio = 0.72f)
+                        animationSpec = spring(
+                            stiffness = 650f,
+                            dampingRatio = 0.64f,
+                            visibilityThreshold = 0.5f
+                        )
                     )
                 }
                 val jobRight = launch {
                     animRight.animateTo(
                         targetValue = targetRight,
-                        animationSpec = spring(stiffness = 460f, dampingRatio = 0.78f)
+                        animationSpec = spring(
+                            stiffness = 480f,
+                            dampingRatio = 0.68f,
+                            visibilityThreshold = 0.5f
+                        )
                     )
                 }
                 jobLeft.join()
                 jobRight.join()
-                isFlightActive = false
             }
         }
 
-        // Spring animation for scaling up the indicator when held/pressed or dragged
+        // Spring animation for scaling the indicator when held/pressed or dragged
         val dragScaleY by animateFloatAsState(
             targetValue = if (!advancedEffectsEnabled) 1f
-                else if (isDragging) 1.12f
-                else if (isSelectedTabPressed) 1.05f
+                else if (isDragging) 1.25f
+                else if (isSelectedTabPressed) 1.07f
                 else 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -191,8 +215,8 @@ fun CategoryTabSelector(
         )
         val dragScaleX by animateFloatAsState(
             targetValue = if (!advancedEffectsEnabled) 1f
-                else if (isDragging) 1.05f
-                else if (isSelectedTabPressed) 1.02f
+                else if (isDragging) 1.12f
+                else if (isSelectedTabPressed) 1.04f
                 else 1f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -312,18 +336,18 @@ fun CategoryTabSelector(
                             // Effetto squish (schiacciamento) controllato contro i bordi in X
                             val maxOverscroll = normalWidthPx * 0.8f 
                             if (dragTargetLeft < paddingPx) {
-                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
-                                val maxPenetration = paddingPx * 1.5f
-                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
-                                targetLeft = paddingPx - penetration
-                                targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f 
-                            } else if (dragTargetRight > maxRight) {
-                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
-                                val maxPenetration = paddingPx * 1.5f
-                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
-                                targetRight = maxRight + penetration
-                                targetLeft = maxLeft + overscroll * 0.15f
-                            }
+                                 val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
+                                 val maxPenetration = paddingPx * 1.5f
+                                 val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                 targetLeft = paddingPx - penetration
+                                 targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f 
+                             } else if (dragTargetRight > maxRight) {
+                                 val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
+                                 val maxPenetration = paddingPx * 1.5f
+                                 val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                 targetRight = maxRight + penetration
+                                 targetLeft = maxLeft + overscroll * 0.15f
+                             }
 
                             // Effetto Jelly + Inerzia
                             val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
@@ -377,16 +401,9 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
-                            val totalDist = flightTargetCenter - flightStartCenter
-                            if (kotlin.math.abs(totalDist) > 1f) {
-                                val fraction = ((centerXPx - flightStartCenter) / totalDist).coerceIn(0f, 1f)
-                                kotlin.math.sin(fraction * Math.PI.toFloat()) * peakFlightBoost
-                            } else 0f
-                        } else 0f
-
-                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
+                        val flightOffset = flightDynamics.value
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
                         val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
@@ -418,16 +435,9 @@ fun CategoryTabSelector(
                         val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
                         val centerXPx = (currentLeft + currentRight) / 2f
 
-                        val flightEnlargeY = if (advancedEffectsEnabled && isFlightActive) {
-                            val totalDist = flightTargetCenter - flightStartCenter
-                            if (kotlin.math.abs(totalDist) > 1f) {
-                                val fraction = ((centerXPx - flightStartCenter) / totalDist).coerceIn(0f, 1f)
-                                kotlin.math.sin(fraction * Math.PI.toFloat()) * peakFlightBoost
-                            } else 0f
-                        } else 0f
-
-                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX else 1f
-                        val totalScaleY = if (advancedEffectsEnabled) maxOf(dragScaleY, 1f + flightEnlargeY) else 1f
+                        val flightOffset = flightDynamics.value
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
 
                         val baseHeight = size.height - (paddingPx * 2f)
                         val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
@@ -519,7 +529,7 @@ private fun CategoryTabItems(
 
             val isCurrentPressed = (isInteractive && isPressed) || (pressedTabIndex == index)
             val tabBounceScale by animateFloatAsState(
-                targetValue = if (isCurrentPressed) 0.92f else 1f,
+                targetValue = if (isCurrentPressed) 0.96f else 1f,
                 animationSpec = spring(
                     stiffness = if (isCurrentPressed) 10000f else Spring.StiffnessMediumLow,
                     dampingRatio = Spring.DampingRatioNoBouncy
