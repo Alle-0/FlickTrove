@@ -41,6 +41,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.SurpriseCompany
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
@@ -80,11 +81,9 @@ fun SurpriseMeOverlay(
     var contentHeightPx by remember { mutableStateOf(0f) }
     val maxModalHeightPx = with(density) { 520.dp.toPx() }
     val maxAllowedHeight = minOf(screenHeight * 0.78f, maxModalHeightPx)
-    val minAllowedHeight = with(density) { 260.dp.toPx() }
-    
     val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeight, maxAllowedHeight) 
-                      else with(density) { 300.dp.toPx() },
+        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceAtMost(maxAllowedHeight) 
+                      else with(density) { 240.dp.toPx() },
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "dynamicHeight"
     )
@@ -250,6 +249,7 @@ fun SurpriseMeOverlay(
                         width = with(density) { currentRect.width.toDp() },
                         height = with(density) { currentRect.height.toDp() }
                     )
+                    .clip(currentShape)
                     .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
             ) {
                 // Background Layer (Blurred glass)
@@ -345,7 +345,7 @@ private fun SurpriseMeContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header
@@ -405,7 +405,7 @@ private fun SurpriseMeContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         if (isGhost) {
             when (step) {
@@ -451,50 +451,15 @@ private fun SurpriseMeContent(
             }
         }
 
-        // Progress bar
+        // Progress bar (Symbiont Elastic Indicator)
         if (step in 1..3) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (i in 1..3) {
-                    val isCurrent = step == i
-                    val isPast = step > i
-                    
-                    val width = if (isGhost) {
-                        if (isCurrent) 24.dp else 8.dp
-                    } else {
-                        val animatedWidth by animateDpAsState(
-                            targetValue = if (isCurrent) 24.dp else 8.dp,
-                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-                            label = "dotWidth"
-                        )
-                        animatedWidth
-                    }
-                    
-                    val color = if (isGhost) {
-                        if (isCurrent || isPast) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.2f)
-                    } else {
-                        val animatedColor by animateColorAsState(
-                            targetValue = if (isCurrent || isPast) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.2f),
-                            animationSpec = tween(300),
-                            label = "dotColor"
-                        )
-                        animatedColor
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .height(4.dp)
-                            .width(width)
-                            .clip(CircleShape)
-                            .background(color)
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(20.dp))
+            SymbiontPagerIndicator(
+                currentPage = step - 1,
+                pageCount = 3,
+                persistPreviousDots = true,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -693,14 +658,14 @@ private fun OptionGridCard(
                 if (isFullWidth) {
                     Modifier.height(if (description != null) 110.dp else 90.dp)
                 } else {
-                    Modifier.aspectRatio(if (description != null) 0.9f else 1.35f)
+                    Modifier.height(if (description != null) 128.dp else 96.dp)
                 }
             )
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.04f))
-            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
-            .padding(12.dp),
+            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

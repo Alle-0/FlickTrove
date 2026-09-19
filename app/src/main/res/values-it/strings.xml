@@ -156,6 +156,7 @@
     <string name="settings_tab_title">Impostazioni</string>
     <string name="settings_general">Generali</string>
     <string name="settings_ui_layout">Interfaccia e Layout</string>
+    <string name="settings_ui_layout_desc">Riordina le schede e personalizza la visibilità</string>
     <string name="settings_hide_saved">Nascondi Titoli Salvati</string>
     <string name="settings_hide_saved_desc">Nasconde i film e le serie TV già visti o salvati nella watchlist dalle sezioni Esplora e Consigliati.</string>
     <string name="settings_folder_bookmarks">Segnalibri cartelle</string>

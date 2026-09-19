@@ -161,6 +161,7 @@
     <string name="settings_tab_title">Einstellungen</string>
     <string name="settings_general">Allgemein</string>
     <string name="settings_ui_layout">Benutzeroberfläche und Layout</string>
+    <string name="settings_ui_layout_desc">Karten neu anordnen und Sichtbarkeit anpassen</string>
     <string name="settings_hide_saved">Gespeicherte Titel ausblenden</string>
     <string name="settings_hide_saved_desc">Blendet angesehene Filme und Watchlist-Titel in Entdecken und Details aus.</string>
     <string name="settings_folder_bookmarks">Ordner-Lesezeichen</string>

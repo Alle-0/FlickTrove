@@ -53,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +67,15 @@ import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.viewmodel.SettingsViewModel
+
+private data class HomeSectionSettingRow(
+    val key: String,
+    val iconRes: Int,
+    val titleRes: Int,
+    val canToggle: Boolean,
+    val checked: Boolean = true,
+    val onCheckedChange: (Boolean) -> Unit = {}
+)
 
 @Composable
 fun HomeSectionsOrderDialog(
@@ -142,6 +152,7 @@ fun HomeSectionsOrderDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Tasto Reset
                 Box(
                     modifier = Modifier
                         .size(34.dp)
@@ -152,27 +163,34 @@ fun HomeSectionsOrderDialog(
                             localOrder = com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER
                             dropTrigger++
                             settingsViewModel.resetHomeFeedSectionsToDefault()
-                        },
+                        }
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                         contentDescription = stringResource(R.string.settings_home_feed_reset),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.size(20.dp)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
+                // Tasto Chiudi
                 Box(
                     modifier = Modifier
                         .size(34.dp)
-                        .bounceClick { onDismiss() },
+                        .bounceClick { onDismiss() }
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.size(24.dp)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -444,8 +462,12 @@ fun HomeSectionsOrderDialog(
                                 MaterialTheme.colorScheme.onSurface
                             },
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
+
+                        Spacer(modifier = Modifier.width(12.dp))
 
                         if (rowInfo.canToggle) {
                             FlickTroveSwitch(
@@ -462,8 +484,9 @@ fun HomeSectionsOrderDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 modifier = Modifier
-                                    .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .background(Color.White.copy(alpha = 0.06f), CircleShape)
+                                    .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                                    .padding(horizontal = 9.dp, vertical = 5.dp)
                             ) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_lock),

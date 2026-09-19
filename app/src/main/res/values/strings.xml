@@ -167,6 +167,7 @@
     <string name="settings_tab_title">Settings</string>
     <string name="settings_general">General</string>
     <string name="settings_ui_layout">Interface and Layout</string>
+    <string name="settings_ui_layout_desc">Reorder cards and customize visibility</string>
     <string name="settings_hide_saved">Hide Saved Items</string>
     <string name="settings_hide_saved_desc">Filters out watched movies and watchlist items from Discover and details.</string>
     <string name="settings_folder_bookmarks">Folder Bookmarks</string>

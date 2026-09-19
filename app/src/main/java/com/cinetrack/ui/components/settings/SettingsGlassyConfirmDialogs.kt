@@ -802,6 +802,8 @@ fun SettingsDashboardSettingsDialog(
     GlassmorphicModal(
         visible = visible,
         activeHazeState = activeHazeState,
+        dimBackground = true,
+        dismissOnClickOutside = true,
         onDismissRequest = onDismiss
     ) {
         DashboardSettingsDialog(
@@ -823,6 +825,8 @@ fun SettingsHomeSectionsOrderDialog(
     GlassmorphicModal(
         visible = visible,
         activeHazeState = activeHazeState,
+        dimBackground = true,
+        dismissOnClickOutside = true,
         onDismissRequest = onDismiss
     ) {
         HomeSectionsOrderDialog(

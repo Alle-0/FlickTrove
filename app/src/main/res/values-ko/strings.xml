@@ -167,6 +167,7 @@
     <string name="settings_tab_title">설정</string>
     <string name="settings_general">일반</string>
     <string name="settings_ui_layout">인터페이스 및 레이아웃</string>
+    <string name="settings_ui_layout_desc">카드 순서 변경 및 표시 설정</string>
     <string name="settings_hide_saved">저장된 항목 숨기기</string>
     <string name="settings_hide_saved_desc">탐색 및 상세 페이지에서 이미 시청했거나 볼 작품 목록의 콘텐츠를 숨깁니다.</string>
     <string name="settings_folder_bookmarks">폴더 북마크 표시</string>

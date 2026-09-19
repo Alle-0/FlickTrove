@@ -161,6 +161,7 @@
     <string name="settings_tab_title">Paramètres</string>
     <string name="settings_general">Général</string>
     <string name="settings_ui_layout">Interface et disposition</string>
+    <string name="settings_ui_layout_desc">Réorganisez les cartes et personnalisez la visibilité</string>
     <string name="settings_hide_saved">Masquer les titres enregistrés</string>
     <string name="settings_hide_saved_desc">Masque les films et séries regardés ou à voir dans les sections Découvrir et détails.</string>
     <string name="settings_folder_bookmarks">Marque-pages de dossiers</string>

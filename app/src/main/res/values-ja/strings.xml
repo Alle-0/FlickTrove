@@ -167,6 +167,7 @@
     <string name="settings_tab_title">設定</string>
     <string name="settings_general">一般</string>
     <string name="settings_ui_layout">インターフェースとレイアウト</string>
+    <string name="settings_ui_layout_desc">カードの並び替えと表示設定</string>
     <string name="settings_hide_saved">保存済みアイテムを非表示</string>
     <string name="settings_hide_saved_desc">「見つける」や詳細画面から視聴済みおよび見たいリストの作品を除外します。</string>
     <string name="settings_folder_bookmarks">フォルダブックマーク</string>

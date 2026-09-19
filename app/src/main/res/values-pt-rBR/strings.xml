@@ -163,6 +163,7 @@
     <string name="settings_tab_title">Configurações</string>
     <string name="settings_general">Geral</string>
     <string name="settings_ui_layout">Interface e Layout</string>
+    <string name="settings_ui_layout_desc">Reorganize os cartões e personalize a visibilidade</string>
     <string name="settings_hide_saved">Ocultar títulos salvos</string>
     <string name="settings_hide_saved_desc">Oculta filmes e séries assistidos ou na lista de interesses das seções Descobrir e detalhes.</string>
     <string name="settings_folder_bookmarks">Marcadores de Pastas</string>

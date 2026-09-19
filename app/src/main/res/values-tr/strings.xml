@@ -167,6 +167,7 @@
     <string name="settings_tab_title">Ayarlar</string>
     <string name="settings_general">Genel</string>
     <string name="settings_ui_layout">Arayüz ve Düzen</string>
+    <string name="settings_ui_layout_desc">Kartları yeniden sıralayın ve görünürlüğü özelleştirin</string>
     <string name="settings_hide_saved">Kaydedilenleri Gizle</string>
     <string name="settings_hide_saved_desc">İzlenen filmleri ve izleme listesindeki yapımları Keşfet ve ayrıntılardan filtreler.</string>
     <string name="settings_folder_bookmarks">Klasör Yer İmleri</string>

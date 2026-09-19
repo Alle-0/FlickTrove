@@ -167,6 +167,7 @@
     <string name="settings_tab_title">设置</string>
     <string name="settings_general">常规</string>
     <string name="settings_ui_layout">界面与布局</string>
+    <string name="settings_ui_layout_desc">重新排序卡片并自定义显示与隐藏</string>
     <string name="settings_hide_saved">隐藏已保存项目</string>
     <string name="settings_hide_saved_desc">从“发现”和详情中过滤掉已看过和想看列表中的项目。</string>
     <string name="settings_folder_bookmarks">文件夹角标</string>

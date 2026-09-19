@@ -161,6 +161,7 @@
     <string name="settings_tab_title">Ajustes</string>
     <string name="settings_general">General</string>
     <string name="settings_ui_layout">Interfaz y diseño</string>
+    <string name="settings_ui_layout_desc">Reordena las tarjetas y personaliza la visibilidad</string>
     <string name="settings_hide_saved">Ocultar títulos guardados</string>
     <string name="settings_hide_saved_desc">Oculta películas y series vistas o en la lista de seguimiento de Descubrir y detalles.</string>
     <string name="settings_folder_bookmarks">Marcadores de carpetas</string>

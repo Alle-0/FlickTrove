@@ -164,6 +164,7 @@
     <string name="settings_tab_title">Настройки</string>
     <string name="settings_general">Общие</string>
     <string name="settings_ui_layout">Интерфейс и компоновка</string>
+    <string name="settings_ui_layout_desc">Изменение порядка карточек и настройка видимости</string>
     <string name="settings_hide_saved">Скрыть сохраненные элементы</string>
     <string name="settings_hide_saved_desc">Скрывает просмотренные фильмы и элементы из списка наблюдения в Обзоре и деталях.</string>
     <string name="settings_folder_bookmarks">Закладки папок</string>

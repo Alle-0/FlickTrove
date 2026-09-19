@@ -167,6 +167,7 @@
     <string name="settings_tab_title">Pengaturan</string>
     <string name="settings_general">Umum</string>
     <string name="settings_ui_layout">Antarmuka dan Tata Letak</string>
+    <string name="settings_ui_layout_desc">Atur ulang kartu dan sesuaikan visibilitas</string>
     <string name="settings_hide_saved">Sembunyikan Item Tersimpan</string>
     <string name="settings_hide_saved_desc">Menyaring film yang sudah ditonton dan item daftar tontonan dari Jelajahi dan detail.</string>
     <string name="settings_folder_bookmarks">Penanda Folder</string>
