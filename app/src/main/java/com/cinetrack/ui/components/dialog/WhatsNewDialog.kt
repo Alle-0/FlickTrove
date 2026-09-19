@@ -22,6 +22,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.parseMarkdownSpans
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -263,44 +264,6 @@ fun MarkdownNotesViewer(
                 }
                 else -> {
                     Spacer(modifier = Modifier.height(6.dp))
-                }
-            }
-        }
-    }
-}
-
-fun parseMarkdownSpans(text: String, accentColor: Color): AnnotatedString {
-    return buildAnnotatedString {
-        var i = 0
-        while (i < text.length) {
-            when {
-                text.startsWith("**", i) -> {
-                    val end = text.indexOf("**", i + 2)
-                    if (end != -1) {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = Color.White)) {
-                            append(text.substring(i + 2, end))
-                        }
-                        i = end + 2
-                    } else {
-                        append(text[i])
-                        i++
-                    }
-                }
-                text.startsWith("`", i) -> {
-                    val end = text.indexOf("`", i + 1)
-                    if (end != -1) {
-                        withStyle(SpanStyle(fontFamily = FontFamily.Monospace, color = accentColor, fontWeight = FontWeight.SemiBold)) {
-                            append(text.substring(i + 1, end))
-                        }
-                        i = end + 1
-                    } else {
-                        append(text[i])
-                        i++
-                    }
-                }
-                else -> {
-                    append(text[i])
-                    i++
                 }
             }
         }

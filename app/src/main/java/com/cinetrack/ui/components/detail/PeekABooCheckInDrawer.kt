@@ -14,12 +14,16 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -67,6 +71,8 @@ import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 
 /**
  * Represents one selectable emotional reaction.
@@ -225,7 +231,7 @@ fun PeekABooCheckInDrawer(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                        .padding(16.dp)
                 ) {
                     // Header and Content
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -256,7 +262,7 @@ fun PeekABooCheckInDrawer(
                             // Close button
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(32.dp)
                                     .bounceClick(scaleDown = 0.85f) { dismissAll() }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.1f)),
@@ -266,7 +272,7 @@ fun PeekABooCheckInDrawer(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                     contentDescription = "Close",
                                     tint = Color.White.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(12.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
                             }
                         }
@@ -453,43 +459,18 @@ fun PeekABooCheckInDrawer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                     ) {
-                        // Pagination dots
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 10.dp)
-                        ) {
-                            repeat(3) { index ->
-                                val isCurrent = currentPage == index
-                                val isDone = currentPage > index
-                                val color by animateColorAsState(
-                                    targetValue = if (isCurrent || isDone) accentColor else Color.White.copy(alpha = 0.2f),
-                                    label = "dotColor"
-                                )
-                                val width by animateDpAsState(
-                                    targetValue = if (isCurrent) 16.dp else 6.dp,
-                                    label = "dotWidth"
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .height(14.dp)
-                                        .width(width + 8.dp)
-                                        .bounceClick(scaleDown = 0.85f) {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            currentPage = index
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .height(6.dp)
-                                            .width(width)
-                                            .clip(CircleShape)
-                                            .background(color)
-                                    )
-                                }
+                        // Pagination dots (Symbiont / Worm elastico con memoria dei passi precedenti)
+                        SymbiontPagerIndicator(
+                            currentPage = currentPage,
+                            pageCount = 3,
+                            modifier = Modifier.padding(bottom = 14.dp),
+                            accentColor = accentColor,
+                            persistPreviousDots = true,
+                            onDotClick = { index ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                currentPage = index
                             }
-                        }
+                        )
 
                         // Back + Save / Next buttons
                         Row(

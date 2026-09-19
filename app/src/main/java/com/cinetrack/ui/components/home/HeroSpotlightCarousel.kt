@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.home
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,12 +50,15 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import androidx.core.graphics.drawable.toBitmap
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.toHexString
 import com.cinetrack.util.toComposeColor
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 
 @Composable
 fun HeroSpotlightCarousel(
@@ -68,14 +73,30 @@ fun HeroSpotlightCarousel(
     val primaryColor = MaterialTheme.colorScheme.primary
     val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
 
-    // Auto-scroll ogni 4 secondi (disattivato se gli effetti avanzati sono disabilitati)
-    LaunchedEffect(pagerState, advancedEffectsEnabled) {
+    // Auto-scroll ogni 4 secondi (si resetta al tocco dell'utente e riparte 4s dopo il rilascio)
+    var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }.collect { inProgress ->
+            if (inProgress) {
+                lastInteractionTime = System.currentTimeMillis()
+            }
+        }
+    }
+
+    LaunchedEffect(advancedEffectsEnabled) {
         if (!advancedEffectsEnabled) return@LaunchedEffect
         while (true) {
-            delay(4000)
-            if (pagerState.pageCount > 0 && !pagerState.isScrollInProgress) {
-                val next = pagerState.currentPage + 1
-                pagerState.animateScrollToPage(next, animationSpec = tween(600))
+            delay(1000)
+            val now = System.currentTimeMillis()
+            if (now - lastInteractionTime >= 4000L && !pagerState.isScrollInProgress && pagerState.pageCount > 0) {
+                try {
+                    val next = pagerState.currentPage + 1
+                    pagerState.animateScrollToPage(next, animationSpec = tween(600))
+                    lastInteractionTime = System.currentTimeMillis()
+                } catch (_: CancellationException) {
+                    lastInteractionTime = System.currentTimeMillis()
+                }
             }
         }
     }
@@ -333,79 +354,16 @@ fun HeroSpotlightCarousel(
                 } // End Page Box
         } // End HorizontalPager
 
-        // Pallini indicatori (Symbiont / Worm effect)
-        Box(
+        // Pallini indicatori (Symbiont / Worm effect con smorzamento dell'inerzia sensibile alla velocità)
+        SymbiontPagerIndicator(
+            pagerState = pagerState,
+            pageCount = movies.size,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val pageCount = movies.size
-            val dotSize = 6.dp
-            val spacing = 8.dp
-            
-            val distance = dotSize + spacing
-            val canvasWidth = dotSize + (distance * (pageCount - 1).coerceAtLeast(0))
-            
-            Canvas(
-                modifier = Modifier
-                    .width(canvasWidth)
-                    .height(dotSize)
-            ) {
-                // Pallini inattivi (base)
-                for (i in 0 until pageCount) {
-                    val cx = (i * distance.toPx()) + (dotSize.toPx() / 2f)
-                    val cy = dotSize.toPx() / 2f
-                    drawCircle(
-                        color = Color.White.copy(alpha = 0.35f),
-                        radius = dotSize.toPx() / 2f,
-                        center = Offset(cx, cy)
-                    )
-                }
-
-                // Symbiont (worm animato)
-                if (pageCount > 0) {
-                    val virtualScrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction).toFloat()
-                    var scrollPosition = ((virtualScrollPosition % pageCount) + pageCount) % pageCount
-                    // Handle edge cases of floating point precision
-                    if (scrollPosition >= pageCount) scrollPosition = 0f
-
-                    val floor = kotlin.math.floor(scrollPosition.toDouble()).toFloat()
-                    val fraction = scrollPosition - floor
-                    
-                    // Logica "worm": 
-                    // Se andiamo oltre l'ultimo indice, il lato destro sfora e il sinistro lo segue.
-                    val leftNode = floor + Math.max(0f, (fraction - 0.5f) * 2f)
-                    val rightNode = floor + Math.min(1f, fraction * 2f)
-                    
-                    val leftX = leftNode * distance.toPx()
-                    val rightX = (rightNode * distance.toPx()) + dotSize.toPx()
-                    
-                    drawRoundRect(
-                        color = primaryColor,
-                        topLeft = Offset(leftX, 0f),
-                        size = Size(rightX - leftX, dotSize.toPx()),
-                        cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
-                    )
-                    
-                    // Se stiamo completando il loop dall'ultimo al primo elemento, disegniamo anche la parte
-                    // che spunta dal primo pallino.
-                    if (rightNode > pageCount - 1) {
-                        val overlapRightNode = rightNode - pageCount
-                        val overlapLeftNode = Math.max(0f, leftNode - pageCount)
-                        val ovLeftX = overlapLeftNode * distance.toPx()
-                        val ovRightX = (overlapRightNode * distance.toPx()) + dotSize.toPx()
-                        if (ovRightX > ovLeftX) {
-                            drawRoundRect(
-                                color = primaryColor,
-                                topLeft = Offset(ovLeftX, 0f),
-                                size = Size(ovRightX - ovLeftX, dotSize.toPx()),
-                                cornerRadius = CornerRadius(dotSize.toPx() / 2f, dotSize.toPx() / 2f)
-                            )
-                        }
-                    }
-                }
-            }
-        }
+            accentColor = primaryColor,
+            persistPreviousDots = false,
+            isInfinite = true
+        )
     }
 }

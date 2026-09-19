@@ -11,12 +11,8 @@ import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.model.ExtraRatings
 import com.cinetrack.data.local.dao.CacheDao
 import com.cinetrack.data.local.dao.FavoriteDao
-import com.cinetrack.data.local.dao.FolderDao
-import com.cinetrack.data.local.dao.SearchHistoryDao
-import com.cinetrack.data.local.dao.WatchHistoryDao
 import com.cinetrack.data.remote.FirebaseRemoteDataSource
 import com.cinetrack.data.local.entities.FolderEntity
-import com.cinetrack.data.local.entities.SearchHistoryEntity
 import com.cinetrack.data.local.entities.MovieDetailCacheEntity
 import com.cinetrack.data.local.entities.ColorCacheEntity
 import com.cinetrack.data.local.entities.HomeFeedCacheEntity
@@ -58,10 +54,10 @@ import com.cinetrack.data.repository.importers.MovieLookupService
 @Singleton
 class MovieRepository @Inject constructor(
     private val favoriteDao: FavoriteDao,
-    private val folderDao: FolderDao,
+    private val folderRepository: FolderRepository,
     private val cacheDao: CacheDao,
-    private val searchHistoryDao: SearchHistoryDao,
-    private val watchHistoryDao: WatchHistoryDao,
+    private val searchHistoryRepository: SearchHistoryRepository,
+    private val watchHistoryRepository: WatchHistoryRepository,
     private val tmdbService: TMDBService,
     private val omdbService: OmdbService,
     private val traktService: TraktService,
@@ -70,6 +66,7 @@ class MovieRepository @Inject constructor(
     @Named("tmdb_api_key") private val apiKey: String,
     @Named("omdb_api_key") private val omdbApiKey: String,
     @Named("trakt_api_key") private val traktApiKey: String,
+    private val boxOfficeRepository: javax.inject.Provider<BoxOfficeRepository>,
     private val widgetNotifier: com.cinetrack.domain.WidgetNotifier,
     @ApplicationContext private val context: Context
 ) : MovieLookupService {
@@ -103,7 +100,7 @@ class MovieRepository @Inject constructor(
 
     suspend fun wipeLocalData() {
         favoriteDao.clearAll()
-        folderDao.clearAll()
+        folderRepository.clearAll()
         widgetNotifier.notifyWidgetUpdated()
     }
 
@@ -500,8 +497,7 @@ class MovieRepository @Inject constructor(
             clientUpdatedAt = System.currentTimeMillis()
         )
         favoriteDao.insert(updatedMovie)
-        watchHistoryDao.deleteByMovieId(movie.id)
-        watchHistoryDao.purgeHistoryForMovie(movie.id)
+        watchHistoryRepository.purgeHistoryForMovie(movie.id)
         widgetNotifier.notifyWidgetUpdated()
 
         // --- PUSH RIMOZIONE A TRAKT ---
@@ -568,8 +564,7 @@ class MovieRepository @Inject constructor(
             clientUpdatedAt = System.currentTimeMillis()
         )
         favoriteDao.insert(updatedMovie)
-        watchHistoryDao.deleteByMovieId(movie.id)
-        watchHistoryDao.purgeHistoryForMovie(movie.id)
+        watchHistoryRepository.purgeHistoryForMovie(movie.id)
 
         // --- PUSH RIMOZIONE A TRAKT ---
         val builder = androidx.work.Data.Builder()
@@ -602,139 +597,19 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    // --- Folder Operations ---
-    fun getFoldersFlow(): Flow<List<FolderEntity>> = folderDao.getAllFlow()
+    // --- Folder Operations (Delegated to FolderRepository) ---
+    fun getFoldersFlow(): Flow<List<FolderEntity>> = folderRepository.getFoldersFlow()
 
-    fun getFolderFlow(folderId: String): Flow<FolderEntity?> = folderDao.getByIdFlow(folderId)
+    fun getFolderFlow(folderId: String): Flow<FolderEntity?> = folderRepository.getFolderFlow(folderId)
 
     fun getMoviesByCompositeIds(compositeIds: List<String>): Flow<List<Movie>> = favoriteDao.getByCompositeIds(compositeIds)
 
     suspend fun saveFolder(folderEntity: FolderEntity) {
-        // Estraiamo la vecchia cartella per fare il calcolo delle differenze (diff)
-        val oldFolder = folderDao.getByIdFlow(folderEntity.id).firstOrNull()
-        
-        val now = System.currentTimeMillis()
-        val updatedEntity = folderEntity.copy(syncStatus = "synced", clientUpdatedAt = now)
-        folderDao.insert(updatedEntity)
-        
-        // --- INIZIO INTEGRAZIONE TRAKT (Instant Write) ---
-        if (folderEntity.id.startsWith("trakt_")) {
-            val traktListId = folderEntity.id.removePrefix("trakt_").toLongOrNull()
-            if (traktListId != null) {
-                val workRequests = mutableListOf<androidx.work.OneTimeWorkRequest>()
-                
-                // 1. Controllo cambio Nome o Descrizione
-                if (oldFolder != null && (oldFolder.name != folderEntity.name || oldFolder.description != folderEntity.description)) {
-                    val updateBuilder = androidx.work.Data.Builder()
-                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_UPDATE_LIST")
-                        .putLong("LIST_ID", traktListId)
-                        .putString("LIST_NAME", folderEntity.name)
-                        .putString("LIST_DESC", folderEntity.description ?: "")
-                    
-                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                        .setInputData(updateBuilder.build()).build())
-                }
-                
-                // 2. Controllo Film/Serie aggiunti o rimossi
-                val oldItems = oldFolder?.itemIds?.toSet() ?: emptySet()
-                val newItems = folderEntity.itemIds.toSet()
-                
-                val added = newItems - oldItems
-                val removed = oldItems - newItems
-                
-                if (added.isNotEmpty()) {
-                    val addBuilder = androidx.work.Data.Builder()
-                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_ADD_LIST_ITEMS")
-                        .putLong("LIST_ID", traktListId)
-                        .putStringArray("ITEMS_ADDED", added.toTypedArray())
-                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                        .setInputData(addBuilder.build()).build())
-                }
-                
-                if (removed.isNotEmpty()) {
-                    val removeBuilder = androidx.work.Data.Builder()
-                        .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_REMOVE_LIST_ITEMS")
-                        .putLong("LIST_ID", traktListId)
-                        .putStringArray("ITEMS_REMOVED", removed.toTypedArray())
-                    workRequests.add(OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                        .setInputData(removeBuilder.build()).build())
-                }
-                
-                if (workRequests.isNotEmpty()) {
-                    WorkManager.getInstance(context).enqueue(workRequests)
-                }
-            }
-        } else if (oldFolder == null) {
-            // FIX: È una cartella appena creata localmente! La pushiamo su Trakt.
-            val createBuilder = androidx.work.Data.Builder()
-                .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_CREATE_LIST")
-                .putString("LOCAL_FOLDER_ID", folderEntity.id)
-                .putString("LIST_NAME", folderEntity.name)
-                .putString("LIST_DESC", folderEntity.description ?: "")
-
-            WorkManager.getInstance(context).enqueue(
-                OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(createBuilder.build()).build()
-            )
-        }
-        // --- FINE INTEGRAZIONE TRAKT ---
-
-        repositoryScope.launch {
-            try {
-                val folder = com.cinetrack.data.model.Folder(
-                    id = updatedEntity.id,
-                    name = updatedEntity.name,
-                    icon = updatedEntity.icon,
-                    color = updatedEntity.color,
-                    description = updatedEntity.description,
-                    itemIds = updatedEntity.itemIds,
-                    createdAt = updatedEntity.createdAt,
-                    updatedAt = updatedEntity.updatedAt,
-                    clientUpdatedAt = now
-                )
-                firebaseRemoteDataSource.setFolder(folder)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Firebase folder sync failed for ${updatedEntity.id}", e)
-                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
-                    folderDao.updateSyncStatus(updatedEntity.id, "pending")
-                }
-            }
-        }
+        folderRepository.saveFolder(folderEntity)
     }
 
     suspend fun deleteFolder(folderId: String) {
-        folderDao.markDeleted(folderId)
-        
-        // --- INIZIO INTEGRAZIONE TRAKT ---
-        if (folderId.startsWith("trakt_")) {
-            val traktListId = folderId.removePrefix("trakt_").toLongOrNull()
-            if (traktListId != null) {
-                val deleteBuilder = androidx.work.Data.Builder()
-                    .putString(TraktInstantWriteWorker.KEY_ACTION, "ACTION_DELETE_LIST")
-                    .putLong("LIST_ID", traktListId)
-                
-                WorkManager.getInstance(context).enqueue(
-                    OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                        .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                        .setInputData(deleteBuilder.build()).build()
-                )
-            }
-        }
-        // --- FINE INTEGRAZIONE TRAKT ---
-
-        repositoryScope.launch {
-            try {
-                firebaseRemoteDataSource.deleteFolder(folderId)
-                folderDao.deleteById(folderId)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-            }
-        }
+        folderRepository.deleteFolder(folderId)
     }
 
     // --- Remote Sync (The "Bunker" recovery) ---
@@ -767,59 +642,10 @@ class MovieRepository @Inject constructor(
         }
         
         // Push pending Folders
-        val pendingFolders = folderDao.getPendingSync()
-        for (folder in pendingFolders) {
-            try {
-                if (folder.syncStatus == "pending_delete") {
-                    firebaseRemoteDataSource.deleteFolder(folder.id)
-                    folderDao.deleteById(folder.id)
-                } else if (folder.syncStatus == "pending") {
-                    val folderDto = com.cinetrack.data.model.Folder(
-                        id = folder.id,
-                        name = folder.name,
-                        icon = folder.icon,
-                        color = folder.color,
-                        description = folder.description,
-                        itemIds = folder.itemIds,
-                        createdAt = folder.createdAt,
-                        updatedAt = folder.updatedAt,
-                        clientUpdatedAt = folder.clientUpdatedAt
-                    )
-                    firebaseRemoteDataSource.setFolder(folderDto)
-                    folderDao.updateSyncStatus(folder.id, "synced")
-                }
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending folder ${folder.id}", e)
-            }
-        }
+        folderRepository.pushPendingFolders()
         
         // Push pending Watch History
-        val pendingHistory = watchHistoryDao.getPendingSync()
-        val historyToDelete = pendingHistory.filter { it.syncStatus == "deleted" }
-        val historyToSync = pendingHistory.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
-        
-        for (history in historyToDelete) {
-            try {
-                firebaseRemoteDataSource.deleteWatchHistory(history.movieId, history.watchedAt)
-                watchHistoryDao.delete(history)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending delete watch history ${history.id}", e)
-            }
-        }
-        
-        if (historyToSync.isNotEmpty()) {
-            try {
-                firebaseRemoteDataSource.batchSetWatchHistory(historyToSync)
-                for (history in historyToSync) {
-                    watchHistoryDao.updateSyncStatus(history.id, "synced")
-                }
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending watch history bulk", e)
-            }
-        }
+        watchHistoryRepository.pushPendingWatchHistory()
         
     }
 
@@ -904,112 +730,14 @@ class MovieRepository @Inject constructor(
             val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
             
             emit(UiText.StringResource(R.string.sync_msg_syncing_folders), 0.7f)
-            val localFoldersList = folderDao.getAll()
-            val localFolders = localFoldersList.associateBy { it.id }
-            val remoteFoldersMap = remoteFolders.associateBy { it.id }
-            
-            val foldersToInsert = mutableListOf<FolderEntity>()
-            val foldersToDelete = mutableListOf<FolderEntity>()
-            
-            for (remoteFolder in remoteFolders) {
-                val local = localFolders[remoteFolder.id]
-                val remoteEntity = FolderEntity(
-                    id = remoteFolder.id,
-                    name = remoteFolder.name,
-                    icon = remoteFolder.icon,
-                    color = remoteFolder.color,
-                    description = remoteFolder.description,
-                    itemIds = remoteFolder.itemIds,
-                    createdAt = remoteFolder.createdAt ?: "",
-                    updatedAt = remoteFolder.updatedAt ?: "",
-                    syncStatus = "synced",
-                    clientUpdatedAt = remoteFolder.clientUpdatedAt
-                )
-                
-                if (local == null) {
-                    foldersToInsert.add(remoteEntity)
-                } else {
-                    if (remoteFolder.clientUpdatedAt >= local.clientUpdatedAt) {
-                        foldersToInsert.add(remoteEntity)
-                    } else {
-                        if (local.syncStatus == "synced") {
-                            folderDao.updateSyncStatus(local.id, "pending")
-                        }
-                    }
-                }
+            folderRepository.syncFoldersFromRemote(remoteFolders) { currentCount, totalCount, portion ->
+                val progress = 0.7f + (0.9f - 0.7f) * portion
+                emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, totalCount), progress)
             }
-            
-            for ((id, localFolder) in localFolders) {
-                if (!remoteFoldersMap.containsKey(id)) {
-                    if (localFolder.syncStatus == "synced") {
-                        foldersToDelete.add(localFolder)
-                    }
-                }
-            }
-            
-            if (foldersToInsert.isNotEmpty()) {
-                val chunks = foldersToInsert.chunked(50)
-                chunks.forEachIndexed { index, chunk ->
-                    folderDao.insertAll(chunk)
-                    val portion = (index + 1).toFloat() / chunks.size.toFloat()
-                    val progress = 0.7f + (0.9f - 0.7f) * portion
-                    val currentCount = (index + 1) * chunk.size
-                    emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, foldersToInsert.size), progress)
-                }
-            }
-            
-            for (folderToDelete in foldersToDelete) {
-                folderDao.deleteById(folderToDelete.id)
-            }
-            android.util.Log.d("MovieRepository", "Successfully synchronized folders with conflict resolution")
 
             // 3. Pull & Reconcile Watch History
             val remoteHistory = firebaseRemoteDataSource.fetchAllWatchHistory()
-            val localHistoryList = watchHistoryDao.getAllWatchHistory()
-            val localHistory = localHistoryList.associateBy { "${it.movieId}_${it.watchedAt}" }
-            val remoteHistoryMap = remoteHistory.associateBy { "${it.movieId}_${it.watchedAt}" }
-            
-            val historyToInsert = mutableListOf<com.cinetrack.data.local.entities.WatchHistoryEntity>()
-            val historyToDelete = mutableListOf<com.cinetrack.data.local.entities.WatchHistoryEntity>()
-            
-            for (remoteEntry in remoteHistory) {
-                val key = "${remoteEntry.movieId}_${remoteEntry.watchedAt}"
-                val local = localHistory[key]
-                val remoteEntity = remoteEntry.copy(syncStatus = "synced")
-                
-                if (local == null) {
-                    // Check if there's a pending delete for this entry that failed to push.
-                    // If it is in pendingHistory with syncStatus == "deleted", we shouldn't insert it.
-                    val isPendingDelete = watchHistoryDao.getPendingSync().any { 
-                        it.movieId == remoteEntity.movieId && it.watchedAt == remoteEntity.watchedAt && it.syncStatus == "deleted" 
-                    }
-                    if (!isPendingDelete) {
-                        historyToInsert.add(remoteEntity)
-                    }
-                } else {
-                    // We already have it, do nothing. It's identical.
-                }
-            }
-            
-            for ((key, localEntry) in localHistory) {
-                if (!remoteHistoryMap.containsKey(key)) {
-                    if (localEntry.syncStatus == "synced") {
-                        historyToDelete.add(localEntry)
-                    }
-                }
-            }
-            
-            if (historyToInsert.isNotEmpty()) {
-                val chunks = historyToInsert.chunked(50)
-                chunks.forEach { chunk ->
-                    watchHistoryDao.insertAll(chunk)
-                }
-            }
-            
-            for (entryToDelete in historyToDelete) {
-                watchHistoryDao.delete(entryToDelete)
-            }
-            android.util.Log.d("MovieRepository", "Successfully synchronized watch history")
+            watchHistoryRepository.syncWatchHistoryFromRemote(remoteHistory)
 
             // 4. Pull Preferences
             emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
@@ -1026,7 +754,7 @@ class MovieRepository @Inject constructor(
 
     suspend fun clearAllData() {
         favoriteDao.clearAll()
-        folderDao.clearAll()
+        folderRepository.clearAll()
         preferenceRepository.clearAll()
     }
 
@@ -1178,22 +906,19 @@ class MovieRepository @Inject constructor(
         }
     }
 
-    // --- Search History ---
-    fun getRecentSearches(): Flow<List<String>> = searchHistoryDao.getRecentSearches().map { entities ->
-        entities.map { it.query }
-    }
+    // --- Search History (Delegated to SearchHistoryRepository) ---
+    fun getRecentSearches(): Flow<List<String>> = searchHistoryRepository.getRecentSearches()
 
     suspend fun saveSearchQuery(query: String) {
-        if (query.isBlank()) return
-        searchHistoryDao.insertSearch(SearchHistoryEntity(query.trim(), System.currentTimeMillis()))
+        searchHistoryRepository.saveSearchQuery(query)
     }
 
     suspend fun deleteSearchQuery(query: String) {
-        searchHistoryDao.deleteSearch(query)
+        searchHistoryRepository.deleteSearchQuery(query)
     }
 
     suspend fun clearRecentSearches() {
-        searchHistoryDao.clearHistory()
+        searchHistoryRepository.clearRecentSearches()
     }
 
 
@@ -1865,200 +1590,22 @@ class MovieRepository @Inject constructor(
             awaitClose { listener.remove() }
         }
     }
-    // --- Watch History ---
-    suspend fun getWatchHistoryForMovie(movieId: Long) = watchHistoryDao.getWatchHistoryForMovie(movieId)
-    fun getWatchHistoryForMovieFlow(movieId: Long) = watchHistoryDao.getWatchHistoryForMovieFlow(movieId)
-    fun getAllWatchHistoryFlow() = watchHistoryDao.getAllWatchHistoryFlow()
-    suspend fun getAllWatchHistory() = watchHistoryDao.getAllWatchHistory()
-    suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.insert(history)
-    suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.update(history.copy(syncStatus = "pending"))
-    suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryDao.markDeleted(history.id)
+    // --- Watch History (Delegated to WatchHistoryRepository) ---
+    suspend fun getWatchHistoryForMovie(movieId: Long) = watchHistoryRepository.getWatchHistoryForMovie(movieId)
+    fun getWatchHistoryForMovieFlow(movieId: Long) = watchHistoryRepository.getWatchHistoryForMovieFlow(movieId)
+    fun getAllWatchHistoryFlow() = watchHistoryRepository.getAllWatchHistoryFlow()
+    suspend fun getAllWatchHistory() = watchHistoryRepository.getAllWatchHistory()
+    suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.insertWatchHistory(history)
+    suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.updateWatchHistory(history)
+    suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.deleteWatchHistory(history)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId)
+
     // --- Box Office ---
-    suspend fun getWeekendBoxOffice(forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> = withContext(Dispatchers.IO) {
-        val cacheId = "box_office_weekend"
-        val ttl = 24 * 60 * 60 * 1000L // 24 hours TTL
+    suspend fun getWeekendBoxOffice(forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =
+        boxOfficeRepository.get().getWeekendBoxOffice(forceRefresh)
 
-        if (!forceRefresh) {
-            try {
-                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
-                if (cachedEntity != null && (System.currentTimeMillis() - cachedEntity.updatedAt) < ttl) {
-                    val cachedList = json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
-                    if (cachedList.isNotEmpty()) {
-                        return@withContext cachedList
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore parse error, proceed to network
-            }
-        }
-
-        try {
-            val traktItems = traktService.getWeekendBoxOffice(apiKey = traktApiKey)
-            if (traktItems.isEmpty()) {
-                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
-                if (cachedEntity != null) {
-                    return@withContext json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
-                }
-                return@withContext emptyList()
-            }
-
-            val boxOfficeList = traktItems.mapIndexedNotNull { index, item ->
-                val tmdbId = item.movie?.ids?.tmdb ?: return@mapIndexedNotNull null
-                val rank = index + 1
-                val revenue = item.revenue
-                val formattedRev = com.cinetrack.data.model.BoxOfficeMovie.formatRevenue(revenue)
-
-                // Cache-First: check favoriteDao first
-                val localMovie = favoriteDao.getById(tmdbId, "movie")
-                val movie = if (localMovie != null && !localMovie.posterPath.isNullOrBlank()) {
-                    localMovie
-                } else {
-                    // Check cache or fetch details
-                    try {
-                        val detailsResponse = fetchMovieDetails(tmdbId, isTv = false)
-                        com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(detailsResponse, "movie")
-                    } catch (e: Exception) {
-                        com.cinetrack.data.model.Movie(
-                            id = tmdbId,
-                            title = item.movie.title ?: "",
-                            releaseDate = item.movie.year?.toString() ?: "",
-                            mediaType = "movie"
-                        )
-                    }
-                }
-
-                com.cinetrack.data.model.BoxOfficeMovie(
-                    movie = movie,
-                    rank = rank,
-                    revenue = revenue,
-                    formattedRevenue = formattedRev
-                )
-            }
-
-            if (boxOfficeList.isNotEmpty()) {
-                try {
-                    cacheDao.saveHomeFeed(
-                        com.cinetrack.data.local.entities.HomeFeedCacheEntity(
-                            id = cacheId,
-                            data = json.encodeToString(boxOfficeList),
-                            updatedAt = System.currentTimeMillis()
-                        )
-                    )
-                } catch (e: Exception) {
-                    // Ignore cache write error
-                }
-            }
-
-            boxOfficeList
-        } catch (e: Exception) {
-            e.printStackTrace()
-            try {
-                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
-                if (cachedEntity != null) {
-                    json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
-                } else {
-                    emptyList()
-                }
-            } catch (ex: Exception) {
-                emptyList()
-            }
-        }
-    }
-
-    suspend fun getAllTimeBoxOffice(year: Int? = null, page: Int = 1, forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> = withContext(Dispatchers.IO) {
-        val cacheId = "box_office_all_time_${year ?: "all"}_p$page"
-        val ttl = 24 * 60 * 60 * 1000L // 24 hours TTL
-
-        if (!forceRefresh) {
-            try {
-                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
-                if (cachedEntity != null && (System.currentTimeMillis() - cachedEntity.updatedAt) < ttl) {
-                    val cachedList = json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
-                    if (cachedList.isNotEmpty() && cachedList.any { it.formattedRevenue.isNotBlank() }) {
-                        return@withContext cachedList
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore parse error, proceed to network
-            }
-        }
-
-        try {
-            val options = mutableMapOf<String, String>()
-            options["sort_by"] = "revenue.desc"
-            options["region"] = ""
-            if (year != null) {
-                options["primary_release_year"] = year.toString()
-            }
-            val movies = discoverMoviesWithParams(page = page, options = options)
-            val baseRank = (page - 1) * 20
-
-            val boxOfficeList = coroutineScope {
-                movies.mapIndexed { index, movie ->
-                    async {
-                        val rank = baseRank + index + 1
-                        val localMovie = favoriteDao.getById(movie.id, "movie")
-                        val revenueFromLocal = localMovie?.revenue ?: 0L
-                        val (finalMovie, finalRevenue) = if (revenueFromLocal > 0L) {
-                            (localMovie ?: movie) to revenueFromLocal
-                        } else {
-                            try {
-                                var details = fetchMovieDetails(movie.id, isTv = false)
-                                if ((details.revenue ?: 0L) == 0L) {
-                                    details = fetchMovieDetails(movie.id, isTv = false, forceRefresh = true)
-                                }
-                                val rev = details.revenue ?: 0L
-                                val mapped = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(details, "movie")
-                                mapped to rev
-                            } catch (e: Exception) {
-                                movie to (movie.revenue ?: 0L)
-                            }
-                        }
-                        val formattedRev = if (finalRevenue > 0L) {
-                            com.cinetrack.data.model.BoxOfficeMovie.formatRevenue(finalRevenue)
-                        } else {
-                            ""
-                        }
-                        com.cinetrack.data.model.BoxOfficeMovie(
-                            movie = finalMovie,
-                            rank = rank,
-                            revenue = finalRevenue,
-                            formattedRevenue = formattedRev
-                        )
-                    }
-                }.awaitAll()
-            }
-
-            if (boxOfficeList.isNotEmpty()) {
-                try {
-                    cacheDao.saveHomeFeed(
-                        com.cinetrack.data.local.entities.HomeFeedCacheEntity(
-                            id = cacheId,
-                            data = json.encodeToString(boxOfficeList),
-                            updatedAt = System.currentTimeMillis()
-                        )
-                    )
-                } catch (e: Exception) {
-                    // Ignore cache write error
-                }
-            }
-
-            boxOfficeList
-        } catch (e: Exception) {
-            e.printStackTrace()
-            try {
-                val cachedEntity = cacheDao.getHomeFeedEntity(cacheId)
-                if (cachedEntity != null) {
-                    json.decodeFromString<List<com.cinetrack.data.model.BoxOfficeMovie>>(cachedEntity.data)
-                } else {
-                    emptyList()
-                }
-            } catch (ex: Exception) {
-                emptyList()
-            }
-        }
-    }
-    suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryDao.deleteByMovieId(movieId)
+    suspend fun getAllTimeBoxOffice(year: Int? = null, page: Int = 1, forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =
+        boxOfficeRepository.get().getAllTimeBoxOffice(year, page, forceRefresh)
 }
 
 data class TraktRatingInfo(val rating: Double?, val votes: Int)

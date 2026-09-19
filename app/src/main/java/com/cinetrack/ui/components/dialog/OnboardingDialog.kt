@@ -1,8 +1,13 @@
 package com.cinetrack.ui.components.dialog
+
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -36,6 +41,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 
 data class OnboardingSlide(
     val titleRes: Int,
@@ -260,49 +266,18 @@ fun OnboardingDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Pager Animated Indicators (matching Surprise Me style)
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(slides.size) { index ->
-                            val isCurrent = pagerState.currentPage == index
-                            val isPast = pagerState.currentPage > index
-
-                            val animatedWidth by animateDpAsState(
-                                targetValue = if (isCurrent) 24.dp else 8.dp,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessLow
-                                ),
-                                label = "indicatorWidth"
-                            )
-                            val animatedColor by animateColorAsState(
-                                targetValue = if (isCurrent || isPast) accentColor else Color.White.copy(alpha = 0.2f),
-                                animationSpec = tween(durationMillis = 300),
-                                label = "indicatorColor"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .height(20.dp)
-                                    .width(animatedWidth + 10.dp)
-                                    .bounceClick {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .height(8.dp)
-                                        .width(animatedWidth)
-                                        .clip(CircleShape)
-                                        .background(animatedColor)
-                                )
+                    // Pager Animated Indicators (Symbiont / Worm elastico)
+                    SymbiontPagerIndicator(
+                        pagerState = pagerState,
+                        pageCount = slides.size,
+                        accentColor = accentColor,
+                        persistPreviousDots = true,
+                        onDotClick = { index ->
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
                         }
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(28.dp))
 

@@ -325,7 +325,7 @@ private fun CommentCard(
                     val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
                     val isLiked = currentUserId != null && comment.likedBy.contains(currentUserId)
 
-                    com.cinetrack.ui.screens.LiquidStarIcon(
+                    com.cinetrack.ui.components.comments.LiquidStarIcon(
                         isLiked = isLiked,
                         accentColor = accentColor,
                         modifier = Modifier.size(12.dp)
