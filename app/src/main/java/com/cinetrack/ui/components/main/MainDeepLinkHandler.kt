@@ -62,10 +62,11 @@ fun MainDeepLinkHandler(
                     settingsViewModel.exchangeTraktCode(code, returnedState)
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "simkl_login") {
-                // SIMKL OAuth callback: flicktrove://simkl_login?code=XXXXX
+                // SIMKL OAuth callback: flicktrove://simkl_login?code=XXXXX&state=YYYYY
                 val code = uri.getQueryParameter("code")
+                val returnedState = uri.getQueryParameter("state")
                 if (!code.isNullOrEmpty()) {
-                    settingsViewModel.exchangeSimklCode(code)
+                    settingsViewModel.exchangeSimklCode(code, returnedState)
                 }
             } else if (isCustomScheme) {
                 val pathSegments = uri.pathSegments

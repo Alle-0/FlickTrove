@@ -364,14 +364,22 @@ fun SettingsSyncBackupSection(
                             onClick = {
                                 if (isTraktLoggedIn) return@SettingsActionButton
                                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                                val verifier = com.cinetrack.util.PkceHelper.generateCodeVerifier()
+                                val challenge = com.cinetrack.util.PkceHelper.generateCodeChallenge(verifier)
+                                val state = com.cinetrack.util.PkceHelper.generateState()
+                                settingsViewModel.savePendingSimklOAuth(verifier, state)
                                 val clientId = Keys.getSimklKey()
                                 val intent = android.content.Intent(
                                     android.content.Intent.ACTION_VIEW,
                                     android.net.Uri.parse(
-                                        "https://simkl.com/oauth/authorize" +
+                                        "https://simkl.com/oauth2/authorize" +
                                         "?response_type=code" +
                                         "&client_id=$clientId" +
-                                        "&redirect_uri=flicktrove://simkl_login"
+                                        "&redirect_uri=flicktrove://simkl_login" +
+                                        "&code_challenge=$challenge" +
+                                        "&code_challenge_method=S256" +
+                                        "&scope=media:read+media:write" +
+                                        "&state=$state"
                                     )
                                 )
                                 context.startActivity(intent)

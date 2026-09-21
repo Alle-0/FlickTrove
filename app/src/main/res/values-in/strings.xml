@@ -770,6 +770,8 @@
     <string name="category_tv">SERIAL TV</string>
     <string name="drawer_menu">Menu</string>
     <string name="detail_director">SUTRADARA</string>
+    <string name="detail_creator">PENCIPTA</string>
+    <string name="detail_creators">PENCIPTA</string>
     <string name="detail_cast">PEMERAN</string>
     <string name="detail_top_comments">KOMENTAR TERATAS</string>
     <string name="detail_plot">SINOPSIS</string>

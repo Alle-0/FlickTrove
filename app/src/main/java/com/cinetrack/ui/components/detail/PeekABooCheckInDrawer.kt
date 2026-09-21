@@ -73,6 +73,17 @@ import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import com.cinetrack.util.VibrationHelper
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
+
+private data class SaveBurstParticle(
+    val angle: Float,
+    val distance: Float,
+    val radius: Float,
+    val color: Color
+)
 
 /**
  * Represents one selectable emotional reaction.
@@ -144,6 +155,28 @@ fun PeekABooCheckInDrawer(
         mutableStateOf(cast.find { it.id == movie?.favoriteActorId })
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    var isSaving by remember { mutableStateOf(false) }
+    val burstProgress = remember { Animatable(0f) }
+
+    val particles = remember(accentColor) {
+        val random = Random(1337)
+        val colors = listOf(
+            Color(0xFF10B981), // Emerald Green
+            Color(0xFF34D399), // Light Emerald
+            Color(0xFFFBBF24), // Gold
+            Color(0xFFF59E0B), // Amber
+            Color.White,
+            accentColor
+        )
+        List(26) {
+            val angle = random.nextFloat() * (2.0 * Math.PI).toFloat()
+            val dist = random.nextFloat() * 46f + 16f
+            val rad = random.nextFloat() * 3.5f + 2f
+            SaveBurstParticle(angle, dist, rad, colors[random.nextInt(colors.size)])
+        }
+    }
+
     // Reset and trigger peek when `visible` transitions to true
     LaunchedEffect(visible, startExpanded) {
         if (visible) {
@@ -158,10 +191,14 @@ fun PeekABooCheckInDrawer(
             currentPage = 0
             isExpanded = startExpanded
             isPeeking = true
+            isSaving = false
+            burstProgress.snapTo(0f)
         } else {
             isPeeking = false
             isExpanded = false
             currentPage = 0
+            isSaving = false
+            burstProgress.snapTo(0f)
         }
     }
 
@@ -179,6 +216,7 @@ fun PeekABooCheckInDrawer(
     val dismissAll = {
         isPeeking = false
         isExpanded = false
+        isSaving = false
         onDismiss()
     }
 
@@ -507,36 +545,128 @@ fun PeekABooCheckInDrawer(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(40.dp)
-                                    .bounceClick(scaleDown = 0.96f) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (currentPage < 2) {
-                                            currentPage += 1
-                                        } else {
-                                            val finalCharImageUrl = selectedMvp?.let { mvp ->
-                                                val cName = mvp.character?.lowercase()?.trim()
-                                                val aName = mvp.name.lowercase().trim()
-                                                cName?.let { characterImages[it] } ?: characterImages[aName]
-                                            }
-                                            val finalRating = if (rating > 0.0) rating else null
-                                            onSave(finalRating, selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
-                                            dismissAll()
-                                        }
-                                    }
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
-                                        )
-                                    ),
+                                    .height(40.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = if (currentPage < 2) stringResource(R.string.checkin_next) else stringResource(R.string.checkin_save_diary),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF0B0F19)
-                                )
+                                // Celebration Particle Burst
+                                if (isSaving && burstProgress.value > 0f) {
+                                    Canvas(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer { clip = false }
+                                    ) {
+                                        val p = burstProgress.value
+                                        val centerX = size.width / 2f
+                                        val centerY = size.height / 2f
+
+                                        // Expanding soft radial glow
+                                        val glowRadius = (size.width / 2f + 28.dp.toPx()) * p
+                                        val glowAlpha = (1f - p) * 0.45f
+                                        if (glowAlpha > 0.01f) {
+                                            drawCircle(
+                                                brush = Brush.radialGradient(
+                                                    colors = listOf(
+                                                        Color(0xFF10B981).copy(alpha = glowAlpha),
+                                                        Color.Transparent
+                                                    ),
+                                                    center = Offset(centerX, centerY),
+                                                    radius = glowRadius
+                                                ),
+                                                center = Offset(centerX, centerY),
+                                                radius = glowRadius
+                                            )
+                                        }
+
+                                        // Radial flying particles
+                                        for (particle in particles) {
+                                            val distPx = particle.distance.dp.toPx() * p
+                                            val px = centerX + cos(particle.angle) * distPx
+                                            val py = centerY + sin(particle.angle) * distPx
+                                            val pAlpha = (1f - p).coerceIn(0f, 1f)
+                                            val pRadius = particle.radius.dp.toPx() * (1f - p * 0.35f)
+
+                                            drawCircle(
+                                                color = particle.color.copy(alpha = pAlpha),
+                                                radius = pRadius,
+                                                center = Offset(px, py)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                val saveBrush = if (isSaving) {
+                                    Brush.horizontalGradient(
+                                        colors = listOf(Color(0xFF10B981), Color(0xFF059669))
+                                    )
+                                } else {
+                                    Brush.horizontalGradient(
+                                        colors = listOf(accentColor, accentColor.copy(alpha = 0.7f))
+                                    )
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .bounceClick(scaleDown = if (isSaving) 1f else 0.96f) {
+                                            if (isSaving) return@bounceClick
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            if (currentPage < 2) {
+                                                currentPage += 1
+                                            } else {
+                                                isSaving = true
+                                                VibrationHelper.vibrateClick(context)
+                                                coroutineScope.launch {
+                                                    burstProgress.animateTo(
+                                                        targetValue = 1f,
+                                                        animationSpec = tween(durationMillis = 480, easing = FastOutSlowInEasing)
+                                                    )
+                                                    delay(120)
+                                                    val finalCharImageUrl = selectedMvp?.let { mvp ->
+                                                        val cName = mvp.character?.lowercase()?.trim()
+                                                        val aName = mvp.name.lowercase().trim()
+                                                        cName?.let { characterImages[it] } ?: characterImages[aName]
+                                                    }
+                                                    val finalRating = if (rating > 0.0) rating else null
+                                                    onSave(finalRating, selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
+                                                    dismissAll()
+                                                }
+                                            }
+                                        }
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(saveBrush),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    AnimatedContent(
+                                        targetState = isSaving,
+                                        transitionSpec = {
+                                            (scaleIn(
+                                                initialScale = 0.5f,
+                                                animationSpec = spring(
+                                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                    stiffness = Spring.StiffnessMediumLow
+                                                )
+                                            ) + fadeIn(tween(200)))
+                                                .togetherWith(scaleOut(targetScale = 0.5f) + fadeOut(tween(150)))
+                                        },
+                                        label = "SaveButtonContent"
+                                    ) { saving ->
+                                        if (saving) {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                                                contentDescription = "Saved",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        } else {
+                                            Text(
+                                                text = if (currentPage < 2) stringResource(R.string.checkin_next) else stringResource(R.string.checkin_save_diary),
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF0B0F19)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

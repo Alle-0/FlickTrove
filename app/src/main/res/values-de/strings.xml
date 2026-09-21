@@ -694,6 +694,8 @@
     <string name="category_tv">SERIEN</string>
     <string name="drawer_menu">Menü</string>
     <string name="detail_director">REGIE</string>
+    <string name="detail_creator">SCHÖPFER</string>
+    <string name="detail_creators">SCHÖPFER</string>
     <string name="detail_cast">BESETZUNG</string>
     <string name="detail_top_comments">TOP-KOMMENTARE</string>
     <string name="detail_plot">HANDLUNG</string>

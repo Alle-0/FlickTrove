@@ -181,11 +181,121 @@ class SimklSyncWorker @AssistedInject constructor(
                 firebaseRemoteDataSource.updateTrendingStatsBulk(bulkStatsUpdates)
             }
 
+            // Sync Simkl Custom Lists (Folders)
+            syncCustomLists()
+
             updateProgress("Sync complete!", 100, 100)
             return@withContext Result.success()
         } catch (e: Exception) {
             e.printStackTrace()
             return@withContext Result.retry()
+        }
+    }
+
+    private suspend fun syncCustomLists() {
+        try {
+            updateProgress("SIMKL ➔ App: Syncing custom lists...")
+            
+            var userId = authRepository.getUserId()
+            if (userId == null) {
+                try {
+                    val userSettings = simklService.getUserSettings()
+                    val uid = userSettings.account?.id
+                    if (uid != null) {
+                        authRepository.saveUserAccount(uid, userSettings.account?.type)
+                        userId = uid
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.w("SimklSyncWorker", "Impossibile recuperare user settings per le custom lists", e)
+                }
+            }
+
+            if (userId == null) {
+                android.util.Log.w("SimklSyncWorker", "UserId non disponibile per recuperare le custom lists")
+                return
+            }
+
+            val listsResponse = simklService.getUserCustomLists(userId)
+            if (listsResponse.error == "premium_only") {
+                android.util.Log.d("SimklSyncWorker", "Custom lists Simkl disponibili solo per account PRO/VIP, skip")
+                return
+            }
+
+            val simklLists = listsResponse.lists ?: emptyList()
+            val remoteSimklFolderIds = simklLists.map { "simkl_${it.id}" }.toSet()
+
+            for (sList in simklLists) {
+                val folderId = "simkl_${sList.id}"
+                val detailResponse = simklService.getCustomListItems(sList.id)
+                if (detailResponse.error == "premium_only") {
+                    continue
+                }
+
+                val compositeIds = mutableListOf<String>()
+                val missingMovies = mutableListOf<Movie>()
+                val items = detailResponse.items ?: emptyList()
+
+                for (item in items) {
+                    val itemTmdbId = item.ids?.tmdb
+                    val itemType = if (item.type == "movie" || sList.media_type == "movies") "movie" else "tv"
+
+                    if (itemTmdbId != null) {
+                        compositeIds.add("${itemType}_${itemTmdbId}")
+
+                        // Se il titolo non esiste in locale, scarichiamo i dettagli base da TMDB con rate-limiting difensivo
+                        if (movieRepository.getMovie(itemTmdbId, itemType) == null) {
+                            try {
+                                val tmdbResponse = if (itemType == "movie") {
+                                    tmdbService.getMovieBasicDetails(itemTmdbId)
+                                } else {
+                                    tmdbService.getTVBasicDetails(itemTmdbId)
+                                }
+                                val newItem = MovieMapper.mapResponseToMovie(tmdbResponse, itemType)
+                                missingMovies.add(newItem)
+                                delay(60L) // Rate-limiting difensivo contro ban IP TMDB
+                            } catch (e: Exception) {
+                                android.util.Log.e("SimklSyncWorker", "Impossibile scaricare item $itemTmdbId per lista Simkl", e)
+                            }
+                        }
+                    }
+                }
+
+                if (missingMovies.isNotEmpty()) {
+                    movieRepository.saveMoviesBulk(missingMovies)
+                }
+
+                val palette = listOf(
+                    "#FF5252", "#E040FB", "#7C4DFF", "#448AFF", 
+                    "#00BCD4", "#4CAF50", "#FFC107", "#FF9800", 
+                    "#FF5722", "#00E676", "#D50000", "#F50057"
+                )
+
+                val localFolder = movieRepository.getFolderFlow(folderId).firstOrNull()
+                val newFolder = com.cinetrack.data.local.entities.FolderEntity(
+                    id = folderId,
+                    name = sList.name,
+                    icon = localFolder?.icon ?: "folder_special",
+                    color = localFolder?.color ?: palette.random(),
+                    description = sList.description ?: "",
+                    itemIds = compositeIds,
+                    createdAt = localFolder?.createdAt ?: System.currentTimeMillis().toString(),
+                    updatedAt = System.currentTimeMillis().toString(),
+                    syncStatus = "synced",
+                    clientUpdatedAt = System.currentTimeMillis()
+                )
+                movieRepository.saveFolder(newFolder)
+            }
+
+            // Pulizia liste zombie: rimuove cartelle locali simkl_ non più esistenti sul server
+            val allLocalFolders = movieRepository.getFoldersFlow().firstOrNull() ?: emptyList()
+            for (localFolder in allLocalFolders) {
+                if (localFolder.id.startsWith("simkl_") && !remoteSimklFolderIds.contains(localFolder.id)) {
+                    movieRepository.deleteFolder(localFolder.id)
+                    android.util.Log.d("SimklSyncWorker", "Cartella Zombie Simkl eliminata: ${localFolder.name}")
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("SimklSyncWorker", "Sync Custom Lists Simkl fallita, skip", e)
         }
     }
 

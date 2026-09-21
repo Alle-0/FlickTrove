@@ -50,9 +50,11 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeChild
@@ -300,17 +302,20 @@ fun CommentInputBar(
                                 }
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                // Spoiler switch
-                                Text(stringResource(R.string.comment_spoiler_toggle), color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelMedium)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Switch(
+                                Text(
+                                    text = stringResource(R.string.comment_spoiler_toggle),
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                FlickTroveSwitch(
                                     checked = isSpoiler,
-                                    onCheckedChange = onSpoilerChanged,
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = accentColor,
-                                        checkedTrackColor = accentColor.copy(alpha = 0.3f)
-                                    ),
-                                    modifier = Modifier.scale(0.8f)
+                                    onCheckedChange = {
+                                        VibrationHelper.vibrateTick(context)
+                                        onSpoilerChanged(it)
+                                    },
+                                    accentColor = accentColor,
+                                    modifier = Modifier.scale(0.85f)
                                 )
                                 Spacer(modifier = Modifier.weight(1f))
                                 Box(

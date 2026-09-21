@@ -770,6 +770,8 @@
     <string name="category_tv">剧集</string>
     <string name="drawer_menu">菜单</string>
     <string name="detail_director">导演</string>
+    <string name="detail_creator">主创</string>
+    <string name="detail_creators">主创</string>
     <string name="detail_cast">演员阵容</string>
     <string name="detail_top_comments">热门影评</string>
     <string name="detail_plot">剧情简介</string>

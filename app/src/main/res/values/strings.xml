@@ -771,6 +771,8 @@
     <string name="category_tv">TV SHOWS</string>
     <string name="drawer_menu">Menu</string>
     <string name="detail_director">DIRECTOR</string>
+    <string name="detail_creator">CREATOR</string>
+    <string name="detail_creators">CREATORS</string>
     <string name="detail_cast">CAST</string>
     <string name="detail_top_comments">TOP COMMENTS</string>
     <string name="detail_plot">PLOT</string>

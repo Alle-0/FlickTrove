@@ -770,6 +770,8 @@
     <string name="category_tv">TV 시리즈</string>
     <string name="drawer_menu">메뉴</string>
     <string name="detail_director">감독</string>
+    <string name="detail_creator">제작자</string>
+    <string name="detail_creators">제작자</string>
     <string name="detail_cast">출연진</string>
     <string name="detail_top_comments">베스트 댓글</string>
     <string name="detail_plot">줄거리</string>

@@ -251,10 +251,12 @@ object NetworkModule {
     @Named("simkl_okhttp")
     fun provideSimklOkHttpClient(
         okHttpClient: OkHttpClient,
-        simklAuthInterceptor: SimklAuthInterceptor
+        simklAuthInterceptor: SimklAuthInterceptor,
+        simklAuthenticator: com.cinetrack.data.api.SimklAuthenticator
     ): OkHttpClient {
         return okHttpClient.newBuilder()
             .addInterceptor(simklAuthInterceptor)
+            .authenticator(simklAuthenticator)
             .build()
     }
 
@@ -273,6 +275,25 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideSimklService(@Named("simkl_retrofit") retrofit: Retrofit): SimklService = retrofit.create(SimklService::class.java)
+
+    /**
+     * A Simkl service backed by the plain OkHttpClient — NO SimklAuthInterceptor and
+     * NO SimklAuthenticator. Used exclusively by [SimklAuthenticator] for the token
+     * refresh call, which MUST NOT go through the authenticating client to avoid an
+     * infinite loop / deadlock when the refresh token itself is rejected with 401.
+     */
+    @Provides
+    @Singleton
+    @Named("simkl_refresh_service")
+    fun provideSimklRefreshService(json: Json, okHttpClient: OkHttpClient): SimklService {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.simkl.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(SimklService::class.java)
+    }
 
     @Provides
     @Named("tmdb_api_key")

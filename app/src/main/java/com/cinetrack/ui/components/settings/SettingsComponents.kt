@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -459,16 +460,10 @@ fun BadgeLegendItem(
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Switch(
+        FlickTroveSwitch(
             checked = enabled,
             onCheckedChange = { onToggle(it) },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = color,
-                checkedTrackColor = color.copy(alpha = 0.3f),
-                uncheckedThumbColor = Color.Gray,
-                uncheckedTrackColor = Color(0xFF2C2C2E),
-                uncheckedBorderColor = Color.Transparent
-            ),
+            accentColor = color,
             modifier = Modifier.scale(0.85f)
         )
     }

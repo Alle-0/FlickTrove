@@ -697,6 +697,8 @@
     <string name="category_tv">टीवी शो</string>
     <string name="drawer_menu">मेनू</string>
     <string name="detail_director">निर्देशक</string>
+    <string name="detail_creator">निर्माता</string>
+    <string name="detail_creators">निर्माता</string>
     <string name="detail_cast">कास्ट</string>
     <string name="detail_top_comments">शीर्ष टिप्पणियाँ</string>
     <string name="detail_plot">कथानक</string>

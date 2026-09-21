@@ -13,6 +13,34 @@ interface SimklService {
         @Body request: SimklTokenRequest
     ): SimklTokenResponse
 
+    @POST("oauth2/token")
+    suspend fun getAccessTokenV2(
+        @Body request: SimklTokenRequestV2
+    ): SimklTokenResponseV2
+
+    @POST("oauth2/token")
+    suspend fun refreshToken(
+        @Body request: SimklTokenRequestV2
+    ): SimklTokenResponseV2
+
+    @GET("users/settings")
+    suspend fun getUserSettings(): SimklUserSettingsResponse
+
+    @GET("lists/user/{userId}")
+    suspend fun getUserCustomLists(
+        @Path("userId") userId: Long,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 50
+    ): SimklUserListsResponse
+
+    @GET("lists/{id}")
+    suspend fun getCustomListItems(
+        @Path("id") listId: Long,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 500,
+        @Query("extended") extended: String = "full"
+    ): SimklListDetailResponse
+
     @GET("sync/activities")
     suspend fun getActivities(): SimklActivitiesResponse
 

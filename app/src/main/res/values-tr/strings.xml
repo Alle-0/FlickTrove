@@ -770,6 +770,8 @@
     <string name="category_tv">DİZİLER</string>
     <string name="drawer_menu">Menü</string>
     <string name="detail_director">YÖNETMEN</string>
+    <string name="detail_creator">YARATICI</string>
+    <string name="detail_creators">YARATICILAR</string>
     <string name="detail_cast">OYUNCULAR</string>
     <string name="detail_top_comments">ÖNE ÇIKAN YORUMLAR</string>
     <string name="detail_plot">ÖZET</string>

@@ -699,6 +699,8 @@
     <string name="category_tv">СЕРИАЛЫ</string>
     <string name="drawer_menu">Меню</string>
     <string name="detail_director">РЕЖИССЕР</string>
+    <string name="detail_creator">СОЗДАТЕЛЬ</string>
+    <string name="detail_creators">СОЗДАТЕЛИ</string>
     <string name="detail_cast">В РОЛЯХ</string>
     <string name="detail_top_comments">ЛУЧШИЕ КОММЕНТАРИИ</string>
     <string name="detail_plot">СЮЖЕТ</string>

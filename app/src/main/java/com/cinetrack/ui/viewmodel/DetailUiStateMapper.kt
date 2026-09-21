@@ -169,7 +169,18 @@ class DetailUiStateMapper @Inject constructor(
             },
             watchedProgress = progress,
             matchPercentage = matchScore,
-            crew = (metadata.credits?.crew ?: emptyList()).toImmutableList(),
+            crew = run {
+                val createdByCrew = metadata.createdBy?.map { creator ->
+                    com.cinetrack.data.api.CrewMember(
+                        id = creator.id,
+                        name = creator.name,
+                        job = "Creator",
+                        department = "Writing",
+                        profilePath = creator.profilePath
+                    )
+                } ?: emptyList()
+                (createdByCrew + (metadata.credits?.crew ?: emptyList())).distinctBy { "${it.id}_${it.job}" }.toImmutableList()
+            },
             cast = (metadata.credits?.cast?.distinctBy { it.id } ?: emptyList()).toImmutableList(),
             streamingProviders = (metadata.watchProviders?.results?.get(watchRegion)?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
             buyRentProviders = ((metadata.watchProviders?.results?.get(watchRegion)?.buy ?: emptyList()) + 

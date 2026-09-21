@@ -694,6 +694,8 @@
     <string name="category_tv">SÉRIES TV</string>
     <string name="drawer_menu">Menu</string>
     <string name="detail_director">RÉALISATEUR</string>
+    <string name="detail_creator">CRÉATEUR</string>
+    <string name="detail_creators">CRÉATEURS</string>
     <string name="detail_cast">CASTING</string>
     <string name="detail_top_comments">MEILLEURS COMMENTAIRES</string>
     <string name="detail_plot">SYNOPSIS</string>

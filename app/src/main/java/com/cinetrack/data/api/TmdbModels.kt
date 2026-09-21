@@ -183,7 +183,8 @@ data class MovieDetailResponse(
     @SerialName("production_countries") val productionCountries: List<ProductionCountry>? = null,
     @SerialName("origin_country") val originCountry: List<String>? = null,
     val keywords: KeywordsResponse? = null,
-    val images: ImagesResponse? = null
+    val images: ImagesResponse? = null,
+    @SerialName("created_by") val createdBy: List<CreatedBy>? = null
 )
 
 @Serializable
@@ -294,6 +295,15 @@ data class CrewMember(
     val job: String = "",
     val department: String = "",
     @SerialName("profile_path") val profilePath: String? = null
+)
+
+@Serializable
+@Stable
+data class CreatedBy(
+    val id: Long = 0L,
+    val name: String = "",
+    @SerialName("profile_path") val profilePath: String? = null,
+    @SerialName("credit_id") val creditId: String? = null
 )
 
 @Serializable

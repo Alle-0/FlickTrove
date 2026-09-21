@@ -668,21 +668,58 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun exchangeSimklCode(code: String) {
+    fun savePendingSimklOAuth(codeVerifier: String, state: String) {
         viewModelScope.launch {
+            simklAuthRepository.savePendingOAuth(codeVerifier, state)
+        }
+    }
+
+    fun exchangeSimklCode(code: String, returnedState: String? = null) {
+        viewModelScope.launch {
+            val expectedState = simklAuthRepository.getPendingOAuthState()
+            val codeVerifier = simklAuthRepository.getPendingCodeVerifier()
+            simklAuthRepository.clearPendingOAuth()
+
+            if (expectedState != null && expectedState != returnedState) {
+                android.util.Log.e("SettingsViewModel", "Simkl OAuth state mismatch — possible CSRF attack")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
+                return@launch
+            }
+
+            if (codeVerifier.isNullOrEmpty()) {
+                android.util.Log.e("SettingsViewModel", "Simkl PKCE code_verifier missing")
+                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
+                return@launch
+            }
+
             try {
-                val response = simklService.get().getAccessToken(
-                    com.cinetrack.data.api.SimklTokenRequest(
-                        code = code,
+                val response = simklService.get().getAccessTokenV2(
+                    com.cinetrack.data.api.SimklTokenRequestV2(
+                        grant_type = "authorization_code",
                         client_id = com.cinetrack.util.Keys.getSimklKey(),
-                        client_secret = com.cinetrack.util.Keys.getSimklSecret(),
-                        redirect_uri = "flicktrove://simkl_login"
+                        code = code,
+                        redirect_uri = "flicktrove://simkl_login",
+                        code_verifier = codeVerifier
                     )
                 )
-                simklAuthRepository.saveToken(response.access_token)
-                
+                simklAuthRepository.saveTokens(
+                    accessToken = response.access_token,
+                    refreshToken = response.refresh_token,
+                    expiresInSeconds = response.expires_in
+                )
+
+                // Fetch account profile & user ID immediately
+                try {
+                    val settings = simklService.get().getUserSettings()
+                    val uid = settings.account?.id
+                    if (uid != null) {
+                        simklAuthRepository.saveUserAccount(uid, settings.account?.type)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.w("SettingsViewModel", "Failed to fetch user settings after Simkl login", e)
+                }
+
                 syncSimklNow()
-                
                 actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connected))
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Simkl token exchange failed", e)

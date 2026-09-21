@@ -770,6 +770,8 @@
     <string name="category_tv">TVシリーズ</string>
     <string name="drawer_menu">メニュー</string>
     <string name="detail_director">監督</string>
+    <string name="detail_creator">クリエイター</string>
+    <string name="detail_creators">クリエイター</string>
     <string name="detail_cast">キャスト</string>
     <string name="detail_top_comments">人気のコメント</string>
     <string name="detail_plot">あらすじ</string>

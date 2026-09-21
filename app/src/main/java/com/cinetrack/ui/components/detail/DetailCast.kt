@@ -83,11 +83,28 @@ fun DetailCast(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // REGIA SECTION
+        // LEAD CREW SECTION (REGIA / IDEATORI)
         val directors = remember(crew) { crew.filter { it.job == "Director" } }
-        if (directors.isNotEmpty()) {
-            val groupedDirectors = remember(directors) {
-                directors.groupBy { it.id }.map { (_, members) ->
+        val creators = remember(crew) { crew.filter { it.job == "Creator" } }
+        val leadCrew = remember(directors, creators) {
+            if (creators.isNotEmpty()) (creators + directors).distinctBy { it.id } else directors
+        }
+        val isCreatorSection = creators.isNotEmpty() && directors.isEmpty()
+        val isDualSection = creators.isNotEmpty() && directors.isNotEmpty()
+
+        val creatorSingular = stringResource(R.string.detail_creator)
+        val creatorPlural = stringResource(R.string.detail_creators)
+        val directorLabel = stringResource(R.string.detail_director)
+
+        val leadSectionTitle = when {
+            isCreatorSection -> if (creators.size > 1) creatorPlural else creatorSingular
+            isDualSection -> "${if (creators.size > 1) creatorPlural else creatorSingular} / $directorLabel"
+            else -> directorLabel
+        }
+
+        if (leadCrew.isNotEmpty()) {
+            val groupedLeadCrew = remember(leadCrew) {
+                leadCrew.groupBy { it.id }.map { (_, members) ->
                     val first = members.first()
                     val combinedJobs = members.map { it.job }.distinct().joinToString(" / ")
                     first.copy(job = combinedJobs)
@@ -99,33 +116,38 @@ fun DetailCast(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bounceClick(scaleDown = 0.98f) { showAllCrew = true }
                     .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.detail_director),
+                    text = leadSectionTitle,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 3.sp
                     ),
                     color = Color.White.copy(alpha = 0.65f)
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.detail_crew).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.65f)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_right),
-                        contentDescription = "See All",
-                        tint = Color.White.copy(alpha = 0.65f),
-                        modifier = Modifier.size(16.dp)
-                    )
+                if (crew.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .bounceClick(scaleDown = 0.98f) { showAllCrew = true }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.detail_crew).uppercase(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.65f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_right),
+                            contentDescription = "See All",
+                            tint = Color.White.copy(alpha = 0.65f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
 
@@ -134,16 +156,19 @@ fun DetailCast(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
-                items(groupedDirectors.take(15), key = { "dir-${it.id}" }, contentType = { "person" }) { person ->
+                items(groupedLeadCrew.take(15), key = { "lead-${it.id}" }, contentType = { "person" }) { person ->
+                    val showRoleBadge = isDualSection
                     PersonCard(
                         id = person.id,
                         name = person.name,
-                        subLabel = "", // Nascondiamo il label "Director" poiché la sezione è già titolata REGIA
+                        subLabel = if (showRoleBadge) {
+                            if (person.job == "Creator") creatorSingular else directorLabel
+                        } else "",
                         imagePath = person.profilePath,
                         accentColor = accentColor,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
-                        showSubLabelContainer = false,
+                        showSubLabelContainer = showRoleBadge,
                         onClick = { onPersonClick(person.id, person.profilePath) }
                     )
                 }
@@ -161,27 +186,55 @@ fun DetailCast(
             }
 
             Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bounceClick(scaleDown = 0.98f) { showAllCast = true }
                     .padding(start = 24.dp, end = 24.dp, top = 0.dp, bottom = 12.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.detail_cast),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 3.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.65f)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_right),
-                    contentDescription = "See All",
-                    tint = Color.White.copy(alpha = 0.65f),
-                    modifier = Modifier.size(16.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.bounceClick(scaleDown = 0.98f) { showAllCast = true }
+                ) {
+                    Text(
+                        text = stringResource(R.string.detail_cast),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 3.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.65f)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_right),
+                        contentDescription = "See All",
+                        tint = Color.White.copy(alpha = 0.65f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                if (leadCrew.isEmpty() && crew.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.bounceClick(scaleDown = 0.98f) { showAllCrew = true }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.detail_crew).uppercase(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.65f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_right),
+                            contentDescription = "See All",
+                            tint = Color.White.copy(alpha = 0.65f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
 
             LazyRow(

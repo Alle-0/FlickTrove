@@ -37,7 +37,15 @@ object MovieMapper {
         val directors = response.credits?.crew?.filter { it.job == "Director" }?.distinctBy { it.id }?.map {
             com.cinetrack.data.model.PersonData(id = it.id, name = it.name, profilePath = it.profilePath)
         }
-        val mainDirector = directors?.firstOrNull()
+        val creators = response.createdBy?.distinctBy { it.id }?.map {
+            com.cinetrack.data.model.PersonData(id = it.id, name = it.name, profilePath = it.profilePath)
+        }
+        val effectiveDirectors = if (!directors.isNullOrEmpty()) {
+            directors
+        } else if (!creators.isNullOrEmpty()) {
+            creators
+        } else null
+        val mainDirector = effectiveDirectors?.firstOrNull()
 
         return Movie(
             id = response.id,
@@ -67,7 +75,7 @@ object MovieMapper {
             nextEpisodeAirDate = response.nextEpisodeToAir?.airDate,
             nextEpisodeString = response.nextEpisodeToAir?.let { "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}" },
             topCastData = topCast,
-            directorData = directors,
+            directorData = effectiveDirectors,
             directorId = mainDirector?.id,
             directorName = mainDirector?.name,
             originCountry = response.originCountry ?: response.productionCountries?.mapNotNull { it.iso31661 },

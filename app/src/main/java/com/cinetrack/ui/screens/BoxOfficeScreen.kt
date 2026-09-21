@@ -571,7 +571,7 @@ fun BoxOfficeMovieRow(
         }
     }
 
-    val rowShape = RoundedCornerShape(16.dp)
+    val rowShape = RoundedCornerShape(24.dp)
 
     Box(
         modifier = Modifier
@@ -614,7 +614,7 @@ fun BoxOfficeMovieRow(
                 modifier = Modifier
                     .width(48.dp)
                     .height(70.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.05f))
             ) {
                 if (posterUrl != null) {
@@ -716,7 +716,7 @@ fun BoxOfficeSkeletonList(contentPadding: PaddingValues) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(26.dp))
                     .shimmerEffect()
             )
         }
@@ -726,7 +726,7 @@ fun BoxOfficeSkeletonList(contentPadding: PaddingValues) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(86.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(24.dp))
                     .shimmerEffect()
             )
         }

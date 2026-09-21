@@ -726,6 +726,8 @@
     <string name="category_tv">SERIE TV</string>
     <string name="drawer_menu">Menu</string>
     <string name="detail_director">REGIA</string>
+    <string name="detail_creator">IDEATORE</string>
+    <string name="detail_creators">IDEATORI</string>
     <string name="detail_cast">CAST</string>
     <string name="detail_top_comments">COMMENTI MIGLIORI</string>
     <string name="detail_plot">TRAMA</string>
