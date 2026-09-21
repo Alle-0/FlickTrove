@@ -85,10 +85,13 @@
         <h2>2. Third-Party Services & APIs</h2>
         <p>FlickTrove integrates with third-party platforms to enrich your cinematic experience:</p>
         <ul>
-          <li><strong>TMDB, TheTVDB, OMDB & Trakt APIs:</strong> Movie, TV show, ratings, and actor details, including
+          <li><strong>TMDB, TheTVDB, OMDB, Trakt & SIMKL APIs:</strong> Movie, TV show, ratings, and actor details, including
             promotional images and posters, are dynamically fetched from The Movie Database (TMDB), TheTVDB, Open Movie Database
-            (OMDB), and Trakt.tv. Please refer to their respective privacy terms for information on third-party data
-            handling.</li>
+            (OMDB), Trakt.tv, and SIMKL.</li>
+          <li><strong>Trakt.tv & SIMKL Account Synchronization:</strong> If you choose to connect your Trakt or SIMKL account,
+            FlickTrove securely authenticates via industry-standard OAuth 2.0 (including PKCE) to synchronize your watch history,
+            personal ratings, watchlist, and custom lists/folders between your device and their cloud platforms. Please refer to the
+            respective Privacy Policies of Trakt.tv and SIMKL for information on how your external account data is processed and stored.</li>
           <li><strong>Google Firebase:</strong> Used for cloud infrastructure, database synchronization, authentication
             services, and crash diagnostics (Crashlytics & Analytics).</li>
           <li><strong>Supabase:</strong> Used for serverless Edge Functions and storing user-uploaded custom avatars and images attached to comments. Images are stored securely and served via public URLs linked to your profile or comment. <em>See the Supabase Privacy Policy for more details.</em></li>

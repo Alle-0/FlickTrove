@@ -81,7 +81,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
 - 📊 **Advanced Statistics**: Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema and TV series.
 - 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
-- ☁️ **Cloud Sync**: Native support for Firebase to save your data (accounts & backups).
+- ☁️ **Cloud & Live Sync**: Native support for Firebase to securely back up your library, alongside seamless two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders/lists.
 - 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
 - 🌍 **Localization**: Native multi-language architecture supporting 13 languages (🇮🇹 🇬🇧 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
 - 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
@@ -91,7 +91,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove community.
 - 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
 - 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
-- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
+- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
 
 ---
 
@@ -137,12 +137,12 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 | **Local Database** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room"> |
 | **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=for-the-badge&logo=google&logoColor=white" alt="Hilt"> |
 | **Images & Colors** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> (Loading & Dynamic Color Extraction) |
-| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> |
+| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> <img src="https://img.shields.io/badge/OAuth_2.0-Trakt_%26_SIMKL-232F3E?style=for-the-badge&logo=openid&logoColor=white" alt="OAuth2"> |
 
 <details>
 <summary><b><img src="docs/assets/readme_icons/2_server.svg" width="18" height="18" align="absmiddle" /> Technical Deep Dive</b></summary>
 <br>
-FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled by <b>Voyager</b> (tab + stack navigator) for a fully Compose-native, lifecycle-safe routing. The Home Feed runs on a dedicated <code>GetHomeFeedUseCase</code> that fires all API calls in parallel via coroutines, ensuring the fastest possible load time.
+FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled by <b>Voyager</b> (tab + stack navigator) for a fully Compose-native, lifecycle-safe routing. The Home Feed runs on a dedicated <code>GetHomeFeedUseCase</code> that fires all API calls in parallel via coroutines, ensuring the fastest possible load time. Background syncing with cloud services (Firebase, Trakt, and SIMKL) is powered by Android <b>WorkManager</b> with resilient exponential backoff, rate-limit pacing, and automatic token refresh.
 </details>
 
 ---
