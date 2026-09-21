@@ -904,6 +904,12 @@ body {
   background: #ed1c24;
 }
 
+.int-icon.simkl {
+  background: #000000;
+  border: 1px solid rgba(0, 200, 255, 0.25);
+  box-shadow: 0 0 14px rgba(0, 200, 255, 0.15);
+}
+
 .int-icon.csv {
   background: #217346;
   color: #fff;
