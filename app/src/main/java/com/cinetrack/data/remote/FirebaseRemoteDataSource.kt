@@ -49,9 +49,11 @@ class FirebaseRemoteDataSource @Inject constructor(
         val uid = userId ?: return
         val docId = "${movie.mediaType}_${movie.id}"
         try {
-            getFavoritesCollection(uid).document(docId)
-                .set(movie, SetOptions.merge())
-                .await()
+            kotlinx.coroutines.withTimeoutOrNull(8_000L) {
+                getFavoritesCollection(uid).document(docId)
+                    .set(movie, SetOptions.merge())
+                    .await()
+            }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRemoteDataSource", "Error setting movie $docId: ${e.message}", e)
         }
@@ -65,12 +67,14 @@ class FirebaseRemoteDataSource @Inject constructor(
         val collection = getFavoritesCollection(uid)
         movies.chunked(40).forEach { chunk ->
             try {
-                val batch = firestore.batch()
-                chunk.forEach { movie ->
-                    val docId = "${movie.mediaType}_${movie.id}"
-                    batch.set(collection.document(docId), movie, SetOptions.merge())
+                kotlinx.coroutines.withTimeoutOrNull(10_000L) {
+                    val batch = firestore.batch()
+                    chunk.forEach { movie ->
+                        val docId = "${movie.mediaType}_${movie.id}"
+                        batch.set(collection.document(docId), movie, SetOptions.merge())
+                    }
+                    batch.commit().await()
                 }
-                batch.commit().await()
             } catch (e: Exception) {
                 android.util.Log.e("FirebaseRemoteDataSource", "Error committing batch of ${chunk.size} movies: ${e.message}", e)
             }
@@ -80,9 +84,15 @@ class FirebaseRemoteDataSource @Inject constructor(
     suspend fun deleteMovie(movieId: Long, mediaType: String) {
         val uid = userId ?: return
         val docId = "${mediaType}_${movieId}"
-        getFavoritesCollection(uid).document(docId)
-            .delete()
-            .await()
+        try {
+            kotlinx.coroutines.withTimeoutOrNull(6_000L) {
+                getFavoritesCollection(uid).document(docId)
+                    .delete()
+                    .await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error deleting movie $docId: ${e.message}", e)
+        }
     }
 
     suspend fun fetchAllFavorites(): List<Movie> {
@@ -106,8 +116,10 @@ class FirebaseRemoteDataSource @Inject constructor(
                     query = query.startAfter(lastSnapshot)
                 }
 
-                val snapshot = query.get(Source.SERVER).await()
-                if (snapshot.isEmpty) break
+                val snapshot = kotlinx.coroutines.withTimeoutOrNull(12_000L) {
+                    query.get(Source.SERVER).await()
+                }
+                if (snapshot == null || snapshot.isEmpty) break
 
                 for (doc in snapshot.documents) {
                     try {
@@ -134,16 +146,30 @@ class FirebaseRemoteDataSource @Inject constructor(
      */
     suspend fun setFolder(folder: Folder) {
         val uid = userId ?: return
-        getFoldersCollection(uid).document(folder.id)
-            .set(folder, SetOptions.merge())
-            .await()
+        if (folder.id.isBlank()) return
+        try {
+            kotlinx.coroutines.withTimeoutOrNull(6_000L) {
+                getFoldersCollection(uid).document(folder.id)
+                    .set(folder, SetOptions.merge())
+                    .await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error setting folder ${folder.id}: ${e.message}", e)
+        }
     }
 
     suspend fun deleteFolder(folderId: String) {
         val uid = userId ?: return
-        getFoldersCollection(uid).document(folderId)
-            .delete()
-            .await()
+        if (folderId.isBlank()) return
+        try {
+            kotlinx.coroutines.withTimeoutOrNull(6_000L) {
+                getFoldersCollection(uid).document(folderId)
+                    .delete()
+                    .await()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error deleting folder $folderId: ${e.message}", e)
+        }
     }
 
     /**
@@ -185,17 +211,23 @@ class FirebaseRemoteDataSource @Inject constructor(
         val uid = userId
         if (uid == null) return emptyList()
         
-        val snapshot = getFoldersCollection(uid).get(Source.SERVER).await()
         val list = mutableListOf<Folder>()
-        for (doc in snapshot.documents) {
-            try {
-                val folder = doc.toObject(Folder::class.java)
-                if (folder != null) {
-                    list.add(folder)
+        try {
+            val snapshot = kotlinx.coroutines.withTimeoutOrNull(12_000L) {
+                getFoldersCollection(uid).get(Source.SERVER).await()
+            } ?: return emptyList()
+            for (doc in snapshot.documents) {
+                try {
+                    val folder = doc.toObject(Folder::class.java)
+                    if (folder != null) {
+                        list.add(folder)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing folder document ${doc.id}: ${e.message}", e)
                 }
-            } catch (e: Exception) {
-                android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing folder document ${doc.id}: ${e.message}", e)
             }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching folders: ${e.message}", e)
         }
         return list
     }
@@ -210,13 +242,16 @@ class FirebaseRemoteDataSource @Inject constructor(
         try {
             val chunks = entries.chunked(40)
             for (chunk in chunks) {
-                firestore.runBatch { batch ->
-                    for (entry in chunk) {
-                        val docId = "${entry.movieId}_${entry.watchedAt}"
-                        val docRef = collection.document(docId)
-                        batch.set(docRef, entry, SetOptions.merge())
-                    }
-                }.await()
+                kotlinx.coroutines.withTimeoutOrNull(10_000L) {
+                    firestore.runBatch { batch ->
+                        for (entry in chunk) {
+                            val safeWatchedAt = entry.watchedAt.replace("/", "-")
+                            val docId = "${entry.movieId}_${safeWatchedAt}"
+                            val docRef = collection.document(docId)
+                            batch.set(docRef, entry, SetOptions.merge())
+                        }
+                    }.await()
+                }
             }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRemoteDataSource", "Error batch setting watch history: ${e.message}", e)

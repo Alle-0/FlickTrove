@@ -1225,6 +1225,7 @@
     <string name="sync_msg_syncing_preferences">Menyinkronkan preferensi...</string>
     <string name="sync_msg_completed">Sinkronisasi selesai</string>
     <string name="sync_msg_error">Kesalahan sinkronisasi</string>
+    <string name="auth_sync_continue_anyway">Tetap lanjutkan</string>
     <string name="comment_already_in_language">Komentar sudah dalam bahasa Anda</string>
     <string name="folder_sort_name">Nama</string>
     <string name="folder_sort_items_count">Jumlah Item</string>

@@ -597,6 +597,29 @@ fun AuthScreen(
             label = "AuthSyncProgress"
         )
 
+        val isSyncingLibrary = when ((loadingState?.message as? com.cinetrack.ui.utils.UiText.StringResource)?.resId) {
+            R.string.sync_msg_fetching_favorites,
+            R.string.sync_msg_syncing_favorites,
+            R.string.sync_msg_saving_favorites,
+            R.string.sync_msg_fetching_folders,
+            R.string.sync_msg_syncing_folders,
+            R.string.sync_msg_saving_folders,
+            R.string.sync_msg_syncing_preferences,
+            R.string.sync_msg_completed -> true
+            else -> false
+        }
+
+        var showDismissButton by remember { mutableStateOf(false) }
+        LaunchedEffect(loadingState) {
+            if (loadingState != null) {
+                val delayMillis = if (isSyncingLibrary) 15_000L else 6_000L
+                delay(delayMillis)
+                showDismissButton = true
+            } else {
+                showDismissButton = false
+            }
+        }
+
         AnimatedVisibility(
             visible = loadingState != null,
             enter = fadeIn(),
@@ -658,6 +681,32 @@ fun AuthScreen(
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
+                        }
+
+                        AnimatedVisibility(
+                            visible = showDismissButton,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 16.dp)
+                                    .bounceClick {
+                                        viewModel.continueAnyway()
+                                    }
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
+                                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.auth_sync_continue_anyway),
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }

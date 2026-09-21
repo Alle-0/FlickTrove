@@ -1144,6 +1144,7 @@
     <string name="sync_msg_syncing_preferences">Einstellungen werden synchronisiert...</string>
     <string name="sync_msg_completed">Synchronisierung abgeschlossen</string>
     <string name="sync_msg_error">Synchronisierungsfehler</string>
+    <string name="auth_sync_continue_anyway">Trotzdem fortfahren</string>
     <string name="comment_already_in_language">Der Kommentar ist bereits in deiner Sprache</string>
     <string name="see_all_countries">Alle ansehen</string>
     <string name="show_less">Weniger anzeigen</string>

@@ -1146,6 +1146,7 @@
     <string name="sync_msg_syncing_preferences">Sincronizando preferências...</string>
     <string name="sync_msg_completed">Sincronização concluída</string>
     <string name="sync_msg_error">Erro de sincronização</string>
+    <string name="auth_sync_continue_anyway">Continuar mesmo assim</string>
     <string name="comment_already_in_language">O comentário já está no seu idioma</string>
     <string name="folder_sort_name">Nome</string>
     <string name="folder_sort_items_count">Quantidade de Itens</string>

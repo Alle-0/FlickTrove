@@ -1179,6 +1179,7 @@
     <string name="sync_msg_syncing_preferences">Sincronizzo preferenze...</string>
     <string name="sync_msg_completed">Sincronizzazione completata</string>
     <string name="sync_msg_error">Errore di sincronizzazione</string>
+    <string name="auth_sync_continue_anyway">Continua comunque</string>
     <string name="comment_already_in_language">Il commento è già nella tua lingua</string>
     <string name="see_all_countries">Vedi tutti</string>
     <string name="show_less">Mostra meno</string>

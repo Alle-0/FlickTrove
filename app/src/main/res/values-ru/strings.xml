@@ -1149,6 +1149,7 @@
     <string name="sync_msg_syncing_preferences">Синхронизация настроек...</string>
     <string name="sync_msg_completed">Синхронизация завершена</string>
     <string name="sync_msg_error">Ошибка синхронизации</string>
+    <string name="auth_sync_continue_anyway">Все равно продолжить</string>
     <string name="comment_already_in_language">Комментарий уже на вашем языке</string>
     <string name="folder_sort_name">Имя</string>
     <string name="folder_sort_items_count">Кол-во элементов</string>

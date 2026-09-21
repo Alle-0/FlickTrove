@@ -1225,6 +1225,7 @@
     <string name="sync_msg_syncing_preferences">設定を同期中...</string>
     <string name="sync_msg_completed">同期完了</string>
     <string name="sync_msg_error">同期エラー</string>
+    <string name="auth_sync_continue_anyway">このまま続行</string>
     <string name="comment_already_in_language">コメントは既に設定言語で書かれています</string>
     <string name="folder_sort_name">名前順</string>
     <string name="folder_sort_items_count">アイテム数順</string>

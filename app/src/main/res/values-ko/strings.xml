@@ -1225,6 +1225,7 @@
     <string name="sync_msg_syncing_preferences">설정 동기화 중...</string>
     <string name="sync_msg_completed">동기화 완료</string>
     <string name="sync_msg_error">동기화 오류</string>
+    <string name="auth_sync_continue_anyway">계속 진행</string>
     <string name="comment_already_in_language">댓글이 이미 설정된 언어로 작성되었습니다</string>
     <string name="folder_sort_name">이름순</string>
     <string name="folder_sort_items_count">항목 수순</string>

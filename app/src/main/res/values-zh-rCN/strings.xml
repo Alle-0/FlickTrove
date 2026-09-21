@@ -1225,6 +1225,7 @@
     <string name="sync_msg_syncing_preferences">正在同步偏好设置...</string>
     <string name="sync_msg_completed">同步已完成</string>
     <string name="sync_msg_error">同步出错</string>
+    <string name="auth_sync_continue_anyway">仍要继续</string>
     <string name="comment_already_in_language">评论已是您的当前语言</string>
     <string name="folder_sort_name">名称</string>
     <string name="folder_sort_items_count">项目数量</string>

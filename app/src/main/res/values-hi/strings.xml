@@ -1144,6 +1144,7 @@
     <string name="sync_msg_syncing_preferences">प्राथमिकताएं सिंक कर रहा है...</string>
     <string name="sync_msg_completed">सिंक पूरा हुआ</string>
     <string name="sync_msg_error">सिंक त्रुटि</string>
+    <string name="auth_sync_continue_anyway">वैसे भी जारी रखें</string>
     <string name="comment_already_in_language">टिप्पणी पहले से ही आपकी भाषा में है</string>
     <string name="folder_sort_name">नाम</string>
     <string name="folder_sort_items_count">आइटम की संख्या</string>

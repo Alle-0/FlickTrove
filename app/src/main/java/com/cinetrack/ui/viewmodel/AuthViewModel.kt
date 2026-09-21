@@ -55,11 +55,16 @@ class AuthViewModel @Inject constructor(
             viewModelScope.launch {
                 val movies = movieRepository.getLocalMovies()
                 if (movies.isEmpty()) {
-                    _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                    movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                        _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                    try {
+                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("AuthViewModel", "checkAutoSync failed", e)
+                    } finally {
+                        _processState.update { null }
                     }
-                    _processState.update { null }
                 }
                 ensureUsernameExists(user.uid, user.email, user.displayName)
             }
@@ -138,11 +143,16 @@ class AuthViewModel @Inject constructor(
                         if (uid != null) {
                             ensureUsernameExists(uid, email, auth.currentUser?.displayName)
                         }
-                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                        try {
+                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("AuthViewModel", "Login sync failed", e)
+                        } finally {
+                            _processState.update { null }
                         }
-                        _processState.update { null }
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -276,11 +286,16 @@ class AuthViewModel @Inject constructor(
                                 // ignore
                             }
                             
-                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            try {
+                                _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                    _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("AuthViewModel", "Signup link sync failed", e)
+                            } finally {
+                                _processState.update { AuthState.Authenticated }
                             }
-                            _processState.update { AuthState.Authenticated }
                         }
                     }
                 }
@@ -318,11 +333,16 @@ class AuthViewModel @Inject constructor(
                                 // ignore
                             }
                             
-                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            try {
+                                _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                    _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("AuthViewModel", "Signup sync failed", e)
+                            } finally {
+                                _processState.update { null }
                             }
-                            _processState.update { null }
                         }
                     }
                 }
@@ -371,11 +391,16 @@ class AuthViewModel @Inject constructor(
                                 ensureUsernameExists(uid, auth.currentUser?.email, result.user?.displayName)
                             }
                             
-                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            try {
+                                _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                    _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("AuthViewModel", "Google link sync failed", e)
+                            } finally {
+                                _processState.update { AuthState.Authenticated }
                             }
-                            _processState.update { AuthState.Authenticated }
                         }
                     }
                 }
@@ -392,11 +417,16 @@ class AuthViewModel @Inject constructor(
                                         ensureUsernameExists(uid, auth.currentUser?.email, auth.currentUser?.displayName)
                                     }
                                     
-                                    _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                                    movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                        _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                    try {
+                                        _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                        movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                            _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                        }
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("AuthViewModel", "Google collision sync failed", e)
+                                    } finally {
+                                        _processState.update { null }
                                     }
-                                    _processState.update { null }
                                 }
                             }.addOnFailureListener { signInException ->
                                 _processState.update { AuthState.Error(getErrorMessage(signInException)) }
@@ -440,11 +470,16 @@ class AuthViewModel @Inject constructor(
                                 ensureUsernameExists(uid, auth.currentUser?.email, result.user?.displayName)
                             }
                             
-                            _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
-                            movieRepository.syncWithFirebase(force = true) { syncProgress ->
-                                _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                            try {
+                                _processState.update { AuthState.Loading(UiText.StringResource(R.string.msg_auth_syncing)) }
+                                movieRepository.syncWithFirebase(force = true) { syncProgress ->
+                                    _processState.update { AuthState.Loading(syncProgress.message, syncProgress.progress) }
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("AuthViewModel", "Google signin sync failed", e)
+                            } finally {
+                                _processState.update { null }
                             }
-                            _processState.update { null }
                         }
                     }
                 }
@@ -501,6 +536,11 @@ class AuthViewModel @Inject constructor(
 
     fun resetProcessState() {
         _processState.update { null }
+    }
+
+    fun continueAnyway() {
+        _processState.update { null }
+        movieRepository.enqueueSyncWorker()
     }
 
     fun deleteAccount(onComplete: (Boolean) -> Unit) {

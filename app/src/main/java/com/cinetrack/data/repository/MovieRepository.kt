@@ -665,12 +665,14 @@ class MovieRepository @Inject constructor(
             return@withContext
         }
 
-        // 0. Push any pending local changes first
-        android.util.Log.d("MovieRepository", "Starting Firebase Sync - Pushing pending changes...")
-        emit(UiText.StringResource(R.string.sync_msg_pushing_changes), 0f)
-        pushPendingChanges()
-
         try {
+            // 0. Push any pending local changes first (bounded by timeout so network stalls never freeze the sync)
+            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Pushing pending changes...")
+            emit(UiText.StringResource(R.string.sync_msg_pushing_changes), 0f)
+            kotlinx.coroutines.withTimeoutOrNull(15_000L) {
+                pushPendingChanges()
+            }
+
             // 1. Pull & Reconcile Favorites
             android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites...")
             emit(UiText.StringResource(R.string.sync_msg_fetching_favorites), null)
@@ -749,6 +751,25 @@ class MovieRepository @Inject constructor(
             if (e is CancellationException) throw e
             android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
             emit(UiText.StringResource(R.string.sync_msg_error), 1f)
+        }
+    }
+
+    fun enqueueSyncWorker() {
+        try {
+            val syncConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+                .build()
+            val syncRequest = OneTimeWorkRequestBuilder<com.cinetrack.data.sync.SyncWorker>()
+                .setConstraints(syncConstraints)
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                com.cinetrack.data.sync.SyncWorker.WORK_NAME,
+                androidx.work.ExistingWorkPolicy.KEEP,
+                syncRequest
+            )
+            android.util.Log.d("MovieRepository", "SyncWorker enqueued successfully via WorkManager")
+        } catch (e: Exception) {
+            android.util.Log.e("MovieRepository", "Failed to enqueue SyncWorker", e)
         }
     }
 

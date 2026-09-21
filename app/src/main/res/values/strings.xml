@@ -1229,6 +1229,7 @@
     <string name="sync_msg_syncing_preferences">Syncing preferences...</string>
     <string name="sync_msg_completed">Sync completed</string>
     <string name="sync_msg_error">Sync error</string>
+    <string name="auth_sync_continue_anyway">Continue anyway</string>
     <string name="comment_already_in_language">Comment is already in your language</string>
     <string name="folder_sort_name">Name</string>
     <string name="folder_sort_items_count">Items Count</string>
