@@ -162,6 +162,11 @@ class HomeViewModel @Inject constructor(
                         } catch (e: Exception) {
                             // Ignore silent sync failure
                         }
+                        try {
+                            repository.healMissingPosters()
+                        } catch (e: Exception) {
+                            // Ignore healing failure
+                        }
                     }
 
                     if (anySyncTriggered) {
@@ -222,6 +227,9 @@ class HomeViewModel @Inject constructor(
         }
         fetchFeed()
         loadBoxOfficeWinner()
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.healMissingPosters()
+        }
     }
 
     private fun loadBoxOfficeWinner() {

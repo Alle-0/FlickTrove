@@ -1188,6 +1188,49 @@ class MovieRepository @Inject constructor(
         }
         return null
     }
+
+    override suspend fun getMediaDetails(id: Long, isTv: Boolean): Movie? {
+        return try {
+            val response = fetchMovieDetails(id, isTv)
+            com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun healMissingPosters() = withContext(Dispatchers.IO) {
+        val missing = favoriteDao.getMoviesWithMissingPosters()
+        if (missing.isEmpty()) return@withContext
+        for (item in missing) {
+            try {
+                val isTv = item.mediaType == "tv"
+                var details = if (item.id > 0) getMediaDetails(item.id, isTv) else null
+                if (details == null || details.posterPath.isNullOrBlank()) {
+                    val titleToSearch = item.title ?: item.name
+                    if (!titleToSearch.isNullOrBlank()) {
+                        details = searchMediaWithYear(titleToSearch, item.releaseYear, isTv)
+                    }
+                }
+                if (details != null && !details.posterPath.isNullOrBlank()) {
+                    val updated = item.copy(
+                        id = if (item.id <= 0) details.id else item.id,
+                        title = if (item.title.isNullOrBlank()) details.title else item.title,
+                        name = if (item.name.isNullOrBlank()) details.name else item.name,
+                        posterPath = details.posterPath,
+                        backdropPath = details.backdropPath ?: item.backdropPath,
+                        overview = if (item.overview.isNullOrBlank()) details.overview else item.overview,
+                        releaseDate = if (item.releaseDate.isNullOrBlank()) details.releaseDate else item.releaseDate,
+                        firstAirDate = if (item.firstAirDate.isNullOrBlank()) details.firstAirDate else item.firstAirDate,
+                        voteAverage = if (item.voteAverage == null || item.voteAverage == 0.0) details.voteAverage else item.voteAverage,
+                        genreIds = if (item.genreIds.isNullOrEmpty()) details.genreIds else item.genreIds
+                    )
+                    favoriteDao.insert(updated)
+                }
+            } catch (_: Exception) {
+                // Ignore individual item failures
+            }
+        }
+    }
     
     suspend fun searchTV(query: String, page: Int = 1): List<Movie> = tmdbService.searchTV(query, page = page).results
     suspend fun searchMulti(query: String, page: Int = 1): List<TMDBSearchResult> = tmdbService.searchMulti(query, page = page).results

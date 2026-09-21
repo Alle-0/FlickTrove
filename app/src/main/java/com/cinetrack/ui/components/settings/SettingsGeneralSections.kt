@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.R
@@ -136,11 +137,24 @@ fun SettingsUILayoutSection(
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
+    val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
         icon = ImageVector.vectorResource(id = R.drawable.ic_interfaccia)
     ) {
+        // --- 1. HOME & FEED ---
+        Text(
+            text = stringResource(R.string.settings_group_home_feed).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+            modifier = Modifier.padding(start = 6.dp, top = 2.dp, bottom = 4.dp)
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_home),
             title = stringResource(R.string.settings_home_feed_sections),
@@ -156,6 +170,66 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 onShowHomeSectionsOrderDialog()
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            title = stringResource(R.string.settings_layout_toggle),
+            description = stringResource(R.string.settings_layout_toggle_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showLayoutToggle,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleLayoutToggle(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_strisce),
+            title = stringResource(R.string.settings_split_home),
+            description = stringResource(R.string.settings_split_home_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showSplitReleasesHome,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleSplitReleasesHome(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+            title = stringResource(R.string.settings_split_dropped),
+            description = stringResource(R.string.settings_split_dropped_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = showSplitDroppedHome,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleSplitDroppedHome(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleSplitDroppedHome(!showSplitDroppedHome)
             }
         )
 
@@ -179,25 +253,18 @@ fun SettingsUILayoutSection(
             }
         )
 
-        val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_clock),
-            title = stringResource(R.string.settings_advanced_prompt_watch_date),
-            description = stringResource(R.string.settings_advanced_prompt_watch_date_desc),
-            trailing = {
-                FlickTroveSwitch(
-                    checked = promptWatchDateOnDetail,
-                    onCheckedChange = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        settingsViewModel.togglePromptWatchDateOnDetail(it) 
-                    },
-                    accentColor = currentAccentColor
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.togglePromptWatchDateOnDetail(!promptWatchDateOnDetail)
-            }
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // --- 2. CARDS & DETAILS ---
+        Text(
+            text = stringResource(R.string.settings_group_cards_details).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+            modifier = Modifier.padding(start = 6.dp, bottom = 4.dp)
         )
 
         SettingsItem(
@@ -259,81 +326,6 @@ fun SettingsUILayoutSection(
                 settingsViewModel.toggleBadges(!showBadges)
             }
         )
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
-            title = stringResource(R.string.settings_layout_toggle),
-            description = stringResource(R.string.settings_layout_toggle_desc),
-            trailing = {
-                FlickTroveSwitch(
-                    checked = showLayoutToggle,
-                    onCheckedChange = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        settingsViewModel.toggleLayoutToggle(it) 
-                    },
-                    accentColor = currentAccentColor
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.toggleLayoutToggle(!showLayoutToggle)
-            }
-        )
-
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
-            title = stringResource(R.string.account_personalize_dashboard),
-            description = stringResource(R.string.settings_personalize_dashboard_desc),
-            trailing = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.triggerDashboardSettingsMenu()
-            }
-        )
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_strisce),
-            title = stringResource(R.string.settings_split_home),
-            description = stringResource(R.string.settings_split_home_desc),
-            trailing = {
-                FlickTroveSwitch(
-                    checked = showSplitReleasesHome,
-                    onCheckedChange = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        settingsViewModel.toggleSplitReleasesHome(it) 
-                    },
-                    accentColor = currentAccentColor
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.toggleSplitReleasesHome(!showSplitReleasesHome)
-            }
-        )
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-            title = stringResource(R.string.settings_split_dropped),
-            description = stringResource(R.string.settings_split_dropped_desc),
-            trailing = {
-                FlickTroveSwitch(
-                    checked = showSplitDroppedHome,
-                    onCheckedChange = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        settingsViewModel.toggleSplitDroppedHome(it) 
-                    },
-                    accentColor = currentAccentColor
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.toggleSplitDroppedHome(!showSplitDroppedHome)
-            }
-        )
 
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
@@ -352,6 +344,44 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleUseMovieLogo(!useMovieLogo)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_clock),
+            title = stringResource(R.string.settings_advanced_prompt_watch_date),
+            description = stringResource(R.string.settings_advanced_prompt_watch_date_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = promptWatchDateOnDetail,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.togglePromptWatchDateOnDetail(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.togglePromptWatchDateOnDetail(!promptWatchDateOnDetail)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            title = stringResource(R.string.account_personalize_dashboard),
+            description = stringResource(R.string.settings_personalize_dashboard_desc),
+            trailing = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(16.dp)
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.triggerDashboardSettingsMenu()
             }
         )
     }

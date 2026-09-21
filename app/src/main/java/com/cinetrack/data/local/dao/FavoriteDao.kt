@@ -70,6 +70,9 @@ interface FavoriteDao {
     @Query("SELECT * FROM favorites WHERE (media_type || '_' || id IN (:compositeIds)) AND sync_status != 'pending_delete'")
     fun getByCompositeIds(compositeIds: List<String>): Flow<List<Movie>>
 
+    @Query("SELECT * FROM favorites WHERE (poster_path IS NULL OR poster_path = '') AND sync_status != 'pending_delete'")
+    suspend fun getMoviesWithMissingPosters(): List<Movie>
+
     @Query("DELETE FROM favorites")
     suspend fun clearAll()
 }

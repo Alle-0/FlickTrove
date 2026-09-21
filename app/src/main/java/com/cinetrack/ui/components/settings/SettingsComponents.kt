@@ -13,10 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -48,6 +52,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 fun Color.toArgb(): Int {
     return (alpha * 255.0f + 0.5f).toInt() shl 24 or
             (red * 255.0f + 0.5f).toInt() shl 16 or
@@ -67,9 +72,9 @@ fun SettingsSection(
     var isExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(initiallyExpanded) }
     val arrowRotation by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (isExpanded) 90f else 0f,
-        animationSpec = androidx.compose.animation.core.spring(
-            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
-            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 360,
+            easing = androidx.compose.animation.core.FastOutSlowInEasing
         ),
         label = "arrowRotation"
     )
@@ -160,17 +165,23 @@ fun SettingsSection(
         androidx.compose.animation.AnimatedVisibility(
             visible = isExpanded,
             enter = androidx.compose.animation.expandVertically(
-                animationSpec = androidx.compose.animation.core.spring(
-                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                expandFrom = Alignment.Top,
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = 360,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing
                 )
-            ) + androidx.compose.animation.fadeIn(),
+            ) + androidx.compose.animation.fadeIn(
+                animationSpec = androidx.compose.animation.core.tween(durationMillis = 240)
+            ),
             exit = androidx.compose.animation.shrinkVertically(
-                animationSpec = androidx.compose.animation.core.spring(
-                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                shrinkTowards = Alignment.Top,
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = 280,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing
                 )
-            ) + androidx.compose.animation.fadeOut()
+            ) + androidx.compose.animation.fadeOut(
+                animationSpec = androidx.compose.animation.core.tween(durationMillis = 180)
+            )
         ) {
             Column(
                 modifier = Modifier

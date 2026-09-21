@@ -25,6 +25,7 @@ class ExternalImportWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val backupRepository: BackupRepository,
+    private val movieRepository: com.cinetrack.data.repository.MovieRepository,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : CoroutineWorker(appContext, workerParams) {
 
@@ -110,6 +111,11 @@ class ExternalImportWorker @AssistedInject constructor(
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_success, count))
                 val msgText = appContext.getString(R.string.settings_msg_import_success, count)
                 showCompletionNotification(msgText, false)
+            }
+            try {
+                movieRepository.healMissingPosters()
+            } catch (e: Exception) {
+                // Ignore healing failure
             }
             Result.success()
         } catch (e: Exception) {

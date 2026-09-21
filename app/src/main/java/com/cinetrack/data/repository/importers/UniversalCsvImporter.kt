@@ -167,8 +167,16 @@ class UniversalCsvImporter(
                                     val m = Movie(
                                         id = it.id,
                                         mediaType = mediaType,
+                                        imdbId = imdbVal.trim(),
                                         title = it.title,
                                         name = it.name,
+                                        posterPath = it.posterPath,
+                                        backdropPath = it.backdropPath,
+                                        voteAverage = it.voteAverage,
+                                        overview = it.overview,
+                                        releaseDate = it.releaseDate,
+                                        firstAirDate = it.firstAirDate,
+                                        genreIds = it.genreIds,
                                         watched = watchedVal,
                                         favorite = favVal || droppedVal,
                                         dropped = droppedVal,
@@ -186,12 +194,21 @@ class UniversalCsvImporter(
                                     Pair(m, folderVal)
                                 }
                             } else if (tmdbVal != null && tmdbVal > 0) {
-                                val mediaType = if (epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true)) "tv" else "movie"
+                                val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true)
+                                val tmdbMovie = movieLookup.getMediaDetails(tmdbVal, isTvMedia)
+                                val mediaType = if (isTvMedia || tmdbMovie?.mediaType == "tv") "tv" else (tmdbMovie?.mediaType ?: "movie")
                                 val m = Movie(
                                     id = tmdbVal,
                                     mediaType = mediaType,
-                                    title = titleVal ?: "Unknown ($tmdbVal)",
-                                    name = if (mediaType == "tv") titleVal else null,
+                                    title = tmdbMovie?.title ?: titleVal ?: "Unknown ($tmdbVal)",
+                                    name = if (mediaType == "tv") (tmdbMovie?.name ?: titleVal) else null,
+                                    posterPath = tmdbMovie?.posterPath,
+                                    backdropPath = tmdbMovie?.backdropPath,
+                                    voteAverage = tmdbMovie?.voteAverage ?: 0.0,
+                                    overview = tmdbMovie?.overview,
+                                    releaseDate = tmdbMovie?.releaseDate,
+                                    firstAirDate = tmdbMovie?.firstAirDate,
+                                    genreIds = tmdbMovie?.genreIds,
                                     watched = watchedVal,
                                     favorite = favVal || droppedVal,
                                     dropped = droppedVal,

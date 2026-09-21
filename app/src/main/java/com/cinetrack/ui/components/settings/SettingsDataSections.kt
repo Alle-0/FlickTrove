@@ -2,6 +2,8 @@ package com.cinetrack.ui.components.settings
 
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -129,72 +131,24 @@ fun SettingsSyncBackupSection(
     val simklSyncWorkInfo by settingsViewModel.simklSyncWorkInfo.collectAsStateWithLifecycle()
     val libraryDetailsSyncWorkInfo by settingsViewModel.libraryDetailsSyncWorkInfo.collectAsStateWithLifecycle()
     val externalImportWorkInfo by settingsViewModel.externalImportWorkInfo.collectAsStateWithLifecycle()
+    val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
+    val unmatchedCount = remember(unmatchedMovies) { unmatchedMovies.count { it.posterPath == null && it.overview == null } }
 
     SettingsSection(
         title = stringResource(R.string.settings_sync_backup),
         icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
         footerText = stringResource(R.string.settings_smart_merge)
     ) {
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
-            title = stringResource(R.string.settings_external_migration),
-            description = stringResource(R.string.settings_external_migration_desc),
-            onClick = {
-                if (externalImportWorkInfo?.state != WorkInfo.State.RUNNING) {
-                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                    onShowExternalMigrationDialog()
-                }
-            },
-            customContent = {
-                if (externalImportWorkInfo != null && externalImportWorkInfo!!.state == WorkInfo.State.RUNNING) {
-                    val progressData = externalImportWorkInfo!!.progress
-                    val current = progressData.getInt("current", 0)
-                    val total = progressData.getInt("total", 0)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    if (total > 0) {
-                        Text(
-                            text = "$current / $total",
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LinearProgressIndicator(
-                            progress = { current.toFloat() / total.toFloat() },
-                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                            color = currentAccentColor,
-                            trackColor = Color.White.copy(alpha = 0.1f)
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.settings_processing),
-                            color = Color.White.copy(alpha = 0.7f),
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                            color = currentAccentColor,
-                            trackColor = Color.White.copy(alpha = 0.1f)
-                        )
-                    }
-                }
-            }
-        )
-
-        // View Unmatched Items
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_error),
-            title = stringResource(R.string.unmatched_items_title),
-            description = stringResource(R.string.unmatched_items_desc),
-            tint = MaterialTheme.colorScheme.error,
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
-                onShowUnmatchedItems()
-            }
+        // --- 1. CLOUD TRACKING ---
+        Text(
+            text = stringResource(R.string.settings_group_cloud_tracking).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+            modifier = Modifier.padding(start = 6.dp, top = 2.dp, bottom = 4.dp)
         )
 
         // Trakt Sync Card
@@ -241,8 +195,6 @@ fun SettingsSyncBackupSection(
                                 if (isSimklLoggedIn) return@SettingsActionButton
                                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                                 val clientId = Keys.getTraktKey()
-                                // Generate a random state for CSRF protection and save it
-                                // so the callback in MainScreen can validate it
                                 val oauthState = java.util.UUID.randomUUID().toString()
                                 settingsViewModel.savePendingOAuthState(oauthState)
                                 val intent = android.content.Intent(
@@ -262,8 +214,6 @@ fun SettingsSyncBackupSection(
                 }
             },
             customContent = {
-                // Session-expired warning — shown when a token refresh was rejected
-                // (e.g. after Trakt's March 2025 token-lifetime change)
                 if (traktNeedsReconnect && !isTraktLoggedIn) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -289,7 +239,6 @@ fun SettingsSyncBackupSection(
                     }
                 }
 
-                // Sync progress indicator
                 if (syncWorkInfo != null && syncWorkInfo!!.state == WorkInfo.State.RUNNING) {
                     val progressData = syncWorkInfo!!.progress
                     val current = progressData.getInt("current", 0)
@@ -389,7 +338,6 @@ fun SettingsSyncBackupSection(
                 }
             },
             customContent = {
-                // Sync progress indicator
                 if (simklSyncWorkInfo != null && simklSyncWorkInfo!!.state == WorkInfo.State.RUNNING) {
                     val progressData = simklSyncWorkInfo!!.progress
                     val current = progressData.getInt("current", 0)
@@ -397,7 +345,7 @@ fun SettingsSyncBackupSection(
                     Spacer(modifier = Modifier.height(16.dp))
                     if (total > 0) {
                         Text(
-                            text = stringResource(R.string.trakt_syncing_progress, current, total), // Can reuse trakt_syncing_progress string
+                            text = stringResource(R.string.trakt_syncing_progress, current, total),
                             color = Color.White.copy(alpha = 0.7f),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.fillMaxWidth(),
@@ -432,10 +380,90 @@ fun SettingsSyncBackupSection(
             }
         )
 
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // --- 2. BACKUP & MIGRATION ---
+        Text(
+            text = stringResource(R.string.settings_group_backup_import).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+            modifier = Modifier.padding(start = 6.dp, top = 2.dp, bottom = 4.dp)
+        )
+
+        // Universal Data Import
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+            title = stringResource(R.string.settings_external_migration),
+            description = stringResource(R.string.settings_external_migration_desc),
+            onClick = {
+                if (externalImportWorkInfo?.state != WorkInfo.State.RUNNING) {
+                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                    onShowExternalMigrationDialog()
+                }
+            },
+            customContent = {
+                if (externalImportWorkInfo != null && externalImportWorkInfo!!.state == WorkInfo.State.RUNNING) {
+                    val progressData = externalImportWorkInfo!!.progress
+                    val current = progressData.getInt("current", 0)
+                    val total = progressData.getInt("total", 0)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (total > 0) {
+                        Text(
+                            text = "$current / $total",
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = { current.toFloat() / total.toFloat() },
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.settings_processing),
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                            color = currentAccentColor,
+                            trackColor = Color.White.copy(alpha = 0.1f)
+                        )
+                    }
+                }
+            }
+        )
+
+        // View Unmatched Items (Conditional: shown ONLY if there are unmatched items)
+        if (unmatchedCount > 0) {
+            SettingsItem(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_error),
+                title = "${stringResource(R.string.unmatched_items_title)} ($unmatchedCount)",
+                description = stringResource(R.string.unmatched_items_desc),
+                tint = MaterialTheme.colorScheme.error,
+                onClick = {
+                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                    onShowUnmatchedItems()
+                }
+            )
+        }
+
         // Grouped Backup Card
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
             title = stringResource(R.string.settings_device_backup),
+            description = stringResource(R.string.settings_device_backup_desc),
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                 onShowBackupDialog()
@@ -448,14 +476,6 @@ fun SettingsSyncBackupSection(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_cloud),
                 title = stringResource(R.string.settings_sync_missing_details),
                 description = stringResource(R.string.settings_sync_missing_details_desc),
-                trailing = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
                 onClick = {
                     if (libraryDetailsSyncWorkInfo?.state != WorkInfo.State.RUNNING) {
                         if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -640,17 +660,21 @@ fun SettingsSupportSection(
             }
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         var creditsExpanded by remember { mutableStateOf(false) }
-        val rotation by androidx.compose.animation.core.animateFloatAsState(
-            targetValue = if (creditsExpanded) 90f else 0f
+        val rotation by animateFloatAsState(
+            targetValue = if (creditsExpanded) 90f else 0f,
+            animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+            label = "creditsArrowRotation"
         )
 
-        // Pill-shaped card that expands vertically
+        // Pill-shaped card that expands vertically (Concentric 16/16 with 32.dp outer container)
         Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            shape = RoundedCornerShape(16.dp),
             color = Color.White.copy(alpha = 0.04f),
             tonalElevation = 0.dp
         ) {
@@ -659,19 +683,19 @@ fun SettingsSupportSection(
                     .border(
                         width = 1.dp,
                         color = Color.White.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(16.dp)
                     )
             ) {
                 // Header row — clickable
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .bounceClick(scaleDown = 0.98f) {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                             creditsExpanded = !creditsExpanded
                         }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Icon badge
@@ -715,8 +739,14 @@ fun SettingsSupportSection(
                 // Expandable content — slides down vertically
                 AnimatedVisibility(
                     visible = creditsExpanded,
-                    enter = expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
-                    exit = shrinkVertically(animationSpec = tween(250)) + fadeOut(animationSpec = tween(200))
+                    enter = expandVertically(
+                        expandFrom = Alignment.Top,
+                        animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(durationMillis = 240)),
+                    exit = shrinkVertically(
+                        shrinkTowards = Alignment.Top,
+                        animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
+                    ) + fadeOut(animationSpec = tween(durationMillis = 180))
                 ) {
                     Column(
                         modifier = Modifier

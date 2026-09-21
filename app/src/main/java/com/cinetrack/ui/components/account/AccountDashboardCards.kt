@@ -23,6 +23,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.graphicsLayer
@@ -116,25 +119,39 @@ fun GeneralStatsCard(
                     totalRatingScore += bucketScore * count
                     totalRatingsCount += count
                 }
-                val avgRating = if (totalRatingsCount > 0) String.format(java.util.Locale.US, "%.1f/10", totalRatingScore / totalRatingsCount) else "N/A"
+                val avgRating = if (totalRatingsCount > 0) {
+                    String.format(java.util.Locale.US, "%.1f/10", totalRatingScore / totalRatingsCount)
+                } else "N/A"
                 val moviesCount = stats.moviesWatched
                 val seriesCount = stats.tvWatched
-                val ratioText = if (moviesCount == 0 && seriesCount == 0) "0/0" else {
+                val ratioText = if (moviesCount == 0 && seriesCount == 0) "0% / 0%" else {
                     val total = moviesCount + seriesCount
                     val moviePct = (moviesCount * 100) / total
                     val seriesPct = 100 - moviePct
-                    "$moviePct/$seriesPct"
+                    "$moviePct% / $seriesPct%"
                 }
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatItem(label = stringResource(R.string.stat_hours_watched), value = stats.totalTimeFormatted)
-                        StatItem(label = stringResource(R.string.stat_completed_titles), value = (moviesCount + seriesCount).toString())
+                        StatItem(
+                            label = stringResource(R.string.stat_hours_watched),
+                            value = stats.totalTimeFormatted
+                        )
+                        StatItem(
+                            label = stringResource(R.string.stat_completed_titles),
+                            value = (moviesCount + seriesCount).toString()
+                        )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatItem(label = stringResource(R.string.stat_avg_rating), value = avgRating)
-                        StatItem(label = stringResource(R.string.stat_movies_vs_series), value = ratioText)
+                        StatItem(
+                            label = stringResource(R.string.stat_avg_rating),
+                            value = avgRating
+                        )
+                        StatItem(
+                            label = stringResource(R.string.stat_movies_vs_series),
+                            value = ratioText
+                        )
                     }
                 }
             } else {
