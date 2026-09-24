@@ -458,8 +458,8 @@
     <string name="detail_translate_yes_cellular">Sì, usa rete</string>
     <string name="detail_translate_no_wifi">No, solo Wi-Fi</string>
     <string name="detail_translate_not_now">Non ora</string>
-    <string name="person_read_less">LEGGI MENO</string>
-    <string name="person_read_more">LEGGI TUTTO</string>
+    <string name="person_read_less">Leggi meno</string>
+    <string name="person_read_more">Leggi tutto</string>
     <string name="person_no_bio">Nessuna biografia disponibile.</string>
     <string name="person_birthday">DATA DI NASCITA</string>
     <string name="person_age">ETÀ</string>

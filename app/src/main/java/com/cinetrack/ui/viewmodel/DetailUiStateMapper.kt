@@ -148,7 +148,9 @@ class DetailUiStateMapper @Inject constructor(
             watchedEpisodes = effectiveWatchedEpisodes,
             progress = progress.toDouble()
         )
-        val matchScore = calculateMatchScoreUseCase(finalMovie, localMovies)
+        // Prefer the pre-computed score from the Home/Recommendations (stored in movie.matchScore),
+        // recalculate only when the movie arrives from a context without a pre-computed score.
+        val matchScore = finalMovie.matchScore ?: calculateMatchScoreUseCase(finalMovie, localMovies)
 
         val currentLang = java.util.Locale.getDefault().language.lowercase()
         val watchRegion = if (currentLang == "it") "IT" else {

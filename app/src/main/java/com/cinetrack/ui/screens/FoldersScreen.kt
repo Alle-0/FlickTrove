@@ -7,7 +7,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import com.cinetrack.util.VibrationHelper
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import com.cinetrack.util.toComposeColor
@@ -45,6 +49,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.ui.viewmodel.FoldersViewModel
 import com.cinetrack.ui.utils.bounceClick
@@ -199,8 +204,11 @@ fun FoldersScreenContent(
                 }
             } else {
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
                 
                 val density = androidx.compose.ui.platform.LocalDensity.current
+                val coroutineScope = rememberCoroutineScope()
+                val context = LocalContext.current
                 
                 // Use fixed standard heights to prevent first-frame measurement clipping
                 val searchBarMaxHeightDp = 64.dp // 56dp for the bar + 8dp bottom padding
@@ -214,9 +222,58 @@ fun FoldersScreenContent(
                 var newFolderMaxHeightPx by remember { mutableFloatStateOf(newFolderMaxHeightPxDefault) }
                 var newFolderHeightPx by remember { mutableFloatStateOf(newFolderMaxHeightPxDefault) }
 
-                val nestedScrollConnection = remember {
+                var snapJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+                fun performSnap(velocity: Float = 0f) {
+                    val searchIsPartial = searchBarHeightPx > 0.5f && searchBarHeightPx < searchBarMaxHeightPx - 0.5f
+                    val folderMax = if (searchQuery.isBlank()) newFolderMaxHeightPx else 0f
+                    val folderIsPartial = folderMax > 0f && newFolderHeightPx > 0.5f && newFolderHeightPx < folderMax - 0.5f
+
+                    if (!searchIsPartial && !folderIsPartial) return
+
+                    val targetSearch = if (searchIsPartial) {
+                        when {
+                            velocity < -300f -> 0f
+                            velocity > 300f -> searchBarMaxHeightPx
+                            searchBarHeightPx < searchBarMaxHeightPx * 0.5f -> 0f
+                            else -> searchBarMaxHeightPx
+                        }
+                    } else searchBarHeightPx
+
+                    val targetFolder = if (folderIsPartial) {
+                        when {
+                            velocity < -300f -> 0f
+                            velocity > 300f -> folderMax
+                            newFolderHeightPx < folderMax * 0.5f -> 0f
+                            else -> folderMax
+                        }
+                    } else newFolderHeightPx
+
+                    val startSearch = searchBarHeightPx
+                    val startFolder = newFolderHeightPx
+
+                    snapJob?.cancel()
+                    snapJob = coroutineScope.launch {
+                        val anim = Animatable(0f)
+                        anim.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                        ) {
+                            if (searchIsPartial) {
+                                searchBarHeightPx = startSearch + (targetSearch - startSearch) * value
+                            }
+                            if (folderIsPartial) {
+                                newFolderHeightPx = startFolder + (targetFolder - startFolder) * value
+                            }
+                        }
+                        VibrationHelper.vibrateTick(context)
+                    }
+                }
+
+                val nestedScrollConnection = remember(searchQuery, searchBarMaxHeightPx, newFolderMaxHeightPx) {
                     object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
                         override fun onPreScroll(available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                            snapJob?.cancel()
                             var consumedY = 0f
                             var delta = available.y
 
@@ -242,6 +299,7 @@ fun FoldersScreenContent(
                         }
 
                         override fun onPostScroll(consumed: androidx.compose.ui.geometry.Offset, available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                            snapJob?.cancel()
                             var consumedY = 0f
                             var delta = available.y
 
@@ -266,12 +324,27 @@ fun FoldersScreenContent(
 
                             return androidx.compose.ui.geometry.Offset(0f, consumedY)
                         }
+
+                        override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
+                            val searchIsPartial = searchBarHeightPx > 0.5f && searchBarHeightPx < searchBarMaxHeightPx - 0.5f
+                            val folderMax = if (searchQuery.isBlank()) newFolderMaxHeightPx else 0f
+                            val folderIsPartial = folderMax > 0f && newFolderHeightPx > 0.5f && newFolderHeightPx < folderMax - 0.5f
+
+                            if (searchIsPartial || folderIsPartial) {
+                                performSnap(available.y)
+                                return available
+                            }
+                            return androidx.compose.ui.unit.Velocity.Zero
+                        }
                     }
                 }
                 
                 LaunchedEffect(listState.isScrollInProgress) {
                     if (listState.isScrollInProgress) {
                         focusManager.clearFocus()
+                        snapJob?.cancel()
+                    } else {
+                        performSnap(0f)
                     }
                 }
                 
@@ -291,7 +364,6 @@ fun FoldersScreenContent(
                         }
                 ) {
                     item {
-                        val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
                         val currentHeight = if (searchBarMaxHeightPx > 0f) with(density) { searchBarHeightPx.toDp() } else Dp.Unspecified
                         val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 8.dp).coerceAtLeast(0.dp)
                         
@@ -577,16 +649,17 @@ fun FolderCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
                 .bounceClick(
+                    scaleDown = 0.97f,
                     onLongClick = { onLongClick(bounds[0]) },
                     onClick = onClick
                 )
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White.copy(alpha = 0.05f))
+                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         // Colored dot (circle) with icon
         val topItems = remember(folder.itemIds, allMovies) {
             folder.itemIds.take(3).mapNotNull { id ->
@@ -650,25 +723,30 @@ fun FolderCard(
         
         Spacer(Modifier.width(16.dp))
         
-        if (topItems.isNotEmpty()) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(folderColor)
-            )
-            Spacer(Modifier.width(8.dp))
-        }
-        
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = folder.name,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = (-0.3).sp
-                ),
-                color = Color.White
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (topItems.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(folderColor)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    text = folder.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = (-0.3).sp
+                    ),
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
             
             val formatter = remember { java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.getDefault()) }
             val formattedDate = remember(folder.createdAt) {
@@ -680,29 +758,46 @@ fun FolderCard(
                 }
             }
             if (formattedDate.isNotEmpty()) {
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = formattedDate,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.4f)
+                    color = Color.White.copy(alpha = 0.45f),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
         }
         
-        Text(
-            text = folder.itemIds.size.toString(),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Medium
-            ),
-            color = Color.White.copy(alpha = 0.4f)
-        )
+        Spacer(Modifier.width(12.dp))
+        
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.08f))
+                .border(0.5.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            val countStr = folder.itemIds.size.toString()
+            val fontSize = if (countStr.length >= 3) 10.sp else 12.sp
+            Text(
+                text = countStr,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = fontSize
+                ),
+                color = Color.White.copy(alpha = 0.85f)
+            )
+        }
         
         Spacer(Modifier.width(8.dp))
         
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
             contentDescription = null,
-            tint = Color.White.copy(alpha = 0.2f),
-            modifier = Modifier.size(20.dp)
+            tint = Color.White.copy(alpha = 0.35f),
+            modifier = Modifier.size(18.dp)
         )
         }
     }
@@ -713,10 +808,10 @@ fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgr
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .bounceClick(scaleDown = 0.97f) { onClick() }
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
-            .bounceClick { onClick() },
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50)),
         contentAlignment = Alignment.Center
     ) {
         if (alphaProgress > 0f) {

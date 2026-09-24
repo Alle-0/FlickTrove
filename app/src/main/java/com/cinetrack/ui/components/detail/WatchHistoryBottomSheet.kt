@@ -62,68 +62,66 @@ fun WatchHistoryBottomSheet(
             hazeState = hazeState
         ) {
             Column(
-                modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 24.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column {
-                    Text(
-                        text = stringResource(id = R.string.watch_history_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    )
-                    
-                    val rewatchCount = if (history.size > 1) history.size - 1 else 0
-                    if (rewatchCount > 0) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
-                            text = "x$rewatchCount ${stringResource(id = R.string.watch_history_rewatch).lowercase()}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.6f)
+                            text = stringResource(id = R.string.watch_history_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
                         )
-                    }
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .bounceClick(scaleDown = 0.9f, onClick = onAddRewatch)
-                            .clip(CircleShape)
-                            .background(accentColor.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                            contentDescription = "Add Rewatch",
-                            tint = accentColor,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        
+                        val rewatchCount = if (history.size > 1) history.size - 1 else 0
+                        if (rewatchCount > 0) {
+                            Text(
+                                text = "x$rewatchCount ${stringResource(id = R.string.watch_history_rewatch).lowercase()}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
+                        }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .bounceClick(scaleDown = 0.9f, onClick = onDismiss)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                            contentDescription = "Close",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .bounceClick(scaleDown = 0.9f, onClick = onAddRewatch)
+                                .clip(CircleShape)
+                                .background(accentColor.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
+                                contentDescription = "Add Rewatch",
+                                tint = accentColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .bounceClick(scaleDown = 0.9f, onClick = onDismiss)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                contentDescription = "Close",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

@@ -53,6 +53,23 @@ import com.cinetrack.di.dataStore
 import com.cinetrack.MainActivity
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.database.FlickTroveDatabase
+import com.cinetrack.data.repository.MovieRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface WidgetEntryPoint {
+    fun movieRepository(): MovieRepository
+}
+
+private data class WidgetMovieData(
+    val movie: Movie,
+    val backdropBitmap: Bitmap?,
+    val logoBitmap: Bitmap?
+)
 
 class FlickTroveWidget : GlanceAppWidget() {
     
@@ -84,18 +101,19 @@ class FlickTroveWidget : GlanceAppWidget() {
 
     @Composable
     private fun SingleMovieWidgetContent(context: Context) {
-        var moviesToWatch by remember { mutableStateOf<List<Pair<Movie, Bitmap?>>>(emptyList()) }
+        var movieData by remember { mutableStateOf<WidgetMovieData?>(null) }
 
         LaunchedEffect(Unit) {
             val db = FlickTroveDatabase.getInstance(context)
             val allMovies = db.favoriteDao().getAll()
             
-            val toWatch = allMovies.filter { !it.watched }
             val todayIso = java.time.LocalDate.now().toString()
             var upcomingMovie: Movie? = null
             var minDistanceDays = Long.MAX_VALUE
             
-            for (movie in toWatch) {
+            // Cerca il prossimo film in arrivo salvato specificamente con reminder (Remind me)
+            val remindedMovies = allMovies.filter { it.reminder && !it.watched }
+            for (movie in remindedMovies) {
                 val dateStr = movie.releaseDate ?: movie.firstAirDate
                 if (dateStr != null && dateStr.length >= 10 && dateStr >= todayIso) {
                     try {
@@ -107,17 +125,16 @@ class FlickTroveWidget : GlanceAppWidget() {
                             upcomingMovie = movie
                         }
                     } catch (e: java.time.format.DateTimeParseException) {
-                        // Ignora i film con data malformata (es. 'TBA' o formati non validi)
+                        // Ignora formati non validi
                     }
                 }
             }
             
-            val movieToShow = upcomingMovie ?: toWatch.maxByOrNull { it.clientUpdatedAt }
-            val loadedList = mutableListOf<Pair<Movie, Bitmap?>>()
+            val movieToShow = upcomingMovie
             
             if (movieToShow != null) {
                 val posterPath = movieToShow.backdropPath ?: movieToShow.posterPath
-                var bitmap: Bitmap? = null
+                var backdropBitmap: Bitmap? = null
                 if (posterPath != null) {
                     try {
                         val request = ImageRequest.Builder(context)
@@ -126,21 +143,45 @@ class FlickTroveWidget : GlanceAppWidget() {
                             .allowHardware(false)
                             .build()
                         val result = context.imageLoader.execute(request)
-                        bitmap = result.drawable?.toBitmap()
+                        backdropBitmap = result.drawable?.toBitmap()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
-                loadedList.add(movieToShow to bitmap)
+
+                var logoBitmap: Bitmap? = null
+                try {
+                    val entryPoint = EntryPointAccessors.fromApplication(
+                        context.applicationContext,
+                        WidgetEntryPoint::class.java
+                    )
+                    val movieRepository = entryPoint.movieRepository()
+                    val isTv = movieToShow.mediaType == "tv"
+                    val logoPath = movieToShow.logoPath ?: movieRepository.getMovieLogo(movieToShow.id, isTv)
+                    if (!logoPath.isNullOrEmpty()) {
+                        val logoRequest = ImageRequest.Builder(context)
+                            .data(buildTmdbImageUrl(logoPath, ImageType.LOGO, ImageQuality.HIGH))
+                            .size(360)
+                            .allowHardware(false)
+                            .build()
+                        val logoResult = context.imageLoader.execute(logoRequest)
+                        logoBitmap = logoResult.drawable?.toBitmap()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                movieData = WidgetMovieData(movieToShow, backdropBitmap, logoBitmap)
+            } else {
+                movieData = null
             }
-            moviesToWatch = loadedList
         }
 
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            if (moviesToWatch.isNotEmpty()) {
-                val m = moviesToWatch[0].first
+            val m = movieData?.movie
+            if (m != null) {
                 data = Uri.parse("flicktrove://detail/${m.mediaType}/${m.id}")
             }
         }
@@ -149,19 +190,42 @@ class FlickTroveWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(Color(0xFF1C1C1E))
-                .cornerRadius(16.dp)
+                .cornerRadius(24.dp)
                 .clickable(actionStartActivity(intent))
         ) {
-            if (moviesToWatch.isEmpty()) {
-                Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = LocalContext.current.getString(R.string.widget_nothing_to_see),
-                        style = TextStyle(color = androidx.glance.color.ColorProvider(day = Color.LightGray, night = Color.LightGray), fontSize = 14.sp)
-                    )
+            val currentData = movieData
+            if (currentData == null) {
+                Box(
+                    modifier = GlanceModifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = GlanceModifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            provider = ImageProvider(R.drawable.ic_calendario),
+                            contentDescription = null,
+                            modifier = GlanceModifier.size(32.dp),
+                            colorFilter = ColorFilter.tint(
+                                androidx.glance.color.ColorProvider(day = Color(0xFFAAAAAA), night = Color(0xFF777777))
+                            )
+                        )
+                        Spacer(modifier = GlanceModifier.height(8.dp))
+                        Text(
+                            text = LocalContext.current.getString(R.string.widget_no_releases),
+                            style = TextStyle(
+                                color = androidx.glance.color.ColorProvider(day = Color.LightGray, night = Color.LightGray),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
                 }
             } else {
-                val movie = moviesToWatch[0].first
-                val bitmap = moviesToWatch[0].second
+                val movie = currentData.movie
+                val bitmap = currentData.backdropBitmap
+                val logoBitmap = currentData.logoBitmap
                 
                 if (bitmap != null) {
                     Image(
@@ -179,8 +243,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                     }
                 }
                 
-                
-                // Overlay text at the bottom
+                // Overlay content at the bottom with deep smooth gradient
                 Box(
                     modifier = GlanceModifier.fillMaxSize(),
                     contentAlignment = Alignment.BottomStart
@@ -188,20 +251,37 @@ class FlickTroveWidget : GlanceAppWidget() {
                     Column(
                         modifier = GlanceModifier
                             .fillMaxWidth()
-                            .background(ImageProvider(R.drawable.widget_bottom_gradient)) // Gradient background
-                            .padding(16.dp)
+                            .background(ImageProvider(R.drawable.widget_bottom_gradient))
+                            .padding(horizontal = 16.dp, vertical = 14.dp)
                     ) {
-                        Text(
-                            text = movie.title ?: movie.name ?: "",
-                            style = TextStyle(
-                                color = androidx.glance.color.ColorProvider(day = Color.White, night = Color.White),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                        if (logoBitmap != null) {
+                            val logoWidthDp = if (logoBitmap.height > 0) {
+                                val ratio = logoBitmap.width.toFloat() / logoBitmap.height.toFloat()
+                                (34f * ratio).coerceIn(24f, 180f).dp
+                            } else {
+                                160.dp
+                            }
+                            Image(
+                                provider = ImageProvider(logoBitmap),
+                                contentDescription = movie.title ?: movie.name ?: "",
+                                modifier = GlanceModifier
+                                    .height(34.dp)
+                                    .width(logoWidthDp),
+                                contentScale = ContentScale.Fit
                             )
-                        )
+                        } else {
+                            Text(
+                                text = movie.title ?: movie.name ?: "",
+                                style = TextStyle(
+                                    color = androidx.glance.color.ColorProvider(day = Color.White, night = Color.White),
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                        
                         val date = movie.releaseDate ?: movie.firstAirDate
                         if (!date.isNullOrEmpty()) {
-                            // Format the date with the locale from the selected app language
                             val formattedDate = if (date.length >= 10) {
                                 try {
                                     val dateObj = java.time.LocalDate.parse(date.take(10))
@@ -210,19 +290,30 @@ class FlickTroveWidget : GlanceAppWidget() {
                                     dateObj.format(formatter)
                                 } catch (e: Exception) { date }
                             } else date
-                            Text(
-                                text = LocalContext.current.getString(R.string.widget_release_date_prefix, formattedDate),
-                                style = TextStyle(
-                                    color = androidx.glance.color.ColorProvider(day = Color(0xFFAAAAAA), night = Color(0xFFAAAAAA)),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                modifier = GlanceModifier.padding(top = 4.dp)
-                            )
+
+                            // Badge a pillola moderno con la data di uscita
+                            Row(
+                                modifier = GlanceModifier
+                                    .padding(top = 6.dp)
+                                    .background(Color(0x33FFFFFF))
+                                    .cornerRadius(12.dp)
+                                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = formattedDate,
+                                    style = TextStyle(
+                                        color = androidx.glance.color.ColorProvider(day = Color.White, night = Color.White),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
                         }
                     }
                 }
                 
+                // Top-end Search Action with subtle translucent container
                 Box(
                     modifier = GlanceModifier.fillMaxSize().padding(12.dp),
                     contentAlignment = Alignment.TopEnd
@@ -230,7 +321,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                     Box(
                         modifier = GlanceModifier
                             .size(36.dp)
-                            .background(Color(0xAA000000))
+                            .background(Color(0x66000000))
                             .cornerRadius(18.dp)
                             .clickable(actionStartActivity(Intent(context, MainActivity::class.java).apply {
                                 action = Intent.ACTION_VIEW
@@ -242,7 +333,7 @@ class FlickTroveWidget : GlanceAppWidget() {
                         Image(
                             provider = ImageProvider(R.drawable.ic_lente),
                             contentDescription = "Cerca",
-                            modifier = GlanceModifier.size(18.dp),
+                            modifier = GlanceModifier.size(16.dp),
                             colorFilter = ColorFilter.tint(androidx.glance.color.ColorProvider(day = Color.White, night = Color.White))
                         )
                     }

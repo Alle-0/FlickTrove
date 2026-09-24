@@ -518,8 +518,8 @@
     <string name="detail_translate_yes_cellular">Ya, gunakan seluler</string>
     <string name="detail_translate_no_wifi">Tidak, hanya Wi-Fi</string>
     <string name="detail_translate_not_now">Nanti saja</string>
-    <string name="person_read_less">BACA LEBIH SEDIKIT</string>
-    <string name="person_read_more">BACA SELENGKAPNYA</string>
+    <string name="person_read_less">Baca lebih sedikit</string>
+    <string name="person_read_more">Baca selengkapnya</string>
     <string name="person_no_bio">Biografi tidak tersedia.</string>
     <string name="person_birthday">TANGGAL LAHIR</string>
     <string name="person_age">UMUR</string>

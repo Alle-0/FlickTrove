@@ -328,7 +328,9 @@ fun CommentInputBar(
                                                     theme = com.giphy.sdk.ui.themes.GPHTheme.Dark,
                                                     mediaTypeConfig = arrayOf(com.giphy.sdk.ui.GPHContentType.gif)
                                                 )
+                                                GiphyDialogCustomizer.prepareStaticRadius(context)
                                                 val dialog = com.giphy.sdk.ui.views.GiphyDialogFragment.newInstance(settings)
+                                                GiphyDialogCustomizer.customizeDialog(dialog, fragmentManager)
                                                 dialog.gifSelectionListener = object : com.giphy.sdk.ui.views.GiphyDialogFragment.GifSelectionListener {
                                                     override fun didSearchTerm(term: String) {}
                                                     override fun onDismissed(selectedContentType: com.giphy.sdk.ui.GPHContentType) {}

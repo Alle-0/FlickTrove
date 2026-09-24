@@ -206,10 +206,10 @@ fun TrovePickCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.7f)
-                            )
+                            0f to Color.Transparent,
+                            0.45f to Color.Transparent,
+                            0.75f to Color.Black.copy(alpha = 0.55f),
+                            1f to Color.Black.copy(alpha = 0.90f)
                         )
                     )
             )

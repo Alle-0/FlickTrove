@@ -52,31 +52,60 @@ import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.api.Person
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
+
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun PersonHeroHeader(
     person: Person,
     paddingValues: PaddingValues,
+    scrollState: LazyListState? = null,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxWidth().height(480.dp)) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(480.dp)
+            .clipToBounds()
+    ) {
+        // Piano di profondità con Parallax GPU
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF2E2E48),
-                            Color(0xFF1E1E32),
-                            Color(0xFF0A0A0A)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
+                .let { m ->
+                    if (scrollState != null) {
+                        m.graphicsLayer {
+                            if (scrollState.firstVisibleItemIndex == 0) {
+                                val scroll = scrollState.firstVisibleItemScrollOffset
+                                // L'immagine sale a metà velocità rispetto allo scroll per creare profondità
+                                translationY = scroll * 0.5f
+                            }
+                        }
+                    } else {
+                        m
+                    }
+                }
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF2E2E48),
+                                Color(0xFF1E1E32),
+                                Color(0xFF0A0A0A)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
             val initials = remember(person.name) {
                 person.name.split(" ")
                     .filter { it.isNotBlank() }
@@ -121,6 +150,7 @@ fun PersonHeroHeader(
                 contentScale = ContentScale.Crop
             )
         }
+        }
 
         Box(
             modifier = Modifier
@@ -153,7 +183,8 @@ fun PersonBioAndInfoSection(
     person: Person,
     showFullBio: Boolean,
     onToggleBio: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    accentColor: Color = MaterialTheme.colorScheme.primary
 ) {
     Column(modifier = modifier.padding(horizontal = 24.dp)) {
         Text(
@@ -212,11 +243,11 @@ fun PersonBioAndInfoSection(
                 }
                 if (hasOverflow || showFullBio) {
                     Text(
-                        text = if (showFullBio) stringResource(R.string.person_read_less) else stringResource(R.string.person_read_more),
+                        text = if (showFullBio) stringResource(R.string.detail_read_less) else stringResource(R.string.detail_read_more),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = Color.White,
+                        color = ColorUtils.lightenForText(accentColor, 1.35f),
                         modifier = Modifier.padding(top = 12.dp)
                     )
                 }

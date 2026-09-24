@@ -1,12 +1,10 @@
 package com.cinetrack.ui.components.detail
 
-import androidx.compose.ui.res.stringResource
-
 import androidx.compose.foundation.background
-
-import com.cinetrack.R
-
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import com.cinetrack.R
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -135,12 +133,16 @@ fun DetailPersonalZone(
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
         ) {
-            val globalRating = if (globalStats != null && globalStats.ratingCount > 0) {
+            val flickTroveRating = if (globalStats != null && globalStats.ratingCount > 0) {
                 globalStats.totalRating / globalStats.ratingCount
             } else {
-                movie.voteAverage
+                null
             }
-            val globalRatingText = if (globalRating != null && globalRating > 0) String.format(java.util.Locale.US, "%.1f", globalRating) else "—"
+            val flickTroveRatingText = if (flickTroveRating != null && flickTroveRating > 0) {
+                String.format(java.util.Locale.US, "%.1f", flickTroveRating)
+            } else {
+                null
+            }
             PersonalAction(
                 label = stringResource(R.string.personal_zone_rate),
                 value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
@@ -152,41 +154,43 @@ fun DetailPersonalZone(
                 enabled = canInteract,
                 onClick = { if (canInteract) expandedAction = if (expandedAction == "rate") null else "rate" },
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                trailingContent = {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .graphicsLayer { alpha = 1f } // sempre acceso, indipendente da canInteract
-                    ) {
-                        Text(
-                            text = stringResource(R.string.personal_zone_global_rating),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White.copy(alpha = 0.4f),
-                            lineHeight = 10.sp
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                trailingContent = if (flickTroveRatingText != null) {
+                    {
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                                .graphicsLayer { alpha = 1f } // sempre acceso, indipendente da canInteract
                         ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_people),
-                                contentDescription = null,
-                                tint = if (globalRating != null && globalRating > 0) accentColor else Color.White.copy(alpha = 0.6f),
-                                modifier = Modifier.size(14.dp)
-                            )
                             Text(
-                                text = globalRatingText,
-                                fontSize = 18.sp,
+                                text = stringResource(R.string.personal_zone_global_rating),
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
-                                color = if (globalRating != null && globalRating > 0) accentColor else Color.White.copy(alpha = 0.6f),
-                                lineHeight = 18.sp
+                                color = Color.White.copy(alpha = 0.4f),
+                                lineHeight = 10.sp
                             )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(0.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_launcher_foreground_vector),
+                                    contentDescription = "FlickTrove Logo",
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Text(
+                                    text = flickTroveRatingText,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = accentColor,
+                                    lineHeight = 18.sp
+                                )
+                            }
                         }
                     }
-                }
+                } else null
             )
         }
 

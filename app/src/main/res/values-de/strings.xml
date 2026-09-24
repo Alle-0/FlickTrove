@@ -442,8 +442,8 @@
     <string name="detail_translate_yes_cellular">Ja, mobile Daten nutzen</string>
     <string name="detail_translate_no_wifi">Nein, nur WLAN</string>
     <string name="detail_translate_not_now">Nicht jetzt</string>
-    <string name="person_read_less">WENIGER LESEN</string>
-    <string name="person_read_more">MEHR LESEN</string>
+    <string name="person_read_less">Weniger lesen</string>
+    <string name="person_read_more">Mehr lesen</string>
     <string name="person_no_bio">Keine Biografie verfügbar.</string>
     <string name="person_birthday">GEBURTSTAG</string>
     <string name="person_age">ALTER</string>

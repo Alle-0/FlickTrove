@@ -518,8 +518,8 @@
     <string name="detail_translate_yes_cellular">Evet, hücresel veri kullan</string>
     <string name="detail_translate_no_wifi">Hayır, yalnızca Wi-Fi</string>
     <string name="detail_translate_not_now">Şimdi değil</string>
-    <string name="person_read_less">DAHA AZ OKU</string>
-    <string name="person_read_more">DAHA FAZLA OKU</string>
+    <string name="person_read_less">Daha az oku</string>
+    <string name="person_read_more">Daha fazla oku</string>
     <string name="person_no_bio">Biyografi bulunmuyor.</string>
     <string name="person_birthday">DOĞUM TARİHİ</string>
     <string name="person_age">YAŞ</string>

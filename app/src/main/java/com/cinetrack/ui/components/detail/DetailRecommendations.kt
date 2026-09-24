@@ -28,6 +28,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.data.model.Movie
@@ -53,6 +64,7 @@ fun DetailRecommendations(
     onMessage: (String) -> Unit,
     onCollectionClick: ((Long, String) -> Unit)? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    scrollState: ScrollState? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -62,13 +74,24 @@ fun DetailRecommendations(
         // --- SEZIONE COLLEZIONE ---
         if (collection != null && collectionMovies.isNotEmpty()) {
             val backdropUrl = collection.backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
+            val lazyListState = rememberLazyListState()
+            val screenHeightPx = with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+            var collectionStaticY by remember(collection.id) { mutableStateOf<Float?>(null) }
+            var collectionHeightPx by remember(collection.id) { mutableStateOf(0f) }
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
+                    .clipToBounds()
+                    .onGloballyPositioned { coordinates ->
+                        if (collectionStaticY == null && scrollState != null) {
+                            collectionStaticY = coordinates.positionInRoot().y + scrollState.value
+                            collectionHeightPx = coordinates.size.height.toFloat()
+                        }
+                    }
             ) {
-                // Backdrop image & gradienti (matchParentSize copre esattamente l'altezza della sezione per sfumare in alto e in basso)
+                // Backdrop image & gradienti
                 if (backdropUrl != null) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -77,7 +100,25 @@ fun DetailRecommendations(
                             .build(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.matchParentSize()
+                        modifier = Modifier
+                            .matchParentSize()
+                            .graphicsLayer {
+                                // 1. Scalatura di sicurezza per evitare bordi vuoti durante la traslazione
+                                scaleX = 1.25f
+                                scaleY = 1.25f
+
+                                // 2. Parallasse orizzontale reattiva allo swipe dei film della collezione
+                                val hScroll = lazyListState.firstVisibleItemIndex * 150f + lazyListState.firstVisibleItemScrollOffset
+                                translationX = (-hScroll * 0.15f).coerceIn(-100f, 100f)
+
+                                // 3. Parallasse verticale 'a finestra' reattiva allo scroll della pagina
+                                if (scrollState != null && collectionStaticY != null) {
+                                    val currentCenter = (collectionStaticY!! - scrollState.value) + (collectionHeightPx / 2f)
+                                    val viewportCenter = screenHeightPx / 2f
+                                    val delta = currentCenter - viewportCenter
+                                    translationY = (-delta * 0.18f).coerceIn(-80f, 80f)
+                                }
+                            }
                     )
                     // Dimming overlay — rende l'immagine più opaca per fondersi elegantemente
                     Box(
@@ -165,6 +206,7 @@ fun DetailRecommendations(
                     }
 
                     LazyRow(
+                        state = lazyListState,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         contentPadding = PaddingValues(horizontal = 24.dp),
                         modifier = Modifier.fillMaxWidth()

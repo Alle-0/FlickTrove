@@ -109,6 +109,7 @@ class MainActivity : FragmentActivity() {
         deepLinkIntent.value = intent
         
         Giphy.configure(this, "V5zYxUI6BN2WFMauxnBhzEjEjPdytapd", verificationMode = false)
+        com.cinetrack.ui.components.comments.GiphyDialogCustomizer.prepareStaticRadius(this)
 
         
         // Smooth exit animation for the native splash screen

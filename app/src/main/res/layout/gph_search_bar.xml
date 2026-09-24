@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:layout_height="@dimen/gph_search_bar_height"
+    tools:layout_width="match_parent"
+    android:animateLayoutChanges="true"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <ImageView
+        android:id="@+id/performSearchBtn"
+        android:layout_width="@dimen/gph_search_bar_height"
+        android:layout_height="0dp"
+        android:padding="12dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/gph_ic_search_pink"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/searchInput"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="8dp"
+        android:background="@null"
+        android:textSize="17dp"
+        android:hint="@string/gph_search_giphy"
+        android:imeOptions="actionSearch|flagNoFullscreen"
+        android:singleLine="true"
+        android:textCursorDrawable="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/giphyLogo"
+        app:layout_constraintStart_toEndOf="@+id/performSearchBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/giphyLogo"
+        android:layout_width="0dp"
+        android:layout_height="14dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/powered_by_giphy"
+        android:contentDescription="Powered by GIPHY"
+        android:clickable="false"
+        android:focusable="false"
+        android:importantForAccessibility="no"
+        android:layout_marginEnd="6dp"
+        app:layout_goneMarginEnd="16dp"
+        app:layout_constraintDimensionRatio="641:85"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/clearSearchBtn"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/clearSearchBtn"
+        android:layout_width="@dimen/gph_search_bar_height"
+        android:layout_height="0dp"
+        android:padding="12dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/gph_ic_close"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+</merge>

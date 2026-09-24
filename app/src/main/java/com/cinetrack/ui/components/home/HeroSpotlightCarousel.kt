@@ -120,16 +120,19 @@ fun HeroSpotlightCarousel(
         label = "translateY"
     )
 
-    Column(modifier = modifier.graphicsLayer {
-        this.alpha = carouselAlpha
-        this.translationY = carouselTranslateY
-    }) {
+    Column(
+        modifier = modifier
+            .graphicsLayer {
+                this.alpha = carouselAlpha
+                this.translationY = carouselTranslateY
+            }
+    ) {
         HorizontalPager(
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 16.dp,
             modifier = Modifier
-                .height(500.dp)
+                .height(460.dp)
         ) { virtualPage ->
             val page = if (movies.isNotEmpty()) virtualPage % movies.size else 0
             val movie = if (movies.isNotEmpty()) movies[page] else return@HorizontalPager
@@ -230,7 +233,7 @@ fun HeroSpotlightCarousel(
                         val bitmap = result.result.drawable.toBitmap()
                         coroutineScope.launch {
                             val cardWidthDp = configuration.screenWidthDp - 64f
-                            val cardAspectRatio = cardWidthDp / 500f
+                            val cardAspectRatio = cardWidthDp / 460f
                             val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
                             if (color != Color.Unspecified) dominantColor = color
                         }
@@ -360,7 +363,8 @@ fun HeroSpotlightCarousel(
             pageCount = movies.size,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp),
+                .padding(top = 16.dp, bottom = 4.dp),
+            indicatorHeight = 12.dp,
             accentColor = primaryColor,
             persistPreviousDots = false,
             isInfinite = true

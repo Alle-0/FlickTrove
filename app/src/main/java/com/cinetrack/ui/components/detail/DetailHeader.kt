@@ -779,16 +779,17 @@ fun VerticalDivider() {
 fun MetaBadge(
     label: String,
     value: String,
+    modifier: Modifier = Modifier,
     valueColor: Color = Color.White,
     showValueBox: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        modifier = modifier
+            .let { if (onClick != null) it.bounceClick(scaleDown = 0.95f) { onClick() } else it }
+            .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.06f), CircleShape)
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
-            .let { if (onClick != null) it.bounceClick(scaleDown = 0.95f) { onClick() } else it }
             .padding(
                 start = 10.dp,
                 end = if (showValueBox) 3.dp else 10.dp,

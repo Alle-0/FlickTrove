@@ -196,14 +196,15 @@ fun SocialNotificationCard(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .offset(x = 6.dp, y = (-4).dp)
+                            .size(20.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primary)
-                            .padding(horizontal = 5.dp, vertical = 1.dp),
+                            .border(1.5.dp, Color(0xFF1C1C1E), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "+${notification.count}",
-                            color = Color.White,
+                            color = Color(0xFF0A1815),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black
                         )

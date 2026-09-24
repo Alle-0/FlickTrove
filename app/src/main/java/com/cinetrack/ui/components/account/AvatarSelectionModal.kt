@@ -397,7 +397,10 @@ fun AvatarSelectionModal(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.verticalFadingEdges(listState, 16.dp, 16.dp)
                         ) {
-                            items(searchResults.filter { it is TMDBSearchResult.MovieResult || it is TMDBSearchResult.TvResult }) { result ->
+                            items(
+                                items = searchResults.filter { it is TMDBSearchResult.MovieResult || it is TMDBSearchResult.TvResult },
+                                key = { "${it.id}_${it.mediaType}" }
+                            ) { result ->
                                 val title = when (result) {
                                     is TMDBSearchResult.MovieResult -> result.title
                                     is TMDBSearchResult.TvResult -> result.name

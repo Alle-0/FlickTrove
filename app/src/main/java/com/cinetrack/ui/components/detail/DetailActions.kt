@@ -17,6 +17,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import androidx.compose.ui.draw.rotate
 import dev.chrisbanes.haze.HazeStyle
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
@@ -699,35 +701,6 @@ fun DetailActions(
                     } // closes side button Box
                     
                     if (optimisticWatchState != WatchState.NONE && availableSideActions.size > 1) {
-                        var previousSideActionIndex by remember { mutableIntStateOf(currentSideActionIndex) }
-                        LaunchedEffect(currentSideActionIndex) {
-                            // Update previous after a slight delay to allow the animation to read it first
-                            kotlinx.coroutines.delay(50)
-                            previousSideActionIndex = currentSideActionIndex
-                        }
-                        
-                        val isMovingDown = currentSideActionIndex > previousSideActionIndex
-                        val isMovingUp = currentSideActionIndex < previousSideActionIndex
-                        
-                        val targetTop = (currentSideActionIndex * 8).dp
-                        val targetBottom = (currentSideActionIndex * 8 + 4).dp
-                        
-                        val topOffset by animateDpAsState(
-                            targetValue = targetTop,
-                            animationSpec = spring(
-                                dampingRatio = 0.65f, 
-                                stiffness = if (isMovingUp) 1500f else if (isMovingDown) 200f else 500f
-                            ),
-                            label = "topOffset"
-                        )
-                        val bottomOffset by animateDpAsState(
-                            targetValue = targetBottom,
-                            animationSpec = spring(
-                                dampingRatio = 0.65f, 
-                                stiffness = if (isMovingDown) 1500f else if (isMovingUp) 200f else 500f
-                            ),
-                            label = "bottomOffset"
-                        )
                         val activeColor by animateColorAsState(
                             targetValue = when (currentSideAction) {
                                 SideAction.TRASH -> trashColor
@@ -737,37 +710,17 @@ fun DetailActions(
                             label = "activeColor"
                         )
                         
-                        val canvasHeight = ((availableSideActions.size * 8) - 4).dp
-                        androidx.compose.foundation.Canvas(
+                        SymbiontPagerIndicator(
+                            currentPage = currentSideActionIndex,
+                            pageCount = availableSideActions.size,
                             modifier = Modifier
                                 .padding(start = 12.dp, end = 6.dp)
-                                .width(4.dp)
-                                .height(canvasHeight)
-                        ) {
-                            val cornerRadius = androidx.compose.ui.geometry.CornerRadius(2.dp.toPx(), 2.dp.toPx())
-                            val faintColor = Color.White.copy(alpha = 0.2f)
-                            
-                            for (i in 0 until availableSideActions.size) {
-                                drawRoundRect(
-                                    color = faintColor,
-                                    topLeft = androidx.compose.ui.geometry.Offset(0f, (i * 8).dp.toPx()),
-                                    size = androidx.compose.ui.geometry.Size(4.dp.toPx(), 4.dp.toPx()),
-                                    cornerRadius = cornerRadius
-                                )
-                            }
-                            
-                            val tY = topOffset.toPx()
-                            val bY = bottomOffset.toPx()
-                            val height = kotlin.math.max(0.1f, bY - tY)
-                            val startY = kotlin.math.min(tY, bY)
-                            
-                            drawRoundRect(
-                                color = activeColor,
-                                topLeft = androidx.compose.ui.geometry.Offset(0f, startY),
-                                size = androidx.compose.ui.geometry.Size(4.dp.toPx(), height),
-                                cornerRadius = cornerRadius
-                            )
-                        } // closes Canvas
+                                .rotate(90f),
+                            accentColor = activeColor,
+                            dotSize = 4.dp,
+                            spacing = 4.dp,
+                            persistPreviousDots = false
+                        )
                     } // closes if
                 } // closes Row
             } // closes if (trashWidth > 20.dp)

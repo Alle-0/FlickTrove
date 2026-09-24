@@ -385,7 +385,8 @@ fun PersonDetailScreenContent(
                             item {
                                 PersonHeroHeader(
                                     person = p,
-                                    paddingValues = paddingValues
+                                    paddingValues = paddingValues,
+                                    scrollState = scrollState
                                 )
                             }
 

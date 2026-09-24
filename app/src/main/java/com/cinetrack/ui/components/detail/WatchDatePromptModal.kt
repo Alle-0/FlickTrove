@@ -60,9 +60,7 @@ fun WatchDatePromptModal(
             onDismissRequest = onDismiss
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Header
@@ -76,12 +74,13 @@ fun WatchDatePromptModal(
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
-                        )
+                        ),
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(32.dp)
                             .bounceClick(scaleDown = 0.9f, onClick = onDismiss)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.1f)),
@@ -91,12 +90,12 @@ fun WatchDatePromptModal(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                             contentDescription = "Close",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 // Options
                 WatchDateOption(

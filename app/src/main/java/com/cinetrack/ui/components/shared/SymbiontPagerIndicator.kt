@@ -46,6 +46,7 @@ fun SymbiontPagerIndicator(
     pagerState: PagerState,
     pageCount: Int,
     modifier: Modifier = Modifier,
+    indicatorHeight: Dp = 20.dp,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     dotSize: Dp = 6.dp,
     spacing: Dp = 8.dp,
@@ -82,7 +83,7 @@ fun SymbiontPagerIndicator(
     }
 
     Box(
-        modifier = modifier.height(20.dp),
+        modifier = modifier.height(indicatorHeight),
         contentAlignment = Alignment.Center
     ) {
         Canvas(
@@ -186,6 +187,7 @@ fun SymbiontPagerIndicator(
     currentPage: Int,
     pageCount: Int,
     modifier: Modifier = Modifier,
+    indicatorHeight: Dp = 20.dp,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     dotSize: Dp = 6.dp,
     spacing: Dp = 8.dp,
@@ -245,7 +247,7 @@ fun SymbiontPagerIndicator(
     }
 
     Box(
-        modifier = modifier.height(20.dp),
+        modifier = modifier.height(indicatorHeight),
         contentAlignment = Alignment.Center
     ) {
         Canvas(

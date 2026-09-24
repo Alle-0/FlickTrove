@@ -377,10 +377,12 @@ fun AccountModals(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(12.dp))
+                            val changesLeft = (2 - nameChangesCount).coerceAtLeast(0)
+                            val limitReached = nameChangesCount >= 2
                             Text(
-                                stringResource(R.string.account_name_changes_left, 2 - nameChangesCount),
+                                stringResource(R.string.account_name_changes_left, changesLeft),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                color = if (limitReached) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                 textAlign = TextAlign.Center
                             )
                             Spacer(modifier = Modifier.height(16.dp))
@@ -390,6 +392,7 @@ fun AccountModals(
                                 OutlinedTextField(
                                     value = nameInput,
                                     onValueChange = {
+                                        if (limitReached) return@OutlinedTextField
                                         val filtered = it.filterNot { char -> char.isWhitespace() }
                                         if (filtered.length <= maxNameLength) {
                                             nameInput = filtered
@@ -406,6 +409,7 @@ fun AccountModals(
                                     },
                                     label = { Text(stringResource(R.string.account_new_name_label)) },
                                     singleLine = true,
+                                    enabled = !limitReached,
                                     isError = nameError != null || nameAvailable == false,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(16.dp),
@@ -436,8 +440,8 @@ fun AccountModals(
                             }
                             Spacer(modifier = Modifier.height(24.dp))
                             
-                            val isSaveEnabled = nameInput.isNotBlank() && nameInput != currentDisplayName && 
-                                              nameInput.length >= 3 && nameAvailable == true && 
+                            val isSaveEnabled = !limitReached && nameInput.isNotBlank() && nameInput != currentDisplayName &&
+                                              nameInput.length >= 3 && nameAvailable == true &&
                                               nameError == null && !isCheckingNameLive && !isCheckingName
 
                             Row(

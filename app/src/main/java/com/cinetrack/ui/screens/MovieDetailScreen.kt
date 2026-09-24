@@ -254,7 +254,7 @@ fun MovieDetailScreenContent(
     val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
-    var parentsGuideYOffset by remember { mutableStateOf<Float?>(null) }
+    var parentsGuideYOffset by remember(movieId) { mutableStateOf<Float?>(null) }
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -651,7 +651,10 @@ fun MovieDetailScreenContent(
 
                                     val cert = state.externalRatings.certification
                                     val country = state.externalRatings.certificationCountry
-                                    if (!cert.isNullOrBlank()) {
+                                    val hasParentsGuide = remember(cert, country) {
+                                        ParentsGuideResolver.resolve(cert, country) != null
+                                    }
+                                    if (hasParentsGuide) {
                                         Spacer(modifier = Modifier.height(56.dp))
                                         DetailParentsGuide(
                                             certification = cert,
@@ -688,6 +691,7 @@ fun MovieDetailScreenContent(
                                         currentId = activeMovie.id,
                                         accentColor = accentColor,
                                         backgroundColor = animatedBgColor,
+                                        scrollState = scrollState,
                                         onMovieClick = onMovieClick,
                                         onLongPress = actionsState.onLongPress,
                                         onAction = { movie -> viewModel.onEvent(DetailEvent.CycleStatus(movie)) },
@@ -763,7 +767,10 @@ fun MovieDetailScreenContent(
                                             }
                                         } catch (e: Exception) { null }
                                     },
-                                    onDismiss = { showWatchDatePrompt = false },
+                                    onDismiss = {
+                                        showWatchDatePrompt = false
+                                        viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, null))
+                                    },
                                     onDateSelected = { customDate ->
                                         showWatchDatePrompt = false
                                         viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, customDate))
@@ -823,6 +830,9 @@ fun MovieDetailScreenContent(
 
     val currentRatings = (cachedSuccess?.externalRatings) ?: (uiState as? DetailUiState.Success)?.externalRatings
     val isTvShow = (cachedSuccess?.movieEntry?.mediaType ?: (uiState as? DetailUiState.Success)?.movieEntry?.mediaType) == "tv"
+    val hasParentsGuide = remember(currentRatings?.certification, currentRatings?.certificationCountry) {
+        ParentsGuideResolver.resolve(currentRatings?.certification, currentRatings?.certificationCountry) != null
+    }
 
     DetailRatingInfoDialog(
         visible = showRatingInfoDialog,
@@ -830,13 +840,11 @@ fun MovieDetailScreenContent(
         hazeState = rootHazeState,
         countryCode = currentRatings?.certificationCountry ?: "US",
         isTv = isTvShow,
-        onViewGuideClick = if (!currentRatings?.certification.isNullOrBlank()) {
+        onViewGuideClick = if (hasParentsGuide) {
             {
                 scope.launch {
                     parentsGuideYOffset?.let {
                         scrollState.animateScrollTo(it.toInt())
-                    } ?: run {
-                        scrollState.animateScrollTo(scrollState.maxValue)
                     }
                 }
             }
