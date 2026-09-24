@@ -601,7 +601,7 @@ private fun WizardStep(title: String, options: List<WizardOption>) {
         ) {
             chunkedOptions.forEach { rowOptions ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     rowOptions.forEach { option ->
@@ -610,7 +610,7 @@ private fun WizardStep(title: String, options: List<WizardOption>) {
                             icon = option.icon,
                             isFullWidth = rowOptions.size == 1,
                             onClick = option.onClick,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).fillMaxHeight()
                         )
                     }
                 }
@@ -632,9 +632,9 @@ private fun OptionGridCard(
         modifier = modifier
             .then(
                 if (isFullWidth) {
-                    Modifier.height(if (description != null) 110.dp else 90.dp)
+                    Modifier.heightIn(min = if (description != null) 90.dp else 72.dp)
                 } else {
-                    Modifier.height(if (description != null) 128.dp else 96.dp)
+                    Modifier.heightIn(min = if (description != null) 110.dp else 90.dp)
                 }
             )
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
@@ -660,7 +660,9 @@ private fun OptionGridCard(
             color = Color.White, 
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             textAlign = TextAlign.Center,
-            lineHeight = 16.sp
+            lineHeight = 16.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
         if (description != null) {
             Spacer(modifier = Modifier.height(4.dp))
