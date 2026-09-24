@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.CommentSortOrder
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.screens.FolderSortOption
 import com.cinetrack.ui.utils.bounceClick
@@ -75,13 +76,8 @@ fun FoldersFilterModal(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 )
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_x),
-                    contentDescription = "Close",
-                    tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier
-                        .size(20.dp)
-                        .bounceClick { onDismissRequest() }
+                ModalCloseButton(
+                    onClick = onDismissRequest
                 )
             }
 

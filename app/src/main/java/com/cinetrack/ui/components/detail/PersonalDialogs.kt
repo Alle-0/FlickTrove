@@ -48,6 +48,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.components.shared.FluidRatingBar
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import android.Manifest
 import android.content.Intent
 import android.speech.RecognizerIntent
@@ -115,20 +116,10 @@ fun RatingPickerBox(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .offset(x = 8.dp, y = (-4).dp)
-                    .bounceClick(scaleDown = 0.85f, onClick = onDismiss),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = "Chiudi",
-                    tint = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            ModalCloseButton(
+                modifier = Modifier.offset(x = 8.dp, y = (-4).dp),
+                onClick = onDismiss
+            )
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -297,19 +288,9 @@ fun NoteEditorBox(
                 letterSpacing = 2.sp,
                 fontWeight = FontWeight.Black
             )
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .bounceClick(scaleDown = 0.85f, onClick = onDismiss),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = "Chiudi",
-                    tint = Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            ModalCloseButton(
+                onClick = onDismiss
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))

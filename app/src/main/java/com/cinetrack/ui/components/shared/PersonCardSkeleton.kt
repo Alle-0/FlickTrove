@@ -47,6 +47,7 @@ fun PersonCardSkeleton(
                     .fillMaxWidth(0.85f)
                     .height(11.dp)
                     .clip(RoundedCornerShape(4.dp))
+                    .background(Color.White.copy(alpha = 0.20f))
                     .shimmerEffect()
             )
         }
@@ -59,6 +60,7 @@ fun PersonCardSkeleton(
                 .fillMaxWidth(0.55f)
                 .height(9.dp)
                 .clip(RoundedCornerShape(3.dp))
+                .background(Color.White.copy(alpha = 0.14f))
                 .shimmerEffect()
         )
     }

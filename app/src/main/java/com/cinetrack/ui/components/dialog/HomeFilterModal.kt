@@ -57,6 +57,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.utils.ProviderConstants
@@ -374,19 +375,9 @@ fun HomeFilterModal(
                                 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .bounceClick { onDismissRequest() },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                        contentDescription = "Chiudi",
-                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
+                                ModalCloseButton(
+                                    onClick = onDismissRequest
+                                )
                             }
                         }
 

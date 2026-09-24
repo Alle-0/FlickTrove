@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
@@ -43,13 +44,8 @@ fun <T> DetailTranslationPromptModal(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = stringResource(R.string.settings_close),
-                    tint = Color.White.copy(alpha = 0.65f),
-                    modifier = Modifier
-                        .size(18.dp)
-                        .bounceClick(scaleDown = 0.9f) { onDismiss() }
+                ModalCloseButton(
+                    onClick = onDismiss
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.components.shared.FlickTroveBottomSheet
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.theme.NeonTeal
 
 private data class RatingInfo(
@@ -87,16 +88,9 @@ fun RatedExplanationBottomSheet(
                     modifier = Modifier.weight(1f)
                 )
 
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                        contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.4f)
-                    )
-                }
+                ModalCloseButton(
+                    onClick = onDismiss
+                )
             }
 
             HorizontalDivider(color = Color.White.copy(alpha = 0.05f))

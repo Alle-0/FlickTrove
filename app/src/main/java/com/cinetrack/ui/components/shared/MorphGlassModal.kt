@@ -67,7 +67,8 @@ fun MorphGlassModal(
     targetMaxWidth: Dp = 420.dp,
     targetWidthFraction: Float = 0.90f,
     maxModalHeightFraction: Float = 0.78f,
-    minModalHeight: Dp = 260.dp,
+    minModalHeight: Dp = 100.dp,
+    fixedModalHeightFraction: Float? = null,
     targetCornerRadius: Dp = 32.dp,
     style: HazeStyle = HazeStyles.glassmorphicDialog,
     scrimAlpha: Float = 0.6f,
@@ -80,15 +81,23 @@ fun MorphGlassModal(
     val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
     val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
 
-    val targetWidth = (screenWidth * targetWidthFraction).coerceAtMost(with(density) { targetMaxWidth.toPx() })
+    val targetWidth by animateFloatAsState(
+        targetValue = (screenWidth * targetWidthFraction).coerceAtMost(with(density) { targetMaxWidth.toPx() }),
+        animationSpec = if (advancedEffectsEnabled) spring(stiffness = Spring.StiffnessLow) 
+                        else spring(stiffness = Spring.StiffnessMedium),
+        label = "dynamicWidth"
+    )
     
     var contentHeightPx by remember { mutableFloatStateOf(0f) }
     val maxAllowedHeight = screenHeight * maxModalHeightFraction
     val minAllowedHeightPx = with(density) { minModalHeight.toPx() }
     
     val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeightPx, maxAllowedHeight) 
-                      else with(density) { 340.dp.toPx() },
+        targetValue = when {
+            fixedModalHeightFraction != null -> screenHeight * fixedModalHeightFraction
+            contentHeightPx > 0 -> contentHeightPx.coerceIn(minAllowedHeightPx, maxAllowedHeight)
+            else -> with(density) { 340.dp.toPx() }
+        },
         animationSpec = if (advancedEffectsEnabled) spring(stiffness = Spring.StiffnessLow) 
                         else spring(stiffness = Spring.StiffnessMedium),
         label = "dynamicHeight"
@@ -141,17 +150,19 @@ fun MorphGlassModal(
                     onClick = onDismissRequest
                 )
         ) {
-            // --- GHOST MEASUREMENT LAYER ---
-            Box(
-                modifier = Modifier
-                    .width(with(density) { targetWidth.toDp() })
-                    .graphicsLayer { this.alpha = 0f }
-                    .onSizeChanged { size ->
-                        if (size.height > 0) contentHeightPx = size.height.toFloat()
-                    }
-                    .align(Alignment.Center)
-            ) {
-                content(0f)
+            if (fixedModalHeightFraction == null) {
+                // --- GHOST MEASUREMENT LAYER ---
+                Box(
+                    modifier = Modifier
+                        .width(with(density) { targetWidth.toDp() })
+                        .graphicsLayer { this.alpha = 0f }
+                        .onSizeChanged { size ->
+                            if (size.height > 0) contentHeightPx = size.height.toFloat()
+                        }
+                        .align(Alignment.Center)
+                ) {
+                    content(0f)
+                }
             }
 
             if (!advancedEffectsEnabled) {

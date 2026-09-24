@@ -177,22 +177,9 @@ fun HomeSectionsOrderDialog(
                     )
                 }
                 // Tasto Chiudi
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .bounceClick { onDismiss() }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                        contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                com.cinetrack.ui.components.shared.ModalCloseButton(
+                    onClose = onDismiss
+                )
             }
         }
         val density = androidx.compose.ui.platform.LocalDensity.current

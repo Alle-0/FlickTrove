@@ -47,6 +47,8 @@ import com.cinetrack.data.repository.MovieRepository
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.ModalBackButton
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.LocalHazeState
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -94,6 +96,51 @@ fun AvatarSelectionModal(
     onDismissRequest: () -> Unit,
     onCharacterSelected: (String?, String?) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onDismissRequest() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .fillMaxHeight(0.65f)
+                .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                .clip(RoundedCornerShape(32.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    focusManager.clearFocus()
+                }
+        ) {
+            AvatarSelectionContent(
+                viewModel = viewModel,
+                mode = mode,
+                onBack = null,
+                onDismissRequest = onDismissRequest,
+                onCharacterSelected = onCharacterSelected
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AvatarSelectionContent(
+    viewModel: AvatarSelectionViewModel = hiltViewModel(),
+    mode: AvatarSelectionMode = AvatarSelectionMode.AVATAR,
+    onBack: (() -> Unit)? = null,
+    onDismissRequest: () -> Unit,
+    onCharacterSelected: (String?, String?) -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<TMDBSearchResult>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
@@ -127,7 +174,15 @@ fun AvatarSelectionModal(
     }
 
     BackHandler(enabled = !isUploading) {
-        onDismissRequest()
+        if (selectedMedia != null) {
+            selectedMedia = null
+            characters = null
+            backdrops = null
+        } else if (onBack != null) {
+            onBack()
+        } else {
+            onDismissRequest()
+        }
     }
 
     // Debounce search
@@ -194,86 +249,51 @@ fun AvatarSelectionModal(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { onDismissRequest() },
-        contentAlignment = Alignment.Center
-    ) {
-        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-        val dynamicCoverRatio = remember(configuration.screenWidthDp) {
-            (configuration.screenWidthDp.toFloat() / 480f).coerceIn(0.6f, 1.5f)
-        }
-        Box(
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val dynamicCoverRatio = remember(configuration.screenWidthDp) {
+        (configuration.screenWidthDp.toFloat() / 480f).coerceIn(0.6f, 1.5f)
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .fillMaxHeight(0.65f)
-                .hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp))
-                .clip(RoundedCornerShape(24.dp))
-                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(24.dp))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    focusManager.clearFocus()
-                }
+                .fillMaxSize()
+                .padding(24.dp)
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp)
-                ) {
-                    // Header
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (selectedMedia != null) {
-                            IconButton(
-                                onClick = { 
-                                    selectedMedia = null 
-                                    characters = null
-                                    backdrops = null
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_left),
-                                    contentDescription = stringResource(R.string.avatar_selection_back),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (selectedMedia != null) {
+                        ModalBackButton(
+                            onClick = { 
+                                selectedMedia = null 
+                                characters = null
+                                backdrops = null
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-                        Text(
-                            text = if (selectedMedia == null) stringResource(R.string.avatar_selection_title_select_media) else if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_title_choose_cover) else stringResource(R.string.avatar_selection_title_choose_avatar),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
                         )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .bounceClick(onClick = onDismissRequest),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_x),
-                            contentDescription = stringResource(R.string.settings_close),
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                    } else if (onBack != null) {
+                        ModalBackButton(
+                            onClick = onBack
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
+                    Text(
+                        text = if (selectedMedia == null) stringResource(R.string.avatar_selection_title_select_media) else if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_title_choose_cover) else stringResource(R.string.avatar_selection_title_choose_avatar),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
                 }
+                ModalCloseButton(
+                    onClick = onDismissRequest
+                )
+            }
                 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -588,5 +608,3 @@ fun AvatarSelectionModal(
             }
         }
     }
-}
-}

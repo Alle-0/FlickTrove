@@ -355,23 +355,11 @@ private fun SurpriseMeContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (step in 1..3) {
-                Box(
-                    modifier = Modifier
-                        .then(if (!isGhost) Modifier.bounceClick { onBack() } else Modifier)
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(R.drawable.ic_left),
-                        contentDescription = stringResource(R.string.detail_content_desc_back),
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                com.cinetrack.ui.components.shared.ModalBackButton(
+                    onClick = { if (!isGhost) onBack() }
+                )
             } else {
-                Spacer(modifier = Modifier.size(36.dp))
+                Spacer(modifier = Modifier.size(32.dp))
             }
 
             Column(
@@ -388,21 +376,9 @@ private fun SurpriseMeContent(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .then(if (!isGhost) Modifier.bounceClick { onClose() } else Modifier)
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    ImageVector.vectorResource(R.drawable.ic_x),
-                    contentDescription = stringResource(R.string.surprise_close),
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            com.cinetrack.ui.components.shared.ModalCloseButton(
+                onClose = { if (!isGhost) onClose() }
+            )
         }
 
         Spacer(modifier = Modifier.height(20.dp))

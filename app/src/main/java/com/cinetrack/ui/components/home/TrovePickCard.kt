@@ -3,6 +3,7 @@ package com.cinetrack.ui.components.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -36,13 +37,12 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.toComposeColor
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 
 /**
- * "The Trove's Pick" — una singola card premium che mette in evidenza
- * il titolo top consigliato dall'algoritmo di raccomandazione.
+ * "The Trove's Pick" — card asimmetrica premium che mette in evidenza
+ * il titolo top consigliato con locandina a sinistra, metadati e colore estratto dalla copertina.
  */
 @Composable
 fun TrovePickCard(
@@ -51,10 +51,8 @@ fun TrovePickCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
-    val coroutineScope = rememberCoroutineScope()
-    var extractedColor by remember { mutableStateOf<Color?>(null) }
     val imageQuality = com.cinetrack.util.LocalImageQuality.current
+
     val backdropUrl = buildTmdbImageUrl(
         movie.backdropPath ?: movie.posterPath,
         ImageType.BACKDROP,
@@ -65,6 +63,7 @@ fun TrovePickCard(
         ImageType.POSTER,
         imageQuality
     )
+
     val hasAnimated = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         if (!hasAnimated.value) {
@@ -74,20 +73,30 @@ fun TrovePickCard(
 
     val cardAlpha by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (hasAnimated.value) 1f else 0f,
-        animationSpec = androidx.compose.animation.core.tween(durationMillis = 400, easing = androidx.compose.animation.core.LinearOutSlowInEasing),
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 400,
+            easing = androidx.compose.animation.core.LinearOutSlowInEasing
+        ),
         label = "alpha"
     )
 
     val cardTranslateY by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (hasAnimated.value) 0f else 60f,
-        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessMedium),
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+        ),
         label = "translateY"
     )
 
-    Column(modifier = modifier.fillMaxWidth().graphicsLayer {
-        this.alpha = cardAlpha
-        this.translationY = cardTranslateY
-    }) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                this.alpha = cardAlpha
+                this.translationY = cardTranslateY
+            }
+    ) {
         // Titolo sezione
         Row(
             modifier = Modifier
@@ -109,14 +118,11 @@ fun TrovePickCard(
             )
         }
 
-        // Extracted accent color or fallback to primary
-        val glowColor = extractedColor ?: movie.accentColor?.toComposeColor() ?: MaterialTheme.colorScheme.primary
-
         // Card principale con glow custom
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp) // Aumentato lo spazio naturale per il glow
+                .padding(vertical = 16.dp)
                 .graphicsLayer { clip = false },
             contentAlignment = Alignment.Center
         ) {
@@ -124,13 +130,13 @@ fun TrovePickCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(340.dp) // Più alto fisicamente (260 card + 80 padding) per far sfumare il blur senza tagli
-                    .offset(y = 12.dp) 
+                    .height(320.dp)
+                    .offset(y = 10.dp)
                     .graphicsLayer {
-                        alpha = 0.55f 
+                        alpha = 0.55f
                         clip = false
                     }
-                    .blur(24.dp) // Blur aumentato per essere più diffuso e morbido
+                    .blur(26.dp)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
@@ -141,242 +147,212 @@ fun TrovePickCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(260.dp)
-                        .padding(horizontal = 24.dp) // Più stretto della card vera (16dp) così sfuma bene ai lati
+                        .height(255.dp)
+                        .padding(horizontal = 24.dp)
                         .align(Alignment.Center)
-                        .graphicsLayer {
-                            // Zoom normale
-                            scaleX = 1.0f
-                            scaleY = 1.0f
-                        }
                 )
             }
 
-            // Card content layer
+            // Card content layer (raggio 32.dp concentrico)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp)
+                    .height(255.dp)
                     .padding(horizontal = 16.dp)
                     .bounceClick { onMovieClick(movie) }
-                    .clip(RoundedCornerShape(36.dp)) // Angoli molto arrotondati per un look morbido
-            ) {
-                // Backdrop come sfondo della card
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(backdropUrl)
-                    .crossfade(true)
-                    .allowHardware(false)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                onSuccess = { result ->
-                    coroutineScope.launch {
-                        val bitmap = result.result.drawable.toBitmap()
-                        val cardWidthDp = configuration.screenWidthDp - 32f
-                        val cardAspectRatio = cardWidthDp / 260f
-                        val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
-                        if (color != Color.Unspecified) {
-                            extractedColor = color
-                        }
-                    }
-                }
-            )
-
-            // Overlay scuro (orizzontale - per leggibilità testo)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                Color.Black.copy(alpha = 0.85f),
-                                Color.Black.copy(alpha = 0.4f),
-                                Color.Transparent
-                            )
-                        )
+                    .clip(RoundedCornerShape(32.dp))
+                    .border(
+                        androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            Color.White.copy(alpha = 0.14f)
+                        ),
+                        RoundedCornerShape(32.dp)
                     )
-            )
-            // (Rimosso Overlay colorato - per preservare i colori originali della copertina)
-            
-            // Overlay scuro (verticale in basso) per testo
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Transparent,
-                            0.45f to Color.Transparent,
-                            0.75f to Color.Black.copy(alpha = 0.55f),
-                            1f to Color.Black.copy(alpha = 0.90f)
-                        )
-                    )
-            )
-
-
-            // Contenuto card: poster + testo
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Poster
+                // Backdrop di sfondo visibile e nitido
                 AsyncImage(
                     model = ImageRequest.Builder(context)
-                        .data(posterUrl)
-                        .allowHardware(false)
+                        .data(backdropUrl)
                         .crossfade(true)
+                        .allowHardware(false)
                         .build(),
-                    contentDescription = movie.title ?: movie.name,
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .width(145.dp)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(24.dp)) // Aumentato per bilanciare l'esterno ultra arrotondato
+                    modifier = Modifier.fillMaxSize()
                 )
 
-                // Testo
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    // Badge "Pick" text only
-                    Text(
-                        text = stringResource(R.string.home_trove_pick_badge).uppercase(),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                // Overlay gradiente orizzontale da sinistra a destra (stacca la locandina e ammorbidisce la scena)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colorStops = arrayOf(
+                                    0.0f to Color.Black.copy(alpha = 0.85f),
+                                    0.45f to Color.Black.copy(alpha = 0.35f),
+                                    1.0f to Color.Transparent
+                                )
+                            )
                         )
+                )
+
+                // Overlay gradiente verticale: profondo dal basso verso l'alto, con lieve sfumatura dall'alto verso il basso
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0.0f to Color.Black.copy(alpha = 0.55f),
+                                    0.18f to Color.Transparent,
+                                    0.42f to Color.Black.copy(alpha = 0.50f),
+                                    0.68f to Color.Black.copy(alpha = 0.88f),
+                                    1.0f to Color.Black.copy(alpha = 0.98f)
+                                )
+                            )
+                        )
+                )
+
+                // Contenuto: Poster a sinistra + Colonna Dettagli a destra
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Locandina / Poster a sinistra con raggio concentrico (32dp - 16dp = 16dp)
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(posterUrl)
+                            .allowHardware(false)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = movie.title ?: movie.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(136.dp)
+                            .fillMaxHeight()
+                            .shadow(8.dp, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(
+                                0.5.dp,
+                                Color.White.copy(alpha = 0.16f),
+                                RoundedCornerShape(16.dp)
+                            )
                     )
 
-                    // Titolo o Logo
-                    if (!movie.logoPath.isNullOrEmpty()) {
-                        val logoUrl = buildTmdbImageUrl(movie.logoPath, ImageType.LOGO, imageQuality)
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(logoUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = movie.title ?: movie.name,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .heightIn(max = 60.dp) // Leggermente più piccolo del carosello hero
-                                .fillMaxWidth(0.9f),
-                            alignment = Alignment.CenterStart
-                        )
-                    } else {
+                    // Colonna Dettagli a destra
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Badge "CURATED FOR YOU" in alto
                         Text(
-                            text = movie.title ?: movie.name ?: "",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Black,
-                                fontSize = 26.sp,
-                                lineHeight = 30.sp,
-                                shadow = androidx.compose.ui.graphics.Shadow(
-                                    color = Color.Black,
-                                    offset = androidx.compose.ui.geometry.Offset(2f, 2f),
-                                    blurRadius = 4f
-                                )
-                            ),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                            text = stringResource(R.string.home_trove_pick_badge).uppercase(),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.3.sp,
+                            maxLines = 1
                         )
-                    }
 
-                    // Anno e Generi
-                    val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
-                    val currentLanguage = context.resources.configuration.locales[0].language
-                    val genres = movie.genreIds?.mapNotNull { id ->
-                        val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
-                        val defaultName = list.find { it.id == id }?.name ?: ""
-                        com.cinetrack.data.model.GenreConstants.getLocalizedName(id, currentLanguage, defaultName).takeIf { it.isNotBlank() }
-                    }?.take(2) ?: emptyList()
-                    
-                    if (year.isNotEmpty() || genres.isNotEmpty()) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (year.isNotEmpty()) {
-                                Text(
-                                    text = year,
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
-                                )
-                            }
-                            genres.forEach { genreName ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(androidx.compose.foundation.shape.CircleShape)
-                                        .background(Color.White.copy(alpha = 0.15f))
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = genreName,
-                                        color = Color.White.copy(alpha = 0.9f),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        maxLines = 1,
-                                        softWrap = false,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
+                        // Parte inferiore: Metadati sistemati e compatti senza overflow
+                        val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
+                        val currentLanguage = context.resources.configuration.locales[0].language
+                        val primaryGenre = movie.genreIds?.firstNotNullOfOrNull { id ->
+                            val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
+                            val defaultName = list.find { it.id == id }?.name ?: ""
+                            com.cinetrack.data.model.GenreConstants.getLocalizedName(id, currentLanguage, defaultName).takeIf { it.isNotBlank() }
                         }
-                    }
-
-                    // Match Score (se disponibile)
-                    val matchScore = movie.matchScore
-                    if (matchScore != null && matchScore > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(androidx.compose.foundation.shape.CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "${matchScore}%",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = stringResource(R.string.match_score).uppercase(),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        letterSpacing = 0.5.sp
-                                    )
-                                )
-                            }
-                        }
-                    } else {
-                        // Fallback Voto
+                        val matchScore = movie.matchScore
                         val rating = movie.voteAverage
-                        if (rating != null && rating > 0.0) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(androidx.compose.foundation.shape.CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Riga 1: Anno e Genere (testo fluido e minimale, senza pillola)
+                            val metaText = listOfNotNull(
+                                year.takeIf { it.isNotEmpty() },
+                                primaryGenre?.takeIf { it.isNotBlank() }
+                            ).joinToString(" • ")
+
+                            if (metaText.isNotEmpty()) {
+                                Text(
+                                    text = metaText,
+                                    color = Color.White.copy(alpha = 0.70f),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            // Riga 2: Match Score e/o Rating (con spaziatura ariosa)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "%.1f".format(rating),
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
-                                    )
+                                // Match Score
+                                if (matchScore != null && matchScore > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                            .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.40f), CircleShape)
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                        ) {
+                                            Text(
+                                                text = "${matchScore}%",
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.match_score).uppercase(),
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                letterSpacing = 0.4.sp
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Rating con stella
+                                if (rating != null && rating > 0.0) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(
+                                                0.5.dp,
+                                                Color.White.copy(alpha = 0.14f),
+                                                CircleShape
+                                            )
+                                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                                    ) {
+                                        Icon(
+                                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
+                                            contentDescription = null,
+                                            tint = Color(0xFFFFC107),
+                                            modifier = Modifier.size(11.dp)
+                                        )
+                                        Text(
+                                            text = "%.1f".format(java.util.Locale.US, rating),
+                                            color = Color.White,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -385,5 +361,4 @@ fun TrovePickCard(
             }
         }
     }
-}
 }

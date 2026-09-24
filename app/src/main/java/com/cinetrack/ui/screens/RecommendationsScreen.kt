@@ -156,8 +156,8 @@ fun RecommendationsScreenContent(
     
     val localHazeState = hazeState ?: remember { dev.chrisbanes.haze.HazeState() }
     
-    var isFlickMode by rememberSaveable { mutableStateOf(false) }
-    var topCardIndex by rememberSaveable(uiState.mediaType) { mutableStateOf(0) }
+    var isFlickMode by viewModel::isFlickMode
+    var topCardIndex by viewModel::topCardIndex
     
     val endOfListReached by remember {
         derivedStateOf {
@@ -367,6 +367,7 @@ fun RecommendationsScreenContent(
                                             }
                                         }
                                     },
+                                    onResolveLogo = viewModel::getMovieLogo,
                                     onActionClick = { 
                                         onMovieClick(movie)
                                     }

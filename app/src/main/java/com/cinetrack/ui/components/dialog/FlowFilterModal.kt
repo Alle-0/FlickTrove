@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.components.detail.ALL_VIBES
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
@@ -118,19 +119,9 @@ fun FlowFilterModal(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .bounceClick { onDismissRequest() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                            contentDescription = "Chiudi",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    ModalCloseButton(
+                        onClick = onDismissRequest
+                    )
                 }
             }
 

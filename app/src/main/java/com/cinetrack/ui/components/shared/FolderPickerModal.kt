@@ -173,21 +173,9 @@ private fun FolderListContent(
                 )
             }
             
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .bounceClick { onClose() }
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = "Chiudi",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            ModalCloseButton(
+                onClick = onClose
+            )
         }
         
         Spacer(Modifier.height(20.dp))
@@ -410,21 +398,9 @@ private fun FolderCreateForm(
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                     color = Color.White
                 )
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .bounceClick { onCancel() }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                        contentDescription = "Chiudi",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                ModalCloseButton(
+                    onClick = onCancel
+                )
             }
             Spacer(Modifier.height(20.dp))
             

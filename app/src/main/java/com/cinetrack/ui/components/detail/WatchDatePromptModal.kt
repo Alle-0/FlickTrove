@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import java.time.Instant
@@ -78,21 +79,9 @@ fun WatchDatePromptModal(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .bounceClick(scaleDown = 0.9f, onClick = onDismiss)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.1f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                            contentDescription = "Close",
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                    ModalCloseButton(
+                        onClick = onDismiss
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))

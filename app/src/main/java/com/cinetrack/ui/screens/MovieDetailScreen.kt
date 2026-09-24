@@ -443,7 +443,11 @@ fun MovieDetailScreenContent(
                 0 -> {
                     DetailSkeleton(
                         hazeState = null,
-                        paddingValues = paddingValues
+                        paddingValues = paddingValues,
+                        preloadedTitle = preloadedTitle,
+                        preloadedPosterPath = preloadedPosterPath,
+                        preloadedBackdropPath = preloadedBackdropPath,
+                        preloadedAccentColor = preloadedAccentColor
                     )
                 }
                 2 -> {

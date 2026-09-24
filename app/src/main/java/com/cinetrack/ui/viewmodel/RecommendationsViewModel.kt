@@ -19,6 +19,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.cinetrack.util.toComposeColor
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -57,6 +60,9 @@ class RecommendationsViewModel @Inject constructor(
     
     val lazyGridState = LazyGridState()
     val animatedMovieIds = mutableSetOf<String>()
+    
+    var isFlickMode by mutableStateOf(false)
+    var topCardIndex by mutableStateOf(0)
     
     private var currentPage = 1
     private var currentTopSourceIds: List<Long> = emptyList()
@@ -103,9 +109,15 @@ class RecommendationsViewModel @Inject constructor(
             .map { it.compositeId }
             .toSet()
 
-        val displayRecommendations = recommended.filter { rec ->
-            !watchedCompositeIds.contains("${mediaType}_${rec.id}")
-        }
+        val displayRecommendations = recommended
+            .filter { rec ->
+                !watchedCompositeIds.contains("${mediaType}_${rec.id}")
+            }
+            .map { rec ->
+                if (rec.matchScore == null || rec.matchScore == 0) {
+                    rec.apply { matchScore = calculateMatchScoreUseCase(rec, localMovies) }
+                } else rec
+            }
 
         RecommendationsUiState(
             mediaType = mediaType,
@@ -142,10 +154,14 @@ class RecommendationsViewModel @Inject constructor(
     }
 
     fun onMediaTypeChanged(type: String) {
-        _mediaType.value = type
+        if (_mediaType.value != type) {
+            _mediaType.value = type
+            topCardIndex = 0
+        }
     }
 
     fun onRefresh() {
+        topCardIndex = 0
         val currentState = uiState.value
         viewModelScope.launch {
             currentPage = 1
@@ -201,6 +217,16 @@ class RecommendationsViewModel @Inject constructor(
 
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
+    }
+
+    suspend fun getMovieLogo(movie: Movie): String? {
+        if (!movie.logoPath.isNullOrEmpty()) return movie.logoPath
+        val isTv = movie.mediaType == "tv" || movie.name != null
+        val logo = repository.getMovieLogo(movie.id, isTv)
+        if (!logo.isNullOrEmpty()) {
+            movie.logoPath = logo
+        }
+        return logo
     }
 
     fun deleteMovie(movie: Movie) {

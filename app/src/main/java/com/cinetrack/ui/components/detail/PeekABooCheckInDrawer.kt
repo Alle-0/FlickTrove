@@ -60,6 +60,7 @@ import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
@@ -298,21 +299,9 @@ fun PeekABooCheckInDrawer(
                                 )
                             }
                             // Close button
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .bounceClick(scaleDown = 0.85f) { dismissAll() }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                    contentDescription = "Close",
-                                    tint = Color.White.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
+                            ModalCloseButton(
+                                onClick = { dismissAll() }
+                            )
                         }
 
                         AnimatedContent(

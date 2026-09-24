@@ -930,16 +930,9 @@ fun FolderCreateDialog(
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                             color = Color.White
                         )
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(Color.White.copy(alpha = 0.1f))
-                                .bounceClick { isDismissing = true },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                        }
+                        com.cinetrack.ui.components.shared.ModalCloseButton(
+                            onClose = { isDismissing = true }
+                        )
                     }
                     Spacer(Modifier.height(24.dp))
                 

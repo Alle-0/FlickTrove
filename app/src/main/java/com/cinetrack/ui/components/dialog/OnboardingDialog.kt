@@ -41,6 +41,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 
 data class OnboardingSlide(
@@ -150,28 +151,15 @@ fun OnboardingDialog(
                     ) {
                         // Back Button in top left (hidden on first slide)
                         if (pagerState.currentPage > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .bounceClick {
-                                        coroutineScope.launch {
-                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                        }
+                            ModalBackButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                     }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.ic_left),
-                                    contentDescription = "Back",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                                }
+                            )
                         } else {
-                            Spacer(modifier = Modifier.size(38.dp))
+                            Spacer(modifier = Modifier.size(32.dp))
                         }
 
                         // Skip Button in top right

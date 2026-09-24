@@ -291,13 +291,14 @@ class FlickTroveWidget : GlanceAppWidget() {
                                 } catch (e: Exception) { date }
                             } else date
 
+                            Spacer(modifier = GlanceModifier.height(6.dp))
+
                             // Badge a pillola moderno con la data di uscita
                             Row(
                                 modifier = GlanceModifier
-                                    .padding(top = 6.dp)
                                     .background(Color(0x33FFFFFF))
-                                    .cornerRadius(12.dp)
-                                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                                    .cornerRadius(10.dp)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(

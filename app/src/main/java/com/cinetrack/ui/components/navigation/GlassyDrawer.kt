@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.ui.utils.bounceClick
@@ -127,19 +128,9 @@ fun GlassyDrawer(
                         }
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .bounceClick { onClose() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                        contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                ModalCloseButton(
+                    onClick = onClose
+                )
             }
             val scrollState = rememberScrollState()
 

@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.dialog
 import com.cinetrack.R
+import com.cinetrack.ui.components.shared.ModalCloseButton
 
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -468,22 +469,9 @@ private fun Header(
         Spacer(modifier = Modifier.width(10.dp))
 
         // Close Button
-        Surface(
-            modifier = Modifier
-                .size(44.dp)
-                .bounceClick { onDismiss() },
-            color = Color.White.copy(alpha = 0.06f),
-            shape = CircleShape
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        ModalCloseButton(
+            onClick = onDismiss
+        )
     }
 }
 

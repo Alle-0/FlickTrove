@@ -122,16 +122,9 @@ fun FolderEditDialog(
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                             color = Color.White
                         )
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .bounceClick { isDismissing = true }
-                                .clip(androidx.compose.foundation.shape.CircleShape)
-                                .background(Color.White.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                        }
+                        ModalCloseButton(
+                            onClose = { isDismissing = true }
+                        )
                     }
                     Spacer(Modifier.height(24.dp))
                     
