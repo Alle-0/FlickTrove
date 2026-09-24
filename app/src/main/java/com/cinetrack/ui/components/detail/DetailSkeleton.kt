@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,14 +29,13 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
-import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 
 /**
  * DetailSkeleton
- * High-fidelity loading skeleton that mirrors MovieDetailScreenContent 1:1.
- * Supports optional preloaded metadata for instantaneous, seamless visual transition.
+ * Sleek, monochrome neutral loading skeleton that mirrors MovieDetailScreenContent 1:1.
+ * Free of artificial colors/tints, with clean translucent surfaces and unified floating dock.
  */
 @Composable
 fun DetailSkeleton(
@@ -48,10 +46,6 @@ fun DetailSkeleton(
     preloadedBackdropPath: String? = null,
     preloadedAccentColor: String? = null
 ) {
-    val themePrimary = MaterialTheme.colorScheme.primary
-    val accentColor = remember(preloadedAccentColor, themePrimary) {
-        preloadedAccentColor?.toComposeColor() ?: themePrimary
-    }
     val backdropPath = preloadedBackdropPath ?: preloadedPosterPath
 
     Box(
@@ -64,32 +58,23 @@ fun DetailSkeleton(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // 1. Backdrop Skeleton matching DetailBackdrop height (480dp) with atmospheric glow & multi-step fade
+            // 1. Backdrop Skeleton matching DetailBackdrop height (480dp)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(480.dp)
                     .background(Color.Black)
             ) {
-                // Atmospheric gradient fallback with vivid accent glow and subtle cinematic aura
+                // Neutral deep slate atmospheric background
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                0.0f to accentColor.copy(alpha = 0.38f),
-                                0.30f to accentColor.copy(alpha = 0.18f),
-                                0.60f to Color(0xFF141520),
+                                0.0f to Color(0xFF1A1C28).copy(alpha = 0.5f),
+                                0.30f to Color(0xFF141522).copy(alpha = 0.3f),
+                                0.60f to Color(0xFF10111A),
                                 1.0f to Color.Black
-                            )
-                        )
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    accentColor.copy(alpha = 0.28f),
-                                    Color.Transparent
-                                ),
-                                radius = 700f
                             )
                         )
                 )
@@ -108,7 +93,7 @@ fun DetailSkeleton(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    // Shimmer over atmospheric fallback when no preloaded image
+                    // Shimmer over neutral backdrop when no image
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -117,7 +102,7 @@ fun DetailSkeleton(
                     )
                 }
 
-                // Exact multi-step fading gradient matching DetailBackdrop so text sits on deep dark fade
+                // Exact multi-step fading gradient matching DetailBackdrop
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -187,21 +172,21 @@ fun DetailSkeleton(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Match Percentage Pill
+                    // Match Percentage Pill (Neutral monochrome)
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(accentColor.copy(alpha = 0.16f))
-                            .border(0.5.dp, accentColor.copy(alpha = 0.35f), CircleShape)
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                            .padding(horizontal = 12.dp, vertical = 5.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(62.dp)
+                                .width(68.dp)
                                 .height(11.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(accentColor.copy(alpha = 0.70f))
+                                .background(Color.White.copy(alpha = 0.20f))
                                 .shimmerEffect()
                         )
                     }
@@ -215,7 +200,7 @@ fun DetailSkeleton(
                             .fillMaxWidth()
                             .height(48.dp)
                             .clip(containerShape)
-                            .background(Color(0xFF1A1A1D).copy(alpha = 0.55f))
+                            .background(Color.White.copy(alpha = 0.05f))
                             .border(1.dp, Color.White.copy(alpha = 0.10f), containerShape)
                     ) {
                         Row(
@@ -224,42 +209,15 @@ fun DetailSkeleton(
                                 .padding(vertical = 6.dp, horizontal = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // TMDB Rating Pill (matches RatingPill)
+                            // Rating Pill (Neutral monochrome)
                             Box(
                                 modifier = Modifier
-                                    .width(84.dp)
+                                    .width(80.dp)
                                     .height(36.dp)
                                     .clip(RoundedCornerShape(48.dp))
-                                    .background(accentColor.copy(alpha = 0.90f))
-                                    .padding(horizontal = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .width(22.dp)
-                                            .height(10.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(Color.Black.copy(alpha = 0.35f))
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .size(10.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.Black.copy(alpha = 0.35f))
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .width(18.dp)
-                                            .height(10.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(Color.Black.copy(alpha = 0.45f))
-                                    )
-                                }
-                            }
+                                    .background(Color.White.copy(alpha = 0.16f))
+                                    .shimmerEffect()
+                            )
 
                             Spacer(modifier = Modifier.weight(1f))
 
@@ -273,7 +231,7 @@ fun DetailSkeleton(
                                         .width(36.dp)
                                         .height(12.dp)
                                         .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.25f))
+                                        .background(Color.White.copy(alpha = 0.22f))
                                         .shimmerEffect()
                                 )
                                 Box(
@@ -287,7 +245,7 @@ fun DetailSkeleton(
                                         .width(52.dp)
                                         .height(12.dp)
                                         .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.25f))
+                                        .background(Color.White.copy(alpha = 0.22f))
                                         .shimmerEffect()
                                 )
                             }
@@ -454,8 +412,8 @@ fun DetailSkeleton(
                                 .width(64.dp)
                                 .height(26.dp)
                                 .clip(CircleShape)
-                                .background(accentColor.copy(alpha = 0.15f))
-                                .border(0.5.dp, accentColor.copy(alpha = 0.30f), CircleShape)
+                                .background(Color.White.copy(alpha = 0.10f))
+                                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                         )
                     }
 
@@ -508,66 +466,23 @@ fun DetailSkeleton(
             }
         }
 
-        // 8. Bottom Floating Action Dock Skeleton (matches DetailActions dual-button dock)
+        // 8. Bottom Floating Action Dock Skeleton (Single Unified Pill - "pillolone unito")
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = paddingValues.calculateBottomPadding() + 32.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Main Action Pill (Watchlist / Visto)
-                Box(
-                    modifier = Modifier
-                        .width(220.dp)
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(Color(0xFF14151E).copy(alpha = 0.90f))
-                        .border(1.dp, accentColor.copy(alpha = 0.40f), RoundedCornerShape(28.dp))
-                        .padding(horizontal = 18.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(accentColor.copy(alpha = 0.65f))
-                        )
-                        Box(
-                            modifier = Modifier
-                                .width(96.dp)
-                                .height(13.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(Color.White.copy(alpha = 0.25f))
-                                .shimmerEffect()
-                        )
-                    }
-                }
-
-                // Side Circular Action Button
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF14151E).copy(alpha = 0.90f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.30f))
-                    )
-                }
-            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Color(0xFF14151E).copy(alpha = 0.85f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(28.dp))
+                    .shimmerEffect()
+            )
         }
     }
 }
