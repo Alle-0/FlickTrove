@@ -46,8 +46,6 @@ fun DetailSkeleton(
     preloadedBackdropPath: String? = null,
     preloadedAccentColor: String? = null
 ) {
-    val backdropPath = preloadedBackdropPath ?: preloadedPosterPath
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -79,28 +77,14 @@ fun DetailSkeleton(
                         )
                 )
 
-                // Backdrop image (rendered if preloaded artwork exists)
-                if (backdropPath != null) {
-                    val imageUrl = buildTmdbImageUrl(backdropPath, ImageType.BACKDROP, LocalImageQuality.current)
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
-                            .crossfade(true)
-                            .crossfade(400)
-                            .build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    // Shimmer over neutral backdrop when no image
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .shimmerEffect()
-                    )
-                }
+                // Pure shimmer backdrop — no preloaded artwork to avoid half-loaded "Frankenstein" look.
+                // A shared element transition should be implemented when the progressive image reveal is desired.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .shimmerEffect()
+                )
 
                 // Exact multi-step fading gradient matching DetailBackdrop
                 Box(
@@ -132,31 +116,16 @@ fun DetailSkeleton(
                         .padding(horizontal = 16.dp)
                 ) {
                     // Title (Preloaded text or high-contrast skeleton)
-                    if (!preloadedTitle.isNullOrBlank()) {
-                        Text(
-                            text = preloadedTitle,
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                fontSize = 40.sp,
-                                fontWeight = FontWeight.Black,
-                                lineHeight = 44.sp,
-                                letterSpacing = (-1.5).sp
-                            ),
-                            color = Color.White,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 6.dp)
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.72f)
-                                .height(38.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.22f))
-                                .shimmerEffect()
-                        )
-                    }
+                    // Title: always shimmer — never show the real title during loading.
+                    // Implement a shared element transition for a progressive title reveal.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.72f)
+                            .height(38.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.22f))
+                            .shimmerEffect()
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
