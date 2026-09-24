@@ -222,7 +222,13 @@ class MovieParadiseImporter @Inject constructor() {
         movieReactions?.forEach { el ->
             val obj = el.jsonObject
             val tmdbId = obj["tmdbId"]?.jsonPrimitive?.contentOrNull?.toLongOrNull() ?: return@forEach
-            val emotions = obj["emotions"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull?.trim()?.uppercase() }
+            val emotions = obj["emotions"]?.jsonArray?.mapNotNull { el ->
+                val raw = el.jsonPrimitive.contentOrNull?.trim()
+                if (!raw.isNullOrBlank()) {
+                    val normalized = com.cinetrack.ui.components.detail.normalizeVibeCode(raw)
+                    if (normalized.isNotBlank()) normalized else null
+                } else null
+            }?.distinct()
             val favChar = obj["favoriteCharacter"]?.jsonPrimitive?.contentOrNull
             val favPerson = obj["favoritePerson"]?.jsonPrimitive?.contentOrNull
 
@@ -244,7 +250,13 @@ class MovieParadiseImporter @Inject constructor() {
             val showTmdbId = obj["showTmdbId"]?.jsonPrimitive?.contentOrNull?.toLongOrNull() ?: return@forEach
             val favChar = obj["favoriteCharacter"]?.jsonPrimitive?.contentOrNull
             val favPerson = obj["favoritePerson"]?.jsonPrimitive?.contentOrNull
-            val emotions = obj["emotions"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull?.trim()?.uppercase() }
+            val emotions = obj["emotions"]?.jsonArray?.mapNotNull { el ->
+                val raw = el.jsonPrimitive.contentOrNull?.trim()
+                if (!raw.isNullOrBlank()) {
+                    val normalized = com.cinetrack.ui.components.detail.normalizeVibeCode(raw)
+                    if (normalized.isNotBlank()) normalized else null
+                } else null
+            }?.distinct()
 
             val item = getItem("tv", showTmdbId)
             if (item.favoriteActorCharacter.isNullOrBlank() && !favChar.isNullOrBlank()) {

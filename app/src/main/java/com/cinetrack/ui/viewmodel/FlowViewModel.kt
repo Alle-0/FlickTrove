@@ -20,7 +20,10 @@ import kotlinx.collections.immutable.toImmutableList
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import com.cinetrack.ui.components.detail.ALL_VIBES
+import com.cinetrack.ui.components.detail.normalizeVibeCode
+import com.cinetrack.ui.components.detail.findVibe
 
 data class VibeStat(val vibe: String, val emoji: String, val count: Int, val iconRes: Int? = null, val colorHex: Long? = null)
 data class MvpStat(
@@ -107,6 +110,32 @@ class FlowViewModel @Inject constructor(
         _filterConfig
     ) { movies, range, filterConfig ->
         withContext(Dispatchers.Default) {
+            // Auto self-healing for legacy or imported vibes (e.g., Movie Paradise unmapped strings)
+            val unnormalizedMovies = movies.filter { movie ->
+                val rawVibes = movie.emotionalVibes
+                if (!rawVibes.isNullOrBlank()) {
+                    rawVibes.split(",").any {
+                        val trimmed = it.trim()
+                        trimmed.isNotEmpty() && normalizeVibeCode(trimmed) != trimmed
+                    }
+                } else false
+            }
+            if (unnormalizedMovies.isNotEmpty()) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    unnormalizedMovies.forEach { movie ->
+                        val fixedVibes = movie.emotionalVibes?.split(",")
+                            ?.map { normalizeVibeCode(it.trim()) }
+                            ?.filter { it.isNotBlank() }
+                            ?.distinct()
+                            ?.joinToString(",")
+                        if (!fixedVibes.isNullOrBlank() && fixedVibes != movie.emotionalVibes) {
+                            movie.emotionalVibes = fixedVibes
+                            movieRepository.saveMovie(movie, syncToTrakt = false)
+                        }
+                    }
+                }
+            }
+
             val watchedMovies = movies.filter { it.watched || (it.mediaType == "tv" && it.dropped) }
             val years = watchedMovies.mapNotNull { movie ->
                 val date = movie.watchedAt
@@ -137,13 +166,16 @@ class FlowViewModel @Inject constructor(
                 movie.emotionalVibes?.split(",")?.forEach { vibe ->
                     val trimmed = vibe.trim()
                     if (trimmed.isNotEmpty()) {
-                        vibeCounts[trimmed] = vibeCounts.getOrDefault(trimmed, 0) + 1
+                        val normalized = normalizeVibeCode(trimmed)
+                        if (normalized.isNotBlank()) {
+                            vibeCounts[normalized] = vibeCounts.getOrDefault(normalized, 0) + 1
+                        }
                     }
                 }
             }
             val topVibes = vibeCounts.entries.map { entry ->
                 val code = entry.key
-                val emotionalVibe = ALL_VIBES.find { it.code == code }
+                val emotionalVibe = findVibe(code)
                 val emoji = emotionalVibe?.emoji ?: "❓"
                 VibeStat(code, emoji, entry.value, emotionalVibe?.iconRes, emotionalVibe?.colorHex) 
             }.sortedByDescending { it.count }
@@ -158,7 +190,7 @@ class FlowViewModel @Inject constructor(
             // 2. Filtro Vibe Emozionale
             val vibeFilteredMovies = if (filterConfig.selectedVibes.isNotEmpty()) {
                 mediaFilteredMovies.filter { movie ->
-                    val movieVibes = movie.emotionalVibes?.split(",")?.map { it.trim() }?.toSet().orEmpty()
+                    val movieVibes = movie.emotionalVibes?.split(",")?.map { normalizeVibeCode(it.trim()) }?.toSet().orEmpty()
                     movieVibes.any { it in filterConfig.selectedVibes }
                 }
             } else {

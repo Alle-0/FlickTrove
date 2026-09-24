@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.detail.ALL_VIBES
+import com.cinetrack.ui.components.detail.findVibe
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
@@ -66,7 +67,7 @@ fun FlowMovieCard(
             movie.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
         }
         val vibes = remember(vibeCodes) {
-            vibeCodes.mapNotNull { code -> ALL_VIBES.find { it.code == code || it.emoji == code } }
+            vibeCodes.mapNotNull { code -> findVibe(code) }
         }
 
         if (vibes.isNotEmpty()) {

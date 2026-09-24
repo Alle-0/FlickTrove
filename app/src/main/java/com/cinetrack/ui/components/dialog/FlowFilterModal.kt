@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.components.detail.ALL_VIBES
+import com.cinetrack.ui.components.detail.findVibe
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.theme.HazeStyles
@@ -229,7 +230,7 @@ fun FlowFilterModal(
                         // Specific Vibes
                         availableVibes.forEach { vibeStat ->
                             val isSelected = vibeStat.vibe in localConfig.selectedVibes
-                            val emotionalVibe = ALL_VIBES.find { it.code == vibeStat.vibe }
+                            val emotionalVibe = findVibe(vibeStat.vibe)
                             val label = emotionalVibe?.labelRes?.let { stringResource(it) } ?: vibeStat.vibe
                             val color = emotionalVibe?.colorHex?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
 

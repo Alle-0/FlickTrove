@@ -106,6 +106,33 @@ val ALL_VIBES = listOf(
     EmotionalVibe("BORING",       "😴", R.string.checkin_vibe_boring, 1, R.drawable.ic_vibe_boring, 0xFF7986CB)
 )
 
+fun normalizeVibeCode(raw: String?): String {
+    if (raw.isNullOrBlank()) return ""
+    val clean = raw.trim().uppercase()
+    return when (clean) {
+        "MIND_BLOWING", "MINDBLOWING", "MIND-BLOWING", "SHOCKED", "SHOCK", "SURPRISED", "🤯" -> "MIND_BLOWING"
+        "HYPED", "HYPE", "THRILLED", "THRILL", "EXCITED", "ACTION", "🔥" -> "HYPED"
+        "FUNNY", "AMUSED", "AMUSING", "HILARIOUS", "LAUGH", "😂" -> "FUNNY"
+        "IN_TEARS", "TEARS", "SAD", "CRYING", "HEARTBREAKING", "😭" -> "IN_TEARS"
+        "FEELS_GOOD", "FEELSGOOD", "FEELS GOOD", "TOUCHED", "WHOLESOME", "WARM", "LOVED", "HEARTWARMING", "😊" -> "FEELS_GOOD"
+        "COZY", "UNDERSTOOD", "COMFORT", "PEACEFUL", "RELAXING", "CHILL", "☕" -> "COZY"
+        "DISAPPOINTED", "FRUSTRATED", "ANGRY", "MAD", "UPSET", "😤" -> "DISAPPOINTED"
+        "WEIRD", "CONFUSED", "STRANGE", "WTF", "SURREAL", "ODD", "🌀" -> "WEIRD"
+        "SCARY", "SCARED", "TENSE", "SPOOKY", "TERRIFIED", "HORROR", "😱" -> "SCARY"
+        "BORING", "BORED", "SLEEPY", "TIRED", "DULL", "😴" -> "BORING"
+        "MASTERPIECE", "PERFECT", "GOAT", "AMAZING", "BRILLIANT", "CAPOLAVORO", "🤩" -> "MASTERPIECE"
+        "MEH", "AVERAGE", "OK", "NEUTRAL", "SO-SO", "😐" -> "MEH"
+        else -> clean
+    }
+}
+
+fun findVibe(codeOrEmoji: String?): EmotionalVibe? {
+    if (codeOrEmoji.isNullOrBlank()) return null
+    val normalized = normalizeVibeCode(codeOrEmoji)
+    val emojiPart = codeOrEmoji.trim().split(" ").firstOrNull()
+    return ALL_VIBES.find { it.code == normalized || it.emoji == codeOrEmoji.trim() || (emojiPart != null && it.emoji == emojiPart) }
+}
+
 /**
  * PeekABooCheckInDrawer
  *
@@ -146,9 +173,7 @@ fun PeekABooCheckInDrawer(
     // Local selection state initialized from movie if present
     var selectedVibes by remember(movie?.emotionalVibes) { 
         val initial = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
-            val clean = vibeString.trim()
-            val emojiPart = clean.split(" ").firstOrNull()
-            ALL_VIBES.find { it.code == clean || it.emoji == emojiPart }
+            findVibe(vibeString)
         }?.toSet() ?: emptySet()
         mutableStateOf(initial) 
     }
@@ -184,9 +209,7 @@ fun PeekABooCheckInDrawer(
             // Restore selection to the saved movie state (in case they modified and dismissed previously)
             rating = movie?.personalRating ?: 0.0
             selectedVibes = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
-                val clean = vibeString.trim()
-                val emojiPart = clean.split(" ").firstOrNull()
-                ALL_VIBES.find { it.code == clean || it.emoji == emojiPart }
+                findVibe(vibeString)
             }?.toSet() ?: emptySet()
             selectedMvp = cast.find { it.id == movie?.favoriteActorId }
             currentPage = 0
