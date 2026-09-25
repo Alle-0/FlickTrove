@@ -520,7 +520,8 @@ fun HomeFeedScreenContent(
                                     AnimatedHomeSection {
                                         TrovePickCard(
                                             movie = trovePick,
-                                            onMovieClick = onMovieClick
+                                            onMovieClick = onMovieClick,
+                                            onResolveLogo = { movie -> viewModel.resolveMovieLogo(movie) }
                                         )
                                     }
                                 }
@@ -852,6 +853,13 @@ fun HomeFeedScreenContent(
                                 }
                             }
                         }
+                    }
+                }
+
+                // CARD DI SUPPORTO — in fondo al feed, riappare ogni 30 giorni dopo il dismiss
+                item(key = "section_support_card") {
+                    AnimatedHomeSection {
+                        HomeSupportCard()
                     }
                 }
 

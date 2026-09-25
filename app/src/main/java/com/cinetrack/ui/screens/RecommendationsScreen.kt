@@ -75,6 +75,7 @@ import com.cinetrack.ui.viewmodel.RecommendationsViewModel
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.components.recommendations.FlickMovieCard
 import com.cinetrack.ui.components.recommendations.FlickControls
+import com.cinetrack.ui.components.recommendations.FlickDeckSkeleton
 import com.cinetrack.ui.components.recommendations.FlickEmptyState
 import com.cinetrack.ui.components.recommendations.lerp
 import dev.chrisbanes.haze.HazeState
@@ -213,36 +214,16 @@ fun RecommendationsScreenContent(
         ) { actionsState ->
             if (isFlickMode) {
                 if (uiState.isLoading) {
-                    Box(
+                    FlickDeckSkeleton(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(
-                                top = topPadding + stickyHeaderHeight + 12.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 80.dp,
-                                start = 24.dp,
-                                end = 24.dp
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.9f)
-                                .fillMaxHeight(0.85f)
-                                .graphicsLayer {
-                                    shape = RoundedCornerShape(38.dp)
-                                    clip = true
-                                }
-                                .border(
-                                    BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
-                                    RoundedCornerShape(38.dp)
-                                )
-                        ) {
-                            com.cinetrack.ui.components.shared.MovieCardSkeleton(
-                                width = screenWidth - 48.dp,
-                                modifier = Modifier.fillMaxSize()
+                                top = topPadding + stickyHeaderHeight + 8.dp,
+                                bottom = paddingValues.calculateBottomPadding() + 8.dp,
+                                start = 20.dp,
+                                end = 20.dp
                             )
-                        }
-                    }
+                    )
                 } else if (uiState.recommendedMovies.isEmpty() || topCardIndex >= uiState.recommendedMovies.size) {
                     FlickEmptyState(
                         onRefresh = {

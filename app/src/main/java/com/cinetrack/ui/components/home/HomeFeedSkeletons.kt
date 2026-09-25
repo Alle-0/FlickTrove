@@ -246,33 +246,35 @@ fun LazyListScope.homeFeedSkeletons() {
                         .shimmerEffect()
                 )
 
-                // Overlay gradiente orizzontale da sinistra a destra
+                // Overlay gradiente orizzontale: sfumatura più scura a sinistra (0.80f che sfuma verso destra)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.horizontalGradient(
                                 colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.85f),
-                                    0.45f to Color.Black.copy(alpha = 0.35f),
+                                    0.0f to Color.Black.copy(alpha = 0.80f),
+                                    0.40f to Color.Black.copy(alpha = 0.42f),
+                                    0.75f to Color.Transparent,
                                     1.0f to Color.Transparent
                                 )
                             )
                         )
                 )
 
-                // Overlay gradiente verticale: profondo dal basso verso l'alto, con lieve sfumatura dall'alto verso il basso
+                // Overlay gradiente verticale: velatura in alto (0.58f) e nero profondo e solido in basso (fino a 1.0f)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.55f),
-                                    0.18f to Color.Transparent,
-                                    0.42f to Color.Black.copy(alpha = 0.50f),
-                                    0.68f to Color.Black.copy(alpha = 0.88f),
-                                    1.0f to Color.Black.copy(alpha = 0.98f)
+                                    0.0f to Color.Black.copy(alpha = 0.58f),
+                                    0.22f to Color.Black.copy(alpha = 0.22f),
+                                    0.42f to Color.Transparent,
+                                    0.55f to Color.Black.copy(alpha = 0.60f),
+                                    0.75f to Color.Black.copy(alpha = 0.92f),
+                                    1.0f to Color.Black
                                 )
                             )
                         )
@@ -318,16 +320,28 @@ fun LazyListScope.homeFeedSkeletons() {
                         )
 
                         // Metadati in basso skeleton
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                            // Titolo skeleton
+                            Box(
+                                modifier = Modifier
+                                    .width(115.dp)
+                                    .height(20.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.White.copy(alpha = 0.22f))
+                                    .shimmerEffect()
+                            )
+
                             // Anno • Genere
                             Box(
                                 modifier = Modifier
-                                    .width(95.dp)
+                                    .width(85.dp)
                                     .height(13.dp)
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(Color.White.copy(alpha = 0.18f))
+                                    .background(Color.White.copy(alpha = 0.16f))
                                     .shimmerEffect()
                             )
+
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             // Pillole Match & Rating (ariose)
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

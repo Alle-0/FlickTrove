@@ -17,8 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -48,10 +52,23 @@ import com.cinetrack.R
 fun TrovePickCard(
     movie: Movie,
     onMovieClick: (Movie) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onResolveLogo: (suspend (Movie) -> String?)? = null
 ) {
     val context = LocalContext.current
     val imageQuality = com.cinetrack.util.LocalImageQuality.current
+
+    var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
+    androidx.compose.runtime.LaunchedEffect(movie.id, movie.logoPath) {
+        if (localLogoPath.isNullOrEmpty() && onResolveLogo != null) {
+            val fetched = onResolveLogo.invoke(movie)
+            if (!fetched.isNullOrEmpty()) {
+                localLogoPath = fetched
+            }
+        } else {
+            localLogoPath = movie.logoPath
+        }
+    }
 
     val backdropUrl = buildTmdbImageUrl(
         movie.backdropPath ?: movie.posterPath,
@@ -126,32 +143,6 @@ fun TrovePickCard(
                 .graphicsLayer { clip = false },
             contentAlignment = Alignment.Center
         ) {
-            // Ambilight Glow layer (dietro la card)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp)
-                    .offset(y = 10.dp)
-                    .graphicsLayer {
-                        alpha = 0.55f
-                        clip = false
-                    }
-                    .blur(26.dp)
-            ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(backdropUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(255.dp)
-                        .padding(horizontal = 24.dp)
-                        .align(Alignment.Center)
-                )
-            }
 
             // Card content layer (raggio 32.dp concentrico)
             Box(
@@ -159,7 +150,14 @@ fun TrovePickCard(
                     .fillMaxWidth()
                     .height(255.dp)
                     .padding(horizontal = 16.dp)
-                    .bounceClick { onMovieClick(movie) }
+                    .bounceClick {
+                        val movieWithLogo = if (!localLogoPath.isNullOrEmpty() && movie.logoPath == null) {
+                            movie.copy().apply { this.logoPath = localLogoPath }
+                        } else {
+                            movie
+                        }
+                        onMovieClick(movieWithLogo)
+                    }
                     .clip(RoundedCornerShape(32.dp))
                     .border(
                         androidx.compose.foundation.BorderStroke(
@@ -181,33 +179,35 @@ fun TrovePickCard(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Overlay gradiente orizzontale da sinistra a destra (stacca la locandina e ammorbidisce la scena)
+                // Overlay gradiente orizzontale: sfumatura più scura a sinistra (0.80f che sfuma verso destra)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.horizontalGradient(
                                 colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.85f),
-                                    0.45f to Color.Black.copy(alpha = 0.35f),
+                                    0.0f to Color.Black.copy(alpha = 0.80f),
+                                    0.40f to Color.Black.copy(alpha = 0.42f),
+                                    0.75f to Color.Transparent,
                                     1.0f to Color.Transparent
                                 )
                             )
                         )
                 )
 
-                // Overlay gradiente verticale: profondo dal basso verso l'alto, con lieve sfumatura dall'alto verso il basso
+                // Overlay gradiente verticale: velatura in alto (0.58f) e nero profondo e solido in basso (fino a 1.0f)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.55f),
-                                    0.18f to Color.Transparent,
-                                    0.42f to Color.Black.copy(alpha = 0.50f),
-                                    0.68f to Color.Black.copy(alpha = 0.88f),
-                                    1.0f to Color.Black.copy(alpha = 0.98f)
+                                    0.0f to Color.Black.copy(alpha = 0.58f),
+                                    0.22f to Color.Black.copy(alpha = 0.22f),
+                                    0.42f to Color.Transparent,
+                                    0.55f to Color.Black.copy(alpha = 0.60f),
+                                    0.75f to Color.Black.copy(alpha = 0.92f),
+                                    1.0f to Color.Black
                                 )
                             )
                         )
@@ -242,60 +242,134 @@ fun TrovePickCard(
                             )
                     )
 
-                    // Colonna Dettagli a destra
+                    // Colonna Dettagli a destra — badge in alto, contenuto in basso
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Badge "CURATED FOR YOU" in alto
-                        Text(
-                            text = stringResource(R.string.home_trove_pick_badge).uppercase(),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.3.sp,
-                            maxLines = 1
-                        )
+                        // Badge "CURATED FOR YOU" ancorato in cima
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .border(
+                                    0.5.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
+                                    CircleShape
+                                )
+                                .padding(horizontal = 9.dp, vertical = 3.5.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.home_trove_pick_badge).uppercase(),
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                                maxLines = 1
+                            )
+                        }
 
-                        // Parte inferiore: Metadati sistemati e compatti senza overflow
+                        // Blocco inferiore: titolo, anno/generi, match + rating
                         val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
                         val currentLanguage = context.resources.configuration.locales[0].language
-                        val primaryGenre = movie.genreIds?.firstNotNullOfOrNull { id ->
+                        val genres = movie.genreIds?.mapNotNull { id ->
                             val list = if (movie.mediaType == "tv") com.cinetrack.data.model.GenreConstants.TV_GENRES else com.cinetrack.data.model.GenreConstants.MOVIE_GENRES
                             val defaultName = list.find { it.id == id }?.name ?: ""
                             com.cinetrack.data.model.GenreConstants.getLocalizedName(id, currentLanguage, defaultName).takeIf { it.isNotBlank() }
-                        }
+                        }?.take(3) ?: emptyList()
+
                         val matchScore = movie.matchScore
                         val rating = movie.voteAverage
+                        val titleText = (movie.title ?: movie.name ?: "").uppercase()
+                        val activeLogo = localLogoPath ?: movie.logoPath
 
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            // Riga 1: Anno e Genere (testo fluido e minimale, senza pillola)
-                            val metaText = listOfNotNull(
-                                year.takeIf { it.isNotEmpty() },
-                                primaryGenre?.takeIf { it.isNotBlank() }
-                            ).joinToString(" • ")
+                            // 1. Logo o titolo testuale Serif
+                            if (!activeLogo.isNullOrEmpty()) {
+                                val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, imageQuality)
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(logoUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = movie.title ?: movie.name,
+                                    contentScale = ContentScale.Fit,
+                                    alignment = Alignment.CenterStart,
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.92f)
+                                        .heightIn(min = 28.dp, max = 46.dp)
+                                )
+                            } else if (titleText.isNotEmpty()) {
+                                Text(
+                                    text = titleText,
+                                    color = Color.White,
+                                    fontFamily = FontFamily.Serif,
+                                    fontSize = 21.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp,
+                                    lineHeight = 25.sp,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
 
+                            // 2. Anno • Generi
+                            val metaText = remember(year, genres) {
+                                buildAnnotatedString {
+                                    if (year.isNotEmpty()) {
+                                        withStyle(
+                                            SpanStyle(
+                                                color = Color.White.copy(alpha = 0.95f),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.5.sp
+                                            )
+                                        ) {
+                                            append(year)
+                                        }
+                                    }
+                                    if (year.isNotEmpty() && genres.isNotEmpty()) {
+                                        withStyle(
+                                            SpanStyle(
+                                                color = Color.White.copy(alpha = 0.40f),
+                                                fontWeight = FontWeight.Normal,
+                                                fontSize = 12.5.sp
+                                            )
+                                        ) {
+                                            append("  •  ")
+                                        }
+                                    }
+                                    if (genres.isNotEmpty()) {
+                                        withStyle(
+                                            SpanStyle(
+                                                color = Color.White.copy(alpha = 0.65f),
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = 12.sp
+                                            )
+                                        ) {
+                                            append(genres.joinToString(", "))
+                                        }
+                                    }
+                                }
+                            }
                             if (metaText.isNotEmpty()) {
                                 Text(
                                     text = metaText,
-                                    color = Color.White.copy(alpha = 0.70f),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
 
-                            // Riga 2: Match Score e/o Rating (con spaziatura ariosa)
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            // 3. Match Score + Rating
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                // Match Score
                                 if (matchScore != null && matchScore > 0) {
                                     Box(
                                         modifier = Modifier
@@ -325,20 +399,10 @@ fun TrovePickCard(
                                     }
                                 }
 
-                                // Rating con stella
                                 if (rating != null && rating > 0.0) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                                        modifier = Modifier
-                                            .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.08f))
-                                            .border(
-                                                0.5.dp,
-                                                Color.White.copy(alpha = 0.14f),
-                                                CircleShape
-                                            )
-                                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(3.dp)
                                     ) {
                                         Icon(
                                             painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
@@ -357,6 +421,7 @@ fun TrovePickCard(
                             }
                         }
                     }
+
                 }
             }
         }

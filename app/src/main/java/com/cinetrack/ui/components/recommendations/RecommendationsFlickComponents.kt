@@ -34,9 +34,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -323,7 +326,7 @@ fun FlickMovieCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Metadata Row: Match Score + Rating + Year
+            // Metadata Row: Match Score + Rating
             val rating = movie.voteAverage ?: 0.0
             val year = movie.releaseYear ?: movie.releaseDate?.take(4)
                 ?: movie.firstAirDate?.take(4)
@@ -331,49 +334,44 @@ fun FlickMovieCard(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Match Score (se disponibile)
+                // Match Score Pill — sfondo più pieno per leggibilità su qualsiasi backdrop
                 if (matchScore != null && matchScore > 0) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f))
-                            .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.50f), CircleShape)
+                            .background(animatedAccent.copy(alpha = 0.30f))
+                            .border(0.5.dp, animatedAccent.copy(alpha = 0.75f), CircleShape)
                             .padding(horizontal = 9.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "${matchScore}%",
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.White,
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.ExtraBold
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = stringResource(R.string.match_score).uppercase(),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.White.copy(alpha = 0.90f),
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
                         }
                     }
                 }
 
-                // Rating Pill
+                // Rating pulito con stella piena (senza pillola per massima armonia con il Match)
                 if (rating > 0.0) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .border(0.5.dp, animatedAccent.copy(alpha = 0.35f), CircleShape)
-                            .padding(horizontal = 9.dp, vertical = 4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_star),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                             contentDescription = null,
                             tint = Color(0xFFFFC107),
                             modifier = Modifier.size(13.dp)
@@ -386,45 +384,69 @@ fun FlickMovieCard(
                         )
                     }
                 }
-
-                // Year Pill
-                if (!year.isNullOrEmpty()) {
-                    Text(
-                        text = year,
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(0.5.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                            .padding(horizontal = 9.dp, vertical = 4.dp)
-                    )
-                }
             }
 
-            // Genres
+            // Anno • Genere • Genere (testo plain, senza pillole)
             val contextLocale = LocalConfiguration.current.locales[0].language
-            val genres = remember(movie.genreIds, movie.genreNamesString, contextLocale) {
+            val genreList = remember(movie.genreIds, movie.genreNamesString, movie.genres, contextLocale) {
                 if (!movie.genreIds.isNullOrEmpty()) {
                     movie.genreIds!!.mapNotNull { id ->
                         val defaultName = com.cinetrack.data.model.GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: ""
                         val localized = com.cinetrack.data.model.GenreConstants.getLocalizedName(id, contextLocale, defaultName)
-                        localized.takeIf { it.isNotEmpty() }
-                    }.joinToString(", ")
+                        localized.takeIf { it.isNotBlank() }
+                    }
+                } else if (!movie.genreNamesString.isNullOrEmpty()) {
+                    movie.genreNamesString!!.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                 } else {
-                    movie.genreNamesString ?: movie.genres?.mapNotNull { it.name }?.joinToString(", ") ?: ""
+                    movie.genres?.mapNotNull { it.name?.takeIf { n -> n.isNotBlank() } } ?: emptyList()
                 }
             }
 
-            if (genres.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+            val metaText = remember(year, genreList) {
+                buildAnnotatedString {
+                    if (!year.isNullOrEmpty()) {
+                        withStyle(
+                            SpanStyle(
+                                color = Color.White.copy(alpha = 0.95f),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        ) {
+                            append(year)
+                        }
+                    }
+                    if (!year.isNullOrEmpty() && genreList.isNotEmpty()) {
+                        withStyle(
+                            SpanStyle(
+                                color = Color.White.copy(alpha = 0.40f),
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 12.sp
+                            )
+                        ) {
+                            append("  •  ")
+                        }
+                    }
+                    if (genreList.isNotEmpty()) {
+                        val genresFormatted = genreList.take(3).joinToString(", ") { genre ->
+                            genre.trim().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        }
+                        withStyle(
+                            SpanStyle(
+                                color = Color.White.copy(alpha = 0.65f),
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.5.sp
+                            )
+                        ) {
+                            append(genresFormatted)
+                        }
+                    }
+                }
+            }
+
+            if (metaText.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = genres.uppercase(),
-                    color = animatedAccent.copy(alpha = 0.95f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.2.sp,
+                    text = metaText,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -611,3 +633,5 @@ fun FlickEmptyState(
         }
     }
 }
+
+

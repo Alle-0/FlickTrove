@@ -55,9 +55,9 @@ import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.components.boxoffice.boxOfficeSkeletons
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.LocalMovieActions
-import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.utils.bounceClick
@@ -196,24 +196,7 @@ fun BoxOfficeScreenContent(
             // Main Content
             when {
                 isCurrentLoading && currentList.isEmpty() -> {
-                    item(key = "skeleton_hero") {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(26.dp))
-                                .shimmerEffect()
-                        )
-                    }
-                    items(6, key = { "skeleton_row_$it" }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(86.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .shimmerEffect()
-                        )
-                    }
+                    boxOfficeSkeletons(activeTab = uiState.activeTab)
                 }
                 uiState.isError && currentList.isEmpty() -> {
                     item(key = "error_state") {
@@ -384,7 +367,8 @@ fun BoxOfficeScreenContent(
     }
 }
 
-@Composable
+
+@androidx.compose.runtime.Composable
 fun BoxOfficeHeroWinnerCard(
     item: BoxOfficeMovie,
     onClick: () -> Unit
@@ -703,35 +687,7 @@ fun BoxOfficeMovieRow(
     }
 }
 
-@Composable
-fun BoxOfficeSkeletonList(contentPadding: PaddingValues) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        // Hero skeleton
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(26.dp))
-                    .shimmerEffect()
-            )
-        }
-        // Row skeletons
-        items(6) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(86.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .shimmerEffect()
-            )
-        }
-    }
-}
+
 
 @Composable
 fun BoxOfficeErrorState(
