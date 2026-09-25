@@ -769,7 +769,8 @@
     <string name="card_quick_note">Hızlı not</string>
     <string name="card_folders">Klasörler</string>
     <string name="card_share">Paylaş</string>
-    <string name="card_delete">Sil</string>
+    <string name="card_remove">Kaldır</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Renk</string>
     <string name="category_movies">FİLMLER</string>
     <string name="category_tv">DİZİLER</string>

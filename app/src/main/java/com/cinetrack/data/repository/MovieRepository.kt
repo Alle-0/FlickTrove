@@ -487,26 +487,38 @@ class MovieRepository @Inject constructor(
     }
 
     suspend fun deleteMovie(movie: Movie) {
+        val existingMovie = favoriteDao.getById(movie.id, movie.mediaType)
+            ?: favoriteDao.getByIdIncludingDeleted(movie.id, movie.mediaType)
+        val targetMovie = existingMovie?.copy(
+            personalRating = existingMovie.personalRating ?: movie.personalRating,
+            favorite = existingMovie.favorite || movie.favorite,
+            watched = existingMovie.watched || movie.watched,
+            watchedEpisodes = if (existingMovie.watchedEpisodes.isNullOrEmpty()) movie.watchedEpisodes else existingMovie.watchedEpisodes,
+            emotionalVibes = if (existingMovie.emotionalVibes.isNullOrEmpty()) movie.emotionalVibes else existingMovie.emotionalVibes,
+            favoriteActorId = existingMovie.favoriteActorId ?: movie.favoriteActorId,
+            imdbId = existingMovie.imdbId ?: movie.imdbId
+        ) ?: movie
+
         // FIX: unico insert atomico con syncStatus già = "pending_delete".
         // Se facessimo insert() + markDeleted() in due step, Room emetterebbe il Flow
         // due volte: la prima con la serie ancora visibile, la seconda senza.
         // Ciò causava la card a rimanere visibile per qualche frame dopo "Eliminar".
-        val updatedMovie = movie.copy(
+        val updatedMovie = targetMovie.copy(
             watchedEpisodes = emptyMap(),
             syncStatus = "pending_delete",
             clientUpdatedAt = System.currentTimeMillis()
         )
         favoriteDao.insert(updatedMovie)
-        watchHistoryRepository.purgeHistoryForMovie(movie.id)
+        watchHistoryRepository.purgeHistoryForMovie(targetMovie.id)
         widgetNotifier.notifyWidgetUpdated()
 
         // --- PUSH RIMOZIONE A TRAKT ---
         val builder = androidx.work.Data.Builder()
             .putString(TraktInstantWriteWorker.KEY_ACTION,     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
-            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
-            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
-        if (movie.imdbId != null) {
-            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
+            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, targetMovie.mediaType)
+            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    targetMovie.id)
+        if (targetMovie.imdbId != null) {
+            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, targetMovie.imdbId)
         }
 
         val workRequests = mutableListOf(
@@ -517,7 +529,7 @@ class MovieRepository @Inject constructor(
         )
 
         // Fix smart-cast salvando in una variabile locale immutabile
-        val currentRating = movie.personalRating
+        val currentRating = targetMovie.personalRating
         if (currentRating != null && currentRating > 0.0) {
             // Fix: uso di .putAll() al posto di fromData()
             val ratingBuilder = androidx.work.Data.Builder().putAll(builder.build())
@@ -527,7 +539,7 @@ class MovieRepository @Inject constructor(
                 .build()
         }
         
-        if (movie.favorite) {
+        if (targetMovie.favorite) {
             // Fix: uso di .putAll() al posto di fromData()
             val watchlistBuilder = androidx.work.Data.Builder().putAll(builder.build())
                 .putString(TraktInstantWriteWorker.KEY_ACTION, TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
@@ -550,9 +562,39 @@ class MovieRepository @Inject constructor(
         
         repositoryScope.launch {
             try {
-                firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
+                firebaseRemoteDataSource.deleteMovie(targetMovie.id, targetMovie.mediaType)
+
+                // Rimuove il voto, le emotional vibes, l'attore MVP e le views dai global stats di Firestore
+                val ratingToRemove = targetMovie.personalRating
+                val vibesToRemove = targetMovie.emotionalVibes?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+                val mvpToRemove = targetMovie.favoriteActorId
+                val calculatedViewsDelta = if (targetMovie.mediaType == "tv") {
+                    -(targetMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0).toLong()
+                } else {
+                    if (targetMovie.watched) -1L else 0L
+                }
+
+                if ((ratingToRemove != null && ratingToRemove > 0.0) ||
+                    vibesToRemove.isNotEmpty() ||
+                    mvpToRemove != null ||
+                    calculatedViewsDelta != 0L
+                ) {
+                    firebaseRemoteDataSource.updateGlobalMovieStats(
+                        compositeId = "${targetMovie.mediaType}_${targetMovie.id}",
+                        addedVibes = emptyList(),
+                        removedVibes = vibesToRemove,
+                        newMvp = null,
+                        oldMvp = mvpToRemove,
+                        newRating = null,
+                        oldRating = ratingToRemove,
+                        newStatus = "unwatched",
+                        oldStatus = if (targetMovie.watched) "watched" else "unwatched",
+                        viewsDelta = calculatedViewsDelta
+                    )
+                }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Error deleting movie or updating global stats: ${e.message}", e)
             }
         }
     }

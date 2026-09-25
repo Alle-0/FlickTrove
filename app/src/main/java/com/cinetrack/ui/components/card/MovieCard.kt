@@ -211,8 +211,9 @@ fun MovieActionsPopup(
     onQuickNote: (Movie) -> Unit,
     onFolders: (Movie) -> Unit,
     onShare: (Movie) -> Unit,
-    onDelete: (Movie) -> Unit,
-    isSaved: Boolean = false
+    onDelete: ((Movie) -> Unit)? = null,
+    isSaved: Boolean = false,
+    canDelete: Boolean = isSaved && onDelete != null
 ) {
     // Use MutableTransitionState to precisely track the AnimatedVisibility lifecycle
     val transitionState = remember { 
@@ -366,7 +367,7 @@ fun MovieActionsPopup(
                             onClick = { onDismiss(); onShare(movie) }
                         )
                         
-                        if (isSaved) {
+                        if (canDelete && onDelete != null) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Box(modifier = Modifier
                                 .fillMaxWidth()
@@ -378,7 +379,7 @@ fun MovieActionsPopup(
                             Spacer(modifier = Modifier.height(4.dp))
                             
                             MovieMenuItem(
-                                text = stringResource(R.string.card_delete),
+                                text = stringResource(R.string.card_remove),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 iconColor = Color(0xFFE57373),
                                 isDestructive = true,

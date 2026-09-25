@@ -769,7 +769,8 @@
     <string name="card_quick_note">快速短评</string>
     <string name="card_folders">文件夹</string>
     <string name="card_share">分享</string>
-    <string name="card_delete">删除</string>
+    <string name="card_remove">移除</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">颜色</string>
     <string name="category_movies">电影</string>
     <string name="category_tv">剧集</string>

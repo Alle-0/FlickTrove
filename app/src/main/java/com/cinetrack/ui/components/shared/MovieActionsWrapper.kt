@@ -19,7 +19,7 @@ data class MovieActionsState(
     val onQuickVote: (Movie) -> Unit,
     val onQuickNote: (Movie) -> Unit,
     val onFolders: (Movie) -> Unit,
-    val onDelete: (Movie) -> Unit,
+    val onDelete: ((Movie) -> Unit)? = null,
     val onShare: (Movie) -> Unit
 )
 
@@ -32,7 +32,7 @@ fun MovieActionsWrapper(
     hazeState: HazeState, // Kept for compatibility, but dialogs use global hazeState now
     folders: List<FolderEntity> = emptyList(),
     isItemInFolder: (Movie, String) -> Boolean = { _, _ -> false },
-    onDelete: (Movie) -> Unit = {},
+    onDelete: ((Movie) -> Unit)? = null,
     onUpdateRating: (Movie, Double) -> Unit = { _, _ -> },
     onUpdateNote: (Movie, String) -> Unit = { _, _ -> },
     onToggleFolder: (Movie, FolderEntity) -> Unit = { _, _ -> },
@@ -54,19 +54,35 @@ fun MovieActionsWrapper(
         )
     }
 
-    val actionsState = remember(onDelete) {
+    val actionsState = remember(folders, isItemInFolder, onDelete, onUpdateRating, onUpdateNote, onToggleFolder) {
         MovieActionsState(
             onLongPress = { movie, pressOffset, cardPos ->
+                manager.setupCallbacks(
+                    folders = folders,
+                    isItemInFolder = isItemInFolder,
+                    onDelete = onDelete,
+                    onUpdateRating = onUpdateRating,
+                    onUpdateNote = onUpdateNote,
+                    onToggleFolder = onToggleFolder
+                )
                 manager.openActionsPopup(movie, pressOffset, cardPos)
             },
             show = { movie ->
+                manager.setupCallbacks(
+                    folders = folders,
+                    isItemInFolder = isItemInFolder,
+                    onDelete = onDelete,
+                    onUpdateRating = onUpdateRating,
+                    onUpdateNote = onUpdateNote,
+                    onToggleFolder = onToggleFolder
+                )
                 // Default position for general "More" button: top right-ish or just centered
                 manager.openActionsPopup(movie, Offset(0f, 0f), Offset(100f, 200f)) 
             },
             onQuickVote = { manager.openRating(it) },
             onQuickNote = { manager.openNotes(it) },
             onFolders = { manager.openFolders(it) },
-            onDelete = { onDelete(it) },
+            onDelete = onDelete,
             onShare = { m ->
                 val shareTitle = m.title ?: m.name ?: ""
                 val shareType = if (m.mediaType == "tv") "tv" else "movie"

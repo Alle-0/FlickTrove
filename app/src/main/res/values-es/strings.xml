@@ -693,7 +693,8 @@
     <string name="card_quick_note">Nota rápida</string>
     <string name="card_folders">Carpetas</string>
     <string name="card_share">Compartir</string>
-    <string name="card_delete">Eliminar</string>
+    <string name="card_remove">Quitar</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Color</string>
     <string name="category_movies">PELÍCULAS</string>
     <string name="category_tv">SERIES TV</string>

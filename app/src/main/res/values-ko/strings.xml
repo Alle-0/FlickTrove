@@ -769,7 +769,8 @@
     <string name="card_quick_note">빠른 메모</string>
     <string name="card_folders">폴더</string>
     <string name="card_share">공유</string>
-    <string name="card_delete">삭제</string>
+    <string name="card_remove">제거</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">색상</string>
     <string name="category_movies">영화</string>
     <string name="category_tv">TV 시리즈</string>

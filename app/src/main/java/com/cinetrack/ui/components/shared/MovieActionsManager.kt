@@ -123,7 +123,7 @@ class MovieActionsManager {
     fun setupCallbacks(
         folders: List<FolderEntity> = emptyList(),
         isItemInFolder: (Movie, String) -> Boolean = { _, _ -> false },
-        onDelete: (Movie) -> Unit = {},
+        onDelete: ((Movie) -> Unit)? = null,
         onUpdateRating: (Movie, Double) -> Unit = { _, _ -> },
         onUpdateNote: (Movie, String) -> Unit = { _, _ -> },
         onToggleFolder: (Movie, FolderEntity) -> Unit = { _, _ -> }

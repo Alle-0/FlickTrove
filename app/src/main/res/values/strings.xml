@@ -770,7 +770,8 @@
     <string name="card_quick_note">Quick note</string>
     <string name="card_folders">Folders</string>
     <string name="card_share">Share</string>
-    <string name="card_delete">Delete</string>
+    <string name="card_remove">Remove</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Color</string>
     <string name="category_movies">MOVIES</string>
     <string name="category_tv">TV SHOWS</string>

@@ -362,7 +362,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                     if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty()) needsUpdate = true
                     
                     if (totalVibesDelta != 0L) {
-                        updates["total_vibes"] = com.google.firebase.firestore.FieldValue.increment(totalVibesDelta)
+                        val currentTotalVibes = snapshot.getLong("total_vibes") ?: 0L
+                        updates["total_vibes"] = (currentTotalVibes + totalVibesDelta).coerceAtLeast(0L)
                     }
                     
                     var totalMvpDelta = 0L
@@ -377,7 +378,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                     if (newMvp != oldMvp) needsUpdate = true
                     
                     if (totalMvpDelta != 0L) {
-                        updates["total_mvps"] = com.google.firebase.firestore.FieldValue.increment(totalMvpDelta)
+                        val currentTotalMvps = snapshot.getLong("total_mvps") ?: 0L
+                        updates["total_mvps"] = (currentTotalMvps + totalMvpDelta).coerceAtLeast(0L)
                     }
                     
                     if (newRating != oldRating) {
@@ -393,10 +395,17 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
 
                     if (ratingDelta != 0.0) {
-                        updates["total_rating"] = com.google.firebase.firestore.FieldValue.increment(ratingDelta)
+                        val currentTotalRating = snapshot.getDouble("total_rating") ?: 0.0
+                        val newTotalRating = (currentTotalRating + ratingDelta).coerceAtLeast(0.0)
+                        updates["total_rating"] = newTotalRating
                     }
                     if (countDelta != 0L) {
-                        updates["rating_count"] = com.google.firebase.firestore.FieldValue.increment(countDelta)
+                        val currentCount = snapshot.getLong("rating_count") ?: 0L
+                        val newCount = (currentCount + countDelta).coerceAtLeast(0L)
+                        updates["rating_count"] = newCount
+                        if (newCount == 0L) {
+                            updates["total_rating"] = 0.0
+                        }
                     }
                     
                     if (needsUpdate) {

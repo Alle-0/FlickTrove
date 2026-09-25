@@ -321,4 +321,23 @@ class PersonDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteMovie(movie: Movie) {
+        viewModelScope.launch {
+            try {
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
+                repository.deleteMovie(movieToDelete)
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
+                    try {
+                        repository.saveMovie(movie)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
+            }
+        }
+    }
 }

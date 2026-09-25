@@ -725,7 +725,8 @@
     <string name="card_quick_note">Nota rapida</string>
     <string name="card_folders">Cartelle</string>
     <string name="card_share">Condividi</string>
-    <string name="card_delete">Elimina</string>
+    <string name="card_remove">Rimuovi</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Colore</string>
     <string name="category_movies">FILM</string>
     <string name="category_tv">SERIE TV</string>

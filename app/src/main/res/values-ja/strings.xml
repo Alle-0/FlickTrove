@@ -769,7 +769,8 @@
     <string name="card_quick_note">クイックメモ</string>
     <string name="card_folders">フォルダ</string>
     <string name="card_share">共有</string>
-    <string name="card_delete">削除</string>
+    <string name="card_remove">削除</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">カラー</string>
     <string name="category_movies">映画</string>
     <string name="category_tv">TVシリーズ</string>

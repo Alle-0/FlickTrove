@@ -696,7 +696,8 @@
     <string name="card_quick_note">त्वरित नोट</string>
     <string name="card_folders">फ़ोल्डर</string>
     <string name="card_share">साझा करें</string>
-    <string name="card_delete">हटाएँ</string>
+    <string name="card_remove">हटाएँ</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">रंग</string>
     <string name="category_movies">फ़िल्में</string>
     <string name="category_tv">टीवी शो</string>

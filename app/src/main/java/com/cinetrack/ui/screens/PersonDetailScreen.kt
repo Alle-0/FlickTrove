@@ -313,7 +313,7 @@ fun PersonDetailScreenContent(
                         isItemInFolder = { movie, folderId ->
                             uiState.folders.find { it.id == folderId }?.itemIds?.contains("${movie.mediaType}_${movie.id}") ?: false
                         },
-                        onDelete = { /* Person detail usually doesn't delete */ },
+                        onDelete = { viewModel.deleteMovie(it) },
                         onUpdateRating = { movie, rating -> viewModel.updateRating(movie, rating) },
                         onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
                         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }

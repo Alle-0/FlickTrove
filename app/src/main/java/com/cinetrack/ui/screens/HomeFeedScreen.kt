@@ -218,8 +218,20 @@ fun HomeFeedScreenContent(
         )
     }
 
-    val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(movieActions) {
-        { m, offset, pos -> movieActions.openActionsPopup(m, offset, pos) }
+    val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(movieActions, uiState.folders, viewModel) {
+        { m, offset, pos ->
+            movieActions.setupCallbacks(
+                folders = uiState.folders,
+                isItemInFolder = { movie, folderId ->
+                    uiState.folders.find { it.id == folderId }?.itemIds?.contains("${if(movie.mediaType.isNotEmpty()) movie.mediaType else uiState.activeTab}_${movie.id}") ?: false
+                },
+                onDelete = { viewModel.deleteMovie(it) },
+                onUpdateRating = { movie, rating -> viewModel.updateRating(movie, rating) },
+                onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
+                onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
+            )
+            movieActions.openActionsPopup(m, offset, pos)
+        }
     }
 
     val stableOnAction: (Movie) -> Unit = remember(viewModel) { { m -> viewModel.toggleWatched(m) } }

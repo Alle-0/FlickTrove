@@ -769,7 +769,8 @@
     <string name="card_quick_note">Catatan cepat</string>
     <string name="card_folders">Folder</string>
     <string name="card_share">Bagikan</string>
-    <string name="card_delete">Hapus</string>
+    <string name="card_remove">Hapus</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Warna</string>
     <string name="category_movies">FILM</string>
     <string name="category_tv">SERIAL TV</string>

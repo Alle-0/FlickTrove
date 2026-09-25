@@ -698,7 +698,8 @@
     <string name="card_quick_note">Быстрая заметка</string>
     <string name="card_folders">Папки</string>
     <string name="card_share">Поделиться</string>
-    <string name="card_delete">Удалить</string>
+    <string name="card_remove">Убрать</string>
+    <string name="card_delete">@string/card_remove</string>
     <string name="color_picker_title">Цвет</string>
     <string name="category_movies">ФИЛЬМЫ</string>
     <string name="category_tv">СЕРИАЛЫ</string>
