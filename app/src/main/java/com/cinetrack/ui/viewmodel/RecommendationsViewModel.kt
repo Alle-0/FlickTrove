@@ -157,11 +157,13 @@ class RecommendationsViewModel @Inject constructor(
         if (_mediaType.value != type) {
             _mediaType.value = type
             topCardIndex = 0
+            currentTopSourceIds = emptyList()
         }
     }
 
     fun onRefresh() {
         topCardIndex = 0
+        currentTopSourceIds = emptyList()
         val currentState = uiState.value
         viewModelScope.launch {
             currentPage = 1
@@ -321,13 +323,13 @@ class RecommendationsViewModel @Inject constructor(
                         .thenByDescending { it.voteAverage ?: 0.0 }
                 ).take(20)
 
-                // Anchor-based genre diversification:
-                // 1. Best-rated film is the anchor
+                // Anchor-based genre diversification with refresh variety:
+                // 1. Pick anchor from the top pool
                 // 2. Pick a second seed with minimal genre overlap with the anchor
                 // 3. Third seed is random from the remainder
-                val anchor = topPool.firstOrNull()
+                val anchor = topPool.take(4).randomOrNull() ?: topPool.firstOrNull()
                 val second = if (anchor != null) {
-                    topPool.drop(1).minByOrNull { candidate ->
+                    topPool.filter { it.id != anchor.id }.minByOrNull { candidate ->
                         (candidate.genreIds ?: emptyList()).intersect((anchor.genreIds ?: emptyList()).toSet()).size
                     }
                 } else null
@@ -354,7 +356,7 @@ class RecommendationsViewModel @Inject constructor(
                 .map { it.compositeId }
                 .toSet()
 
-            val existingIds = _recommendedMovies.value.map { it.id }.toSet()
+            val existingIds = if (isAppend) _recommendedMovies.value.map { it.id }.toSet() else emptySet()
 
             // Utilizziamo coroutineScope e async per fare le 3 chiamate API in parallelo!
             val rawData = coroutineScope {

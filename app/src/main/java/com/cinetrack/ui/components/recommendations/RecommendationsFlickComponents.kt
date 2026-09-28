@@ -534,49 +534,42 @@ fun FlickControls(
 
 @Composable
 fun FlickEmptyState(
-    onRefresh: () -> Unit,
-    localHazeState: HazeState
+    onRefresh: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
+                .fillMaxWidth(0.92f)
                 .wrapContentHeight()
+                .clip(RoundedCornerShape(32.dp))
+                .background(Color(0xFF141418).copy(alpha = 0.94f))
+                .border(
+                    BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
+                    RoundedCornerShape(32.dp)
+                )
         ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .hazeGlass(
-                        state = localHazeState,
-                        shape = RoundedCornerShape(24.dp),
-                        blurRadius = 16.dp,
-                        containerColor = Color.Black.copy(alpha = 0.25f),
-                    )
-            )
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp)
-                    .graphicsLayer { },
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(72.dp)
                         .background(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                             shape = CircleShape
                         )
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -585,49 +578,60 @@ fun FlickEmptyState(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(38.dp)
+                        modifier = Modifier.size(34.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
                     text = stringResource(R.string.recommendations_completed_title),
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    letterSpacing = (-0.3).sp
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = stringResource(R.string.recommendations_completed_desc),
-                    color = Color.White.copy(alpha = 0.6f),
+                    color = Color.White.copy(alpha = 0.65f),
                     fontSize = 14.sp,
-                    lineHeight = 22.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    lineHeight = 21.sp,
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                Button(
-                    onClick = {},
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.Black
-                    ),
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(48.dp)
-                        .bounceClick(scaleDown = 0.94f) { onRefresh() }
+                        .fillMaxWidth(0.85f)
+                        .height(50.dp)
+                        .bounceClick { onRefresh() }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.recommendations_reload),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.recommendations_reload),
+                            color = Color.Black,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
                 }
             }
         }

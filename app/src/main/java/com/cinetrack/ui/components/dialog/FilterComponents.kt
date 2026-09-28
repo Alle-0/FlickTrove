@@ -166,35 +166,53 @@ fun ExpandableSection(
 fun FilterChip(
     label: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    unselectedBorderColor: Color = Color.Transparent,
+    unselectedBgColor: Color = Color.Black.copy(alpha = 0.45f),
+    dotColor: Color? = null
 ) {
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Transparent,
+        targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else unselectedBorderColor,
         label = "chipBorder"
     )
     val bgColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else Color.Black.copy(alpha = 0.45f),
+        targetValue = if (isSelected) accentColor.copy(alpha = 0.22f) else unselectedBgColor,
         label = "chipBg"
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+        targetValue = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
         label = "chipText"
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .bounceClick { onClick() }
             .clip(CircleShape)
             .background(bgColor)
             .border(width = 1.dp, color = borderColor, shape = CircleShape)
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = textColor
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (dotColor != null) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(dotColor)
+                )
+            }
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = textColor
+            )
+        }
     }
 }
 

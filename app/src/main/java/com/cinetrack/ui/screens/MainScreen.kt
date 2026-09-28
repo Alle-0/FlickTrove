@@ -80,6 +80,7 @@ import com.cinetrack.ui.screens.HomeTab
 import com.cinetrack.ui.screens.HomeFeedTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
+import com.cinetrack.ui.screens.TrophyRoomTab
 import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.screens.BoxOfficeTab
 import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
@@ -189,7 +190,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             BackHandler(enabled = currentTab !is HomeFeedTab) {
                 if (currentTab is FolderDetailTab) {
                     tabNavigator.current = FoldersTab
-                } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab) {
+                } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is TrophyRoomTab) {
                     tabNavigator.current = AccountTab
                 } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is SettingsTab || currentTab is BoxOfficeTab) {
                     tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab
@@ -205,11 +206,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             val symbiontPullState = remember { SymbiontPullState() }
             Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
                 val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
+                val activeTrophyFilterConfig = remember { mutableStateOf<com.cinetrack.ui.TrophyFilterModalConfig?>(null) }
                 val folderReorderRequest = remember { mutableStateOf<(() -> Unit)?>(null) }
                 val folderReorderConfig = remember { mutableStateOf<com.cinetrack.ui.FolderReorderModalConfig?>(null) }
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
                     LocalActiveFilterConfig provides activeFilterConfig,
+                    com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
                     com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
                     com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
                     LocalFilterRequest provides { bounds ->
@@ -229,13 +232,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 transitionSpec = {
                                     val targetDepth = when (targetState) {
                                         is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
                                     val initialDepth = when (initialState) {
                                         is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab -> 1
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
@@ -289,6 +292,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is FolderDetailTab -> currentTab.folderName
                                 is FlowTab -> "Flow"
                                 is FlowStatsTab -> "Flow stats"
+                                is TrophyRoomTab -> stringResource(R.string.dashboard_trophies)
                                 else -> stringResource(R.string.app_name)
                             }
 
@@ -347,13 +351,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     isDimmed = isSettingsDialogOpen,
                                     onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
                                     onMenuClick = null, // Menu rimosso
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
-                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else discoverHasActiveFilters,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
+                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.totalUnreadCount,

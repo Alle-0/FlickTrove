@@ -362,9 +362,13 @@ class SettingsViewModel @Inject constructor(
         .map { it.showGeneralStats }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showTrophies: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showTrophies }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val dashboardCardOrder: StateFlow<List<String>> = preferenceRepository.userPreferencesFlow
         .map { it.dashboardCardOrder }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("stats", "folders", "flow"))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf("stats", "folders", "flow", "trophies"))
 
     val showHomeContinueWatching: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showHomeContinueWatching }
@@ -513,6 +517,15 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.DynamicString("General Stats ${context.getString(statusRes)}")) // Assuming no specific string res yet
+        }
+    }
+
+    fun toggleShowTrophies(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowTrophies(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
+            actionFeedbackManager.emit(UiText.DynamicString("Trophy Room ${context.getString(statusRes)}"))
         }
     }
 

@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">Menampilkan kartu Flow Anda di dasbor profil Anda.</string>
     <string name="settings_show_general_stats">Kartu Statistik Umum</string>
     <string name="settings_show_general_stats_desc">Menampilkan kartu Statistik Umum di dasbor profil Anda.</string>
+    <string name="settings_show_trophies">Kartu Ruang Trofi</string>
+    <string name="settings_show_trophies_desc">Menampilkan kartu Ruang Trofi di dasbor profil Anda.</string>
     <string name="settings_language">Bahasa Aplikasi</string>
     <string name="settings_language_desc">Perubahan akan diterapkan setelah memulai ulang</string>
     <string name="settings_language_system">Sistem</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">Sinkronisasi dan statistik didukung oleh SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Data tambahan dan rating disediakan oleh Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Data tambahan dan rating disediakan oleh Metacritic.</string>
+    <string name="settings_game_icons_notice">Ikon trofi dan pencapaian disediakan oleh Game-Icons.net di bawah lisensi CC BY 3.0.</string>
     <string name="settings_made_with">Dikembangkan dengan </string>
     <string name="settings_for_lovers"> untuk pecinta film</string>
     <string name="settings_cancel">Batal</string>
@@ -1142,6 +1145,9 @@
     <string name="dashboard_general_stats">STATISTIK UMUM</string>
     <string name="dashboard_my_folders">FOLDER SAYA</string>
     <string name="dashboard_your_flow">FLOW ANDA</string>
+    <string name="dashboard_trophies">Ruang Trofi</string>
+    <string name="dashboard_trophies_desc">Pameran penghargaan &amp; gulungan yang hilang</string>
+    <string name="dashboard_trophies_coming_soon">Segera Hadir</string>
     <string name="flow_empty_title">Flow Anda kosong</string>
     <string name="flow_empty_desc">Tambahkan lebih banyak film dan serial TV ke daftar Sudah Ditonton untuk menghasilkan Flow pribadi Anda.</string>
     <string name="flow_stats_empty_title">Belum ada statistik</string>

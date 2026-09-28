@@ -88,6 +88,7 @@ gdpr-data*
 # =========================
 supabase/
 figma_exports_svg_v2/
+icon_badge_import/
 mcp.json
 tools/scripts/
 GEMINI.md

@@ -198,6 +198,8 @@
     <string name="settings_show_your_flow_desc">Показывает карточку «Ваша лента» на панели вашего профиля.</string>
     <string name="settings_show_general_stats">Карточка «Общая статистика»</string>
     <string name="settings_show_general_stats_desc">Показывает карточку общей статистики на панели вашего профиля.</string>
+    <string name="settings_show_trophies">Карточка «Комната трофеев»</string>
+    <string name="settings_show_trophies_desc">Показывает карточку «Комната трофеев» на панели вашего профиля.</string>
     <string name="settings_language">Язык приложения</string>
     <string name="settings_language_desc">Изменения вступят в силу после перезапуска</string>
     <string name="settings_language_system">Системный</string>
@@ -284,6 +286,7 @@
     <string name="settings_simkl_notice">Синхронизация и статистика от SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Дополнительные данные и рейтинги предоставлены Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Дополнительные данные и рейтинги предоставлены Metacritic.</string>
+    <string name="settings_game_icons_notice">Иконки трофеев и достижений предоставлены Game-Icons.net по лицензии CC BY 3.0.</string>
     <string name="settings_made_with">Разработано с </string>
     <string name="settings_for_lovers"> для любителей кино</string>
     <string name="settings_cancel">Отмена</string>
@@ -1066,6 +1069,9 @@
     <string name="dashboard_general_stats">ОБЩАЯ СТАТИСТИКА</string>
     <string name="dashboard_my_folders">МОИ ПАПКИ</string>
     <string name="dashboard_your_flow">ВАША ЛЕНТА</string>
+    <string name="dashboard_trophies">Зал трофеев</string>
+    <string name="dashboard_trophies_desc">Доска почёта и потерянные бобины</string>
+    <string name="dashboard_trophies_coming_soon">Скоро</string>
     <string name="flow_empty_title">Ваша лента пуста</string>
     <string name="flow_empty_desc">Добавьте больше фильмов и сериалов в список \'Просмотрено\', чтобы создать персонализированную ленту.</string>
     <string name="flow_stats_empty_title">Пока нет статистики</string>

@@ -197,6 +197,8 @@
     <string name="settings_show_your_flow_desc">Mostra o cartão Seu Fluxo no painel do seu perfil.</string>
     <string name="settings_show_general_stats">Cartão Estatísticas Gerais</string>
     <string name="settings_show_general_stats_desc">Mostra o cartão de Estatísticas Gerais no painel do seu perfil.</string>
+    <string name="settings_show_trophies">Cartão Sala de Troféus</string>
+    <string name="settings_show_trophies_desc">Mostra o cartão da Sala de Troféus no painel do seu perfil.</string>
     <string name="settings_language">Idioma do Aplicativo</string>
     <string name="settings_language_desc">As alterações serão aplicadas ao reiniciar</string>
     <string name="settings_language_system">Sistema</string>
@@ -283,6 +285,7 @@
     <string name="settings_simkl_notice">Sincronização e estatísticas desenvolvidas por SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Dados adicionais e classificações fornecidos por Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Dados adicionais e classificações fornecidos por Metacritic.</string>
+    <string name="settings_game_icons_notice">Ícones de troféus e conquistas fornecidos por Game-Icons.net sob licença CC BY 3.0.</string>
     <string name="settings_made_with">Desenvolvido com </string>
     <string name="settings_for_lovers"> para amantes do cinema</string>
     <string name="settings_cancel">Cancelar</string>
@@ -1063,6 +1066,9 @@
     <string name="dashboard_general_stats">ESTATÍSTICAS GERAIS</string>
     <string name="dashboard_my_folders">MINHAS PASTAS</string>
     <string name="dashboard_your_flow">SEU FLUXO</string>
+    <string name="dashboard_trophies">Sala de Troféus</string>
+    <string name="dashboard_trophies_desc">Galeria de honras e rolos perdidos</string>
+    <string name="dashboard_trophies_coming_soon">Em breve</string>
     <string name="flow_empty_title">Seu Fluxo está vazio</string>
     <string name="flow_empty_desc">Adicione mais filmes e séries de TV à sua lista de Assistidos para gerar seu Fluxo personalizado.</string>
     <string name="flow_stats_empty_title">Nenhuma estatística ainda</string>

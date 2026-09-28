@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">계정 대시보드에 Your Flow 카드를 표시합니다.</string>
     <string name="settings_show_general_stats">일반 통계 카드</string>
     <string name="settings_show_general_stats_desc">계정 대시보드에 일반 통계 카드를 표시합니다.</string>
+    <string name="settings_show_trophies">트로피 룸 카드</string>
+    <string name="settings_show_trophies_desc">계정 대시보드에 트로피 룸 카드를 표시합니다.</string>
     <string name="settings_language">앱 언어</string>
     <string name="settings_language_desc">앱을 재시작하면 변경 사항이 적용됩니다</string>
     <string name="settings_language_system">시스템 기본값</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">동기화 및 통계 기능은 SIMKL에서 지원합니다.</string>
     <string name="settings_rotten_tomatoes_notice">추가 데이터 및 평점은 Rotten Tomatoes에서 제공합니다.</string>
     <string name="settings_metacritic_notice">추가 데이터 및 평점은 Metacritic에서 제공합니다.</string>
+    <string name="settings_game_icons_notice">트로피 및 업적 아이콘은 CC BY 3.0 라이선스에 따라 Game-Icons.net에서 제공됩니다.</string>
     <string name="settings_made_with">개발: </string>
     <string name="settings_for_lovers"> (영화와 시리즈를 사랑하는 이들을 위해)</string>
     <string name="settings_cancel">취소</string>
@@ -1142,6 +1145,9 @@
     <string name="dashboard_general_stats">일반 통계</string>
     <string name="dashboard_my_folders">내 폴더</string>
     <string name="dashboard_your_flow">YOUR FLOW</string>
+    <string name="dashboard_trophies">트로피 룸</string>
+    <string name="dashboard_trophies_desc">명예의 전당 및 잃어버린 릴</string>
+    <string name="dashboard_trophies_coming_soon">곧 출시</string>
     <string name="flow_empty_title">Flow가 비어 있습니다</string>
     <string name="flow_empty_desc">\'시청 완료\' 목록에 더 많은 작품을 추가하고 나만의 맞춤 Flow를 완성해 보세요.</string>
     <string name="flow_stats_empty_title">아직 통계가 없습니다</string>

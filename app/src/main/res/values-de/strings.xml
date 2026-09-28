@@ -279,6 +279,7 @@
     <string name="settings_simkl_notice">Synchronisation und Statistiken unterstützt von SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Zusätzliche Daten und Bewertungen bereitgestellt von Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Zusätzliche Daten und Bewertungen bereitgestellt von Metacritic.</string>
+    <string name="settings_game_icons_notice">Erfolgs- und Trophäen-Icons bereitgestellt von Game-Icons.net unter CC BY 3.0.</string>
     <string name="settings_made_with">Entwickelt mit </string>
     <string name="settings_for_lovers"> für Filmliebhaber</string>
     <string name="settings_cancel">Abbrechen</string>
@@ -1061,6 +1062,9 @@
     <string name="dashboard_general_stats">GESAMTE STATISTIKEN</string>
     <string name="dashboard_my_folders">MEINE ORDNER</string>
     <string name="dashboard_your_flow">DEIN FLOW</string>
+    <string name="dashboard_trophies">Trophäenraum</string>
+    <string name="dashboard_trophies_desc">Ehrenhalle &amp; verschollene Filmrollen</string>
+    <string name="dashboard_trophies_coming_soon">Demnächst</string>
     <string name="flow_empty_title">Dein Flow ist leer</string>
     <string name="flow_empty_desc">Füge mehr Filme und Serien zu deiner „Gesehen“-Liste hinzu, um deinen personalisierten Flow zu erstellen.</string>
     <string name="flow_stats_empty_title">Noch keine Statistiken</string>
@@ -1188,6 +1192,8 @@
 
     <string name="settings_show_general_stats">Karte Allgemeine Statistiken</string>
     <string name="settings_show_general_stats_desc">Zeigt die Karte mit allgemeinen Statistiken auf Ihrem Profil-Dashboard an.</string>
+    <string name="settings_show_trophies">Trophäenraum-Karte</string>
+    <string name="settings_show_trophies_desc">Zeigt die Trophäenraum-Karte in Ihrem Profil-Dashboard an.</string>
     <string name="stats_map_no_movies">Keine Filme</string>
     <string name="stats_map_movies">%1$d Filme</string>
     <string name="feedback_roadmap_note">Haben Sie eine komplexe Idee oder möchten Sie die Roadmap diskutieren? Treten Sie r/FlickTrove bei oder eröffnen Sie ein Issue auf GitHub!</string>

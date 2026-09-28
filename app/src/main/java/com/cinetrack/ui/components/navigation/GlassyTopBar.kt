@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -360,7 +361,7 @@ fun GlassyTopBar(
                                 else Modifier
                             )
                             .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
+                                val position = coords.positionInRoot()
                                 filterButtonBounds[0] = Rect(
                                     position.x,
                                     position.y,
@@ -487,7 +488,7 @@ fun GlassyTopBar(
                         modifier = Modifier
                             .size(36.dp)
                             .onGloballyPositioned { coords ->
-                                val position = coords.positionInWindow()
+                                val position = coords.positionInRoot()
                                 editButtonBounds[0] = Rect(
                                     position.x,
                                     position.y,

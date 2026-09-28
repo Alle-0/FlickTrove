@@ -43,6 +43,8 @@ import dev.chrisbanes.haze.HazeState
 import androidx.compose.foundation.border
 import androidx.compose.ui.zIndex
 import androidx.compose.animation.core.*
+import com.cinetrack.ui.components.badge.FlickTroveBadgeEmblem
+import com.cinetrack.ui.components.badge.SAMPLE_TROPHY_ROOM_ITEMS
 
 @Composable
 fun GeneralStatsCard(
@@ -572,3 +574,174 @@ fun YourFlowCard(
         }
     }
 }
+
+private fun parseSampleDate(dateStr: String?): Long {
+    if (dateStr == null) return 0L
+    val parts = dateStr.trim().split(" ")
+    if (parts.size != 3) return 0L
+    val day = parts[0].toIntOrNull() ?: 0
+    val month = when (parts[1].lowercase()) {
+        "gen" -> 1
+        "feb" -> 2
+        "mar" -> 3
+        "apr" -> 4
+        "mag" -> 5
+        "giu" -> 6
+        "lug" -> 7
+        "ago" -> 8
+        "set" -> 9
+        "ott" -> 10
+        "nov" -> 11
+        "dic" -> 12
+        else -> 0
+    }
+    val year = parts[2].toIntOrNull() ?: 0
+    return year * 10000L + month * 100L + day
+}
+
+@Composable
+fun TrophyShowcaseCard(
+    hazeState: HazeState,
+    backgroundLuminance: Float = 0f,
+    isEnabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardAlpha = if (isEnabled) 1f else 0.45f
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(32.dp))
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(32.dp),
+                    containerColor = cardOverlay,
+                    borderColor = Color.White.copy(alpha = if (isEnabled) 0.12f else 0.05f),
+                    borderWidth = 1.dp,
+                    useOffscreenStrategy = false
+                )
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 14.dp, horizontal = 16.dp)
+                .graphicsLayer { alpha = cardAlpha }
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (isEnabled) {
+                            Modifier.bounceClick { onClick() }
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_trophy),
+                    contentDescription = stringResource(R.string.dashboard_trophies),
+                    tint = if (isEnabled) Color.White else Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.dashboard_trophies),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        letterSpacing = 1.sp
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (isEnabled) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_right),
+                        contentDescription = "Open Trophy Room",
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_lock),
+                            contentDescription = stringResource(R.string.dashboard_trophies_coming_soon),
+                            tint = Color.White.copy(alpha = 0.6f),
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.dashboard_trophies_coming_soon),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.dashboard_trophies_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = if (isEnabled) 0.75f else 0.5f),
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Overlapping preview emblems from the last 3 unlocked badges
+                val previewEmblems = remember {
+                    SAMPLE_TROPHY_ROOM_ITEMS
+                        .filter { it.isUnlocked }
+                        .sortedByDescending { parseSampleDate(it.unlockedDate) }
+                        .take(3)
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy((-10).dp)
+                ) {
+                    previewEmblems.forEachIndexed { index, item ->
+                        Box(
+                            modifier = Modifier
+                                .zIndex((index + 1).toFloat())
+                                .size(34.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            FlickTroveBadgeEmblem(
+                                tier = item.currentTier,
+                                iconKind = item.badge.iconKind,
+                                isUnlocked = isEnabled,
+                                size = 34.dp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">在个人中心主页显示“Your Flow”卡片。</string>
     <string name="settings_show_general_stats">“常规统计”卡片</string>
     <string name="settings_show_general_stats_desc">在个人中心主页显示“常规统计”卡片。</string>
+    <string name="settings_show_trophies">“陈列室”卡片</string>
+    <string name="settings_show_trophies_desc">在个人中心主页显示“陈列室”卡片。</string>
     <string name="settings_language">应用语言</string>
     <string name="settings_language_desc">重启应用后生效</string>
     <string name="settings_language_system">跟随系统</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">同步与统计功能由 SIMKL 提供。</string>
     <string name="settings_rotten_tomatoes_notice">补充数据与评分由 Rotten Tomatoes 提供。</string>
     <string name="settings_metacritic_notice">补充数据与评分由 Metacritic 提供。</string>
+    <string name="settings_game_icons_notice">成就与奖杯图标由 Game-Icons.net 在 CC BY 3.0 许可下提供。</string>
     <string name="settings_made_with">用心打造，</string>
     <string name="settings_for_lovers">献给影迷</string>
     <string name="settings_cancel">取消</string>
@@ -1142,6 +1145,9 @@
     <string name="dashboard_general_stats">常规统计</string>
     <string name="dashboard_my_folders">我的文件夹</string>
     <string name="dashboard_your_flow">你的专属 FLOW</string>
+    <string name="dashboard_trophies">荣誉陈列室</string>
+    <string name="dashboard_trophies_desc">荣誉殿堂与失落胶卷</string>
+    <string name="dashboard_trophies_coming_soon">即将推出</string>
     <string name="flow_empty_title">你的 Flow 还是空的</string>
     <string name="flow_empty_desc">在“已看过”列表中添加更多电影和剧集，即可生成属于你的个性化 Flow。</string>
     <string name="flow_stats_empty_title">暂无统计数据</string>

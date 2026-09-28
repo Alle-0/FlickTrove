@@ -220,12 +220,19 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             val isTargetSearch = targetState is com.cinetrack.ui.screens.SearchScreen
                                             val isInitialSearch = initialState is com.cinetrack.ui.screens.SearchScreen
                                             val isInitialSplash = initialState is com.cinetrack.ui.screens.SplashScreen
+                                            val isTargetTrophy = targetState is com.cinetrack.ui.screens.TrophyRoomScreen
+                                            val isInitialTrophy = initialState is com.cinetrack.ui.screens.TrophyRoomScreen
                                             
                                             val enter = if (isPop || isReplace || isInitialSplash) {
                                                 androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(500))
                                             } else {
                                                 if (isTargetSearch) {
                                                     androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
+                                                } else if (isTargetTrophy) {
+                                                    androidx.compose.animation.slideInHorizontally(
+                                                        initialOffsetX = { it },
+                                                        animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    )
                                                 } else {
                                                     androidx.compose.animation.slideInVertically(
                                                         initialOffsetY = { it },
@@ -237,6 +244,11 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             val exit = if (isPop) {
                                                 if (isInitialSearch) {
                                                     androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+                                                } else if (isInitialTrophy) {
+                                                    androidx.compose.animation.slideOutHorizontally(
+                                                        targetOffsetX = { it },
+                                                        animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    )
                                                 } else {
                                                     androidx.compose.animation.slideOutVertically(
                                                         targetOffsetY = { it },

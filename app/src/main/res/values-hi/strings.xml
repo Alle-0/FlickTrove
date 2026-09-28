@@ -197,6 +197,8 @@
     <string name="settings_show_your_flow_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर आपका फ़्लो कार्ड दिखाता है।</string>
     <string name="settings_show_general_stats">सामान्य आँकड़े कार्ड</string>
     <string name="settings_show_general_stats_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर सामान्य आँकड़े कार्ड दिखाता है।</string>
+    <string name="settings_show_trophies">ट्रॉफ़ी रूम कार्ड</string>
+    <string name="settings_show_trophies_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर ट्रॉफ़ी रूम कार्ड दिखाता है।</string>
     <string name="settings_language">ऐप की भाषा</string>
     <string name="settings_language_desc">परिवर्तन पुनरारंभ करने पर लागू होंगे</string>
     <string name="settings_language_system">सिस्टम</string>
@@ -283,6 +285,7 @@
     <string name="settings_simkl_notice">SIMKL द्वारा संचालित सिंक और आँकड़े।</string>
     <string name="settings_rotten_tomatoes_notice">Rotten Tomatoes द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
     <string name="settings_metacritic_notice">Metacritic द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
+    <string name="settings_game_icons_notice">ट्रॉफी और उपलब्धि आइकन CC BY 3.0 के तहत Game-Icons.net द्वारा प्रदान किए गए हैं।</string>
     <string name="settings_made_with">इसके साथ विकसित किया गया: </string>
     <string name="settings_for_lovers"> फ़िल्म प्रेमियों के लिए</string>
     <string name="settings_cancel">रद्द करें</string>
@@ -1061,6 +1064,9 @@
     <string name="dashboard_general_stats">सामान्य आँकड़े</string>
     <string name="dashboard_my_folders">मेरे फ़ोल्डर</string>
     <string name="dashboard_your_flow">आपका फ़्लो</string>
+    <string name="dashboard_trophies">ट्रॉफी रूम</string>
+    <string name="dashboard_trophies_desc">सम्मान और खोई हुई रीलें</string>
+    <string name="dashboard_trophies_coming_soon">जल्द आ रहा है</string>
     <string name="flow_empty_title">आपका फ़्लो खाली है</string>
     <string name="flow_empty_desc">अपना व्यक्तिगत फ़्लो उत्पन्न करने के लिए अपनी \'देख लीं\' सूची में अधिक फ़िल्में और टीवी शो जोड़ें।</string>
     <string name="flow_stats_empty_title">अभी तक कोई आँकड़े नहीं</string>

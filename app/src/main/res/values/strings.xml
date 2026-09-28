@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">Shows the Your Flow card on your profile dashboard.</string>
     <string name="settings_show_general_stats">General Stats Card</string>
     <string name="settings_show_general_stats_desc">Shows the General Stats card on your profile dashboard.</string>
+    <string name="settings_show_trophies">Trophy Room Card</string>
+    <string name="settings_show_trophies_desc">Shows the Trophy Room card on your profile dashboard.</string>
     <string name="settings_language">App Language</string>
     <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">Sync and stats powered by SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Additional data and ratings provided by Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Additional data and ratings provided by Metacritic.</string>
+    <string name="settings_game_icons_notice">Achievement and trophy icons provided by Game-Icons.net under CC BY 3.0.</string>
     <string name="settings_made_with">Developed with </string>
     <string name="settings_for_lovers"> for movie lovers</string>
     <string name="settings_cancel">Cancel</string>
@@ -1145,6 +1148,9 @@
     <string name="dashboard_general_stats">GENERAL STATS</string>
     <string name="dashboard_my_folders">MY FOLDERS</string>
     <string name="dashboard_your_flow">YOUR FLOW</string>
+    <string name="dashboard_trophies">Trophy Room</string>
+    <string name="dashboard_trophies_desc">Honors showcase &amp; lost reels</string>
+    <string name="dashboard_trophies_coming_soon">Coming Soon</string>
     <string name="flow_empty_title">Your Flow is empty</string>
     <string name="flow_empty_desc">Add more movies and TV shows to your Watched list to generate your personalized Flow.</string>
     <string name="flow_stats_empty_title">No stats yet</string>

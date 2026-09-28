@@ -32,6 +32,9 @@ import com.cinetrack.ui.components.account.AccountModals
 import com.cinetrack.ui.components.dialog.FlowFilterModal
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.viewmodel.FlowViewModel
+import com.cinetrack.ui.LocalActiveTrophyFilterConfig
+import com.cinetrack.ui.components.badge.TrophyFilterModal
+import com.cinetrack.ui.screens.TrophyRoomTab
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -181,6 +184,24 @@ fun MainModalsContainer(
                     },
                     onDismissRequest = onFilterModalDismiss
                 )
+            }
+        } else if (currentTab is TrophyRoomTab) {
+            val activeTrophyFilterState = LocalActiveTrophyFilterConfig.current
+            val trophyConfig = activeTrophyFilterState.value
+            if (trophyConfig != null) {
+                Box(modifier = Modifier.zIndex(70000f)) {
+                    TrophyFilterModal(
+                        isVisible = isFilterModalVisible,
+                        config = trophyConfig.config,
+                        triggerBounds = filterButtonBounds,
+                        hazeState = globalHazeState,
+                        onApply = { newConfig ->
+                            trophyConfig.onApply(newConfig)
+                            onFilterModalDismiss()
+                        },
+                        onDismissRequest = onFilterModalDismiss
+                    )
+                }
             }
         }
     }

@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">アカウントダッシュボードに「Your Flow」カードを表示します。</string>
     <string name="settings_show_general_stats">一般統計カード</string>
     <string name="settings_show_general_stats_desc">アカウントダッシュボードに「一般統計」カードを表示します。</string>
+    <string name="settings_show_trophies">トロフィールームカード</string>
+    <string name="settings_show_trophies_desc">アカウントダッシュボードに「トロフィールーム」カードを表示します。</string>
     <string name="settings_language">アプリの言語</string>
     <string name="settings_language_desc">再起動後に変更が適用されます</string>
     <string name="settings_language_system">システム</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">同期および統計機能はSIMKLによって提供されています。</string>
     <string name="settings_rotten_tomatoes_notice">追加データおよび評価はRotten Tomatoesより提供されています。</string>
     <string name="settings_metacritic_notice">追加データおよび評価はMetacriticより提供されています。</string>
+    <string name="settings_game_icons_notice">トロフィーおよびアチーブメントのアイコンは、CC BY 3.0に基づき Game-Icons.net から提供されています。</string>
     <string name="settings_made_with">開発: </string>
     <string name="settings_for_lovers">（映画を愛するすべての人へ）</string>
     <string name="settings_cancel">キャンセル</string>
@@ -1142,6 +1145,9 @@
     <string name="dashboard_general_stats">一般統計</string>
     <string name="dashboard_my_folders">マイフォルダ</string>
     <string name="dashboard_your_flow">YOUR FLOW</string>
+    <string name="dashboard_trophies">トロフィールーム</string>
+    <string name="dashboard_trophies_desc">栄誉の展示と失われたリール</string>
+    <string name="dashboard_trophies_coming_soon">近日公開</string>
     <string name="flow_empty_title">Flowは空です</string>
     <string name="flow_empty_desc">「視聴済み」リストに映画やTVシリーズを追加して、あなただけのFlowを作成しましょう。</string>
     <string name="flow_stats_empty_title">統計がまだありません</string>

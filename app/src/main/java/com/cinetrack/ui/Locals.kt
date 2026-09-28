@@ -39,3 +39,10 @@ data class FolderReorderModalConfig(
 )
 
 val LocalFolderReorderConfig = compositionLocalOf<MutableState<FolderReorderModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }
+
+data class TrophyFilterModalConfig(
+    val config: com.cinetrack.ui.components.badge.TrophyFilterConfig,
+    val onApply: (com.cinetrack.ui.components.badge.TrophyFilterConfig) -> Unit
+)
+
+val LocalActiveTrophyFilterConfig = compositionLocalOf<MutableState<TrophyFilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }

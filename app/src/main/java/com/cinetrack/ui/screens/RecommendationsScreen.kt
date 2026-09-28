@@ -229,8 +229,7 @@ fun RecommendationsScreenContent(
                         onRefresh = {
                             topCardIndex = 0
                             viewModel.onRefresh()
-                        },
-                        localHazeState = localHazeState
+                        }
                     )
                 } else {
                     val movies = uiState.recommendedMovies

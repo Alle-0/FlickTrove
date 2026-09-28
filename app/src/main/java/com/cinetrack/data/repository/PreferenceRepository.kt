@@ -62,6 +62,7 @@ class PreferenceRepository @Inject constructor(
         val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
         val SHOW_GENERAL_STATS = booleanPreferencesKey("show_general_stats")
+        val SHOW_TROPHIES = booleanPreferencesKey("show_trophies")
         val DASHBOARD_CARD_ORDER = stringPreferencesKey("dashboard_card_order")
         val SHOW_HOME_CONTINUE_WATCHING = booleanPreferencesKey("show_home_continue_watching")
         val SHOW_HOME_BOX_OFFICE = booleanPreferencesKey("show_home_box_office")
@@ -116,7 +117,11 @@ class PreferenceRepository @Inject constructor(
                 titleTextSizeMultiplier = preferences[PreferencesKeys.TITLE_TEXT_SIZE_MULTIPLIER] ?: 1.0f,
                 imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM",
                 showGeneralStats = preferences[PreferencesKeys.SHOW_GENERAL_STATS] ?: true,
-                dashboardCardOrder = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow").split(","),
+                showTrophies = preferences[PreferencesKeys.SHOW_TROPHIES] ?: true,
+                dashboardCardOrder = run {
+                    val raw = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow,trophies").split(",").filter { it.isNotBlank() }
+                    if (!raw.contains("trophies")) raw + "trophies" else raw
+                },
                 showHomeContinueWatching = preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] ?: true,
                 showHomeBoxOffice = preferences[PreferencesKeys.SHOW_HOME_BOX_OFFICE] ?: true,
                 showHomeWatchlist = preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] ?: true,
@@ -326,6 +331,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateShowGeneralStats(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_GENERAL_STATS] = show
+        }
+    }
+
+    suspend fun updateShowTrophies(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_TROPHIES] = show
         }
     }
 

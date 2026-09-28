@@ -201,6 +201,8 @@
     <string name="settings_show_your_flow_desc">Profil panelinizde Akışınız kartını gösterir.</string>
     <string name="settings_show_general_stats">Genel İstatistikler Kartı</string>
     <string name="settings_show_general_stats_desc">Profil panelinizde Genel İstatistikler kartını gösterir.</string>
+    <string name="settings_show_trophies">Kupa Odası Kartı</string>
+    <string name="settings_show_trophies_desc">Profil panelinizde Kupa Odası kartını gösterir.</string>
     <string name="settings_language">Uygulama Dili</string>
     <string name="settings_language_desc">Değişiklikler yeniden başlatıldığında uygulanacaktır</string>
     <string name="settings_language_system">Sistem</string>
@@ -290,6 +292,7 @@
     <string name="settings_simkl_notice">Senkronizasyon ve istatistikler SIMKL tarafından sağlanmaktadır.</string>
     <string name="settings_rotten_tomatoes_notice">Ek veriler ve puanlar Rotten Tomatoes tarafından sağlanmaktadır.</string>
     <string name="settings_metacritic_notice">Ek veriler ve puanlar Metacritic tarafından sağlanmaktadır.</string>
+    <string name="settings_game_icons_notice">Kupa ve başarı simgeleri CC BY 3.0 kapsamında Game-Icons.net tarafından sağlanmıştır.</string>
     <string name="settings_made_with">Geliştirici: </string>
     <string name="settings_for_lovers"> (sinemaseverler için)</string>
     <string name="settings_cancel">İptal</string>
@@ -1142,6 +1145,9 @@
     <string name="dashboard_general_stats">GENEL İSTATİSTİKLER</string>
     <string name="dashboard_my_folders">KLASÖRLERİM</string>
     <string name="dashboard_your_flow">AKIŞINIZ</string>
+    <string name="dashboard_trophies">Kupa Odası</string>
+    <string name="dashboard_trophies_desc">Onur panosu ve kayıp makaralar</string>
+    <string name="dashboard_trophies_coming_soon">Çok Yakında</string>
     <string name="flow_empty_title">Akışınız boş</string>
     <string name="flow_empty_desc">Kişiselleştirilmiş Akışınızı oluşturmak için İzlendi listenize daha fazla film ve dizi ekleyin.</string>
     <string name="flow_stats_empty_title">Henüz istatistik yok</string>

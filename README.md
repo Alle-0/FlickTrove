@@ -242,6 +242,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
 - 🍅 [Rotten Tomatoes](https://www.rottentomatoes.com/) - For critic and audience scores
 - Ⓜ️ [Metacritic](https://www.metacritic.com/) - For aggregated critic reviews
+- 🏆 [Game-Icons.net](https://game-icons.net/) - For achievement badge and trophy icons (licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/))
 
 > *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 

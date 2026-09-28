@@ -279,6 +279,7 @@
     <string name="settings_simkl_notice">Synchronisation et statistiques propulsées par SIMKL.</string>
     <string name="settings_rotten_tomatoes_notice">Données supplémentaires et évaluations fournies par Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Données supplémentaires et évaluations fournies par Metacritic.</string>
+    <string name="settings_game_icons_notice">Icônes de trophées et succès fournies par Game-Icons.net sous licence CC BY 3.0.</string>
     <string name="settings_made_with">Développé avec </string>
     <string name="settings_for_lovers"> pour les passionnés de cinéma</string>
     <string name="settings_cancel">Annuler</string>
@@ -1061,6 +1062,9 @@
     <string name="dashboard_general_stats">STATISTIQUES GÉNÉRALES</string>
     <string name="dashboard_my_folders">MES DOSSIERS</string>
     <string name="dashboard_your_flow">VOTRE FLOW</string>
+    <string name="dashboard_trophies">Salle des trophées</string>
+    <string name="dashboard_trophies_desc">Tableau d\'honneur et bobines perdues</string>
+    <string name="dashboard_trophies_coming_soon">Bientôt disponible</string>
     <string name="flow_empty_title">Votre Flow est vide</string>
     <string name="flow_empty_desc">Ajoutez plus de films et séries à votre liste Â« Vus Â» pour générer votre Flow personnalisé.</string>
     <string name="flow_stats_empty_title">Pas encore de statistiques</string>
@@ -1188,6 +1192,8 @@
 
     <string name="settings_show_general_stats">Carte Statistiques Générales</string>
     <string name="settings_show_general_stats_desc">Affiche la carte des statistiques générales sur le tableau de bord de votre profil.</string>
+    <string name="settings_show_trophies">Carte Salle des Trophées</string>
+    <string name="settings_show_trophies_desc">Affiche la carte Salle des Trophées sur le tableau de bord de votre profil.</string>
     <string name="stats_map_no_movies">Aucun film</string>
     <string name="stats_map_movies">%1$d films</string>
     <string name="feedback_roadmap_note">Vous avez une idée complexe ou vous souhaitez discuter de la feuille de route ? Rejoignez r/FlickTrove ou ouvrez une Issue sur GitHub !</string>

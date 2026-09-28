@@ -44,6 +44,7 @@ import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.account.AvatarSelectionModal
+import com.cinetrack.ui.components.account.TrophyShowcaseCard
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
@@ -77,6 +78,7 @@ import com.cinetrack.ui.screens.FlowStatsTab
 import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.screens.FolderCreateDialog
+import com.cinetrack.ui.screens.TrophyRoomTab
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
 import dagger.hilt.android.EntryPointAccessors
@@ -141,6 +143,7 @@ object AccountTab : Tab {
         val showMyFolders by settingsViewModel.showMyFolders.collectAsStateWithLifecycle()
         val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
         val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
+        val showTrophies by settingsViewModel.showTrophies.collectAsStateWithLifecycle()
         val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
         
         // Firebase User Info
@@ -213,6 +216,17 @@ object AccountTab : Tab {
                     }
             }
         }
+
+        val isAuthorizedBadgeUser = remember(currentDisplayName, currentUser?.email, currentUser?.displayName) {
+            val name = currentDisplayName.trim()
+            val authName = currentUser?.displayName?.trim()
+            val authEmail = currentUser?.email?.trim()
+            
+            name.equals("Aaa", ignoreCase = true) ||
+            authName?.equals("Aaa", ignoreCase = true) == true ||
+            authEmail?.equals("a@a.com", ignoreCase = true) == true
+        }
+
         var extractedColor by remember { mutableStateOf<Color?>(null) }
         var rawExtractedColor by remember { mutableStateOf<Color?>(null) }
         
@@ -462,6 +476,20 @@ object AccountTab : Tab {
                                             backgroundLuminance = rawLuminance,
                                             onFlowClick = { tabNavigator.current = FlowTab },
                                             onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
+                                        )
+                                    }
+                                }
+                                "trophies" -> {
+                                    if (showTrophies) {
+                                        TrophyShowcaseCard(
+                                            hazeState = backgroundHazeState,
+                                            backgroundLuminance = rawLuminance,
+                                            isEnabled = isAuthorizedBadgeUser,
+                                            onClick = {
+                                                if (isAuthorizedBadgeUser) {
+                                                    tabNavigator.current = TrophyRoomTab
+                                                }
+                                            }
                                         )
                                     }
                                 }

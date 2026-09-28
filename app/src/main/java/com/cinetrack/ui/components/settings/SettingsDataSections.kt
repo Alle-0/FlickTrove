@@ -786,6 +786,10 @@ fun SettingsSupportSection(
                             brand = "Metacritic",
                             text = stringResource(R.string.settings_metacritic_notice)
                         )
+                        AttributionRow(
+                            brand = "Game-Icons.net",
+                            text = stringResource(R.string.settings_game_icons_notice)
+                        )
                     }
                 }
             }
