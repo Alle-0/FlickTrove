@@ -470,14 +470,20 @@ data class Movie(
                 "2026-01-01"
             }
 
+            val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+
             var nextEpSeason: Int? = null
             var nextEpNum: Int? = null
             if (!nextEpisodeString.isNullOrBlank() && (nextEpisodeAirDate.isNullOrBlank() || nextEpisodeAirDate!! > todayIso)) {
                 try {
                     val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(nextEpisodeString!!)
                     if (match != null) {
-                        nextEpSeason = match.groupValues[1].toIntOrNull()
-                        nextEpNum = match.groupValues[2].toIntOrNull()
+                        val parsedS = match.groupValues[1].toIntOrNull()
+                        val parsedE = match.groupValues[2].toIntOrNull()
+                        if (parsedS != null && (maxDatedSeason == 0 || parsedS >= maxDatedSeason)) {
+                            nextEpSeason = parsedS
+                            nextEpNum = parsedE
+                        }
                     }
                 } catch (e: Exception) {
                     // Ignore parsing error
@@ -487,7 +493,7 @@ data class Movie(
             val validSeasons = seasons?.filter { (it.seasonNumber ?: 0) > 0 }
             if (!validSeasons.isNullOrEmpty()) {
                 val sum = validSeasons.sumOf { season ->
-                    getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
+                    getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum, maxDatedSeason)
                 }
                 if (sum > 0) return minOf(sum, numberOfEpisodes ?: sum)
             }
@@ -499,15 +505,22 @@ data class Movie(
         season: Season,
         todayIso: String,
         nextEpSeason: Int? = null,
-        nextEpNum: Int? = null
+        nextEpNum: Int? = null,
+        maxDatedSeason: Int = 0
     ): Int {
         val sNum = season.seasonNumber ?: 0
         if (sNum <= 0) return 0
         val totalCount = season.episodeCount ?: 0
         if (totalCount <= 0) return 0
 
-        // 1. Check nextEpisodeToAir if available
-        if (nextEpSeason != null && nextEpNum != null) {
+        val effectiveMaxDatedSeason = if (maxDatedSeason > 0) {
+            maxDatedSeason
+        } else {
+            seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+        }
+
+        // 1. Check nextEpisodeToAir if available (only if nextEpSeason is at or beyond already aired seasons)
+        if (nextEpSeason != null && nextEpNum != null && (effectiveMaxDatedSeason == 0 || nextEpSeason >= effectiveMaxDatedSeason)) {
             if (sNum > nextEpSeason) return 0
             if (sNum == nextEpSeason && nextEpNum == 1) {
                 val nDate = nextEpisodeAirDate
@@ -540,8 +553,7 @@ data class Movie(
             return 0
         }
 
-        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
-        if (maxDatedSeason > 0 && sNum > maxDatedSeason) {
+        if (effectiveMaxDatedSeason > 0 && sNum > effectiveMaxDatedSeason) {
             return 0
         }
 
@@ -552,8 +564,9 @@ data class Movie(
         season: Season,
         todayIso: String,
         nextEpSeason: Int? = null,
-        nextEpNum: Int? = null
-    ): Int = getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
+        nextEpNum: Int? = null,
+        maxDatedSeason: Int = 0
+    ): Int = getEffectiveAiredEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum, maxDatedSeason)
 
     fun getReleasedEpisodeCountForSeason(
         season: Season,
@@ -567,12 +580,18 @@ data class Movie(
         val totalCount = season.episodeCount ?: 0
         if (totalCount <= 0) return 0
 
+        val effectiveMaxDatedSeason = if (maxDatedSeason > 0) {
+            maxDatedSeason
+        } else {
+            seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+        }
+
         val eps = season.episodes
         if (!eps.isNullOrEmpty() && eps.any { !it.airDate.isNullOrBlank() }) {
             return eps.count { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }
         }
 
-        if (nextEpSeason != null && nextEpNum != null) {
+        if (nextEpSeason != null && nextEpNum != null && (effectiveMaxDatedSeason == 0 || nextEpSeason >= effectiveMaxDatedSeason)) {
             if (sNum > nextEpSeason) return 0
             if (sNum == nextEpSeason) {
                 val airedInCurrent = maxOf(0, nextEpNum - 1)
@@ -593,7 +612,7 @@ data class Movie(
             return 0
         }
 
-        if (maxDatedSeason > 0 && sNum > maxDatedSeason) {
+        if (effectiveMaxDatedSeason > 0 && sNum > effectiveMaxDatedSeason) {
             return 0
         }
 
@@ -612,19 +631,23 @@ data class Movie(
             "2026-01-01"
         }
 
+        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
+
         var nextAiringSeason: Int? = null
         var nextAiringEpNum: Int? = null
         if (!nextEpisodeString.isNullOrBlank() && (nextEpisodeAirDate.isNullOrBlank() || nextEpisodeAirDate!! > todayIso)) {
             try {
                 val match = EPISODE_REGEX.find(nextEpisodeString!!)
                 if (match != null) {
-                    nextAiringSeason = match.groupValues[1].toIntOrNull()
-                    nextAiringEpNum = match.groupValues[2].toIntOrNull()
+                    val parsedS = match.groupValues[1].toIntOrNull()
+                    val parsedE = match.groupValues[2].toIntOrNull()
+                    if (parsedS != null && (maxDatedSeason == 0 || parsedS >= maxDatedSeason)) {
+                        nextAiringSeason = parsedS
+                        nextAiringEpNum = parsedE
+                    }
                 }
             } catch (_: Exception) {}
         }
-
-        val maxDatedSeason = seasons?.filter { !it.airDate.isNullOrBlank() && it.airDate.take(10) <= todayIso }?.maxOfOrNull { it.seasonNumber ?: 0 } ?: 0
 
         val seasonAiredCounts = validSeasons.map { season ->
             season to getReleasedEpisodeCountForSeason(season, todayIso, nextAiringSeason, nextAiringEpNum, maxDatedSeason)

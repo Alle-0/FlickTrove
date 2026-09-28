@@ -372,10 +372,11 @@ class FlickTroveNowWatchingWidget : GlanceAppWidget() {
         for (show in shows) {
             val name = show.name ?: show.title ?: continue
             val bitmap = posterCache[show.id]
-            val unwatched = collectFirstUnwatchedEpisode(show, todayIso)
+            val nextInfo = show.calculateNextEpisode()
 
-            if (unwatched != null) {
-                val (s, e) = unwatched
+            if (nextInfo != null && !nextInfo.isUpToDateWithAirDate && nextInfo.remainingTotal > 0) {
+                val s = nextInfo.seasonNumber
+                val e = nextInfo.episodeNumber
                 val sStr = s.toString().padStart(2, '0')
                 val eStr = e.toString().padStart(2, '0')
                 result.add(
@@ -390,84 +391,10 @@ class FlickTroveNowWatchingWidget : GlanceAppWidget() {
                         label = "S${sStr}E${eStr}"
                     )
                 )
-            } else {
-                // Fallback se seasons non popolato ma c'è nextEpisodeString
-                val next = show.nextEpisodeString
-                if (!next.isNullOrEmpty()) {
-                    val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(next)
-                    val s = match?.groupValues?.get(1)?.toIntOrNull() ?: 1
-                    val e = match?.groupValues?.get(2)?.toIntOrNull() ?: 1
-                    result.add(
-                        EpisodeEntry(
-                            showId = show.id,
-                            showName = name,
-                            imdbId = show.imdbId,
-                            mediaType = show.mediaType ?: "tv",
-                            bitmap = bitmap,
-                            seasonNum = s,
-                            episodeNum = e,
-                            label = next.uppercase()
-                        )
-                    )
-                }
             }
         }
 
         return result
     }
-
-    /**
-     * Restituisce il PRIMO episodio in assoluto non ancora visto per la serie
-     * (ordinato per stagione e numero episodio rilasciato fino ad oggi).
-     * Esclude speciali (stagione 0) ed episodi futuri non ancora trasmessi.
-     */
-    private fun collectFirstUnwatchedEpisode(show: Movie, todayIso: String): Pair<Int, Int>? {
-        val seasons = show.seasons ?: return null
-
-        var nextAiringSeason: Int? = null
-        var nextAiringEpNum: Int? = null
-        if (!show.nextEpisodeString.isNullOrBlank() && (show.nextEpisodeAirDate.isNullOrBlank() || show.nextEpisodeAirDate!! > todayIso)) {
-            try {
-                val match = Regex("""[Ss](\d+)[Ee](\d+)""").find(show.nextEpisodeString!!)
-                if (match != null) {
-                    nextAiringSeason = match.groupValues[1].toIntOrNull()
-                    nextAiringEpNum = match.groupValues[2].toIntOrNull()
-                }
-            } catch (_: Exception) {}
-        }
-
-        val validSeasons = seasons.filter { (it.seasonNumber ?: 0) > 0 }.sortedBy { it.seasonNumber }
-
-        for (season in validSeasons) {
-            val sNum = season.seasonNumber ?: continue
-            val watchedEps = show.watchedEpisodes?.get(sNum.toString()) ?: emptyList()
-
-            // 1. Se la stagione ha la lista degli episodi dettagliata
-            val epsList = season.episodes
-            if (!epsList.isNullOrEmpty()) {
-                val firstUnwatched = epsList
-                    .filter { ep ->
-                        val d = ep.airDate
-                        (d.isNullOrEmpty() || d.take(10) <= todayIso) && !watchedEps.contains(ep.episodeNumber)
-                    }
-                    .minByOrNull { it.episodeNumber }
-
-                if (firstUnwatched != null) {
-                    return sNum to firstUnwatched.episodeNumber
-                }
-            } else {
-                // 2. Altrimenti usa il conteggio degli episodi rilasciati
-                val airedCount = show.getReleasedEpisodeCountForSeason(season, todayIso, nextAiringSeason, nextAiringEpNum)
-                if (airedCount > 0) {
-                    for (ep in 1..airedCount) {
-                        if (!watchedEps.contains(ep)) {
-                            return sNum to ep
-                        }
-                    }
-                }
-            }
-        }
-
-        return null
-    }
 }
+

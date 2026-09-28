@@ -97,38 +97,7 @@ class MarkEpisodeWatchedCallback : ActionCallback {
                 UpdateEpisodesUseCase()
             }
 
-            var updatedShow = updateEpisodesUseCase(show, seasonNum, currentEpList).copy(dropped = false)
-
-            // Ricalcola nextEpisodeString e nextEpisodeAirDate se necessario
-            val seasons = show.seasons
-            if (seasons != null) {
-                data class EpInfo(val s: Int, val e: Int, val airDate: String?)
-                val nextEp = seasons
-                    .filter { (it.seasonNumber ?: 0) > 0 }
-                    .flatMap { season ->
-                        val sN = season.seasonNumber ?: return@flatMap emptyList<EpInfo>()
-                        val watched = currentWatchedMap[sN.toString()] ?: emptyList()
-                        (season.episodes ?: emptyList())
-                            .filter { ep -> !watched.contains(ep.episodeNumber) }
-                            .map { ep -> EpInfo(sN, ep.episodeNumber, ep.airDate) }
-                    }
-                    .sortedWith(compareBy({ it.s }, { it.e }))
-                    .firstOrNull()
-
-                if (nextEp != null) {
-                    val sStr = nextEp.s.toString().padStart(2, '0')
-                    val eStr = nextEp.e.toString().padStart(2, '0')
-                    updatedShow = updatedShow.copy(
-                        nextEpisodeString = "S${sStr}E${eStr}",
-                        nextEpisodeAirDate = nextEp.airDate
-                    )
-                } else {
-                    updatedShow = updatedShow.copy(
-                        nextEpisodeString = null,
-                        nextEpisodeAirDate = null
-                    )
-                }
-            }
+            val updatedShow = updateEpisodesUseCase(show, seasonNum, currentEpList).copy(dropped = false)
 
             // Salva tramite MovieRepository (che aggiorna Room, notifica widget ed esegue sync Trakt/Simkl)
             var savedViaRepo = false

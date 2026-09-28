@@ -69,10 +69,14 @@ class UpdatesViewModel @Inject constructor(
                     val nextAirDate = show.nextEpisodeAirDate
                     val seasons = show.seasons ?: continue
 
+                    val targetSeasonNum = show.nextEpisodeString?.let {
+                        Regex("""[Ss](\d+)[Ee](\d+)""").find(it)?.groupValues?.get(1)?.toIntOrNull()
+                    }
+
                     val targetSeasons = seasons.filter { s ->
                         s.seasonNumber > 0 && s.episodes.isNullOrEmpty() && (
                             (!s.airDate.isNullOrBlank() && s.airDate >= today) ||
-                            (!nextAirDate.isNullOrBlank() && nextAirDate >= today)
+                            (targetSeasonNum != null && s.seasonNumber == targetSeasonNum && !nextAirDate.isNullOrBlank() && nextAirDate >= today)
                         )
                     }
 
