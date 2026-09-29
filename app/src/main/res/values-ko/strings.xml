@@ -1211,6 +1211,23 @@
     <string name="comment_report_spoiler">스포일러 포함</string>
     <string name="comment_report_inappropriate_content">부적절한 내용</string>
     <string name="comment_report_inappropriate_user">부적절한 닉네임 또는 아바타</string>
+    <string name="comment_report_reason_spoiler">미표시 스포일러</string>
+    <string name="comment_report_reason_abuse">괴롭힘 또는 혐오 발언</string>
+    <string name="comment_report_reason_spam">스팸 또는 부적절한 광고</string>
+    <string name="comment_report_reason_sexual">음란물 또는 성적 콘텐츠</string>
+    <string name="comment_report_reason_illegal">불법 콘텐츠</string>
+    <string name="comment_report_reason_other">기타</string>
+    <string name="comment_report_reason_mine_hide">이전 보관된 댓글 숨기기</string>
+    <string name="comment_report_duplicate">이미 신고한 댓글입니다.</string>
+    <string name="comment_report_success">신고가 접수되었습니다. 소중한 의견 감사합니다!</string>
+    <string name="comment_report_error">신고를 전송할 수 없습니다. 나중에 다시 시도해 주세요.</string>
+    <string name="comment_block_user_title">사용자 차단</string>
+    <string name="comment_block_user_subtitle">@%1$s 님을 차단하시겠습니까? 해당 사용자의 댓글과 답글이 앱 전체에서 더 이상 표시되지 않습니다.</string>
+    <string name="comment_block_user_confirm">차단</string>
+    <string name="comment_block_user_action">%1$s 차단</string>
+    <string name="comment_block_user_success">@%1$s 님을 차단했습니다</string>
+    <string name="comment_unblock_user_btn">차단 해제</string>
+    <string name="comment_unblock_user_success">사용자 차단을 해제했습니다</string>
     <string name="comment_delete_title">삭제</string>
     <string name="comment_delete_subtitle">이 댓글을 정말로 삭제하시겠습니까?</string>
     <string name="comment_cancel_btn">취소</string>
@@ -1360,4 +1377,7 @@
     <string name="flow_filter_media_movies">영화</string>
     <string name="flow_filter_media_tv">시리즈</string>
     <string name="flow_filter_reset">초기화</string>
+    <string name="filter_source">출처</string>
+    <string name="filter_source_all">전체 (CommsUni)</string>
+    <string name="filter_source_flicktrove">FlickTrove만</string>
 </resources>

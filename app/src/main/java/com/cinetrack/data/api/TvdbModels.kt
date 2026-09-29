@@ -28,6 +28,7 @@ data class TvdbSearchResponse(
 @Serializable
 data class TvdbSearchResult(
     val tvdb_id: String? = null,
+    val id: String? = null,
     val name: String? = null,
     val year: String? = null
 )

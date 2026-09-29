@@ -1135,6 +1135,23 @@
     <string name="comment_report_spoiler">Содержит спойлеры</string>
     <string name="comment_report_inappropriate_content">Неуместный контент</string>
     <string name="comment_report_inappropriate_user">Неуместное имя пользователя или аватар</string>
+    <string name="comment_report_reason_spoiler">Неотмеченный спойлер</string>
+    <string name="comment_report_reason_abuse">Оскорбления или язык вражды</string>
+    <string name="comment_report_reason_spam">Спам или реклама</string>
+    <string name="comment_report_reason_sexual">Откровенный сексуальный контент</string>
+    <string name="comment_report_reason_illegal">Незаконный контент</string>
+    <string name="comment_report_reason_other">Другое</string>
+    <string name="comment_report_reason_mine_hide">Скрыть мой старый архивный комментарий</string>
+    <string name="comment_report_duplicate">Вы уже пожаловались на этот комментарий.</string>
+    <string name="comment_report_success">Жалоба отправлена. Спасибо за обратную связь!</string>
+    <string name="comment_report_error">Не удалось отправить жалобу. Попробуйте позже.</string>
+    <string name="comment_block_user_title">Заблокировать пользователя</string>
+    <string name="comment_block_user_subtitle">Заблокировать @%1$s? Вы больше не увидите комментарии и ответы этого пользователя во всем приложении.</string>
+    <string name="comment_block_user_confirm">Заблокировать</string>
+    <string name="comment_block_user_action">Заблокировать %1$s</string>
+    <string name="comment_block_user_success">Пользователь @%1$s заблокирован</string>
+    <string name="comment_unblock_user_btn">Разблокировать</string>
+    <string name="comment_unblock_user_success">Пользователь разблокирован</string>
     <string name="comment_delete_title">Удалить</string>
     <string name="comment_delete_subtitle">Вы действительно хотите удалить этот комментарий?</string>
     <string name="comment_cancel_btn">Отмена</string>
@@ -1291,5 +1308,8 @@
     <string name="flow_filter_media_movies">Фильмы</string>
     <string name="flow_filter_media_tv">Сериалы</string>
     <string name="flow_filter_reset">Сбросить</string>
+    <string name="filter_source">ИСТОЧНИК</string>
+    <string name="filter_source_all">Все (CommsUni)</string>
+    <string name="filter_source_flicktrove">Только FlickTrove</string>
 </resources>
 

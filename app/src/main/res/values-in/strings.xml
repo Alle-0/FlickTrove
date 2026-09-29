@@ -1211,6 +1211,23 @@
     <string name="comment_report_spoiler">Mengandung spoiler</string>
     <string name="comment_report_inappropriate_content">Konten tidak pantas</string>
     <string name="comment_report_inappropriate_user">Nama pengguna atau avatar tidak pantas</string>
+    <string name="comment_report_reason_spoiler">Spoiler tanpa peringatan</string>
+    <string name="comment_report_reason_abuse">Pelecehan atau ujaran kebencian</string>
+    <string name="comment_report_reason_spam">Spam atau iklan yang tidak diinginkan</string>
+    <string name="comment_report_reason_sexual">Konten eksplisit seksual</string>
+    <string name="comment_report_reason_illegal">Konten ilegal</string>
+    <string name="comment_report_reason_other">Lainnya</string>
+    <string name="comment_report_reason_mine_hide">Sembunyikan komentar arsip lama saya</string>
+    <string name="comment_report_duplicate">Anda sudah melaporkan komentar ini.</string>
+    <string name="comment_report_success">Laporan terkirim. Terima kasih atas masukan Anda!</string>
+    <string name="comment_report_error">Tidak dapat mengirim laporan. Silakan coba lagi nanti.</string>
+    <string name="comment_block_user_title">Blokir pengguna</string>
+    <string name="comment_block_user_subtitle">Apakah Anda yakin ingin memblokir @%1$s? Komentar dan balasannya tidak akan terlihat lagi oleh Anda di seluruh aplikasi.</string>
+    <string name="comment_block_user_confirm">Blokir</string>
+    <string name="comment_block_user_action">Blokir %1$s</string>
+    <string name="comment_block_user_success">Pengguna @%1$s diblokir</string>
+    <string name="comment_unblock_user_btn">Buka blokir</string>
+    <string name="comment_unblock_user_success">Pengguna telah dibuka blokirnya</string>
     <string name="comment_delete_title">Hapus</string>
     <string name="comment_delete_subtitle">Apakah Anda benar-benar ingin menghapus komentar ini?</string>
     <string name="comment_cancel_btn">Batal</string>
@@ -1359,4 +1376,7 @@
     <string name="flow_filter_media_movies">Film</string>
     <string name="flow_filter_media_tv">Serial TV</string>
     <string name="flow_filter_reset">Atur Ulang</string>
+    <string name="filter_source">SUMBER</string>
+    <string name="filter_source_all">Semua (CommsUni)</string>
+    <string name="filter_source_flicktrove">Hanya FlickTrove</string>
 </resources>

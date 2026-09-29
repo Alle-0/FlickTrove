@@ -9,6 +9,7 @@ import coil.imageLoader
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.parseSimpleMarkdown
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
+import com.cinetrack.ui.components.shared.shimmerEffect
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -53,6 +54,7 @@ import com.cinetrack.ui.viewmodel.CommentsViewModel
 import com.cinetrack.ui.components.detail.DetailTranslationPromptModal
 import com.cinetrack.ui.components.comments.CommentInputBar
 import com.cinetrack.ui.components.comments.CommentReportModal
+import com.cinetrack.ui.components.comments.CommentBlockModal
 import com.cinetrack.ui.components.comments.CommentDeleteModal
 import com.cinetrack.ui.components.comments.CommentCardItem
 import com.cinetrack.ui.components.comments.LiquidStarIcon
@@ -89,12 +91,14 @@ import com.cinetrack.data.model.CommentSortOption
 import com.cinetrack.data.model.CommentSortOrder
 
 
-class CommentsScreen(
-    private val mediaId: String,
-    private val mediaType: String,
-    private val accentColorValue: Long,
+class CommsUniCommentsScreen(
+    private val tvdbId: Int? = null,
+    private val mediaId: String = "",
+    private val mediaType: String = "movie",
+    private val accentColorValue: Long = 0L,
     private val mediaTitle: String = "",
     private val mediaImage: String? = null,
+    private val releaseYear: String? = null,
     private val focusInputOnLaunch: Boolean = false,
     private val targetCommentId: String? = null
 ) : Screen {
@@ -105,7 +109,7 @@ class CommentsScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel = getViewModel<CommentsViewModel>()
+        val viewModel = getViewModel<com.cinetrack.ui.viewmodel.CommsUniViewModel>()
         
         val localCtx = androidx.compose.ui.platform.LocalContext.current
         var currentContext = localCtx
@@ -119,8 +123,13 @@ class CommentsScreen(
             getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         
-        LaunchedEffect(mediaId, mediaType) {
-            viewModel.init(mediaId, mediaType)
+        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear) {
+            viewModel.init(
+                tvdbId = tvdbId,
+                entityType = mediaType,
+                title = mediaTitle,
+                year = releaseYear
+            )
         }
 
         val comments by viewModel.comments.collectAsStateWithLifecycle()
@@ -129,8 +138,9 @@ class CommentsScreen(
         val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
         val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
         val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
-        val isUserBanned by viewModel.isUserBanned.collectAsStateWithLifecycle()
-        val banExpiration by viewModel.banExpiration.collectAsStateWithLifecycle()
+        // Temporary shadow properties
+        val isUserBanned = false 
+        val banExpiration: String? = null
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -140,13 +150,15 @@ class CommentsScreen(
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
         var commentToDelete by remember { mutableStateOf<AppComment?>(null) }
+        var userToBlock by remember { mutableStateOf<AppComment?>(null) }
         var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
+        var sourceFilter by remember { mutableStateOf<String?>(null) }
         var showSortMenu by remember { mutableStateOf(false) }
         var sortButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
-        LaunchedEffect(sortOption, sortOrder) {
-            viewModel.setSort(sortOption, sortOrder)
+        LaunchedEffect(sortOption, sortOrder, sourceFilter) {
+            viewModel.setSort(sortOption, sortOrder, sourceFilter)
         }
         val localFocusManager = LocalFocusManager.current
         val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
@@ -331,6 +343,9 @@ class CommentsScreen(
                                 onReport = {
                                     commentToReport = comment
                                 },
+                                onBlockUser = {
+                                    userToBlock = comment
+                                },
                                 onTranslate = { text ->
                                     viewModel.translateComment(comment.id, text)
                                 },
@@ -428,12 +443,14 @@ class CommentsScreen(
                 triggerBounds = sortButtonBounds,
                 sortConfig = com.cinetrack.data.model.SortConfig(
                     sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",
-                    sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc"
+                    sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc",
+                    selectedSource = sourceFilter
                 ),
                 hazeState = hazeState,
                 onSortConfigChanged = { newConfig ->
                     sortOption = if (newConfig.sortType == "date") CommentSortOption.DATE else CommentSortOption.LIKES
                     sortOrder = if (newConfig.sortDirection == "desc") CommentSortOrder.DESC else CommentSortOrder.ASC
+                    sourceFilter = newConfig.selectedSource
                 },
                 onDismissRequest = { showSortMenu = false }
             )
@@ -458,6 +475,24 @@ class CommentsScreen(
                         viewModel.reportComment(c.id, category, c.text, c.userId, c.userDisplayName)
                     }
                     commentToReport = null
+                },
+                onBlockUser = {
+                    val target = commentToReport
+                    commentToReport = null
+                    userToBlock = target
+                },
+                hazeState = hazeState
+            )
+
+            // Block User Dialog Overlay
+            CommentBlockModal(
+                comment = userToBlock,
+                onDismiss = { userToBlock = null },
+                onConfirm = {
+                    userToBlock?.let { c ->
+                        viewModel.blockAuthor(c.userId, c.userDisplayName)
+                    }
+                    userToBlock = null
                 },
                 hazeState = hazeState
             )
@@ -488,15 +523,15 @@ class CommentsScreen(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .shimmerEffect()
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.3f).background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(4.dp)))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.3f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
                 Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.8f).background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(4.dp)))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.8f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
                 Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.5f).background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(4.dp)))
+                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.5f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
             }
         }
     }
@@ -508,7 +543,7 @@ class CommentsScreen(
         sortOrder: CommentSortOrder
     ): List<AppComment> {
         val tree = mutableListOf<AppComment>()
-        val map = comments.groupBy { it.parentId }
+        val map = comments.groupBy { it.parentId?.takeIf { p -> p.isNotBlank() } }
 
         fun addChildren(parentId: String?) {
             val children = map[parentId]?.let { list ->

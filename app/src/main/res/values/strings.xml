@@ -1215,6 +1215,23 @@
     <string name="comment_report_spoiler">Contains spoilers</string>
     <string name="comment_report_inappropriate_content">Inappropriate content</string>
     <string name="comment_report_inappropriate_user">Inappropriate username or avatar</string>
+    <string name="comment_report_reason_spoiler">Unmarked spoiler</string>
+    <string name="comment_report_reason_abuse">Harassment or hate speech</string>
+    <string name="comment_report_reason_spam">Spam or unwanted advertising</string>
+    <string name="comment_report_reason_sexual">Sexually explicit content</string>
+    <string name="comment_report_reason_illegal">Illegal content</string>
+    <string name="comment_report_reason_other">Other</string>
+    <string name="comment_report_reason_mine_hide">Hide my old archived comment</string>
+    <string name="comment_report_duplicate">You have already reported this comment.</string>
+    <string name="comment_report_success">Report submitted. Thank you for your feedback!</string>
+    <string name="comment_report_error">Unable to send report. Please try again later.</string>
+    <string name="comment_block_user_title">Block user</string>
+    <string name="comment_block_user_subtitle">Are you sure you want to block %1$s? Their comments and replies will no longer be visible anywhere in the app.</string>
+    <string name="comment_block_user_confirm">Block</string>
+    <string name="comment_block_user_action">Block %1$s</string>
+    <string name="comment_block_user_success">User %1$s blocked</string>
+    <string name="comment_unblock_user_btn">Unblock</string>
+    <string name="comment_unblock_user_success">User unblocked</string>
     <string name="comment_delete_title">Delete</string>
     <string name="comment_delete_subtitle">Do you really want to delete this comment?</string>
     <string name="comment_cancel_btn">Cancel</string>
@@ -1360,4 +1377,7 @@
     <string name="flow_filter_media_movies">Movies</string>
     <string name="flow_filter_media_tv">TV Shows</string>
     <string name="flow_filter_reset">Reset</string>
+    <string name="filter_source">SOURCE</string>
+    <string name="filter_source_all">All (CommsUni)</string>
+    <string name="filter_source_flicktrove">Only FlickTrove</string>
 </resources>

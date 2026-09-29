@@ -1211,6 +1211,23 @@
     <string name="comment_report_spoiler">包含未经标注的剧透</string>
     <string name="comment_report_inappropriate_content">不当/违规内容</string>
     <string name="comment_report_inappropriate_user">不当的用户名或头像</string>
+    <string name="comment_report_reason_spoiler">未标注剧透</string>
+    <string name="comment_report_reason_abuse">骚扰或仇恨言论</string>
+    <string name="comment_report_reason_spam">垃圾广告或营销</string>
+    <string name="comment_report_reason_sexual">含有色情/露骨内容</string>
+    <string name="comment_report_reason_illegal">违法违规内容</string>
+    <string name="comment_report_reason_other">其他</string>
+    <string name="comment_report_reason_mine_hide">隐藏我已归档的历史评论</string>
+    <string name="comment_report_duplicate">您已举报过此评论。</string>
+    <string name="comment_report_success">举报已提交，感谢您的反馈！</string>
+    <string name="comment_report_error">无法提交举报，请稍后重试。</string>
+    <string name="comment_block_user_title">屏蔽用户</string>
+    <string name="comment_block_user_subtitle">确定要屏蔽 @%1$s 吗？在整个应用中您将不再看到该用户的评论与回复。</string>
+    <string name="comment_block_user_confirm">屏蔽</string>
+    <string name="comment_block_user_action">屏蔽 %1$s</string>
+    <string name="comment_block_user_success">已屏蔽用户 @%1$s</string>
+    <string name="comment_unblock_user_btn">取消屏蔽</string>
+    <string name="comment_unblock_user_success">已取消屏蔽该用户</string>
     <string name="comment_delete_title">删除</string>
     <string name="comment_delete_subtitle">确定要删除这条评论吗？</string>
     <string name="comment_cancel_btn">取消</string>
@@ -1360,4 +1377,7 @@
     <string name="flow_filter_media_movies">电影</string>
     <string name="flow_filter_media_tv">剧集</string>
     <string name="flow_filter_reset">重置</string>
+    <string name="filter_source">来源</string>
+    <string name="filter_source_all">全部 (CommsUni)</string>
+    <string name="filter_source_flicktrove">仅 FlickTrove</string>
 </resources>

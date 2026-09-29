@@ -1128,6 +1128,23 @@
     <string name="comment_report_spoiler">Contient des spoilers</string>
     <string name="comment_report_inappropriate_content">Contenu inapproprié</string>
     <string name="comment_report_inappropriate_user">Nom d\'utilisateur ou avatar inapproprié</string>
+    <string name="comment_report_reason_spoiler">Spoiler non signalé</string>
+    <string name="comment_report_reason_abuse">Harcèlement ou propos haineux</string>
+    <string name="comment_report_reason_spam">Spam ou publicité indésirable</string>
+    <string name="comment_report_reason_sexual">Contenu sexuellement explicite</string>
+    <string name="comment_report_reason_illegal">Contenu illégal</string>
+    <string name="comment_report_reason_other">Autre motif</string>
+    <string name="comment_report_reason_mine_hide">Masquer mon ancien commentaire archivé</string>
+    <string name="comment_report_duplicate">Vous avez déjà signalé ce commentaire.</string>
+    <string name="comment_report_success">Signalement envoyé. Merci pour votre retour !</string>
+    <string name="comment_report_error">Impossible d\'envoyer le signalement. Veuillez réessayer plus tard.</string>
+    <string name="comment_block_user_title">Bloquer l\'utilisateur</string>
+    <string name="comment_block_user_subtitle">Voulez-vous bloquer @%1$s ? Ses commentaires et réponses ne seront plus visibles pour vous dans toute l\'application.</string>
+    <string name="comment_block_user_confirm">Bloquer</string>
+    <string name="comment_block_user_action">Bloquer %1$s</string>
+    <string name="comment_block_user_success">Utilisateur @%1$s bloqué</string>
+    <string name="comment_unblock_user_btn">Débloquer</string>
+    <string name="comment_unblock_user_success">Utilisateur débloqué</string>
     <string name="comment_delete_title">Supprimer</string>
     <string name="comment_delete_subtitle">Voulez-vous vraiment supprimer ce commentaire ?</string>
     <string name="comment_cancel_btn">Annuler</string>
@@ -1291,5 +1308,8 @@
     <string name="flow_filter_media_movies">Films</string>
     <string name="flow_filter_media_tv">Séries TV</string>
     <string name="flow_filter_reset">Réinitialiser</string>
+    <string name="filter_source">SOURCE</string>
+    <string name="filter_source_all">Tous (CommsUni)</string>
+    <string name="filter_source_flicktrove">Seulement FlickTrove</string>
 </resources>
 

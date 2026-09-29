@@ -1132,6 +1132,23 @@
     <string name="comment_report_spoiler">Contém spoilers</string>
     <string name="comment_report_inappropriate_content">Conteúdo inadequado</string>
     <string name="comment_report_inappropriate_user">Nome de usuário ou avatar inadequado</string>
+    <string name="comment_report_reason_spoiler">Spoiler não sinalizado</string>
+    <string name="comment_report_reason_abuse">Assédio ou discurso de ódio</string>
+    <string name="comment_report_reason_spam">Spam ou publicidade indesejada</string>
+    <string name="comment_report_reason_sexual">Conteúdo sexualmente explícito</string>
+    <string name="comment_report_reason_illegal">Conteúdo ilegal</string>
+    <string name="comment_report_reason_other">Outro motivo</string>
+    <string name="comment_report_reason_mine_hide">Ocultar meu comentário antigo arquivado</string>
+    <string name="comment_report_duplicate">Você já denunciou este comentário.</string>
+    <string name="comment_report_success">Denúncia enviada. Obrigado pelo seu feedback!</string>
+    <string name="comment_report_error">Não foi possível enviar a denúncia. Tente novamente mais tarde.</string>
+    <string name="comment_block_user_title">Bloquear usuário</string>
+    <string name="comment_block_user_subtitle">Deseja bloquear @%1$s? Os comentários e respostas deste usuário não serão mais visíveis para você no app.</string>
+    <string name="comment_block_user_confirm">Bloquear</string>
+    <string name="comment_block_user_action">Bloquear %1$s</string>
+    <string name="comment_block_user_success">Usuário @%1$s bloqueado</string>
+    <string name="comment_unblock_user_btn">Desbloquear</string>
+    <string name="comment_unblock_user_success">Usuário desbloqueado</string>
     <string name="comment_delete_title">Excluir</string>
     <string name="comment_delete_subtitle">Você realmente deseja excluir este comentário?</string>
     <string name="comment_cancel_btn">Cancelar</string>
@@ -1290,6 +1307,9 @@
     <string name="flow_filter_media_movies">Filmes</string>
     <string name="flow_filter_media_tv">Séries de TV</string>
     <string name="flow_filter_reset">Redefinir</string>
+    <string name="filter_source">ORIGEM</string>
+    <string name="filter_source_all">Todos (CommsUni)</string>
+    <string name="filter_source_flicktrove">Apenas FlickTrove</string>
 </resources>
 
 

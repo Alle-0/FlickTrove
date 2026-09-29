@@ -55,7 +55,12 @@ fun LiquidStarIcon(isLiked: Boolean, accentColor: Color, modifier: Modifier = Mo
                 waveAnim.snapTo(0f)
             }
         } else {
-            fillAnim.snapTo(0f)
+            launch {
+                fillAnim.animateTo(
+                    targetValue = 0f,
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 200, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                )
+            }
             splashAnim.snapTo(0f)
             waveAnim.snapTo(0f)
         }

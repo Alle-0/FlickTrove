@@ -1211,6 +1211,23 @@
     <string name="comment_report_spoiler">ネタバレを含んでいる</string>
     <string name="comment_report_inappropriate_content">不適切なコンテンツ</string>
     <string name="comment_report_inappropriate_user">不適切なユーザー名またはアバター</string>
+    <string name="comment_report_reason_spoiler">ネタバレ警告なし</string>
+    <string name="comment_report_reason_abuse">嫌がらせやヘイトスピーチ</string>
+    <string name="comment_report_reason_spam">スパムや宣伝</string>
+    <string name="comment_report_reason_sexual">露骨な性的コンテンツ</string>
+    <string name="comment_report_reason_illegal">違法なコンテンツ</string>
+    <string name="comment_report_reason_other">その他</string>
+    <string name="comment_report_reason_mine_hide">過去のアーカイブコメントを非表示にする</string>
+    <string name="comment_report_duplicate">このコメントはすでに通報済みです。</string>
+    <string name="comment_report_success">通報を送信しました。ご協力ありがとうございます！</string>
+    <string name="comment_report_error">通報を送信できませんでした。後でもう一度お試しください。</string>
+    <string name="comment_block_user_title">ユーザーをブロック</string>
+    <string name="comment_block_user_subtitle">@%1$s をブロックしますか？このユーザーのコメントや返信はアプリ全体で非表示になります。</string>
+    <string name="comment_block_user_confirm">ブロック</string>
+    <string name="comment_block_user_action">%1$s をブロック</string>
+    <string name="comment_block_user_success">@%1$s をブロックしました</string>
+    <string name="comment_unblock_user_btn">ブロック解除</string>
+    <string name="comment_unblock_user_success">ユーザーのブロックを解除しました</string>
     <string name="comment_delete_title">削除</string>
     <string name="comment_delete_subtitle">本当にこのコメントを削除しますか？</string>
     <string name="comment_cancel_btn">キャンセル</string>
@@ -1360,4 +1377,7 @@
     <string name="flow_filter_media_movies">映画</string>
     <string name="flow_filter_media_tv">ドラマ・アニメ</string>
     <string name="flow_filter_reset">リセット</string>
+    <string name="filter_source">ソース</string>
+    <string name="filter_source_all">すべて (CommsUni)</string>
+    <string name="filter_source_flicktrove">FlickTroveのみ</string>
 </resources>

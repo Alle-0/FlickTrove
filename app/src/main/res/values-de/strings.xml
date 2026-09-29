@@ -1128,6 +1128,23 @@
     <string name="comment_report_spoiler">Enthält Spoiler</string>
     <string name="comment_report_inappropriate_content">Unangemessener Inhalt</string>
     <string name="comment_report_inappropriate_user">Unangemessener Benutzername oder Avatar</string>
+    <string name="comment_report_reason_spoiler">Nicht markierter Spoiler</string>
+    <string name="comment_report_reason_abuse">Belästigung oder Hassrede</string>
+    <string name="comment_report_reason_spam">Spam oder unerwünschte Werbung</string>
+    <string name="comment_report_reason_sexual">Sexuell eindeutige Inhalte</string>
+    <string name="comment_report_reason_illegal">Illegaler Inhalt</string>
+    <string name="comment_report_reason_other">Anderer Grund</string>
+    <string name="comment_report_reason_mine_hide">Meinen alten archivierten Kommentar verbergen</string>
+    <string name="comment_report_duplicate">Du hast diesen Kommentar bereits gemeldet.</string>
+    <string name="comment_report_success">Meldung gesendet. Danke für dein Feedback!</string>
+    <string name="comment_report_error">Meldung konnte nicht gesendet werden. Bitte versuche es später erneut.</string>
+    <string name="comment_block_user_title">Benutzer blockieren</string>
+    <string name="comment_block_user_subtitle">Möchtest du @%1$s blockieren? Dessen Kommentare und Antworten werden für dich nirgendwo in der App mehr sichtbar sein.</string>
+    <string name="comment_block_user_confirm">Blockieren</string>
+    <string name="comment_block_user_action">%1$s blockieren</string>
+    <string name="comment_block_user_success">Benutzer @%1$s blockiert</string>
+    <string name="comment_unblock_user_btn">Entsperren</string>
+    <string name="comment_unblock_user_success">Benutzer entsperrt</string>
     <string name="comment_delete_title">Löschen</string>
     <string name="comment_delete_subtitle">Möchtest du diesen Kommentar wirklich löschen?</string>
     <string name="comment_cancel_btn">Abbrechen</string>
@@ -1292,5 +1309,8 @@
     <string name="flow_filter_media_movies">Filme</string>
     <string name="flow_filter_media_tv">Serien</string>
     <string name="flow_filter_reset">Zurücksetzen</string>
+    <string name="filter_source">QUELLE</string>
+    <string name="filter_source_all">Alle (CommsUni)</string>
+    <string name="filter_source_flicktrove">Nur FlickTrove</string>
 </resources>
 

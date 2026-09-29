@@ -334,14 +334,17 @@ fun MovieDetailScreenContent(
             val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
             val globalAccentColor = settingsViewModel.accentColor.value.toComposeColor()
             
-            // Push CommentsScreen
+            val tvdbId = state.details.externalIds?.tvdbId
+            val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
             navigator.push(
-                CommentsScreen(
+                com.cinetrack.ui.screens.CommsUniCommentsScreen(
+                    tvdbId = tvdbId,
                     mediaId = viewModel.movieId.toString(),
                     mediaType = viewModel.mediaType,
                     accentColorValue = globalAccentColor.value.toLong(),
                     mediaTitle = mediaTitle,
                     mediaImage = image,
+                    releaseYear = releaseYear,
                     targetCommentId = targetCommentId,
                     focusInputOnLaunch = false
                 )
@@ -611,13 +614,17 @@ fun MovieDetailScreenContent(
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
                                                 val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+                                                val tvdbId = state.details.externalIds?.tvdbId
+                                                val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
                                                 navigator.push(
-                                                    CommentsScreen(
-                                                        mediaId = viewModel.movieId.toString(), 
-                                                        mediaType = viewModel.mediaType, 
-                                                        accentColorValue = globalAccentColor.value.toLong(), 
-                                                        mediaTitle = mediaTitle, 
+                                                    com.cinetrack.ui.screens.CommsUniCommentsScreen(
+                                                        tvdbId = tvdbId,
+                                                        mediaId = viewModel.movieId.toString(),
+                                                        mediaType = viewModel.mediaType,
+                                                        accentColorValue = globalAccentColor.value.toLong(),
+                                                        mediaTitle = mediaTitle,
                                                         mediaImage = image,
+                                                        releaseYear = releaseYear,
                                                         focusInputOnLaunch = focusInput
                                                     )
                                                 )

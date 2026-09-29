@@ -18,12 +18,22 @@ data class AppComment(
     val likedBy: List<String> = ArrayList(),
     val parentId: String? = null,
     val parentUserId: String? = null,
+    val rootCommentId: String? = null,
     val repliesCount: Int = 0,
     val depth: Int = 0,
     val isDeleted: Boolean = false,
     @get:PropertyName("isSpoiler")
     @set:PropertyName("isSpoiler")
-    var isSpoiler: Boolean = false
+    var isSpoiler: Boolean = false,
+    
+    // --- Campi per CommsUni ---
+    val originSlug: String = "",
+    val originName: String = "",
+    val originColor: String? = null,
+    val originIcon: String? = null,
+    val archivedLikes: Int = 0,
+    val nativeLikes: Int = 0,
+    val attachedMedia: List<String> = emptyList()
 )
 
 enum class CommentSortOption { DATE, LIKES }

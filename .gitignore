@@ -94,5 +94,5 @@ tools/scripts/
 GEMINI.md
 AGENTS.md
 app/src/test/
-
-
+*.txt
+partner*.md

@@ -67,6 +67,25 @@ class TvdbRepository @Inject constructor(
         }
     }
 
+    suspend fun resolveTvdbId(title: String, year: String? = null, type: String = "movie"): Int? {
+        if (title.isBlank()) return null
+        return try {
+            val searchType = if (type.lowercase() in listOf("tv", "series", "show")) "series" else "movie"
+            val searchResponse = if (!year.isNullOrBlank()) {
+                tvdbApi.search(query = title, year = year, type = searchType)
+            } else {
+                tvdbApi.search(query = title, type = searchType)
+            }
+            val firstResult = searchResponse.data.firstOrNull()
+                ?: if (!year.isNullOrBlank()) tvdbApi.search(query = title, type = searchType).data.firstOrNull() else null
+            val idStr = firstResult?.tvdb_id ?: firstResult?.id?.substringAfter("-")
+            idStr?.toIntOrNull()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
     /**
      * Fetches series seasons and episodes from TVDB and maps them to internal TMDB-like models.
      * Supports Absolute Order for Anime and Aired Order for standard series.

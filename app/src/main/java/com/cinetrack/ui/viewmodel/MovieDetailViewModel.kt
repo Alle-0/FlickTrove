@@ -62,6 +62,7 @@ class MovieDetailViewModel @Inject constructor(
     private val translationManager: TranslationManager,
     private val detailUiStateMapper: DetailUiStateMapper,
     private val tvdbRepository: TvdbRepository,
+    private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
@@ -88,13 +89,47 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
+    private var lastTvdbId: Int? = null
+    private var lastTitle: String? = null
+    private var lastYear: String? = null
+
+    private suspend fun fetchPreviewComments(
+        tvdbId: Int?,
+        title: String?,
+        year: String?
+    ): List<com.cinetrack.data.model.AppComment> {
+        return try {
+            val resolvedTvdbId = if (tvdbId != null && tvdbId > 0) {
+                tvdbId
+            } else if (!title.isNullOrBlank()) {
+                tvdbRepository.resolveTvdbId(title, year, if (mediaType == "tv") "series" else "movie")
+            } else null
+
+            if (resolvedTvdbId != null && resolvedTvdbId > 0) {
+                lastTvdbId = resolvedTvdbId
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                commsUniRepository.getTopCommentsPreview(
+                    tvdbId = resolvedTvdbId,
+                    entityType = if (mediaType == "tv") "show" else "movie",
+                    limit = 5,
+                    currentUserId = uid
+                )
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            emptyList()
+        }
+    }
+
     private fun onNetworkRestored() {
         viewModelScope.launch {
             if (_error.value != null) {
                 _error.value = null
             }
             fetchFromTMDB(movieId, mediaType == "tv")
-            val comments = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
+            val comments = fetchPreviewComments(lastTvdbId, lastTitle, lastYear)
             if (comments.isNotEmpty() || _appComments.value.isEmpty()) {
                 _appComments.value = comments
             }
@@ -127,12 +162,6 @@ class MovieDetailViewModel @Inject constructor(
                 repository.getGlobalMovieStatsFlow(movieId, mediaType).collect { stats ->
                     _globalStats.value = stats
                 }
-            }
-            
-            // Fetch comments
-            viewModelScope.launch {
-                val comments = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
-                _appComments.value = comments
             }
 
             // Fetch watch history
@@ -339,7 +368,10 @@ class MovieDetailViewModel @Inject constructor(
                     val certPair = com.cinetrack.data.mapper.MovieMapper.extractCertificationWithCountry(response, if (isTv) "tv" else "movie", userCountry)
                     _externalRatings.update { it.copy(certification = certPair?.second, certificationCountry = certPair?.first) }
                     val imdbId = response.externalIds?.imdbId
-                    fetchExternalRatings(imdbId, id)
+                    val tvdbId = response.externalIds?.tvdbId
+                    val title = response.title ?: response.name
+                    val year = (response.releaseDate ?: response.firstAirDate)?.take(4)
+                    fetchExternalRatings(imdbId, id, tvdbId, title, year)
 
                     // Update local DB if movie already exists (to sync missing release dates etc.)
                     val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
@@ -447,13 +479,22 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun fetchExternalRatings(imdbId: String?, tmdbId: Long) {
+    private fun fetchExternalRatings(
+        imdbId: String?,
+        tmdbId: Long,
+        tvdbId: Int? = null,
+        title: String? = null,
+        year: String? = null
+    ) {
+        lastTvdbId = tvdbId
+        lastTitle = title
+        lastYear = year
         viewModelScope.launch {
             kotlinx.coroutines.supervisorScope {
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { commentRepository.getTopCommentsForMediaPreview(tmdbId.toString()) }
+                val commentsDeferred = async { fetchPreviewComments(tvdbId, title, year) }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
@@ -511,7 +552,6 @@ class MovieDetailViewModel @Inject constructor(
         // Ottimistico
         val currentComments = _appComments.value.toMutableList()
         val index = currentComments.indexOfFirst { it.id == commentId }
-        val commentSnippet = if (index != -1) currentComments[index].text else null
         if (index != -1) {
             val comment = currentComments[index]
             val isLiked = comment.likedBy.contains(uId)
@@ -521,22 +561,17 @@ class MovieDetailViewModel @Inject constructor(
             
             currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
             _appComments.value = currentComments
-        }
 
-        // Chiamata di rete in background
-        viewModelScope.launch {
-            val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
-            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
-            val success = commentRepository.toggleLike(
-                movieId.toString(),
-                commentId,
-                mediaType,
-                mediaTitle,
-                mediaImage,
-                commentSnippet = commentSnippet
-            )
-            if (!success) {
-                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
+            // Chiamata di rete in background verso CommsUni
+            viewModelScope.launch {
+                val result = if (isLiked) {
+                    commsUniRepository.unlikeComment(commentId)
+                } else {
+                    commsUniRepository.likeComment(commentId)
+                }
+                if (result.isFailure) {
+                    refreshComments()
+                }
             }
         }
     }
@@ -1102,20 +1137,12 @@ class MovieDetailViewModel @Inject constructor(
 
     fun refreshComments() {
         viewModelScope.launch {
-            _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
+            _appComments.value = fetchPreviewComments(lastTvdbId, lastTitle, lastYear)
         }
     }
 
     fun toggleLikeComment(commentId: String) {
-        viewModelScope.launch {
-            val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
-            val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
-            val success = commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
-            if (success) {
-                // Refresh comments
-                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
-            }
-        }
+        toggleCommentLike(commentId)
     }
 
     fun reportComment(commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String) {

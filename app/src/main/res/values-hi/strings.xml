@@ -1130,6 +1130,23 @@
     <string name="comment_report_spoiler">स्पॉइलर शामिल हैं</string>
     <string name="comment_report_inappropriate_content">अनुचित सामग्री</string>
     <string name="comment_report_inappropriate_user">अनुचित उपयोगकर्ता नाम या अवतार</string>
+    <string name="comment_report_reason_spoiler">अचिह्नित स्पॉइलर</string>
+    <string name="comment_report_reason_abuse">उत्पीड़न या नफ़रत फैलाने वाली भाषा</string>
+    <string name="comment_report_reason_spam">स्पैम या अनचाहा विज्ञापन</string>
+    <string name="comment_report_reason_sexual">यौन रूप से स्पष्ट सामग्री</string>
+    <string name="comment_report_reason_illegal">अवैध सामग्री</string>
+    <string name="comment_report_reason_other">अन्य</string>
+    <string name="comment_report_reason_mine_hide">मेरी पुरानी संग्रहीत टिप्पणी छिपाएं</string>
+    <string name="comment_report_duplicate">आपने पहले ही इस टिप्पणी की रिपोर्ट कर दी है।</string>
+    <string name="comment_report_success">रिपोर्ट भेजी गई। आपकी प्रतिक्रिया के लिए धन्यवाद!</string>
+    <string name="comment_report_error">रिपोर्ट भेजने में असमर्थ। कृपया बाद में पुनः प्रयास करें।</string>
+    <string name="comment_block_user_title">उपयोगकर्ता को ब्लॉक करें</string>
+    <string name="comment_block_user_subtitle">क्या आप @%1$s को ब्लॉक करना चाहते हैं? इनकी टिप्पणियां और जवाब ऐप में आपको नहीं दिखेंगे।</string>
+    <string name="comment_block_user_confirm">ब्लॉक करें</string>
+    <string name="comment_block_user_action">%1$s को ब्लॉक करें</string>
+    <string name="comment_block_user_success">उपयोगकर्ता @%1$s को ब्लॉक कर दिया गया</string>
+    <string name="comment_unblock_user_btn">अनब्लॉक करें</string>
+    <string name="comment_unblock_user_success">उपयोगकर्ता को अनब्लॉक कर दिया गया</string>
     <string name="comment_delete_title">हटाएँ</string>
     <string name="comment_delete_subtitle">क्या आप वाकई इस टिप्पणी को हटाना चाहते हैं?</string>
     <string name="comment_cancel_btn">रद्द करें</string>
@@ -1288,6 +1305,9 @@
     <string name="flow_filter_media_movies">फ़िल्में</string>
     <string name="flow_filter_media_tv">टीवी शो</string>
     <string name="flow_filter_reset">रीसेट</string>
+    <string name="filter_source">स्रोत</string>
+    <string name="filter_source_all">सभी (CommsUni)</string>
+    <string name="filter_source_flicktrove">केवल FlickTrove</string>
 </resources>
 
 

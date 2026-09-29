@@ -6,7 +6,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -47,6 +50,8 @@ import com.cinetrack.ui.viewmodel.CommentsViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+private val MEDIA_REGEX = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
 
 @Composable
 fun CommentCardItem(
@@ -67,40 +72,25 @@ fun CommentCardItem(
     onReply: () -> Unit,
     onToggleLike: () -> Unit,
     onReport: () -> Unit,
+    onBlockUser: (() -> Unit)? = null,
     onTranslate: (text: String) -> Unit,
-    onTriggerGuestAuth: () -> Unit
+    onTriggerGuestAuth: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val visualDepth = comment.depth.coerceAtMost(3)
     val baseStartPadding = 16.dp
     val indentSpacing = 20.dp
 
-    val parentExpanded = remember(comment.parentId, flatTree) {
-        if (comment.parentId == null) true
-        else flatTree.any { it.id == comment.parentId }
-    }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                val startX = (baseStartPadding + 18.dp).toPx() // center of first avatar
+                val spacingPx = indentSpacing.toPx()
+                val avatarCenterY = (12.dp + 18.dp).toPx() // top padding + half avatar
 
-    var hasAppeared by remember { mutableStateOf(false) }
-    var isAppearing by remember(parentExpanded) { mutableStateOf(hasAppeared) }
-    LaunchedEffect(parentExpanded) {
-        if (!hasAppeared) {
-            isAppearing = true
-            hasAppeared = true
-        }
-    }
-
-    AnimatedVisibility(
-        visible = isAppearing,
-        enter = expandVertically() + fadeIn()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    val startX = (baseStartPadding + 18.dp).toPx() // center of first avatar
-                    val spacingPx = indentSpacing.toPx()
-                    val avatarCenterY = (12.dp + 18.dp).toPx() // top padding + half avatar
-
+                if (visualDepth > 0) {
                     for (i in 0 until visualDepth) {
                         val xPos = startX + (i * spacingPx)
                         val isLastVisualLevel = (i == visualDepth - 1)
@@ -164,19 +154,20 @@ fun CommentCardItem(
                             }
                         }
                     }
-
-                    // Draw line down from our own avatar if we have children
-                    val hasChildren = index < flatTree.lastIndex && flatTree[index + 1].depth > comment.depth
-                    if (hasChildren) {
-                        val myX = startX + (visualDepth * spacingPx)
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.15f),
-                            start = Offset(myX, avatarCenterY),
-                            end = Offset(myX, size.height),
-                            strokeWidth = 3f
-                        )
-                    }
                 }
+
+                // Draw line down from our own avatar if we have children
+                val hasChildren = index < flatTree.lastIndex && flatTree[index + 1].depth > comment.depth
+                if (hasChildren) {
+                    val myX = startX + (visualDepth * spacingPx)
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.15f),
+                        start = Offset(myX, avatarCenterY),
+                        end = Offset(myX, size.height),
+                        strokeWidth = 3f
+                    )
+                }
+            }
                 .padding(
                     start = baseStartPadding + (indentSpacing * visualDepth),
                     end = 16.dp,
@@ -185,18 +176,65 @@ fun CommentCardItem(
                 )
         ) {
             // Avatar
+            val avatarBgColor = remember(comment.userDisplayName, comment.originSlug) {
+                if (comment.userDisplayName.isNotBlank()) {
+                    val hue = (comment.userDisplayName.fold(0) { acc, c -> acc * 31 + c.code }.and(0x7FFFFFFF) % 360).toFloat()
+                    Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.45f, 0.35f)))
+                } else {
+                    Color(0xFF2A2A2A)
+                }
+            }
+            var isImageError by remember(comment.userAvatarUrl) { mutableStateOf(false) }
+
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(Color.DarkGray)
+                    .clip(CircleShape)
+                    .background(avatarBgColor),
+                contentAlignment = Alignment.Center
             ) {
-                if (comment.userAvatarUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = comment.userAvatarUrl,
+                val initial = comment.userDisplayName.trim().firstOrNull()?.uppercaseChar()
+                if (initial != null && initial.isLetterOrDigit()) {
+                    Text(
+                        text = initial.toString(),
+                        color = Color.White.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_persona),
                         contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.6f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                val safeAvatarUrl = comment.userAvatarUrl.trim()
+                if (safeAvatarUrl.isNotBlank() && !isImageError) {
+                    val modelData: Any = if (safeAvatarUrl.startsWith("data:image", ignoreCase = true) && safeAvatarUrl.contains("base64,")) {
+                        try {
+                            val base64Data = safeAvatarUrl.substringAfter("base64,")
+                            android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                        } catch (e: Exception) {
+                            safeAvatarUrl
+                        }
+                    } else {
+                        safeAvatarUrl
+                    }
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(modelData)
+                            .crossfade(true)
+                            .build(),
+                        imageLoader = imageLoader,
+                        contentDescription = comment.userDisplayName,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        onError = { errorResult ->
+                            android.util.Log.e("CommentAvatar", "Failed loading avatar for ${comment.userDisplayName} ($safeAvatarUrl): ${errorResult.result.throwable.message}")
+                            isImageError = true
+                        }
                     )
                 }
             }
@@ -217,6 +255,61 @@ fun CommentCardItem(
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = Color.White
                     )
+                    if (comment.originSlug.isNotBlank()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        val parsedColor = comment.originColor?.let {
+                            try {
+                                Color(android.graphics.Color.parseColor(it))
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                        // If no API color, derive a deterministic vivid hue from the slug
+                        val originColor = parsedColor ?: run {
+                            val hue = (comment.originSlug.fold(0) { acc, c -> acc * 31 + c.code }
+                                .and(0x7FFFFFFF) % 360).toFloat()
+                            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.65f, 0.9f)))
+                        }
+
+                        val originIconUrl = comment.originIcon?.takeIf { it.isNotBlank() }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(originColor.copy(alpha = 0.18f), CircleShape)
+                                .border(1.dp, originColor.copy(alpha = 0.4f), CircleShape)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            if (!originIconUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = originIconUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .clip(RoundedCornerShape(3.5.dp))
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_world),
+                                    contentDescription = null,
+                                    tint = originColor,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = comment.originName.ifBlank {
+                                    comment.originSlug.replaceFirstChar { char ->
+                                        if (char.isLowerCase()) char.titlecase(Locale.ROOT) else char.toString()
+                                    }
+                                },
+                                color = originColor,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 9.sp),
+                                maxLines = 1
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     if (comment.userId == currentUserId && !isEffectivelyDeleted && comment.createdAt != null) {
                         val timeSinceCreated = System.currentTimeMillis() - comment.createdAt.toDate().time
@@ -257,25 +350,39 @@ fun CommentCardItem(
                     else -> comment.text
                 }
 
-                val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-                val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
-                val mediaUrls = mediaRegex.findAll(comment.text).map { it.groupValues[1] }.toList()
+                val textWithoutMedia = remember(displayedTextRaw) {
+                    val clean = displayedTextRaw.replace(MEDIA_REGEX, "").trim()
+                    if (clean == "[image]" || clean == "[gif]") "" else clean
+                }
+
+                val mediaUrls = remember(comment.text, comment.attachedMedia) {
+                    val inlineMediaUrls = MEDIA_REGEX.findAll(comment.text).map { it.groupValues[1] }.toList()
+                    (inlineMediaUrls + comment.attachedMedia).distinct()
+                }
+
+                val parentDisplayName = remember(comment.depth, comment.parentId, flatTree) {
+                    if (comment.depth >= 3 && comment.parentId != null) {
+                        flatTree.find { it.id == comment.parentId }?.userDisplayName
+                    } else null
+                }
+
+                val annotatedCommentText = remember(mediaUrls, textWithoutMedia, displayedTextRaw, accentColor, parentDisplayName) {
+                    buildAnnotatedString {
+                        if (parentDisplayName != null) {
+                            withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
+                                append("@$parentDisplayName ")
+                            }
+                        }
+                        val targetText = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
+                        append(parseSimpleMarkdown(targetText, accentColor))
+                    }
+                }
 
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column {
                         if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
                             Text(
-                                text = buildAnnotatedString {
-                                    if (comment.depth >= 3 && comment.parentId != null) {
-                                        val parentComment = flatTree.find { it.id == comment.parentId }
-                                        if (parentComment != null) {
-                                            withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
-                                                append("@${parentComment.userDisplayName} ")
-                                            }
-                                        }
-                                    }
-                                    append(parseSimpleMarkdown(if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw, accentColor))
-                                },
+                                text = annotatedCommentText,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.8f),
                                 maxLines = if (isTextExpanded) Int.MAX_VALUE else 6,
@@ -286,7 +393,6 @@ fun CommentCardItem(
                                     }
                                 },
                                 modifier = Modifier
-                                    .animateContentSize()
                                     .then(
                                         if (isBlurred) Modifier.clip(RoundedCornerShape(8.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                     )
@@ -425,14 +531,30 @@ fun CommentCardItem(
                             },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            if (comment.archivedLikes > 0) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_star),
+                                    contentDescription = null,
+                                    tint = Color(0xFFFFD700).copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(
+                                    text = "${comment.archivedLikes}",
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
                             LiquidStarIcon(
                                 isLiked = isLiked,
                                 accentColor = accentColor,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
+                            val displayLikes = if (comment.archivedLikes > 0) comment.nativeLikes else comment.likesCount
                             Text(
-                                text = "${comment.likesCount}",
+                                text = "$displayLikes",
                                 color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
                                 style = MaterialTheme.typography.labelMedium
                             )
@@ -442,7 +564,7 @@ fun CommentCardItem(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_flag),
                                 contentDescription = stringResource(R.string.comment_report_title),
-                                tint = Color.Red,
+                                tint = Color.White.copy(alpha = 0.5f),
                                 modifier = Modifier
                                     .size(14.dp)
                                     .bounceClick {
@@ -534,5 +656,4 @@ fun CommentCardItem(
                 }
             }
         }
-    }
 }

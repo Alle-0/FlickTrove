@@ -112,11 +112,13 @@ class TranslationManager @Inject constructor() {
         requireWifi: Boolean = false
     ): Boolean {
         return try {
-            val conditions = DownloadConditions.Builder()
-                .apply { if (requireWifi) requireWifi() }
-                .build()
-            getOrCreateTranslator(sourceLang, targetLang).downloadModelIfNeeded(conditions).await()
-            true
+            kotlinx.coroutines.withTimeoutOrNull(45_000L) {
+                val conditions = DownloadConditions.Builder()
+                    .apply { if (requireWifi) requireWifi() }
+                    .build()
+                getOrCreateTranslator(sourceLang, targetLang).downloadModelIfNeeded(conditions).await()
+                true
+            } ?: false
         } catch (e: Exception) {
             false
         }

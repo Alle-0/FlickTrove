@@ -98,7 +98,7 @@ fun HomeFilterModal(
     val bottomSafetyPx = with(density) { 56.dp.toPx() }
     val maxAllowedHeight = screenHeight - topSafetyPx - bottomSafetyPx
     
-    var expandedSection by remember { mutableStateOf<String?>(if (isCommentsFilter) "sort" else null) }
+    var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
     var showAllGenres by remember { mutableStateOf(false) }
     
     val targetHeightPx by animateFloatAsState(
@@ -140,6 +140,7 @@ fun HomeFilterModal(
     LaunchedEffect(isVisible) {
         if (isVisible) {
             localSortConfig = sortConfig
+            expandedSection = null
         }
     }
 
@@ -186,6 +187,7 @@ fun HomeFilterModal(
                         // Measure based on which section is expanded
                         val expandedHeight = when(expandedSection) {
                             "sort" -> with(density) { (if (isCommentsFilter) 48 * 2 + 100 else 48 * 6 + 100).dp.toPx() } // Approx sort items
+                            "source" -> with(density) { (48 * 2 + 30).dp.toPx() }
                             "genres" -> with(density) { 250.dp.toPx() }
                             "platforms" -> with(density) { 100.dp.toPx() }
                             "period" -> with(density) { 120.dp.toPx() }
@@ -195,7 +197,7 @@ fun HomeFilterModal(
                         
                         Spacer(modifier = Modifier.height(
                             with(density) { 
-                                val sectionCount = if (isCommentsFilter) 1 else 4
+                                val sectionCount = if (isCommentsFilter) 2 else 4
                                 (54 * sectionCount).dp + // Section headers
                                 expandedHeight.pxToDp(density) +
                                 100.dp // Apply button space
@@ -336,7 +338,8 @@ fun HomeFilterModal(
                                     localSortConfig.selectedKeywords.isNotEmpty() ||
                                     localSortConfig.selectedProviders.isNotEmpty() ||
                                     localSortConfig.selectedDecades.isNotEmpty() ||
-                                    localSortConfig.selectedStatuses.isNotEmpty()
+                                    localSortConfig.selectedStatuses.isNotEmpty() ||
+                                    localSortConfig.selectedSource != null
                                 if (hasActiveFilters) {
                                     Row(
                                         modifier = Modifier
@@ -346,7 +349,8 @@ fun HomeFilterModal(
                                                     selectedKeywords = emptyList(),
                                                     selectedProviders = emptyList(),
                                                     selectedDecades = emptyList(),
-                                                    selectedStatuses = emptyList()
+                                                    selectedStatuses = emptyList(),
+                                                    selectedSource = null
                                                 )
                                             }
                                             .clip(RoundedCornerShape(24.dp))
@@ -396,9 +400,9 @@ fun HomeFilterModal(
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_sort_by),
                                     isExpanded = expandedSection == "sort",
-                                    showChevron = !isCommentsFilter,
-                                    isClickable = !isCommentsFilter,
-                                    onToggle = { if (!isCommentsFilter) expandedSection = if (expandedSection == "sort") null else "sort" }
+                                    showChevron = true,
+                                    isClickable = true,
+                                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -479,6 +483,34 @@ fun HomeFilterModal(
                                                 onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
                                             )
                                         }
+                                    }
+                                }
+                            }
+
+                            // --- SOURCE SECTION (Only for comments) ---
+                            if (isCommentsFilter) {
+                                ExpandableSection(
+                                    title = stringResource(R.string.filter_source),
+                                    isExpanded = expandedSection == "source",
+                                    showChevron = true,
+                                    isClickable = true,
+                                    badgeCount = if (localSortConfig.selectedSource != null) 1 else 0,
+                                    onToggle = { expandedSection = if (expandedSection == "source") null else "source" }
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        SortOptionItem(
+                                            label = stringResource(R.string.filter_source_all),
+                                            isSelected = localSortConfig.selectedSource == null,
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedSource = null) }
+                                        )
+                                        SortOptionItem(
+                                            label = stringResource(R.string.filter_source_flicktrove),
+                                            isSelected = localSortConfig.selectedSource == "flicktrove",
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedSource = "flicktrove") }
+                                        )
                                     }
                                 }
                             }

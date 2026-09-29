@@ -1163,6 +1163,23 @@
     <string name="comment_report_spoiler">Contiene spoiler</string>
     <string name="comment_report_inappropriate_content">Contenuti inappropriati</string>
     <string name="comment_report_inappropriate_user">Nome utente o avatar inappropriato</string>
+    <string name="comment_report_reason_spoiler">Spoiler non contrassegnato</string>
+    <string name="comment_report_reason_abuse">Molestie o insulti</string>
+    <string name="comment_report_reason_spam">Spam o pubblicità</string>
+    <string name="comment_report_reason_sexual">Contenuto sessualmente esplicito</string>
+    <string name="comment_report_reason_illegal">Contenuto illegale</string>
+    <string name="comment_report_reason_other">Altro</string>
+    <string name="comment_report_reason_mine_hide">Nascondi il mio vecchio commento</string>
+    <string name="comment_report_duplicate">Hai già segnalato questo commento.</string>
+    <string name="comment_report_success">Segnalazione inviata. Grazie per il tuo feedback!</string>
+    <string name="comment_report_error">Impossibile inviare la segnalazione. Riprova più tardi.</string>
+    <string name="comment_block_user_title">Blocca utente</string>
+    <string name="comment_block_user_subtitle">Vuoi bloccare @%1$s? I suoi commenti e risposte non saranno più visibili per te in tutta l\'app.</string>
+    <string name="comment_block_user_confirm">Blocca</string>
+    <string name="comment_block_user_action">Blocca %1$s</string>
+    <string name="comment_block_user_success">Utente @%1$s bloccato</string>
+    <string name="comment_unblock_user_btn">Sblocca</string>
+    <string name="comment_unblock_user_success">Utente sbloccato</string>
     <string name="comment_delete_title">Elimina</string>
     <string name="comment_delete_subtitle">Vuoi davvero eliminare il commento?</string>
     <string name="comment_cancel_btn">Annulla</string>
@@ -1318,4 +1335,7 @@
     <string name="flow_filter_media_movies">Film</string>
     <string name="flow_filter_media_tv">Serie TV</string>
     <string name="flow_filter_reset">Reimposta</string>
+    <string name="filter_source">PROVENIENZA</string>
+    <string name="filter_source_all">Tutti (CommsUni)</string>
+    <string name="filter_source_flicktrove">Solo FlickTrove</string>
 </resources>

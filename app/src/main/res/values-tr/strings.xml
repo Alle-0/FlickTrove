@@ -1211,6 +1211,23 @@
     <string name="comment_report_spoiler">Spoiler içeriyor</string>
     <string name="comment_report_inappropriate_content">Uygunsuz içerik</string>
     <string name="comment_report_inappropriate_user">Uygunsuz kullanıcı adı veya avatar</string>
+    <string name="comment_report_reason_spoiler">İşaretlenmemiş spoiler</string>
+    <string name="comment_report_reason_abuse">Taciz veya nefret söylemi</string>
+    <string name="comment_report_reason_spam">Spam veya istenmeyen reklam</string>
+    <string name="comment_report_reason_sexual">Cinsel içerik</string>
+    <string name="comment_report_reason_illegal">Yasa dışı içerik</string>
+    <string name="comment_report_reason_other">Diğer</string>
+    <string name="comment_report_reason_mine_hide">Eski arşivlenmiş yorumumu gizle</string>
+    <string name="comment_report_duplicate">Bu yorumu zaten bildirdiniz.</string>
+    <string name="comment_report_success">Bildirim gönderildi. Geri bildiriminiz için teşekkürler!</string>
+    <string name="comment_report_error">Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.</string>
+    <string name="comment_block_user_title">Kullanıcıyı engelle</string>
+    <string name="comment_block_user_subtitle">@%1$s adlı kullanıcıyı engellemek istiyor musunuz? Bu kullanıcının yorumları ve yanıtları uygulamada artık sizin için görünmeyecek.</string>
+    <string name="comment_block_user_confirm">Engelle</string>
+    <string name="comment_block_user_action">%1$s adlı kullanıcıyı engelle</string>
+    <string name="comment_block_user_success">@%1$s engellendi</string>
+    <string name="comment_unblock_user_btn">Engeli kaldır</string>
+    <string name="comment_unblock_user_success">Kullanıcının engeli kaldırıldı</string>
     <string name="comment_delete_title">Sil</string>
     <string name="comment_delete_subtitle">Bu yorumu gerçekten silmek istiyor musunuz?</string>
     <string name="comment_cancel_btn">İptal</string>
@@ -1360,4 +1377,7 @@
     <string name="flow_filter_media_movies">Filmler</string>
     <string name="flow_filter_media_tv">Diziler</string>
     <string name="flow_filter_reset">Sıfırla</string>
+    <string name="filter_source">KAYNAK</string>
+    <string name="filter_source_all">Tümü (CommsUni)</string>
+    <string name="filter_source_flicktrove">Yalnızca FlickTrove</string>
 </resources>

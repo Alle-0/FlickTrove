@@ -317,4 +317,41 @@ object NetworkModule {
             .build()
             .create(com.cinetrack.data.api.SupabaseStorageApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideCommsUniInterceptor(): com.cinetrack.data.api.CommsUniInterceptor {
+        return com.cinetrack.data.api.CommsUniInterceptor()
+    }
+
+    @Provides
+    @Singleton
+    @Named("commsuni_okhttp")
+    fun provideCommsUniOkHttpClient(
+        okHttpClient: OkHttpClient,
+        commsUniInterceptor: com.cinetrack.data.api.CommsUniInterceptor
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptor(commsUniInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("commsuni_retrofit")
+    fun provideCommsUniRetrofit(
+        json: Json,
+        @Named("commsuni_okhttp") okHttpClient: OkHttpClient
+    ): Retrofit {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.commsuni.tv/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCommsUniService(@Named("commsuni_retrofit") retrofit: Retrofit): com.cinetrack.data.api.CommsUniService = retrofit.create(com.cinetrack.data.api.CommsUniService::class.java)
 }
