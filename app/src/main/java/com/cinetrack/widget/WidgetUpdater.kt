@@ -55,6 +55,16 @@ object WidgetUpdater {
                         FlickTroveNowWatchingWidget().update(context, glanceId)
                     } catch (e: Exception) {}
                 }
+
+                // Aggiorna FlickTroveMoviesWatchlistWidget
+                val widget5Component = android.content.ComponentName(context, FlickTroveMoviesWatchlistWidgetReceiver::class.java)
+                val widget5Ids = appWidgetManager.getAppWidgetIds(widget5Component)
+                widget5Ids.forEach { id ->
+                    try {
+                        val glanceId = manager.getGlanceIdBy(id)
+                        FlickTroveMoviesWatchlistWidget().update(context, glanceId)
+                    } catch (e: Exception) {}
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

@@ -618,6 +618,9 @@
     <string name="widget_now_watching_title">VIENDO AHORA</string>
     <string name="widget_now_watching_empty">¡Al día! No hay episodios pendientes.</string>
     <string name="widget_available_since">Desde: %1$s</string>
+    <string name="widget_movies_watchlist_name">Películas por ver</string>
+    <string name="widget_movies_watchlist_title">PELÍCULAS POR VER</string>
+    <string name="widget_movies_watchlist_empty">No hay películas por ver</string>
     <string name="comments_screen_title">Discusión</string>
     <string name="comments_screen_title_with_media">Discusión: %1$s</string>
     <string name="comment_translate">Traducir</string>

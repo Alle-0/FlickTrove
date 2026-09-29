@@ -650,6 +650,9 @@
     <string name="widget_now_watching_title">IN VISIONE</string>
     <string name="widget_now_watching_empty">Tutto in pari! Nessun episodio in attesa.</string>
     <string name="widget_available_since">Dal: %1$s</string>
+    <string name="widget_movies_watchlist_name">Film da vedere</string>
+    <string name="widget_movies_watchlist_title">FILM DA VEDERE</string>
+    <string name="widget_movies_watchlist_empty">Nessun film da vedere</string>
     <string name="comments_screen_title">Discussione</string>
     <string name="comments_screen_title_with_media">Discussione: %1$s</string>
     <string name="comment_translate">Traduci</string>

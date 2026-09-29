@@ -618,6 +618,9 @@
     <string name="widget_now_watching_title">SCHAUE GERADE</string>
     <string name="widget_now_watching_empty">Alles aufgeholt! Keine wartenden Episoden.</string>
     <string name="widget_available_since">Seit: %1$s</string>
+    <string name="widget_movies_watchlist_name">Filme auf der Merkliste</string>
+    <string name="widget_movies_watchlist_title">FILME AUF DER MERKLISTE</string>
+    <string name="widget_movies_watchlist_empty">Keine Filme auf der Merkliste</string>
     <string name="comments_screen_title">Diskussion</string>
     <string name="comments_screen_title_with_media">Diskussion: %1$s</string>
     <string name="comment_translate">Übersetzen</string>

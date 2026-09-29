@@ -696,6 +696,9 @@
     <string name="widget_now_watching_title">SEDANG DITONTON</string>
     <string name="widget_now_watching_empty">Sudah menonton semua! Tidak ada episode menunggu.</string>
     <string name="widget_available_since">Sejak: %1$s</string>
+    <string name="widget_movies_watchlist_name">Film untuk Ditonton</string>
+    <string name="widget_movies_watchlist_title">FILM UNTUK DITONTON</string>
+    <string name="widget_movies_watchlist_empty">Tidak ada film untuk ditonton</string>
     <string name="comments_screen_title">Diskusi</string>
     <string name="comments_screen_title_with_media">Diskusi: %1$s</string>
     <string name="comment_translate">Terjemahkan</string>

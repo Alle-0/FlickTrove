@@ -696,6 +696,9 @@
     <string name="widget_now_watching_title">ŞU ANDA İZLENENLER</string>
     <string name="widget_now_watching_empty">Hepsini izlediniz! Bekleyen bölüm yok.</string>
     <string name="widget_available_since">Çıkış: %1$s</string>
+    <string name="widget_movies_watchlist_name">İzlenecek Filmler</string>
+    <string name="widget_movies_watchlist_title">İZLENECEK FİLMLER</string>
+    <string name="widget_movies_watchlist_empty">İzlenecek film yok</string>
     <string name="comments_screen_title">Tartışma</string>
     <string name="comments_screen_title_with_media">Tartışma: %1$s</string>
     <string name="comment_translate">Çevir</string>

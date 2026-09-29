@@ -696,6 +696,9 @@
     <string name="widget_now_watching_title">正在追剧</string>
     <string name="widget_now_watching_empty">全部追平！暂无待看剧集。</string>
     <string name="widget_available_since">上线时间：%1$s</string>
+    <string name="widget_movies_watchlist_name">待看电影</string>
+    <string name="widget_movies_watchlist_title">待看电影</string>
+    <string name="widget_movies_watchlist_empty">暂无待看电影</string>
     <string name="comments_screen_title">讨论区</string>
     <string name="comments_screen_title_with_media">讨论区：%1$s</string>
     <string name="comment_translate">翻译</string>

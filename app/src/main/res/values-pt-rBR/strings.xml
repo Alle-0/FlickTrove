@@ -625,6 +625,9 @@
     <string name="widget_now_watching_title">ASSISTINDO AGORA</string>
     <string name="widget_now_watching_empty">Tudo em dia! Nenhum episódio aguardando.</string>
     <string name="widget_available_since">Desde: %1$s</string>
+    <string name="widget_movies_watchlist_name">Filmes para Ver</string>
+    <string name="widget_movies_watchlist_title">FILMES PARA VER</string>
+    <string name="widget_movies_watchlist_empty">Nenhum filme para ver</string>
     <string name="comments_screen_title">Discussão</string>
     <string name="comments_screen_title_with_media">Discussão: %1$s</string>
     <string name="comment_translate">Traduzir</string>

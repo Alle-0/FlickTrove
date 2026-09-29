@@ -625,6 +625,9 @@
     <string name="widget_now_watching_title">СМОТРЮ СЕЙЧАС</string>
     <string name="widget_now_watching_empty">Всё просмотрено! Нет ожидающих эпизодов.</string>
     <string name="widget_available_since">С: %1$s</string>
+    <string name="widget_movies_watchlist_name">Фильмы к просмотру</string>
+    <string name="widget_movies_watchlist_title">ФИЛЬМЫ К ПРОСМОТРУ</string>
+    <string name="widget_movies_watchlist_empty">Нет фильмов к просмотру</string>
     <string name="comments_screen_title">Обсуждение</string>
     <string name="comments_screen_title_with_media">Обсуждение: %1$s</string>
     <string name="comment_translate">Перевести</string>

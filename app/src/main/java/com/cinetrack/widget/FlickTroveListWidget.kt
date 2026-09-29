@@ -260,27 +260,77 @@ class FlickTroveListWidget : GlanceAppWidget() {
                                             fontWeight = FontWeight.Bold
                                         )
                                     )
-                                    Spacer(modifier = GlanceModifier.height(6.dp))
-                                    val dateStr = movie.releaseDate ?: movie.firstAirDate
-                                    var formattedDate = dateStr ?: ""
-                                    if (!dateStr.isNullOrEmpty() && dateStr.length >= 10) {
-                                        try {
-                                            val dateObj = java.time.LocalDate.parse(dateStr.take(10))
-                                            val locale = context.resources.configuration.locales[0]
-                                            val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
-                                            formattedDate = dateObj.format(formatter)
-                                        } catch (e: Exception) {}
-                                    }
-                                    
-                                    if (formattedDate.isNotEmpty()) {
-                                        Text(
-                                            text = formattedDate.uppercase(),
-                                            style = TextStyle(
-                                                color = androidx.glance.color.ColorProvider(day = Color(0xFF666666), night = Color(0xFFAAAAAA)),
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Medium
-                                            )
-                                        )
+                                    val dateInfo = getMovieDateInfo(movie.releaseDate ?: movie.firstAirDate, context)
+                                    if (dateInfo != null) {
+                                        Spacer(modifier = GlanceModifier.height(5.dp))
+                                        Box(
+                                            modifier = GlanceModifier
+                                                .background(
+                                                    when {
+                                                        dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                            day = Color(0xFFFFEBEE),
+                                                            night = Color(0x38E50914)
+                                                        )
+                                                        dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                            day = Color(0xFFFFF3E0),
+                                                            night = Color(0x33FF9800)
+                                                        )
+                                                        else -> androidx.glance.color.ColorProvider(
+                                                            day = Color(0xFFEEEEF2),
+                                                            night = Color(0xFF25252B)
+                                                        )
+                                                    }
+                                                )
+                                                .cornerRadius(16.dp)
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Image(
+                                                    provider = ImageProvider(R.drawable.ic_calendario),
+                                                    contentDescription = null,
+                                                    modifier = GlanceModifier.size(10.dp),
+                                                    colorFilter = androidx.glance.ColorFilter.tint(
+                                                        when {
+                                                            dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFE50914),
+                                                                night = Color(0xFFFF4444)
+                                                            )
+                                                            dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFEF6C00),
+                                                                night = Color(0xFFFFB74D)
+                                                            )
+                                                            else -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFF666666),
+                                                                night = Color(0xFFB8B8C0)
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                                Spacer(modifier = GlanceModifier.width(4.dp))
+                                                Text(
+                                                    text = dateInfo.label,
+                                                    style = TextStyle(
+                                                        color = when {
+                                                            dateInfo.isToday -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFD32F2F),
+                                                                night = Color(0xFFFF5252)
+                                                            )
+                                                            dateInfo.isTomorrow -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFFE65100),
+                                                                night = Color(0xFFFFB74D)
+                                                            )
+                                                            else -> androidx.glance.color.ColorProvider(
+                                                                day = Color(0xFF222222),
+                                                                night = Color(0xFFEEEEEE)
+                                                            )
+                                                        },
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    ),
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -298,6 +348,54 @@ class FlickTroveListWidget : GlanceAppWidget() {
                 }
                 }
             }
+        }
+    }
+
+    private data class MovieDateInfo(
+        val label: String,
+        val isToday: Boolean,
+        val isTomorrow: Boolean
+    )
+
+    private fun getMovieDateInfo(dateStr: String?, context: Context): MovieDateInfo? {
+        if (dateStr.isNullOrEmpty() || dateStr.length < 10) return null
+        return try {
+            val targetDate = java.time.LocalDate.parse(dateStr.take(10))
+            val today = java.time.LocalDate.now()
+            val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(today, targetDate)
+            val locale = try {
+                context.resources.configuration.locales[0]
+            } catch (_: Exception) {
+                java.util.Locale.getDefault()
+            }
+
+            val isToday = daysBetween == 0L
+            val isTomorrow = daysBetween == 1L
+
+            val dayMonthPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM", locale)
+            val formattedDayMonth = targetDate.format(dayMonthPattern).uppercase()
+
+            val label = when {
+                isToday -> {
+                    val todayText = context.getString(R.string.widget_date_today).uppercase()
+                    "$todayText • $formattedDayMonth"
+                }
+                isTomorrow -> {
+                    val tomorrowText = context.getString(R.string.widget_date_tomorrow).uppercase()
+                    "$tomorrowText • $formattedDayMonth"
+                }
+                daysBetween in 2L..6L -> {
+                    val weekPattern = java.time.format.DateTimeFormatter.ofPattern("EEE • d MMM", locale)
+                    targetDate.format(weekPattern).uppercase()
+                }
+                else -> {
+                    val fullPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+                    targetDate.format(fullPattern).uppercase()
+                }
+            }
+            MovieDateInfo(label = label, isToday = isToday, isTomorrow = isTomorrow)
+        } catch (e: Exception) {
+            null
         }
     }
 }

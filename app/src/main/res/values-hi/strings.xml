@@ -623,6 +623,9 @@
     <string name="widget_now_watching_title">अभी देख रहे हैं</string>
     <string name="widget_now_watching_empty">सब देख लिया! कोई एपिसोड प्रतीक्षा में नहीं।</string>
     <string name="widget_available_since">से: %1$s</string>
+    <string name="widget_movies_watchlist_name">देखने के लिए फ़िल्में</string>
+    <string name="widget_movies_watchlist_title">देखने के लिए फ़िल्में</string>
+    <string name="widget_movies_watchlist_empty">देखने के लिए कोई फ़िल्म नहीं है</string>
     <string name="comments_screen_title">चर्चा</string>
     <string name="comments_screen_title_with_media">चर्चा: %1$s</string>
     <string name="comment_translate">अनुवाद करें</string>

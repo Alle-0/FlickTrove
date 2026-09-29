@@ -618,6 +618,9 @@
     <string name="widget_now_watching_title">EN COURS</string>
     <string name="widget_now_watching_empty">Tout vu ! Aucun épisode en attente.</string>
     <string name="widget_available_since">Depuis : %1$s</string>
+    <string name="widget_movies_watchlist_name">Films à voir</string>
+    <string name="widget_movies_watchlist_title">FILMS À VOIR</string>
+    <string name="widget_movies_watchlist_empty">Aucun film à voir</string>
     <string name="comments_screen_title">Discussion</string>
     <string name="comments_screen_title_with_media">Discussion : %1$s</string>
     <string name="comment_translate">Traduire</string>

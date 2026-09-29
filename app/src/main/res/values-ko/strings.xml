@@ -696,6 +696,9 @@
     <string name="widget_now_watching_title">시청 중</string>
     <string name="widget_now_watching_empty">모두 시청 완료했습니다! 대기 중인 에피소드가 없습니다.</string>
     <string name="widget_available_since">공개 시작: %1$s</string>
+    <string name="widget_movies_watchlist_name">볼 영화</string>
+    <string name="widget_movies_watchlist_title">볼 영화</string>
+    <string name="widget_movies_watchlist_empty">볼 영화가 없습니다</string>
     <string name="comments_screen_title">커뮤니티 토론</string>
     <string name="comments_screen_title_with_media">토론: %1$s</string>
     <string name="comment_translate">번역</string>

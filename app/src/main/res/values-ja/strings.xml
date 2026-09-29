@@ -696,6 +696,9 @@
     <string name="widget_now_watching_title">視聴中</string>
     <string name="widget_now_watching_empty">すべて視聴済みです！待機中のエピソードはありません。</string>
     <string name="widget_available_since">配信開始: %1$s</string>
+    <string name="widget_movies_watchlist_name">観たい映画</string>
+    <string name="widget_movies_watchlist_title">観たい映画</string>
+    <string name="widget_movies_watchlist_empty">観たい映画はありません</string>
     <string name="comments_screen_title">ディスカッション</string>
     <string name="comments_screen_title_with_media">ディスカッション: %1$s</string>
     <string name="comment_translate">翻訳</string>

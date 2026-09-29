@@ -697,6 +697,9 @@
     <string name="widget_now_watching_title">NOW WATCHING</string>
     <string name="widget_now_watching_empty">All caught up! No episodes waiting.</string>
     <string name="widget_available_since">Since: %1$s</string>
+    <string name="widget_movies_watchlist_name">Movies to Watch</string>
+    <string name="widget_movies_watchlist_title">MOVIES TO WATCH</string>
+    <string name="widget_movies_watchlist_empty">No movies in watchlist</string>
     <string name="comments_screen_title">Discussion</string>
     <string name="comments_screen_title_with_media">Discussion: %1$s</string>
     <string name="comment_translate">Translate</string>
