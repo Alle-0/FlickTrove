@@ -30,6 +30,7 @@ class CommsUniViewModel @Inject constructor(
     private val commsUniRepository: CommsUniRepository,
     private val preferenceRepository: PreferenceRepository,
     private val auth: FirebaseAuth,
+    private val firestore: com.google.firebase.firestore.FirebaseFirestore,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val translationManager: TranslationManager,
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
@@ -92,8 +93,24 @@ class CommsUniViewModel @Inject constructor(
         if (authorId.isNotBlank()) {
             val wasDifferent = _cachedAuthorId.value != authorId
             _cachedAuthorId.value = authorId
-            auth.currentUser?.uid?.let { uid ->
+            val uid = auth.currentUser?.uid
+            if (uid != null) {
                 prefs.edit().putString("author_id_$uid", authorId).apply()
+                viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    try {
+                        firestore.collection("commsuni_authors")
+                            .document(authorId)
+                            .set(
+                                mapOf(
+                                    "uid" to uid,
+                                    "updatedAt" to Timestamp.now()
+                                ),
+                                com.google.firebase.firestore.SetOptions.merge()
+                            )
+                    } catch (e: Exception) {
+                        android.util.Log.e("CommsUniViewModel", "Failed to map authorId to Firestore", e)
+                    }
+                }
             }
             if (_comments.value.isNotEmpty()) {
                 val targetId = currentUserId ?: authorId
@@ -112,6 +129,27 @@ class CommsUniViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private var currentRawMediaId: String = ""
+
+    private suspend fun resolveFirebaseUidForAuthor(authorIdOrUid: String): String? {
+        if (authorIdOrUid.isBlank()) return null
+        val currentUid = auth.currentUser?.uid
+        if (!authorIdOrUid.contains("-") && authorIdOrUid.length >= 20) {
+            return if (authorIdOrUid != currentUid) authorIdOrUid else null
+        }
+        return try {
+            val doc = firestore.collection("commsuni_authors")
+                .document(authorIdOrUid)
+                .get()
+                .await()
+            val mappedUid = doc.getString("uid")
+            if (mappedUid != null && mappedUid != currentUid) mappedUid else null
+        } catch (e: Exception) {
+            android.util.Log.e("CommsUniViewModel", "Failed to resolve authorId to uid", e)
+            null
         }
     }
 
@@ -166,8 +204,12 @@ class CommsUniViewModel @Inject constructor(
         seasonNumber: Int? = null,
         episodeNumber: Int? = null,
         title: String? = null,
-        year: String? = null
+        year: String? = null,
+        rawMediaId: String = ""
     ) {
+        if (rawMediaId.isNotBlank()) {
+            currentRawMediaId = rawMediaId
+        }
         val normalizedType = if (entityType.lowercase() in listOf("tv", "series", "show")) "show" else "movie"
         if (tvdbId != null && tvdbId > 0) {
             val entityId = commsUniRepository.buildEntityId(tvdbId, seasonNumber, episodeNumber)
@@ -490,6 +532,59 @@ class CommsUniViewModel @Inject constructor(
                 val tempIndex = updated.indexOfFirst { it.id == tempId }
                 if (tempIndex != -1) updated[tempIndex] = finalReal
                 _comments.value = updated
+
+                // Se è una risposta a un commento FlickTrover, invia la notifica Social e Push all'autore
+                if (parentId != null) {
+                    val parentComment = _comments.value.find { it.id == parentId }
+                    val targetAuthorId = parentUserId ?: parentComment?.userId
+                    val isParentFlickTrove = parentComment?.originSlug?.equals("flicktrove", ignoreCase = true) == true
+                        || (parentComment == null && targetAuthorId != null)
+
+                    if (isParentFlickTrove && !targetAuthorId.isNullOrBlank()) {
+                        val currentAuthUid = auth.currentUser?.uid
+                        if (currentAuthUid != null) {
+                            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                try {
+                                    val targetUid = resolveFirebaseUidForAuthor(targetAuthorId)
+                                    if (targetUid != null && targetUid != currentAuthUid) {
+                                        val notifRef = firestore.collection("user_social_notifications")
+                                            .document(targetUid)
+                                            .collection("items")
+                                            .document()
+                                        val socialNotif = hashMapOf(
+                                            "id" to notifRef.id,
+                                            "type" to "reply",
+                                            "mediaId" to currentRawMediaId,
+                                            "mediaType" to currentEntityType,
+                                            "mediaTitle" to mediaTitle,
+                                            "mediaImage" to mediaImage,
+                                            "commentId" to newComment.id,
+                                            "senderName" to (auth.currentUser?.displayName ?: "Qualcuno"),
+                                            "senderUserId" to currentAuthUid,
+                                            "snippet" to text.take(80),
+                                            "createdAt" to Timestamp.now(),
+                                            "isRead" to false
+                                        )
+                                        notifRef.set(socialNotif).await()
+
+                                        com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                                            targetUserId = targetUid,
+                                            titleLocKey = "notification_reply_title",
+                                            bodyLocKey = "notification_reply_body",
+                                            bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
+                                            mediaId = currentRawMediaId.toLongOrNull() ?: 0L,
+                                            mediaType = currentEntityType,
+                                            mediaImage = mediaImage,
+                                            commentId = newComment.id
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("CommsUniViewModel", "Failed to send reply social notification", e)
+                                }
+                            }
+                        }
+                    }
+                }
             }.onFailure { e ->
                 // Remove the optimistic item
                 _comments.value = _comments.value.filter { it.id != tempId }
@@ -602,7 +697,8 @@ class CommsUniViewModel @Inject constructor(
 
 
     fun toggleLikeComment(commentId: String, mediaTitle: String, mediaImage: String?) {
-        val uid = currentUserId ?: return
+        val currentAuthUid = auth.currentUser?.uid ?: return
+        val uid = currentUserId ?: currentAuthUid
         viewModelScope.launch {
             val currentList = _comments.value.toMutableList()
             val commentIndex = currentList.indexOfFirst { it.id == commentId }
@@ -643,6 +739,56 @@ class CommsUniViewModel @Inject constructor(
                     _comments.value = revertList
                 }
                 actionFeedbackManager.emit(UiText.DynamicString("Errore di rete con CommsUni."))
+                return@launch
+            }
+
+            // Se il commento appartiene a un FlickTrover, invia/rimuovi notifica Social e Push
+            if (comment.originSlug.equals("flicktrove", ignoreCase = true) && !comment.userId.isBlank()) {
+                launch(kotlinx.coroutines.Dispatchers.IO) {
+                    try {
+                        val targetUid = resolveFirebaseUidForAuthor(comment.userId)
+                        if (targetUid != null && targetUid != currentAuthUid) {
+                            val notifId = "${commentId}_${currentAuthUid}_like"
+                            val notifRef = firestore.collection("user_social_notifications")
+                                .document(targetUid)
+                                .collection("items")
+                                .document(notifId)
+
+                            if (!isLiked) {
+                                val notif = hashMapOf(
+                                    "id" to notifRef.id,
+                                    "type" to "like",
+                                    "mediaId" to currentRawMediaId,
+                                    "mediaType" to currentEntityType,
+                                    "mediaTitle" to mediaTitle,
+                                    "mediaImage" to mediaImage,
+                                    "commentId" to commentId,
+                                    "senderName" to (auth.currentUser?.displayName ?: "Qualcuno"),
+                                    "senderUserId" to currentAuthUid,
+                                    "snippet" to comment.text.take(80),
+                                    "createdAt" to Timestamp.now(),
+                                    "isRead" to false
+                                )
+                                notifRef.set(notif, com.google.firebase.firestore.SetOptions.merge()).await()
+
+                                com.cinetrack.util.SupabaseNotificationService.notifyUser(
+                                    targetUserId = targetUid,
+                                    titleLocKey = "notification_like_title",
+                                    bodyLocKey = "notification_like_body",
+                                    bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
+                                    mediaId = currentRawMediaId.toLongOrNull() ?: 0L,
+                                    mediaType = currentEntityType,
+                                    mediaImage = mediaImage,
+                                    commentId = commentId
+                                )
+                            } else {
+                                notifRef.delete().await()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("CommsUniViewModel", "Failed to update like social notification", e)
+                    }
+                }
             }
         }
     }

@@ -123,12 +123,13 @@ class CommsUniCommentsScreen(
             getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         
-        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear) {
+        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId) {
             viewModel.init(
                 tvdbId = tvdbId,
                 entityType = mediaType,
                 title = mediaTitle,
-                year = releaseYear
+                year = releaseYear,
+                rawMediaId = mediaId
             )
         }
 
