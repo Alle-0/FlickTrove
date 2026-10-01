@@ -328,6 +328,7 @@ fun AttributionRow(
         "TheTVDB" -> R.drawable.ic_tvdb_logo
         "GIPHY" -> R.drawable.ic_giphy_logo
         "SIMKL" -> R.drawable.ic_simkl_logo
+        "CommsUni", "CommsUni (commsuni.tv)" -> R.drawable.ic_commsuni_logo
         "Rotten Tomatoes" -> R.drawable.ic_rottentomatoes_logo
         "Metacritic" -> R.drawable.ic_metacritic_logo
         else -> null
@@ -359,6 +360,7 @@ fun AttributionRow(
                         "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
                         "GIPHY" -> Color.Black
                         "SIMKL" -> Color(0xFF1B1B1B)
+                        "CommsUni", "CommsUni (commsuni.tv)" -> Color(0xFF2B2D30)
                         "Rotten Tomatoes" -> Color(0xFFFA320A)
                         "Metacritic" -> Color(0xFFFFCC33)
                         else -> Color.White.copy(alpha = 0.05f)
