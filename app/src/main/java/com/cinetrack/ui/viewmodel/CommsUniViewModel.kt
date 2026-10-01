@@ -72,6 +72,19 @@ class CommsUniViewModel @Inject constructor(
         }
     }
 
+    fun isCommentMine(comment: com.cinetrack.data.model.AppComment): Boolean {
+        val currentAuthUid = auth.currentUser?.uid
+        val authorId = currentAuthorId
+        val actorId = currentActorId
+        val myCommentIds = getMyCommentIds()
+        
+        return (comment.id.isNotBlank() && comment.id in myCommentIds) ||
+               (currentAuthUid != null && comment.userId == currentAuthUid) ||
+               (authorId != null && comment.userId.equals(authorId, ignoreCase = true)) ||
+               (actorId != null && comment.userId.equals(actorId, ignoreCase = true)) ||
+               (currentUserId != null && comment.userId.equals(currentUserId, ignoreCase = true))
+    }
+
     private fun getMyCommentIds(): Set<String> {
         val uid = auth.currentUser?.uid ?: return emptySet()
         return prefs.getStringSet("my_comment_ids_$uid", emptySet()) ?: emptySet()
@@ -458,6 +471,9 @@ class CommsUniViewModel @Inject constructor(
                 val remainingFirestore = firestoreComments
                     .filterNot { it.id in matchedFirestoreIds }
                     .map { fc ->
+                        if (auth.currentUser?.uid != null && fc.userId == auth.currentUser?.uid) {
+                            trackMyCommentId(fc.id)
+                        }
                         if (fc.originSlug.isNullOrBlank()) {
                             fc.copy(
                                 originSlug = "flicktrove",
@@ -620,8 +636,8 @@ class CommsUniViewModel @Inject constructor(
                 }
             } else if (!postToCommsUni && currentRawMediaId.isNotBlank()) {
                 // Destinazione FlickTrove: salva solo su Firestore locale
-                val firestoreSuccess = try {
-                    commentRepository.addComment(
+                val generatedId = try {
+                    commentRepository.addCommentAndGetId(
                         mediaId = currentRawMediaId,
                         mediaType = currentEntityType,
                         text = text,
@@ -633,13 +649,14 @@ class CommsUniViewModel @Inject constructor(
                         mediaImage = optimisticAvatar
                     )
                 } catch (e: Exception) {
-                    false
+                    null
                 }
 
-                if (firestoreSuccess) {
+                if (generatedId != null) {
+                    trackMyCommentId(generatedId)
                     Result.success(
                         CommsUniComment(
-                            id = tempId,
+                            id = generatedId,
                             entityId = currentEntityId,
                             source = "flicktrove",
                             origin = CommsUniOrigin(kind = "native", slug = "flicktrove", displayName = "FlickTrove"),
@@ -743,14 +760,28 @@ class CommsUniViewModel @Inject constructor(
         // Optimistic update locally
         val currentList = _comments.value.toMutableList()
         val index = currentList.indexOfFirst { it.id == commentId }
+        val targetComment = currentList.getOrNull(index)
+        val isFlickTrove = targetComment?.originSlug?.equals("flicktrove", ignoreCase = true) == true || targetComment?.originSlug.isNullOrBlank()
+
         if (index != -1) {
             currentList[index] = currentList[index].copy(isSpoiler = targetStatus)
             _comments.value = currentList
         }
 
         viewModelScope.launch {
-            val result = commsUniRepository.updateCommentSpoiler(commentId, targetStatus)
-            if (result.isFailure) {
+            val success = if (isFlickTrove && currentRawMediaId.isNotBlank()) {
+                try {
+                    commentRepository.toggleSpoiler(currentRawMediaId, commentId, targetStatus)
+                } catch (_: Exception) {
+                    false
+                }
+            } else if (currentEntityId.isNotBlank() && !isFlickTrove) {
+                commsUniRepository.updateCommentSpoiler(commentId, targetStatus).isSuccess
+            } else {
+                true
+            }
+
+            if (!success) {
                 // Revert on failure
                 val revertList = _comments.value.toMutableList()
                 val revertIndex = revertList.indexOfFirst { it.id == commentId }

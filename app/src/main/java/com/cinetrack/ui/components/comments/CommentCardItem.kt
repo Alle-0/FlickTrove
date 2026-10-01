@@ -77,6 +77,7 @@ fun CommentCardItem(
     onTranslate: (text: String) -> Unit,
     onTriggerGuestAuth: () -> Unit,
     onOpenUrl: ((String) -> Unit)? = null,
+    isOwner: Boolean = (currentUserId != null && comment.userId == currentUserId),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -320,7 +321,7 @@ fun CommentCardItem(
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    if (comment.userId == currentUserId && !isEffectivelyDeleted && comment.createdAt != null) {
+                    if (isOwner && !isEffectivelyDeleted && comment.createdAt != null) {
                         val timeSinceCreated = System.currentTimeMillis() - comment.createdAt.toDate().time
                         if (timeSinceCreated <= 12 * 60 * 60 * 1000) {
                             Icon(
@@ -559,7 +560,7 @@ fun CommentCardItem(
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
-                        if (comment.userId != currentUserId) {
+                        if (!isOwner) {
                             Spacer(modifier = Modifier.width(16.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_flag),

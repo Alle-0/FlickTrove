@@ -109,8 +109,22 @@ class CommentRepository @Inject constructor(
         depth: Int = 0,
         mediaTitle: String = "",
         mediaImage: String? = null
-    ): Boolean {
-        val user = auth.currentUser ?: return false
+    ): Boolean = addCommentAndGetId(
+        mediaId, mediaType, text, isSpoiler, parentId, parentUserId, depth, mediaTitle, mediaImage
+    ) != null
+
+    suspend fun addCommentAndGetId(
+        mediaId: String,
+        mediaType: String,
+        text: String,
+        isSpoiler: Boolean = false,
+        parentId: String? = null,
+        parentUserId: String? = null,
+        depth: Int = 0,
+        mediaTitle: String = "",
+        mediaImage: String? = null
+    ): String? {
+        val user = auth.currentUser ?: return null
         
         // Check if user is banned
         try {
@@ -118,7 +132,7 @@ class CommentRepository @Inject constructor(
             val isBanned = userDoc.getBoolean("bannedFromCommenting") == true
             val bannedUntil = userDoc.getTimestamp("bannedUntil")?.toDate()
             if (isBanned || (bannedUntil != null && bannedUntil.after(java.util.Date()))) {
-                return false
+                return null
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -142,7 +156,8 @@ class CommentRepository @Inject constructor(
             val generatedCommentId = firestore.runTransaction { transaction ->
                 val mediaCommentsColl = getMediaCommentsCollection(mediaId)
                 val newDocRef = mediaCommentsColl.document()
-                transaction.set(newDocRef, newComment)
+                val commentWithId = newComment.copy(id = newDocRef.id)
+                transaction.set(newDocRef, commentWithId)
 
                 // If it's a reply, increment the parent's repliesCount
                 if (parentId != null) {
@@ -214,10 +229,30 @@ class CommentRepository @Inject constructor(
                 }
             }
 
+            generatedCommentId
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    suspend fun toggleSpoiler(
+        mediaId: String,
+        commentId: String,
+        isSpoiler: Boolean
+    ): Boolean {
+        val user = auth.currentUser ?: return false
+        return try {
+            val docRef = getMediaCommentsCollection(mediaId).document(commentId)
+            val snap = docRef.get().await()
+            val commentOwnerId = snap.getString("userId")
+            if (commentOwnerId != user.uid) return false
+
+            docRef.update("isSpoiler", isSpoiler).await()
             true
         } catch (e: Exception) {
             e.printStackTrace()
-            throw e
+            false
         }
     }
 

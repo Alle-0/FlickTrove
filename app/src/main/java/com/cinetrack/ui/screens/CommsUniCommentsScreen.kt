@@ -342,6 +342,7 @@ class CommsUniCommentsScreen(
                                 isLiked = isLiked,
                                 translationState = translationStates[comment.id],
                                 currentUserId = viewModel.currentUserId,
+                                isOwner = viewModel.isCommentMine(comment),
                                 isUserAnonymous = viewModel.isUserAnonymous,
                                 accentColor = accentColor,
                                 isExpanded = isExpanded,
