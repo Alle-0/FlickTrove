@@ -17,6 +17,11 @@ interface TvdbApi {
         @Query("type") type: String? = null // "movie" or "series"
     ): TvdbSearchResponse
 
+    @GET("v4/search/remoteid/{remoteId}")
+    suspend fun searchByRemoteId(
+        @Path("remoteId") remoteId: String
+    ): TvdbRemoteIdResponse
+
     @GET("v4/movies/{id}/extended")
     suspend fun getMovieExtended(@Path("id") id: String): TvdbExtendedResponse
 

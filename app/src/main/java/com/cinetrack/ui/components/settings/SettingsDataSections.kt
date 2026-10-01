@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
@@ -526,7 +527,9 @@ fun SettingsAccountSection(
     onShowLogoutConfirm: () -> Unit,
     onShowDeleteDialog: () -> Unit,
     onShowWipeSelectionDialog: () -> Unit,
-    onLinkGoogleClick: () -> Unit
+    onLinkGoogleClick: () -> Unit,
+    blockedUsersCount: Int = 0,
+    onShowBlockedUsersDialog: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val isGuest = user?.isAnonymous == true
@@ -568,6 +571,53 @@ fun SettingsAccountSection(
                 onClick = {
                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
                     onLinkGoogleClick()
+                }
+            )
+        }
+
+        if (!isGuest && onShowBlockedUsersDialog != null) {
+            SettingsItem(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_block),
+                title = stringResource(R.string.settings_blocked_users_title),
+                description = stringResource(R.string.settings_blocked_users_desc),
+                tint = Color.White,
+                trailing = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (blockedUsersCount > 0) {
+                            val countStr = "$blockedUsersCount"
+                            Box(
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .defaultMinSize(minWidth = 20.dp)
+                                    .clip(CircleShape)
+                                    .background(currentAccentColor.copy(alpha = 0.18f))
+                                    .border(1.dp, currentAccentColor.copy(alpha = 0.35f), CircleShape)
+                                    .padding(horizontal = if (countStr.length > 1) 5.dp else 0.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = countStr,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp,
+                                        lineHeight = 11.sp
+                                    ),
+                                    color = currentAccentColor
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.2f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                },
+                onClick = {
+                    if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                    onShowBlockedUsersDialog()
                 }
             )
         }
@@ -777,6 +827,10 @@ fun SettingsSupportSection(
                         AttributionRow(
                             brand = "SIMKL",
                             text = stringResource(R.string.settings_simkl_notice)
+                        )
+                        AttributionRow(
+                            brand = "CommsUni (commsuni.tv)",
+                            text = stringResource(R.string.settings_commsuni_notice)
                         )
                         AttributionRow(
                             brand = "Rotten Tomatoes",

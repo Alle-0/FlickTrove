@@ -1308,6 +1308,22 @@
     <string name="filter_source">स्रोत</string>
     <string name="filter_source_all">सभी (CommsUni)</string>
     <string name="filter_source_flicktrove">केवल FlickTrove</string>
+    <string name="settings_blocked_users_title">ब्लॉक किए गए उपयोगकर्ता</string>
+    <string name="settings_blocked_users_desc">ब्लॉक किए गए लोगों को देखें और प्रबंधित करें</string>
+    <string name="settings_blocked_users_subtitle">टिप्पणियों में आपके द्वारा ब्लॉक किए गए लोग</string>
+    <string name="settings_blocked_users_empty">कोई ब्लॉक किया गया उपयोगकर्ता नहीं</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">FlickTrove से बाहर जा रहे हैं</string>
+    <string name="external_link_warning_desc">आप टिप्पणियों में साझा की गई बाहरी वेबसाइट पर जा रहे हैं। FlickTrove तीसरे पक्ष की सामग्री, गोपनीयता या सुरक्षा के लिए ज़िम्मेदार नहीं है।</string>
+    <string name="external_link_warning_continue">वेबसाइट पर जाएं</string>
+    <string name="external_link_error_no_browser">लिंक खोलने में असमर्थ। कोई ब्राउज़र नहीं मिला।</string>
+    <string name="link_security_invalid_scheme">लिंक अवरुद्ध: असमर्थित या असुरक्षित URL योजना।</string>
+    <string name="link_security_ip_blocked">लिंक अवरुद्ध: सुरक्षा कारणों से सीधे IP पते की अनुमति नहीं है।</string>
+    <string name="link_security_deceptive">लिंक अवरुद्ध: भ्रामक URL का पता चला।</string>
+    <string name="link_security_punycode">लिंक अवरुद्ध: संदिग्ध डोमेन का पता चला।</string>
+    <string name="link_security_dangerous_file">लिंक अवरुद्ध: प्रत्यक्ष फ़ाइल डाउनलोड की अनुमति नहीं है।</string>
+    <string name="link_security_malformed">अमान्य या विकृत वेब लिंक।</string>
 </resources>
 
 

@@ -113,3 +113,23 @@ data class TvdbEpisodesResponse(
 data class TvdbEpisodesData(
     val episodes: List<TvdbEpisode> = emptyList()
 )
+
+@Serializable
+data class TvdbRemoteIdResponse(
+    val status: String? = null,
+    val data: List<TvdbRemoteIdResult> = emptyList()
+)
+
+@Serializable
+data class TvdbRemoteIdResult(
+    val movie: TvdbRemoteIdEntity? = null,
+    val series: TvdbRemoteIdEntity? = null
+)
+
+@Serializable
+data class TvdbRemoteIdEntity(
+    val id: Int? = null,
+    val name: String? = null,
+    val year: String? = null
+)
+

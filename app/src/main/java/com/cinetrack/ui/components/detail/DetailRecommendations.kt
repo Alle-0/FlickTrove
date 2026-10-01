@@ -107,7 +107,8 @@ fun DetailRecommendations(
                         modifier = Modifier
                             .matchParentSize()
                             .graphicsLayer {
-                                // 1. Scalatura di sicurezza sull'asse verticale per la traslazione del parallasse
+                                // 1. Scala uniforme per il parallasse (mantiene le proporzioni dell'immagine)
+                                scaleX = 1.25f
                                 scaleY = 1.25f
 
                                 // 2. Parallasse verticale 'a finestra' reattiva allo scroll della pagina:

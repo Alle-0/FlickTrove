@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.border
@@ -51,7 +52,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-private val MEDIA_REGEX = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+private val MEDIA_REGEX = Regex("!\\[.*?\\]\\((.*?)\\)")
 
 @Composable
 fun CommentCardItem(
@@ -75,6 +76,7 @@ fun CommentCardItem(
     onBlockUser: (() -> Unit)? = null,
     onTranslate: (text: String) -> Unit,
     onTriggerGuestAuth: () -> Unit,
+    onOpenUrl: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -243,7 +245,7 @@ fun CommentCardItem(
 
             // Body
             Column(modifier = Modifier.weight(1f)) {
-                val isEffectivelyDeleted = comment.isDeleted || comment.userId.isBlank() || (comment.text.isBlank() && comment.userDisplayName.isBlank())
+                val isEffectivelyDeleted = comment.isEffectivelyDeleted
 
                 // Author Header
                 Row(
@@ -281,7 +283,14 @@ fun CommentCardItem(
                                 .border(1.dp, originColor.copy(alpha = 0.4f), CircleShape)
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            if (!originIconUrl.isNullOrBlank()) {
+                            if (comment.originSlug.equals("flicktrove", ignoreCase = true)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_flicktrove_logo),
+                                    contentDescription = "FlickTrove",
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.size(width = 16.dp, height = 12.dp)
+                                )
+                            } else if (!originIconUrl.isNullOrBlank()) {
                                 AsyncImage(
                                     model = originIconUrl,
                                     contentDescription = null,
@@ -366,7 +375,7 @@ fun CommentCardItem(
                     } else null
                 }
 
-                val annotatedCommentText = remember(mediaUrls, textWithoutMedia, displayedTextRaw, accentColor, parentDisplayName) {
+                val annotatedCommentText = remember(mediaUrls, textWithoutMedia, displayedTextRaw, accentColor, parentDisplayName, onOpenUrl) {
                     buildAnnotatedString {
                         if (parentDisplayName != null) {
                             withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
@@ -374,7 +383,7 @@ fun CommentCardItem(
                             }
                         }
                         val targetText = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
-                        append(parseSimpleMarkdown(targetText, accentColor))
+                        append(parseSimpleMarkdown(targetText, accentColor, onLinkClick = onOpenUrl))
                     }
                 }
 
@@ -403,6 +412,13 @@ fun CommentCardItem(
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
                                         .data(mediaUrl)
+                                        .crossfade(true)
+                                        .apply {
+                                            if (mediaUrl.contains("commsuni.tv")) {
+                                                addHeader("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
+                                                addHeader("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                            }
+                                        }
                                         .build(),
                                     imageLoader = imageLoader,
                                     contentDescription = "Attachment",
@@ -531,30 +547,14 @@ fun CommentCardItem(
                             },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (comment.archivedLikes > 0) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_star),
-                                    contentDescription = null,
-                                    tint = Color(0xFFFFD700).copy(alpha = 0.7f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
-                                Text(
-                                    text = "${comment.archivedLikes}",
-                                    color = Color.White.copy(alpha = 0.6f),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                            }
                             LiquidStarIcon(
                                 isLiked = isLiked,
                                 accentColor = accentColor,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            val displayLikes = if (comment.archivedLikes > 0) comment.nativeLikes else comment.likesCount
                             Text(
-                                text = "$displayLikes",
+                                text = "${comment.likesCount}",
                                 color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
                                 style = MaterialTheme.typography.labelMedium
                             )

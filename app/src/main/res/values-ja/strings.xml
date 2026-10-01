@@ -1380,4 +1380,20 @@
     <string name="filter_source">ソース</string>
     <string name="filter_source_all">すべて (CommsUni)</string>
     <string name="filter_source_flicktrove">FlickTroveのみ</string>
+    <string name="settings_blocked_users_title">ブロックしたユーザー</string>
+    <string name="settings_blocked_users_desc">ブロックしたユーザーの確認と管理</string>
+    <string name="settings_blocked_users_subtitle">コメントでブロックしたユーザー</string>
+    <string name="settings_blocked_users_empty">ブロックしたユーザーはいません</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">FlickTroveから移動します</string>
+    <string name="external_link_warning_desc">コメントで共有された外部ウェブサイトを開こうとしています。FlickTroveは外部コンテンツ、プライバシー、セキュリティに関して一切の責任を負いません。</string>
+    <string name="external_link_warning_continue">サイトを開く</string>
+    <string name="external_link_error_no_browser">リンクを開けません。ブラウザが見つかりません。</string>
+    <string name="link_security_invalid_scheme">リンクがブロックされました：安全でないまたは非対応のURLスキームです。</string>
+    <string name="link_security_ip_blocked">リンクがブロックされました：セキュリティ上、直接IPアドレスは許可されていません。</string>
+    <string name="link_security_deceptive">リンクがブロックされました：悪質な偽装URLが検出されました。</string>
+    <string name="link_security_punycode">リンクがブロックされました：疑わしい類似ドメインが検出されました。</string>
+    <string name="link_security_dangerous_file">リンクがブロックされました：直接のファイルダウンロードは許可されていません。</string>
+    <string name="link_security_malformed">無効または不正な形式のウェブリンクです。</string>
 </resources>

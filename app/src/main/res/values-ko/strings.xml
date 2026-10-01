@@ -1380,4 +1380,20 @@
     <string name="filter_source">출처</string>
     <string name="filter_source_all">전체 (CommsUni)</string>
     <string name="filter_source_flicktrove">FlickTrove만</string>
+    <string name="settings_blocked_users_title">차단된 사용자</string>
+    <string name="settings_blocked_users_desc">차단된 사용자 확인 및 관리</string>
+    <string name="settings_blocked_users_subtitle">댓글에서 차단한 사용자 목록</string>
+    <string name="settings_blocked_users_empty">차단된 사용자가 없습니다</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">FlickTrove 외부로 이동</string>
+    <string name="external_link_warning_desc">댓글에 공유된 외부 웹사이트로 이동하려고 합니다. FlickTrove는 타사 콘텐츠, 개인정보 보호 및 보안에 대해 책임을 지지 않습니다.</string>
+    <string name="external_link_warning_continue">사이트 방문</string>
+    <string name="external_link_error_no_browser">링크를 열 수 없습니다. 브라우저를 찾을 수 없습니다.</string>
+    <string name="link_security_invalid_scheme">링크 차단됨: 지원되지 않거나 안전하지 않은 URL 스키마입니다.</string>
+    <string name="link_security_ip_blocked">링크 차단됨: 보안을 위해 직접 IP 주소는 허용되지 않습니다.</string>
+    <string name="link_security_deceptive">링크 차단됨: 기만적인 URL이 감지되었습니다.</string>
+    <string name="link_security_punycode">링크 차단됨: 유사한 피싱 의심 도메인이 감지되었습니다.</string>
+    <string name="link_security_dangerous_file">링크 차단됨: 직접 파일 다운로드는 허용되지 않습니다.</string>
+    <string name="link_security_malformed">잘못되거나 유효하지 않은 웹 링크입니다.</string>
 </resources>

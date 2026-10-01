@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Body + tail (aeroplanino con scia) -->
+    <path
+        android:pathData="M17.3282,11.8755L15.1744,18.3369C14.5486,20.2142 11.8681,20.1398 11.3475,18.2307L10.3558,14.5944M18.7881,7.49563L18.8917,7.185C19.4128,5.62149 17.9254,4.13401 16.3618,4.65518L5.20995,8.37248C3.33268,8.99823 3.40708,11.6787 5.31617,12.1994L6.5,12.5"
+        android:strokeColor="#000000"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" />
+
+    <!-- Inner fold line (tratto staccato) -->
+    <path
+        android:pathData="M11.1606,12L11.8582,11.3024L12.9188,10.2418"
+        android:strokeColor="#000000"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" />
+
+</vector>

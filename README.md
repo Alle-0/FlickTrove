@@ -88,7 +88,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 📅 **Magazine & News Feed**: A dedicated editorial news section with curated articles from top film publications.
 - 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
 - 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Storage.
-- 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove community.
+- 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove and **CommsUni (commsuni.tv)** federated community.
 - 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
 - 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
 - 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
@@ -239,6 +239,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 🍿 [OMDb API](http://www.omdbapi.com/) - For additional movie data and ratings
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
 - 📡 [SIMKL API](https://api.simkl.org/) - For bidirectional sync and tracking
+- 🌐 [CommsUni (commsuni.tv)](https://commsuni.tv/) - For federated community discussion and social comments network
 - 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
 - 🍅 [Rotten Tomatoes](https://www.rottentomatoes.com/) - For critic and audience scores
 - Ⓜ️ [Metacritic](https://www.metacritic.com/) - For aggregated critic reviews

@@ -42,8 +42,12 @@ object CommsUniMapper {
         }
 
         val allMediaUrls = mutableListOf<String>()
-        comment.media?.let { allMediaUrls.add(it.url) }
-        comment.attachments.forEach { allMediaUrls.add(it.url) }
+        val primaryMediaUrl = comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl
+        primaryMediaUrl?.takeIf { it.isNotBlank() }?.let { allMediaUrls.add(it) }
+        comment.attachments.forEach { att ->
+            val attUrl = att.url ?: att.apiUrl
+            attUrl?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
+        }
 
         val sourceRow = sourcesMap[comment.origin.slug]
 
@@ -89,7 +93,8 @@ object CommsUniMapper {
             originIcon = sourceRow?.iconUrl,
             archivedLikes = comment.likes.archived,
             nativeLikes = comment.likes.native,
-            attachedMedia = allMediaUrls
+            attachedMedia = allMediaUrls,
+            rating = comment.rating
         )
     }
 }

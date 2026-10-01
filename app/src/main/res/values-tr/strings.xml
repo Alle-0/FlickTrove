@@ -1380,4 +1380,20 @@
     <string name="filter_source">KAYNAK</string>
     <string name="filter_source_all">Tümü (CommsUni)</string>
     <string name="filter_source_flicktrove">Yalnızca FlickTrove</string>
+    <string name="settings_blocked_users_title">Engellenen kullanıcılar</string>
+    <string name="settings_blocked_users_desc">Engellenen kişileri görüntüleyin ve yönetin</string>
+    <string name="settings_blocked_users_subtitle">Yorumlarda engellediğiniz kişiler</string>
+    <string name="settings_blocked_users_empty">Engellenen kullanıcı yok</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">FlickTrove\'dan Ayrılıyorsunuz</string>
+    <string name="external_link_warning_desc">Yorumlarda paylaşılan harici bir web sitesine gitmek üzeresiniz. FlickTrove üçüncü taraf içerik, gizlilik veya güvenlikten sorumlu değildir.</string>
+    <string name="external_link_warning_continue">Siteyi Ziyaret Et</string>
+    <string name="external_link_error_no_browser">Bağlantı açılamadı. Tarayıcı bulunamadı.</string>
+    <string name="link_security_invalid_scheme">Bağlantı engellendi: desteklenmeyen veya güvensiz URL şeması.</string>
+    <string name="link_security_ip_blocked">Bağlantı engellendi: doğrudan IP adreslerine güvenlik nedeniyle izin verilmez.</string>
+    <string name="link_security_deceptive">Bağlantı engellendi: aldatıcı URL tespit edildi.</string>
+    <string name="link_security_punycode">Bağlantı engellendi: şüpheli benzer alan adı tespit edildi.</string>
+    <string name="link_security_dangerous_file">Bağlantı engellendi: doğrudan dosya indirmeye izin verilmez.</string>
+    <string name="link_security_malformed">Geçersiz web bağlantısı.</string>
 </resources>

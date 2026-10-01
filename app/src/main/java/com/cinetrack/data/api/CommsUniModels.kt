@@ -9,42 +9,42 @@ data class CommsUniConversationStatsResponse(
 
 @Serializable
 data class CommsUniConversationStats(
-    val entityType: String,
-    val entityId: String,
-    val comments: CommsUniSplitCountStats,
-    val replies: CommsUniSplitCountStats,
-    val commentsComplete: Boolean,
-    val repliesComplete: Boolean,
+    val entityType: String = "",
+    val entityId: String = "",
+    val comments: CommsUniSplitCountStats = CommsUniSplitCountStats(),
+    val replies: CommsUniSplitCountStats = CommsUniSplitCountStats(),
+    val commentsComplete: Boolean = true,
+    val repliesComplete: Boolean = true,
     val languageCounts: List<CommsUniLanguageCount> = emptyList(),
     val sourceCounts: List<CommsUniSourceCount> = emptyList()
 )
 
 @Serializable
 data class CommsUniSplitCountStats(
-    val archived: Int,
-    val native: Int,
-    val total: Int,
+    val archived: Int = 0,
+    val native: Int = 0,
+    val total: Int = 0,
     val allTime: CommsUniSplitCount? = null
 )
 
 @Serializable
 data class CommsUniSplitCount(
-    val archived: Int,
-    val native: Int,
-    val total: Int
+    val archived: Int = 0,
+    val native: Int = 0,
+    val total: Int = 0
 )
 
 @Serializable
 data class CommsUniLanguageCount(
-    val language: String,
+    val language: String = "",
     val base: String? = null,
-    val count: Int
+    val count: Int = 0
 )
 
 @Serializable
 data class CommsUniSourceCount(
-    val source: String,
-    val count: Int
+    val source: String = "",
+    val count: Int = 0
 )
 
 @Serializable
@@ -80,12 +80,12 @@ data class CommsUniSingleCommentData(
 
 @Serializable
 data class CommsUniComment(
-    val id: String,
-    val entityId: String,
-    val source: String,
-    val origin: CommsUniOrigin,
-    val text: String?,
-    val createdAt: String,
+    val id: String = "",
+    val entityId: String = "",
+    val source: String = "",
+    val origin: CommsUniOrigin = CommsUniOrigin(),
+    val text: String? = null,
+    val createdAt: String = "",
     val likeCount: Int = 0,
     val likes: CommsUniSplitCount = CommsUniSplitCount(0, 0, 0),
     val isSpoiler: Boolean = false,
@@ -104,7 +104,7 @@ data class CommsUniComment(
     val userColor: String? = null,
     val userAvatar: String? = null,
     val language: String? = null,
-    val rating: Int? = null,
+    val rating: Double? = null,
     val mentions: List<CommsUniMention> = emptyList(),
     val hasImage: Boolean = false,
     val media: CommsUniMedia? = null,
@@ -120,25 +120,29 @@ data class CommsUniComment(
 
 @Serializable
 data class CommsUniOrigin(
-    val kind: String,
-    val slug: String,
-    val displayName: String
+    val kind: String = "",
+    val slug: String = "",
+    val displayName: String = ""
 )
 
 @Serializable
 data class CommsUniMention(
-    val ordinal: Int,
-    val userId: String?,
-    val userName: String?,
-    val userColor: String?,
-    val start: Int?,
-    val end: Int?
+    val ordinal: Int = 0,
+    val userId: String? = null,
+    val userName: String? = null,
+    val userColor: String? = null,
+    val start: Int? = null,
+    val end: Int? = null
 )
 
 @Serializable
 data class CommsUniMedia(
-    val kind: String,
-    val url: String,
+    val kind: String = "",
+    val url: String? = null,
+    val apiUrl: String? = null,
+    val contentType: String? = null,
+    val provider: String? = null,
+    val bytes: Long? = null,
     val width: Int? = null,
     val height: Int? = null,
     val mimeType: String? = null

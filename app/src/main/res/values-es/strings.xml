@@ -277,6 +277,7 @@
     <string name="settings_tvdb_notice">Metadatos de series proporcionados por TheTVDB.</string>
     <string name="settings_trakt_notice">Sincronización y estadísticas impulsadas por Trakt.tv.</string>
     <string name="settings_simkl_notice">Sincronización y estadísticas impulsadas por SIMKL.</string>
+    <string name="settings_commsuni_notice">Discusiones y comentarios federados de la comunidad proporcionados por CommsUni (commsuni.tv).</string>
     <string name="settings_rotten_tomatoes_notice">Datos adicionales y calificaciones proporcionadas por Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Datos adicionales y calificaciones proporcionadas por Metacritic.</string>
     <string name="settings_game_icons_notice">Iconos de trofeos y logros proporcionados por Game-Icons.net bajo licencia CC BY 3.0.</string>
@@ -1314,5 +1315,21 @@
     <string name="filter_source">ORIGEN</string>
     <string name="filter_source_all">Todos (CommsUni)</string>
     <string name="filter_source_flicktrove">Solo FlickTrove</string>
+    <string name="settings_blocked_users_title">Usuarios bloqueados</string>
+    <string name="settings_blocked_users_desc">Ver y administrar personas bloqueadas</string>
+    <string name="settings_blocked_users_subtitle">Personas que has bloqueado en los comentarios</string>
+    <string name="settings_blocked_users_empty">No hay usuarios bloqueados</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Saliendo de FlickTrove</string>
+    <string name="external_link_warning_desc">Estás a punto de visitar un sitio web externo compartido en los comentarios. FlickTrove no se hace responsable del contenido, privacidad o seguridad de terceros.</string>
+    <string name="external_link_warning_continue">Visitar sitio</string>
+    <string name="external_link_error_no_browser">No se pudo abrir el enlace. No se encontró ningún navegador.</string>
+    <string name="link_security_invalid_scheme">Enlace bloqueado: esquema de URL no admitido o no seguro.</string>
+    <string name="link_security_ip_blocked">Enlace bloqueado: las direcciones IP directas no están permitidas por seguridad.</string>
+    <string name="link_security_deceptive">Enlace bloqueado: se detectó una URL engañosa.</string>
+    <string name="link_security_punycode">Enlace bloqueado: se detectó un dominio sospechoso homógrafo.</string>
+    <string name="link_security_dangerous_file">Enlace bloqueado: descarga directa de archivos no permitida.</string>
+    <string name="link_security_malformed">Enlace web no válido o mal formado.</string>
 </resources>
 

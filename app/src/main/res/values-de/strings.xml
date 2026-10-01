@@ -1312,5 +1312,21 @@
     <string name="filter_source">QUELLE</string>
     <string name="filter_source_all">Alle (CommsUni)</string>
     <string name="filter_source_flicktrove">Nur FlickTrove</string>
+    <string name="settings_blocked_users_title">Blockierte Benutzer</string>
+    <string name="settings_blocked_users_desc">Blockierte Personen anzeigen und verwalten</string>
+    <string name="settings_blocked_users_subtitle">Personen, die du in den Kommentaren blockiert hast</string>
+    <string name="settings_blocked_users_empty">Keine blockierten Benutzer</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">FlickTrove verlassen</string>
+    <string name="external_link_warning_desc">Sie besuchen eine externe Website, die in den Kommentaren geteilt wurde. FlickTrove ist nicht für fremde Inhalte, Datenschutz oder Sicherheit verantwortlich.</string>
+    <string name="external_link_warning_continue">Website besuchen</string>
+    <string name="external_link_error_no_browser">Link konnte nicht geöffnet werden. Kein Browser gefunden.</string>
+    <string name="link_security_invalid_scheme">Link blockiert: Nicht unterstütztes oder unsicheres URL-Schema.</string>
+    <string name="link_security_ip_blocked">Link blockiert: Direkte IP-Adressen sind aus Sicherheitsgründen nicht erlaubt.</string>
+    <string name="link_security_deceptive">Link blockiert: Täuschungsversuch erkannt.</string>
+    <string name="link_security_punycode">Link blockiert: Verdächtige Look-alike-Domain erkannt.</string>
+    <string name="link_security_dangerous_file">Link blockiert: Direkter Datei-Download nicht erlaubt.</string>
+    <string name="link_security_malformed">Ungültiger oder fehlerhafter Link.</string>
 </resources>
 

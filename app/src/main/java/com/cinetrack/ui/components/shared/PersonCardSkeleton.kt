@@ -27,8 +27,8 @@ fun PersonCardSkeleton(
             modifier = Modifier
                 .size(width)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
                 .shimmerEffect()
         )
 
@@ -47,7 +47,7 @@ fun PersonCardSkeleton(
                     .fillMaxWidth(0.85f)
                     .height(11.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color.White.copy(alpha = 0.20f))
+                    .background(Color.White.copy(alpha = 0.06f))
                     .shimmerEffect()
             )
         }
@@ -60,7 +60,7 @@ fun PersonCardSkeleton(
                 .fillMaxWidth(0.55f)
                 .height(9.dp)
                 .clip(RoundedCornerShape(3.dp))
-                .background(Color.White.copy(alpha = 0.14f))
+                .background(Color.White.copy(alpha = 0.04f))
                 .shimmerEffect()
         )
     }

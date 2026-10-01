@@ -33,8 +33,37 @@ data class AppComment(
     val originIcon: String? = null,
     val archivedLikes: Int = 0,
     val nativeLikes: Int = 0,
-    val attachedMedia: List<String> = emptyList()
-)
+    val attachedMedia: List<String> = emptyList(),
+    val rating: Double? = null
+) {
+    val isEffectivelyDeleted: Boolean
+        get() = isDeleted ||
+                userId.isBlank() ||
+                (text.isBlank() && userDisplayName.isBlank()) ||
+                (text.trim().startsWith("[") && text.trim().endsWith("]") && (userDisplayName.isBlank() || (userDisplayName.trim().startsWith("[") && userDisplayName.trim().endsWith("]"))))
+}
 
 enum class CommentSortOption { DATE, LIKES }
 enum class CommentSortOrder { ASC, DESC }
+
+fun List<AppComment>.filterDeletedWithoutReplies(): List<AppComment> {
+    val childrenMap = this.groupBy { it.parentId?.takeIf { p -> p.isNotBlank() } }
+
+    fun hasActiveDescendants(commentId: String, visited: MutableSet<String> = mutableSetOf()): Boolean {
+        if (!visited.add(commentId)) return false
+        val children = childrenMap[commentId] ?: return false
+        for (child in children) {
+            if (!child.isEffectivelyDeleted) return true
+            if (hasActiveDescendants(child.id, visited)) return true
+        }
+        return false
+    }
+
+    return this.filter { comment ->
+        if (!comment.isEffectivelyDeleted) {
+            true
+        } else {
+            comment.repliesCount > 0 || hasActiveDescendants(comment.id)
+        }
+    }
+}

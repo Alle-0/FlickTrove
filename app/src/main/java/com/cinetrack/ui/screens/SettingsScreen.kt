@@ -62,6 +62,7 @@ import com.cinetrack.ui.components.settings.*
 import com.cinetrack.ui.components.settings.WipeDataSelectionDialog
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.dialog.UnmatchedItemsModal
+import com.cinetrack.ui.components.dialog.BlockedUsersModal
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
 import androidx.compose.ui.res.vectorResource
@@ -527,11 +528,13 @@ fun SettingsScreenContent(
 
     var showUnmatchedItemsModal by remember { mutableStateOf(false) }
     val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
+    var showBlockedUsersModal by remember { mutableStateOf(false) }
+    val blockedUsers by settingsViewModel.blockedAuthorsList.collectAsStateWithLifecycle()
 
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || isBackupLoading ||
-                           showDeepSyncConfirm || showUnmatchedItemsModal || showDashboardSettings || showHomeSectionsDialog
+                           showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog
 
     BackHandler(enabled = anyDialogVisible) {
         focusManager.clearFocus()
@@ -551,6 +554,7 @@ fun SettingsScreenContent(
         showWipeLocalDataConfirm = false
         showWipeTotalDataConfirm = false
         showUnmatchedItemsModal = false
+        showBlockedUsersModal = false
         showDashboardSettings = false
         showHomeSectionsDialog = false
     }
@@ -599,6 +603,7 @@ fun SettingsScreenContent(
             showWipeLocalDataConfirm = false
             showWipeTotalDataConfirm = false
             showUnmatchedItemsModal = false
+            showBlockedUsersModal = false
             showDashboardSettings = false
             showHomeSectionsDialog = false
         }
@@ -808,7 +813,9 @@ fun SettingsScreenContent(
                             onShowLogoutConfirm = { showLogoutConfirm = true },
                             onShowDeleteDialog = { showDeleteDialog = true },
                             onShowWipeSelectionDialog = { showWipeSelectionDialog = true },
-                            onLinkGoogleClick = { handleGoogleLink() }
+                            onLinkGoogleClick = { handleGoogleLink() },
+                            blockedUsersCount = blockedUsers.size,
+                            onShowBlockedUsersDialog = { showBlockedUsersModal = true }
                         )
                     }
 
@@ -855,6 +862,7 @@ fun SettingsScreenContent(
                                 showBackupDialog = false
                                 showExternalMigrationDialog = false
                                 showUnmatchedItemsModal = false
+                                showBlockedUsersModal = false
                                 showDashboardSettings = false
                                 showHomeSectionsDialog = false
                             }
@@ -1096,6 +1104,17 @@ fun SettingsScreenContent(
             onRemoveItem = { item ->
                 settingsViewModel.deleteUnmatchedItem(item)
             }
+        )
+
+        BlockedUsersModal(
+            isVisible = showBlockedUsersModal,
+            onClose = { showBlockedUsersModal = false },
+            blockedUsers = blockedUsers,
+            onUnblock = { authorId ->
+                settingsViewModel.unblockAuthor(authorId)
+            },
+            hazeState = activeHazeState,
+            accentColor = currentAccentColor
         )
 
         SettingsLoadingOverlay(

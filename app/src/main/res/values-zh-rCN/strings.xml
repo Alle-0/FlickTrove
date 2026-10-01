@@ -1380,4 +1380,20 @@
     <string name="filter_source">来源</string>
     <string name="filter_source_all">全部 (CommsUni)</string>
     <string name="filter_source_flicktrove">仅 FlickTrove</string>
+    <string name="settings_blocked_users_title">已屏蔽用户</string>
+    <string name="settings_blocked_users_desc">查看并管理已屏蔽的人</string>
+    <string name="settings_blocked_users_subtitle">您在评论中屏蔽的用户</string>
+    <string name="settings_blocked_users_empty">没有已屏蔽的用户</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">即将离开 FlickTrove</string>
+    <string name="external_link_warning_desc">您即将访问评论中分享的外部网站。FlickTrove 对第三方的网站内容、隐私或安全性不承担任何责任。</string>
+    <string name="external_link_warning_continue">访问网站</string>
+    <string name="external_link_error_no_browser">无法打开链接，未找到浏览器应用。</string>
+    <string name="link_security_invalid_scheme">链接已拦截：不支持或不安全的 URL 协议。</string>
+    <string name="link_security_ip_blocked">链接已拦截：出于安全考虑，不允许直接访问 IP 地址。</string>
+    <string name="link_security_deceptive">链接已拦截：检测到欺诈性链接。</string>
+    <string name="link_security_punycode">链接已拦截：检测到可疑仿冒域名。</string>
+    <string name="link_security_dangerous_file">链接已拦截：不允许直接下载文件。</string>
+    <string name="link_security_malformed">无效或格式错误的网页链接。</string>
 </resources>

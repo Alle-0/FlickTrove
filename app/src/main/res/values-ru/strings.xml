@@ -1311,5 +1311,21 @@
     <string name="filter_source">ИСТОЧНИК</string>
     <string name="filter_source_all">Все (CommsUni)</string>
     <string name="filter_source_flicktrove">Только FlickTrove</string>
+    <string name="settings_blocked_users_title">Заблокированные пользователи</string>
+    <string name="settings_blocked_users_desc">Просмотр и управление заблокированными</string>
+    <string name="settings_blocked_users_subtitle">Пользователи, которых вы заблокировали в комментариях</string>
+    <string name="settings_blocked_users_empty">Нет заблокированных пользователей</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Переход из FlickTrove</string>
+    <string name="external_link_warning_desc">Вы переходите на сторонний веб-сайт из комментариев. FlickTrove не несет ответственности за контент, конфиденциальность и безопасность сторонних сайтов.</string>
+    <string name="external_link_warning_continue">Перейти на сайт</string>
+    <string name="external_link_error_no_browser">Не удалось открыть ссылку. Браузер не найден.</string>
+    <string name="link_security_invalid_scheme">Ссылка заблокирована: неподдерживаемая или небезопасная схема URL.</string>
+    <string name="link_security_ip_blocked">Ссылка заблокирована: прямые IP-адреса запрещены в целях безопасности.</string>
+    <string name="link_security_deceptive">Ссылка заблокирована: обнаружен вводящий в заблуждение адрес.</string>
+    <string name="link_security_punycode">Ссылка заблокирована: обнаружен подозрительный домен.</string>
+    <string name="link_security_dangerous_file">Ссылка заблокирована: прямая загрузка файлов запрещена.</string>
+    <string name="link_security_malformed">Недействительная ссылка.</string>
 </resources>
 

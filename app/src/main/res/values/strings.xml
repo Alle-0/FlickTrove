@@ -290,6 +290,7 @@
     <string name="settings_tvdb_notice">Series metadata provided by TheTVDB.</string>
     <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
     <string name="settings_simkl_notice">Sync and stats powered by SIMKL.</string>
+    <string name="settings_commsuni_notice">Community discussion and federated comments provided via CommsUni (commsuni.tv).</string>
     <string name="settings_rotten_tomatoes_notice">Additional data and ratings provided by Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Additional data and ratings provided by Metacritic.</string>
     <string name="settings_game_icons_notice">Achievement and trophy icons provided by Game-Icons.net under CC BY 3.0.</string>
@@ -1380,4 +1381,20 @@
     <string name="filter_source">SOURCE</string>
     <string name="filter_source_all">All (CommsUni)</string>
     <string name="filter_source_flicktrove">Only FlickTrove</string>
+    <string name="settings_blocked_users_title">Blocked users</string>
+    <string name="settings_blocked_users_desc">View and manage blocked people</string>
+    <string name="settings_blocked_users_subtitle">People you have blocked from comments</string>
+    <string name="settings_blocked_users_empty">No blocked users</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Leaving FlickTrove</string>
+    <string name="external_link_warning_desc">You are about to visit an external website shared in the comments. FlickTrove is not responsible for third-party content, privacy, or security.</string>
+    <string name="external_link_warning_continue">Visit Website</string>
+    <string name="external_link_error_no_browser">Unable to open link. No web browser found.</string>
+    <string name="link_security_invalid_scheme">Link blocked: unsupported or unsafe URL scheme.</string>
+    <string name="link_security_ip_blocked">Link blocked: direct IP addresses are not permitted for security.</string>
+    <string name="link_security_deceptive">Link blocked: deceptive URL detected.</string>
+    <string name="link_security_punycode">Link blocked: suspicious look-alike domain detected.</string>
+    <string name="link_security_dangerous_file">Link blocked: direct file download not permitted.</string>
+    <string name="link_security_malformed">Invalid or malformed web link.</string>
 </resources>

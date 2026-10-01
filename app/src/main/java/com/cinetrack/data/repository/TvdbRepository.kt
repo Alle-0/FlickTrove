@@ -67,17 +67,48 @@ class TvdbRepository @Inject constructor(
         }
     }
 
+    suspend fun resolveTvdbIdByRemoteId(remoteId: String, type: String = "movie"): Int? {
+        if (remoteId.isBlank()) return null
+        return try {
+            val response = tvdbApi.searchByRemoteId(remoteId)
+            val isShow = type.lowercase() in listOf("tv", "series", "show")
+            val first = response.data.firstOrNull() ?: return null
+            if (isShow) {
+                first.series?.id ?: first.movie?.id
+            } else {
+                first.movie?.id ?: first.series?.id
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun resolveTvdbId(title: String, year: String? = null, type: String = "movie"): Int? {
         if (title.isBlank()) return null
         return try {
             val searchType = if (type.lowercase() in listOf("tv", "series", "show")) "series" else "movie"
-            val searchResponse = if (!year.isNullOrBlank()) {
+            var searchResponse = if (!year.isNullOrBlank()) {
                 tvdbApi.search(query = title, year = year, type = searchType)
             } else {
                 tvdbApi.search(query = title, type = searchType)
             }
-            val firstResult = searchResponse.data.firstOrNull()
-                ?: if (!year.isNullOrBlank()) tvdbApi.search(query = title, type = searchType).data.firstOrNull() else null
+            var results = searchResponse.data
+            if (results.isEmpty() && !year.isNullOrBlank()) {
+                results = tvdbApi.search(query = title, type = searchType).data
+            }
+            if (results.isEmpty() && title.contains(":")) {
+                val cleanPrefix = title.substringBefore(":").trim()
+                if (cleanPrefix.isNotBlank()) {
+                    val fallbackSearch = tvdbApi.search(query = cleanPrefix, type = searchType).data
+                    val matched = fallbackSearch.find { it.name?.contains(title, ignoreCase = true) == true }
+                        ?: fallbackSearch.firstOrNull()
+                    if (matched != null) {
+                        val fallbackId = matched.tvdb_id ?: matched.id?.substringAfter("-")
+                        return fallbackId?.toIntOrNull()
+                    }
+                }
+            }
+            val firstResult = results.firstOrNull()
             val idStr = firstResult?.tvdb_id ?: firstResult?.id?.substringAfter("-")
             idStr?.toIntOrNull()
         } catch (e: Exception) {

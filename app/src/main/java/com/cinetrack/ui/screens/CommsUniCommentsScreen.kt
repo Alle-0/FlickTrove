@@ -10,6 +10,9 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.parseSimpleMarkdown
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
 import com.cinetrack.ui.components.shared.shimmerEffect
+import com.cinetrack.ui.components.shared.rememberShimmerBrush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,12 +53,16 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil.compose.AsyncImage
 import com.cinetrack.data.model.AppComment
+import com.cinetrack.data.model.filterDeletedWithoutReplies
 import com.cinetrack.ui.viewmodel.CommentsViewModel
 import com.cinetrack.ui.components.detail.DetailTranslationPromptModal
 import com.cinetrack.ui.components.comments.CommentInputBar
 import com.cinetrack.ui.components.comments.CommentReportModal
 import com.cinetrack.ui.components.comments.CommentBlockModal
 import com.cinetrack.ui.components.comments.CommentDeleteModal
+import com.cinetrack.ui.components.comments.ExternalLinkWarningModal
+import com.cinetrack.util.LinkSecurityUtils
+import com.cinetrack.util.LinkSecurityCheck
 import com.cinetrack.ui.components.comments.CommentCardItem
 import com.cinetrack.ui.components.comments.LiquidStarIcon
 import androidx.compose.material.icons.Icons
@@ -147,11 +154,14 @@ class CommsUniCommentsScreen(
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
         var inputText by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
         var isSpoiler by remember { mutableStateOf(false) }
+        var postToCommsUni by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
         var isInputExpanded by remember { mutableStateOf(false) }
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
         var commentToDelete by remember { mutableStateOf<AppComment?>(null) }
         var userToBlock by remember { mutableStateOf<AppComment?>(null) }
+        var pendingExternalUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+        var pendingExternalHost by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
         var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
         var sourceFilter by remember { mutableStateOf<String?>(null) }
@@ -290,6 +300,8 @@ class CommsUniCommentsScreen(
                     }
                 }
 
+                val shimmerBrush = rememberShimmerBrush()
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -298,12 +310,28 @@ class CommsUniCommentsScreen(
                     contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 16.dp, bottom = 140.dp)
                 ) {
                     if (isLoading) {
-                        items(5) {
-                            SkeletonCommentItem()
+                        items(5) { index ->
+                            SkeletonCommentItem(index = index, brush = shimmerBrush)
+                        }
+                    } else if (flatTree.isEmpty()) {
+                        item(key = "comments_empty_state") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp, vertical = 80.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.comment_empty_state),
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
                         }
                     } else {
                         itemsIndexed(flatTree, key = { _, it -> it.id }) { index, comment ->
-                            val isLiked = viewModel.currentUserId != null && comment.likedBy.contains(viewModel.currentUserId)
+                            val isLiked = viewModel.isCommentLikedByMe(comment)
                             val isExpanded = expandedComments.value.contains(comment.id)
                             CommentCardItem(
                                 modifier = Modifier.animateItem(),
@@ -352,6 +380,17 @@ class CommsUniCommentsScreen(
                                 },
                                 onTriggerGuestAuth = {
                                     settingsViewModel.triggerGuestAuthDialog()
+                                },
+                                onOpenUrl = { rawUrl ->
+                                    when (val check = LinkSecurityUtils.verifyUrl(rawUrl)) {
+                                        is LinkSecurityCheck.Safe -> {
+                                            pendingExternalUrl = check.cleanUrl
+                                            pendingExternalHost = check.host
+                                        }
+                                        is LinkSecurityCheck.Blocked -> {
+                                            viewModel.emitBlockedLink(check.reasonResId)
+                                        }
+                                    }
                                 }
                             )
                         }
@@ -394,6 +433,8 @@ class CommsUniCommentsScreen(
                     onGuestAuthTrigger = { settingsViewModel.triggerGuestAuthDialog() },
                     isSpoiler = isSpoiler,
                     onSpoilerChanged = { isSpoiler = it },
+                    postToCommsUni = postToCommsUni,
+                    onPostToCommsUniChanged = { postToCommsUni = it },
                     attachedMedia = attachedMedia,
                     onAttachedMediaChanged = { attachedMedia = it },
                     isUploadingImage = isUploadingImage,
@@ -422,7 +463,7 @@ class CommsUniCommentsScreen(
                             }
 
                             localFocusManager.clearFocus()
-                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage)
+                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage, postToCommsUni)
                             inputText = androidx.compose.ui.text.input.TextFieldValue("")
                             attachedMedia = emptyList()
                             replyingTo = null
@@ -477,8 +518,7 @@ class CommsUniCommentsScreen(
                     }
                     commentToReport = null
                 },
-                onBlockUser = {
-                    val target = commentToReport
+                onBlockUser = { target ->
                     commentToReport = null
                     userToBlock = target
                 },
@@ -510,29 +550,206 @@ class CommsUniCommentsScreen(
                 },
                 hazeState = hazeState
             )
+
+            // External Link Warning Dialog Overlay
+            ExternalLinkWarningModal(
+                url = pendingExternalUrl,
+                host = pendingExternalHost,
+                onDismiss = { pendingExternalUrl = null },
+                onConfirm = { linkUrl ->
+                    pendingExternalUrl = null
+                    try {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(linkUrl)).apply {
+                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        viewModel.emitBlockedLink(R.string.external_link_error_no_browser)
+                    }
+                },
+                hazeState = hazeState
+            )
+
+            androidx.activity.compose.BackHandler(
+                enabled = pendingExternalUrl != null || userToBlock != null || commentToReport != null || commentToDelete != null
+            ) {
+                when {
+                    pendingExternalUrl != null -> pendingExternalUrl = null
+                    userToBlock != null -> userToBlock = null
+                    commentToReport != null -> commentToReport = null
+                    commentToDelete != null -> commentToDelete = null
+                }
+            }
         } // End of Outer Box
     }
 
     @Composable
-    private fun SkeletonCommentItem() {
+    private fun SkeletonCommentItem(
+        index: Int,
+        brush: Brush
+    ) {
+        val isReply = index == 1
+        val isMediaComment = index == 2
+        val isLongComment = index == 3
+
+        val startPadding = if (isReply) 36.dp else 16.dp
+        val avatarSize = if (isReply) 30.dp else 36.dp
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
+                .padding(start = startPadding, end = 16.dp, top = 10.dp, bottom = 10.dp)
+                .drawBehind {
+                    if (isReply) {
+                        val lineX = (-16.dp).toPx()
+                        val branchY = 18.dp.toPx()
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.12f),
+                            start = Offset(lineX, -14.dp.toPx()),
+                            end = Offset(lineX, branchY),
+                            strokeWidth = 2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.12f),
+                            start = Offset(lineX, branchY),
+                            end = Offset(-4.dp.toPx(), branchY),
+                            strokeWidth = 2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    }
+                }
         ) {
+            // Avatar
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .shimmerEffect()
+                    .size(avatarSize)
+                    .clip(CircleShape)
+                    .background(brush)
             )
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.3f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.8f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.height(14.dp).fillMaxWidth(0.5f).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                // Header row: Username + Pill Badge + Right timestamp
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val nameWidth = when (index % 4) {
+                        0 -> 76.dp
+                        1 -> 64.dp
+                        2 -> 88.dp
+                        else -> 70.dp
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(width = nameWidth, height = 12.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Origin Badge Pill (CircleShape matching FlickTrove design standard)
+                    Box(
+                        modifier = Modifier
+                            .size(width = if (index % 2 == 0) 66.dp else 54.dp, height = 18.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Timestamp
+                    Box(
+                        modifier = Modifier
+                            .size(width = 36.dp, height = 10.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Content
+                if (isMediaComment) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.42f)
+                            .height(12.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.75f)
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(brush),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_image),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.15f),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                } else if (isLongComment) {
+                    Box(modifier = Modifier.fillMaxWidth(0.96f).height(12.dp).clip(CircleShape).background(brush))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(modifier = Modifier.fillMaxWidth(0.86f).height(12.dp).clip(CircleShape).background(brush))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(modifier = Modifier.fillMaxWidth(0.45f).height(12.dp).clip(CircleShape).background(brush))
+                } else {
+                    val w1 = if (isReply) 0.88f else 0.92f
+                    val w2 = if (isReply) 0.52f else 0.65f
+                    Box(modifier = Modifier.fillMaxWidth(w1).height(12.dp).clip(CircleShape).background(brush))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(modifier = Modifier.fillMaxWidth(w2).height(12.dp).clip(CircleShape).background(brush))
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Action Footer Row: Reply pill + Star with like count + Flag
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 38.dp, height = 12.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(width = 16.dp, height = 10.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(brush)
+                    )
+                }
             }
         }
     }
@@ -543,8 +760,9 @@ class CommsUniCommentsScreen(
         sortOption: CommentSortOption,
         sortOrder: CommentSortOrder
     ): List<AppComment> {
+        val filtered = comments.filterDeletedWithoutReplies()
         val tree = mutableListOf<AppComment>()
-        val map = comments.groupBy { it.parentId?.takeIf { p -> p.isNotBlank() } }
+        val map = filtered.groupBy { it.parentId?.takeIf { p -> p.isNotBlank() } }
 
         fun addChildren(parentId: String?) {
             val children = map[parentId]?.let { list ->

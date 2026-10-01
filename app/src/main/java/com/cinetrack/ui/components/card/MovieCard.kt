@@ -291,7 +291,7 @@ fun MovieActionsPopup(
                                 shape = RoundedCornerShape(24.dp)
                             )
                             .bounceClick(scaleDown = 1f) { }
-                            .padding(6.dp)
+                            .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 10.dp)
                     ) {
                         Column(
                             modifier = Modifier
@@ -371,6 +371,7 @@ fun MovieActionsPopup(
                             Spacer(modifier = Modifier.height(4.dp))
                             Box(modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = 6.dp)
                                 .height(1.dp)
                                 .animateEnterExit(
                                     enter = fadeIn(tween(300, delayMillis = 200))

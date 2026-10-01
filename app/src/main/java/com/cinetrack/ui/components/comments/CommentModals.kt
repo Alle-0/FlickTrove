@@ -11,7 +11,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,15 +37,19 @@ fun CommentReportModal(
     comment: AppComment?,
     onDismiss: () -> Unit,
     onReport: (category: String) -> Unit,
-    onBlockUser: (() -> Unit)? = null,
+    onBlockUser: ((comment: AppComment) -> Unit)? = null,
     hazeState: HazeState
 ) {
+    // Keep last non-null comment so content stays visible during the exit fade-out animation
+    var displayComment by remember { mutableStateOf(comment) }
+    LaunchedEffect(comment) { if (comment != null) displayComment = comment }
+
     FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
         hazeState = hazeState
     ) {
-        if (comment != null) {
+        val c = displayComment ?: return@FlickTroveModal
             // Header with Title and Unified Close Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -69,12 +77,12 @@ fun CommentReportModal(
             Spacer(modifier = Modifier.height(18.dp))
 
             // Concise, scannable report reasons mapped to CommsUni categories
-            val reasons = remember(comment.originSlug) {
+            val reasons = remember(c.originSlug) {
                 buildList {
                     add("spoiler" to R.string.comment_report_reason_spoiler)
                     add("abuse" to R.string.comment_report_reason_abuse)
                     add("spam" to R.string.comment_report_reason_spam)
-                    if (comment.originSlug.equals("tvtime", ignoreCase = true)) {
+                    if (c.originSlug.equals("tvtime", ignoreCase = true)) {
                         add("mine_hide" to R.string.comment_report_reason_mine_hide)
                     }
                     add("other" to R.string.comment_report_reason_other)
@@ -125,7 +133,7 @@ fun CommentReportModal(
             }
 
             // Block author action inside the report modal
-            if (onBlockUser != null && comment.userId.isNotBlank()) {
+            if (onBlockUser != null && c.userId.isNotBlank()) {
                 Spacer(modifier = Modifier.height(14.dp))
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
@@ -134,14 +142,13 @@ fun CommentReportModal(
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
-                val displayName = comment.userDisplayName.ifBlank { "User" }
+                val displayName = c.userDisplayName.ifBlank { "User" }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
                         .bounceClick {
-                            onDismiss()
-                            onBlockUser()
+                            onBlockUser(c)
                         }
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFFF3B30).copy(alpha = 0.12f))
@@ -170,7 +177,6 @@ fun CommentReportModal(
                     }
                 }
             }
-        }
     }
 }
 
@@ -345,3 +351,162 @@ fun CommentDeleteModal(
         }
     }
 }
+
+@Composable
+fun ExternalLinkWarningModal(
+    url: String?,
+    host: String,
+    onDismiss: () -> Unit,
+    onConfirm: (url: String) -> Unit,
+    hazeState: HazeState
+) {
+    FlickTroveModal(
+        isVisible = !url.isNullOrBlank(),
+        onDismissRequest = onDismiss,
+        hazeState = hazeState
+    ) {
+        if (!url.isNullOrBlank()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(Color(0xFF2DD4BF).copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_external_link),
+                            contentDescription = null,
+                            tint = Color(0xFF2DD4BF),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.external_link_warning_title),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+                ModalCloseButton(onClick = onDismiss)
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = stringResource(R.string.external_link_warning_desc),
+                color = Color.White.copy(0.70f),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Domain & URL Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                    .padding(14.dp)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_world),
+                            contentDescription = null,
+                            tint = Color(0xFF2DD4BF),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = host.ifBlank { "Website" },
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = url,
+                        color = Color.White.copy(alpha = 0.50f),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Action Buttons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                        .bounceClick { onDismiss() }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.comment_cancel_btn),
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1.2f)
+                        .height(50.dp)
+                        .bounceClick { onConfirm(url) }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF2DD4BF))
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.external_link_warning_continue),
+                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_right),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+

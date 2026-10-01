@@ -24,6 +24,13 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.auth.userProfileChangeRequest
 
+import com.cinetrack.data.repository.CommsUniRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+
 sealed interface AuthState {
     object Unauthenticated : AuthState
     object Anonymous : AuthState
@@ -39,7 +46,9 @@ sealed interface AuthState {
 class AuthViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val movieRepository: MovieRepository,
-    private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase
+    private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase,
+    private val commsUniRepository: CommsUniRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _processState = MutableStateFlow<AuthState?>(null)
@@ -561,25 +570,7 @@ class AuthViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                // Delete Firestore data first while user is still authenticated
-                try {
-                    val batch = Firebase.firestore.batch()
-                    batch.delete(Firebase.firestore.collection("users").document(uid))
-                    if (!displayName.isNullOrBlank()) {
-                        batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
-                    }
-                    batch.commit().await()
-                } catch (e: Exception) {
-                    // ignore
-                }
-                
-                // Delete Auth user
-                user.delete().await()
-                
-                // Clear local data and complete
-                movieRepository.clearAllData()
-                auth.signOut()
-                _processState.update { AuthState.Unauthenticated }
+                performAccountPurge(user, uid, displayName)
                 onComplete(true)
             } catch (exception: Exception) {
                 if (user.isAnonymous) {
@@ -610,30 +601,105 @@ class AuthViewModel @Inject constructor(
                 val credential = EmailAuthProvider.getCredential(email, password)
                 user.reauthenticate(credential).await()
                 
-                // Delete Firestore data first while user is still authenticated
-                try {
-                    val batch = Firebase.firestore.batch()
-                    batch.delete(Firebase.firestore.collection("users").document(uid))
-                    if (!displayName.isNullOrBlank()) {
-                        batch.delete(Firebase.firestore.collection("usernames").document(displayName.lowercase()))
-                    }
-                    batch.commit().await()
-                } catch (e: Exception) {
-                    // ignore
-                }
-                
-                // Delete Auth user
-                user.delete().await()
-                
-                movieRepository.clearAllData()
-                auth.signOut()
-                _processState.update { AuthState.Unauthenticated }
+                performAccountPurge(user, uid, displayName)
                 onComplete(true)
             } catch (e: Exception) {
                 _processState.update { AuthState.Error(getErrorMessage(e)) }
                 onComplete(false)
             }
         }
+    }
+
+    /**
+     * Esegue il purge completo dell'account rispettando la Single Source of Truth
+     * e riducendo al minimo assoluto le chiamate di rete:
+     * - CommsUni: cancellazione parallela in una singola onda coroutine solo se ci sono commenti.
+     * - Firestore: singola scrittura batch atomica (1 commit) per users, usernames, commsuni_authors e notifiche.
+     * - Pulizia SharedPreferences e cancellazione Firebase Auth + Room locale.
+     */
+    private suspend fun performAccountPurge(
+        user: com.google.firebase.auth.FirebaseUser,
+        uid: String,
+        displayName: String?
+    ) {
+        // 1. Minimo di chiamate verso CommsUni: recuperiamo gli ID commenti tracciati in locale
+        val prefs = context.getSharedPreferences("commsuni_prefs", Context.MODE_PRIVATE)
+        val myCommentIds = prefs.getStringSet("my_comment_ids_$uid", emptySet()) ?: emptySet()
+        val authorId = prefs.getString("author_id_$uid", null)
+
+        // Se l'utente ha scritto commenti, cancellazione a blocchi controllati (anti-429 Rate Limiting & OkHttp saturation)
+        if (myCommentIds.isNotEmpty()) {
+            coroutineScope {
+                // Elabora a chunk di massimo 4 richieste contemporanee per rispettare il pool OkHttp
+                // ed evitare che il backend CommsUni o Cloudflare inneschi l'HTTP 429 Too Many Requests
+                myCommentIds.chunked(4).forEach { chunk ->
+                    chunk.map { commentId ->
+                        async {
+                            runCatching { commsUniRepository.deleteComment(commentId) }
+                        }
+                    }.awaitAll()
+
+                    if (myCommentIds.size > 4) {
+                        kotlinx.coroutines.delay(60)
+                    }
+                }
+            }
+        }
+
+        // 2. Minimo di chiamate verso Firestore: singola scrittura WriteBatch atomica (1 chiamata commit)
+        try {
+            val firestore = Firebase.firestore
+            val batch = firestore.batch()
+
+            // Elimina documento utente primario
+            batch.delete(firestore.collection("users").document(uid))
+
+            // Rilascia lo username se presente
+            if (!displayName.isNullOrBlank()) {
+                batch.delete(firestore.collection("usernames").document(displayName.lowercase()))
+            }
+
+            // Elimina il mapping autore CommsUni -> UID
+            if (!authorId.isNullOrBlank()) {
+                batch.delete(firestore.collection("commsuni_authors").document(authorId))
+            }
+
+            // Elimina il documento genitore delle notifiche social e le relative sottocollezioni
+            batch.delete(firestore.collection("user_social_notifications").document(uid))
+            try {
+                val notifsSnap = firestore.collection("user_social_notifications")
+                    .document(uid)
+                    .collection("items")
+                    .limit(100)
+                    .get()
+                    .await()
+                for (doc in notifsSnap.documents) {
+                    batch.delete(doc.reference)
+                }
+            } catch (_: Exception) {
+                // Ignore failure if no notifications collection exists
+            }
+
+            batch.commit().await()
+        } catch (_: Exception) {
+            // Continua anche se alcuni documenti Firestore non esistono o permessi già revocati
+        }
+
+        // 3. Pulizia locale SharedPreferences per questo account
+        prefs.edit()
+            .remove("my_comment_ids_$uid")
+            .remove("author_id_$uid")
+            .remove("user_avatar_$uid")
+            .remove("user_name_$uid")
+            .apply()
+
+        // 4. Eliminazione account Firebase Auth
+        user.delete().await()
+
+        // 5. Azzeramento database locale Room & disconnessione
+        movieRepository.clearAllData()
+        auth.signOut()
+        _processState.update { AuthState.Unauthenticated }
     }
 
     fun resetPassword(email: String) {

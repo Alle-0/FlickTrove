@@ -115,15 +115,13 @@ fun DetailSkeleton(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-                    // Title (Preloaded text or high-contrast skeleton)
-                    // Title: always shimmer — never show the real title during loading.
-                    // Implement a shared element transition for a progressive title reveal.
+                    // Title (Sleek dark translucent skeleton)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(0.72f)
                             .height(38.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White.copy(alpha = 0.22f))
+                            .background(Color.White.copy(alpha = 0.06f))
                             .shimmerEffect()
                     )
 
@@ -135,7 +133,7 @@ fun DetailSkeleton(
                             .fillMaxWidth(0.40f)
                             .height(12.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color.White.copy(alpha = 0.15f))
+                            .background(Color.White.copy(alpha = 0.04f))
                             .shimmerEffect()
                     )
 
@@ -145,8 +143,8 @@ fun DetailSkeleton(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                            .background(Color.White.copy(alpha = 0.04f))
+                            .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
                             .padding(horizontal = 12.dp, vertical = 5.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -155,7 +153,7 @@ fun DetailSkeleton(
                                 .width(68.dp)
                                 .height(11.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Color.White.copy(alpha = 0.20f))
+                                .background(Color.White.copy(alpha = 0.06f))
                                 .shimmerEffect()
                         )
                     }
@@ -169,8 +167,8 @@ fun DetailSkeleton(
                             .fillMaxWidth()
                             .height(48.dp)
                             .clip(containerShape)
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.10f), containerShape)
+                            .background(Color.White.copy(alpha = 0.03f))
+                            .border(1.dp, Color.White.copy(alpha = 0.06f), containerShape)
                     ) {
                         Row(
                             modifier = Modifier
@@ -184,7 +182,7 @@ fun DetailSkeleton(
                                     .width(80.dp)
                                     .height(36.dp)
                                     .clip(RoundedCornerShape(48.dp))
-                                    .background(Color.White.copy(alpha = 0.16f))
+                                    .background(Color.White.copy(alpha = 0.06f))
                                     .shimmerEffect()
                             )
 
@@ -200,21 +198,21 @@ fun DetailSkeleton(
                                         .width(36.dp)
                                         .height(12.dp)
                                         .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.22f))
+                                        .background(Color.White.copy(alpha = 0.06f))
                                         .shimmerEffect()
                                 )
                                 Box(
                                     modifier = Modifier
                                         .padding(horizontal = 10.dp)
                                         .size(4.dp)
-                                        .background(Color.White.copy(alpha = 0.35f), CircleShape)
+                                        .background(Color.White.copy(alpha = 0.12f), CircleShape)
                                 )
                                 Box(
                                     modifier = Modifier
                                         .width(52.dp)
                                         .height(12.dp)
                                         .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.22f))
+                                        .background(Color.White.copy(alpha = 0.06f))
                                         .shimmerEffect()
                                 )
                             }
@@ -241,8 +239,8 @@ fun DetailSkeleton(
                                     .width(pillWidth)
                                     .height(32.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                                    .background(Color.White.copy(alpha = 0.04f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
                                     .shimmerEffect()
                             )
                         }
@@ -260,8 +258,8 @@ fun DetailSkeleton(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.04f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
                                     .shimmerEffect()
                             )
                         }
@@ -282,7 +280,7 @@ fun DetailSkeleton(
                             .width(64.dp)
                             .height(12.dp)
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.35f))
+                            .background(Color.White.copy(alpha = 0.08f))
                             .shimmerEffect()
                     )
 
@@ -295,7 +293,7 @@ fun DetailSkeleton(
                                 .fillMaxWidth(fraction)
                                 .height(13.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Color.White.copy(alpha = 0.16f))
+                                .background(Color.White.copy(alpha = 0.05f))
                                 .shimmerEffect()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -316,7 +314,7 @@ fun DetailSkeleton(
                             .width(116.dp)
                             .height(12.dp)
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.35f))
+                            .background(Color.White.copy(alpha = 0.08f))
                             .shimmerEffect()
                     )
 
@@ -333,8 +331,8 @@ fun DetailSkeleton(
                                     .weight(1f)
                                     .height(64.dp)
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.03f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
                                     .shimmerEffect()
                             )
                         }
@@ -348,8 +346,8 @@ fun DetailSkeleton(
                             .fillMaxWidth()
                             .height(64.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.05f))
-                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.03f))
+                            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
                             .shimmerEffect()
                     )
                 }
@@ -373,7 +371,7 @@ fun DetailSkeleton(
                                 .width(96.dp)
                                 .height(12.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Color.White.copy(alpha = 0.35f))
+                                .background(Color.White.copy(alpha = 0.08f))
                                 .shimmerEffect()
                         )
                         Box(
@@ -381,8 +379,8 @@ fun DetailSkeleton(
                                 .width(64.dp)
                                 .height(26.dp)
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.10f))
-                                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                                .background(Color.White.copy(alpha = 0.04f))
+                                .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
                         )
                     }
 
@@ -394,8 +392,8 @@ fun DetailSkeleton(
                             .fillMaxWidth()
                             .height(72.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.04f))
-                            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.03f))
+                            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
                             .shimmerEffect()
                     )
                 }
@@ -414,7 +412,7 @@ fun DetailSkeleton(
                             .width(56.dp)
                             .height(12.dp)
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.35f))
+                            .background(Color.White.copy(alpha = 0.08f))
                             .shimmerEffect()
                     )
 
@@ -449,7 +447,7 @@ fun DetailSkeleton(
                     .height(56.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .background(Color(0xFF14151E).copy(alpha = 0.85f))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(28.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(28.dp))
                     .shimmerEffect()
             )
         }

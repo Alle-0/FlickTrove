@@ -412,4 +412,10 @@ class CommentsViewModel @Inject constructor(
             }
         }
     }
+
+    fun emitBlockedLink(reasonResId: Int) {
+        viewModelScope.launch {
+            actionFeedbackManager.emit(UiText.StringResource(reasonResId))
+        }
+    }
 }

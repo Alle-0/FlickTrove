@@ -51,10 +51,21 @@ class SettingsViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val appUpdateManager: com.cinetrack.util.AppUpdateManager,
+    private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     val updateInfo = appUpdateManager.updateInfo
+
+    val blockedAuthorsList: StateFlow<List<com.cinetrack.data.repository.BlockedAuthor>> = 
+        blockedAuthorsManager.blockedAuthorsList
+
+    fun unblockAuthor(authorId: String) {
+        viewModelScope.launch {
+            blockedAuthorsManager.unblockAuthor(authorId)
+            emitToast(UiText.StringResource(R.string.comment_unblock_user_success))
+        }
+    }
 
     private val _showEditProfileMenu = MutableSharedFlow<Rect?>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()

@@ -272,6 +272,7 @@
     <string name="settings_omdb_notice">Dati addizionali e rating forniti da OMDb API.</string>
     <string name="settings_trakt_notice">Sincronizzazione e statistiche alimentate da Trakt.tv.</string>
     <string name="settings_simkl_notice">Sincronizzazione e statistiche alimentate da SIMKL.</string>
+    <string name="settings_commsuni_notice">Discussioni e commenti federati della community forniti tramite CommsUni (commsuni.tv).</string>
     <string name="settings_rotten_tomatoes_notice">Dati addizionali e rating forniti da Rotten Tomatoes.</string>
     <string name="settings_metacritic_notice">Dati addizionali e rating forniti da Metacritic.</string>
     <string name="settings_game_icons_notice">Icone di trofei e riconoscimenti fornite da Game-Icons.net sotto licenza CC BY 3.0.</string>
@@ -1338,4 +1339,20 @@
     <string name="filter_source">PROVENIENZA</string>
     <string name="filter_source_all">Tutti (CommsUni)</string>
     <string name="filter_source_flicktrove">Solo FlickTrove</string>
+    <string name="settings_blocked_users_title">Utenti bloccati</string>
+    <string name="settings_blocked_users_desc">Visualizza e gestisci le persone bloccate</string>
+    <string name="settings_blocked_users_subtitle">Persone che hai bloccato nei commenti</string>
+    <string name="settings_blocked_users_empty">Nessun utente bloccato</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Stai lasciando FlickTrove</string>
+    <string name="external_link_warning_desc">Stai per visitare un sito web esterno condiviso nei commenti. FlickTrove non è responsabile per contenuti, privacy o sicurezza di siti terzi.</string>
+    <string name="external_link_warning_continue">Visita il sito</string>
+    <string name="external_link_error_no_browser">Impossibile aprire il link. Nessun browser trovato.</string>
+    <string name="link_security_invalid_scheme">Link bloccato: schema URL non supportato o non sicuro.</string>
+    <string name="link_security_ip_blocked">Link bloccato: gli indirizzi IP diretti non sono consentiti per motivi di sicurezza.</string>
+    <string name="link_security_deceptive">Link bloccato: rilevato indirizzo ingannevole o sospetto.</string>
+    <string name="link_security_punycode">Link bloccato: rilevato dominio omografo sospetto.</string>
+    <string name="link_security_dangerous_file">Link bloccato: download diretto di file non consentito.</string>
+    <string name="link_security_malformed">Link non valido o malformato.</string>
 </resources>

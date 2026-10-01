@@ -1311,5 +1311,21 @@
     <string name="filter_source">SOURCE</string>
     <string name="filter_source_all">Tous (CommsUni)</string>
     <string name="filter_source_flicktrove">Seulement FlickTrove</string>
+    <string name="settings_blocked_users_title">Utilisateurs bloqués</string>
+    <string name="settings_blocked_users_desc">Afficher et gérer les personnes bloquées</string>
+    <string name="settings_blocked_users_subtitle">Personnes que vous avez bloquées dans les commentaires</string>
+    <string name="settings_blocked_users_empty">Aucun utilisateur bloqué</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Vous quittez FlickTrove</string>
+    <string name="external_link_warning_desc">Vous vous apprêtez à visiter un site externe partagé dans les commentaires. FlickTrove n\'est pas responsable du contenu, de la confidentialité ou de la sécurité tiers.</string>
+    <string name="external_link_warning_continue">Visiter le site</string>
+    <string name="external_link_error_no_browser">Impossible d\'ouvrir le lien. Aucun navigateur trouvé.</string>
+    <string name="link_security_invalid_scheme">Lien bloqué : schéma d\'URL non pris en charge ou non sécurisé.</string>
+    <string name="link_security_ip_blocked">Lien bloqué : les adresses IP directes sont interdites par sécurité.</string>
+    <string name="link_security_deceptive">Lien bloqué : URL trompeuse détectée.</string>
+    <string name="link_security_punycode">Lien bloqué : domaine suspect détecté.</string>
+    <string name="link_security_dangerous_file">Lien bloqué : téléchargement direct de fichier non autorisé.</string>
+    <string name="link_security_malformed">Lien web non valide ou mal formé.</string>
 </resources>
 

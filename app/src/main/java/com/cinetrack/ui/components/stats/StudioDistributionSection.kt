@@ -213,9 +213,9 @@ private fun PodiumColumn(
             modifier = Modifier
                 .width(80.dp)
                 .height(34.dp)
-                .background(Color(0xFF161922), RoundedCornerShape(14.dp))
-                .border(1.dp, item.color.copy(alpha = 0.40f), RoundedCornerShape(14.dp))
-                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White.copy(alpha = 0.06f), CircleShape)
+                .border(1.dp, item.color.copy(alpha = 0.40f), CircleShape)
+                .clip(CircleShape)
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -431,9 +431,9 @@ fun StudioDistributionSection(
                                             modifier = Modifier
                                                 .width(90.dp)
                                                 .height(30.dp)
-                                                .background(Color(0xFF161922), RoundedCornerShape(50))
-                                                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
-                                                .clip(RoundedCornerShape(50))
+                                                .background(Color.White.copy(alpha = 0.06f), CircleShape)
+                                                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
+                                                .clip(CircleShape)
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                                             contentAlignment = Alignment.Center
                                         ) {

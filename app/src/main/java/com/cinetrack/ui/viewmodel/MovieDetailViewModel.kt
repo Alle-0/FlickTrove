@@ -63,6 +63,7 @@ class MovieDetailViewModel @Inject constructor(
     private val detailUiStateMapper: DetailUiStateMapper,
     private val tvdbRepository: TvdbRepository,
     private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
+    private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
     private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
@@ -99,23 +100,91 @@ class MovieDetailViewModel @Inject constructor(
         year: String?
     ): List<com.cinetrack.data.model.AppComment> {
         return try {
-            val resolvedTvdbId = if (tvdbId != null && tvdbId > 0) {
-                tvdbId
-            } else if (!title.isNullOrBlank()) {
-                tvdbRepository.resolveTvdbId(title, year, if (mediaType == "tv") "series" else "movie")
-            } else null
+            kotlinx.coroutines.coroutineScope {
+                val firestoreDeferred = async {
+                    if (movieId != 0L) {
+                        try {
+                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5)
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    } else emptyList()
+                }
 
-            if (resolvedTvdbId != null && resolvedTvdbId > 0) {
-                lastTvdbId = resolvedTvdbId
-                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                commsUniRepository.getTopCommentsPreview(
-                    tvdbId = resolvedTvdbId,
-                    entityType = if (mediaType == "tv") "show" else "movie",
-                    limit = 5,
-                    currentUserId = uid
-                )
-            } else {
-                emptyList()
+                val commsUniDeferred = async {
+                    try {
+                        val resolvedTvdbId = if (tvdbId != null && tvdbId > 0) {
+                            tvdbId
+                        } else {
+                            val searchType = if (mediaType == "tv") "series" else "movie"
+                            tvdbRepository.resolveTvdbIdByRemoteId(movieId.toString(), searchType)
+                                ?: if (!title.isNullOrBlank()) tvdbRepository.resolveTvdbId(title, year, searchType) else null
+                        }
+
+                        if (resolvedTvdbId != null && resolvedTvdbId > 0) {
+                            lastTvdbId = resolvedTvdbId
+                            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                            commsUniRepository.getTopCommentsPreview(
+                                tvdbId = resolvedTvdbId,
+                                entityType = if (mediaType == "tv") "show" else "movie",
+                                limit = 5,
+                                currentUserId = uid
+                            )
+                        } else {
+                            emptyList()
+                        }
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                }
+
+                val firestoreComments = firestoreDeferred.await()
+                val commsUniComments = commsUniDeferred.await()
+
+                val matchedFirestoreIds = mutableSetOf<String>()
+                val mergedCommsUni = commsUniComments.map { cc ->
+                    val matchingFc = firestoreComments.firstOrNull { fc ->
+                        fc.id == cc.id || (
+                            fc.text.trim() == cc.text.trim() &&
+                            (fc.userDisplayName.trim().equals(cc.userDisplayName.trim(), ignoreCase = true) || fc.userDisplayName.isBlank())
+                        )
+                    }
+                    if (matchingFc != null) {
+                        matchedFirestoreIds.add(matchingFc.id)
+                        cc.copy(
+                            userAvatarUrl = matchingFc.userAvatarUrl.takeIf { it.isNotBlank() } ?: cc.userAvatarUrl,
+                            userDisplayName = matchingFc.userDisplayName.takeIf { it.isNotBlank() } ?: cc.userDisplayName,
+                            likesCount = maxOf(matchingFc.likesCount, cc.likesCount),
+                            likedBy = (matchingFc.likedBy + cc.likedBy).distinct(),
+                            originSlug = if (cc.originSlug.isBlank()) "flicktrove" else cc.originSlug,
+                            originName = if (cc.originName.isBlank()) "FlickTrove" else cc.originName,
+                            originColor = cc.originColor ?: "#2dd4bf"
+                        )
+                    } else {
+                        cc
+                    }
+                }
+
+                val remainingFirestore = firestoreComments
+                    .filterNot { it.id in matchedFirestoreIds }
+                    .map { fc ->
+                        if (fc.originSlug.isBlank()) {
+                            fc.copy(originSlug = "flicktrove", originName = "FlickTrove", originColor = "#2dd4bf")
+                        } else fc
+                    }
+
+                val combined = (mergedCommsUni + remainingFirestore)
+                    .filterNot { blockedAuthorsManager.isAuthorBlocked(it.userId, it.userDisplayName) }
+                    .filterNot { it.isEffectivelyDeleted }
+                combined.sortedWith(
+                    compareByDescending<com.cinetrack.data.model.AppComment> {
+                        it.originSlug.equals("flicktrove", ignoreCase = true) || it.originSlug.isBlank()
+                    }.thenByDescending {
+                        it.likesCount
+                    }.thenByDescending {
+                        it.createdAt?.seconds ?: 0L
+                    }
+                ).take(5)
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
@@ -279,9 +348,16 @@ class MovieDetailViewModel @Inject constructor(
         val flow3 = combine(
             _appComments,
             _characterImages,
-            _watchHistory
-        ) { comments, charImages, wHistory ->
-            Triple(comments, charImages, wHistory)
+            _watchHistory,
+            blockedAuthorsManager.blockedAuthorIds,
+            blockedAuthorsManager.blockedAuthorNames
+        ) { comments, charImages, wHistory, bIds, bNames ->
+            val filteredComments = comments.filterNot { c ->
+                c.userId in bIds || 
+                "name_${c.userDisplayName.trim().lowercase()}" in bIds || 
+                c.userDisplayName.trim().lowercase() in bNames
+            }
+            Triple(filteredComments, charImages, wHistory)
         }
 
         return combine(
@@ -562,14 +638,20 @@ class MovieDetailViewModel @Inject constructor(
             currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
             _appComments.value = currentComments
 
-            // Chiamata di rete in background verso CommsUni
+            // Chiamata di rete in background verso Firestore (se commento FlickTrove) o CommsUni
             viewModelScope.launch {
+                val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
+                val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
+                val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
+                if (isFlickTrove) {
+                    commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
+                }
                 val result = if (isLiked) {
                     commsUniRepository.unlikeComment(commentId)
                 } else {
                     commsUniRepository.likeComment(commentId)
                 }
-                if (result.isFailure) {
+                if (result.isFailure && !isFlickTrove) {
                     refreshComments()
                 }
             }

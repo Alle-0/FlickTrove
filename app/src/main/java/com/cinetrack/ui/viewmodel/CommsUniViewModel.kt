@@ -3,7 +3,9 @@ package com.cinetrack.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.api.CommsUniComment
+import com.cinetrack.data.model.filterDeletedWithoutReplies
 import com.cinetrack.data.api.CommsUniConversationStats
+import com.cinetrack.data.api.CommsUniOrigin
 import com.cinetrack.data.repository.CommsUniRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
@@ -17,9 +19,12 @@ import java.util.Locale
 import java.util.TimeZone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.google.mlkit.nl.translate.TranslateLanguage
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -28,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CommsUniViewModel @Inject constructor(
     private val commsUniRepository: CommsUniRepository,
+    private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     private val preferenceRepository: PreferenceRepository,
     private val auth: FirebaseAuth,
     private val firestore: com.google.firebase.firestore.FirebaseFirestore,
@@ -35,31 +41,9 @@ class CommsUniViewModel @Inject constructor(
     private val translationManager: TranslationManager,
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val tvdbRepository: com.cinetrack.data.repository.TvdbRepository,
+    private val storageRepository: com.cinetrack.data.repository.StorageRepository,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
-
-    init {
-        viewModelScope.launch {
-            blockedAuthorsManager.blockedAuthorIds.collect { blockedIds ->
-                if (blockedIds.isNotEmpty() && _comments.value.isNotEmpty()) {
-                    val myAuthorId = currentAuthorId
-                    val myActorId = currentActorId
-                    val rawUid = auth.currentUser?.uid
-                    val myCommentIds = getMyCommentIds()
-                    _comments.value = _comments.value.filterNot { comment ->
-                        val isMine = (comment.id in myCommentIds) ||
-                            (!comment.userId.isBlank() && (
-                                (myAuthorId != null && comment.userId == myAuthorId) ||
-                                (myActorId != null && comment.userId == myActorId) ||
-                                (rawUid != null && comment.userId == rawUid) ||
-                                (currentUserId != null && comment.userId == currentUserId)
-                            ))
-                        !isMine && comment.userId in blockedIds
-                    }
-                }
-            }
-        }
-    }
 
     private val prefs by lazy { context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE) }
     private val _cachedAuthorId = MutableStateFlow<String?>(null)
@@ -76,6 +60,17 @@ class CommsUniViewModel @Inject constructor(
         }
 
     val currentUserId: String? get() = currentAuthorId ?: currentActorId ?: auth.currentUser?.uid
+
+    fun isCommentLikedByMe(comment: com.cinetrack.data.model.AppComment): Boolean {
+        val currentAuthUid = auth.currentUser?.uid
+        val authorId = currentAuthorId
+        val actorId = currentActorId
+        return comment.likedBy.any { id ->
+            (currentAuthUid != null && id == currentAuthUid) ||
+            (authorId != null && id.equals(authorId, ignoreCase = true)) ||
+            (actorId != null && id.equals(actorId, ignoreCase = true))
+        }
+    }
 
     private fun getMyCommentIds(): Set<String> {
         val uid = auth.currentUser?.uid ?: return emptySet()
@@ -198,6 +193,37 @@ class CommsUniViewModel @Inject constructor(
         _showTranslationPrompt.value = null
     }
 
+    init {
+        viewModelScope.launch {
+            combine(
+                blockedAuthorsManager.blockedAuthorIds,
+                blockedAuthorsManager.blockedAuthorNames
+            ) { ids, names -> Pair(ids, names) }
+                .collect { (blockedIds, blockedNames) ->
+                    if ((blockedIds.isNotEmpty() || blockedNames.isNotEmpty()) && _comments.value.isNotEmpty()) {
+                        val myAuthorId = currentAuthorId
+                        val myActorId = currentActorId
+                        val rawUid = auth.currentUser?.uid
+                        val myCommentIds = getMyCommentIds()
+                        _comments.value = _comments.value.filterNot { comment ->
+                            val isMine = (comment.id in myCommentIds) ||
+                                (!comment.userId.isBlank() && (
+                                    (myAuthorId != null && comment.userId == myAuthorId) ||
+                                    (myActorId != null && comment.userId == myActorId) ||
+                                    (rawUid != null && comment.userId == rawUid) ||
+                                    (currentUserId != null && comment.userId == currentUserId)
+                                ))
+                            val cleanName = comment.userDisplayName.trim().lowercase()
+                            val isBlocked = comment.userId in blockedIds ||
+                                "name_$cleanName" in blockedIds ||
+                                cleanName in blockedNames
+                            !isMine && isBlocked
+                        }
+                    }
+                }
+        }
+    }
+
     fun init(
         tvdbId: Int? = null,
         entityType: String = "movie",
@@ -219,26 +245,22 @@ class CommsUniViewModel @Inject constructor(
             
             refreshStats()
             refreshComments()
-        } else if (!title.isNullOrBlank()) {
+        } else {
             _isLoading.value = true
             viewModelScope.launch {
-                val resolvedTvdbId = tvdbRepository.resolveTvdbId(title, year, normalizedType)
+                val resolvedTvdbId = if (rawMediaId.isNotBlank()) {
+                    tvdbRepository.resolveTvdbIdByRemoteId(rawMediaId, normalizedType)
+                } else null
+                    ?: if (!title.isNullOrBlank()) tvdbRepository.resolveTvdbId(title, year, normalizedType) else null
+
                 if (resolvedTvdbId != null && resolvedTvdbId > 0) {
                     val entityId = commsUniRepository.buildEntityId(resolvedTvdbId, seasonNumber, episodeNumber)
                     currentEntityId = entityId
                     currentEntityType = normalizedType
                     refreshStats()
-                    refreshComments()
-                } else {
-                    _isLoading.value = false
-                    _comments.value = emptyList()
-                    _hasMoreComments.value = false
                 }
+                refreshComments()
             }
-        } else {
-            _isLoading.value = false
-            _comments.value = emptyList()
-            _hasMoreComments.value = false
         }
     }
 
@@ -361,54 +383,108 @@ class CommsUniViewModel @Inject constructor(
             val sourcesResult = commsUniRepository.getSources()
             cachedSourcesMap = sourcesResult.getOrNull()?.associateBy { it.slug } ?: emptyMap()
             
-            val result = commsUniRepository.getComments(
-                entityType = currentEntityType,
-                entityId = currentEntityId,
-                sort = currentSort,
-                limit = 50,
-                cursor = null,
-                source = currentSourceFilter,
-                language = currentLanguageFilter
-            )
-            
-            result.onSuccess { response ->
-                _comments.value = extractAllComments(response.data.comments, cachedSourcesMap)
-                nextCursor = response.data.nextCursor
-                _hasMoreComments.value = !response.data.complete
-            }.onFailure {
-                if (it.message == "not_archived") {
-                    _comments.value = emptyList()
-                    _hasMoreComments.value = false
-                } else {
-                    // Show error as a dummy comment so the developer can see it
-                    _comments.value = listOf(
-                        com.cinetrack.data.model.AppComment(
-                            id = "error_dummy",
-                            mediaId = currentEntityId,
-                            mediaType = currentEntityType,
-                            userId = "sys",
-                            userDisplayName = "System Error",
-                            userAvatarUrl = "",
-                            text = "Error loading comments: ${it.message}\n\n${it.stackTraceToString()}",
-                            createdAt = com.google.firebase.Timestamp.now(),
-                            likesCount = 0,
-                            likedBy = emptyList(),
-                            parentId = null,
-                            parentUserId = null,
-                            repliesCount = 0,
-                            depth = 0,
-                            isDeleted = false,
-                            isSpoiler = false,
-                            originSlug = "system",
-                            originName = "System",
-                            archivedLikes = 0,
-                            nativeLikes = 0
+            coroutineScope {
+                val commsUniDeferred = async {
+                    if (currentEntityId.isNotBlank()) {
+                        commsUniRepository.getComments(
+                            entityType = currentEntityType,
+                            entityId = currentEntityId,
+                            sort = currentSort,
+                            limit = 50,
+                            cursor = null,
+                            source = currentSourceFilter,
+                            language = currentLanguageFilter
                         )
-                    )
+                    } else null
+                }
+
+                val firestoreDeferred = async {
+                    if (currentRawMediaId.isNotBlank()) {
+                        try {
+                            val (fComments, _) = commentRepository.getCommentsForMedia(
+                                mediaId = currentRawMediaId,
+                                limit = 50
+                            )
+                            fComments
+                        } catch (e: Exception) {
+                            emptyList<com.cinetrack.data.model.AppComment>()
+                        }
+                    } else emptyList<com.cinetrack.data.model.AppComment>()
+                }
+
+                val commsUniResult = commsUniDeferred.await()
+                val firestoreComments = firestoreDeferred.await()
+
+                var commsUniList = emptyList<com.cinetrack.data.model.AppComment>()
+                if (commsUniResult != null) {
+                    commsUniResult.onSuccess { response ->
+                        commsUniList = extractAllComments(response.data.comments, cachedSourcesMap)
+                        nextCursor = response.data.nextCursor
+                        _hasMoreComments.value = !response.data.complete
+                    }.onFailure {
+                        if (it.message != "not_archived") {
+                            android.util.Log.e("CommsUniViewModel", "Error loading CommsUni comments", it)
+                        }
+                        _hasMoreComments.value = false
+                    }
+                } else {
                     _hasMoreComments.value = false
                 }
+
+                val matchedFirestoreIds = mutableSetOf<String>()
+                val mergedCommsUni = commsUniList.map { cc ->
+                    val matchingFc = firestoreComments.firstOrNull { fc ->
+                        fc.id == cc.id || (
+                            fc.text.trim() == cc.text.trim() &&
+                            (fc.userDisplayName.trim().equals(cc.userDisplayName.trim(), ignoreCase = true) || fc.userDisplayName.isBlank())
+                        )
+                    }
+                    if (matchingFc != null) {
+                        matchedFirestoreIds.add(matchingFc.id)
+                        cc.copy(
+                            userAvatarUrl = matchingFc.userAvatarUrl.takeIf { it.isNotBlank() } ?: cc.userAvatarUrl,
+                            userDisplayName = matchingFc.userDisplayName.takeIf { it.isNotBlank() } ?: cc.userDisplayName,
+                            likesCount = maxOf(matchingFc.likesCount, cc.likesCount),
+                            likedBy = (matchingFc.likedBy + cc.likedBy).distinct(),
+                            originSlug = if (cc.originSlug.isBlank()) "flicktrove" else cc.originSlug,
+                            originName = if (cc.originName.isBlank()) "FlickTrove" else cc.originName,
+                            originColor = cc.originColor ?: "#2dd4bf"
+                        )
+                    } else {
+                        cc
+                    }
+                }
+
+                val remainingFirestore = firestoreComments
+                    .filterNot { it.id in matchedFirestoreIds }
+                    .map { fc ->
+                        if (fc.originSlug.isNullOrBlank()) {
+                            fc.copy(
+                                originSlug = "flicktrove",
+                                originName = "FlickTrove",
+                                originColor = "#2dd4bf"
+                            )
+                        } else fc
+                    }
+
+                val blockedIds = blockedAuthorsManager.blockedAuthorIds.value
+                val blockedNames = blockedAuthorsManager.blockedAuthorNames.value
+                val combined = (mergedCommsUni + remainingFirestore)
+                    .filterNot { 
+                        val cleanName = it.userDisplayName.trim().lowercase()
+                        it.userId in blockedIds || "name_$cleanName" in blockedIds || cleanName in blockedNames
+                    }
+                    .filterDeletedWithoutReplies()
+
+                val sorted = if (currentSort == "most_liked" || currentSort == "likes") {
+                    combined.sortedWith(compareByDescending<com.cinetrack.data.model.AppComment> { it.likesCount }.thenByDescending { it.createdAt?.seconds ?: 0L })
+                } else {
+                    combined.sortedByDescending { it.createdAt?.seconds ?: 0L }
+                }
+
+                _comments.value = sorted
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 
@@ -433,10 +509,17 @@ class CommsUniViewModel @Inject constructor(
                 val existingIds = currentList.map { it.id }.toSet()
                 
                 val newMapped = extractAllComments(response.data.comments, cachedSourcesMap)
-                val toAdd = newMapped.filterNot { existingIds.contains(it.id) }
+                val blockedIds = blockedAuthorsManager.blockedAuthorIds.value
+                val blockedNames = blockedAuthorsManager.blockedAuthorNames.value
+                val toAdd = newMapped
+                    .filterNot { existingIds.contains(it.id) }
+                    .filterNot {
+                        val cleanName = it.userDisplayName.trim().lowercase()
+                        it.userId in blockedIds || "name_$cleanName" in blockedIds || cleanName in blockedNames
+                    }
                 
                 currentList.addAll(toAdd)
-                _comments.value = currentList
+                _comments.value = currentList.filterDeletedWithoutReplies()
                 
                 nextCursor = response.data.nextCursor
                 _hasMoreComments.value = !response.data.complete
@@ -459,12 +542,28 @@ class CommsUniViewModel @Inject constructor(
     }
 
     fun uploadCommentImage(imageUri: android.net.Uri, onSuccess: (android.net.Uri) -> Unit, onError: (String) -> Unit) {
-        onError("Not implemented for CommsUni yet")
+        viewModelScope.launch {
+            val result = storageRepository.uploadCommentImage(imageUri)
+            result.onSuccess { url ->
+                onSuccess(android.net.Uri.parse(url))
+            }.onFailure { e ->
+                onError(e.message ?: "Upload fallito")
+            }
+        }
     }
 
     fun postComment(mediaId: String, mediaType: String, text: String, isSpoiler: Boolean, parentId: String?, parentUserId: String?, attachedMedia: List<String>) {}
 
-    fun addComment(text: String, isSpoiler: Boolean, parentId: String?, parentUserId: String?, depth: Int, mediaTitle: String, mediaImage: String?) {
+    fun addComment(
+        text: String,
+        isSpoiler: Boolean,
+        parentId: String?,
+        parentUserId: String?,
+        depth: Int,
+        mediaTitle: String,
+        mediaImage: String?,
+        postToCommsUni: Boolean = true
+    ) {
         if (isUserAnonymous) return  // Block anonymous writes silently
         val uid = currentUserId ?: return
 
@@ -511,11 +610,51 @@ class CommsUniViewModel @Inject constructor(
             }
             _comments.value = currentList
 
-            // Real API call
-            val result = if (parentId != null) {
-                commsUniRepository.createReply(parentId, text, isSpoiler)
+            // Invio verso la destinazione selezionata (mutuamente esclusiva)
+            val result = if (postToCommsUni && currentEntityId.isNotBlank()) {
+                // Destinazione CommsUni: pubblica solo sulla rete CommsUni
+                if (parentId != null) {
+                    commsUniRepository.createReply(parentId, text, isSpoiler)
+                } else {
+                    commsUniRepository.createComment(currentEntityType, currentEntityId, text, isSpoiler)
+                }
+            } else if (!postToCommsUni && currentRawMediaId.isNotBlank()) {
+                // Destinazione FlickTrove: salva solo su Firestore locale
+                val firestoreSuccess = try {
+                    commentRepository.addComment(
+                        mediaId = currentRawMediaId,
+                        mediaType = currentEntityType,
+                        text = text,
+                        isSpoiler = isSpoiler,
+                        parentId = parentId,
+                        parentUserId = parentUserId,
+                        depth = depth.coerceAtMost(1),
+                        mediaTitle = "",
+                        mediaImage = optimisticAvatar
+                    )
+                } catch (e: Exception) {
+                    false
+                }
+
+                if (firestoreSuccess) {
+                    Result.success(
+                        CommsUniComment(
+                            id = tempId,
+                            entityId = currentEntityId,
+                            source = "flicktrove",
+                            origin = CommsUniOrigin(kind = "native", slug = "flicktrove", displayName = "FlickTrove"),
+                            text = text,
+                            createdAt = java.time.Instant.now().toString(),
+                            userId = uid,
+                            userName = resolvedName,
+                            userAvatar = optimisticAvatar
+                        )
+                    )
+                } else {
+                    Result.failure(Exception("Impossibile salvare il commento su FlickTrove."))
+                }
             } else {
-                commsUniRepository.createComment(currentEntityType, currentEntityId, text, isSpoiler)
+                Result.failure(Exception("Impossibile inviare il commento."))
             }
 
             result.onSuccess { newComment ->
@@ -633,32 +772,70 @@ class CommsUniViewModel @Inject constructor(
         detail: String? = null
     ) {
         viewModelScope.launch {
-            val result = commsUniRepository.reportComment(commentId, reason = category, detail = detail)
-            result.onSuccess { reportStatus ->
-                when (reportStatus) {
-                    CommsUniRepository.ReportCommentResult.SUCCESS -> {
+            val targetComment = _comments.value.find { it.id == commentId }
+            val isFlickTrove = targetComment?.originSlug?.equals("flicktrove", ignoreCase = true) == true || targetComment?.originSlug.isNullOrBlank()
+
+            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
+                val fResult = try {
+                    commentRepository.reportComment(
+                        mediaId = currentRawMediaId,
+                        commentId = commentId,
+                        reason = category.uppercase(),
+                        commentText = text ?: targetComment?.text ?: "",
+                        commentAuthorId = userId ?: targetComment?.userId ?: "",
+                        commentAuthorName = userDisplayName ?: targetComment?.userDisplayName ?: ""
+                    )
+                } catch (e: Exception) {
+                    com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR
+                }
+
+                when (fResult) {
+                    com.cinetrack.data.repository.CommentRepository.ReportResult.SUCCESS -> {
                         actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_success))
                     }
-                    CommsUniRepository.ReportCommentResult.DUPLICATE -> {
+                    com.cinetrack.data.repository.CommentRepository.ReportResult.COOLDOWN -> {
                         actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_duplicate))
                     }
-                    CommsUniRepository.ReportCommentResult.ERROR -> {
+                    com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR -> {
                         actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
                     }
                 }
-            }.onFailure {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
+            } else {
+                val result = commsUniRepository.reportComment(commentId, reason = category, detail = detail)
+                result.onSuccess { reportStatus ->
+                    when (reportStatus) {
+                        CommsUniRepository.ReportCommentResult.SUCCESS -> {
+                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_success))
+                        }
+                        CommsUniRepository.ReportCommentResult.DUPLICATE -> {
+                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_duplicate))
+                        }
+                        CommsUniRepository.ReportCommentResult.ERROR -> {
+                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
+                        }
+                    }
+                }.onFailure {
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
+                }
             }
         }
     }
 
     fun blockAuthor(userId: String, authorName: String) {
-        if (userId.isBlank()) return
+        val cleanName = authorName.trim()
+        val cleanId = userId.trim()
+        val effectiveId = if (cleanId.isNotBlank()) cleanId else "name_${cleanName.lowercase()}"
+        if (effectiveId.isBlank()) return
+
         viewModelScope.launch {
-            blockedAuthorsManager.blockAuthor(userId, authorName)
-            _comments.value = _comments.value.filterNot { it.userId == userId }
+            blockedAuthorsManager.blockAuthor(effectiveId, cleanName)
+            _comments.value = _comments.value.filterNot { 
+                it.userId == effectiveId || 
+                (cleanId.isNotBlank() && it.userId == cleanId) || 
+                (cleanName.isNotBlank() && it.userDisplayName.equals(cleanName, ignoreCase = true))
+            }
             actionFeedbackManager.emit(
-                UiText.StringResource(R.string.comment_block_user_success, authorName)
+                UiText.StringResource(R.string.comment_block_user_success, cleanName.ifBlank { "User" })
             )
         }
     }
@@ -674,6 +851,12 @@ class CommsUniViewModel @Inject constructor(
         }
     }
 
+    fun emitBlockedLink(reasonResId: Int) {
+        viewModelScope.launch {
+            actionFeedbackManager.emit(UiText.StringResource(reasonResId))
+        }
+    }
+
     fun deleteComment(commentId: String) {
         viewModelScope.launch {
             // Optimistic: remove immediately
@@ -682,7 +865,17 @@ class CommsUniViewModel @Inject constructor(
             currentList.removeAll { it.id == commentId }
             _comments.value = currentList
 
-            val result = commsUniRepository.deleteComment(commentId)
+            val isFlickTrove = removed?.originSlug?.equals("flicktrove", ignoreCase = true) == true || removed?.originSlug.isNullOrBlank()
+            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
+                try {
+                    commentRepository.deleteComment(currentRawMediaId, commentId)
+                } catch (_: Exception) {}
+            }
+            val result = if (currentEntityId.isNotBlank() && !isFlickTrove) {
+                commsUniRepository.deleteComment(commentId)
+            } else {
+                Result.success(true)
+            }
             if (result.isFailure) {
                 // Revert
                 removed?.let {
@@ -698,39 +891,51 @@ class CommsUniViewModel @Inject constructor(
 
     fun toggleLikeComment(commentId: String, mediaTitle: String, mediaImage: String?) {
         val currentAuthUid = auth.currentUser?.uid ?: return
-        val uid = currentUserId ?: currentAuthUid
+        val authorId = currentAuthorId
+        val actorId = currentActorId
         viewModelScope.launch {
             val currentList = _comments.value.toMutableList()
             val commentIndex = currentList.indexOfFirst { it.id == commentId }
             if (commentIndex == -1) return@launch
             
             val comment = currentList[commentIndex]
-            val isLiked = comment.likedBy.contains(uid)
+            val isLiked = isCommentLikedByMe(comment)
+            val myIds = listOfNotNull(currentAuthUid, authorId, actorId)
             
             // Optimistic update
             val newLikedBy = if (isLiked) {
-                comment.likedBy.filter { it != uid }
+                comment.likedBy.filterNot { it in myIds }
             } else {
-                comment.likedBy + uid
+                (comment.likedBy + currentAuthUid).distinct()
             }
             
             val updatedComment = comment.copy(
                 likedBy = newLikedBy,
-                likesCount = comment.likesCount + if (isLiked) -1 else 1,
-                nativeLikes = comment.nativeLikes + if (isLiked) -1 else 1
+                likesCount = maxOf(0, comment.likesCount + if (isLiked) -1 else 1),
+                nativeLikes = maxOf(0, comment.nativeLikes + if (isLiked) -1 else 1)
             )
             
             currentList[commentIndex] = updatedComment
             _comments.value = currentList
             
             // Network call
-            val result = if (isLiked) {
-                commsUniRepository.unlikeComment(commentId)
+            val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
+            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
+                try {
+                    commentRepository.toggleLike(currentRawMediaId, commentId, currentEntityType, mediaTitle, mediaImage)
+                } catch (_: Exception) {}
+            }
+            val result = if (currentEntityId.isNotBlank()) {
+                if (isLiked) {
+                    commsUniRepository.unlikeComment(commentId)
+                } else {
+                    commsUniRepository.likeComment(commentId)
+                }
             } else {
-                commsUniRepository.likeComment(commentId)
+                Result.success(Unit)
             }
             
-            if (result.isFailure) {
+            if (result.isFailure && !isFlickTrove) {
                 // Revert
                 val revertList = _comments.value.toMutableList()
                 val revertIndex = revertList.indexOfFirst { it.id == commentId }
@@ -883,31 +1088,56 @@ class CommsUniViewModel @Inject constructor(
         val parentParam = if (isNested) commentId else null
 
         viewModelScope.launch {
-            val result = commsUniRepository.getReplies(
-                commentId = rootId,
-                sort = "most_recent",
-                limit = 50,
-                parent = parentParam,
-                source = currentSourceFilter,
-                language = currentLanguageFilter
-            )
-            
-            result.onSuccess { response ->
-                val currentList = _comments.value.toMutableList()
-                val existingIds = currentList.map { it.id }.toSet()
-                
-                // Map replies and ensure parentId points to commentId if not set, and rootCommentId is preserved
-                val newMapped = extractAllComments(response.data.allItems, cachedSourcesMap)
-                    .map { reply ->
-                        val effectiveParentId = if (reply.parentId.isNullOrBlank()) commentId else reply.parentId
-                        val effectiveRootId = if (reply.rootCommentId.isNullOrBlank()) rootId else reply.rootCommentId
-                        reply.copy(parentId = effectiveParentId, rootCommentId = effectiveRootId)
+            val currentList = _comments.value.toMutableList()
+            val existingIds = currentList.map { it.id }.toSet()
+            val newReplies = mutableListOf<com.cinetrack.data.model.AppComment>()
+
+            // 1. Fetch Firestore replies if rawMediaId is present
+            if (currentRawMediaId.isNotBlank()) {
+                try {
+                    val fReplies = commentRepository.getRepliesForComment(currentRawMediaId, commentId).map { reply ->
+                        reply.copy(
+                            parentId = commentId,
+                            rootCommentId = rootId,
+                            originSlug = if (reply.originSlug.isNullOrBlank()) "flicktrove" else reply.originSlug,
+                            originName = if (reply.originName.isNullOrBlank()) "FlickTrove" else reply.originName,
+                            originColor = if (reply.originColor.isNullOrBlank()) "#2dd4bf" else reply.originColor
+                        )
                     }
+                    newReplies.addAll(fReplies)
+                } catch (e: Exception) {
+                    android.util.Log.e("CommsUniViewModel", "Failed to load Firestore replies for $commentId", e)
+                }
+            }
+
+            // 2. Fetch CommsUni replies if entityId is present
+            if (currentEntityId.isNotBlank()) {
+                val result = commsUniRepository.getReplies(
+                    commentId = rootId,
+                    sort = "most_recent",
+                    limit = 50,
+                    parent = parentParam,
+                    source = currentSourceFilter,
+                    language = currentLanguageFilter
+                )
                 
-                val toAdd = newMapped.filterNot { existingIds.contains(it.id) }
-                
+                result.onSuccess { response ->
+                    val newMapped = extractAllComments(response.data.allItems, cachedSourcesMap)
+                        .map { reply ->
+                            val effectiveParentId = if (reply.parentId.isNullOrBlank()) commentId else reply.parentId
+                            val effectiveRootId = if (reply.rootCommentId.isNullOrBlank()) rootId else reply.rootCommentId
+                            reply.copy(parentId = effectiveParentId, rootCommentId = effectiveRootId)
+                        }
+                    newReplies.addAll(newMapped)
+                }.onFailure { error ->
+                    android.util.Log.e("CommsUniViewModel", "Failed to load CommsUni replies for $commentId (root: $rootId, parent: $parentParam)", error)
+                }
+            }
+
+            if (newReplies.isNotEmpty()) {
+                val toAdd = newReplies.distinctBy { it.id }.filterNot { existingIds.contains(it.id) }
                 val fixedExisting = currentList.map { existing ->
-                    val fixedReply = newMapped.find { it.id == existing.id }
+                    val fixedReply = newReplies.find { it.id == existing.id }
                     if (fixedReply != null && existing.parentId.isNullOrBlank()) {
                         existing.copy(parentId = commentId, rootCommentId = rootId)
                     } else existing
@@ -915,8 +1145,6 @@ class CommsUniViewModel @Inject constructor(
                 
                 fixedExisting.addAll(toAdd)
                 _comments.value = fixedExisting
-            }.onFailure { error ->
-                android.util.Log.e("CommsUniViewModel", "Failed to load replies for $commentId (root: $rootId, parent: $parentParam)", error)
             }
         }
     }

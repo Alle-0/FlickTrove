@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -61,6 +63,7 @@ interface DetailCommentsEntryPoint {
     fun translationManager(): com.cinetrack.util.TranslationManager
     fun preferenceRepository(): com.cinetrack.data.repository.PreferenceRepository
     fun actionFeedbackManager(): com.cinetrack.ui.utils.ActionFeedbackManager
+    fun blockedAuthorsManager(): com.cinetrack.data.repository.BlockedAuthorsManager
 }
 
 @Composable
@@ -72,6 +75,17 @@ fun DetailComments(
     onLikeClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val entryPoint = remember(context) {
+        dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            DetailCommentsEntryPoint::class.java
+        )
+    }
+    val blockedAuthorsManager = remember(entryPoint) { entryPoint.blockedAuthorsManager() }
+    val blockedAuthorIds by blockedAuthorsManager.blockedAuthorIds.collectAsState()
+    val blockedAuthorNames by blockedAuthorsManager.blockedAuthorNames.collectAsState()
+
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -116,11 +130,23 @@ fun DetailComments(
             )
         }
 
-        val sortedComments = remember(comments) {
+        val sortedComments = remember(comments, blockedAuthorIds, blockedAuthorNames) {
             comments.filter { 
-                val isEffectivelyDeleted = it.isDeleted || it.userId.isBlank() || (it.text.isBlank() && it.userDisplayName.isBlank())
-                it.depth == 0 && !isEffectivelyDeleted 
-            }.sortedByDescending { it.likesCount }.take(5)
+                val isEffectivelyDeleted = it.isEffectivelyDeleted
+                val cleanName = it.userDisplayName.trim().lowercase()
+                val cleanId = it.userId.trim()
+                val isBlocked = (cleanId.isNotBlank() && (cleanId in blockedAuthorIds || "name_$cleanId" in blockedAuthorIds)) ||
+                    (cleanName.isNotBlank() && (cleanName in blockedAuthorNames || "name_$cleanName" in blockedAuthorIds || cleanName in blockedAuthorIds))
+                it.depth == 0 && !isEffectivelyDeleted && !isBlocked
+            }.sortedWith(
+                compareByDescending<AppComment> {
+                    it.originSlug.equals("flicktrove", ignoreCase = true) || it.originSlug.isBlank()
+                }.thenByDescending {
+                    it.likesCount
+                }.thenByDescending {
+                    it.createdAt?.seconds ?: 0L
+                }
+            ).take(5)
         }
 
         if (sortedComments.isEmpty()) {
@@ -305,18 +331,84 @@ private fun CommentCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val username = comment.userDisplayName.takeIf { it.isNotBlank() } ?: stringResource(R.string.comment_anonymous_user)
-                Text(
-                    text = username,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    ),
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                ) {
+                    val username = comment.userDisplayName.takeIf { it.isNotBlank() } ?: stringResource(R.string.comment_anonymous_user)
+                    Text(
+                        text = username,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        ),
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    
+                    val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
+                    if (isFlickTrove) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF2DD4BF).copy(alpha = 0.18f))
+                                .border(1.dp, Color(0xFF2DD4BF).copy(alpha = 0.45f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_flicktrove_logo),
+                                contentDescription = "FlickTrove",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(width = 12.5.dp, height = 9.6.dp)
+                            )
+                        }
+                    } else if (comment.originSlug.isNotBlank()) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        val parsedColor = comment.originColor?.let {
+                            try {
+                                Color(android.graphics.Color.parseColor(it))
+                            } catch (_: Exception) {
+                                null
+                            }
+                        }
+                        val originColor = parsedColor ?: run {
+                            val hue = (comment.originSlug.fold(0) { acc, c -> acc * 31 + c.code }
+                                .and(0x7FFFFFFF) % 360).toFloat()
+                            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.65f, 0.9f)))
+                        }
+                        val originIconUrl = comment.originIcon?.takeIf { it.isNotBlank() }
+
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(originColor.copy(alpha = 0.18f))
+                                .border(1.dp, originColor.copy(alpha = 0.45f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (!originIconUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = originIconUrl,
+                                    contentDescription = comment.originName,
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_world),
+                                    contentDescription = comment.originName,
+                                    tint = originColor,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                            }
+                        }
+                    }
+                }
                 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -420,9 +512,10 @@ private fun CommentCard(
                     is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslation.text
                     else -> comment.text
                 }
-                val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+                val mediaRegex = Regex("!\\[.*?\\]\\((.*?)\\)")
                 val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
-                val mediaUrls = mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList()
+                val inlineMediaUrls = mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList()
+                val mediaUrls = (inlineMediaUrls + comment.attachedMedia).distinct()
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column(
                         modifier = Modifier
@@ -452,6 +545,13 @@ private fun CommentCard(
                                 coil.compose.AsyncImage(
                                     model = coil.request.ImageRequest.Builder(context)
                                         .data(mediaUrl)
+                                        .crossfade(true)
+                                        .apply {
+                                            if (mediaUrl.contains("commsuni.tv")) {
+                                                addHeader("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
+                                                addHeader("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                            }
+                                        }
                                         .build(),
                                     contentDescription = "Attachment",
                                     modifier = Modifier

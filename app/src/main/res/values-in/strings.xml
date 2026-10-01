@@ -1379,4 +1379,20 @@
     <string name="filter_source">SUMBER</string>
     <string name="filter_source_all">Semua (CommsUni)</string>
     <string name="filter_source_flicktrove">Hanya FlickTrove</string>
+    <string name="settings_blocked_users_title">Pengguna diblokir</string>
+    <string name="settings_blocked_users_desc">Lihat dan kelola orang yang diblokir</string>
+    <string name="settings_blocked_users_subtitle">Orang yang Anda blokir di komentar</string>
+    <string name="settings_blocked_users_empty">Tidak ada pengguna yang diblokir</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Meninggalkan FlickTrove</string>
+    <string name="external_link_warning_desc">Anda akan mengunjungi situs web eksternal yang dibagikan di komentar. FlickTrove tidak bertanggung jawab atas konten, privasi, atau keamanan pihak ketiga.</string>
+    <string name="external_link_warning_continue">Kunjungi Situs</string>
+    <string name="external_link_error_no_browser">Tidak dapat membuka tautan. Tidak ada browser yang ditemukan.</string>
+    <string name="link_security_invalid_scheme">Tautan diblokir: skema URL tidak didukung atau tidak aman.</string>
+    <string name="link_security_ip_blocked">Tautan diblokir: alamat IP langsung tidak diizinkan demi keamanan.</string>
+    <string name="link_security_deceptive">Tautan diblokir: terdeteksi URL yang menyesatkan.</string>
+    <string name="link_security_punycode">Tautan diblokir: terdeteksi domain mencurigakan.</string>
+    <string name="link_security_dangerous_file">Tautan diblokir: unduhan file langsung tidak diizinkan.</string>
+    <string name="link_security_malformed">Tautan web tidak valid atau salah format.</string>
 </resources>

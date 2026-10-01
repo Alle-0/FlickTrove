@@ -20,7 +20,23 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
             .build()
 
     override fun newImageLoader(): coil.ImageLoader {
+        val okHttpClient = okhttp3.OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+                if (request.url.host.contains("commsuni.tv")) {
+                    val authenticatedRequest = request.newBuilder()
+                        .header("Authorization", "Bearer ${BuildConfig.COMMSUNI_API_KEY}")
+                        .header("User-Agent", "FlickTrove-Android/${BuildConfig.VERSION_NAME}")
+                        .build()
+                    chain.proceed(authenticatedRequest)
+                } else {
+                    chain.proceed(request)
+                }
+            }
+            .build()
+
         return coil.ImageLoader.Builder(this)
+            .okHttpClient(okHttpClient)
             .memoryCache {
                 coil.memory.MemoryCache.Builder(this)
                     .maxSizePercent(0.25)

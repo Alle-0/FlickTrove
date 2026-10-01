@@ -1310,6 +1310,22 @@
     <string name="filter_source">ORIGEM</string>
     <string name="filter_source_all">Todos (CommsUni)</string>
     <string name="filter_source_flicktrove">Apenas FlickTrove</string>
+    <string name="settings_blocked_users_title">Usuários bloqueados</string>
+    <string name="settings_blocked_users_desc">Ver e gerenciar pessoas bloqueadas</string>
+    <string name="settings_blocked_users_subtitle">Pessoas que você bloqueou nos comentários</string>
+    <string name="settings_blocked_users_empty">Nenhum usuário bloqueado</string>
+    <string name="comment_destination_commsuni">CommsUni</string>
+    <string name="comment_destination_flicktrove">FlickTrove</string>
+    <string name="external_link_warning_title">Saindo do FlickTrove</string>
+    <string name="external_link_warning_desc">Você está prestes a visitar um site externo compartilhado nos comentários. O FlickTrove não é responsável por conteúdo, privacidade ou segurança de terceiros.</string>
+    <string name="external_link_warning_continue">Visitar site</string>
+    <string name="external_link_error_no_browser">Não foi possível abrir o link. Nenhum navegador encontrado.</string>
+    <string name="link_security_invalid_scheme">Link bloqueado: esquema de URL não compatível ou inseguro.</string>
+    <string name="link_security_ip_blocked">Link bloqueado: endereços IP diretos não são permitidos por segurança.</string>
+    <string name="link_security_deceptive">Link bloqueado: URL enganosa detectada.</string>
+    <string name="link_security_punycode">Link bloqueado: domínio suspeito detectado.</string>
+    <string name="link_security_dangerous_file">Link bloqueado: download direto de arquivo não permitido.</string>
+    <string name="link_security_malformed">Link da web inválido ou malformado.</string>
 </resources>
 
 
