@@ -191,6 +191,7 @@ class CommsUniViewModel @Inject constructor(
 
     private var currentEntityId: String = ""
     private var currentEntityType: String = ""
+    private var currentTitle: String? = null
 
     // Translation State (Identical logic to old CommentsViewModel)
     // Uses CommentsViewModel.TranslationState for compatibility with UI components
@@ -248,6 +249,9 @@ class CommsUniViewModel @Inject constructor(
     ) {
         if (rawMediaId.isNotBlank()) {
             currentRawMediaId = rawMediaId
+        }
+        if (!title.isNullOrBlank()) {
+            currentTitle = title
         }
         val normalizedType = if (entityType.lowercase() in listOf("tv", "series", "show")) "show" else "movie"
         if (tvdbId != null && tvdbId > 0) {
@@ -632,7 +636,13 @@ class CommsUniViewModel @Inject constructor(
                 if (parentId != null) {
                     commsUniRepository.createReply(parentId, text, isSpoiler)
                 } else {
-                    commsUniRepository.createComment(currentEntityType, currentEntityId, text, isSpoiler)
+                    commsUniRepository.createComment(
+                        entityType = currentEntityType,
+                        entityId = currentEntityId,
+                        text = text,
+                        isSpoiler = isSpoiler,
+                        title = currentTitle
+                    )
                 }
             } else if (!postToCommsUni && currentRawMediaId.isNotBlank()) {
                 // Destinazione FlickTrove: salva solo su Firestore locale

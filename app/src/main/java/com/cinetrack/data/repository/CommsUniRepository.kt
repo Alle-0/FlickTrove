@@ -165,9 +165,31 @@ class CommsUniRepository @Inject constructor(
         }
     }
 
-    suspend fun createComment(entityType: String, entityId: String, text: String, isSpoiler: Boolean, language: String? = null): Result<com.cinetrack.data.api.CommsUniComment> {
+    suspend fun createComment(
+        entityType: String,
+        entityId: String,
+        text: String,
+        isSpoiler: Boolean,
+        language: String? = null,
+        title: String? = null
+    ): Result<com.cinetrack.data.api.CommsUniComment> {
         return try {
-            val response = commsUniService.createComment(entityType, entityId, com.cinetrack.data.api.CommsUniWriteCommentRequest(text = text, language = language, isSpoiler = isSpoiler))
+            val entityPayload = if (!title.isNullOrBlank()) {
+                com.cinetrack.data.api.CommsUniEntityPayload(
+                    title = title,
+                    showTitle = title
+                )
+            } else null
+            val response = commsUniService.createComment(
+                entityType,
+                entityId,
+                com.cinetrack.data.api.CommsUniWriteCommentRequest(
+                    text = text,
+                    language = language,
+                    isSpoiler = isSpoiler,
+                    entity = entityPayload
+                )
+            )
             if (response.isSuccessful) {
                 response.body()?.let { Result.success(it.data.comment) } ?: Result.failure(Exception("Empty body"))
             } else {

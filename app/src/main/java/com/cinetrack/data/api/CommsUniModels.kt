@@ -149,11 +149,19 @@ data class CommsUniMedia(
 )
 
 @Serializable
+data class CommsUniEntityPayload(
+    val title: String? = null,
+    val showTitle: String? = null
+)
+
+@Serializable
 data class CommsUniWriteCommentRequest(
     val text: String,
     val language: String? = null,
     val isSpoiler: Boolean = false,
-    val rating: Double? = null
+    val rating: Double? = null,
+    val entity: CommsUniEntityPayload? = null,
+    val createdAt: String? = null
 )
 
 enum class CommsUniReportReason(val value: String) {
