@@ -72,41 +72,46 @@ class WatchHistoryRepository @Inject constructor(
 
     suspend fun syncWatchHistoryFromRemote(remoteHistory: List<WatchHistoryEntity>) {
         val localHistoryList = watchHistoryDao.getAllWatchHistory()
+        // Key: "movieId_watchedAt" — unique identity for a watch event
         val localHistory = localHistoryList.associateBy { "${it.movieId}_${it.watchedAt}" }
         val remoteHistoryMap = remoteHistory.associateBy { "${it.movieId}_${it.watchedAt}" }
 
         val historyToInsert = mutableListOf<WatchHistoryEntity>()
         val historyToDelete = mutableListOf<WatchHistoryEntity>()
 
-        for (remoteEntry in remoteHistory) {
-            val local = localHistory["${remoteEntry.movieId}_${remoteEntry.watchedAt}"]
-            val remoteEntity = remoteEntry.copy(syncStatus = "synced")
+        // Cache pending-delete set once to avoid N+1 queries inside the loop
+        val pendingDeleteKeys = watchHistoryDao.getPendingSync()
+            .filter { it.syncStatus == "deleted" }
+            .map { "${it.movieId}_${it.watchedAt}" }
+            .toHashSet()
 
-            if (local == null) {
-                val isPendingDelete = watchHistoryDao.getPendingSync().any {
-                    it.movieId == remoteEntry.movieId && it.watchedAt == remoteEntry.watchedAt && it.syncStatus == "deleted"
+        for (remoteEntry in remoteHistory) {
+            val key = "${remoteEntry.movieId}_${remoteEntry.watchedAt}"
+            val local = localHistory[key]
+
+            when {
+                // Entry doesn't exist locally → insert it, unless the user deleted it locally
+                local == null -> {
+                    if (key !in pendingDeleteKeys) {
+                        historyToInsert.add(remoteEntry.copy(syncStatus = "synced"))
+                    }
                 }
-                if (!isPendingDelete) {
-                    historyToInsert.add(remoteEntity)
-                }
-            } else {
-                if (local.syncStatus == "synced") {
-                    historyToInsert.add(remoteEntity)
-                }
+                // Entry exists locally and is already in sync → nothing to do (skip to avoid phantom REPLACE)
+                local.syncStatus == "synced" -> { /* already up-to-date, do nothing */ }
+                // Entry exists locally with "pending" or other status → user modified it locally; respect local data
+                else -> { /* local wins, do nothing */ }
             }
         }
 
+        // Entries that exist locally (as "synced") but are absent from remote → remote deleted them
         for ((key, localEntry) in localHistory) {
-            if (!remoteHistoryMap.containsKey(key)) {
-                if (localEntry.syncStatus == "synced") {
-                    historyToDelete.add(localEntry)
-                }
+            if (!remoteHistoryMap.containsKey(key) && localEntry.syncStatus == "synced") {
+                historyToDelete.add(localEntry)
             }
         }
 
         if (historyToInsert.isNotEmpty()) {
-            val chunks = historyToInsert.chunked(50)
-            chunks.forEach { chunk ->
+            historyToInsert.chunked(50).forEach { chunk ->
                 watchHistoryDao.insertAll(chunk)
             }
         }
@@ -114,6 +119,6 @@ class WatchHistoryRepository @Inject constructor(
         for (entryToDelete in historyToDelete) {
             watchHistoryDao.delete(entryToDelete)
         }
-        android.util.Log.d("WatchHistoryRepository", "Successfully synchronized watch history")
+        android.util.Log.d("WatchHistoryRepository", "syncWatchHistoryFromRemote: inserted=${historyToInsert.size}, deleted=${historyToDelete.size}")
     }
 }

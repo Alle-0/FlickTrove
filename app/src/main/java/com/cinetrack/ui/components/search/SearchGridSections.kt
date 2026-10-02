@@ -540,7 +540,7 @@ fun LazyGridScope.searchTrendingCollectionsSection(
     collectionSpan: Int,
     keyboardController: SoftwareKeyboardController?,
     favorites: List<Movie> = emptyList(),
-    onCollectionClick: (Long, String?) -> Unit
+    onCollectionClick: (String, String?) -> Unit
 ) {
     if (trendingCollections.isNotEmpty() || isLoading) {
         item(span = { GridItemSpan(12) }) {
@@ -567,7 +567,7 @@ fun LazyGridScope.searchTrendingCollectionsSection(
                         favorites = favorites,
                         onClick = {
                             keyboardController?.hide()
-                            onCollectionClick(item.id, item.name)
+                            onCollectionClick(item.editorialId ?: item.id.toString(), item.name)
                         }
                     )
                 }
@@ -584,16 +584,72 @@ fun LazyGridScope.searchTrendingCollectionsSection(
     }
 }
 
+fun LazyGridScope.searchEditorialCollectionsVetrina(
+    editorialCollections: List<com.cinetrack.data.model.EditorialCollection>,
+    keyboardController: SoftwareKeyboardController?,
+    favorites: List<Movie> = emptyList(),
+    onCollectionClick: (String, String?) -> Unit
+) {
+    if (editorialCollections.isNotEmpty()) {
+        item(span = { GridItemSpan(12) }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Text(
+                    text = "Raccolte Editoriali",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                )
+                
+                androidx.compose.foundation.lazy.LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        count = editorialCollections.size,
+                        key = { index -> "editorial_${editorialCollections[index].id}" }
+                    ) { index ->
+                        val ed = editorialCollections[index]
+                        val result = TMDBSearchResult.CollectionResult(
+                            id = kotlin.math.abs(ed.id.hashCode()).toLong(),
+                            name = ed.title,
+                            posterPath = ed.posterPath,
+                            backdropPath = ed.backdropPath,
+                            overview = ed.description,
+                            partsCount = ed.items.size,
+                            editorialId = ed.id
+                        )
+                        CollectionCollageCard(
+                            collection = result,
+                            favorites = favorites,
+                            modifier = Modifier.width(300.dp),
+                            onClick = {
+                                keyboardController?.hide()
+                                onCollectionClick(ed.id, ed.title)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 @Composable
 fun CollectionCollageCard(
     collection: TMDBSearchResult.CollectionResult,
     favorites: List<Movie> = emptyList(),
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val backdropUrl = buildTmdbImageUrl(collection.backdropPath ?: collection.posterPath, ImageType.BACKDROP, LocalImageQuality.current)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(160.dp)
             .bounceClick(scaleDown = 0.96f) { onClick() }
@@ -734,7 +790,7 @@ fun LazyGridScope.searchResultsGridSection(
     precomputedFolderColors: Map<String, List<Color>>? = null,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit,
-    onCollectionClick: (Long, String?) -> Unit,
+    onCollectionClick: (String, String?) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit
@@ -845,7 +901,7 @@ fun LazyGridScope.searchResultsGridSection(
                     favorites = favorites,
                     onClick = {
                         keyboardController?.hide()
-                        onCollectionClick(item.id, item.name)
+                        onCollectionClick(item.editorialId ?: item.id.toString(), item.name)
                     }
                 )
             }

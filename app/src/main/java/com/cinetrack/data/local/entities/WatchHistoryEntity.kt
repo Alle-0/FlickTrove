@@ -6,7 +6,10 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Entity(tableName = "watch_history", indices = [Index("movieId")])
+@Entity(
+    tableName = "watch_history",
+    indices = [Index("movieId"), Index(value = ["movieId", "watchedAt"], unique = true)]
+)
 data class WatchHistoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

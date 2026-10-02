@@ -151,7 +151,7 @@ data class SearchScreen(
                         navigator.push(PersonDetailScreen(personId, null))
                     },
                     onCollectionClick = { collectionId, collectionName ->
-                        navigator.push(CollectionDetailScreen(collectionId, collectionName))
+                        navigator.push(CollectionDetailScreen(collectionId.toString(), collectionName))
                     },
                     onDiscoverTrendingClick = { requestedType ->
                         DiscoverTab.requestedType = requestedType
@@ -178,7 +178,7 @@ fun SearchScreenContent(
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit = {},
-    onCollectionClick: (Long, String?) -> Unit = { _, _ -> },
+    onCollectionClick: (String, String?) -> Unit = { _, _ -> },
     onDiscoverTrendingClick: ((String) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()

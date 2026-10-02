@@ -72,7 +72,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 data class CollectionDetailScreen(
-    val collectionId: Long,
+    val collectionId: String,
     val collectionName: String? = null
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey

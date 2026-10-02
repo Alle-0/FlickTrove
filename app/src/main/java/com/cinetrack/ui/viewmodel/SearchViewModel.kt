@@ -53,7 +53,8 @@ data class SearchUiState(
     val togglingIds: PersistentSet<Long> = persistentSetOf(),
     val errorMessage: String? = null,
     val suggestedFilters: ImmutableList<FilterPill> = persistentListOf(),
-    val isLocalOnly: Boolean = false // true when showing local library results due to POOR/OFFLINE connection
+    val isLocalOnly: Boolean = false, // true when showing local library results due to POOR/OFFLINE connection
+    val editorialCollections: ImmutableList<com.cinetrack.data.model.EditorialCollection> = persistentListOf()
 )
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -66,7 +67,8 @@ class SearchViewModel @Inject constructor(
     private val tmdbService: TMDBService,
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     private val actionFeedbackManager: ActionFeedbackManager,
-    private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase
+    private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase,
+    private val editorialCollectionRepository: com.cinetrack.data.repository.EditorialCollectionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -86,18 +88,25 @@ class SearchViewModel @Inject constructor(
     ): List<TMDBSearchResult.CollectionResult> = kotlinx.coroutines.coroutineScope {
         collections.map { col ->
             async {
-                try {
-                    partsSemaphore.withPermit {
-                        val details = tmdbService.getCollectionDetails(col.id)
-                        val posters = details.parts.mapNotNull { it.posterPath }.take(4)
-                        col.copy(
-                            partsPosterPaths = posters,
-                            partsCount = details.parts.size,
-                            partsIds = details.parts.map { it.id }
-                        )
+                if (col.editorialId != null) {
+                    val editorialCol = editorialCollectionRepository.getCollection(col.editorialId)
+                    col.copy(
+                        partsCount = editorialCol?.items?.size ?: 0
+                    )
+                } else {
+                    try {
+                        partsSemaphore.withPermit {
+                            val details = tmdbService.getCollectionDetails(col.id)
+                            val posters = details.parts.mapNotNull { it.posterPath }.take(4)
+                            col.copy(
+                                partsPosterPaths = posters,
+                                partsCount = details.parts.size,
+                                partsIds = details.parts.map { it.id }
+                            )
+                        }
+                    } catch (e: Exception) {
+                        col
                     }
-                } catch (e: Exception) {
-                    col
                 }
             }
         }.awaitAll()
@@ -166,6 +175,11 @@ class SearchViewModel @Inject constructor(
             preferenceRepository.userPreferencesFlow.collect { prefs ->
                 _uiState.update { it.copy(preferences = prefs) }
             }
+        }
+
+        viewModelScope.launch {
+            val collections = editorialCollectionRepository.getAllCollections()
+            _uiState.update { it.copy(editorialCollections = collections.toImmutableList()) }
         }
 
         viewModelScope.launch {
@@ -319,7 +333,26 @@ class SearchViewModel @Inject constructor(
                         }
                         "collection" -> {
                             val response = tmdbService.searchCollection(query, page = page)
-                            newBatch = enrichCollectionsWithParts(response.results)
+                            
+                            val rawCollections = if (page == 1) {
+                                val editorialCollections = editorialCollectionRepository.getAllCollections()
+                                val matched = editorialCollections.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }.map { ed ->
+                                    TMDBSearchResult.CollectionResult(
+                                        id = kotlin.math.abs(ed.id.hashCode()).toLong(),
+                                        name = ed.title,
+                                        posterPath = ed.posterPath,
+                                        backdropPath = ed.backdropPath,
+                                        overview = ed.description,
+                                        partsCount = ed.items.size,
+                                        editorialId = ed.id
+                                    )
+                                }
+                                matched + response.results
+                            } else {
+                                response.results
+                            }
+                            
+                            newBatch = enrichCollectionsWithParts(rawCollections)
                             totalPages = response.totalPages ?: 1
                         }
                         else -> {

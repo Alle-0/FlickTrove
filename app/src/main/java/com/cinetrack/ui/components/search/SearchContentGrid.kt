@@ -62,7 +62,7 @@ fun SearchContentGrid(
     animatedMovieIds: MutableSet<String>?,
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit,
-    onCollectionClick: (Long, String?) -> Unit,
+    onCollectionClick: (String, String?) -> Unit,
     onDiscoverTrendingClick: ((String) -> Unit)?,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
@@ -165,6 +165,15 @@ fun SearchContentGrid(
             val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection")
 
             if (showEmptySearch) {
+                if (uiState.category == "collection") {
+                    searchEditorialCollectionsVetrina(
+                        editorialCollections = uiState.editorialCollections,
+                        keyboardController = keyboardController,
+                        favorites = uiState.favorites,
+                        onCollectionClick = onCollectionClick
+                    )
+                }
+
                 if (uiState.category == "movie") {
                     searchTrendingMoviesSection(
                         trendingMovies = uiState.trendingMovies,

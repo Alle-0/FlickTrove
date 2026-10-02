@@ -320,10 +320,10 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
-          Apri in FlickTrove
+          <span id="txt-open-app">Open in FlickTrove</span>
         </a>
 
-        <div class="divider" id="divider" style="display:none;">oppure</div>
+        <div class="divider" id="divider" style="display:none;">or</div>
 
         <a id="btn-play-store"
            href="https://github.com/Alle-0/FlickTrove/releases/latest"
@@ -332,16 +332,16 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          Scarica da GitHub
+          <span id="txt-download">Download from GitHub</span>
         </a>
       </div>
     </div>
   </div>
 
-  <p class="footnote">
-    Non hai l'app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Scaricala gratis da GitHub Releases</a>.<br>
-    Potrebbe essere necessario abilitare <em>"Installa da origini sconosciute"</em> nelle impostazioni Android.<br>
-    <a href="https://alle-0.github.io/FlickTrove/">Scopri FlickTrove →</a>
+  <p class="footnote" id="footnote">
+    Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Download it free from GitHub Releases</a>.<br>
+    You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br>
+    <a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>
   </p>
 
 </div>
@@ -356,6 +356,8 @@
   const params  = new URLSearchParams(window.location.search);
   const type    = params.get('type') || 'movie';  // movie | tv | person
   const id      = params.get('id');
+  const t       = params.get('t');
+  const p       = params.get('p');
 
   // --- Elements ---
   const titleEl     = document.getElementById('content-title');
@@ -365,10 +367,38 @@
   const typeBadge   = document.getElementById('type-badge');
   const btnOpenApp  = document.getElementById('btn-open-app');
   const divider     = document.getElementById('divider');
+  
+  // --- I18n ---
+  const userLang = navigator.language || navigator.userLanguage || 'en';
+  const isIt = userLang.toLowerCase().startsWith('it');
+  
+  const i18n = {
+    type_movie: isIt ? 'Film' : 'Movie',
+    type_tv: isIt ? 'Serie TV' : 'TV Show',
+    type_person: isIt ? 'Persona' : 'Person',
+    type_collection: isIt ? 'Collezione' : 'Collection',
+    type_fallback: isIt ? 'Contenuto' : 'Content',
+    open_app: isIt ? 'Apri in FlickTrove' : 'Open in FlickTrove',
+    or: isIt ? 'oppure' : 'or',
+    download: isIt ? 'Scarica da GitHub' : 'Download from GitHub',
+    footnote: isIt 
+      ? `Non hai l'app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Scaricala gratis da GitHub Releases</a>.<br>Potrebbe essere necessario abilitare <em>"Installa da origini sconosciute"</em> nelle impostazioni Android.<br><a href="https://alle-0.github.io/FlickTrove/">Scopri FlickTrove →</a>`
+      : `Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Download it free from GitHub Releases</a>.<br>You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br><a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>`,
+    fallback_title: isIt ? 'Contenuto FlickTrove' : 'FlickTrove Content',
+    invalid_link: isIt ? 'Link non valido' : 'Invalid link',
+    collection_parts: isIt ? 'film nella collezione' : 'movies in the collection',
+    fallback_meta: isIt ? "Apri nell'app per vedere i dettagli" : "Open in app to see details",
+    tmdb_lang: isIt ? 'it-IT' : 'en-US'
+  };
+  
+  document.getElementById('txt-open-app').textContent = i18n.open_app;
+  document.getElementById('divider').textContent = i18n.or;
+  document.getElementById('txt-download').textContent = i18n.download;
+  document.getElementById('footnote').innerHTML = i18n.footnote;
 
   // --- Type label ---
-  const typeLabels = { movie: 'Film', tv: 'Serie TV', person: 'Persona', collection: 'Collezione' };
-  typeBadge.textContent = typeLabels[type] || 'Contenuto';
+  const typeLabels = { movie: i18n.type_movie, tv: i18n.type_tv, person: i18n.type_person, collection: i18n.type_collection };
+  typeBadge.textContent = typeLabels[type] || i18n.type_fallback;
 
   // --- Deep link intent URL (custom scheme, still works if app is installed) ---
   if (id) {
@@ -380,14 +410,41 @@
 
   // --- Fetch metadata from TMDB (public API, no key needed for basic info) ---
   async function fetchTmdb() {
-    if (!id) { showFallback('Link non valido'); return; }
+    if (!id) { showFallback(i18n.invalid_link); return; }
+
+    if (t) {
+      titleEl.textContent  = t;
+      titleEl.classList.remove('skeleton');
+      titleEl.style.width  = '';
+      titleEl.style.height = '';
+      document.title = `${t} — FlickTrove`;
+      
+      metaEl.textContent   = i18n.fallback_meta;
+      metaEl.classList.remove('skeleton');
+      metaEl.style.width  = '';
+      metaEl.style.height = '';
+    }
+    
+    if (p) {
+      posterImg.src = `${TMDB_IMAGE_BASE}w500${p}`;
+      posterImg.onload = () => {
+        posterImg.classList.add('loaded');
+        posterPh.style.display = 'none';
+      };
+      posterImg.onerror = () => { /* keep placeholder */ };
+    }
+    
+    // If we have enough data from the URL, skip TMDB API to avoid 401 Unauthorized (since TMDB_READ_TOKEN is empty)
+    if (t && p) {
+       return;
+    }
 
     try {
       let endpoint = '';
-      if (type === 'movie')  endpoint = `/movie/${id}?language=it-IT`;
-      if (type === 'tv')     endpoint = `/tv/${id}?language=it-IT`;
-      if (type === 'person') endpoint = `/person/${id}?language=it-IT`;
-      if (type === 'collection') endpoint = `/collection/${id}?language=it-IT`;
+      if (type === 'movie')  endpoint = `/movie/${id}?language=${i18n.tmdb_lang}`;
+      if (type === 'tv')     endpoint = `/tv/${id}?language=${i18n.tmdb_lang}`;
+      if (type === 'person') endpoint = `/person/${id}?language=${i18n.tmdb_lang}`;
+      if (type === 'collection') endpoint = `/collection/${id}?language=${i18n.tmdb_lang}`;
 
       // Try TMDB without auth (public endpoints return limited data but title is available)
       const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
@@ -400,7 +457,7 @@
       const data = await res.json();
 
       // Title
-      const title = data.title || data.name || 'Contenuto FlickTrove';
+      const title = data.title || data.name || i18n.fallback_title;
       titleEl.textContent  = title;
       titleEl.classList.remove('skeleton');
       titleEl.style.width  = '';
@@ -412,7 +469,7 @@
       if (data.first_air_date) metaText = data.first_air_date.slice(0,4);
       if (data.genres?.length) metaText += (metaText ? ' · ' : '') + data.genres.slice(0,2).map(g => g.name).join(', ');
       if (data.known_for_department) metaText = data.known_for_department;
-      if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} film nella collezione`;
+      if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} ${i18n.collection_parts}`;
       metaEl.textContent = metaText;
       metaEl.classList.remove('skeleton');
       metaEl.style.width  = '';
@@ -438,9 +495,9 @@
   }
 
   function showFallback(msg) {
-    titleEl.textContent  = 'Contenuto FlickTrove';
+    titleEl.textContent  = i18n.fallback_title;
     titleEl.classList.remove('skeleton');
-    metaEl.textContent   = msg || 'Apri nell\'app per vedere i dettagli';
+    metaEl.textContent   = msg || i18n.fallback_meta;
     metaEl.classList.remove('skeleton');
     titleEl.style.width = metaEl.style.width = '';
     titleEl.style.height = metaEl.style.height = '';

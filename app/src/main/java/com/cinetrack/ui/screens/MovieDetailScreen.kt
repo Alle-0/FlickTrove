@@ -707,7 +707,7 @@ fun MovieDetailScreenContent(
                                         onLongPress = actionsState.onLongPress,
                                         onAction = { movie -> viewModel.onEvent(DetailEvent.CycleStatus(movie)) },
                                         onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) },
-                                        onCollectionClick = { id, name -> navigator.push(com.cinetrack.ui.screens.CollectionDetailScreen(id, name)) },
+                                        onCollectionClick = { id, name -> navigator.push(com.cinetrack.ui.screens.CollectionDetailScreen(id.toString(), name)) },
                                         animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))

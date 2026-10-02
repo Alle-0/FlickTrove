@@ -14,6 +14,7 @@ import com.cinetrack.data.api.CollectionResponse
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.repository.MovieRepository
+import com.cinetrack.data.repository.EditorialCollectionRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.utils.ActionFeedbackManager
@@ -41,7 +42,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 data class CollectionDetailUiState(
-    val collectionId: Long = 0L,
+    val collectionId: String = "",
     val collectionName: String? = null,
     val collection: CollectionResponse? = null,
     val isLoading: Boolean = true,
@@ -56,12 +57,13 @@ data class CollectionDetailUiState(
 class CollectionDetailViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val repository: MovieRepository,
+    private val editorialRepository: EditorialCollectionRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _collectionId = MutableStateFlow<Long>(0L)
+    private val _collectionId = MutableStateFlow<String>("")
     private var _collectionName: String? = null
     private val _isLoading = MutableStateFlow(true)
     private val _collection = MutableStateFlow<CollectionResponse?>(null)
@@ -101,8 +103,8 @@ class CollectionDetailViewModel @Inject constructor(
         }
     }
 
-    fun initCollection(id: Long, name: String?) {
-        if (_collectionId.value == 0L && id != 0L) {
+    fun initCollection(id: String, name: String?) {
+        if (_collectionId.value == "" && id != "") {
             _collectionId.value = id
             _collectionName = name
             viewModelScope.launch {
@@ -174,22 +176,45 @@ class CollectionDetailViewModel @Inject constructor(
         initialValue = CollectionDetailUiState()
     )
 
-    private fun fetchCollection(id: Long) {
+    private fun fetchCollection(id: String) {
         _collectionId.value = id
         viewModelScope.launch {
             val startTime = System.currentTimeMillis()
             _isLoading.value = true
             _error.value = null
             try {
-                repository.getCollectionDetailsFlow(id).collect { details ->
-                    // Sort parts by release date chronologically so saga films are in correct viewing sequence!
-                    val sortedParts = details.parts.map { movie ->
-                        if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
-                    }.sortedBy { movie ->
-                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                if (!id.all { it.isDigit() }) {
+                    val editorialCollection = editorialRepository.getCollection(id)
+                    if (editorialCollection != null) {
+                        val moviesWithIndex = editorialRepository.getCollectionMovies(id)
+                        val sortedParts = moviesWithIndex.sortedBy { it.second }.map { it.first }
+                        
+                        val firstMovie = sortedParts.firstOrNull()
+                        val mockResponse = CollectionResponse(
+                            id = id.hashCode().toLong(),
+                            name = editorialCollection.title,
+                            overview = editorialCollection.description,
+                            posterPath = firstMovie?.posterPath,
+                            backdropPath = firstMovie?.backdropPath ?: firstMovie?.posterPath,
+                            parts = sortedParts
+                        )
+                        _collection.value = mockResponse
+                    } else {
+                        _error.value = "Collection non trovata"
                     }
-                    _collection.value = details.copy(parts = sortedParts)
                     _isLoading.value = false
+                } else {
+                    val idLong = id.toLongOrNull() ?: return@launch
+                    repository.getCollectionDetailsFlow(idLong).collect { details ->
+                        // Sort parts by release date chronologically so saga films are in correct viewing sequence!
+                        val sortedParts = details.parts.map { movie ->
+                            if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                        }.sortedBy { movie ->
+                            movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                        }
+                        _collection.value = details.copy(parts = sortedParts)
+                        _isLoading.value = false
+                    }
                 }
             } catch (e: Exception) {
                 if (_collection.value == null) {
@@ -201,7 +226,7 @@ class CollectionDetailViewModel @Inject constructor(
     }
 
     fun retry() {
-        if (_collectionId.value != 0L) {
+        if (_collectionId.value != "") {
             fetchCollection(_collectionId.value)
         }
     }

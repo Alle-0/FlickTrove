@@ -50,7 +50,7 @@ fun MainDeepLinkHandler(
                 if (id != null) {
                     when (type) {
                         "person" -> rootNavigator.push(PersonDetailScreen(id, null))
-                        "collection" -> rootNavigator.push(CollectionDetailScreen(id, null))
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(id.toString(), null))
                         else -> rootNavigator.push(MovieDetailScreen(id, type))
                     }
                 }
@@ -81,7 +81,7 @@ fun MainDeepLinkHandler(
                 if (id != null) {
                     when (type) {
                         "person" -> rootNavigator.push(PersonDetailScreen(id, null))
-                        "collection" -> rootNavigator.push(CollectionDetailScreen(id, null))
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(id.toString(), null))
                         else -> rootNavigator.push(MovieDetailScreen(id, type, openComments = openComments, targetCommentId = targetCommentId))
                     }
                 }
