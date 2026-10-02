@@ -52,10 +52,10 @@ data class EditorialCollectionScreen(val collectionId: String) : Screen {
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            // Sfondo Cinematico basato sulla prima card se disponibile
+            // Sfondo Cinematico basato sulla cover della raccolta o sul primo elemento
             val firstMovie = uiState.movies.firstOrNull()?.first
             CinematicBackground(
-                backdropUrl = firstMovie?.posterPath,
+                backdropUrl = uiState.collection?.backdropPath ?: uiState.collection?.posterPath ?: firstMovie?.posterPath,
                 modifier = Modifier.fillMaxSize()
             )
 

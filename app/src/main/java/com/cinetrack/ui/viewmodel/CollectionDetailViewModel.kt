@@ -194,8 +194,8 @@ class CollectionDetailViewModel @Inject constructor(
                             id = id.hashCode().toLong(),
                             name = editorialCollection.title,
                             overview = editorialCollection.description,
-                            posterPath = firstMovie?.posterPath,
-                            backdropPath = firstMovie?.backdropPath ?: firstMovie?.posterPath,
+                            posterPath = editorialCollection.posterPath ?: firstMovie?.posterPath,
+                            backdropPath = editorialCollection.backdropPath ?: editorialCollection.posterPath ?: firstMovie?.backdropPath ?: firstMovie?.posterPath,
                             parts = sortedParts
                         )
                         _collection.value = mockResponse
