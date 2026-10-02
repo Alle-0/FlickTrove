@@ -24,6 +24,10 @@ object MovieMapper {
         val regionalReleaseDate = if (type == "movie") {
             val regionalReleases = response.releaseDates?.results?.find { it.iso31661 == region }?.releaseDates
             regionalReleases?.find { it.type == 3 }?.releaseDate?.take(10)
+                ?: regionalReleases?.find { it.type == 4 }?.releaseDate?.take(10)
+                ?: regionalReleases?.find { it.type == 2 }?.releaseDate?.take(10)
+                ?: regionalReleases?.find { it.type == 5 }?.releaseDate?.take(10)
+                ?: regionalReleases?.find { it.type == 6 }?.releaseDate?.take(10)
                 ?: regionalReleases?.firstOrNull()?.releaseDate?.take(10)
                 ?: response.releaseDate
         } else {

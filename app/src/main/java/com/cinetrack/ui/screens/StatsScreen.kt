@@ -434,7 +434,7 @@ fun StatsScreenContent(
                                     rightValue = stats.tvWatched,
                                     rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
                                     accentColor = MaterialTheme.colorScheme.primary,
-                                    rightSuffix = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null
+                                    rightSuffix = if (stats.totalEpisodes > 0) " • ${stringResource(R.string.stats_episodes_short, stats.totalEpisodes)}" else null
                                 )
 
                                 Spacer(Modifier.height(10.dp))

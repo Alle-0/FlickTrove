@@ -231,23 +231,32 @@ class StatsViewModel @Inject constructor(
         val watchedTVUnique = watched.filter { it.mediaType == "tv" }
         val watchedTV = if (filteredHistory != null) {
             watchedTVUnique.flatMap { m ->
-                val historyCount = filteredHistory.count { it.movieId == m.id }
+                val rewatchesInPeriod = filteredHistory.filter { it.movieId == m.id && it.isRewatch }
+                val firstWatchInPeriod = filteredHistory.any { it.movieId == m.id && !it.isRewatch }
                 val totalHistoryCount = allHistory.count { it.movieId == m.id }
                 
-                val fullWatchCopy = m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false)
                 val result = mutableListOf<Movie>()
                 
-                for (i in 0 until historyCount) {
-                    result.add(fullWatchCopy)
+                for (rewatch in rewatchesInPeriod) {
+                    val historicalMap = try {
+                        if (rewatch.historicalEpisodes != null) {
+                            kotlinx.serialization.json.Json.decodeFromString<Map<String, List<Int>>>(rewatch.historicalEpisodes)
+                        } else null
+                    } catch (e: Exception) { null }
+                    
+                    if (historicalMap != null) {
+                        result.add(m.copy(watched = false, watchedEpisodes = historicalMap, dropped = false))
+                    } else {
+                        result.add(m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false))
+                    }
                 }
                 
-                if (m.watched) {
-                    if (totalHistoryCount == 0) {
-                        result.add(m)
-                    }
-                } else {
+                if (firstWatchInPeriod) {
+                    result.add(m)
+                } else if (totalHistoryCount == 0) {
+                    // Fallback for older entries without watch history
                     val currentEps = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    if (currentEps > 0 || totalHistoryCount == 0) {
+                    if (m.watched || currentEps > 0) {
                         result.add(m)
                     }
                 }
@@ -255,12 +264,32 @@ class StatsViewModel @Inject constructor(
                 result
             }
         } else {
-            watchedTVUnique.map { m ->
-                if (allHistory.any { it.movieId == m.id }) {
-                    m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false)
-                } else {
-                    m
+            watchedTVUnique.flatMap { m ->
+                val rewatches = allHistory.filter { it.movieId == m.id && it.isRewatch }
+                val result = mutableListOf<Movie>()
+                
+                // Add historical watches
+                for (rewatch in rewatches) {
+                    val historicalMap = try {
+                        if (rewatch.historicalEpisodes != null) {
+                            kotlinx.serialization.json.Json.decodeFromString<Map<String, List<Int>>>(rewatch.historicalEpisodes)
+                        } else null
+                    } catch (e: Exception) { null }
+                    
+                    if (historicalMap != null) {
+                        result.add(m.copy(watched = false, watchedEpisodes = historicalMap, dropped = false))
+                    } else {
+                        result.add(m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false))
+                    }
                 }
+                
+                // Add the current active watch (first watch or current progress of next rewatch)
+                val currentEps = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
+                if (m.watched || currentEps > 0 || allHistory.any { it.movieId == m.id && !it.isRewatch }) {
+                    result.add(m)
+                }
+                
+                result
             }
         }
 
@@ -277,7 +306,8 @@ class StatsViewModel @Inject constructor(
         val tvStats = watchedTV.map { m ->
             val watchedCount = m.watchedEpisodes?.values?.sumOf { it.size }?.takeIf { it > 0 }
                 ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
-            var avgRunTime = m.episodeRunTime?.firstOrNull() ?: 45
+            val isComedyOrAnim = m.genreIds?.any { it == 35L || it == 16L } == true
+            var avgRunTime = m.episodeRunTime?.firstOrNull() ?: m.runtime?.takeIf { it > 0 } ?: if (isComedyOrAnim) 22 else 45
             if (avgRunTime > 240) {
                 val totalEps = m.numberOfEpisodes?.takeIf { it > 0 } ?: 1
                 val calculatedAvg = avgRunTime / totalEps

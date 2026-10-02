@@ -577,7 +577,8 @@ data class Movie(
     ): Int {
         val sNum = season.seasonNumber ?: 0
         if (sNum <= 0) return 0
-        val totalCount = season.episodeCount ?: 0
+        
+        val totalCount = season.episodes?.size ?: season.episodeCount ?: 0
         if (totalCount <= 0) return 0
 
         val effectiveMaxDatedSeason = if (maxDatedSeason > 0) {

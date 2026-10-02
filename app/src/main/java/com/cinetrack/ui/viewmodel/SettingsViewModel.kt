@@ -897,7 +897,7 @@ class SettingsViewModel @Inject constructor(
                 val userId = auth.currentUser?.uid ?: "anonymous"
                 val feedback = com.cinetrack.data.model.Feedback(
                     userId = userId,
-                    userEmail = email.ifBlank { auth.currentUser?.email ?: "" },
+                    userEmail = email.ifBlank { auth.currentUser?.email?.let { "$it (non inserita)" } ?: "Non inserita" },
                     title = title,
                     description = description,
                     rating = rating,

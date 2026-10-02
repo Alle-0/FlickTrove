@@ -996,13 +996,33 @@ class MovieDetailViewModel @Inject constructor(
             movieUpdateMutex.withLock {
                 val previousMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
                 val updated = when (watchState) {
-                    WatchState.NONE -> previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
-                    WatchState.DROPPED -> previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
+                    WatchState.NONE -> {
+                        if (mediaType == "tv") {
+                            previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                        } else {
+                            previousMovie.copy(favorite = false, watched = false, reminder = false, watchedAt = null, dropped = false)
+                        }
+                    }
+                    WatchState.DROPPED -> {
+                        if (mediaType == "tv") {
+                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true, watchedEpisodes = emptyMap(), progress = 0.0)
+                        } else {
+                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
+                        }
+                    }
                     WatchState.BOOKMARKED -> {
                         if (previousMovie.isReleased) {
-                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
+                            if (mediaType == "tv") {
+                                previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                            } else {
+                                previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
+                            }
                         } else {
-                            previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
+                            if (mediaType == "tv") {
+                                previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                            } else {
+                                previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
+                            }
                         }
                     }
                     WatchState.WATCHED -> {
@@ -1045,8 +1065,10 @@ class MovieDetailViewModel @Inject constructor(
                     val currentMovie = repository.getMovie(id, mediaType)
                     if (currentMovie != null) {
                         val updatedSeasons = currentMovie.seasons?.map {
-                            if (it.seasonNumber == seasonNumber) season else it
-                        } ?: listOf(season)
+                            if (it.seasonNumber == seasonNumber) {
+                                season.copy(episodeCount = season.episodes?.size ?: it.episodeCount ?: season.episodeCount)
+                            } else it
+                        } ?: listOf(season.copy(episodeCount = season.episodes?.size ?: season.episodeCount))
                         repository.saveMovie(currentMovie.copy(seasons = updatedSeasons))
                     }
                 }

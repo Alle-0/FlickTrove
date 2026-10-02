@@ -257,8 +257,8 @@ fun ContinueWatchingSeriesCard(
         }
     }
 
-    val formattedNextDate = remember(nextAirDate, movie.firstAirDate, movie.releaseDate) {
-        val rawDate = nextAirDate ?: (movie.firstAirDate ?: movie.releaseDate)?.take(10)
+    val formattedNextDate = remember(nextAirDate, movie.firstAirDate, movie.releaseDate, isReleased) {
+        val rawDate = nextAirDate ?: if (!isReleased) (movie.firstAirDate ?: movie.releaseDate)?.take(10) else null
         if (rawDate.isNullOrBlank()) null
         else {
             try {

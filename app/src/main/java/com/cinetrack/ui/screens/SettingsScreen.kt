@@ -1062,7 +1062,7 @@ fun SettingsScreenContent(
         SettingsFeedbackDialog(
             visible = showFeedbackDialog,
             activeHazeState = activeHazeState,
-            initialEmail = user?.email ?: "",
+            initialEmail = "",
             isLoading = isFeedbackLoading,
             onDismiss = { if (!isFeedbackLoading) showFeedbackDialog = false },
             onSubmit = { t, d, r, e ->
