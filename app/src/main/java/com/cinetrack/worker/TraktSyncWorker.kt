@@ -361,6 +361,34 @@ class TraktSyncWorker @AssistedInject constructor(
                         var updatedNumberOfEpisodes = local.numberOfEpisodes
                         var updatedPosterPath = local.posterPath
                         var updatedBackdropPath = local.backdropPath
+
+                        // Guard: if the user explicitly dropped this show locally, Trakt has no concept
+                        // of "dropped". We must never overwrite dropped=true with favorite=true or
+                        // change the watched flag based purely on episode count.
+                        // Only update metadata (poster, episode count) but preserve the user's intent.
+                        if (local.dropped) {
+                            if (local.posterPath.isNullOrEmpty() || local.numberOfEpisodes == null) {
+                                try {
+                                    val tmdbResponse = tmdbService.getTVBasicDetails(showTmdbId)
+                                    val mapped = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, "tv")
+                                    updatedPosterPath = mapped.posterPath ?: local.posterPath
+                                    updatedBackdropPath = mapped.backdropPath ?: local.backdropPath
+                                    updatedNumberOfEpisodes = if ((mapped.numberOfEpisodes ?: 0) > 0) mapped.numberOfEpisodes else local.numberOfEpisodes
+                                } catch (e: Exception) { /* non-fatal */ }
+                                if (updatedPosterPath != local.posterPath || updatedNumberOfEpisodes != local.numberOfEpisodes) {
+                                    episodeUpdates.add(local.copy(
+                                        posterPath = updatedPosterPath,
+                                        backdropPath = updatedBackdropPath,
+                                        numberOfEpisodes = updatedNumberOfEpisodes,
+                                        watchedEpisodes = seasonsMap, // keep episodes in sync for stats
+                                        syncStatus = "synced",
+                                        clientUpdatedAt = System.currentTimeMillis()
+                                    ))
+                                }
+                            }
+                            return // Preserve dropped state — do not touch watched/favorite
+                        }
+
                         if (totalEps == 0 || local.posterPath.isNullOrEmpty()) {
                             try {
                                 val tmdbResponse = tmdbService.getTVBasicDetails(showTmdbId)
@@ -375,7 +403,12 @@ class TraktSyncWorker @AssistedInject constructor(
                         }
 
                         val isCompleted = totalEps > 0 && totalWatched >= totalEps
-                        val shouldBeFavorite = if (!isCompleted && totalWatched > 0) true else if (isCompleted) false else local.favorite
+                        // Only move to watchlist if not already dropped/watched and has progress
+                        val shouldBeFavorite = when {
+                            isCompleted -> false
+                            !isCompleted && totalWatched > 0 -> true
+                            else -> local.favorite
+                        }
                         val progressVal = if (totalEps > 0) (totalWatched.toDouble() / totalEps.toDouble()).coerceIn(0.0, 1.0) else 0.0
 
                         if (seasonsMap != local.watchedEpisodes || local.watched != isCompleted || local.favorite != shouldBeFavorite || updatedNumberOfEpisodes != local.numberOfEpisodes || local.progress != progressVal || updatedPosterPath != local.posterPath) {
@@ -393,7 +426,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )
                             )
-                            
+
                             if (isRecent(lastWatchedAt)) {
                                 val localWatched = local.watchedEpisodes?.values?.sumOf { it.size } ?: 0
                                 val delta = totalWatched - localWatched
@@ -515,6 +548,9 @@ class TraktSyncWorker @AssistedInject constructor(
                             // verranno rimosse fisicamente dal TraktInstantWriteWorker dopo il
                             // push a Trakt. Resettarle qui le farebbe riapparire in continueWatching.
                             if (local.syncStatus == "pending_delete") continue
+                            // Guard: serie droppate — Trakt non conosce il concetto di "dropped",
+                            // quindi una serie droppata non apparirà in watchedShows. Non resettarla.
+                            if (local.dropped) continue
                             if ((!local.watchedEpisodes.isNullOrEmpty() || local.watched) && !processedShowTmdbIds.contains(local.id)) {
                                 episodeUpdates.add(
                                     local.copy(
