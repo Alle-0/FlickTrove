@@ -786,6 +786,9 @@
     <string name="settings_msg_import_error">Error de migración: comprueba el formato del archivo</string>
     <string name="settings_msg_import_started">Importación iniciada en segundo plano…</string>
     <string name="settings_msg_sync_details_started">Sincronización de detalles iniciada en segundo plano…</string>
+    <string name="search_editorial_collections">Colecciones Editoriales</string>
+    <string name="editorial_mcu_title">Universo Cinematográfico de Marvel</string>
+    <string name="editorial_mcu_desc">La Sagrada Línea Temporal completa del MCU: el orden narrativo definitivo que une películas, series de TV (Defenders, Agent Carter) y animación. Vive todo el arco épico en su secuencia cronológica exacta.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" eliminado</string>
     <string name="msg_item_deleted">\"%1$s\" borrado</string>

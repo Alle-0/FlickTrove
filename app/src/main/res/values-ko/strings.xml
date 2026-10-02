@@ -863,6 +863,9 @@
     <string name="settings_msg_import_error">가져오기 실패: 파일 형식을 확인하세요</string>
     <string name="settings_msg_import_started">백그라운드에서 가져오기 시작됨…</string>
     <string name="settings_msg_sync_details_started">백그라운드에서 세부정보 동기화 시작됨…</string>
+    <string name="search_editorial_collections">에디토리얼 컬렉션</string>
+    <string name="editorial_mcu_title">마블 시네마틱 유니버스</string>
+    <string name="editorial_mcu_desc">MCU 신성한 타임라인의 완성: 영화, TV 시리즈(디펜더스, 에이전트 카터), 애니메이션을 잇는 결정적인 서사 순서. 정확한 시간 순서로 전체 서사시를 경험하세요.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" 삭제됨</string>
     <string name="msg_item_deleted">\"%1$s\" 삭제됨</string>

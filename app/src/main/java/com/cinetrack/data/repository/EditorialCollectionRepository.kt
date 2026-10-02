@@ -1,8 +1,11 @@
 package com.cinetrack.data.repository
 
+import android.content.Context
+import com.cinetrack.R
 import com.cinetrack.data.model.EditorialCollection
 import com.cinetrack.data.model.Movie
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -13,14 +16,27 @@ import javax.inject.Singleton
 @Singleton
 class EditorialCollectionRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieRepository,
+    @ApplicationContext private val context: Context
 ) {
+
+    private fun localize(col: EditorialCollection): EditorialCollection {
+        return if (col.id == "marvel_mcu") {
+            col.copy(
+                title = context.getString(R.string.editorial_mcu_title),
+                description = context.getString(R.string.editorial_mcu_desc)
+            )
+        } else {
+            col
+        }
+    }
 
     suspend fun getCollection(collectionId: String): EditorialCollection? {
         return try {
             val doc = firestore.collection("editorial_collections").document(collectionId).get().await()
             if (doc.exists()) {
-                doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
+                val col = doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
+                col?.let { localize(it) }
             } else {
                 null
             }
@@ -34,7 +50,8 @@ class EditorialCollectionRepository @Inject constructor(
         return try {
             val snapshot = firestore.collection("editorial_collections").get().await()
             snapshot.documents.mapNotNull { doc ->
-                doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
+                val col = doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
+                col?.let { localize(it) }
             }
         } catch (e: Exception) {
             e.printStackTrace()

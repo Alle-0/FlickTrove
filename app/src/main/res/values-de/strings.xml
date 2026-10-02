@@ -785,6 +785,9 @@
     <string name="settings_msg_import_error">Migrationsfehler: Dateiformat überprüfen</string>
     <string name="settings_msg_import_started">Import im Hintergrund gestartet…</string>
     <string name="settings_msg_sync_details_started">Detailsynchronisierung im Hintergrund gestartet…</string>
+    <string name="search_editorial_collections">Redaktionelle Sammlungen</string>
+    <string name="editorial_mcu_title">Marvel Cinematic Universe</string>
+    <string name="editorial_mcu_desc">Die vollständige Heilige Zeitlinie des MCU: Die definitive narrative Reihenfolge, die Filme, TV-Serien (Defenders, Agent Carter) und Animation vereint. Erlebe die gesamte epische Saga in exakter chronologischer Reihenfolge.</string>
     <string name="msg_item_added_action">„%1$s“ %2$s</string>
     <string name="msg_item_removed">„%1$s“ entfernt</string>
     <string name="msg_item_deleted">„%1$s“ gelöscht</string>

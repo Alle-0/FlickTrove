@@ -863,6 +863,9 @@
     <string name="settings_msg_import_error">移行エラー: ファイル形式を確認してください</string>
     <string name="settings_msg_import_started">バックグラウンドでインポートを開始しました…</string>
     <string name="settings_msg_sync_details_started">バックグラウンドで詳細の同期を開始しました…</string>
+    <string name="search_editorial_collections">おすすめコレクション</string>
+    <string name="editorial_mcu_title">マーベル・シネマティック・ユニバース</string>
+    <string name="editorial_mcu_desc">MCU神聖時間軸の完全版：映画、TVシリーズ（ディフェンダーズ、エージェント・カーター）、アニメーションを繋ぐ決定版の物語順。壮大なサーガを正確な時系列順で体験しよう。</string>
     <string name="msg_item_added_action">「%1$s」を%2$s</string>
     <string name="msg_item_removed">「%1$s」を削除しました</string>
     <string name="msg_item_deleted">「%1$s」を削除しました</string>

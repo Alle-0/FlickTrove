@@ -863,6 +863,9 @@
     <string name="settings_msg_import_error">迁移失败：请检查文件格式</string>
     <string name="settings_msg_import_started">后台导入已启动…</string>
     <string name="settings_msg_sync_details_started">后台详细信息同步已启动…</string>
+    <string name="search_editorial_collections">編輯精選系列</string>
+    <string name="editorial_mcu_title">漫威電影宇宙</string>
+    <string name="editorial_mcu_desc">漫威電影宇宙完整神聖時間線：融合電影、電視影集（捍衛者聯盟、卡特探員）與動畫的終極敘事順序。依照精確的時間順序體驗這部壯闊史詩。</string>
     <string name="msg_item_added_action">“%1$s” %2$s</string>
     <string name="msg_item_removed">“%1$s” 已移除</string>
     <string name="msg_item_deleted">“%1$s” 已删除</string>

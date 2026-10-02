@@ -785,6 +785,9 @@
     <string name="settings_msg_import_error">Erreur de migration : vérifiez le format du fichier</string>
     <string name="settings_msg_import_started">Importation démarrée en arrière-plan…</string>
     <string name="settings_msg_sync_details_started">Synchronisation des détails démarrée en arrière-plan…</string>
+    <string name="search_editorial_collections">Collections Éditoriales</string>
+    <string name="editorial_mcu_title">Univers Cinématographique Marvel</string>
+    <string name="editorial_mcu_desc">L\'Éternel Flux Temporel complet du MCU : l\'ordre narratif définitif réunissant films, séries TV (Defenders, Agent Carter) et animation. Vivez toute l\'épopée dans son ordre chronologique exact.</string>
     <string name="msg_item_added_action">Â« %1$s Â» %2$s</string>
     <string name="msg_item_removed">Â« %1$s Â» supprimé</string>
     <string name="msg_item_deleted">Â« %1$s Â» effacé</string>

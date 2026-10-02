@@ -820,6 +820,9 @@
     <string name="settings_msg_import_error">Errore durante la migrazione: verifica il formato</string>
     <string name="settings_msg_import_started">Importazione avviata in background…</string>
     <string name="settings_msg_sync_details_started">Sincronizzazione dettagli avviata in background…</string>
+    <string name="search_editorial_collections">Raccolte Editoriali</string>
+    <string name="editorial_mcu_title">Marvel Cinematic Universe</string>
+    <string name="editorial_mcu_desc">La Sacra Linea Temporale completa del MCU: l\'ordine narrativo definitivo che unisce i film, le serie TV (Defenders, Agent Carter) e l\'animazione. Vivi l\'intero arco epico nell\'esatta sequenza cronologica.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" rimosso</string>
     <string name="msg_item_deleted">\"%1$s\" eliminato</string>

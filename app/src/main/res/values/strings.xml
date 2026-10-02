@@ -867,6 +867,9 @@
     <string name="settings_msg_import_error">Migration error: check file format</string>
     <string name="settings_msg_import_started">Import started in background…</string>
     <string name="settings_msg_sync_details_started">Details sync started in background…</string>
+    <string name="search_editorial_collections">Editorial Collections</string>
+    <string name="editorial_mcu_title">Marvel Cinematic Universe</string>
+    <string name="editorial_mcu_desc">The complete MCU Sacred Timeline: the definitive narrative order uniting movies, TV series (Defenders, Agent Carter), and animation. Experience the entire epic saga in exact chronological sequence.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removed</string>
     <string name="msg_item_deleted">\"%1$s\" deleted</string>

@@ -863,6 +863,9 @@
     <string name="settings_msg_import_error">Kesalahan migrasi: periksa format file</string>
     <string name="settings_msg_import_started">Impor dimulai di latar belakang…</string>
     <string name="settings_msg_sync_details_started">Sinkronisasi detail dimulai di latar belakang…</string>
+    <string name="search_editorial_collections">Koleksi Editorial</string>
+    <string name="editorial_mcu_title">Marvel Cinematic Universe</string>
+    <string name="editorial_mcu_desc">Garis Waktu Sakral MCU lengkap: urutan narasi definitif yang menggabungkan film, serial TV (Defenders, Agent Carter), dan animasi. Nikmati seluruh kisah epik dalam urutan kronologis yang tepat.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" dihapus</string>
     <string name="msg_item_deleted">\"%1$s\" dihapus</string>

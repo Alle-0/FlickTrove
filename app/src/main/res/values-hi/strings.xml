@@ -790,6 +790,9 @@
     <string name="settings_msg_import_error">माइग्रेशन त्रुटि: फ़ाइल प्रारूप की जाँच करें</string>
     <string name="settings_msg_import_started">पृष्ठभूमि में इम्पोर्ट शुरू हुआ…</string>
     <string name="settings_msg_sync_details_started">पृष्ठभूमि में विवरण सिंक शुरू हुआ…</string>
+    <string name="search_editorial_collections">संपादकीय संग्रह</string>
+    <string name="editorial_mcu_title">मार्वल सिनेमैटिक यूनिवर्स</string>
+    <string name="editorial_mcu_desc">MCU की संपूर्ण सेक्रेड टाइमलाइन: फिल्मों, टीवी सीरीज़ (Defenders, Agent Carter) और एनिमेशन को जोड़ने वाला निश्चित कथा क्रम। सटीक कालानुक्रमिक क्रम में पूरे महाकाव्य को जीएं।</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" हटा दिया गया</string>
     <string name="msg_item_deleted">\"%1$s\" हटा दिया गया</string>

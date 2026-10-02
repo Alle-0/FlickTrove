@@ -863,6 +863,9 @@
     <string name="settings_msg_import_error">Aktarım hatası: dosya biçimini kontrol edin</string>
     <string name="settings_msg_import_started">İçe aktarma arka planda başlatıldı…</string>
     <string name="settings_msg_sync_details_started">Ayrıntı senkronizasyonu arka planda başlatıldı…</string>
+    <string name="search_editorial_collections">Editör Koleksiyonları</string>
+    <string name="editorial_mcu_title">Marvel Sinematik Evreni</string>
+    <string name="editorial_mcu_desc">MCU\'nun eksiksiz Kutsal Zaman Çizelgesi: filmleri, TV dizilerini (Defenders, Agent Carter) ve animasyonları bir araya getiren kesin anlatı sırası. Tüm destanı tam kronolojik sırayla deneyimleyin.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" kaldırıldı</string>
     <string name="msg_item_deleted">\"%1$s\" silindi</string>

@@ -598,7 +598,7 @@ fun LazyGridScope.searchEditorialCollectionsVetrina(
                     .padding(bottom = 24.dp)
             ) {
                 Text(
-                    text = "Raccolte Editoriali",
+                    text = stringResource(R.string.search_editorial_collections),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
