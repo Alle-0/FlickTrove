@@ -15,9 +15,8 @@
 # Gradle & Build Outputs
 # =========================
 .gradle/
-/build/
-app/build/
-baselineprofile/build/
+build/
+**/build/
 release/
 *.apk
 *.aab
@@ -63,6 +62,7 @@ log.txt
 firebase-debug.log
 firebase-debug.*.log
 crashlytics-build.properties
+.firebase/
 
 # =========================
 # OS Generated Files
