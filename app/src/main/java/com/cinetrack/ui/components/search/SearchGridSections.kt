@@ -620,6 +620,7 @@ fun LazyGridScope.searchEditorialCollectionsVetrina(
                             backdropPath = ed.backdropPath,
                             overview = ed.description,
                             partsCount = ed.items.size,
+                            partsIds = ed.items.map { it.tmdbId },
                             editorialId = ed.id
                         )
                         CollectionCollageCard(

@@ -91,7 +91,8 @@ class SearchViewModel @Inject constructor(
                 if (col.editorialId != null) {
                     val editorialCol = editorialCollectionRepository.getCollection(col.editorialId)
                     col.copy(
-                        partsCount = editorialCol?.items?.size ?: 0
+                        partsCount = editorialCol?.items?.size ?: 0,
+                        partsIds = editorialCol?.items?.map { it.tmdbId } ?: emptyList()
                     )
                 } else {
                     try {
@@ -344,6 +345,7 @@ class SearchViewModel @Inject constructor(
                                         backdropPath = ed.backdropPath,
                                         overview = ed.description,
                                         partsCount = ed.items.size,
+                                        partsIds = ed.items.map { it.tmdbId },
                                         editorialId = ed.id
                                     )
                                 }
