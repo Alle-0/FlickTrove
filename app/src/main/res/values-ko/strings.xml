@@ -862,6 +862,7 @@
     <string name="settings_msg_import_success">%1$d개 항목을 성공적으로 가져왔습니다</string>
     <string name="settings_msg_import_error">가져오기 실패: 파일 형식을 확인하세요</string>
     <string name="settings_msg_import_started">백그라운드에서 가져오기 시작됨…</string>
+    <string name="settings_msg_sync_details_started">백그라운드에서 세부정보 동기화 시작됨…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" 삭제됨</string>
     <string name="msg_item_deleted">\"%1$s\" 삭제됨</string>

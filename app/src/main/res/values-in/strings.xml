@@ -862,6 +862,7 @@
     <string name="settings_msg_import_success">Berhasil mengimpor %1$d item</string>
     <string name="settings_msg_import_error">Kesalahan migrasi: periksa format file</string>
     <string name="settings_msg_import_started">Impor dimulai di latar belakang…</string>
+    <string name="settings_msg_sync_details_started">Sinkronisasi detail dimulai di latar belakang…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" dihapus</string>
     <string name="msg_item_deleted">\"%1$s\" dihapus</string>

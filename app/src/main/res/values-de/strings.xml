@@ -784,6 +784,7 @@
     <string name="settings_msg_import_success">%1$d Elemente erfolgreich importiert</string>
     <string name="settings_msg_import_error">Migrationsfehler: Dateiformat überprüfen</string>
     <string name="settings_msg_import_started">Import im Hintergrund gestartet…</string>
+    <string name="settings_msg_sync_details_started">Detailsynchronisierung im Hintergrund gestartet…</string>
     <string name="msg_item_added_action">„%1$s“ %2$s</string>
     <string name="msg_item_removed">„%1$s“ entfernt</string>
     <string name="msg_item_deleted">„%1$s“ gelöscht</string>

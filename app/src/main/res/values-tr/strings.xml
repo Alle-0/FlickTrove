@@ -862,6 +862,7 @@
     <string name="settings_msg_import_success">%1$d öge başarıyla içe aktarıldı</string>
     <string name="settings_msg_import_error">Aktarım hatası: dosya biçimini kontrol edin</string>
     <string name="settings_msg_import_started">İçe aktarma arka planda başlatıldı…</string>
+    <string name="settings_msg_sync_details_started">Ayrıntı senkronizasyonu arka planda başlatıldı…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" kaldırıldı</string>
     <string name="msg_item_deleted">\"%1$s\" silindi</string>

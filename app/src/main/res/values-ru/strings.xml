@@ -791,6 +791,7 @@
     <string name="settings_msg_import_success">Успешно импортировано %1$d элементов</string>
     <string name="settings_msg_import_error">Ошибка миграции: проверьте формат файла</string>
     <string name="settings_msg_import_started">Импорт начат в фоновом режиме…</string>
+    <string name="settings_msg_sync_details_started">Синхронизация сведений запущена в фоновом режиме…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" удален</string>
     <string name="msg_item_deleted">\"%1$s\" удален(о)</string>

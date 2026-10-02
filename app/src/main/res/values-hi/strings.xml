@@ -789,6 +789,7 @@
     <string name="settings_msg_import_success">%1$d आइटम सफलतापूर्वक इम्पोर्ट किए गए</string>
     <string name="settings_msg_import_error">माइग्रेशन त्रुटि: फ़ाइल प्रारूप की जाँच करें</string>
     <string name="settings_msg_import_started">पृष्ठभूमि में इम्पोर्ट शुरू हुआ…</string>
+    <string name="settings_msg_sync_details_started">पृष्ठभूमि में विवरण सिंक शुरू हुआ…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" हटा दिया गया</string>
     <string name="msg_item_deleted">\"%1$s\" हटा दिया गया</string>

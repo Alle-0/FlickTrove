@@ -862,6 +862,7 @@
     <string name="settings_msg_import_success">成功导入 %1$d 项内容</string>
     <string name="settings_msg_import_error">迁移失败：请检查文件格式</string>
     <string name="settings_msg_import_started">后台导入已启动…</string>
+    <string name="settings_msg_sync_details_started">后台详细信息同步已启动…</string>
     <string name="msg_item_added_action">“%1$s” %2$s</string>
     <string name="msg_item_removed">“%1$s” 已移除</string>
     <string name="msg_item_deleted">“%1$s” 已删除</string>

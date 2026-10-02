@@ -866,6 +866,7 @@
     <string name="settings_msg_import_success">Successfully imported %1$d items</string>
     <string name="settings_msg_import_error">Migration error: check file format</string>
     <string name="settings_msg_import_started">Import started in background…</string>
+    <string name="settings_msg_sync_details_started">Details sync started in background…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removed</string>
     <string name="msg_item_deleted">\"%1$s\" deleted</string>

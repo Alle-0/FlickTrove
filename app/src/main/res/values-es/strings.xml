@@ -785,6 +785,7 @@
     <string name="settings_msg_import_success">Se importaron con éxito %1$d elementos</string>
     <string name="settings_msg_import_error">Error de migración: comprueba el formato del archivo</string>
     <string name="settings_msg_import_started">Importación iniciada en segundo plano…</string>
+    <string name="settings_msg_sync_details_started">Sincronización de detalles iniciada en segundo plano…</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" eliminado</string>
     <string name="msg_item_deleted">\"%1$s\" borrado</string>

@@ -876,7 +876,7 @@ class SettingsViewModel @Inject constructor(
             workRequest
         )
         viewModelScope.launch {
-            actionFeedbackManager.emit(UiText.DynamicString("Sincronizzazione dettagli avviata in background"))
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_sync_details_started))
         }
     }
 

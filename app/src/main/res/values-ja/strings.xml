@@ -862,6 +862,7 @@
     <string name="settings_msg_import_success">%1$d件のアイテムをインポートしました</string>
     <string name="settings_msg_import_error">移行エラー: ファイル形式を確認してください</string>
     <string name="settings_msg_import_started">バックグラウンドでインポートを開始しました…</string>
+    <string name="settings_msg_sync_details_started">バックグラウンドで詳細の同期を開始しました…</string>
     <string name="msg_item_added_action">「%1$s」を%2$s</string>
     <string name="msg_item_removed">「%1$s」を削除しました</string>
     <string name="msg_item_deleted">「%1$s」を削除しました</string>
