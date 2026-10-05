@@ -253,8 +253,9 @@ fun TriStatPill(
     thirdIcon: ImageVector,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    secondSuffix: String? = null,
-    secondSubLabel: String? = null
+    firstDetail: String? = null,
+    secondDetail: String? = null,
+    thirdDetail: String? = null
 ) {
     Box(
         modifier = modifier
@@ -264,42 +265,18 @@ fun TriStatPill(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 14.dp),
+                .padding(horizontal = 8.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // First item
-            Row(
+            TriStatColumn(
+                value = firstValue,
+                label = firstLabel,
+                icon = firstIcon,
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(firstIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
-                }
-                Column(modifier = Modifier.weight(1f, fill = false)) {
-                    CountingText(
-                        target = firstValue,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-0.5).sp
-                    )
-                    Text(
-                        firstLabel,
-                        color = Color.White.copy(alpha = 0.45f),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.4.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+                detail = firstDetail
+            )
 
             // Divider 1
             Box(
@@ -310,52 +287,14 @@ fun TriStatPill(
             )
 
             // Second item
-            Row(
+            TriStatColumn(
+                value = secondValue,
+                label = secondLabel,
+                icon = secondIcon,
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Spacer(Modifier.width(2.dp))
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(secondIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
-                }
-                Column(modifier = Modifier.weight(1f, fill = false)) {
-                    CountingText(
-                        target = secondValue,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-0.5).sp,
-                        suffix = secondSuffix,
-                        suffixFontSize = 10.sp
-                    )
-                    if (secondSubLabel != null) {
-                        Text(
-                            text = secondSubLabel,
-                            color = accentColor,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.2.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Text(
-                        secondLabel,
-                        color = Color.White.copy(alpha = 0.45f),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.4.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+                detail = secondDetail
+            )
 
             // Divider 2
             Box(
@@ -366,39 +305,74 @@ fun TriStatPill(
             )
 
             // Third item
-            Row(
+            TriStatColumn(
+                value = thirdValue,
+                label = thirdLabel,
+                icon = thirdIcon,
+                accentColor = accentColor,
                 modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Spacer(Modifier.width(2.dp))
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(thirdIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
-                }
-                Column(modifier = Modifier.weight(1f, fill = false)) {
-                    CountingText(
-                        target = thirdValue,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-0.5).sp
-                    )
-                    Text(
-                        thirdLabel,
-                        color = Color.White.copy(alpha = 0.45f),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.4.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                detail = thirdDetail
+            )
+        }
+    }
+}
+
+@Composable
+private fun TriStatColumn(
+    value: Int,
+    label: String,
+    icon: ImageVector,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+    detail: String? = null
+) {
+    Row(
+        modifier = modifier.padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = accentColor, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(8.dp))
+        Column(
+            modifier = Modifier.weight(1f, fill = false),
+            verticalArrangement = Arrangement.Center
+        ) {
+            CountingText(
+                target = value,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = (-0.5).sp
+            )
+            if (detail != null) {
+                Text(
+                    text = detail,
+                    color = Color.White.copy(alpha = 0.45f),
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.2.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.offset(y = (-2).dp)
+                )
             }
+            Text(
+                text = label,
+                color = Color.White.copy(alpha = 0.45f),
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.4.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = if (detail != null) Modifier.offset(y = (-2).dp) else Modifier
+            )
         }
     }
 }

@@ -1415,6 +1415,7 @@
     <string name="filter_language">BAHASA</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv adalah lapisan komentar bersama untuk aplikasi serial dan film. Komentar, persatuan, TV — dari komunitas, untuk komunitas. Tumbuh dari TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Tumbuh dari TV Community Archive, proyek pelestarian yang dibuat pada Juli 2026 untuk menyimpan diskusi historis TV Time sebelum ditutup sambil melindungi privasi komunitas.</string>
     <string name="commsuni_info_connected">Komunitas Terhubung</string>
     <string name="settings_blocked_users_title">Pengguna diblokir</string>
     <string name="settings_blocked_users_desc">Lihat dan kelola orang yang diblokir</string>

@@ -75,18 +75,7 @@ fun CommentContextPreviewCard(
     comment: AppComment,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val isEffectivelyDeleted = comment.isEffectivelyDeleted
-    val avatarBgColor = remember(comment.userDisplayName, comment.originSlug) {
-        if (comment.userDisplayName.isNotBlank()) {
-            val hue = (comment.userDisplayName.fold(0) { acc, c -> acc * 31 + c.code }.and(0x7FFFFFFF) % 360).toFloat()
-            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.45f, 0.35f)))
-        } else {
-            Color(0xFF2A2A2A)
-        }
-    }
-    var isImageError by remember(comment.userAvatarUrl) { mutableStateOf(false) }
-
     val cleanPreviewText = remember(comment.text) {
         comment.text
             .replace(MEDIA_REGEX, "")
@@ -98,160 +87,103 @@ fun CommentContextPreviewCard(
             }
     }
 
-    Box(
+    val authorName = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted)
+                     else comment.userDisplayName.ifBlank { stringResource(R.string.comment_anonymous_user) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(1.dp, Color.White.copy(alpha = 0.09f), RoundedCornerShape(16.dp))
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = 8.dp)
     ) {
+        // Quoted text in italic, centered, elegant
+        Text(
+            text = "“${if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else cleanPreviewText}”",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                fontWeight = FontWeight.Normal,
+                fontSize = 13.5.sp,
+                lineHeight = 18.sp
+            ),
+            color = Color.White.copy(alpha = 0.80f),
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Author and Origin badge line
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.Center
         ) {
-            // Avatar (32.dp, CircleShape)
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(avatarBgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                val initial = comment.userDisplayName.trim().firstOrNull()?.uppercaseChar()
-                if (initial != null && initial.isLetterOrDigit()) {
-                    Text(
-                        text = initial.toString(),
-                        color = Color.White.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_persona),
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+            Text(
+                text = "— $authorName",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = Color.White.copy(alpha = 0.45f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-                val safeAvatarUrl = comment.userAvatarUrl.trim()
-                if (safeAvatarUrl.isNotBlank() && !isImageError) {
-                    val modelData: Any = if (safeAvatarUrl.startsWith("data:image", ignoreCase = true) && safeAvatarUrl.contains("base64,")) {
-                        try {
-                            val base64Data = safeAvatarUrl.substringAfter("base64,")
-                            android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
-                        } catch (e: Exception) {
-                            safeAvatarUrl
-                        }
-                    } else {
-                        safeAvatarUrl
+            if (comment.originSlug.isNotBlank() && !comment.originSlug.equals("flicktrove", ignoreCase = true)) {
+                Spacer(modifier = Modifier.width(6.dp))
+
+                val parsedColor = comment.originColor?.let {
+                    try {
+                        Color(android.graphics.Color.parseColor(it))
+                    } catch (e: Exception) {
+                        null
                     }
-
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(modelData)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = comment.userDisplayName,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        onError = { isImageError = true }
-                    )
                 }
-            }
+                val originColor = parsedColor ?: run {
+                    val hue = (comment.originSlug.fold(0) { acc, c -> acc * 31 + c.code }
+                        .and(0x7FFFFFFF) % 360).toFloat()
+                    Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.65f, 0.9f)))
+                }
+                val originIconUrl = comment.originIcon?.takeIf { it.isNotBlank() }
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // Body Column
-            Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .background(originColor.copy(alpha = 0.15f), CircleShape)
+                        .border(0.5.dp, originColor.copy(alpha = 0.35f), CircleShape)
+                        .padding(horizontal = 6.dp, vertical = 1.5.dp)
                 ) {
-                    Text(
-                        text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted)
-                               else comment.userDisplayName.ifBlank { stringResource(R.string.comment_anonymous_user) },
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-
-                    if (comment.originSlug.isNotBlank()) {
-                        Spacer(modifier = Modifier.width(6.dp))
-
-                        val parsedColor = comment.originColor?.let {
-                            try {
-                                Color(android.graphics.Color.parseColor(it))
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }
-                        val originColor = parsedColor ?: run {
-                            val hue = (comment.originSlug.fold(0) { acc, c -> acc * 31 + c.code }
-                                .and(0x7FFFFFFF) % 360).toFloat()
-                            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.65f, 0.9f)))
-                        }
-                        val originIconUrl = comment.originIcon?.takeIf { it.isNotBlank() }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                    if (!originIconUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = originIconUrl,
+                            contentDescription = null,
                             modifier = Modifier
-                                .background(originColor.copy(alpha = 0.18f), CircleShape)
-                                .border(1.dp, originColor.copy(alpha = 0.4f), CircleShape)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            if (comment.originSlug.equals("flicktrove", ignoreCase = true)) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_flicktrove_logo),
-                                    contentDescription = "FlickTrove",
-                                    tint = Color.Unspecified,
-                                    modifier = Modifier.size(width = 12.dp, height = 9.dp)
-                                )
-                            } else if (!originIconUrl.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = originIconUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(11.dp)
-                                        .clip(RoundedCornerShape(3.dp))
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_world),
-                                    contentDescription = null,
-                                    tint = originColor,
-                                    modifier = Modifier.size(10.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = comment.originName.ifBlank {
-                                    comment.originSlug.replaceFirstChar { char ->
-                                        if (char.isLowerCase()) char.titlecase(Locale.ROOT) else char.toString()
-                                    }
-                                },
-                                color = originColor,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 8.5.sp),
-                                maxLines = 1
-                            )
-                        }
+                                .size(10.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_world),
+                            contentDescription = null,
+                            tint = originColor,
+                            modifier = Modifier.size(9.dp)
+                        )
                     }
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = comment.originName.ifBlank {
+                            comment.originSlug.replaceFirstChar { char ->
+                                if (char.isLowerCase()) char.titlecase(Locale.ROOT) else char.toString()
+                            }
+                        },
+                        color = originColor,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 8.5.sp
+                        ),
+                        maxLines = 1
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Text(
-                    text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else cleanPreviewText,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.65f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
@@ -287,14 +219,12 @@ fun CommentReportModal(
         }
     }
 
-    MorphGlassModal(
+    FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
-        triggerBounds = triggerBounds,
-        hazeState = hazeState,
-        targetMaxWidth = 420.dp
+        hazeState = hazeState
     ) {
-        val c = displayComment ?: return@MorphGlassModal
+        val c = displayComment ?: return@FlickTroveModal
         val canBlock = onBlockUser != null && c.userId.isNotBlank()
 
         val isTvTime = remember(c.originSlug, c.originName, c.id, c.userDisplayName) {
@@ -311,9 +241,7 @@ fun CommentReportModal(
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 24.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             AnimatedContent(
                 targetState = currentStep,
@@ -356,12 +284,12 @@ fun CommentReportModal(
                             ModalCloseButton(onClick = onDismiss)
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Comment Preview Card
                         CommentContextPreviewCard(comment = c)
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Column(
                             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -546,12 +474,12 @@ fun CommentReportModal(
                             ModalCloseButton(onClick = onDismiss)
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Comment Preview Card
                         CommentContextPreviewCard(comment = c)
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
                             text = stringResource(R.string.comment_report_subtitle),
@@ -645,12 +573,12 @@ fun CommentReportModal(
                             ModalCloseButton(onClick = onDismiss)
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Comment Preview Card
                         CommentContextPreviewCard(comment = c)
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
                             text = stringResource(R.string.comment_report_other_subtitle),
@@ -785,12 +713,12 @@ fun CommentReportModal(
                             ModalCloseButton(onClick = onDismiss)
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         // Comment Preview Card
                         CommentContextPreviewCard(comment = c)
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
                             text = stringResource(R.string.comment_tvtime_ownership_subtitle),
@@ -1271,6 +1199,7 @@ fun CommsUniInfoModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .graphicsLayer { alpha = contentAlpha }
                 .padding(horizontal = 22.dp, vertical = 24.dp)
         ) {
@@ -1320,7 +1249,70 @@ fun CommsUniInfoModal(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // TV Community Archive section card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.04f))
+                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(16.dp))
+                    .padding(14.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "TV Community Archive",
+                        color = Color(0xFFFFD31A),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = stringResource(R.string.commsuni_info_archive_desc),
+                        color = Color.White.copy(alpha = 0.78f),
+                        style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .bounceClick {
+                                try {
+                                    val intent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse("https://tvtime-archive.com")
+                                    )
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {}
+                            }
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFFD31A).copy(alpha = 0.14f))
+                            .border(1.dp, Color(0xFFFFD31A).copy(alpha = 0.30f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Text(
+                            text = "tvtime-archive.com",
+                            color = Color(0xFFFFD31A),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_external_link),
+                            contentDescription = null,
+                            tint = Color(0xFFFFD31A),
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
@@ -1345,7 +1337,7 @@ fun CommsUniInfoModal(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_right),
+                        painter = painterResource(id = R.drawable.ic_external_link),
                         contentDescription = null,
                         tint = Color.Black,
                         modifier = Modifier.size(14.dp)

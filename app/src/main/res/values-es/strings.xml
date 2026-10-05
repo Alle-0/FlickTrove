@@ -1351,6 +1351,7 @@
     <string name="filter_language">IDIOMA</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv es una capa de comentarios compartida para apps de series y películas. Comentarios, unión, TV — de la comunidad, para la comunidad. Nacido del TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Nacido del TV Community Archive, un proyecto de preservación creado en julio de 2026 para salvar las conversaciones históricas de TV Time antes de su cierre, protegiendo la privacidad de la comunidad.</string>
     <string name="commsuni_info_connected">Comunidades Conectadas</string>
     <string name="settings_blocked_users_title">Usuarios bloqueados</string>
     <string name="settings_blocked_users_desc">Ver y administrar personas bloqueadas</string>

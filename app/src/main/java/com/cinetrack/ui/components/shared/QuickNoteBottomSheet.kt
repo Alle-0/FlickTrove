@@ -44,6 +44,12 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Delete
 
+@dagger.hilt.EntryPoint
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+interface QuickNoteEntryPoint {
+    fun movieRepository(): com.cinetrack.data.repository.MovieRepository
+}
+
 @Composable
 fun QuickNoteModal(
     movieId: Long,
@@ -55,9 +61,30 @@ fun QuickNoteModal(
     onSave: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var note by remember { mutableStateOf(initialNote) }
-    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val repository = remember(context) {
+        try {
+            dagger.hilt.android.EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                QuickNoteEntryPoint::class.java
+            ).movieRepository()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    var note by remember(initialNote) { mutableStateOf(initialNote) }
+
+    LaunchedEffect(movieId, mediaType, initialNote) {
+        if (note.isBlank() && repository != null) {
+            val local = repository.getMovie(movieId, mediaType)
+            if (!local?.personalNote.isNullOrBlank()) {
+                note = local.personalNote!!
+            }
+        }
+    }
+
+    val haptic = LocalHapticFeedback.current
     
     val audioHelper = remember { AudioRecorderHelper(context) }
     var hasAudio by remember { mutableStateOf(audioHelper.hasAudioNote(movieId, mediaType)) }

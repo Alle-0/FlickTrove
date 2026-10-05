@@ -1417,6 +1417,7 @@
     <string name="filter_language">LANGUAGE</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv is a shared comments layer for TV and movie apps. Comments, unity, TV — from the community, for the community. Grown out of the TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Born out of the TV Community Archive, a preservation project created in July 2026 to save historic TV Time discussions before its shutdown while ensuring user privacy.</string>
     <string name="commsuni_info_connected">Connected Communities</string>
     <string name="settings_blocked_users_title">Blocked users</string>
     <string name="settings_blocked_users_desc">View and manage blocked people</string>

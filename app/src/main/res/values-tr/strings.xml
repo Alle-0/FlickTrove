@@ -1416,6 +1416,7 @@
     <string name="filter_language">DİL</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv dizi ve film uygulamaları için ortak bir yorum katmanıdır. Yorumlar, birlik, TV — topluluktan, topluluk için. TV Community Archive projesinden doğmuştur.</string>
+    <string name="commsuni_info_archive_desc">Kullanıcı gizliliğini koruyarak kapanmadan önceki tarihi TV Time tartışmalarını kurtarmak için Temmuz 2026\'da başlatılan TV Community Archive projesinden doğmuştur.</string>
     <string name="commsuni_info_connected">Bağlı Topluluklar</string>
     <string name="settings_blocked_users_title">Engellenen kullanıcılar</string>
     <string name="settings_blocked_users_desc">Engellenen kişileri görüntüleyin ve yönetin</string>

@@ -1348,6 +1348,7 @@
     <string name="filter_language">SPRACHE</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv ist eine gemeinsame Kommentarebene für Serien- und Film-Apps. Kommentare, Einheit, TV — aus der Community, für die Community. Entstanden aus dem TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Entstanden aus dem TV Community Archive, einem Projekt aus dem Juli 2026, um historische TV Time-Diskussionen vor der Schließung zu bewahren und die Privatsphäre der Community zu schützen.</string>
     <string name="commsuni_info_connected">Verbundene Communities</string>
     <string name="settings_blocked_users_title">Blockierte Benutzer</string>
     <string name="settings_blocked_users_desc">Blockierte Personen anzeigen und verwalten</string>

@@ -1375,6 +1375,7 @@
     <string name="filter_language">LINGUA</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv è un livello di commenti condiviso per le app di cinema e serie TV. Commenti, unione, TV — dalla community, per la community. Nato dal TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Nato dal TV Community Archive, progetto di preservazione creato nel luglio 2026 per salvare le discussioni storiche di TV Time prima della chiusura, proteggendo la privacy della community.</string>
     <string name="commsuni_info_connected">Community Collegate</string>
     <string name="settings_blocked_users_title">Utenti bloccati</string>
     <string name="settings_blocked_users_desc">Visualizza e gestisci le persone bloccate</string>

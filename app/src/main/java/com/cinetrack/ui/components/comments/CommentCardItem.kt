@@ -75,7 +75,7 @@ fun CommentCardItem(
     onDeleteComment: () -> Unit,
     onReply: () -> Unit,
     onToggleLike: () -> Unit,
-    onReport: (Rect) -> Unit,
+    onReport: () -> Unit,
     onBlockUser: (() -> Unit)? = null,
     onTranslate: (text: String) -> Unit,
     onTriggerGuestAuth: () -> Unit,
@@ -565,19 +565,15 @@ fun CommentCardItem(
                         }
                         if (!isOwner) {
                             Spacer(modifier = Modifier.width(16.dp))
-                            var flagBounds by remember { mutableStateOf<Rect?>(null) }
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_flag),
                                 contentDescription = stringResource(R.string.comment_report_title),
                                 tint = Color.White.copy(alpha = 0.5f),
                                 modifier = Modifier
                                     .size(14.dp)
-                                    .onGloballyPositioned { coordinates ->
-                                        flagBounds = coordinates.boundsInWindow()
-                                    }
                                     .bounceClick {
                                         if (isUserAnonymous) onTriggerGuestAuth()
-                                        else onReport(flagBounds ?: Rect.Zero)
+                                        else onReport()
                                     }
                             )
                         }

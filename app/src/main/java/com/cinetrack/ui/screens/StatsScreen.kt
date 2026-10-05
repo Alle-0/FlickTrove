@@ -433,7 +433,7 @@ fun StatsScreenContent(
                                     secondLabel = stringResource(R.string.stats_watched),
                                     secondValue = stats.tvWatched,
                                     secondIcon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                                    secondSubLabel = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
+                                    secondDetail = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
                                     thirdLabel = stringResource(R.string.stats_completed),
                                     thirdValue = stats.tvCompleted,
                                     thirdIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),

@@ -35,6 +35,8 @@ class DetailUiStateMapper @Inject constructor(
         if (metadata == null) return DetailUiState.Loading
 
         val movie = localMovies.find { it.id == movieId && it.mediaType == mediaType }
+            ?: localMovies.find { it.id == movieId && (it.mediaType.isBlank() || mediaType.isBlank()) }
+            ?: localMovies.find { it.id == movieId }
         val freshMovie = MovieMapper.mapResponseToMovie(metadata, mediaType)
         
         val effectiveMovie = movie?.copy(

@@ -33,12 +33,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -100,21 +102,25 @@ fun CommentInputBar(
     val isCompact = !isExpanded
 
     val outerCorner by animateDpAsState(
-        targetValue = if (isCompact) 30.dp else 28.dp,
+        targetValue = 30.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
         label = "outerBoxCorner"
     )
     val boxShape = RoundedCornerShape(outerCorner)
-
     val outerInnerPaddingH by animateDpAsState(
-        targetValue = if (isCompact) 8.dp else 12.dp,
+        targetValue = if (isCompact) 8.dp else 14.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
         label = "outerInnerPaddingH"
     )
-    val outerInnerPaddingV by animateDpAsState(
-        targetValue = if (isCompact) 8.dp else 12.dp,
+    val outerInnerPaddingTop by animateDpAsState(
+        targetValue = if (isCompact) 8.dp else 14.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
-        label = "outerInnerPaddingV"
+        label = "outerInnerPaddingTop"
+    )
+    val outerInnerPaddingBottom by animateDpAsState(
+        targetValue = if (isCompact) 8.dp else 14.dp,
+        animationSpec = tween(250, easing = FastOutSlowInEasing),
+        label = "outerInnerPaddingBottom"
     )
 
     Box(
@@ -134,7 +140,12 @@ fun CommentInputBar(
                 shape = boxShape
             )
             .animateContentSize(alignment = Alignment.BottomCenter)
-            .padding(horizontal = outerInnerPaddingH, vertical = outerInnerPaddingV)
+            .padding(
+                start = outerInnerPaddingH,
+                end = outerInnerPaddingH,
+                top = outerInnerPaddingTop,
+                bottom = outerInnerPaddingBottom
+            )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             val lastReplyingTo = remember { mutableStateOf(replyingTo) }
@@ -424,13 +435,13 @@ fun CommentInputBar(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 8.dp, bottom = 4.dp, start = 2.dp, end = 2.dp),
+                                .padding(top = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Foto
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(32.dp)
                                     .bounceClick(enabled = attachedMedia.isEmpty() && !isUploadingImage) {
                                         if (!isUploadingImage) onPickImage()
                                     }
@@ -446,7 +457,7 @@ fun CommentInputBar(
                                         painter = painterResource(id = R.drawable.ic_image),
                                         contentDescription = "Foto",
                                         tint = Color.White.copy(alpha = fotoAlpha),
-                                        modifier = Modifier.size(17.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
@@ -456,7 +467,7 @@ fun CommentInputBar(
                             // GIF
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(32.dp)
                                     .bounceClick(enabled = attachedMedia.isEmpty()) {
                                         val fragmentManager = context.findFragmentActivity()?.supportFragmentManager
                                         if (fragmentManager != null) {
@@ -492,7 +503,7 @@ fun CommentInputBar(
                                     painter = painterResource(id = R.drawable.ic_gif),
                                     contentDescription = "GIF",
                                     tint = Color.White.copy(alpha = gifAlpha),
-                                    modifier = Modifier.size(17.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
 
@@ -501,7 +512,7 @@ fun CommentInputBar(
                             // Markdown pencil toggle
                             Box(
                                 modifier = Modifier
-                                    .size(34.dp)
+                                    .size(32.dp)
                                     .bounceClick { isMarkdownMenuExpanded = !isMarkdownMenuExpanded }
                                     .clip(CircleShape)
                                     .background(if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f))
@@ -512,7 +523,7 @@ fun CommentInputBar(
                                     painter = painterResource(id = R.drawable.ic_pencil),
                                     contentDescription = "Markdown",
                                     tint = if (isMarkdownMenuExpanded) accentColor else Color.White.copy(alpha = 0.75f),
-                                    modifier = Modifier.size(17.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
 
@@ -537,7 +548,7 @@ fun CommentInputBar(
                                         else Color.White.copy(alpha = 0.15f),
                                         CircleShape
                                     )
-                                    .padding(horizontal = 9.dp),
+                                    .padding(horizontal = 11.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Row(
@@ -548,14 +559,20 @@ fun CommentInputBar(
                                         painter = painterResource(id = if (isSpoiler) R.drawable.ic_eye_off else R.drawable.ic_eye),
                                         contentDescription = stringResource(R.string.comment_spoiler_toggle),
                                         tint = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
-                                        modifier = Modifier.size(13.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Spacer(modifier = Modifier.width(5.dp))
                                     Text(
                                         text = stringResource(R.string.comment_spoiler_toggle),
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
+                                            fontSize = 11.sp,
+                                            lineHeight = 11.sp,
+                                            platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                            lineHeightStyle = LineHeightStyle(
+                                                alignment = LineHeightStyle.Alignment.Center,
+                                                trim = LineHeightStyle.Trim.Both
+                                            )
                                         ),
                                         color = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
                                         maxLines = 1
@@ -586,7 +603,7 @@ fun CommentInputBar(
                                             else Color.White.copy(alpha = 0.15f),
                                             CircleShape
                                         )
-                                        .padding(horizontal = 9.dp),
+                                        .padding(horizontal = 11.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Row(
@@ -597,15 +614,21 @@ fun CommentInputBar(
                                             painter = painterResource(id = if (postToCommsUni) R.drawable.ic_world else R.drawable.ic_lock),
                                             contentDescription = null,
                                             tint = if (postToCommsUni) accentColor else Color.White.copy(alpha = 0.65f),
-                                            modifier = Modifier.size(12.dp)
+                                            modifier = Modifier.size(13.dp)
                                         )
-                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Spacer(modifier = Modifier.width(5.dp))
                                         Text(
                                             text = if (postToCommsUni) stringResource(R.string.comment_destination_commsuni)
                                                    else stringResource(R.string.comment_destination_flicktrove),
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 11.sp
+                                                fontSize = 11.sp,
+                                                lineHeight = 11.sp,
+                                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                                lineHeightStyle = LineHeightStyle(
+                                                    alignment = LineHeightStyle.Alignment.Center,
+                                                    trim = LineHeightStyle.Trim.Both
+                                                )
                                             ),
                                             color = if (postToCommsUni) accentColor else Color.White.copy(alpha = 0.65f),
                                             maxLines = 1

@@ -138,7 +138,7 @@ fun HomeFilterModal(
             if (initialState == false && targetState == true) {
                 spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
             } else {
-                spring(stiffness = Spring.StiffnessMedium)
+                tween(durationMillis = 220, easing = FastOutSlowInEasing)
             }
         },
         label = "expansionProgress"
@@ -156,7 +156,7 @@ fun HomeFilterModal(
         }
     }
 
-    if (transition.currentState || transition.targetState) {
+    if ((transition.currentState || transition.targetState) && (isVisible || progress > 0.02f)) {
         val effectiveScrimAlpha = if (triggerBounds != null) {
             val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
             0.6f * FastOutSlowInEasing.transform(scrimProgress)
@@ -225,12 +225,7 @@ fun HomeFilterModal(
                 }
             }
 
-            val startRect = triggerBounds ?: targetRect.copy(
-                left = targetRect.center.x - 20f,
-                top = targetRect.center.y - 20f,
-                right = targetRect.center.x + 20f,
-                bottom = targetRect.center.y + 20f
-            )
+            val startRect = triggerBounds ?: targetRect
 
             // Center moves smoothly towards screen center
             val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
@@ -246,7 +241,7 @@ fun HomeFilterModal(
                     0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
                 }
             } else {
-                progress
+                lerp(0.92f, 1f, progress)
             }
 
             // Corner radius stays circular during liftoff, then morphs into target rounded corners
@@ -255,11 +250,11 @@ fun HomeFilterModal(
                 if (progress <= delay) 0f
                 else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
             } else {
-                progress
+                1f
             }
 
-            val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
-            val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
+            val currentWidth = if (triggerBounds != null) lerp(startRect.width, targetRect.width, sizeProgress) else targetRect.width * sizeProgress
+            val currentHeight = if (triggerBounds != null) lerp(startRect.height, targetRect.height, sizeProgress) else targetRect.height * sizeProgress
 
             val currentRect = Rect(
                 left = currentCenterX - currentWidth / 2f,
@@ -294,6 +289,12 @@ fun HomeFilterModal(
             } else {
                 HazeStyles.ModalBorderAlpha
             }
+            val modalAlpha = if (triggerBounds != null) {
+                if (progress <= 0.06f) 0f
+                else ((progress - 0.06f) / 0.24f).coerceIn(0f, 1f)
+            } else {
+                if (progress <= 0.02f) 0f else progress
+            }
 
             Box(
                 modifier = Modifier
@@ -302,6 +303,7 @@ fun HomeFilterModal(
                         width = with(density) { currentRect.width.toDp() },
                         height = with(density) { currentRect.height.toDp() }
                     )
+                    .graphicsLayer { this.alpha = modalAlpha }
                     .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
             ) {
                 // Background Layer (Blurred glass)
@@ -312,6 +314,7 @@ fun HomeFilterModal(
                             state = hazeState,
                             shape = currentShape,
                             style = animatedStyle,
+                            alpha = modalAlpha,
                             useOffscreenStrategy = false
                         )
                         .border(

@@ -1344,6 +1344,7 @@
     <string name="filter_language">भाषा</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv टीवी और मूवी ऐप्स के लिए एक साझा टिप्पणी लेयर है। टिप्पणियाँ, एकता, टीवी — समुदाय द्वारा, समुदाय के लिए। TV Community Archive से विकसित।</string>
+    <string name="commsuni_info_archive_desc">TV Community Archive से विकसित, जो जुलाई 2026 में उपयोगकर्ताओं की गोपनीयता की रक्षा करते हुए बंद होने से पहले ऐतिहासिक TV Time चर्चाओं को सहेजने के लिए बनाया गया था।</string>
     <string name="commsuni_info_connected">जुड़े हुए समुदाय</string>
     <string name="settings_blocked_users_title">ब्लॉक किए गए उपयोगकर्ता</string>
     <string name="settings_blocked_users_desc">ब्लॉक किए गए लोगों को देखें और प्रबंधित करें</string>

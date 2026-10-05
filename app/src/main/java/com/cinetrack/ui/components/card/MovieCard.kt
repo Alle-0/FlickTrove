@@ -410,6 +410,7 @@ fun MovieCard(
     isReminder: Boolean = false,
     progress: Float = 0f,
     personalRating: Double? = null,
+    personalNote: String? = null,
     showActionHint: Boolean = true,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     folderColors: List<Color> = emptyList(),
@@ -509,6 +510,7 @@ fun MovieCard(
                             this.watched = isWatched
                             this.reminder = isReminder
                             if (personalRating != null) this.personalRating = personalRating
+                            if (!personalNote.isNullOrBlank()) this.personalNote = personalNote
                         }, offset, cardPosition[0])
                     }
                 ) { offset -> 

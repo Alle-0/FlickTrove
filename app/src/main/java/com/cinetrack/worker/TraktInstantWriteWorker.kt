@@ -139,10 +139,15 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 }
                 ACTION_REMOVE_WATCHED -> {
                     traktService.removeFromHistory(buildSyncRequest(mediaType, ids))
-                    // Hard-delete the pending_delete row once Trakt has confirmed the removal
+                    // Only hard-delete if the row was explicitly soft-deleted (pending_delete) by user
                     if (tmdbId != -1L) {
-                        movieRepository.hardDeleteMovie(tmdbId, mediaType)
-                        android.util.Log.d("TraktInstantWriteWorker", "Hard-deleted pending_delete row for $tmdbId ($mediaType)")
+                        val localMovie = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
+                        if (localMovie?.syncStatus == "pending_delete") {
+                            movieRepository.hardDeleteMovie(tmdbId, mediaType)
+                            android.util.Log.d("TraktInstantWriteWorker", "Hard-deleted pending_delete row for $tmdbId ($mediaType)")
+                        } else {
+                            android.util.Log.d("TraktInstantWriteWorker", "Preserved row for $tmdbId ($mediaType) - syncStatus is ${localMovie?.syncStatus}")
+                        }
                     }
                 }
 

@@ -1416,6 +1416,7 @@
     <string name="filter_language">语言</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv 是面向影視應用的共享評論層。評論、共聚、電視 — 源自社群，服務社群。誕生自 TV Community Archive。</string>
+    <string name="commsuni_info_archive_desc">誕生自 TV Community Archive，該專案於 2026 年 7 月發起，旨在 TV Time 關閉前保存歷史社群討論，同時保護使用者隱私。</string>
     <string name="commsuni_info_connected">已连接的社区</string>
     <string name="settings_blocked_users_title">已屏蔽用户</string>
     <string name="settings_blocked_users_desc">查看并管理已屏蔽的人</string>

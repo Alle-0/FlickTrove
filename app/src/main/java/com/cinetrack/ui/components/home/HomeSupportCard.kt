@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
 
 private const val PREFS_SUPPORT = "flicktrove_support"
@@ -107,7 +108,8 @@ fun HomeSupportCard(
         ),
         modifier = modifier
     ) {
-        val cardShape = RoundedCornerShape(24.dp)
+        val cardShape = RoundedCornerShape(32.dp)
+        val buttonShape = RoundedCornerShape(16.dp)
         val coralAccent = Color(0xFFFF4B55)
         val paypalBlue = Color(0xFF0070BA)
 
@@ -138,17 +140,19 @@ fun HomeSupportCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 18.dp)
+                    .padding(16.dp)
             ) {
                 // Header: Icona cerchio cuore a sinistra + Titolo & Descrizione
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 36.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Icona cerchio rosso/corallo con cuore bianco pieno
                     Box(
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
                             .background(coralAccent),
                         contentAlignment = Alignment.Center
@@ -157,7 +161,7 @@ fun HomeSupportCard(
                             imageVector = Icons.Rounded.Favorite,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -182,7 +186,7 @@ fun HomeSupportCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Pulsanti Ko-fi e PayPal affiancati
+                // Pulsanti Ko-fi e PayPal affiancati con raggio concentrico (32dp - 16dp = 16dp)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -191,14 +195,14 @@ fun HomeSupportCard(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp)
+                            .height(48.dp)
                             .bounceClick {
                                 markSupportClicked(context)
                                 dismissed = true
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(KOFI_URL))
                                 context.startActivity(intent)
                             }
-                            .clip(CircleShape)
+                            .clip(buttonShape)
                             .background(coralAccent),
                         contentAlignment = Alignment.Center
                     ) {
@@ -225,14 +229,14 @@ fun HomeSupportCard(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp)
+                            .height(48.dp)
                             .bounceClick {
                                 markSupportClicked(context)
                                 dismissed = true
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PAYPAL_URL))
                                 context.startActivity(intent)
                             }
-                            .clip(CircleShape)
+                            .clip(buttonShape)
                             .background(paypalBlue),
                         contentAlignment = Alignment.Center
                     ) {
@@ -257,25 +261,19 @@ fun HomeSupportCard(
                 }
             }
 
-            // Tasto Chiudi discreto in alto a destra (non comprime il testo)
-            Box(
+            // Tasto Chiudi unificato concentrico in alto a destra (32dp, raggio 16dp a padding 16/16)
+            ModalCloseButton(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 12.dp, end = 12.dp)
-                    .size(28.dp)
-                    .bounceClick {
-                        dismissed = true
-                        markSupportDismissed(context)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                    contentDescription = "Chiudi",
-                    tint = Color.White.copy(alpha = 0.35f),
-                    modifier = Modifier.size(15.dp)
-                )
-            }
+                    .padding(top = 16.dp, end = 16.dp),
+                size = 32.dp,
+                iconSize = 16.dp,
+                tint = Color.White.copy(alpha = 0.45f),
+                onClose = {
+                    dismissed = true
+                    markSupportDismissed(context)
+                }
+            )
         }
     }
 }

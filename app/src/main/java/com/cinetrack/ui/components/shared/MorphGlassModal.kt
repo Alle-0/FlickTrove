@@ -123,13 +123,13 @@ fun MorphGlassModal(
             } else if (initialState == false && targetState == true) {
                 spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
             } else {
-                spring(stiffness = Spring.StiffnessMedium)
+                tween(durationMillis = 220, easing = FastOutSlowInEasing)
             }
         },
         label = "expansionProgress"
     ) { state -> if (state) 1f else 0f }
 
-    if (transition.currentState || transition.targetState) {
+    if ((transition.currentState || transition.targetState) && (isVisible || progress > 0.02f)) {
         val effectiveScrimAlpha = if (!advancedEffectsEnabled) {
             scrimAlpha * progress
         } else if (triggerBounds != null) {
@@ -211,13 +211,8 @@ fun MorphGlassModal(
                     }
                 }
             } else {
-                // Expanding morph from trigger button bounds (or center)
-                val startRect = triggerBounds ?: targetRect.copy(
-                    left = targetRect.center.x - 20f,
-                    top = targetRect.center.y - 20f,
-                    right = targetRect.center.x + 20f,
-                    bottom = targetRect.center.y + 20f
-                )
+                // Expanding morph from trigger button bounds (or center scale)
+                val startRect = triggerBounds ?: targetRect
 
                 // Center moves smoothly towards screen center
                 val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
@@ -233,7 +228,7 @@ fun MorphGlassModal(
                         0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
                     }
                 } else {
-                    progress
+                    lerp(0.92f, 1f, progress)
                 }
 
                 // Corner radius stays circular during liftoff, then morphs into target rounded corners
@@ -242,11 +237,11 @@ fun MorphGlassModal(
                     if (progress <= delay) 0f
                     else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
                 } else {
-                    progress
+                    1f
                 }
 
-                val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
-                val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
+                val currentWidth = if (triggerBounds != null) lerp(startRect.width, targetRect.width, sizeProgress) else targetRect.width * sizeProgress
+                val currentHeight = if (triggerBounds != null) lerp(startRect.height, targetRect.height, sizeProgress) else targetRect.height * sizeProgress
 
                 val currentRect = Rect(
                     left = currentCenterX - currentWidth / 2f,
@@ -277,6 +272,12 @@ fun MorphGlassModal(
                 } else {
                     HazeStyles.ModalBorderAlpha
                 }
+                val modalAlpha = if (triggerBounds != null) {
+                    if (progress <= 0.06f) 0f
+                    else ((progress - 0.06f) / 0.24f).coerceIn(0f, 1f)
+                } else {
+                    if (progress <= 0.02f) 0f else progress
+                }
 
                 Box(
                     modifier = Modifier
@@ -285,6 +286,7 @@ fun MorphGlassModal(
                             width = with(density) { currentRect.width.toDp() },
                             height = with(density) { currentRect.height.toDp() }
                         )
+                        .graphicsLayer { this.alpha = modalAlpha }
                         .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
                 ) {
                     // Background Layer (Blurred glass)
@@ -295,6 +297,7 @@ fun MorphGlassModal(
                                 state = hazeState,
                                 shape = currentShape,
                                 style = animatedStyle,
+                                alpha = modalAlpha,
                                 useOffscreenStrategy = false
                             )
                             .border(

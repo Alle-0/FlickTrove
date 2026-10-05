@@ -57,9 +57,14 @@ class SimklInstantWriteWorker @AssistedInject constructor(
                 }
                 TraktInstantWriteWorker.ACTION_REMOVE_WATCHED -> {
                     simklService.removeFromHistory(buildHistoryRequest(mediaType, ids))
-                    // Hard-delete the pending_delete row once SIMKL has confirmed the removal
-                    movieRepository.hardDeleteMovie(tmdbId, mediaType)
-                    android.util.Log.d("SimklInstantWriteWorker", "Hard-deleted pending_delete row for $tmdbId ($mediaType)")
+                    // Only hard-delete if the row was explicitly soft-deleted (pending_delete) by user
+                    val localMovie = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
+                    if (localMovie?.syncStatus == "pending_delete") {
+                        movieRepository.hardDeleteMovie(tmdbId, mediaType)
+                        android.util.Log.d("SimklInstantWriteWorker", "Hard-deleted pending_delete row for $tmdbId ($mediaType)")
+                    } else {
+                        android.util.Log.d("SimklInstantWriteWorker", "Preserved row for $tmdbId ($mediaType) - syncStatus is ${localMovie?.syncStatus}")
+                    }
                 }
 
                 // ── Watchlist ─────────────────────────────────────────────────

@@ -1416,6 +1416,7 @@
     <string name="filter_language">언어</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv는 드라마와 영화 앱을 위한 공유 댓글 플랫폼입니다. 댓글, 연대, TV — 커뮤니티에 의한, 커뮤니티를 위한 공간. TV Community Archive에서 시작되었습니다.</string>
+    <string name="commsuni_info_archive_desc">사용자 개인정보를 보호하면서 서비스 종료 전 TV Time의 역사적인 커뮤니티 토론을 보존하기 위해 2026년 7월 시작된 TV Community Archive에서 탄생했습니다.</string>
     <string name="commsuni_info_connected">연결된 커뮤니티</string>
     <string name="settings_blocked_users_title">차단된 사용자</string>
     <string name="settings_blocked_users_desc">차단된 사용자 확인 및 관리</string>

@@ -1347,6 +1347,7 @@
     <string name="filter_language">ЯЗЫК</string>
     <string name="commsuni_info_title">CommsUni.tv</string>
     <string name="commsuni_info_desc">CommsUni.tv — это общий уровень комментариев для приложений о сериалах и фильмах. Комментарии, единство, ТВ — от сообщества, для сообщества. Создан на базе TV Community Archive.</string>
+    <string name="commsuni_info_archive_desc">Создан на базе TV Community Archive — проекта, запущенного в июле 2026 года для сохранения исторических обсуждений TV Time до его закрытия с защитой конфиденциальности сообщества.</string>
     <string name="commsuni_info_connected">Подключенные сообщества</string>
     <string name="settings_blocked_users_title">Заблокированные пользователи</string>
     <string name="settings_blocked_users_desc">Просмотр и управление заблокированными</string>

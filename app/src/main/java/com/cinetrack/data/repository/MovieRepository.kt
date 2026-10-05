@@ -140,10 +140,18 @@ class MovieRepository @Inject constructor(
 
     fun getMovieFlow(id: Long, mediaType: String): Flow<Movie?> = favoriteDao.getByIdFlow(id, mediaType)
 
-    suspend fun getMovie(id: Long, mediaType: String): Movie? = favoriteDao.getById(id, mediaType)
+    suspend fun getMovie(id: Long, mediaType: String): Movie? {
+        val normalizedType = mediaType.ifBlank { "movie" }
+        return favoriteDao.getById(id, normalizedType)
+            ?: favoriteDao.getById(id, if (normalizedType == "movie") "tv" else "movie")
+    }
 
     /** Returns the movie even if it's pending_delete — used by sync workers to prevent resurrection */
-    suspend fun getMovieIncludingDeleted(id: Long, mediaType: String): Movie? = favoriteDao.getByIdIncludingDeleted(id, mediaType)
+    suspend fun getMovieIncludingDeleted(id: Long, mediaType: String): Movie? {
+        val normalizedType = mediaType.ifBlank { "movie" }
+        return favoriteDao.getByIdIncludingDeleted(id, normalizedType)
+            ?: favoriteDao.getByIdIncludingDeleted(id, if (normalizedType == "movie") "tv" else "movie")
+    }
 
     /** Physically removes a pending_delete row after the remote API confirms the deletion */
     suspend fun hardDeleteMovie(id: Long, mediaType: String) = favoriteDao.deleteById(id, mediaType)
@@ -153,19 +161,31 @@ class MovieRepository @Inject constructor(
     suspend fun getUpcomingMoviesForUpdate(limit: Int = 150): List<Movie> = favoriteDao.getUpcomingMoviesForUpdate(limit)
 
     suspend fun saveMovie(movie: Movie, syncToTrakt: Boolean = true) {
-        val oldMovie = favoriteDao.getById(movie.id, movie.mediaType)
+        val targetMediaType = if (movie.mediaType.isBlank()) "movie" else movie.mediaType
+        val movieToSave = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
+        val oldMovie = favoriteDao.getById(movieToSave.id, movieToSave.mediaType)
+            ?: favoriteDao.getById(movieToSave.id, if (movieToSave.mediaType == "movie") "tv" else "movie")
+
+        // Safeguard user's personalNote: only clear if caller explicitly provided empty string/blank,
+        // and keep old note if caller did not touch personalNote (null).
+        val resolvedPersonalNote = if (movieToSave.personalNote != null) {
+            movieToSave.personalNote?.trim()?.ifBlank { null }
+        } else {
+            oldMovie?.personalNote
+        }
 
         // 1. Update Room immediately
-        val updatedMovie = movie.copy(
+        val updatedMovie = movieToSave.copy(
+            personalNote = resolvedPersonalNote,
             syncStatus = "synced",
-            clientUpdatedAt = if (syncToTrakt) System.currentTimeMillis() else (movie.clientUpdatedAt.takeIf { it > 0 } ?: oldMovie?.clientUpdatedAt ?: System.currentTimeMillis())
+            clientUpdatedAt = if (syncToTrakt) System.currentTimeMillis() else (movieToSave.clientUpdatedAt.takeIf { it > 0 } ?: oldMovie?.clientUpdatedAt ?: System.currentTimeMillis())
         )
-        updatedMovie.emotionalVibes = movie.emotionalVibes
-        updatedMovie.favoriteActorId = movie.favoriteActorId
-        updatedMovie.favoriteActorName = movie.favoriteActorName
-        updatedMovie.favoriteActorProfilePath = movie.favoriteActorProfilePath
-        updatedMovie.favoriteActorTmdbPath = movie.favoriteActorTmdbPath
-        updatedMovie.favoriteActorCharacter = movie.favoriteActorCharacter
+        updatedMovie.emotionalVibes = movieToSave.emotionalVibes
+        updatedMovie.favoriteActorId = movieToSave.favoriteActorId
+        updatedMovie.favoriteActorName = movieToSave.favoriteActorName
+        updatedMovie.favoriteActorProfilePath = movieToSave.favoriteActorProfilePath
+        updatedMovie.favoriteActorTmdbPath = movieToSave.favoriteActorTmdbPath
+        updatedMovie.favoriteActorCharacter = movieToSave.favoriteActorCharacter
         favoriteDao.insert(updatedMovie)
         
         // Notify Widget of changes
@@ -747,7 +767,17 @@ class MovieRepository @Inject constructor(
             
             for ((key, localMovie) in localFavorites) {
                 if (!remoteFavoritesMap.containsKey(key)) {
-                    if (localMovie.syncStatus == "synced") {
+                    val hasUserContent = !localMovie.personalNote.isNullOrBlank() ||
+                        (localMovie.personalRating ?: 0.0) > 0.0 ||
+                        localMovie.favorite ||
+                        localMovie.watched ||
+                        localMovie.reminder
+                    if (hasUserContent) {
+                        // Protect user data from being wiped: keep locally and mark pending sync so it uploads to remote
+                        if (localMovie.syncStatus == "synced") {
+                            favoriteDao.updateSyncStatus(localMovie.id, localMovie.mediaType, "pending")
+                        }
+                    } else if (localMovie.syncStatus == "synced") {
                         moviesToDelete.add(localMovie)
                     }
                 }

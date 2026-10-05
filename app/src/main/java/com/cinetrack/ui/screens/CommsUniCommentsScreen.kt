@@ -164,7 +164,6 @@ class CommsUniCommentsScreen(
         var isInputExpanded by remember { mutableStateOf(false) }
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
-        var reportTriggerBounds by remember { mutableStateOf<Rect?>(null) }
         var commentToDelete by remember { mutableStateOf<AppComment?>(null) }
         var userToBlock by remember { mutableStateOf<AppComment?>(null) }
         var pendingExternalUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
@@ -419,9 +418,8 @@ class CommsUniCommentsScreen(
                                 onToggleLike = {
                                     viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage)
                                 },
-                                onReport = { bounds ->
+                                onReport = {
                                     commentToReport = comment
-                                    reportTriggerBounds = bounds
                                 },
                                 onBlockUser = {
                                     userToBlock = comment
@@ -579,7 +577,6 @@ class CommsUniCommentsScreen(
             // Report Dialog Overlay
             CommentReportModal(
                 comment = commentToReport,
-                triggerBounds = reportTriggerBounds,
                 onDismiss = { commentToReport = null },
                 onReport = { category, detail ->
                     commentToReport?.let { c ->
