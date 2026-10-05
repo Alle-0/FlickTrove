@@ -351,6 +351,14 @@
     <string name="settings_dialog_wipe_total_data_title">清除所有数据</string>
     <string name="settings_dialog_wipe_total_data_desc">确定要删除所有内容吗？这将从云端和此设备永久抹除您的媒体库。此操作不可逆。</string>
     <string name="settings_yes_wipe_total">清除所有数据</string>
+    <string name="settings_cleanup_rewatches_title">清理重看记录</string>
+    <string name="settings_cleanup_rewatches_desc">删除重复观看记录，仅保留每个作品的首次观看</string>
+    <string name="settings_cleanup_rewatches_dialog_title">清理重看记录</string>
+    <string name="settings_cleanup_rewatches_dialog_desc">发现 %1$d 条重复重看记录。是否删除它们并仅保留每个作品的首次观看？此操作也将同步至云端。</string>
+    <string name="settings_cleanup_rewatches_dialog_desc_zero">您的历史记录中未发现重复的重看记录。观看计数已经是唯一的！</string>
+    <string name="settings_cleanup_rewatches_confirm_btn">删除重复项</string>
+    <string name="settings_cleanup_rewatches_success">已删除 %1$d 条重复重看记录</string>
+    <string name="settings_cleanup_rewatches_none">没有需要清理的重复重看记录</string>
     <string name="settings_account_deleted_success">账号已成功注销</string>
     <string name="settings_action_success">操作成功完成</string>
     <string name="settings_login">登录</string>
@@ -866,6 +874,8 @@
     <string name="search_editorial_collections">編輯精選系列</string>
     <string name="editorial_mcu_title">漫威電影宇宙</string>
     <string name="editorial_mcu_desc">漫威電影宇宙完整神聖時間線：融合電影、電視影集（捍衛者聯盟、卡特探員）與動畫的終極敘事順序。依照精確的時間順序體驗這部壯闊史詩。</string>
+    <string name="editorial_star_wars_title">星際大戰：正史時間線</string>
+    <string name="editorial_star_wars_desc">完整的盧卡斯影業官方正史時間線：從高共和國時代與絕地的隕落，到銀河內戰及第一軍團的崛起，依照精確的敘事順序展開。</string>
     <string name="msg_item_added_action">“%1$s” %2$s</string>
     <string name="msg_item_removed">“%1$s” 已移除</string>
     <string name="msg_item_deleted">“%1$s” 已删除</string>
@@ -1082,13 +1092,20 @@
     <string name="onboarding_slide4_title">你的数据全由你掌控</string>
     <string name="onboarding_slide4_sub">本地备份与 TRAKT 同步</string>
     <string name="onboarding_slide4_desc">随时随地一键导入导出本地 JSON 备份，或绑定 Trakt 账号享受自动云同步。</string>
-    <string name="onboarding_slide5_title">弃剧优雅收纳</string>
-    <string name="onboarding_slide5_sub">隐藏半途放弃的剧集</string>
-    <string name="onboarding_slide5_desc">追剧半途中断？上滑删除键将其设为“已弃剧”，在完整保留已看记录的同时，不再受未看剧集通知的打扰。</string>
+    <string name="onboarding_slide5_title">弃剧管理与移出列表</string>
+    <string name="onboarding_slide5_sub">弃剧管理与移出列表</string>
+    <string name="onboarding_slide5_desc">想将电影或剧集移出列表？在重温（电影）或弃剧（剧集）按钮上向上轻扫即可显示删除按钮，也可直接设为“Dropped”停止接收未看剧集通知。</string>
     <string name="settings_review_tutorial">重播新手引导教程</string>
     <string name="collection_badge_movies_plural">%1$d 部电影</string>
     <string name="collection_badge_movies_single">%1$d 部电影</string>
     <string name="collection_badge_movies_plus">%1$d+ 部电影</string>
+    <string name="collection_badge_items_plural">%1$d 部作品</string>
+    <string name="collection_badge_items_single">%1$d 部作品</string>
+    <string name="collection_badge_series_plural">%1$d 部影集</string>
+    <string name="collection_badge_series_single">%1$d 部影集</string>
+    <string name="collection_filter_sort_chronological">時間軸順序</string>
+    <string name="collection_filter_modal_title">合集篩選</string>
+    <string name="collection_filter_empty">沒有符合所選篩選條件的項目</string>
     <string name="overview_show_more">展开更多</string>
     <string name="overview_show_less">收起</string>
     <string name="checkin_how_did_it_make_you_feel">看完后你有什么感觉？</string>
@@ -1210,6 +1227,11 @@
     <string name="comment_collapse">折叠</string>
     <string name="comment_view_replies_singular">查看 %1$d 条回复</string>
     <string name="comment_view_replies_plural">查看 %1$d 条回复</string>
+    <string name="comment_action_menu_title">评论选项</string>
+    <string name="comment_action_report">举报评论</string>
+    <string name="comment_action_tvtime_ownership">这是你的评论吗？ (TV Time)</string>
+    <string name="comment_tvtime_ownership_title">TV Time 归档</string>
+    <string name="comment_tvtime_ownership_subtitle">你在 TV Time 上写过这条评论吗？你可以认领或隐藏它。</string>
     <string name="comment_report_title">举报</string>
     <string name="comment_report_subtitle">您想举报什么内容？</string>
     <string name="comment_report_spoiler">包含未经标注的剧透</string>
@@ -1221,7 +1243,12 @@
     <string name="comment_report_reason_sexual">含有色情/露骨内容</string>
     <string name="comment_report_reason_illegal">违法违规内容</string>
     <string name="comment_report_reason_other">其他</string>
+    <string name="comment_report_other_title">其他原因</string>
+    <string name="comment_report_other_subtitle">简短描述举报原因。</string>
+    <string name="comment_report_other_placeholder">说明此评论存在的问题...</string>
+    <string name="comment_report_other_submit">提交举报</string>
     <string name="comment_report_reason_mine_hide">隐藏我已归档的历史评论</string>
+    <string name="comment_report_reason_mine_claim">认领我已归档的历史评论</string>
     <string name="comment_report_duplicate">您已举报过此评论。</string>
     <string name="comment_report_success">举报已提交，感谢您的反馈！</string>
     <string name="comment_report_error">无法提交举报，请稍后重试。</string>
@@ -1310,6 +1337,8 @@
     <string name="watch_date_prompt_custom">自定义日期</string>
     <string name="settings_advanced_prompt_watch_date">详情页标记已看时询问观看日期</string>
     <string name="settings_advanced_prompt_watch_date_desc">从详情页标记已看过时弹出确认框选择确切日期，而非默认填充为今天。</string>
+    <string name="settings_auto_open_vibe_on_watch">标记已看后打开Vibe签到</string>
+    <string name="settings_auto_open_vibe_on_watch_desc">在详情页将电影标记为已看时，自动打开签到抽屉以进行评分并选择情绪氛围。</string>
 
     <!-- Home Feed Sections -->
     <string name="home_section_popular">热门推荐</string>
@@ -1384,6 +1413,10 @@
     <string name="filter_source">来源</string>
     <string name="filter_source_all">全部 (CommsUni)</string>
     <string name="filter_source_flicktrove">仅 FlickTrove</string>
+    <string name="filter_language">语言</string>
+    <string name="commsuni_info_title">CommsUni.tv</string>
+    <string name="commsuni_info_desc">CommsUni.tv 是面向影視應用的共享評論層。評論、共聚、電視 — 源自社群，服務社群。誕生自 TV Community Archive。</string>
+    <string name="commsuni_info_connected">已连接的社区</string>
     <string name="settings_blocked_users_title">已屏蔽用户</string>
     <string name="settings_blocked_users_desc">查看并管理已屏蔽的人</string>
     <string name="settings_blocked_users_subtitle">您在评论中屏蔽的用户</string>

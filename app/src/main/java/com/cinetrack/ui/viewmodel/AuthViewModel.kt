@@ -223,11 +223,13 @@ class AuthViewModel @Inject constructor(
             // Always ensure email and avatar are up to date
             batch.set(userRef, mapOf("email" to emailToSave, "photoUrl" to avatarToSave), com.google.firebase.firestore.SetOptions.merge())
             
+            val finalName: String
             if (!hasDisplayName) {
                 val baseName = fallbackName?.takeIf { it.isNotBlank() } 
                     ?: fallbackEmail?.substringBefore("@") 
                     ?: "User"
                 val uniqueName = generateUniqueUsername(baseName, uid)
+                finalName = uniqueName
                 
                 currentUser?.updateProfile(com.google.firebase.auth.userProfileChangeRequest {
                     displayName = uniqueName
@@ -242,8 +244,15 @@ class AuthViewModel @Inject constructor(
                 
                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                 batch.set(usernameRef, mapOf("uid" to uid))
+            } else {
+                finalName = snapshot.getString("displayName") ?: currentUser?.displayName ?: "User"
             }
             batch.commit().await()
+
+            // Sync profile to CommsUni
+            runCatching {
+                commsUniRepository.updateProfile(finalName, avatarToSave.ifBlank { null })
+            }
         } catch (e: Exception) {
             // Ignore
         }

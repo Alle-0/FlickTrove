@@ -37,6 +37,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
         val HIDE_SAVED_FROM_DISCOVERY = booleanPreferencesKey("hide_saved_from_discovery")
         val PROMPT_WATCH_DATE_ON_DETAIL = booleanPreferencesKey("prompt_watch_date_on_detail")
+        val AUTO_OPEN_VIBE_ON_WATCH = booleanPreferencesKey("auto_open_vibe_on_watch")
         val EPISODES_LAYOUT = stringPreferencesKey("episodes_layout")
     }
 
@@ -46,6 +47,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val promptWatchDateOnDetail: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.PROMPT_WATCH_DATE_ON_DETAIL] ?: false
+    }
+
+    override val autoOpenVibeOnWatch: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.AUTO_OPEN_VIBE_ON_WATCH] ?: false
     }
 
     override val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -211,6 +216,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun togglePromptWatchDateOnDetail(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.PROMPT_WATCH_DATE_ON_DETAIL] = enabled
+        }
+    }
+
+    override suspend fun toggleAutoOpenVibeOnWatch(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.AUTO_OPEN_VIBE_ON_WATCH] = enabled
         }
     }
 

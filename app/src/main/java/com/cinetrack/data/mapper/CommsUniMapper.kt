@@ -49,7 +49,11 @@ object CommsUniMapper {
             attUrl?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
         }
 
-        val sourceRow = sourcesMap[comment.origin.slug]
+        val resolvedSlug = comment.origin.slug.ifBlank { comment.source }
+        val sourceRow = sourcesMap[resolvedSlug] ?: sourcesMap[comment.origin.slug] ?: sourcesMap[comment.source]
+        val resolvedName = comment.origin.displayName.ifBlank {
+            sourceRow?.displayName ?: if (resolvedSlug.contains("tvtime", ignoreCase = true)) "TV Time Refugees" else resolvedSlug
+        }
 
         val isMyComment = (comment.id in myCommentIds) ||
             (!comment.userId.isNullOrBlank() && (
@@ -87,14 +91,15 @@ object CommsUniMapper {
             depth = comment.depth,
             isDeleted = comment.deleted ?: false,
             isSpoiler = comment.isSpoiler,
-            originSlug = comment.origin.slug,
-            originName = comment.origin.displayName,
+            originSlug = resolvedSlug,
+            originName = resolvedName,
             originColor = sourceRow?.accentColor,
             originIcon = sourceRow?.iconUrl,
             archivedLikes = comment.likes.archived,
             nativeLikes = comment.likes.native,
             attachedMedia = allMediaUrls,
-            rating = comment.rating
+            rating = comment.rating,
+            language = comment.language
         )
     }
 }

@@ -149,6 +149,7 @@ class CommentsScreen(
         var isInputExpanded by remember { mutableStateOf(false) }
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
+        var reportTriggerBounds by remember { mutableStateOf<Rect?>(null) }
         var commentToDelete by remember { mutableStateOf<AppComment?>(null) }
         var pendingExternalUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var pendingExternalHost by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
@@ -362,8 +363,9 @@ class CommentsScreen(
                                 onToggleLike = {
                                     viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage)
                                 },
-                                onReport = {
+                                onReport = { bounds ->
                                     commentToReport = comment
+                                    reportTriggerBounds = bounds
                                 },
                                 onTranslate = { text ->
                                     viewModel.translateComment(comment.id, text)
@@ -497,6 +499,7 @@ class CommentsScreen(
             // Report Dialog Overlay
             CommentReportModal(
                 comment = commentToReport,
+                triggerBounds = reportTriggerBounds,
                 onDismiss = { commentToReport = null },
                 onReport = { category ->
                     commentToReport?.let { c ->

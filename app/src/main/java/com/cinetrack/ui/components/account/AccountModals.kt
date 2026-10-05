@@ -514,25 +514,37 @@ fun AccountModals(
                                             try {
                                                 val oldNameDoc = Firebase.firestore.collection("usernames").document(currentDisplayName.lowercase())
                                                 val newNameDoc = Firebase.firestore.collection("usernames").document(nameInput.lowercase())
+                                                val userRef = Firebase.firestore.collection("users").document(currentUser!!.uid)
                                                 
-                                                val existingDoc = newNameDoc.get().await()
-                                                if (existingDoc.exists() && existingDoc.getString("uid") != currentUser!!.uid) {
-                                                    isCheckingName = false
-                                                    nameAvailable = false
-                                                    nameError = context.getString(R.string.account_error_name_taken)
-                                                    return@launch
-                                                }
-                                                
-                                                Firebase.firestore.runTransaction { transaction ->
+                                                val updatedCount = Firebase.firestore.runTransaction { transaction ->
+                                                    val userSnap = transaction.get(userRef)
+                                                    val currentCount = userSnap.getLong("nameChangesCount")?.toInt() ?: 0
+                                                    if (currentCount >= 2) {
+                                                        throw IllegalStateException("LIMIT_REACHED")
+                                                    }
+                                                    
+                                                    val newNameSnap = transaction.get(newNameDoc)
+                                                    if (newNameSnap.exists() && newNameSnap.getString("uid") != currentUser.uid) {
+                                                        throw IllegalArgumentException("NAME_TAKEN")
+                                                    }
+                                                    
                                                     if (oldNameDoc.path != newNameDoc.path) {
                                                         transaction.delete(oldNameDoc)
                                                     }
-                                                    transaction.set(newNameDoc, hashMapOf("uid" to currentUser!!.uid, "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp()))
-                                                    transaction.update(
-                                                        Firebase.firestore.collection("users").document(currentUser!!.uid),
-                                                        "displayName", nameInput,
-                                                        "nameChangesCount", com.google.firebase.firestore.FieldValue.increment(1)
+                                                    transaction.set(
+                                                        newNameDoc,
+                                                        hashMapOf(
+                                                            "uid" to currentUser.uid,
+                                                            "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                                        )
                                                     )
+                                                    val nextCount = currentCount + 1
+                                                    transaction.update(
+                                                        userRef,
+                                                        "displayName", nameInput,
+                                                        "nameChangesCount", nextCount
+                                                    )
+                                                    nextCount
                                                 }.await()
                                                 
                                                 currentUser!!.updateProfile(userProfileChangeRequest {
@@ -540,11 +552,25 @@ fun AccountModals(
                                                 }).await()
                                                 
                                                 currentDisplayName = nameInput
-                                                nameChangesCount++
-                                                prefs.edit().putInt("changes_${currentUser.uid}", nameChangesCount).apply()
+                                                nameChangesCount = updatedCount
+                                                prefs.edit().putInt("changes_${currentUser.uid}", updatedCount).apply()
+                                                
+                                                // Sync profile immediately to CommsUni
+                                                settingsViewModel.updateCommsUniProfile(
+                                                    displayName = nameInput,
+                                                    avatarUrl = currentPhotoUrl?.toString()
+                                                )
+                                                
                                                 showProfileMenu = false
                                             } catch (e: Exception) {
-                                                snackbarHostState.showSnackbar(context.getString(R.string.account_error_name_update_failed))
+                                                if (e is IllegalArgumentException || e.message == "NAME_TAKEN") {
+                                                    nameAvailable = false
+                                                    nameError = context.getString(R.string.account_error_name_taken)
+                                                } else if (e is IllegalStateException || e.message == "LIMIT_REACHED") {
+                                                    snackbarHostState.showSnackbar(context.getString(R.string.account_error_max_name_changes))
+                                                } else {
+                                                    snackbarHostState.showSnackbar(context.getString(R.string.account_error_name_update_failed))
+                                                }
                                             } finally {
                                                 isCheckingName = false
                                             }
@@ -584,6 +610,13 @@ fun AccountModals(
                                 currentPhotoUrl = oldUrl
                                 scope.launch { snackbarHostState.showSnackbar("Failed to update avatar. Please try again.") }
                             }
+                            
+                            // Sync profile immediately to CommsUni
+                            settingsViewModel.updateCommsUniProfile(
+                                displayName = currentDisplayName,
+                                avatarUrl = newUrl
+                            )
+                            
                             showProfileMenu = false
                         }
                     )

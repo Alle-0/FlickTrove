@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,7 +57,9 @@ fun SimpleMorphingTopBar(
     detailStackDepth: Int,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onShareClick: () -> Unit
+    onShareClick: () -> Unit,
+    onFilterClick: (() -> Unit)? = null,
+    hasActiveFilters: Boolean = false
 ) {
     val density = LocalDensity.current
 
@@ -88,9 +93,10 @@ fun SimpleMorphingTopBar(
     val modalCorner = 22.dp
 
     // ── Symbiote pill shape ────────────────────────────────────────────────────
-    val symbioteShape: Shape = remember(currentEffectiveProgress, density, modalCorner) {
+    val symbioteShape: Shape = remember(currentEffectiveProgress, density, modalCorner, onFilterClick != null) {
         GenericShape { size, _ ->
             val circleSize = with(density) { 44.dp.toPx() }
+            val rightBaseWidth = if (onFilterClick != null) with(density) { (44 + 4 + 44).dp.toPx() } else circleSize
             val progress = currentEffectiveProgress
             val pillWidth = size.width
             val pillHeight = size.height
@@ -99,14 +105,15 @@ fun SimpleMorphingTopBar(
             if (progress <= 0.01f && pillHeight <= with(density) { 45.dp.toPx() }) return@GenericShape
 
             val stretchProgress = (progress / 0.75f).coerceIn(0f, 1f)
-            val stretchWidth = circleSize + (pillWidth / 2f - circleSize) * stretchProgress
+            val stretchWidthLeft = circleSize + (pillWidth / 2f - circleSize) * stretchProgress
+            val stretchWidthRight = rightBaseWidth + (pillWidth / 2f - rightBaseWidth) * stretchProgress
             val p4 = stretchProgress * stretchProgress * stretchProgress * stretchProgress
             val innerRadius = radius * (1f - p4)
 
             val pathLeft = androidx.compose.ui.graphics.Path().apply {
                 addRoundRect(
                     androidx.compose.ui.geometry.RoundRect(
-                        left = 0f, top = 0f, right = stretchWidth + 2f, bottom = pillHeight,
+                        left = 0f, top = 0f, right = stretchWidthLeft + 2f, bottom = pillHeight,
                         topLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
                         topRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
                         bottomRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
@@ -117,7 +124,7 @@ fun SimpleMorphingTopBar(
             val pathRight = androidx.compose.ui.graphics.Path().apply {
                 addRoundRect(
                     androidx.compose.ui.geometry.RoundRect(
-                        left = pillWidth - stretchWidth - 2f, top = 0f, right = pillWidth, bottom = pillHeight,
+                        left = pillWidth - stretchWidthRight - 2f, top = 0f, right = pillWidth, bottom = pillHeight,
                         topLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(innerRadius),
                         topRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
                         bottomRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
@@ -295,12 +302,71 @@ fun SimpleMorphingTopBar(
                         )
                     }
 
-                    // Right: Share
+                    // Right: Filter & Share
                     Row(
                         modifier = Modifier.align(Alignment.CenterEnd),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        if (onFilterClick != null) {
+                            var isFilterPressed by remember { mutableStateOf(false) }
+                            val filterIconScale by animateFloatAsState(
+                                targetValue = if (isFilterPressed) 0.88f else 1f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "filterIconScale"
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onPress = {
+                                                isFilterPressed = true
+                                                try { awaitRelease() } finally { isFilterPressed = false }
+                                            },
+                                            onTap = {
+                                                onFilterClick()
+                                            }
+                                        )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (currentEffectiveProgress <= 0.01f) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .hazeGlass(
+                                                state = localHazeState,
+                                                shape = CircleShape,
+                                                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                useOffscreenStrategy = true
+                                            )
+                                    )
+                                }
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_filtri),
+                                    contentDescription = stringResource(R.string.filter_title),
+                                    tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .graphicsLayer {
+                                            scaleX = filterIconScale
+                                            scaleY = filterIconScale
+                                        }
+                                )
+                                if (hasActiveFilters) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(top = 9.dp, end = 9.dp)
+                                            .size(7.dp)
+                                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                            .border(1.dp, Color(0xFF14141E), CircleShape)
+                                    )
+                                }
+                            }
+                        }
+
                         // Share
                         Box(
                             modifier = Modifier
@@ -376,7 +442,9 @@ fun CollectionMorphingTopBar(
     detailStackDepth: Int,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onShareClick: () -> Unit
+    onShareClick: () -> Unit,
+    onFilterClick: (() -> Unit)? = null,
+    hasActiveFilters: Boolean = false
 ) = SimpleMorphingTopBar(
     title = title,
     localHazeState = localHazeState,
@@ -384,5 +452,7 @@ fun CollectionMorphingTopBar(
     detailStackDepth = detailStackDepth,
     onBackClick = onBackClick,
     onHomeClick = onHomeClick,
-    onShareClick = onShareClick
+    onShareClick = onShareClick,
+    onFilterClick = onFilterClick,
+    hasActiveFilters = hasActiveFilters
 )

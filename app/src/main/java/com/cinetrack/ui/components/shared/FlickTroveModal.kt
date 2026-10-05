@@ -26,6 +26,8 @@ import androidx.compose.ui.zIndex
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.core.*
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.cinetrack.ui.utils.bounceClick
 
 /**
@@ -41,11 +43,17 @@ fun FlickTroveModal(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val cardShape = RoundedCornerShape(32.dp)
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var isClosing by remember { mutableStateOf(false) }
 
     // Handle back button for dismissal
-    BackHandler(enabled = isVisible && !isClosing, onBack = { isClosing = true })
+    BackHandler(enabled = isVisible && !isClosing, onBack = { 
+        keyboardController?.hide()
+        focusManager.clearFocus()
+        isClosing = true 
+    })
 
     var animateIn by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animateIn = true }
@@ -74,7 +82,11 @@ fun FlickTroveModal(
                     .fillMaxSize()
                     .zIndex(100f)
                     .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * modalAlpha))
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { isClosing = true }
+                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                        isClosing = true 
+                    }
                     .graphicsLayer { alpha = modalAlpha },
                 contentAlignment = Alignment.Center
             ) {
@@ -83,7 +95,10 @@ fun FlickTroveModal(
                         .widthIn(max = 420.dp)
                         .fillMaxWidth(0.90f)
                         .padding(horizontal = 16.dp)
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { /* Consume clicks */ },
+                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        },
                     shape = cardShape,
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -103,6 +118,10 @@ fun FlickTroveModal(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }
                                 .padding(horizontal = 22.dp, vertical = 24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {

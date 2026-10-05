@@ -1705,6 +1705,8 @@ class MovieRepository @Inject constructor(
     suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.updateWatchHistory(history)
     suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.deleteWatchHistory(history)
     suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId)
+    suspend fun countDuplicateRewatches(): Int = watchHistoryRepository.countDuplicateRewatches()
+    suspend fun cleanupAllRewatches(): Int = watchHistoryRepository.cleanupAllRewatches()
 
     // --- Box Office ---
     suspend fun getWeekendBoxOffice(forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =

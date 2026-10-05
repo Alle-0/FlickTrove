@@ -2,6 +2,7 @@ package com.cinetrack.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,7 +109,8 @@ class CommsUniCommentsScreen(
     private val mediaImage: String? = null,
     private val releaseYear: String? = null,
     private val focusInputOnLaunch: Boolean = false,
-    private val targetCommentId: String? = null
+    private val targetCommentId: String? = null,
+    private val imdbId: String? = null
 ) : Screen {
 
     override val key: String = "CommentsScreen_${mediaType}_${mediaId}_${java.util.UUID.randomUUID()}"
@@ -130,13 +133,14 @@ class CommsUniCommentsScreen(
             getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         
-        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId) {
+        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId, imdbId) {
             viewModel.init(
                 tvdbId = tvdbId,
                 entityType = mediaType,
                 title = mediaTitle,
                 year = releaseYear,
-                rawMediaId = mediaId
+                rawMediaId = mediaId,
+                imdbId = imdbId
             )
         }
 
@@ -149,6 +153,8 @@ class CommsUniCommentsScreen(
         // Temporary shadow properties
         val isUserBanned = false 
         val banExpiration: String? = null
+        val availableSources by viewModel.availableSources.collectAsStateWithLifecycle()
+        val conversationStats by viewModel.conversationStats.collectAsStateWithLifecycle()
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -158,18 +164,25 @@ class CommsUniCommentsScreen(
         var isInputExpanded by remember { mutableStateOf(false) }
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
+        var reportTriggerBounds by remember { mutableStateOf<Rect?>(null) }
         var commentToDelete by remember { mutableStateOf<AppComment?>(null) }
         var userToBlock by remember { mutableStateOf<AppComment?>(null) }
         var pendingExternalUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var pendingExternalHost by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
-        var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
+        var sortOption by remember { mutableStateOf(CommentSortOption.LIKES) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
-        var sourceFilter by remember { mutableStateOf<String?>(null) }
+        var sourceFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
+        var languageFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
         var showSortMenu by remember { mutableStateOf(false) }
+        var showCommsUniInfo by remember { mutableStateOf(false) }
         var sortButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var commsUniButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
-        LaunchedEffect(sortOption, sortOrder, sourceFilter) {
-            viewModel.setSort(sortOption, sortOrder, sourceFilter)
+        LaunchedEffect(sortOption, sortOrder, sourceFilters, languageFilters) {
+            val sortString = if (sortOption == CommentSortOption.DATE) (if (sortOrder == CommentSortOrder.DESC) "most_recent" else "oldest") else "most_liked"
+            val singleSource = if (sourceFilters.count() == 1) sourceFilters.first() else null
+            val singleLanguage = if (languageFilters.count() == 1) languageFilters.first() else null
+            viewModel.setSortAndFilters(sortString, singleSource, singleLanguage)
         }
         val localFocusManager = LocalFocusManager.current
         val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
@@ -242,20 +255,56 @@ class CommsUniCommentsScreen(
                     ),
                     actions = {
                         val sortCoords = remember { arrayOf<LayoutCoordinates?>(null) }
-                        Box {
+                        val commsUniCoords = remember { arrayOf<LayoutCoordinates?>(null) }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .padding(12.dp)
-                                    .onGloballyPositioned { sortCoords[0] = it }
-                                    .bounceClick { 
-                                        sortButtonBounds = sortCoords[0]?.let {
+                                    .padding(end = 6.dp)
+                                    .onGloballyPositioned { commsUniCoords[0] = it }
+                                    .bounceClick {
+                                        commsUniButtonBounds = commsUniCoords[0]?.let {
                                             val pos = it.positionInWindow()
                                             Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
                                         }
-                                        showSortMenu = true 
+                                        showCommsUniInfo = true
                                     }
+                                    .clip(CircleShape)
+                                    .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_commsuni_logo),
+                                        contentDescription = stringResource(R.string.commsuni_info_title),
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Rounded.Info,
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.70f),
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                            }
+                            Box {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(12.dp)
+                                        .onGloballyPositioned { sortCoords[0] = it }
+                                        .bounceClick { 
+                                            sortButtonBounds = sortCoords[0]?.let {
+                                                val pos = it.positionInWindow()
+                                                Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                            }
+                                            showSortMenu = true 
+                                        }
+                                ) {
+                                    Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
+                                }
                             }
                         }
                     }
@@ -285,8 +334,8 @@ class CommsUniCommentsScreen(
                     }
                 }
 
-                val flatTree = remember(comments, expandedComments.value, sortOption, sortOrder) { 
-                    buildFlatTree(comments, expandedComments.value, sortOption, sortOrder) 
+                val flatTree = remember(comments, expandedComments.value, sortOption, sortOrder, sourceFilters, languageFilters) { 
+                    buildFlatTree(comments, expandedComments.value, sortOption, sortOrder, sourceFilters, languageFilters) 
                 }
 
                 LaunchedEffect(flatTree) {
@@ -370,8 +419,9 @@ class CommsUniCommentsScreen(
                                 onToggleLike = {
                                     viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage)
                                 },
-                                onReport = {
+                                onReport = { bounds ->
                                     commentToReport = comment
+                                    reportTriggerBounds = bounds
                                 },
                                 onBlockUser = {
                                     userToBlock = comment
@@ -480,22 +530,39 @@ class CommsUniCommentsScreen(
             
             // Sort Dialog Overlay
             // Sort Menu using HomeFilterModal for consistency
+            val commentLanguages = remember(conversationStats, comments) {
+                val fromStats = conversationStats?.languageCounts?.mapNotNull { it.language.lowercase().trim() } ?: emptyList()
+                val fromComments = comments.mapNotNull { it.language?.lowercase()?.trim() }
+                (fromStats + fromComments).filter { it.isNotBlank() }.distinct()
+            }
             com.cinetrack.ui.components.dialog.HomeFilterModal(
                 isVisible = showSortMenu,
                 isCommentsFilter = true,
+                availableSources = availableSources,
+                availableLanguages = commentLanguages,
                 triggerBounds = sortButtonBounds,
                 sortConfig = com.cinetrack.data.model.SortConfig(
                     sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",
                     sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc",
-                    selectedSource = sourceFilter
+                    selectedSources = sourceFilters.toList(),
+                    selectedLanguages = languageFilters.toList()
                 ),
                 hazeState = hazeState,
                 onSortConfigChanged = { newConfig ->
                     sortOption = if (newConfig.sortType == "date") CommentSortOption.DATE else CommentSortOption.LIKES
                     sortOrder = if (newConfig.sortDirection == "desc") CommentSortOrder.DESC else CommentSortOrder.ASC
-                    sourceFilter = newConfig.selectedSource
+                    sourceFilters = (newConfig.selectedSources + listOfNotNull(newConfig.selectedSource)).toSet()
+                    languageFilters = (newConfig.selectedLanguages + listOfNotNull(newConfig.selectedLanguage)).toSet()
                 },
                 onDismissRequest = { showSortMenu = false }
+            )
+
+            // CommsUni Project Info Modal
+            com.cinetrack.ui.components.comments.CommsUniInfoModal(
+                isVisible = showCommsUniInfo,
+                onDismiss = { showCommsUniInfo = false },
+                triggerBounds = commsUniButtonBounds,
+                hazeState = hazeState
             )
 
             // Translation Prompt Dialog
@@ -512,10 +579,11 @@ class CommsUniCommentsScreen(
             // Report Dialog Overlay
             CommentReportModal(
                 comment = commentToReport,
+                triggerBounds = reportTriggerBounds,
                 onDismiss = { commentToReport = null },
-                onReport = { category ->
+                onReport = { category, detail ->
                     commentToReport?.let { c ->
-                        viewModel.reportComment(c.id, category, c.text, c.userId, c.userDisplayName)
+                        viewModel.reportComment(c.id, category, c.text, c.userId, c.userDisplayName, detail = detail)
                     }
                     commentToReport = null
                 },
@@ -759,9 +827,34 @@ class CommsUniCommentsScreen(
         comments: List<AppComment>, 
         expandedComments: Set<String>,
         sortOption: CommentSortOption,
-        sortOrder: CommentSortOrder
+        sortOrder: CommentSortOrder,
+        sourceFilters: Set<String> = emptySet(),
+        languageFilters: Set<String> = emptySet()
     ): List<AppComment> {
-        val filtered = comments.filterDeletedWithoutReplies()
+        val nonDeleted = comments.filterDeletedWithoutReplies()
+        val hasSourceFilter = sourceFilters.isNotEmpty()
+        val hasLanguageFilter = languageFilters.isNotEmpty()
+
+        val matchingIds = if (hasSourceFilter || hasLanguageFilter) {
+            val ids = mutableSetOf<String>()
+            nonDeleted.forEach { c ->
+                val matchesSource = !hasSourceFilter || sourceFilters.any { c.originSlug.equals(it, ignoreCase = true) }
+                val matchesLanguage = !hasLanguageFilter || languageFilters.any { langCode ->
+                    c.language?.equals(langCode, ignoreCase = true) == true
+                }
+                if (matchesSource && matchesLanguage) {
+                    ids.add(c.id)
+                    var p = c.parentId
+                    while (!p.isNullOrBlank()) {
+                        ids.add(p)
+                        p = comments.find { it.id == p }?.parentId
+                    }
+                }
+            }
+            ids
+        } else null
+
+        val filtered = if (matchingIds != null) nonDeleted.filter { it.id in matchingIds } else nonDeleted
         val tree = mutableListOf<AppComment>()
         val map = filtered.groupBy { it.parentId?.takeIf { p -> p.isNotBlank() } }
 

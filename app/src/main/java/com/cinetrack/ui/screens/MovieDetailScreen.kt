@@ -253,6 +253,7 @@ fun MovieDetailScreenContent(
     val useMovieLogo by viewModel.useMovieLogo.collectAsStateWithLifecycle()
     val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
+    val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
     var parentsGuideYOffset by remember(movieId) { mutableStateOf<Float?>(null) }
 
@@ -287,7 +288,7 @@ fun MovieDetailScreenContent(
     LaunchedEffect(uiState) {
         val currentWatchState = (uiState as? DetailUiState.Success)?.watchState
         if (currentWatchState == WatchState.WATCHED && previousWatchState != null && previousWatchState != WatchState.WATCHED) {
-            forceExpandCheckIn = false
+            forceExpandCheckIn = autoOpenVibeOnWatch
             showCheckInDrawer = true
         }
         if (currentWatchState != null) {
@@ -295,10 +296,10 @@ fun MovieDetailScreenContent(
         }
     }
 
-    // Dismiss peek-a-boo drawer when user scrolls
+    // Dismiss peek-a-boo drawer when user scrolls (only if not expanded into full modal)
     val isScrollInProgress = scrollState.isScrollInProgress
     LaunchedEffect(isScrollInProgress) {
-        if (isScrollInProgress && showCheckInDrawer) {
+        if (isScrollInProgress && showCheckInDrawer && !forceExpandCheckIn) {
             showCheckInDrawer = false
         }
     }
@@ -334,7 +335,8 @@ fun MovieDetailScreenContent(
             val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
             val globalAccentColor = settingsViewModel.accentColor.value.toComposeColor()
             
-            val tvdbId = state.details.externalIds?.tvdbId
+            val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
+            val imdbId = state.details.externalIds?.imdbId
             val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
             navigator.push(
                 com.cinetrack.ui.screens.CommsUniCommentsScreen(
@@ -346,7 +348,8 @@ fun MovieDetailScreenContent(
                     mediaImage = image,
                     releaseYear = releaseYear,
                     targetCommentId = targetCommentId,
-                    focusInputOnLaunch = false
+                    focusInputOnLaunch = false,
+                    imdbId = imdbId
                 )
             )
         }
@@ -614,7 +617,8 @@ fun MovieDetailScreenContent(
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
                                                 val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
-                                                val tvdbId = state.details.externalIds?.tvdbId
+                                                val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
+                                                val imdbId = state.details.externalIds?.imdbId
                                                 val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
                                                 navigator.push(
                                                     com.cinetrack.ui.screens.CommsUniCommentsScreen(
@@ -625,7 +629,8 @@ fun MovieDetailScreenContent(
                                                         mediaTitle = mediaTitle,
                                                         mediaImage = image,
                                                         releaseYear = releaseYear,
-                                                        focusInputOnLaunch = focusInput
+                                                        focusInputOnLaunch = focusInput,
+                                                        imdbId = imdbId
                                                     )
                                                 )
                                             } 

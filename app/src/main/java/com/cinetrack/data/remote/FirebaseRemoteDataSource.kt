@@ -288,6 +288,28 @@ class FirebaseRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun batchDeleteWatchHistory(entries: List<WatchHistoryEntity>) {
+        val uid = userId ?: return
+        val collection = getWatchHistoryCollection(uid)
+        try {
+            val chunks = entries.chunked(100)
+            for (chunk in chunks) {
+                kotlinx.coroutines.withTimeoutOrNull(10_000L) {
+                    firestore.runBatch { batch ->
+                        for (entry in chunk) {
+                            val safeWatchedAt = entry.watchedAt.replace("/", "-")
+                            val docId = "${entry.movieId}_${safeWatchedAt}"
+                            val docRef = collection.document(docId)
+                            batch.delete(docRef)
+                        }
+                    }.await()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error batch deleting watch history: ${e.message}", e)
+        }
+    }
+
     /**
      * User Preferences
      */
@@ -444,7 +466,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                 }
                 
-                // Update trending_stats_weekly and trending_stats_monthly
+                // Update trending_stats_weekly
                 val isNewWatched = (newStatus == "watched" && oldStatus != "watched")
                 val isRemovedWatched = (oldStatus == "watched" && newStatus != "watched")
                 

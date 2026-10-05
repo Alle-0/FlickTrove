@@ -21,7 +21,8 @@ fun PillProgressBorder(
     modifier: Modifier = Modifier,
     width: Dp = Dp.Unspecified,
     height: Dp = Dp.Unspecified,
-    strokeWidth: Dp = 2.dp
+    strokeWidth: Dp = 1.5.dp,
+    trackColor: Color = Color.White.copy(alpha = 0.35f)
 ) {
     val pathMeasure = remember { PathMeasure() }
     val canvasModifier = if (width != Dp.Unspecified && height != Dp.Unspecified) {
@@ -60,7 +61,7 @@ fun PillProgressBorder(
         // Draw background track
         drawPath(
             path = fullPath,
-            color = Color.White.copy(alpha = 0.2f),
+            color = trackColor,
             style = Stroke(width = strokeWidthPx)
         )
 

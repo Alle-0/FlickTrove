@@ -387,32 +387,31 @@ class RecommendationsViewModel @Inject constructor(
                 }.map { it.copy(mediaType = type) }
             )
 
-            if (results.isEmpty()) {
+            val userProfile = calculateMatchScoreUseCase.buildUserProfile(favorites)
+            val scoredResults = results.distinctBy { it.id }.map { movie ->
+                val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
+                movie.apply { matchScore = score }
+            }
+
+            if (scoredResults.isEmpty()) {
                 if (page > 1) _isEndReached.value = true
                 else _recommendedMovies.value = emptyList()
             } else {
                 // 1. Primary filter: 70% match score threshold
-                var newMovies = results.distinctBy { it.id }
-                    .filter { movie ->
-                        val score = calculateMatchScoreUseCase(movie, favorites)
-                        score == null || score >= 70
-                    }
+                var newMovies = scoredResults.filter { it.matchScore == null || (it.matchScore ?: 0) >= 70 }
 
                 // 2. Graceful degradation: 55% threshold before full fallback
-                if (newMovies.isEmpty() && results.isNotEmpty()) {
-                    newMovies = results.distinctBy { it.id }
-                        .filter { movie ->
-                            val score = calculateMatchScoreUseCase(movie, favorites)
-                            score == null || score >= 55
-                        }
-                        .sortedByDescending { calculateMatchScoreUseCase(it, favorites) ?: 0 }
+                if (newMovies.isEmpty() && scoredResults.isNotEmpty()) {
+                    newMovies = scoredResults
+                        .filter { it.matchScore == null || (it.matchScore ?: 0) >= 55 }
+                        .sortedByDescending { it.matchScore ?: 0 }
                         .take(10)
                 }
 
                 // 3. Full fallback: show best available if all filters too strict
-                if (newMovies.isEmpty() && results.isNotEmpty()) {
-                    newMovies = results.distinctBy { it.id }
-                        .sortedByDescending { calculateMatchScoreUseCase(it, favorites) ?: 0 }
+                if (newMovies.isEmpty() && scoredResults.isNotEmpty()) {
+                    newMovies = scoredResults
+                        .sortedByDescending { it.matchScore ?: 0 }
                         .take(10)
                 }
 

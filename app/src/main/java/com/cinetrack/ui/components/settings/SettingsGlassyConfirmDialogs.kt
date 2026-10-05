@@ -468,6 +468,85 @@ fun WipeDataConfirmDialog(
 }
 
 @Composable
+fun CleanupRewatchesConfirmDialog(
+    visible: Boolean,
+    duplicateCount: Int,
+    isLoading: Boolean,
+    activeHazeState: HazeState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    GlassmorphicModal(
+        visible = visible,
+        activeHazeState = activeHazeState,
+        dimBackground = true,
+        dismissOnClickOutside = !isLoading,
+        onDismissRequest = { if (!isLoading) onDismiss() }
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Icon(
+                ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
+                null,
+                tint = Color(0xFFFFA000),
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                stringResource(R.string.settings_cleanup_rewatches_dialog_title),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                if (duplicateCount > 0) {
+                    stringResource(R.string.settings_cleanup_rewatches_dialog_desc, duplicateCount)
+                } else {
+                    stringResource(R.string.settings_cleanup_rewatches_dialog_desc_zero)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            if (duplicateCount > 0) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SettingsDialogCancelButton(
+                        text = stringResource(R.string.settings_cancel),
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isLoading
+                    )
+                    SettingsDialogConfirmButton(
+                        text = stringResource(R.string.settings_cleanup_rewatches_confirm_btn),
+                        onClick = onConfirm,
+                        containerColor = Color(0xFFFFA000),
+                        contentColor = Color.Black,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isLoading
+                    )
+                }
+            } else {
+                SettingsDialogConfirmButton(
+                    text = stringResource(R.string.settings_got_it),
+                    onClick = onDismiss,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.Black,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun LogoutConfirmDialog(
     visible: Boolean,
     activeHazeState: HazeState,

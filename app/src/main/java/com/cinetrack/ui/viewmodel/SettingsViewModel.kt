@@ -52,8 +52,19 @@ class SettingsViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val appUpdateManager: com.cinetrack.util.AppUpdateManager,
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
+    private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    fun updateCommsUniProfile(displayName: String, avatarUrl: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                commsUniRepository.updateProfile(displayName, avatarUrl)
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsViewModel", "Failed to sync profile to CommsUni", e)
+            }
+        }
+    }
 
     val updateInfo = appUpdateManager.updateInfo
 
@@ -193,6 +204,18 @@ class SettingsViewModel @Inject constructor(
     fun togglePromptWatchDateOnDetail(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.togglePromptWatchDateOnDetail(enabled)
+        }
+    }
+
+    val autoOpenVibeOnWatch = settingsRepository.autoOpenVibeOnWatch.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    fun toggleAutoOpenVibeOnWatch(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleAutoOpenVibeOnWatch(enabled)
         }
     }
 
@@ -995,6 +1018,34 @@ class SettingsViewModel @Inject constructor(
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_action_success))
             } catch (e: Exception) {
                 actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to wipe total data"))
+            }
+        }
+    }
+
+    fun countDuplicateRewatches(onResult: (Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val count = movieRepository.countDuplicateRewatches()
+                onResult(count)
+            } catch (e: Exception) {
+                onResult(0)
+            }
+        }
+    }
+
+    fun cleanupRewatches(onComplete: (Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val deletedCount = movieRepository.cleanupAllRewatches()
+                if (deletedCount > 0) {
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_cleanup_rewatches_success, deletedCount))
+                } else {
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_cleanup_rewatches_none))
+                }
+                onComplete(deletedCount)
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to clean up rewatches"))
+                onComplete(0)
             }
         }
     }

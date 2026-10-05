@@ -138,6 +138,7 @@ fun SettingsUILayoutSection(
     val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
+    val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -364,6 +365,26 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.togglePromptWatchDateOnDetail(!promptWatchDateOnDetail)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+            title = stringResource(R.string.settings_auto_open_vibe_on_watch),
+            description = stringResource(R.string.settings_auto_open_vibe_on_watch_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = autoOpenVibeOnWatch,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleAutoOpenVibeOnWatch(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleAutoOpenVibeOnWatch(!autoOpenVibeOnWatch)
             }
         )
 

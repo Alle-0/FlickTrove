@@ -21,13 +21,16 @@ class EditorialCollectionRepository @Inject constructor(
 ) {
 
     private fun localize(col: EditorialCollection): EditorialCollection {
-        return if (col.id == "marvel_mcu") {
-            col.copy(
+        return when (col.id) {
+            "marvel_mcu" -> col.copy(
                 title = context.getString(R.string.editorial_mcu_title),
                 description = context.getString(R.string.editorial_mcu_desc)
             )
-        } else {
-            col
+            "star_wars_canon" -> col.copy(
+                title = context.getString(R.string.editorial_star_wars_title),
+                description = context.getString(R.string.editorial_star_wars_desc)
+            )
+            else -> col
         }
     }
 

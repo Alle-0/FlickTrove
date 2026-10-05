@@ -530,10 +530,13 @@ fun SettingsScreenContent(
     val unmatchedMovies by settingsViewModel.unmatchedMovies.collectAsStateWithLifecycle()
     var showBlockedUsersModal by remember { mutableStateOf(false) }
     val blockedUsers by settingsViewModel.blockedAuthorsList.collectAsStateWithLifecycle()
+    var showCleanupRewatchesDialog by remember { mutableStateOf(false) }
+    var duplicateRewatchesCount by remember { mutableIntStateOf(0) }
+    var isCleaningUpRewatches by remember { mutableStateOf(false) }
 
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
-                           showExternalMigrationDialog || isBackupLoading ||
+                           showExternalMigrationDialog || isBackupLoading || showCleanupRewatchesDialog ||
                            showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog
 
     BackHandler(enabled = anyDialogVisible) {
@@ -553,6 +556,7 @@ fun SettingsScreenContent(
         showWipeSelectionDialog = false
         showWipeLocalDataConfirm = false
         showWipeTotalDataConfirm = false
+        showCleanupRewatchesDialog = false
         showUnmatchedItemsModal = false
         showBlockedUsersModal = false
         showDashboardSettings = false
@@ -602,6 +606,7 @@ fun SettingsScreenContent(
             showWipeSelectionDialog = false
             showWipeLocalDataConfirm = false
             showWipeTotalDataConfirm = false
+            showCleanupRewatchesDialog = false
             showUnmatchedItemsModal = false
             showBlockedUsersModal = false
             showDashboardSettings = false
@@ -813,6 +818,12 @@ fun SettingsScreenContent(
                             onShowLogoutConfirm = { showLogoutConfirm = true },
                             onShowDeleteDialog = { showDeleteDialog = true },
                             onShowWipeSelectionDialog = { showWipeSelectionDialog = true },
+                            onShowCleanupRewatchesDialog = {
+                                settingsViewModel.countDuplicateRewatches { count ->
+                                    duplicateRewatchesCount = count
+                                    showCleanupRewatchesDialog = true
+                                }
+                            },
                             onLinkGoogleClick = { handleGoogleLink() },
                             blockedUsersCount = blockedUsers.size,
                             onShowBlockedUsersDialog = { showBlockedUsersModal = true }
@@ -861,6 +872,7 @@ fun SettingsScreenContent(
                                 showLogoutConfirm = false
                                 showBackupDialog = false
                                 showExternalMigrationDialog = false
+                                showCleanupRewatchesDialog = false
                                 showUnmatchedItemsModal = false
                                 showBlockedUsersModal = false
                                 showDashboardSettings = false
@@ -986,6 +998,21 @@ fun SettingsScreenContent(
             onConfirm = {
                 showWipeTotalDataConfirm = false
                 settingsViewModel.wipeTotalData()
+            }
+        )
+
+        CleanupRewatchesConfirmDialog(
+            visible = showCleanupRewatchesDialog,
+            duplicateCount = duplicateRewatchesCount,
+            isLoading = isCleaningUpRewatches,
+            activeHazeState = activeHazeState,
+            onDismiss = { showCleanupRewatchesDialog = false },
+            onConfirm = {
+                isCleaningUpRewatches = true
+                settingsViewModel.cleanupRewatches { _ ->
+                    isCleaningUpRewatches = false
+                    showCleanupRewatchesDialog = false
+                }
             }
         )
 

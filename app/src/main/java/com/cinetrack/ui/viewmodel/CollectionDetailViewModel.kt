@@ -12,6 +12,7 @@ import coil.request.SuccessResult
 import com.cinetrack.R
 import com.cinetrack.data.api.CollectionResponse
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.EditorialCollectionRepository
@@ -45,12 +46,26 @@ data class CollectionDetailUiState(
     val collectionId: String = "",
     val collectionName: String? = null,
     val collection: CollectionResponse? = null,
+    val displayedParts: ImmutableList<Movie> = persistentListOf(),
+    val sortConfig: SortConfig = SortConfig(sortType = "chronological", sortDirection = "asc"),
+    val isFilterModalOpen: Boolean = false,
+    val hasTvSeries: Boolean = false,
     val isLoading: Boolean = true,
     val favorites: ImmutableList<Movie> = persistentListOf(),
     val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: UserPreferences = UserPreferences(),
     val error: String? = null
+) {
+    val hasActiveFilters: Boolean
+        get() = sortConfig.sortType != "chronological" || sortConfig.selectedMedia != null || sortConfig.sortDirection != "asc"
+}
+
+private data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
 )
 
 @HiltViewModel
@@ -67,12 +82,31 @@ class CollectionDetailViewModel @Inject constructor(
     private var _collectionName: String? = null
     private val _isLoading = MutableStateFlow(true)
     private val _collection = MutableStateFlow<CollectionResponse?>(null)
+    private val _rawPartsWithTimeline = MutableStateFlow<ImmutableList<Pair<Movie, Int>>>(persistentListOf())
+    private val _sortConfig = MutableStateFlow(SortConfig(sortType = "chronological", sortDirection = "asc"))
+    private val _isFilterModalOpen = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
     private val _extractedColor = MutableStateFlow<Color?>(null)
     val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
 
     val scrollState = androidx.compose.foundation.ScrollState(0)
     val animatedMovieIds = mutableSetOf<String>()
+
+    fun updateSortConfig(config: SortConfig) {
+        _sortConfig.value = config
+    }
+
+    fun openFilterModal() {
+        _isFilterModalOpen.value = true
+    }
+
+    fun dismissFilterModal() {
+        _isFilterModalOpen.value = false
+    }
+
+    fun resetFilters() {
+        _sortConfig.value = SortConfig(sortType = "chronological", sortDirection = "asc")
+    }
 
     fun fetchAccentColor(imageUrl: String, forceReload: Boolean = false, targetAspectRatio: Float? = null) {
         if (forceReload || _extractedColor.value == null) {
@@ -125,21 +159,30 @@ class CollectionDetailViewModel @Inject constructor(
         combine(
             _collection,
             _isLoading,
-            _error
-        ) { col, loading, err -> Triple(col, loading, err) },
+            _error,
+            _rawPartsWithTimeline
+        ) { col, loading, err, rawParts -> Quadruple(col, loading, err, rawParts) },
+        combine(
+            _sortConfig,
+            _isFilterModalOpen
+        ) { sort, modalOpen -> Pair(sort, modalOpen) },
         combine(
             repository.getLocalMoviesFlow(),
             repository.getFoldersFlow(),
             preferenceRepository.userPreferencesFlow
         ) { favs, flds, prefs -> Triple(favs, flds, prefs) }
-    ) { groupA, groupB ->
+    ) { groupA, groupB, groupC ->
         val collection = groupA.first
         val isLoading = groupA.second
         val error = groupA.third
+        val rawParts = groupA.fourth
 
-        val favorites = groupB.first
-        val folders = groupB.second
-        val preferences = groupB.third
+        val sortConfig = groupB.first
+        val isFilterModalOpen = groupB.second
+
+        val favorites = groupC.first
+        val folders = groupC.second
+        val preferences = groupC.third
 
         val folderColorsMap = mutableMapOf<String, ImmutableList<String>>()
         folders.forEach { folder ->
@@ -159,10 +202,54 @@ class CollectionDetailViewModel @Inject constructor(
             }
         }
 
+        val baseItems = if (rawParts.isNotEmpty()) {
+            rawParts
+        } else {
+            collection?.parts?.mapIndexed { idx, m ->
+                val eff = if (m.mediaType.isBlank()) m.copy(mediaType = "movie") else m
+                Pair(eff, idx + 1)
+            } ?: emptyList()
+        }
+
+        val hasTvSeries = baseItems.any { it.first.mediaType == "tv" }
+
+        val filteredItems = baseItems.filter { (movie, _) ->
+            when (sortConfig.selectedMedia) {
+                "movie" -> movie.mediaType != "tv"
+                "tv" -> movie.mediaType == "tv"
+                else -> true
+            }
+        }
+
+        val sortedParts = when (sortConfig.sortType) {
+            "release_date" -> {
+                if (sortConfig.sortDirection == "desc") {
+                    filteredItems.sortedByDescending { (movie, _) ->
+                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: ""
+                    }
+                } else {
+                    filteredItems.sortedBy { (movie, _) ->
+                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                    }
+                }
+            }
+            else -> { // "chronological"
+                if (sortConfig.sortDirection == "desc") {
+                    filteredItems.sortedByDescending { it.second }
+                } else {
+                    filteredItems.sortedBy { it.second }
+                }
+            }
+        }.map { it.first }
+
         CollectionDetailUiState(
             collectionId = _collectionId.value,
             collectionName = _collectionName ?: collection?.name,
             collection = collection,
+            displayedParts = sortedParts.toImmutableList(),
+            sortConfig = sortConfig,
+            isFilterModalOpen = isFilterModalOpen,
+            hasTvSeries = hasTvSeries,
             isLoading = isLoading,
             favorites = favorites.toImmutableList(),
             folders = folders.toImmutableList(),
@@ -187,6 +274,7 @@ class CollectionDetailViewModel @Inject constructor(
                     val editorialCollection = editorialRepository.getCollection(id)
                     if (editorialCollection != null) {
                         val moviesWithIndex = editorialRepository.getCollectionMovies(id)
+                        _rawPartsWithTimeline.value = moviesWithIndex.toImmutableList()
                         val sortedParts = moviesWithIndex.sortedBy { it.second }.map { it.first }
                         
                         val firstMovie = sortedParts.firstOrNull()
@@ -212,6 +300,8 @@ class CollectionDetailViewModel @Inject constructor(
                         }.sortedBy { movie ->
                             movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
                         }
+                        val withIndex = sortedParts.mapIndexed { idx, movie -> Pair(movie, idx + 1) }
+                        _rawPartsWithTimeline.value = withIndex.toImmutableList()
                         _collection.value = details.copy(parts = sortedParts)
                         _isLoading.value = false
                     }

@@ -92,7 +92,7 @@ class FlickTroveListWidget : GlanceAppWidget() {
             val db = FlickTroveDatabase.getInstance(context)
             val allMovies = db.favoriteDao().getAll()
             
-            val toWatch = allMovies.filter { !it.watched }
+            val toWatch = allMovies.filter { (it.favorite || it.reminder) && !it.watched && !it.dropped }
             val todayIso = java.time.LocalDate.now().toString()
             
             // Filter only upcoming movies

@@ -2,8 +2,9 @@ package com.cinetrack.ui.components.comments
 
 import android.os.Build
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,6 +30,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,7 +75,7 @@ fun CommentCardItem(
     onDeleteComment: () -> Unit,
     onReply: () -> Unit,
     onToggleLike: () -> Unit,
-    onReport: () -> Unit,
+    onReport: (Rect) -> Unit,
     onBlockUser: (() -> Unit)? = null,
     onTranslate: (text: String) -> Unit,
     onTriggerGuestAuth: () -> Unit,
@@ -562,55 +565,32 @@ fun CommentCardItem(
                         }
                         if (!isOwner) {
                             Spacer(modifier = Modifier.width(16.dp))
+                            var flagBounds by remember { mutableStateOf<Rect?>(null) }
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_flag),
                                 contentDescription = stringResource(R.string.comment_report_title),
                                 tint = Color.White.copy(alpha = 0.5f),
                                 modifier = Modifier
                                     .size(14.dp)
+                                    .onGloballyPositioned { coordinates ->
+                                        flagBounds = coordinates.boundsInWindow()
+                                    }
                                     .bounceClick {
                                         if (isUserAnonymous) onTriggerGuestAuth()
-                                        else onReport()
+                                        else onReport(flagBounds ?: Rect.Zero)
                                     }
                             )
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        // Translate button
-                        when (translationState) {
-                            is CommentsViewModel.TranslationState.Downloading,
-                            is CommentsViewModel.TranslationState.Translating -> {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(12.dp),
-                                    strokeWidth = 1.5.dp,
-                                    color = accentColor
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
-                            is CommentsViewModel.TranslationState.Translated -> {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_traduzione),
-                                    contentDescription = stringResource(R.string.comment_show_original),
-                                    tint = accentColor,
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .bounceClick { onTranslate(comment.text) }
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
-                            else -> {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_traduzione),
-                                    contentDescription = stringResource(R.string.comment_translate),
-                                    tint = Color.White.copy(alpha = 0.55f),
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .bounceClick { onTranslate(comment.text) }
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
-                        }
+                        // Translate button with progressive filling download bar
+                        TranslationProgressIndicator(
+                            translationState = translationState,
+                            accentColor = accentColor,
+                            onTranslate = { onTranslate(comment.text) }
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
                     } else {
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -657,4 +637,155 @@ fun CommentCardItem(
                 }
             }
         }
+}
+
+@Composable
+fun TranslationProgressIndicator(
+    translationState: CommentsViewModel.TranslationState?,
+    accentColor: Color,
+    onTranslate: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isDownloading = translationState is CommentsViewModel.TranslationState.Downloading
+    val isTranslating = translationState is CommentsViewModel.TranslationState.Translating
+    val isTranslated = translationState is CommentsViewModel.TranslationState.Translated
+    val isProgressVisible = isDownloading || isTranslating
+
+    val progress = remember { Animatable(0.08f) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "downloadingShimmer")
+    val shimmerPhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerPhase"
+    )
+    val iconAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.50f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iconPulse"
+    )
+
+    LaunchedEffect(isDownloading) {
+        if (isDownloading) {
+            progress.snapTo(0.08f)
+            // Multi-phase continuous filling curve scaled to realistic ML Kit model downloads:
+            // Phase 1: Fast start response
+            progress.animateTo(0.35f, tween(2000, easing = FastOutSlowInEasing))
+            // Phase 2: Steady mid download
+            progress.animateTo(0.65f, tween(4000, easing = LinearEasing))
+            // Phase 3: High progress
+            progress.animateTo(0.85f, tween(6000, easing = LinearOutSlowInEasing))
+            // Phase 4: Long buffer crawl so it never freezes
+            progress.animateTo(0.96f, tween(12000, easing = LinearOutSlowInEasing))
+        }
+    }
+
+    LaunchedEffect(isTranslating) {
+        if (isTranslating) {
+            progress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+            )
+        }
+    }
+
+    // Animate width & spacing to smoothly slide the icon to the left when opening,
+    // and slide it back to the right when closing (preserving rounded pill shape at every frame)
+    val animatedBarWidth by animateDpAsState(
+        targetValue = if (isProgressVisible) 36.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = 0.82f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "translationBarWidth"
+    )
+    val animatedSpacing by animateDpAsState(
+        targetValue = if (isProgressVisible) 6.dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = 0.82f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "translationSpacing"
+    )
+    val animatedBarAlpha by animateFloatAsState(
+        targetValue = if (isProgressVisible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = if (isProgressVisible) 220 else 180,
+            easing = FastOutSlowInEasing
+        ),
+        label = "translationBarAlpha"
+    )
+
+    val targetIconTint = when {
+        isDownloading -> accentColor.copy(alpha = iconAlpha)
+        isTranslating -> accentColor
+        isTranslated -> accentColor
+        else -> Color.White.copy(alpha = 0.55f)
+    }
+    val animatedIconTint by animateColorAsState(
+        targetValue = targetIconTint,
+        animationSpec = tween(220),
+        label = "translationIconTint"
+    )
+
+    val canClick = !isDownloading && !isTranslating
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_traduzione),
+            contentDescription = stringResource(
+                if (isTranslated) R.string.comment_show_original else R.string.comment_translate
+            ),
+            tint = animatedIconTint,
+            modifier = Modifier
+                .size(14.dp)
+                .bounceClick(enabled = canClick) { onTranslate() }
+        )
+
+        if (animatedBarWidth > 0.5.dp && animatedBarAlpha > 0.01f) {
+            Spacer(modifier = Modifier.width(animatedSpacing))
+            Box(
+                modifier = Modifier
+                    .width(animatedBarWidth)
+                    .height(4.dp)
+                    .graphicsLayer { alpha = animatedBarAlpha }
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f))
+            ) {
+                val currentProg = progress.value.coerceIn(0.06f, 1f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction = currentProg)
+                        .clip(CircleShape)
+                        .background(
+                            if (isTranslating) {
+                                Brush.linearGradient(listOf(accentColor, accentColor))
+                            } else {
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        accentColor.copy(alpha = 0.70f),
+                                        Color.White.copy(alpha = 0.90f),
+                                        accentColor
+                                    ),
+                                    startX = -40f + shimmerPhase * 100f,
+                                    endX = shimmerPhase * 100f
+                                )
+                            }
+                        )
+                )
+            }
+        }
+    }
 }

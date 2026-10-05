@@ -42,18 +42,74 @@ class WatchHistoryRepository @Inject constructor(
         watchHistoryDao.purgeHistoryForMovie(movieId)
     }
 
+    suspend fun countDuplicateRewatches(): Int {
+        val allHistory = watchHistoryDao.getAllWatchHistory()
+        var duplicateCount = 0
+        val byMovie = allHistory.groupBy { it.movieId }
+        for ((_, entries) in byMovie) {
+            if (entries.size > 1) {
+                duplicateCount += (entries.size - 1)
+            } else if (entries.size == 1 && entries.first().isRewatch) {
+                duplicateCount += 1
+            }
+        }
+        return duplicateCount
+    }
+
+    suspend fun cleanupAllRewatches(): Int {
+        val allHistory = watchHistoryDao.getAllWatchHistory()
+        val toDelete = mutableListOf<WatchHistoryEntity>()
+        val byMovie = allHistory.groupBy { it.movieId }
+        for ((_, entries) in byMovie) {
+            if (entries.size > 1) {
+                // Keep the oldest watch (first watch event)
+                val sorted = entries.sortedBy { it.watchedAt }
+                val duplicates = sorted.drop(1)
+                toDelete.addAll(duplicates)
+                // Ensure the retained first watch has isRewatch = false
+                val first = sorted.first()
+                if (first.isRewatch) {
+                    watchHistoryDao.update(first.copy(isRewatch = false, syncStatus = "pending"))
+                }
+            } else if (entries.size == 1 && entries.first().isRewatch) {
+                // If there's only 1 entry for this movie but it was flagged as rewatch, normalize it
+                watchHistoryDao.update(entries.first().copy(isRewatch = false, syncStatus = "pending"))
+            }
+        }
+
+        // Also catch any entry explicitly marked isRewatch = true that wasn't caught above
+        for (entry in allHistory) {
+            if (entry.isRewatch && toDelete.none { it.id == entry.id }) {
+                toDelete.add(entry)
+            }
+        }
+
+        if (toDelete.isEmpty()) return 0
+
+        for (entry in toDelete) {
+            watchHistoryDao.markDeleted(entry.id)
+        }
+
+        // Push pending deletions to Firebase (in bulk) and purge from Room
+        pushPendingWatchHistory()
+
+        return toDelete.size
+    }
+
     suspend fun pushPendingWatchHistory() {
         val pendingHistory = watchHistoryDao.getPendingSync()
         val historyToDelete = pendingHistory.filter { it.syncStatus == "deleted" }
         val historyToSync = pendingHistory.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
 
-        for (history in historyToDelete) {
+        if (historyToDelete.isNotEmpty()) {
             try {
-                firebaseRemoteDataSource.deleteWatchHistory(history.movieId, history.watchedAt)
-                watchHistoryDao.delete(history)
+                firebaseRemoteDataSource.batchDeleteWatchHistory(historyToDelete)
+                for (history in historyToDelete) {
+                    watchHistoryDao.delete(history)
+                }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                android.util.Log.e("WatchHistoryRepository", "Failed to push pending delete watch history ${history.id}", e)
+                android.util.Log.e("WatchHistoryRepository", "Failed to push pending delete watch history bulk", e)
             }
         }
 

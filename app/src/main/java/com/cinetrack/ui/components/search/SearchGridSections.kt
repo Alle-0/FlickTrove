@@ -71,6 +71,9 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.components.common.PillProgressBorder
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.horizontalFadingEdges
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -605,7 +608,18 @@ fun LazyGridScope.searchEditorialCollectionsVetrina(
                     modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
                 )
                 
+                val rowState = rememberLazyListState()
+
                 androidx.compose.foundation.lazy.LazyRow(
+                    state = rowState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalFadingEdges(
+                            lazyListState = rowState,
+                            leftEdgeWidth = 24.dp,
+                            rightEdgeWidth = 28.dp
+                        ),
+                    contentPadding = PaddingValues(end = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(
@@ -692,6 +706,22 @@ fun CollectionCollageCard(
                             Color(0xFF09090F).copy(alpha = 0.55f),
                             Color(0xFF09090F).copy(alpha = 0.95f)
                         )
+                    )
+                )
+        )
+
+        // Gradient for left & right contrast (title on left, pill on right)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        0.0f to Color(0xFF09090F).copy(alpha = 0.85f),
+                        0.30f to Color(0xFF09090F).copy(alpha = 0.45f),
+                        0.52f to Color.Transparent,
+                        0.74f to Color.Transparent,
+                        0.90f to Color(0xFF09090F).copy(alpha = 0.40f),
+                        1.0f to Color(0xFF09090F).copy(alpha = 0.75f)
                     )
                 )
         )

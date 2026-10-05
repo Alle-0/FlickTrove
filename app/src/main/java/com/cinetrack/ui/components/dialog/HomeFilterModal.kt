@@ -75,11 +75,15 @@ fun HomeFilterModal(
     isVisible: Boolean,
     isVisti: Boolean = false,
     isFolder: Boolean = false,
+    isCollectionFilter: Boolean = false,
+    hasTvSeries: Boolean = false,
     sortConfig: SortConfig,
     hazeState: HazeState?,
     triggerBounds: Rect? = null,
     category: String = "movie",
     isCommentsFilter: Boolean = false,
+    availableSources: List<com.cinetrack.data.api.SourceCatalogRow> = emptyList(),
+    availableLanguages: List<String> = emptyList(),
     showSortBy: Boolean = true,
     suggestedFilters: List<com.cinetrack.ui.viewmodel.FilterPill> = emptyList(),
     initialKeywordName: String? = null,
@@ -101,8 +105,16 @@ fun HomeFilterModal(
     var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
     var showAllGenres by remember { mutableStateOf(false) }
     
+    val minAllowedHeight = with(density) {
+        when {
+            isCollectionFilter -> (if (hasTvSeries) 320.dp else 260.dp).toPx()
+            isCommentsFilter -> 380.dp.toPx()
+            else -> 380.dp.toPx()
+        }
+    }
+
     val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(with(density) { (if (isCommentsFilter) 0.dp else 380.dp).toPx() }, maxAllowedHeight) 
+        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeight, maxAllowedHeight) 
                       else screenHeight * 0.45f,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "dynamicHeight"
@@ -186,8 +198,10 @@ fun HomeFilterModal(
                     ) {
                         // Measure based on which section is expanded
                         val expandedHeight = when(expandedSection) {
-                            "sort" -> with(density) { (if (isCommentsFilter) 48 * 2 + 100 else 48 * 6 + 100).dp.toPx() } // Approx sort items
-                            "source" -> with(density) { (48 * 2 + 30).dp.toPx() }
+                            "sort" -> with(density) { (if (isCommentsFilter || isCollectionFilter) 48 * 2 + 100 else 48 * 6 + 100).dp.toPx() } // Approx sort items
+                            "source" -> with(density) { ((availableSources.size.coerceAtLeast(2) + 1) * 44 + 30).dp.toPx() }
+                            "language" -> with(density) { (11 * 44 + 30).dp.toPx().coerceAtMost(maxAllowedHeight * 0.50f) }
+                            "media" -> with(density) { (48 * 3 + 30).dp.toPx() }
                             "genres" -> with(density) { 250.dp.toPx() }
                             "platforms" -> with(density) { 100.dp.toPx() }
                             "period" -> with(density) { 120.dp.toPx() }
@@ -197,7 +211,11 @@ fun HomeFilterModal(
                         
                         Spacer(modifier = Modifier.height(
                             with(density) { 
-                                val sectionCount = if (isCommentsFilter) 2 else 4
+                                val sectionCount = when {
+                                    isCollectionFilter -> if (hasTvSeries) 2 else 1
+                                    isCommentsFilter -> 3
+                                    else -> 4
+                                }
                                 (54 * sectionCount).dp + // Section headers
                                 expandedHeight.pxToDp(density) +
                                 100.dp // Apply button space
@@ -325,8 +343,13 @@ fun HomeFilterModal(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            val titleText = if (isCollectionFilter) {
+                                stringResource(R.string.collection_filter_modal_title).uppercase()
+                            } else {
+                                stringResource(R.string.filter_title)
+                            }
                             Text(
-                                text = stringResource(R.string.filter_title),
+                                text = titleText,
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 3.sp,
@@ -334,24 +357,44 @@ fun HomeFilterModal(
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // Reset All Button
-                                val hasActiveFilters = localSortConfig.selectedGenres.isNotEmpty() ||
-                                    localSortConfig.selectedKeywords.isNotEmpty() ||
-                                    localSortConfig.selectedProviders.isNotEmpty() ||
-                                    localSortConfig.selectedDecades.isNotEmpty() ||
-                                    localSortConfig.selectedStatuses.isNotEmpty() ||
-                                    localSortConfig.selectedSource != null
+                                val hasActiveFilters = if (isCollectionFilter) {
+                                    localSortConfig.sortType != "chronological" ||
+                                        localSortConfig.selectedMedia != null ||
+                                        localSortConfig.sortDirection != "asc"
+                                } else {
+                                    localSortConfig.selectedGenres.isNotEmpty() ||
+                                        localSortConfig.selectedKeywords.isNotEmpty() ||
+                                        localSortConfig.selectedProviders.isNotEmpty() ||
+                                        localSortConfig.selectedDecades.isNotEmpty() ||
+                                        localSortConfig.selectedStatuses.isNotEmpty() ||
+                                        localSortConfig.selectedSources.isNotEmpty() ||
+                                        localSortConfig.selectedLanguages.isNotEmpty() ||
+                                        localSortConfig.selectedSource != null ||
+                                        localSortConfig.selectedLanguage != null
+                                }
                                 if (hasActiveFilters) {
                                     Row(
                                         modifier = Modifier
                                             .bounceClick {
-                                                localSortConfig = localSortConfig.copy(
-                                                    selectedGenres = emptyList(),
-                                                    selectedKeywords = emptyList(),
-                                                    selectedProviders = emptyList(),
-                                                    selectedDecades = emptyList(),
-                                                    selectedStatuses = emptyList(),
-                                                    selectedSource = null
-                                                )
+                                                localSortConfig = if (isCollectionFilter) {
+                                                    localSortConfig.copy(
+                                                        sortType = "chronological",
+                                                        sortDirection = "asc",
+                                                        selectedMedia = null
+                                                    )
+                                                } else {
+                                                    localSortConfig.copy(
+                                                        selectedGenres = emptyList(),
+                                                        selectedKeywords = emptyList(),
+                                                        selectedProviders = emptyList(),
+                                                        selectedDecades = emptyList(),
+                                                        selectedStatuses = emptyList(),
+                                                        selectedSources = emptyList(),
+                                                        selectedLanguages = emptyList(),
+                                                        selectedSource = null,
+                                                        selectedLanguage = null
+                                                    )
+                                                }
                                             }
                                             .clip(RoundedCornerShape(24.dp))
                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = HazeStyles.GlassAlphaLow))
@@ -418,7 +461,10 @@ fun HomeFilterModal(
                                             category == "genre"
 
                                         val sortOptions = buildList {
-                                            if (isCommentsFilter) {
+                                            if (isCollectionFilter) {
+                                                add(FilterOption("chronological", stringResource(R.string.collection_filter_sort_chronological)))
+                                                add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
+                                            } else if (isCommentsFilter) {
                                                 add(FilterOption("date", stringResource(R.string.comment_sort_date)))
                                                 add(FilterOption("likes", stringResource(R.string.comment_sort_likes)))
                                             } else if (isDiscoverCategory) {
@@ -489,34 +535,173 @@ fun HomeFilterModal(
 
                             // --- SOURCE SECTION (Only for comments) ---
                             if (isCommentsFilter) {
+                                val activeSources = remember(localSortConfig.selectedSources, localSortConfig.selectedSource) {
+                                    (localSortConfig.selectedSources + listOfNotNull(localSortConfig.selectedSource)).toSet()
+                                }
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_source),
                                     isExpanded = expandedSection == "source",
                                     showChevron = true,
                                     isClickable = true,
-                                    badgeCount = if (localSortConfig.selectedSource != null) 1 else 0,
+                                    badgeCount = activeSources.size,
                                     onToggle = { expandedSection = if (expandedSection == "source") null else "source" }
+                                ) {
+                                    val sources = remember(availableSources) {
+                                        val rawList = if (availableSources.isNotEmpty()) {
+                                            availableSources
+                                        } else {
+                                            listOf(
+                                                com.cinetrack.data.api.SourceCatalogRow(slug = "flicktrove", displayName = "FlickTrove"),
+                                                com.cinetrack.data.api.SourceCatalogRow(slug = "tvtime", displayName = "TV Time Refugees")
+                                            )
+                                        }
+                                        val flickTroveItem = rawList.firstOrNull { it.slug.equals("flicktrove", ignoreCase = true) }
+                                            ?: com.cinetrack.data.api.SourceCatalogRow(slug = "flicktrove", displayName = "FlickTrove")
+                                        val otherItems = rawList
+                                            .filter { !it.slug.equals("flicktrove", ignoreCase = true) }
+                                            .sortedBy { (it.displayName?.ifBlank { it.slug } ?: it.slug).lowercase() }
+                                        listOf(flickTroveItem) + otherItems
+                                    }
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        FilterChip(
+                                            label = stringResource(R.string.filter_source_all),
+                                            isSelected = activeSources.isEmpty(),
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedSources = emptyList(), selectedSource = null) }
+                                        )
+                                        sources.forEach { source ->
+                                            val isSelected = source.slug in activeSources
+                                            FilterChip(
+                                                label = source.displayName?.ifBlank { source.slug } ?: source.slug,
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    val newSet = if (isSelected) activeSources - source.slug else activeSources + source.slug
+                                                    localSortConfig = localSortConfig.copy(
+                                                        selectedSources = newSet.toList(),
+                                                        selectedSource = null
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // --- LANGUAGE SECTION (Only for comments) ---
+                            if (isCommentsFilter) {
+                                val activeLanguages = remember(localSortConfig.selectedLanguages, localSortConfig.selectedLanguage) {
+                                    (localSortConfig.selectedLanguages + listOfNotNull(localSortConfig.selectedLanguage)).toSet()
+                                }
+                                ExpandableSection(
+                                    title = stringResource(R.string.filter_language),
+                                    isExpanded = expandedSection == "language",
+                                    showChevron = true,
+                                    isClickable = true,
+                                    badgeCount = activeLanguages.size,
+                                    onToggle = { expandedSection = if (expandedSection == "language") null else "language" }
+                                ) {
+                                    val currentLocale = if (!configuration.locales.isEmpty) configuration.locales[0] else java.util.Locale.getDefault()
+                                    val commsUniSupportedLanguageCodes = remember {
+                                        listOf(
+                                            "en", "it", "es", "fr", "de", "pt", "ru", "tr", "ar", "pl",
+                                            "nl", "id", "ja", "ko", "zh", "hi", "el", "hu", "cs", "ro",
+                                            "sv", "da", "fi", "no", "uk", "vi", "th", "he", "fa", "ms",
+                                            "bg", "hr", "sr", "sk"
+                                        )
+                                    }
+                                    val allLanguageCodes = remember(availableLanguages, commsUniSupportedLanguageCodes) {
+                                        (commsUniSupportedLanguageCodes + availableLanguages)
+                                            .map { it.lowercase().trim() }
+                                            .filter { it.isNotBlank() }
+                                            .distinct()
+                                    }
+                                    val allLabel = stringResource(R.string.flow_filter_media_all)
+                                    val languages = remember(currentLocale, allLanguageCodes, allLabel) {
+                                        val userLangCode = currentLocale.language.lowercase()
+                                        val mapped = allLanguageCodes.map { code ->
+                                            val loc = java.util.Locale.forLanguageTag(code)
+                                            val rawName = loc.getDisplayLanguage(currentLocale)
+                                            val displayName = rawName.replaceFirstChar {
+                                                if (it.isLowerCase()) it.titlecase(currentLocale) else it.toString()
+                                            }.ifBlank { code.uppercase() }
+                                            code to displayName
+                                        }
+                                        val userLangPair = mapped.firstOrNull { it.first == userLangCode }
+                                        val otherLangs = mapped
+                                            .filter { it.first != userLangCode }
+                                            .sortedBy { it.second.lowercase(currentLocale) }
+                                        if (userLangPair != null) {
+                                            listOf(userLangPair) + otherLangs
+                                        } else {
+                                            otherLangs
+                                        }
+                                    }
+                                    FlowRow(
+                                        modifier = Modifier.padding(horizontal = 12.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        FilterChip(
+                                            label = allLabel,
+                                            isSelected = activeLanguages.isEmpty(),
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedLanguages = emptyList(), selectedLanguage = null) }
+                                        )
+                                        languages.forEach { (code, label) ->
+                                            val isSelected = code in activeLanguages
+                                            FilterChip(
+                                                label = label,
+                                                isSelected = isSelected,
+                                                onClick = {
+                                                    val newSet = if (isSelected) activeLanguages - code else activeLanguages + code
+                                                    localSortConfig = localSortConfig.copy(
+                                                        selectedLanguages = newSet.toList(),
+                                                        selectedLanguage = null
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // --- MEDIA TYPE SECTION (Only for collections with TV series) ---
+                            if (isCollectionFilter && hasTvSeries) {
+                                ExpandableSection(
+                                    title = stringResource(R.string.flow_filter_section_media),
+                                    isExpanded = expandedSection == "media",
+                                    showChevron = true,
+                                    isClickable = true,
+                                    badgeCount = if (localSortConfig.selectedMedia != null) 1 else 0,
+                                    onToggle = { expandedSection = if (expandedSection == "media") null else "media" }
                                 ) {
                                     Column(
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         SortOptionItem(
-                                            label = stringResource(R.string.filter_source_all),
-                                            isSelected = localSortConfig.selectedSource == null,
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedSource = null) }
+                                            label = stringResource(R.string.flow_filter_media_all),
+                                            isSelected = localSortConfig.selectedMedia == null,
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = null) }
                                         )
                                         SortOptionItem(
-                                            label = stringResource(R.string.filter_source_flicktrove),
-                                            isSelected = localSortConfig.selectedSource == "flicktrove",
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedSource = "flicktrove") }
+                                            label = stringResource(R.string.flow_filter_media_movies),
+                                            isSelected = localSortConfig.selectedMedia == "movie",
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = "movie") }
+                                        )
+                                        SortOptionItem(
+                                            label = stringResource(R.string.flow_filter_media_tv),
+                                            isSelected = localSortConfig.selectedMedia == "tv",
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = "tv") }
                                         )
                                     }
                                 }
                             }
 
                             // --- STATUS SECTION (Only for TV, not for upcoming) ---
-                            if (!isCommentsFilter && category.contains("tv") && !category.contains("upcoming")) {
+                            if (!isCommentsFilter && !isCollectionFilter && category.contains("tv") && !category.contains("upcoming")) {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_status),
                                     isExpanded = expandedSection == "status",
@@ -557,7 +742,7 @@ fun HomeFilterModal(
                             }
 
                             // --- ACTIVE KEYWORDS SECTION ---
-                            if (!isCommentsFilter && localSortConfig.selectedKeywords.isNotEmpty()) {
+                            if (!isCommentsFilter && !isCollectionFilter && localSortConfig.selectedKeywords.isNotEmpty()) {
                                 ExpandableSection(
                                     title = stringResource(R.string.filter_active_subgenres),
                                     isExpanded = expandedSection == "keywords" || expandedSection == null,
@@ -590,7 +775,7 @@ fun HomeFilterModal(
                             }
 
                             // --- GENRES SECTION ---
-                            if (!isCommentsFilter) {
+                            if (!isCommentsFilter && !isCollectionFilter) {
                                 ExpandableSection(
                                 title = stringResource(R.string.filter_genres),
                                 isExpanded = expandedSection == "genres",
@@ -660,7 +845,7 @@ fun HomeFilterModal(
                             }
 
                             // --- PLATFORMS SECTION ---
-                            if (!isCommentsFilter) {
+                            if (!isCommentsFilter && !isCollectionFilter) {
                                 ExpandableSection(
                                 title = stringResource(R.string.filter_platforms),
                                 isExpanded = expandedSection == "platforms",
@@ -696,7 +881,7 @@ fun HomeFilterModal(
                         }
 
                         // --- DECADES / RELEASE MONTHS SECTION ---
-                        if (!isCommentsFilter) {
+                        if (!isCommentsFilter && !isCollectionFilter) {
                             val isUpcoming = category.contains("upcoming")
                             val sectionTitle = if (isUpcoming) {
                                 stringResource(R.string.filter_release_month)

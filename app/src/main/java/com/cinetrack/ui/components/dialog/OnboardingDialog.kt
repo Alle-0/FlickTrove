@@ -182,7 +182,7 @@ fun OnboardingDialog(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(330.dp)
+                            .height(345.dp)
                     ) { page ->
                         val slide = slides[page]
                         Column(
@@ -196,7 +196,7 @@ fun OnboardingDialog(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(185.dp)
+                                        .height(165.dp)
                                         .clip(RoundedCornerShape(20.dp))
                                         .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp)),
                                     contentAlignment = Alignment.Center
@@ -216,7 +216,7 @@ fun OnboardingDialog(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
                             Text(
                                 text = stringResource(slide.subtitleRes),
@@ -227,7 +227,7 @@ fun OnboardingDialog(
                                 color = accentColor
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
                             Text(
                                 text = stringResource(slide.titleRes),
@@ -239,13 +239,13 @@ fun OnboardingDialog(
                                 textAlign = TextAlign.Center
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
                                 text = stringResource(slide.descriptionRes),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = Color.White.copy(alpha = 0.7f),
-                                    lineHeight = 20.sp
+                                    lineHeight = 19.sp
                                 ),
                                 textAlign = TextAlign.Center
                             )

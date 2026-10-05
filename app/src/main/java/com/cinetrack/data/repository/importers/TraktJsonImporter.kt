@@ -92,6 +92,21 @@ class TraktJsonImporter @Inject constructor(
                         ?: o?.get("rating")?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
                     if (id != null && r != null) {
                         ratingsMap[id] = r
+                        ratingsMap[kotlin.math.abs(id)] = r
+                    }
+                }
+            }
+
+            val categoriesMap = mutableMapOf<String, String>()
+            if (element is JsonObject && element["categories"] is JsonArray) {
+                (element["categories"] as JsonArray).forEach { cObj ->
+                    val o = cObj as? JsonObject
+                    val cId = o?.get("id")?.jsonPrimitive?.contentOrNull
+                        ?: o?.get("id_category")?.jsonPrimitive?.contentOrNull
+                    val cName = o?.get("name")?.jsonPrimitive?.contentOrNull
+                        ?: o?.get("title")?.jsonPrimitive?.contentOrNull
+                    if (!cId.isNullOrBlank() && !cName.isNullOrBlank()) {
+                        categoriesMap[cId] = cName
                     }
                 }
             }
@@ -148,8 +163,13 @@ class TraktJsonImporter @Inject constructor(
                         ?: itemObj["show_name"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["movie_name"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["show_title"]?.jsonPrimitive?.contentOrNull
-                    val year = itemObj["year"]?.jsonPrimitive?.contentOrNull
+                    val rawYear = itemObj["year"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["release_year"]?.jsonPrimitive?.contentOrNull
+                    val year = if (rawYear != null && rawYear.length > 4 && rawYear.toLongOrNull() != null) {
+                        try {
+                            java.time.Instant.ofEpochMilli(rawYear.toLong()).atZone(java.time.ZoneOffset.UTC).year.toString()
+                        } catch (_: Exception) { rawYear.take(4) }
+                    } else rawYear
                     val typeStr = itemObj["type"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["media_type"]?.jsonPrimitive?.contentOrNull
                         ?: obj["type"]?.jsonPrimitive?.contentOrNull
@@ -241,9 +261,16 @@ class TraktJsonImporter @Inject constructor(
                         ?: itemObj["list_name"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["list"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["tag"]?.jsonPrimitive?.contentOrNull
-                    val folderName = rawFolder ?: if (isWatchlistFile) "Watchlist" else null
 
-                    if (!isSeen && (isWatchlistFile || folderName?.equals("watchlist", ignoreCase = true) == true || folderName?.equals("to watch", ignoreCase = true) == true || folderName?.equals("planned", ignoreCase = true) == true || folderName?.equals("for_later", ignoreCase = true) == true)) {
+                    val rawCategories = obj["categories"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["categories"]?.jsonPrimitive?.contentOrNull
+                    val categoryFolderName = if (!rawCategories.isNullOrBlank() && categoriesMap.isNotEmpty()) {
+                        rawCategories.split(",").mapNotNull { categoriesMap[it.trim()] }.firstOrNull()
+                    } else null
+
+                    val folderName = rawFolder ?: categoryFolderName ?: if (isWatchlistFile) "Watchlist" else null
+
+                    if (!isSeen && !isDropped) {
                         isFav = true
                     }
 
@@ -323,11 +350,34 @@ class TraktJsonImporter @Inject constructor(
                                 }
                             } else if (tmdbId != null && tmdbId > 0) {
                                 val mediaType = if (finalWatchedEps != null || typeStr.contains("tv", ignoreCase = true) || typeStr.contains("show", ignoreCase = true)) "tv" else "movie"
+                                val backdrop = itemObj["backdrop"]?.jsonPrimitive?.contentOrNull
+                                    ?: itemObj["backdrop_path"]?.jsonPrimitive?.contentOrNull
+                                val poster = itemObj["poster"]?.jsonPrimitive?.contentOrNull
+                                    ?: itemObj["poster_path"]?.jsonPrimitive?.contentOrNull
+                                val overview = itemObj["overview"]?.jsonPrimitive?.contentOrNull
+                                val voteAvg = itemObj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                                    ?: obj["rating"]?.jsonPrimitive?.contentOrNull?.toDoubleOrNull()
+                                val relDate = if (rawYear != null && rawYear.length > 4 && rawYear.toLongOrNull() != null) {
+                                    try {
+                                        java.time.Instant.ofEpochMilli(rawYear.toLong()).atZone(java.time.ZoneOffset.UTC).toLocalDate().toString()
+                                    } catch (_: Exception) { null }
+                                } else itemObj["release_date"]?.jsonPrimitive?.contentOrNull
+                                val parsedGenreIds = itemObj["genres"]?.jsonPrimitive?.contentOrNull
+                                    ?.split(",")?.mapNotNull { it.trim().toLongOrNull() }
+                                    ?: itemObj["genre_ids"]?.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull?.toLongOrNull() }
+
                                 val m = Movie(
                                     id = tmdbId,
                                     mediaType = mediaType,
                                     title = title ?: "Unknown ($tmdbId)",
                                     name = if (mediaType == "tv") title else null,
+                                    posterPath = poster,
+                                    backdropPath = backdrop,
+                                    overview = overview,
+                                    voteAverage = voteAvg,
+                                    releaseDate = if (mediaType != "tv") relDate else null,
+                                    firstAirDate = if (mediaType == "tv") relDate else null,
+                                    genreIds = parsedGenreIds,
                                     watched = isSeen,
                                     favorite = isFav,
                                     dropped = isDropped,

@@ -527,6 +527,7 @@ fun SettingsAccountSection(
     onShowLogoutConfirm: () -> Unit,
     onShowDeleteDialog: () -> Unit,
     onShowWipeSelectionDialog: () -> Unit,
+    onShowCleanupRewatchesDialog: () -> Unit,
     onLinkGoogleClick: () -> Unit,
     blockedUsersCount: Int = 0,
     onShowBlockedUsersDialog: (() -> Unit)? = null
@@ -622,6 +623,17 @@ fun SettingsAccountSection(
             )
         }
         
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
+            title = stringResource(id = R.string.settings_cleanup_rewatches_title),
+            description = stringResource(id = R.string.settings_cleanup_rewatches_desc),
+            tint = Color(0xFFFFA000),
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
+                onShowCleanupRewatchesDialog()
+            }
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
             title = stringResource(id = R.string.settings_dialog_wipe_data_title),

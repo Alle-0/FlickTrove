@@ -351,6 +351,14 @@
     <string name="settings_dialog_wipe_total_data_title">모든 데이터 삭제</string>
     <string name="settings_dialog_wipe_total_data_desc">정말 모든 데이터를 삭제하시겠습니까? 클라우드와 이 기기에서 보관함이 완전히 삭제되며 복구할 수 없습니다.</string>
     <string name="settings_yes_wipe_total">모든 데이터 삭제</string>
+    <string name="settings_cleanup_rewatches_title">재시청 기록 정리</string>
+    <string name="settings_cleanup_rewatches_desc">중복된 시청 기록을 삭제하고 작품당 최초 시청만 유지합니다</string>
+    <string name="settings_cleanup_rewatches_dialog_title">재시청 기록 정리</string>
+    <string name="settings_cleanup_rewatches_dialog_desc">중복된 재시청 기록 %1$d개를 발견했습니다. 이를 삭제하고 작품당 최초 시청만 유지하시겠습니까? 클라우드에도 동기화됩니다.</string>
+    <string name="settings_cleanup_rewatches_dialog_desc_zero">시청 기록에 중복된 재시청이 없습니다. 시청 횟수가 이미 고유합니다!</string>
+    <string name="settings_cleanup_rewatches_confirm_btn">중복 항목 삭제</string>
+    <string name="settings_cleanup_rewatches_success">중복된 재시청 기록 %1$d개를 삭제했습니다</string>
+    <string name="settings_cleanup_rewatches_none">정리할 중복 재시청 기록이 없습니다</string>
     <string name="settings_account_deleted_success">계정이 성공적으로 삭제되었습니다</string>
     <string name="settings_action_success">작업이 정상적으로 완료되었습니다</string>
     <string name="settings_login">로그인</string>
@@ -866,6 +874,8 @@
     <string name="search_editorial_collections">에디토리얼 컬렉션</string>
     <string name="editorial_mcu_title">마블 시네마틱 유니버스</string>
     <string name="editorial_mcu_desc">MCU 신성한 타임라인의 완성: 영화, TV 시리즈(디펜더스, 에이전트 카터), 애니메이션을 잇는 결정적인 서사 순서. 정확한 시간 순서로 전체 서사시를 경험하세요.</string>
+    <string name="editorial_star_wars_title">스타워즈: 공식 캐넌 타임라인</string>
+    <string name="editorial_star_wars_desc">루카스필름 공식 캐넌 타임라인 전체: 고공화국과 제다이의 몰락부터 은하 내전과 퍼스트 오더의 부흥까지 정확한 이야기 순서대로 감상하세요.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" 삭제됨</string>
     <string name="msg_item_deleted">\"%1$s\" 삭제됨</string>
@@ -1082,13 +1092,20 @@
     <string name="onboarding_slide4_title">온전한 나만의 데이터</string>
     <string name="onboarding_slide4_sub">로컬 백업 및 TRAKT 자동 동기화</string>
     <string name="onboarding_slide4_desc">로컬 JSON 백업을 손쉽게 내보내고 가져올 수 있으며, Trakt 계정을 연결해 자동으로 동기화할 수 있습니다.</string>
-    <string name="onboarding_slide5_title">시청 중단 시리즈 관리</string>
-    <string name="onboarding_slide5_sub">하차한 작품 숨기기</string>
-    <string name="onboarding_slide5_desc">보던 시리즈를 도중에 하차하셨나요? 삭제 버튼을 위로 스와이프해 \'시청 중단\'으로 표시하면, 본 기록은 유지하면서 미시청 알림을 말끔히 숨겨줍니다.</string>
+    <string name="onboarding_slide5_title">시청 중단 및 목록 삭제</string>
+    <string name="onboarding_slide5_sub">하차 작품 관리 및 삭제</string>
+    <string name="onboarding_slide5_desc">영화나 시리즈를 목록에서 삭제하고 싶으신가요? Rewatch(영화) 또는 Dropped(시리즈) 버튼을 위로 스와이프해 휴지통을 표시하거나, \'Dropped\'로 설정해 새 에피소드 알림을 끌 수 있습니다.</string>
     <string name="settings_review_tutorial">튜토리얼 다시 보기</string>
     <string name="collection_badge_movies_plural">영화 %1$d편</string>
     <string name="collection_badge_movies_single">영화 %1$d편</string>
     <string name="collection_badge_movies_plus">영화 %1$d편+</string>
+    <string name="collection_badge_items_plural">%1$d개 항목</string>
+    <string name="collection_badge_items_single">%1$d개 항목</string>
+    <string name="collection_badge_series_plural">시리즈 %1$d편</string>
+    <string name="collection_badge_series_single">시리즈 %1$d편</string>
+    <string name="collection_filter_sort_chronological">연대순</string>
+    <string name="collection_filter_modal_title">컬렉션 필터</string>
+    <string name="collection_filter_empty">선택한 필터와 일치하는 항목이 없습니다</string>
     <string name="overview_show_more">더보기</string>
     <string name="overview_show_less">접기</string>
     <string name="checkin_how_did_it_make_you_feel">이 작품을 보고 어떤 느낌이 드셨나요?</string>
@@ -1210,6 +1227,11 @@
     <string name="comment_collapse">접기</string>
     <string name="comment_view_replies_singular">답글 %1$d개 보기</string>
     <string name="comment_view_replies_plural">답글 %1$d개 보기</string>
+    <string name="comment_action_menu_title">댓글 옵션</string>
+    <string name="comment_action_report">댓글 신고</string>
+    <string name="comment_action_tvtime_ownership">본인의 댓글인가요? (TV Time)</string>
+    <string name="comment_tvtime_ownership_title">TV Time 아카이브</string>
+    <string name="comment_tvtime_ownership_subtitle">TV Time에서 작성한 댓글인가요? 소유권을 주장하거나 숨길 수 있습니다.</string>
     <string name="comment_report_title">신고</string>
     <string name="comment_report_subtitle">어떤 사유로 신고하시겠습니까?</string>
     <string name="comment_report_spoiler">스포일러 포함</string>
@@ -1221,7 +1243,12 @@
     <string name="comment_report_reason_sexual">음란물 또는 성적 콘텐츠</string>
     <string name="comment_report_reason_illegal">불법 콘텐츠</string>
     <string name="comment_report_reason_other">기타</string>
+    <string name="comment_report_other_title">기타 사유</string>
+    <string name="comment_report_other_subtitle">신고 사유를 간략하게 설명해 주세요.</string>
+    <string name="comment_report_other_placeholder">이 댓글의 문제점을 설명해 주세요...</string>
+    <string name="comment_report_other_submit">신고 제출</string>
     <string name="comment_report_reason_mine_hide">이전 보관된 댓글 숨기기</string>
+    <string name="comment_report_reason_mine_claim">이전 보관된 댓글 소유권 주장</string>
     <string name="comment_report_duplicate">이미 신고한 댓글입니다.</string>
     <string name="comment_report_success">신고가 접수되었습니다. 소중한 의견 감사합니다!</string>
     <string name="comment_report_error">신고를 전송할 수 없습니다. 나중에 다시 시도해 주세요.</string>
@@ -1310,6 +1337,8 @@
     <string name="watch_date_prompt_custom">직접 날짜 선택</string>
     <string name="settings_advanced_prompt_watch_date">상세 페이지에서 시청일 지정 팝업 띄우기</string>
     <string name="settings_advanced_prompt_watch_date_desc">상세 페이지에서 시청 완료로 등록할 때 오늘 날짜로 자동 처리하지 않고 정확한 감상 날짜를 묻는 팝업을 표시합니다.</string>
+    <string name="settings_auto_open_vibe_on_watch">시청 완료 시 Vibe 체크인 열기</string>
+    <string name="settings_auto_open_vibe_on_watch_desc">상세 페이지에서 영화를 시청 완료로 표시할 때 별점 평가 및 감정 바이브를 선택하는 체크인 화면을 자동으로 엽니다.</string>
 
     <!-- Home Feed Sections -->
     <string name="home_section_popular">인기 콘텐츠</string>
@@ -1384,6 +1413,10 @@
     <string name="filter_source">출처</string>
     <string name="filter_source_all">전체 (CommsUni)</string>
     <string name="filter_source_flicktrove">FlickTrove만</string>
+    <string name="filter_language">언어</string>
+    <string name="commsuni_info_title">CommsUni.tv</string>
+    <string name="commsuni_info_desc">CommsUni.tv는 드라마와 영화 앱을 위한 공유 댓글 플랫폼입니다. 댓글, 연대, TV — 커뮤니티에 의한, 커뮤니티를 위한 공간. TV Community Archive에서 시작되었습니다.</string>
+    <string name="commsuni_info_connected">연결된 커뮤니티</string>
     <string name="settings_blocked_users_title">차단된 사용자</string>
     <string name="settings_blocked_users_desc">차단된 사용자 확인 및 관리</string>
     <string name="settings_blocked_users_subtitle">댓글에서 차단한 사용자 목록</string>

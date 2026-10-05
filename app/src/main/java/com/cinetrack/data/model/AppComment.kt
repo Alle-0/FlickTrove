@@ -34,7 +34,8 @@ data class AppComment(
     val archivedLikes: Int = 0,
     val nativeLikes: Int = 0,
     val attachedMedia: List<String> = emptyList(),
-    val rating: Double? = null
+    val rating: Double? = null,
+    val language: String? = null
 ) {
     val isEffectivelyDeleted: Boolean
         get() = isDeleted ||

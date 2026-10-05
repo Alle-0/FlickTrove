@@ -171,7 +171,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         }
                     }
                     if (!currentMovie.watched || currentMovie != localMovie) {
-                        val updated = currentMovie.copy(watched = true, watchedAt = item.watched_at)
+                        val updated = currentMovie.copy(watched = true, watchedAt = item.watched_at, favorite = false)
                         moviesToUpdate.add(updated)
                         if (isRecent(item.watched_at)) {
                             bulkStatsUpdates.add(
@@ -193,7 +193,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     }
                     
                     var newMovie = MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
-                    newMovie = newMovie.copy(watched = true, watchedAt = item.watched_at)
+                    newMovie = newMovie.copy(watched = true, watchedAt = item.watched_at, favorite = false)
                     moviesToUpdate.add(newMovie)
                     
                     if (isRecent(item.watched_at)) {
@@ -465,6 +465,20 @@ class TraktSyncWorker @AssistedInject constructor(
                             android.util.Log.e("TRAKT_DEBUG", "Errore lookup TMDB per IMDB ID $imdbId", e)
                         }
                     }
+
+                    // Fallback 2: risoluzione via TVDB se ancora assente
+                    val tvdbId = remoteShow.show?.ids?.tvdb
+                    if (showTmdbId == null && tvdbId != null && tvdbId > 0L) {
+                        try {
+                            val found = tmdbService.findByExternalId(tvdbId.toString(), "tvdb_id")
+                            val resolved = found.tvResults?.firstOrNull()?.id
+                            if (resolved != null && resolved > 100L) {
+                                showTmdbId = resolved
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("TRAKT_DEBUG", "Errore lookup TMDB per TVDB ID $tvdbId", e)
+                        }
+                    }
                     // Anche il TMDB ID diretto può essere sospettosamente piccolo se Trakt
                     // ha serializzato ids.trakt al posto di ids.tmdb.
                     if (showTmdbId == null || showTmdbId <= 0L) continue
@@ -708,10 +722,14 @@ class TraktSyncWorker @AssistedInject constructor(
             }
 
             // ── Fase 3: Watchlist (paginata + two-way diff) ──────────────────
-            val remoteWatchlistedAt = lastActivities.movies.watchlisted_at
-                ?: lastActivities.shows.watchlisted_at
-            val localWatchlistedAt  = traktAuthRepository.getLastWatchlistTime()
-            if (isFirstSync || (remoteWatchlistedAt != null && remoteWatchlistedAt != localWatchlistedAt)) {
+            val remoteMovieWatchlistedAt = lastActivities.movies.watchlisted_at.orEmpty()
+            val remoteShowWatchlistedAt  = lastActivities.shows.watchlisted_at.orEmpty()
+            val remoteWatchlistKey = if (remoteMovieWatchlistedAt.isNotEmpty() || remoteShowWatchlistedAt.isNotEmpty()) {
+                "${remoteMovieWatchlistedAt}_${remoteShowWatchlistedAt}"
+            } else null
+            val localWatchlistKey = traktAuthRepository.getLastWatchlistTime()
+
+            if (force || isFirstSync || (remoteWatchlistKey != null && remoteWatchlistKey != localWatchlistKey)) {
                 try {
                     // Accumulare tutte le pagine prima del diff (evita falsi negative)
                     val allRemoteWatchlist = mutableListOf<com.cinetrack.data.api.TraktWatchlistItem>()
@@ -726,28 +744,59 @@ class TraktSyncWorker @AssistedInject constructor(
                         wPage++
                     } while (wPage <= wTotalPages)
 
-                    // Set di tutti gli ID remoti in watchlist
-                    val remoteWatchlistIds = allRemoteWatchlist.mapNotNull { item ->
-                        val tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb
-                        val mt     = if (item.type == "movie") "movie" else "tv"
-                        if (tmdbId != null) Pair(tmdbId, mt) else null
-                    }.toHashSet()
-
-                    val watchlistUpdates = mutableListOf<com.cinetrack.data.model.Movie>()
-                    val localMovies      = movieRepository.getLocalMoviesIncludingDeleted()
+                    // Set di tutti gli ID remoti in watchlist risolti
+                    val remoteWatchlistIds = mutableSetOf<Pair<Long, String>>()
+                    val watchlistUpdates   = mutableListOf<com.cinetrack.data.model.Movie>()
+                    val localMovies        = movieRepository.getLocalMoviesIncludingDeleted()
 
                     // favorite = true per tutto ciò che è in watchlist remota
                     for (item in allRemoteWatchlist) {
-                        val tmdbId    = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: continue
-                        val mediaType = if (item.type == "movie") "movie" else "tv"
-                        val local     = movieRepository.getMovie(tmdbId, mediaType)
+                        val mediaType = if (item.movie != null || item.type == "movie") "movie" else "tv"
+                        var tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb
+                        val imdbId = item.movie?.ids?.imdb ?: item.show?.ids?.imdb
+
+                        // Fallback: risoluzione via IMDB se ids.tmdb è assente
+                        if (tmdbId == null && !imdbId.isNullOrBlank()) {
+                            try {
+                                val found = tmdbService.findByExternalId(imdbId, "imdb_id")
+                                val resolved = if (mediaType == "movie") {
+                                    found.movieResults?.firstOrNull()?.id
+                                } else {
+                                    found.tvResults?.firstOrNull()?.id
+                                }
+                                if (resolved != null && resolved > 100L) {
+                                    tmdbId = resolved
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("TraktSyncWorker", "Errore lookup TMDB per IMDB ID $imdbId in watchlist", e)
+                            }
+                        }
+
+                        // Fallback 2: risoluzione via TVDB se ancora assente (serie TV)
+                        val tvdbId = item.show?.ids?.tvdb
+                        if (tmdbId == null && tvdbId != null && tvdbId > 0L) {
+                            try {
+                                val found = tmdbService.findByExternalId(tvdbId.toString(), "tvdb_id")
+                                val resolved = found.tvResults?.firstOrNull()?.id
+                                if (resolved != null && resolved > 100L) {
+                                    tmdbId = resolved
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("TraktSyncWorker", "Errore lookup TMDB per TVDB ID $tvdbId in watchlist", e)
+                            }
+                        }
+
+                        if (tmdbId == null || tmdbId <= 0L) continue
+
+                        remoteWatchlistIds.add(Pair(tmdbId, mediaType))
+                        val local = movieRepository.getMovie(tmdbId, mediaType)
                         
                         if (local != null) {
-                            if (!local.favorite) {
-                                watchlistUpdates.add(local.copy(favorite = true))
+                            if (!local.favorite || local.watched) {
+                                watchlistUpdates.add(local.copy(favorite = true, watched = false))
                             }
                         } else {
-                            // FIX: Se il film in watchlist non esiste nel DB locale, lo scarichiamo da TMDB!
+                            // Se il film/serie in watchlist non esiste nel DB locale, lo scarichiamo da TMDB
                             try {
                                 val tmdbResponse = if (mediaType == "movie") {
                                     tmdbService.getMovieBasicDetails(tmdbId)
@@ -756,7 +805,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                 }
                                 
                                 var newMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
-                                newMovie = newMovie.copy(favorite = true)
+                                newMovie = newMovie.copy(favorite = true, watched = false)
                                 watchlistUpdates.add(newMovie)
                                 
                                 delay(50)
@@ -807,7 +856,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     }
 
                     if (watchlistUpdates.isNotEmpty()) movieRepository.saveMoviesBulk(watchlistUpdates)
-                    remoteWatchlistedAt?.let { traktAuthRepository.saveLastWatchlistTime(it) }
+                    remoteWatchlistKey?.let { traktAuthRepository.saveLastWatchlistTime(it) }
                 } catch (e: Exception) {
                     android.util.Log.w("TraktSyncWorker", "Watchlist sync fallita, skip", e)
                 }

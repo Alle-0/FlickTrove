@@ -296,7 +296,8 @@ data class TraktSyncEpisode(
 data class TraktSyncIds(
     val tmdb: Long? = null,
     val imdb: String? = null,
-    val trakt: Long? = null
+    val trakt: Long? = null,
+    val tvdb: Long? = null
 )
 
 @Serializable

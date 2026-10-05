@@ -351,6 +351,14 @@
     <string name="settings_dialog_wipe_total_data_title">すべてのデータを削除</string>
     <string name="settings_dialog_wipe_total_data_desc">本当にすべてのデータを削除しますか？ クラウドおよびこの端末からライブラリが完全に消去されます。この操作は取り消せません。</string>
     <string name="settings_yes_wipe_total">全データを削除</string>
+    <string name="settings_cleanup_rewatches_title">再視聴履歴の整理</string>
+    <string name="settings_cleanup_rewatches_desc">重複した視聴履歴を削除し、タイトルごとに最初の視聴のみを残します</string>
+    <string name="settings_cleanup_rewatches_dialog_title">再視聴履歴の整理</string>
+    <string name="settings_cleanup_rewatches_dialog_desc">%1$d 件の重複した再視聴履歴が見つかりました。これらを削除し、各タイトルの最初の視聴のみを残しますか？クラウドにも同期されます。</string>
+    <string name="settings_cleanup_rewatches_dialog_desc_zero">履歴内に重複した再視聴は見つかりませんでした。視聴回数はすでに一意です！</string>
+    <string name="settings_cleanup_rewatches_confirm_btn">重複を削除</string>
+    <string name="settings_cleanup_rewatches_success">%1$d 件の重複した再視聴履歴を削除しました</string>
+    <string name="settings_cleanup_rewatches_none">整理する重複履歴はありません</string>
     <string name="settings_account_deleted_success">アカウントが正常に削除されました</string>
     <string name="settings_action_success">処理が正常に完了しました</string>
     <string name="settings_login">ログイン</string>
@@ -866,6 +874,8 @@
     <string name="search_editorial_collections">おすすめコレクション</string>
     <string name="editorial_mcu_title">マーベル・シネマティック・ユニバース</string>
     <string name="editorial_mcu_desc">MCU神聖時間軸の完全版：映画、TVシリーズ（ディフェンダーズ、エージェント・カーター）、アニメーションを繋ぐ決定版の物語順。壮大なサーガを正確な時系列順で体験しよう。</string>
+    <string name="editorial_star_wars_title">スター・ウォーズ：正史タイムライン</string>
+    <string name="editorial_star_wars_desc">ルーカスフィルム公式正史の完全タイムライン：高共和国時代、ジェダイの崩壊から銀河内乱、ファースト・オーダーの台頭までを正確な物語順で体験。</string>
     <string name="msg_item_added_action">「%1$s」を%2$s</string>
     <string name="msg_item_removed">「%1$s」を削除しました</string>
     <string name="msg_item_deleted">「%1$s」を削除しました</string>
@@ -1082,13 +1092,20 @@
     <string name="onboarding_slide4_title">データはあなたのもの</string>
     <string name="onboarding_slide4_sub">ローカルバックアップ＆TRAKT同期</string>
     <string name="onboarding_slide4_desc">ローカルJSONバックアップを瞬時に保存・復元。Traktアカウントと連携すれば自動同期も可能です。</string>
-    <string name="onboarding_slide5_title">視聴中断シリーズ</string>
-    <string name="onboarding_slide5_sub">中断した番組をスマートに非表示</string>
-    <string name="onboarding_slide5_desc">途中で観るのをやめましたか？ 削除ボタンを上にスワイプして「視聴中断」に設定すれば、視聴履歴を保持したまま未視聴リストから隠せます。</string>
+    <string name="onboarding_slide5_title">視聴中断とリスト削除</string>
+    <string name="onboarding_slide5_sub">視聴中断作品とリスト削除</string>
+    <string name="onboarding_slide5_desc">映画やドラマをリストから削除したいですか？ Rewatch（映画）またはDropped（ドラマ）ボタンを上にスワイプしてゴミ箱を表示するか、「Dropped」にして新着通知を停止できます。</string>
     <string name="settings_review_tutorial">チュートリアルをもう一度見る</string>
     <string name="collection_badge_movies_plural">%1$d作品</string>
     <string name="collection_badge_movies_single">%1$d作品</string>
     <string name="collection_badge_movies_plus">%1$d+作品</string>
+    <string name="collection_badge_items_plural">%1$d作品</string>
+    <string name="collection_badge_items_single">%1$d作品</string>
+    <string name="collection_badge_series_plural">%1$dシリーズ</string>
+    <string name="collection_badge_series_single">%1$dシリーズ</string>
+    <string name="collection_filter_sort_chronological">時系列順</string>
+    <string name="collection_filter_modal_title">コレクションフィルター</string>
+    <string name="collection_filter_empty">選択したフィルターに一致する作品はありません</string>
     <string name="overview_show_more">もっと見る</string>
     <string name="overview_show_less">折りたたむ</string>
     <string name="checkin_how_did_it_make_you_feel">どんな気持ちになりましたか？</string>
@@ -1210,6 +1227,11 @@
     <string name="comment_collapse">折りたたむ</string>
     <string name="comment_view_replies_singular">%1$d件の返信を表示</string>
     <string name="comment_view_replies_plural">%1$d件の返信を表示</string>
+    <string name="comment_action_menu_title">コメントのオプション</string>
+    <string name="comment_action_report">コメントを通報</string>
+    <string name="comment_action_tvtime_ownership">あなたのコメントですか？ (TV Time)</string>
+    <string name="comment_tvtime_ownership_title">TV Time アーカイブ</string>
+    <string name="comment_tvtime_ownership_subtitle">TV Timeでこのコメントを書きましたか？ 申請または非表示にできます。</string>
     <string name="comment_report_title">通報</string>
     <string name="comment_report_subtitle">通報の理由を選択してください</string>
     <string name="comment_report_spoiler">ネタバレを含んでいる</string>
@@ -1221,7 +1243,12 @@
     <string name="comment_report_reason_sexual">露骨な性的コンテンツ</string>
     <string name="comment_report_reason_illegal">違法なコンテンツ</string>
     <string name="comment_report_reason_other">その他</string>
+    <string name="comment_report_other_title">その他の理由</string>
+    <string name="comment_report_other_subtitle">通報する理由を簡潔に入力してください。</string>
+    <string name="comment_report_other_placeholder">このコメントの問題点を説明してください...</string>
+    <string name="comment_report_other_submit">通報を送信</string>
     <string name="comment_report_reason_mine_hide">過去のアーカイブコメントを非表示にする</string>
+    <string name="comment_report_reason_mine_claim">以前のアーカイブされたコメントを申請する</string>
     <string name="comment_report_duplicate">このコメントはすでに通報済みです。</string>
     <string name="comment_report_success">通報を送信しました。ご協力ありがとうございます！</string>
     <string name="comment_report_error">通報を送信できませんでした。後でもう一度お試しください。</string>
@@ -1310,6 +1337,8 @@
     <string name="watch_date_prompt_custom">日付を指定</string>
     <string name="settings_advanced_prompt_watch_date">詳細画面で視聴日の選択を表示</string>
     <string name="settings_advanced_prompt_watch_date_desc">詳細画面から視聴済みにする際、自動で今日の日付にせず、正確な日付を指定するダイアログを表示します。</string>
+    <string name="settings_auto_open_vibe_on_watch">視聴済みにした時にVibeチェックインを開く</string>
+    <string name="settings_auto_open_vibe_on_watch_desc">詳細画面で映画を視聴済みにマークした際、評価やバイブを選択するチェックイン画面を自動で開きます。</string>
 
     <!-- Home Feed Sections -->
     <string name="home_section_popular">人気</string>
@@ -1384,6 +1413,10 @@
     <string name="filter_source">ソース</string>
     <string name="filter_source_all">すべて (CommsUni)</string>
     <string name="filter_source_flicktrove">FlickTroveのみ</string>
+    <string name="filter_language">言語</string>
+    <string name="commsuni_info_title">CommsUni.tv</string>
+    <string name="commsuni_info_desc">CommsUni.tv はドラマ・映画アプリのための共有コメントプラットフォームです。コメント、団結、TV — コミュニティによる、コミュニティのための空間。TV Community Archive から誕生しました。</string>
+    <string name="commsuni_info_connected">接続されたコミュニティ</string>
     <string name="settings_blocked_users_title">ブロックしたユーザー</string>
     <string name="settings_blocked_users_desc">ブロックしたユーザーの確認と管理</string>
     <string name="settings_blocked_users_subtitle">コメントでブロックしたユーザー</string>

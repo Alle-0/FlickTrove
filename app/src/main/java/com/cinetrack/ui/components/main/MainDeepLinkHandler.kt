@@ -33,8 +33,7 @@ fun MainDeepLinkHandler(
 
         if (uri != null || action?.startsWith("com.cinetrack.") == true) {
             if (uri != null) {
-                // Alziamo a 800ms solo per il test, per escludere al 100% i problemi di caricamento di Voyager
-                delay(800) 
+                delay(50)
             }
 
             val isCustomScheme = uri != null && uri.scheme == "flicktrove" && (uri.host == "media" || uri.host == "detail")

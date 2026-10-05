@@ -80,6 +80,19 @@ object ImporterUtils {
     fun parseAndNormalizeWatchedDate(rawDate: String?): String? {
         if (rawDate.isNullOrBlank()) return null
         val trimmed = rawDate.trim()
+
+        // 1. Numeric epoch timestamps (milliseconds or seconds)
+        trimmed.toLongOrNull()?.let { num ->
+            try {
+                val instant = if (num > 100_000_000_000L) { // milliseconds (> 1973)
+                    Instant.ofEpochMilli(num)
+                } else if (num > 0) { // seconds
+                    Instant.ofEpochSecond(num)
+                } else null
+                if (instant != null) return instant.toString()
+            } catch (_: Exception) {}
+        }
+
         try {
             Instant.parse(trimmed)
             return trimmed

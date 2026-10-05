@@ -232,12 +232,21 @@ private fun CommentCard(
             translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading
             val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi)
             if (!downloaded) {
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
-                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
-                return@launch
+                // Seamless fallback to online translation immediately if model download fails
+                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
+                val onlineResult = translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
+                if (onlineResult != null && onlineResult.trim().lowercase() != cleanText.trim().lowercase()) {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(onlineResult)
+                    return@launch
+                } else {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
+                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
+                    return@launch
+                }
             }
             translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
             val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
+                ?: translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
             if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
                 translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
             } else {
@@ -274,19 +283,37 @@ private fun CommentCard(
                 return@launch
             }
 
-            val effectiveSourceLang = detectedLang ?: if (targetMlKit != com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH) {
-                com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH
-            } else {
-                com.google.mlkit.nl.translate.TranslateLanguage.ITALIAN
-            }
-
-            val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
-            if (!modelReady) {
-                showPrompt = Pair(comment.id, cleanText)
+            val effectiveSourceLang = detectedLang ?: run {
+                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
                 return@launch
             }
 
             confirmTranslation(false, cleanText, effectiveSourceLang, targetMlKit)
+        }
+    }
+
+    LaunchedEffect(comment.id) {
+        val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
+        val cleanText = comment.text.replace(mediaRegex, "").trim()
+        if (cleanText.length >= 5 && translationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle) {
+            try {
+                val translationManager = entryPoint.translationManager()
+                val preferenceRepository = entryPoint.preferenceRepository()
+                val prefs = preferenceRepository.userPreferencesFlow.first()
+                val systemLang = java.util.Locale.getDefault().language
+                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
+                val targetMlKit = translationManager.getCurrentTargetLanguage()
+                val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
+                val detectedLang = translationManager.identifyLanguage(cleanText)
+                if (detectedLang != null && detectedLang != targetBcp47 && detectedLang != targetMlKit) {
+                    if (translationManager.isModelDownloaded(detectedLang, targetMlKit)) {
+                        val translated = translationManager.translateFrom(cleanText, detectedLang, targetMlKit)
+                        if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
+                            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -303,10 +330,8 @@ private fun CommentCard(
                 translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
                 val targetMlKit = translationManager.getCurrentTargetLanguage()
                 val detectedLang = translationManager.identifyLanguage(text)
-                val effectiveSourceLang = detectedLang ?: if (targetMlKit != com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH) {
-                    com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH
-                } else {
-                    com.google.mlkit.nl.translate.TranslateLanguage.ITALIAN
+                val effectiveSourceLang = detectedLang ?: run {
+                    return@launch
                 }
                 confirmTranslation(requireWifi, text, effectiveSourceLang, targetMlKit)
             }
@@ -434,37 +459,12 @@ private fun CommentCard(
                     
                     Spacer(modifier = Modifier.width(10.dp))
                     
-                    // Translate button in top right
-                    when (translationState) {
-                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading,
-                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(12.dp),
-                                strokeWidth = 1.5.dp,
-                                color = accentColor
-                            )
-                        }
-                        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_traduzione),
-                                contentDescription = stringResource(R.string.comment_show_original),
-                                tint = accentColor,
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .bounceClick { handleTranslate() }
-                            )
-                        }
-                        else -> {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_traduzione),
-                                contentDescription = stringResource(R.string.comment_translate),
-                                tint = Color.White.copy(alpha = 0.55f),
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .bounceClick { handleTranslate() }
-                            )
-                        }
-                    }
+                    // Translate button in top right with progressive filling download bar
+                    com.cinetrack.ui.components.comments.TranslationProgressIndicator(
+                        translationState = translationState,
+                        accentColor = accentColor,
+                        onTranslate = { handleTranslate() }
+                    )
                 }
             }
             

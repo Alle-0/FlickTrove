@@ -351,6 +351,14 @@
     <string name="settings_dialog_wipe_total_data_title">Tüm Verileri Sıfırla</string>
     <string name="settings_dialog_wipe_total_data_desc">Her şeyi silmek istediğinizden emin misiniz? Bu işlem kitaplığınızı hem buluttan hem de bu cihazdan kalıcı olarak silecektir. Bu işlem geri alınamaz.</string>
     <string name="settings_yes_wipe_total">Tüm Verileri Sıfırla</string>
+    <string name="settings_cleanup_rewatches_title">Yeniden İzlemeleri Temizle</string>
+    <string name="settings_cleanup_rewatches_desc">Mükerrer izleme kayıtlarını kaldırın ve her yapım için yalnızca ilk izlemenizi saklayın</string>
+    <string name="settings_cleanup_rewatches_dialog_title">Yeniden İzlemeleri Temizle</string>
+    <string name="settings_cleanup_rewatches_dialog_desc">%1$d mükerrer izleme kaydı bulundu. Bunları silip her yapım için yalnızca ilk izlemenizi saklamak istiyor musunuz? Bulut ile de senkronize edilecektir.</string>
+    <string name="settings_cleanup_rewatches_dialog_desc_zero">Geçmişinizde mükerrer yeniden izleme kaydı bulunamadı. İzleme sayınız zaten benzersiz!</string>
+    <string name="settings_cleanup_rewatches_confirm_btn">Mükerrerleri Kaldır</string>
+    <string name="settings_cleanup_rewatches_success">%1$d mükerrer izleme kaydı kaldırıldı</string>
+    <string name="settings_cleanup_rewatches_none">Temizlenecek mükerrer izleme yok</string>
     <string name="settings_account_deleted_success">Hesap başarıyla silindi</string>
     <string name="settings_action_success">İşlem başarıyla tamamlandı</string>
     <string name="settings_login">Giriş Yap</string>
@@ -866,6 +874,8 @@
     <string name="search_editorial_collections">Editör Koleksiyonları</string>
     <string name="editorial_mcu_title">Marvel Sinematik Evreni</string>
     <string name="editorial_mcu_desc">MCU\'nun eksiksiz Kutsal Zaman Çizelgesi: filmleri, TV dizilerini (Defenders, Agent Carter) ve animasyonları bir araya getiren kesin anlatı sırası. Tüm destanı tam kronolojik sırayla deneyimleyin.</string>
+    <string name="editorial_star_wars_title">Star Wars: Kanon Zaman Çizelgesi</string>
+    <string name="editorial_star_wars_desc">Eksiksiz resmi Lucasfilm kanon zaman çizelgesi: Yüksek Cumhuriyet ve Jedi\'ların Çöküşü\'nden Galaktik İç Savaş\'a ve İlk Düzen\'in Yükselişi\'ne kadar tam hikaye akışı sırasında.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" kaldırıldı</string>
     <string name="msg_item_deleted">\"%1$s\" silindi</string>
@@ -1082,13 +1092,20 @@
     <string name="onboarding_slide4_title">Verileriniz Yalnızca Size Aittir</string>
     <string name="onboarding_slide4_sub">YEREL YEDEKLEME &amp; TRAKT SENKRONİZASYONU</string>
     <string name="onboarding_slide4_desc">Yerel JSON yedeklerini saniyeler içinde dışa ve içe aktarın ya da otomatik senkronizasyon için Trakt hesabınızı bağlayın.</string>
-    <string name="onboarding_slide5_title">Bırakılan Diziler</string>
-    <string name="onboarding_slide5_sub">YARIDA BIRAKILAN YAPIMLARI GİZLEYİN</string>
-    <string name="onboarding_slide5_desc">Bir diziyi yarıda mı bıraktınız? Sil düğmesini yukarı kaydırarak \'Bırakıldı\' olarak işaretleyin; böylece izlediklerinizi kaybetmeden sizi izlenmemiş bölümlerle rahatsız etmeyi durdurur.</string>
+    <string name="onboarding_slide5_title">Bırakılanlar ve Kaldırma</string>
+    <string name="onboarding_slide5_sub">BIRAKILAN DİZİLER VE KALDIRMA</string>
+    <string name="onboarding_slide5_desc">Listeden bir film veya diziyi kaldırmak mı istiyorsunuz? Silme düğmesini görmek için Rewatch (filmler) veya Dropped (diziler) düğmesini yukarı kaydırın ya da yeni bölüm bildirimlerini durdurmak için \'Dropped\' yapın.</string>
     <string name="settings_review_tutorial">Tanıtımı Tekrar Oynat</string>
     <string name="collection_badge_movies_plural">%1$d FİLM</string>
     <string name="collection_badge_movies_single">%1$d FİLM</string>
     <string name="collection_badge_movies_plus">%1$d+ FİLM</string>
+    <string name="collection_badge_items_plural">%1$d BAŞLIK</string>
+    <string name="collection_badge_items_single">%1$d BAŞLIK</string>
+    <string name="collection_badge_series_plural">%1$d DİZİ</string>
+    <string name="collection_badge_series_single">%1$d DİZİ</string>
+    <string name="collection_filter_sort_chronological">Kronolojik</string>
+    <string name="collection_filter_modal_title">Koleksiyon Filtreleri</string>
+    <string name="collection_filter_empty">Seçilen filtrelere uygun öğe bulunamadı</string>
     <string name="overview_show_more">Daha fazla göster</string>
     <string name="overview_show_less">Daha az göster</string>
     <string name="checkin_how_did_it_make_you_feel">Nasıl hissettirdi?</string>
@@ -1210,6 +1227,11 @@
     <string name="comment_collapse">Daralt</string>
     <string name="comment_view_replies_singular">%1$d yanıtı görüntüle</string>
     <string name="comment_view_replies_plural">%1$d yanıtı görüntüle</string>
+    <string name="comment_action_menu_title">Yorum seçenekleri</string>
+    <string name="comment_action_report">Yorumu bildir</string>
+    <string name="comment_action_tvtime_ownership">Bu sizin yorumunuz mu? (TV Time)</string>
+    <string name="comment_tvtime_ownership_title">TV Time Arşivi</string>
+    <string name="comment_tvtime_ownership_subtitle">Bu yorumu TV Time\'da mı yazdınız? Sahiplenebilir veya gizleyebilirsiniz.</string>
     <string name="comment_report_title">Bildir</string>
     <string name="comment_report_subtitle">Neyi bildirmek istiyorsunuz?</string>
     <string name="comment_report_spoiler">Spoiler içeriyor</string>
@@ -1221,7 +1243,12 @@
     <string name="comment_report_reason_sexual">Cinsel içerik</string>
     <string name="comment_report_reason_illegal">Yasa dışı içerik</string>
     <string name="comment_report_reason_other">Diğer</string>
+    <string name="comment_report_other_title">Diğer neden</string>
+    <string name="comment_report_other_subtitle">Şikayetinizin nedenini kısaca açıklayın.</string>
+    <string name="comment_report_other_placeholder">Bu yorumla ilgili sorunu açıklayın...</string>
+    <string name="comment_report_other_submit">Şikayeti Gönder</string>
     <string name="comment_report_reason_mine_hide">Eski arşivlenmiş yorumumu gizle</string>
+    <string name="comment_report_reason_mine_claim">Eski arşivlenmiş yorumumu sahiplen</string>
     <string name="comment_report_duplicate">Bu yorumu zaten bildirdiniz.</string>
     <string name="comment_report_success">Bildirim gönderildi. Geri bildiriminiz için teşekkürler!</string>
     <string name="comment_report_error">Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.</string>
@@ -1310,6 +1337,8 @@
     <string name="watch_date_prompt_custom">Özel tarih</string>
     <string name="settings_advanced_prompt_watch_date">Detay Ekranında İzleme Tarihini Sor</string>
     <string name="settings_advanced_prompt_watch_date_desc">Bir filmi detay ekranından izlendi olarak işaretlerken, doğrudan bugünü seçmek yerine tam izleme tarihini soran bir iletişim kutusu gösterin.</string>
+    <string name="settings_auto_open_vibe_on_watch">İzlendiğinde Vibe Check-in\'i aç</string>
+    <string name="settings_auto_open_vibe_on_watch_desc">Detay ekranında bir filmi izlendi olarak işaretlerken puan vermek ve vibe seçmek için Check-in panelini otomatik olarak açın.</string>
 
     <!-- Home Feed Sections -->
     <string name="home_section_popular">Popüler</string>
@@ -1384,6 +1413,10 @@
     <string name="filter_source">KAYNAK</string>
     <string name="filter_source_all">Tümü (CommsUni)</string>
     <string name="filter_source_flicktrove">Yalnızca FlickTrove</string>
+    <string name="filter_language">DİL</string>
+    <string name="commsuni_info_title">CommsUni.tv</string>
+    <string name="commsuni_info_desc">CommsUni.tv dizi ve film uygulamaları için ortak bir yorum katmanıdır. Yorumlar, birlik, TV — topluluktan, topluluk için. TV Community Archive projesinden doğmuştur.</string>
+    <string name="commsuni_info_connected">Bağlı Topluluklar</string>
     <string name="settings_blocked_users_title">Engellenen kullanıcılar</string>
     <string name="settings_blocked_users_desc">Engellenen kişileri görüntüleyin ve yönetin</string>
     <string name="settings_blocked_users_subtitle">Yorumlarda engellediğiniz kişiler</string>

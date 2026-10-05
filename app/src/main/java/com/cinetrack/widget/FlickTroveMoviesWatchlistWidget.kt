@@ -109,9 +109,10 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
             val db = FlickTroveDatabase.getInstance(context)
             val allMovies = db.favoriteDao().getAll()
 
-            // Filtra film non visti e non abbandonati, ordinati per aggiunti di recente
+            // Filtra film non visti e non abbandonati che appartengono effettivamente alla watchlist (favorite == true), ordinati per aggiunti di recente
             val toWatch = allMovies.filter { movie ->
                 (movie.mediaType == "movie" || movie.mediaType.isEmpty()) &&
+                    movie.favorite &&
                     !movie.watched &&
                     !movie.dropped
             }.sortedByDescending { movie ->
@@ -120,8 +121,8 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                     ?: 0L
             }
 
-            // Mostra fino a 25 film per garantire una lista scrollabile ricca
-            val topMovies = toWatch.take(25)
+            // Mostra fino a 10 film per garantire nitidezza massima e rimanere ampiamente nei limiti IPC di RemoteViews
+            val topMovies = toWatch.take(10)
 
             val entryPoint = try {
                 EntryPointAccessors.fromApplication(
@@ -137,13 +138,13 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                         val title = movie.title ?: movie.name ?: ""
                         val backdropPath = movie.backdropPath ?: movie.posterPath
 
-                        // 1. Scarica backdrop in qualità MEDIA (w1280) per massima nitidezza
+                        // 1. Scarica backdrop in risoluzione ottimizzata
                         var backdropRaw: Bitmap? = null
                         if (!backdropPath.isNullOrEmpty()) {
                             try {
                                 val req = ImageRequest.Builder(context)
                                     .data(buildTmdbImageUrl(backdropPath, ImageType.BACKDROP, ImageQuality.MEDIUM))
-                                    .size(800, 300)
+                                    .size(720, 240)
                                     .allowHardware(false)
                                     .build()
                                 val drawable = context.imageLoader.execute(req).drawable
@@ -151,14 +152,14 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                             } catch (_: Exception) {}
                         }
 
-                        // 2. Scarica logo ufficiale in qualità MEDIA (w300) per bordi e font definiti
+                        // 2. Scarica logo ufficiale per bordi e font definiti
                         var logoRaw: Bitmap? = null
                         try {
                             val logoPath = movie.logoPath ?: movieRepository?.getMovieLogo(movie.id, false)
                             if (!logoPath.isNullOrEmpty()) {
                                 val logoReq = ImageRequest.Builder(context)
                                     .data(buildTmdbImageUrl(logoPath, ImageType.LOGO, ImageQuality.MEDIUM))
-                                    .size(450, 180)
+                                    .size(480, 180)
                                     .allowHardware(false)
                                     .build()
                                 val drawable = context.imageLoader.execute(logoReq).drawable
@@ -166,14 +167,14 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                             }
                         } catch (_: Exception) {}
 
-                        // 3. Componi backdrop + velatura scura + logo/titolo in un unico bitmap nitido ad alta risoluzione (540x162 @ RGB_565 = ~170KB)
+                        // 3. Componi backdrop + velatura scura + logo/titolo in un unico bitmap nitido ad alta risoluzione (720x216)
                         val finalBanner = if (backdropRaw != null) {
                             createBannerBitmap(
                                 backdrop = backdropRaw,
                                 logo = logoRaw,
                                 title = title,
-                                targetWidth = 540,
-                                targetHeight = 162
+                                targetWidth = 720,
+                                targetHeight = 216
                             )
                         } else null
 
@@ -247,7 +248,7 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
         } else {
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = AndroidColor.WHITE
-                textSize = 25f
+                textSize = targetHeight * 0.155f
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
                 textAlign = Paint.Align.CENTER
                 letterSpacing = 0.06f
@@ -386,9 +387,7 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
         Box(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .padding(bottom = 14.dp)
-                .cornerRadius(14.dp)
-                .clickable(actionStartActivity(detailIntent)),
+                .padding(bottom = 14.dp),
             contentAlignment = Alignment.Center
         ) {
             if (entry.bannerBitmap != null) {
@@ -398,7 +397,8 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                     modifier = GlanceModifier
                         .fillMaxWidth()
                         .height(68.dp)
-                        .cornerRadius(14.dp),
+                        .cornerRadius(14.dp)
+                        .clickable(actionStartActivity(detailIntent)),
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -407,6 +407,7 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                         .fillMaxWidth()
                         .height(68.dp)
                         .cornerRadius(14.dp)
+                        .clickable(actionStartActivity(detailIntent))
                         .background(
                             androidx.glance.color.ColorProvider(
                                 day = Color(0xFFE5E5EA),

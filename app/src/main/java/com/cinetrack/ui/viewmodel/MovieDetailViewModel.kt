@@ -90,7 +90,9 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private var lastTvdbId: Int? = null
+    var lastTvdbId: Int? = null
+        private set
+    val tvdbId: Int? get() = lastTvdbId
     private var lastTitle: String? = null
     private var lastYear: String? = null
 
@@ -562,7 +564,9 @@ class MovieDetailViewModel @Inject constructor(
         title: String? = null,
         year: String? = null
     ) {
-        lastTvdbId = tvdbId
+        if (tvdbId != null && tvdbId > 0) {
+            lastTvdbId = tvdbId
+        }
         lastTitle = title
         lastYear = year
         viewModelScope.launch {
@@ -1121,18 +1125,13 @@ class MovieDetailViewModel @Inject constructor(
 
     fun requestTranslation(commentId: Long, text: String) {
         viewModelScope.launch {
-            // Update target language from user preferences before any model check
+            // Update target language from user preferences before translation
             val prefs = preferenceRepository.userPreferencesFlow.first()
             val systemLang = java.util.Locale.getDefault().language
             translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
 
-            if (translationManager.isModelDownloaded()) {
-                // If model is already downloaded, translate immediately without prompt
-                translateComment(commentId, text, requireWifi = false)
-            } else {
-                // Ask user for permission to download
-                _showTranslationPrompt.value = Pair(commentId, text)
-            }
+            // Direct background translation without modal download prompt
+            translateComment(commentId, text, requireWifi = false)
         }
     }
 
@@ -1154,12 +1153,22 @@ class MovieDetailViewModel @Inject constructor(
                 if (translated != null) {
                     _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = translated)) }
                 } else {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
-                    emitMessage(UiText.StringResource(R.string.msg_error_translating))
+                    val onlineFallback = translationManager.translateOnline(text, "en", translationManager.getCurrentTargetLanguage())
+                    if (onlineFallback != null) {
+                        _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = onlineFallback)) }
+                    } else {
+                        _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
+                        emitMessage(UiText.StringResource(R.string.msg_error_translating))
+                    }
                 }
             } else {
-                _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
-                emitMessage(UiText.StringResource(R.string.msg_error_lang_model))
+                val onlineFallback = translationManager.translateOnline(text, "en", translationManager.getCurrentTargetLanguage())
+                if (onlineFallback != null) {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = onlineFallback)) }
+                } else {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
+                    emitMessage(UiText.StringResource(R.string.msg_error_lang_model))
+                }
             }
         }
     }

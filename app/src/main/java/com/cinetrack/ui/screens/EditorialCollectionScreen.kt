@@ -141,11 +141,16 @@ data class EditorialCollectionScreen(val collectionId: String) : Screen {
                             .padding(top = 8.dp),
                         contentPadding = PaddingValues(bottom = 120.dp, start = 16.dp, end = 16.dp)
                     ) {
-                        itemsIndexed(uiState.movies, key = { _, item -> item.first.id }) { index, (movie, timelineIndex) ->
+                        itemsIndexed(uiState.movies, key = { index, item -> "${item.first.id}_${item.second}_$index" }) { index, (movie, timelineIndex) ->
                             val isLast = index == uiState.movies.lastIndex
+                            val label = if (uiState.isChronologicalOrder) {
+                                if (collectionId == "marvel_mcu") "Fase $timelineIndex" else "#$timelineIndex"
+                            } else {
+                                movie.releaseDate?.take(4) ?: "N/A"
+                            }
                             TimelineNode(
                                 movie = movie,
-                                indexLabel = if (uiState.isChronologicalOrder) "Fase $timelineIndex" else (movie.releaseDate?.take(4) ?: "N/A"),
+                                indexLabel = label,
                                 isLast = isLast,
                                 onClick = {
                                     navigator.push(MovieDetailScreen(movie.id, movie.mediaType))

@@ -148,7 +148,8 @@ fun DualStatPill(
     rightValue: Int,
     rightIcon: ImageVector,
     accentColor: Color,
-    rightSuffix: String? = null
+    rightSuffix: String? = null,
+    rightDetail: String? = null
 ) {
     Box(
         modifier = Modifier.fillMaxWidth()
@@ -217,7 +218,185 @@ fun DualStatPill(
                         suffix = rightSuffix,
                         suffixFontSize = 11.sp
                     )
-                    Text(rightLabel, color = Color.White.copy(alpha = 0.3f), fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(rightLabel, color = Color.White.copy(alpha = 0.45f), fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                        if (rightDetail != null) {
+                            Text(
+                                " • $rightDetail",
+                                color = accentColor,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.3.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Tri stat pill  (single surface, two dividers, three columns)
+// ════════════════════════════════════════════════════════════════════
+
+@Composable
+fun TriStatPill(
+    firstLabel: String,
+    firstValue: Int,
+    firstIcon: ImageVector,
+    secondLabel: String,
+    secondValue: Int,
+    secondIcon: ImageVector,
+    thirdLabel: String,
+    thirdValue: Int,
+    thirdIcon: ImageVector,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+    secondSuffix: String? = null,
+    secondSubLabel: String? = null
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .statsCard(RoundedCornerShape(24.dp))
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // First item
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(firstIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
+                }
+                Column(modifier = Modifier.weight(1f, fill = false)) {
+                    CountingText(
+                        target = firstValue,
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Text(
+                        firstLabel,
+                        color = Color.White.copy(alpha = 0.45f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.4.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            // Divider 1
+            Box(
+                Modifier
+                    .width(1.dp)
+                    .height(34.dp)
+                    .background(Color.White.copy(alpha = 0.08f))
+            )
+
+            // Second item
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Spacer(Modifier.width(2.dp))
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(secondIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
+                }
+                Column(modifier = Modifier.weight(1f, fill = false)) {
+                    CountingText(
+                        target = secondValue,
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-0.5).sp,
+                        suffix = secondSuffix,
+                        suffixFontSize = 10.sp
+                    )
+                    if (secondSubLabel != null) {
+                        Text(
+                            text = secondSubLabel,
+                            color = accentColor,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.2.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Text(
+                        secondLabel,
+                        color = Color.White.copy(alpha = 0.45f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.4.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            // Divider 2
+            Box(
+                Modifier
+                    .width(1.dp)
+                    .height(34.dp)
+                    .background(Color.White.copy(alpha = 0.08f))
+            )
+
+            // Third item
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Spacer(Modifier.width(2.dp))
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(accentColor.copy(alpha = 0.12f), RoundedCornerShape(11.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(thirdIcon, null, tint = accentColor, modifier = Modifier.size(19.dp))
+                }
+                Column(modifier = Modifier.weight(1f, fill = false)) {
+                    CountingText(
+                        target = thirdValue,
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Text(
+                        thirdLabel,
+                        color = Color.White.copy(alpha = 0.45f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.4.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
@@ -237,6 +416,7 @@ fun MediaTimeCard(
     longestDurationMinutes: Int,
     accentColor: Color,
     sectionIcon: ImageVector,
+    timeDetail: String? = null,
     longestSuffix: String? = null,
     longestPosterPath: String? = null,
     onLongestItemClick: (() -> Unit)? = null
@@ -269,6 +449,15 @@ fun MediaTimeCard(
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(timeLabel, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+                    if (timeDetail != null) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            "• $timeDetail",
+                            color = Color.White.copy(alpha = 0.45f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(time, color = accentColor, fontSize = 18.sp, fontWeight = FontWeight.Black, letterSpacing = (-0.4).sp)

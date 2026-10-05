@@ -8,6 +8,7 @@ import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.data.model.BackupData
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.importers.BingersImporter
+import com.cinetrack.data.repository.importers.CinemaniacImporter
 import com.cinetrack.data.repository.importers.MovieParadiseImporter
 import com.cinetrack.data.repository.importers.RefractImporter
 import com.cinetrack.data.repository.importers.SofaImporter
@@ -43,6 +44,7 @@ class BackupRepository @Inject constructor(
     private val bingersImporter: BingersImporter,
     private val sofaImporter: SofaImporter,
     private val refractImporter: RefractImporter,
+    private val cinemaniacImporter: CinemaniacImporter,
     private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -150,6 +152,15 @@ class BackupRepository @Inject constructor(
     ): Int {
         val bytes = inputStream.readBytes()
         val text = bytes.decodeToString()
+        if (cinemaniacImporter.isCinemaniacJson(text, fileName)) {
+            return cinemaniacImporter.migrateJsonStream(
+                inputStream = java.io.ByteArrayInputStream(bytes),
+                onProgress = onProgress,
+                fileName = fileName
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
         if (movieParadiseImporter.isMovieParadiseJson(text)) {
             return movieParadiseImporter.migrateJsonStream(
                 inputStream = java.io.ByteArrayInputStream(bytes),
@@ -268,6 +279,16 @@ class BackupRepository @Inject constructor(
             }
         }
 
+        // Dedicated Cinemaniac export handler: processes Cinemaniac .bak or JSON inside ZIP
+        if (cinemaniacImporter.isCinemaniacZip(zipEntries)) {
+            return@withContext cinemaniacImporter.migrateCinemaniacZip(
+                zipEntries = zipEntries,
+                onProgress = onProgress
+            ) { items, cb ->
+                processAndSaveImportedItems(items, cb)
+            }
+        }
+
         var totalCount = 0
         for ((name, entryBytes) in zipEntries) {
             try {
@@ -370,6 +391,9 @@ class BackupRepository @Inject constructor(
                     reminder = existing.reminder || m.reminder,
                     personalRating = existing.personalRating ?: m.personalRating,
                     personalNote = (if (!existing.personalNote.isNullOrBlank()) existing.personalNote else m.personalNote)?.take(5000),
+                    numberOfEpisodes = if ((existing.numberOfEpisodes ?: 0) > 0) existing.numberOfEpisodes else m.numberOfEpisodes,
+                    numberOfSeasons = if ((existing.numberOfSeasons ?: 0) > 0) existing.numberOfSeasons else m.numberOfSeasons,
+                    progress = if ((existing.progress ?: 0.0) > 0.0) existing.progress else m.progress,
                     watchedEpisodes = newEpsMap,
                     watchedAt = bestWatchedAt
                 )
@@ -458,6 +482,9 @@ class BackupRepository @Inject constructor(
                     reminder = local.reminder || incoming.reminder,
                     personalRating = local.personalRating ?: incoming.personalRating,
                     personalNote = (if (!local.personalNote.isNullOrBlank()) local.personalNote else incoming.personalNote)?.take(5000),
+                    numberOfEpisodes = if ((local.numberOfEpisodes ?: 0) > 0) local.numberOfEpisodes else incoming.numberOfEpisodes,
+                    numberOfSeasons = if ((local.numberOfSeasons ?: 0) > 0) local.numberOfSeasons else incoming.numberOfSeasons,
+                    progress = if ((local.progress ?: 0.0) > 0.0) local.progress else incoming.progress,
                     watchedEpisodes = newEpsMap,
                     watchedAt = bestWatchedAt,
                     clientUpdatedAt = System.currentTimeMillis(),

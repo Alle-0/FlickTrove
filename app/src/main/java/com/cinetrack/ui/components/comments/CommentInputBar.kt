@@ -100,7 +100,7 @@ fun CommentInputBar(
     val isCompact = !isExpanded
 
     val outerCorner by animateDpAsState(
-        targetValue = if (isCompact) 30.dp else 24.dp,
+        targetValue = if (isCompact) 30.dp else 28.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
         label = "outerBoxCorner"
     )
@@ -112,7 +112,7 @@ fun CommentInputBar(
         label = "outerInnerPaddingH"
     )
     val outerInnerPaddingV by animateDpAsState(
-        targetValue = if (isCompact) 8.dp else 10.dp,
+        targetValue = if (isCompact) 8.dp else 12.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
         label = "outerInnerPaddingV"
     )
@@ -272,7 +272,7 @@ fun CommentInputBar(
                 )
                 val textBoxShape = RoundedCornerShape(textBoxCorner)
                 val textPadH by animateDpAsState(
-                    targetValue = if (isCompact) 16.dp else 13.dp,
+                    targetValue = if (isCompact) 16.dp else 14.dp,
                     animationSpec = tween(250, easing = FastOutSlowInEasing),
                     label = "textPadH"
                 )
@@ -424,7 +424,7 @@ fun CommentInputBar(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 6.dp),
+                                .padding(top = 8.dp, bottom = 4.dp, start = 2.dp, end = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Foto

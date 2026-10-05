@@ -87,7 +87,11 @@ data class SortConfig(
     val selectedDecades: List<String> = emptyList(),
     val selectedKeywords: List<Long> = emptyList(),
     val selectedStatuses: List<String> = emptyList(), // "dropped", "not_started", "watching", "up_to_date"
-    val selectedSource: String? = null // null = All (CommsUni), "flicktrove" = Only FlickTrove
+    val selectedSources: List<String> = emptyList(), // empty = All (CommsUni)
+    val selectedLanguages: List<String> = emptyList(), // empty = all
+    val selectedSource: String? = null, // Deprecated backwards-compatibility fallback
+    val selectedMedia: String? = null, // null = all, "movie", "tv"
+    val selectedLanguage: String? = null // Deprecated backwards-compatibility fallback
 )
 
 @Serializable

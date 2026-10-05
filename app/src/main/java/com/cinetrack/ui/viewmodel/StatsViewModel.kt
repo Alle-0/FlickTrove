@@ -61,6 +61,7 @@ data class CalculatedStats(
     val longestMovie: Movie?,
     val longestMovieMinutes: Int,
     val tvWatched: Int,
+    val tvCompleted: Int = 0,
     val tvToWatch: Int,
     val totalEpisodes: Int,
     val tvMinutes: Int,
@@ -264,33 +265,7 @@ class StatsViewModel @Inject constructor(
                 result
             }
         } else {
-            watchedTVUnique.flatMap { m ->
-                val rewatches = allHistory.filter { it.movieId == m.id && it.isRewatch }
-                val result = mutableListOf<Movie>()
-                
-                // Add historical watches
-                for (rewatch in rewatches) {
-                    val historicalMap = try {
-                        if (rewatch.historicalEpisodes != null) {
-                            kotlinx.serialization.json.Json.decodeFromString<Map<String, List<Int>>>(rewatch.historicalEpisodes)
-                        } else null
-                    } catch (e: Exception) { null }
-                    
-                    if (historicalMap != null) {
-                        result.add(m.copy(watched = false, watchedEpisodes = historicalMap, dropped = false))
-                    } else {
-                        result.add(m.copy(watched = true, watchedEpisodes = emptyMap(), dropped = false))
-                    }
-                }
-                
-                // Add the current active watch (first watch or current progress of next rewatch)
-                val currentEps = m.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                if (m.watched || currentEps > 0 || allHistory.any { it.movieId == m.id && !it.isRewatch }) {
-                    result.add(m)
-                }
-                
-                result
-            }
+            watchedTVUnique
         }
 
         // Movies
@@ -508,6 +483,7 @@ class StatsViewModel @Inject constructor(
             longestMovie = longestMovie,
             longestMovieMinutes = longestMovie?.runtime ?: 0,
             tvWatched = watchedTV.size,
+            tvCompleted = watchedTV.count { it.watched },
             tvToWatch = allMovies.count { it.mediaType == "tv" && !it.watched && !it.dropped && (it.favorite || it.reminder) },
             totalEpisodes = totalEpisodes,
             tvMinutes = tvMin,

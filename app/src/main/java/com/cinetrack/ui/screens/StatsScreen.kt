@@ -425,16 +425,19 @@ fun StatsScreenContent(
                                     title = stringResource(R.string.stats_tv_series),
                                     count = null
                                 )
-                                // Single pill: DA VEDERE | COMPLETATE
-                                DualStatPill(
-                                    leftLabel = stringResource(R.string.stats_to_watch),
-                                    leftValue = stats.tvToWatch,
-                                    leftIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
-                                    rightLabel = stringResource(R.string.stats_completed),
-                                    rightValue = stats.tvWatched,
-                                    rightIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
-                                    accentColor = MaterialTheme.colorScheme.primary,
-                                    rightSuffix = if (stats.totalEpisodes > 0) " • ${stringResource(R.string.stats_episodes_short, stats.totalEpisodes)}" else null
+                                // 3 columns: DA VEDERE | VISTE | COMPLETATE
+                                TriStatPill(
+                                    firstLabel = stringResource(R.string.stats_to_watch),
+                                    firstValue = stats.tvToWatch,
+                                    firstIcon = ImageVector.vectorResource(id = R.drawable.ic_punto_cerchiato),
+                                    secondLabel = stringResource(R.string.stats_watched),
+                                    secondValue = stats.tvWatched,
+                                    secondIcon = ImageVector.vectorResource(id = R.drawable.ic_tv),
+                                    secondSubLabel = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
+                                    thirdLabel = stringResource(R.string.stats_completed),
+                                    thirdValue = stats.tvCompleted,
+                                    thirdIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
+                                    accentColor = MaterialTheme.colorScheme.primary
                                 )
 
                                 Spacer(Modifier.height(10.dp))
@@ -442,6 +445,7 @@ fun StatsScreenContent(
                                 MediaTimeCard(
                                     timeLabel = stringResource(R.string.stats_time_spent),
                                     time = stats.tvTimeFormatted,
+                                    timeDetail = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
                                     longestLabel = stringResource(R.string.stats_longest_tv),
                                     longestTitle = stats.longestTV?.title ?: stats.longestTV?.name,
                                     longestDurationMinutes = stats.longestTVMinutes,
